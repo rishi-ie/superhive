@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { BrowserWindow, app } from "electron";
+import { BrowserWindow, app, ipcMain } from "electron";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 //#region \0rolldown/runtime.js
@@ -1881,6 +1881,11 @@ var __dirname$1 = dirname(fileURLToPath(import.meta.url));
 import_main.default.initialize();
 import_main.default.info("Superhive starting...");
 var mainWindow = null;
+function toggleMaximize() {
+	if (!mainWindow) return;
+	if (mainWindow.isMaximized()) mainWindow.unmaximize();
+	else mainWindow.maximize();
+}
 function createWindow() {
 	mainWindow = new BrowserWindow({
 		width: 1200,
@@ -1888,11 +1893,26 @@ function createWindow() {
 		minWidth: 800,
 		minHeight: 600,
 		title: "Superhive",
+		backgroundColor: "#151110",
+		titleBarStyle: "hidden",
+		trafficLightPosition: {
+			x: 16,
+			y: 18
+		},
+		show: false,
 		webPreferences: {
 			preload: join(__dirname$1, "preload.js"),
 			contextIsolation: true,
 			nodeIntegration: false
 		}
+	});
+	mainWindow.maximize();
+	mainWindow.show();
+	mainWindow.on("maximize", () => {
+		mainWindow?.webContents.send("window:maximized-changed", true);
+	});
+	mainWindow.on("unmaximize", () => {
+		mainWindow?.webContents.send("window:maximized-changed", false);
 	});
 	if (process.env.VITE_DEV_SERVER_URL) {
 		import_main.default.info("Loading dev server:", process.env.VITE_DEV_SERVER_URL);
@@ -1905,6 +1925,9 @@ function createWindow() {
 		mainWindow = null;
 	});
 }
+ipcMain.handle("window:toggle-maximize", () => {
+	toggleMaximize();
+});
 app.whenReady().then(() => {
 	import_main.default.info("App ready");
 	createWindow();
