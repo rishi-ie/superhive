@@ -10,7 +10,7 @@ type MaximizeOnDoubleClickProps = {
 export function MaximizeOnDoubleClick({ children, className = '', onClick }: MaximizeOnDoubleClickProps) {
   const { onClick: handleClick } = useDoubleClick({
     onDoubleClick: () => {
-      window.electron?.toggleMaximize();
+      (window.electron as { toggleMaximize?: () => void })?.toggleMaximize?.();
     },
   });
 

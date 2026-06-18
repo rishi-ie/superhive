@@ -60,7 +60,9 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
         className="flex h-full flex-col bg-sidebar border-l border-sidebar-border/40"
         style={{ width: `${width}px`, minWidth: `${width}px` }}
       >
-        <MaximizeOnDoubleClick className="h-9 shrink-0" />
+        <MaximizeOnDoubleClick className="h-9 shrink-0">
+          <div />
+        </MaximizeOnDoubleClick>
         <RightPanelTabs
           tabs={rightPanelTabs}
           activeTab={activeTab}

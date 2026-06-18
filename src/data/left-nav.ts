@@ -1,7 +1,18 @@
-import { Layers, Timer, ClipboardCheck } from 'lucide-react';
+import { Layers, Users, ClipboardCheck, Timer, Bell } from 'lucide-react';
 
-export const navItems = [
-  { id: 'workspaces', label: 'Workspaces', icon: Layers },
+export type NavItem = {
+  id: string;
+  label: string;
+  icon: typeof Layers;
+};
+
+export const mainNavItems: NavItem[] = [
+  { id: 'projects', label: 'Projects', icon: Layers },
+  { id: 'employees', label: 'Employees', icon: Users },
+  { id: 'tickets', label: 'Tickets', icon: ClipboardCheck },
   { id: 'automations', label: 'Automations', icon: Timer },
-  { id: 'tasks', label: 'Tasks & PRs', icon: ClipboardCheck },
-] as const;
+];
+
+export const bottomNavItems: NavItem[] = [
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+];
