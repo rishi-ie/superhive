@@ -1,0 +1,23 @@
+appId: com.superhive.app
+productName: Superhive
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist
+  - dist-electron
+asar: true
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.productivity
+win:
+  target:
+    - nsis
+    - portable
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Utility
