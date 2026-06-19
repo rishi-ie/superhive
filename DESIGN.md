@@ -112,8 +112,8 @@ Clickable path segments with branch selector dropdown
 - **Footer**: Notifications bell with count
 
 ### Right Auxiliary Panel
-- **Tabs**: Changes, Searches, Everyone (underline style)
-- **Filter Toolbar**: File count + search
+- **Tabs**: Overview, Manage, Inbox (button-style with icons)
+- **Filter Toolbar**: Branch dropdown + changes filter + view toggles
 - **Empty State**: Icon + message
 
 ## Archived Components

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { GitBranch } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { RightPanelTabs } from './right-auxiliary/RightPanelTabs';
 import { FilterToolbar } from './right-auxiliary/FilterToolbar';
 import { PanelEmptyState } from './right-auxiliary/PanelEmptyState';
@@ -15,7 +15,7 @@ const MIN_WIDTH = 200;
 const MAX_WIDTH = 500;
 
 export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
-  const [activeTab, setActiveTab] = useState('changes');
+  const [activeTab, setActiveTab] = useState('overview');
   const isResizingRef = useRef(false);
 
   useEffect(() => {
@@ -70,8 +70,8 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
         />
         <FilterToolbar fileCount={0} />
         <PanelEmptyState
-          icon={<GitBranch size={20} className="text-muted-foreground/60" strokeWidth={1} />}
-          title="No changes"
+          icon={<Eye size={20} className="text-muted-foreground/60" strokeWidth={1} />}
+          title="Nothing here yet"
         />
       </div>
     </>

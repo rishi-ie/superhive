@@ -4,7 +4,7 @@ import { CenterWorkspace } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 
 const DEFAULT_LEFT_WIDTH = 280;
-const DEFAULT_RIGHT_WIDTH = 280;
+const DEFAULT_RIGHT_WIDTH = 340;
 const MIN_LEFT_WIDTH = 180;
 const MAX_LEFT_WIDTH = 400;
 const MIN_RIGHT_WIDTH = 200;

@@ -5,7 +5,7 @@
 **Superhive** is a multi-model AI chat/workspace interface with a three-panel layout:
 - **Left Nav**: Workspace navigation, favorites, active employees/tasks, main nav (Projects, Employees, Tickets, Automations)
 - **Center**: AI chat workspace with breadcrumb path bar, workspace tabs, chat area (empty state with suggested actions), and composer
-- **Right Auxiliary**: Contextual panel with tabs (Changes, Searches, Everyone), filters, empty state
+- **Right Auxiliary**: Contextual panel with tabs (Overview, Manage, Inbox), filters, empty state
 
 ## Dev Commands
 
