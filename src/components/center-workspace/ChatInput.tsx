@@ -10,7 +10,7 @@ type ChatInputProps = {
 };
 
 export function ChatInput({
-  placeholder = 'Ask a question or type / for commands...',
+  placeholder = 'Describe an objective...',
   primaryActionLabel = 'Auto',
   secondaryActionLabel = 'Opus 4.8',
   onSubmit,
