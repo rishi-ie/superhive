@@ -2,19 +2,23 @@ import { useState, useRef, useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import { RightPanelTabs } from './right-auxiliary/RightPanelTabs';
 import { FilterToolbar } from './right-auxiliary/FilterToolbar';
-import { PanelEmptyState } from './right-auxiliary/PanelEmptyState';
+import { OverviewPanel } from './right-auxiliary/OverviewPanel';
+import { ManagePanel } from './right-auxiliary/ManagePanel';
+import { InboxPanel } from './right-auxiliary/InboxPanel';
 import { MaximizeOnDoubleClick } from './ui/MaximizeOnDoubleClick';
 import { rightPanelTabs } from '@/data/right-panel-tabs';
+import type { Notification } from '@/data/mock/notifications';
 
 type RightAuxiliaryProps = {
   width: number;
   onWidthChange: (width: number) => void;
+  notifications?: Notification[];
 };
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 500;
 
-export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
+export function RightAuxiliary({ width, onWidthChange, notifications = [] }: RightAuxiliaryProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const isResizingRef = useRef(false);
 
@@ -69,10 +73,11 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
           onTabChange={setActiveTab}
         />
         <FilterToolbar fileCount={0} />
-        <PanelEmptyState
-          icon={<Eye size={20} className="text-muted-foreground/60" strokeWidth={1} />}
-          title="Nothing here yet"
-        />
+        <div className="flex-1 overflow-y-auto">
+          {activeTab === 'overview' && <OverviewPanel />}
+          {activeTab === 'manage' && <ManagePanel />}
+          {activeTab === 'inbox' && <InboxPanel notifications={notifications} />}
+        </div>
       </div>
     </>
   );
