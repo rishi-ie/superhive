@@ -11,11 +11,13 @@ export function Settings({ onBack }: SettingsProps) {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
-      <SettingsSidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onBack={onBack}
-      />
+      <div className="w-[300px] shrink-0">
+        <SettingsSidebar
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          onBack={onBack}
+        />
+      </div>
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-12 pt-16 pb-24">
           {activeSection === "account" && (
