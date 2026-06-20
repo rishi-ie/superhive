@@ -11,7 +11,7 @@ export function Settings({ onBack }: SettingsProps) {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
-      <div className="w-[300px] shrink-0">
+      <div className="w-75 shrink-0">
         <SettingsSidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}

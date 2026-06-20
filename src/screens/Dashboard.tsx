@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { LeftNav } from '@/components/LeftNav';
 import { CenterWorkspace } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
@@ -24,7 +23,17 @@ export function Dashboard({
   onRightWidthChange,
   onNavigate,
 }: DashboardProps) {
-  const [notificationCount] = useState(notifications.filter((n) => !n.read).length);
+  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
+
+  const workspaces_data = USE_MOCK_DATA ? workspaces : [];
+  const favorites_data = USE_MOCK_DATA ? favorites : [];
+  const employees_data = USE_MOCK_DATA ? activeEmployees : [];
+  const tasks_data = USE_MOCK_DATA ? activeTasks : [];
+  const notifications_data = USE_MOCK_DATA ? notifications : [];
+
+  const [notificationCount] = USE_MOCK_DATA
+    ? [notifications.filter((n) => !n.read).length]
+    : [0];
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -32,18 +41,18 @@ export function Dashboard({
         width={leftWidth}
         onWidthChange={onLeftWidthChange}
         onSettingsClick={() => onNavigate('settings')}
-        workspaces={workspaces}
-        currentWorkspace={currentWorkspace}
-        favorites={favorites}
-        activeEmployees={activeEmployees}
-        activeTasks={activeTasks}
+        workspaces={workspaces_data}
+        currentWorkspace={USE_MOCK_DATA ? currentWorkspace : undefined}
+        favorites={favorites_data}
+        activeEmployees={employees_data}
+        activeTasks={tasks_data}
         notificationCount={notificationCount}
       />
       <CenterWorkspace />
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}
-        notifications={notifications}
+        notifications={notifications_data}
       />
     </div>
   );

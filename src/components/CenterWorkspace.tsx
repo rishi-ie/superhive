@@ -9,6 +9,7 @@ import { currentThread } from '@/data/mock/chat';
 
 export function CenterWorkspace() {
   const [activeTab, setActiveTab] = useState('chat');
+  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 
   return (
     <div className="flex h-full flex-1 flex-col min-w-0 bg-background">
@@ -21,7 +22,7 @@ export function CenterWorkspace() {
       />
 
       <div className="flex-1 overflow-y-auto flex flex-col">
-        <ChatThread thread={currentThread} />
+        {USE_MOCK_DATA ? <ChatThread thread={currentThread} /> : <ChatEmptyState />}
       </div>
 
       <ChatInput />
