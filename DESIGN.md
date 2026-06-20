@@ -142,6 +142,117 @@ These components are kept for potential future use (e.g., for different workspac
 ### Transitions
 - Most color changes: `transition-colors`
 
+## Page Navigation
+
+### Mechanism
+State-based page switching in `App.tsx` — no router. A `page` state (`'main' | 'settings'`) controls which root screen renders.
+
+```ts
+const [page, setPage] = useState<Page>('main');
+// App-level state so panel widths survive page swaps
+const [leftWidth, setLeftWidth] = useState(280);
+const [rightWidth, setRightWidth] = useState(340);
+```
+
+### Entry Points
+
+| Trigger | Location | Effect |
+|---------|----------|--------|
+| Click Settings icon | LeftNavFooter | `onSettingsClick → setPage('settings')` |
+| Click Settings item | TeamSelector dropdown | Same handler |
+
+### Exit Points
+
+| Trigger | Location | Effect |
+|---------|----------|--------|
+| Click "← Back" | SettingsSidebar top | `onBack → setPage('main')` |
+
+### Flow: Open Settings
+1. User on Main Layout clicks Settings icon (Left Nav footer)
+2. `onSettingsClick` fires → `setPage('settings')` in App
+3. App unmounts `<Dashboard />`, mounts `<Settings onBack={...} />`
+4. Settings renders with Account section pre-selected
+
+### Flow: Leave Settings
+1. User clicks "← Back" in Settings sidebar
+2. `onBack` fires → `setPage('main')`
+3. App unmounts `<Settings />`, mounts `<Dashboard />`
+4. Panel widths are preserved (live in App, not Dashboard)
+
+## Pages
+
+### Settings Page
+
+**Route**: No URL — state-based page switch from Main Layout.
+
+**Layout**: Two-column grid (`grid-cols-[280px_1fr]`), full viewport height.
+
+#### Column 1: Settings Sidebar (280px fixed)
+
+**Header Control Row** (40px, `-webkit-app-region: drag`):
+- macOS traffic lights (auto-inset from OS)
+- Back/Forward/History icon buttons (disabled — no history in v1)
+
+**Sticky Top**:
+- "← Back" text link: `text-xs text-muted-foreground`, navigates to Main Layout
+- "Settings" h1: `text-2xl font-semibold`
+- Search input: full-width, `bg-input border-border rounded-md`, magnifying glass icon left, placeholder "Search settings..."
+
+**Scrollable Nav List** (3 categories):
+
+| Category | Items |
+|----------|-------|
+| **PERSONAL** | Account (active default) · Appearance · Notifications |
+| **EDITOR & WORKFLOW** | General · Keyboard · Git & Worktrees · Agents · Terminal · Links · Models |
+| **ORGANIZATION** | Organization · Teams · Projects · Hosts · Integrations |
+
+- Nav item: `flex items-center gap-2.5 px-3 py-2 rounded-md text-sm`
+- Active: `bg-sidebar-accent` + 2px terracotta left border
+- Icon + label per item (Lucide icons)
+
+**Sticky Footer**: "Documentation" link + ExternalLink icon
+
+#### Column 2: Content Area
+
+Max-width `768px` (max-w-3xl), centered horizontally, `px-12 pt-16 pb-24`.
+
+**Account Section** (default active):
+
+| Row | Left | Right |
+|-----|------|-------|
+| 1 | "Avatar" label + "Recommended size 256x256" subtitle | 80px circular avatar, hover shows "Change" overlay |
+| 2 | "Name" label | Text input, value: "Rishi Sidharda", 320px wide |
+| 3 | "Email" label | Text input, value: "nandipati.sidharda@gmail.com", 320px wide |
+| 4 | "Sign out of this device" + subtitle | Outline button "Sign out" |
+
+All other sections (Appearance, Notifications, etc.) show "Coming soon." placeholder.
+
+## New UI Components
+
+### TextInput
+- Sizes: `sm` (text-xs, px-2.5 py-1.5) · `md` (text-sm, px-3 py-2)
+- Tokens: `bg-input border-border rounded-md`, focus `ring-1 ring-ring`
+- States: default · hover · focus · filled · disabled · error
+
+### Button
+- Variants: `solid` (terracotta bg) · `outline` (border bg-secondary) · `ghost` (transparent)
+- Sizes: `sm` (h-7) · `md` (h-9) · `lg` (h-11)
+- States: default · hover · focus · active · disabled · loading
+- Loading state: animated spinner SVG
+
+### Avatar
+- Sizes: `xs`(24px) · `sm`(32px) · `md`(40px) · `lg`(56px) · `xl`(80px)
+- Shows `src` image if provided, otherwise renders initials from `fallback` string
+- States: default · hover (via parent overlay) · with-status-dot (future)
+
+### IconButton (existing, extended)
+- Variants: `ghost` · `solid` · `outline`
+- Sizes: `xs` · `sm` · `md` · `lg`
+
+### NavItem (existing)
+- Used for settings sidebar nav items
+- States: default · hover · active (terracotta left border)
+
 ## Technical Notes
 
 - **Tailwind v4** with CSS variables for theming
@@ -149,3 +260,4 @@ These components are kept for potential future use (e.g., for different workspac
 - Component library is hand-rolled (no external UI lib)
 - All panels use flexbox column layout
 - Scroll containers use custom webkit scrollbar styling
+- State-based routing via `App.tsx` page state — no router library
