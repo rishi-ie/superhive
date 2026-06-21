@@ -4,9 +4,11 @@ import { FilterToolbar } from './right-auxiliary/FilterToolbar';
 import { TelemetryDeck } from './right-auxiliary/TelemetryDeck';
 import { ControlMatrix } from './right-auxiliary/ControlMatrix';
 import { AuditQueue } from './right-auxiliary/AuditQueue';
+import { RightPanelActivityFeed } from './right-auxiliary/RightPanelActivityFeed';
 import { MaximizeOnDoubleClick } from './ui/MaximizeOnDoubleClick';
 import { rightPanelTabs } from '@/data/right-panel-tabs';
 import { getActiveEmployee, type Employee } from '@/data/employees/store';
+import { swarmActivity, projectAgents } from '@/data/mock/project';
 
 type RightAuxiliaryProps = {
   width: number;
@@ -21,6 +23,7 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
   const isResizingRef = useRef(false);
 
   const activeAgent: Employee | null = getActiveEmployee();
+  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -74,7 +77,14 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
         />
         <FilterToolbar fileCount={0} />
         <div className="flex-1 overflow-y-auto">
-          {activeTab === 'overview' && activeAgent && <TelemetryDeck agent={activeAgent} />}
+          {activeTab === 'overview' && activeAgent && (
+            <>
+              <TelemetryDeck agent={activeAgent} />
+              {USE_MOCK_DATA && (
+                <RightPanelActivityFeed items={swarmActivity} agents={projectAgents} />
+              )}
+            </>
+          )}
           {activeTab === 'manage'   && activeAgent && <ControlMatrix agent={activeAgent} />}
           {activeTab === 'inbox'    && <AuditQueue agent={activeAgent} />}
         </div>

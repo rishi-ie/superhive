@@ -5,11 +5,12 @@ import { STROKE_WIDTH } from '@/lib/constants';
 type AccordionItemProps = {
   label: string;
   icon?: ReactNode;
+  badge?: ReactNode;
   defaultOpen?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
 };
 
-export function AccordionItem({ label, icon, defaultOpen = false, children }: AccordionItemProps) {
+export function AccordionItem({ label, icon, badge, defaultOpen = false, children }: AccordionItemProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
@@ -25,6 +26,7 @@ export function AccordionItem({ label, icon, defaultOpen = false, children }: Ac
         />
         {icon && <span className="shrink-0">{icon}</span>}
         <span className="flex-1 text-left">{label}</span>
+        {badge && <span className="shrink-0">{badge}</span>}
       </button>
 
       <div
@@ -45,10 +47,11 @@ export function AccordionItem({ label, icon, defaultOpen = false, children }: Ac
 type AccordionHeaderProps = {
   label: string;
   icon?: ReactNode;
+  badge?: ReactNode;
   onClick?: () => void;
 };
 
-export function AccordionHeader({ label, icon, onClick }: AccordionHeaderProps) {
+export function AccordionHeader({ label, icon, badge, onClick }: AccordionHeaderProps) {
   return (
     <div className="px-2 py-0.5">
       <button
@@ -58,6 +61,7 @@ export function AccordionHeader({ label, icon, onClick }: AccordionHeaderProps) 
         <span className="shrink-0" style={{ width: 12, display: 'inline-block' }} />
         {icon && <span className="shrink-0">{icon}</span>}
         <span className="flex-1 text-left">{label}</span>
+        {badge && <span className="shrink-0">{badge}</span>}
       </button>
     </div>
   );

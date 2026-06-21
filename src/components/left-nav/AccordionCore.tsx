@@ -65,6 +65,12 @@ export function AccordionCore({ onItemClick }: AccordionCoreProps) {
       <AccordionItem label="Communications" icon={getIcon('communications')}>
         {commsRows.map(c => <NavRow key={c.id} id={c.id} label={c.label} onItemClick={onItemClick} />)}
       </AccordionItem>
+
+      <AccordionItem
+        label="Remote"
+        icon={getIcon('remote')}
+        badge={<span className="text-[9px] text-muted-foreground/60 italic pr-1">Coming soon</span>}
+      />
     </div>
   );
 }

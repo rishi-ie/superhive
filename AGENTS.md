@@ -4,9 +4,9 @@
 
 **Superhive** is a digital employee workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
 
-- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, Employees, Tickets, Automations, Communications), utilities (Settings, Help)
-- **Center (Operations Deck)**: AI chat workspace with breadcrumb, tab strip, chat area (empty state or thread), and composer
-- **Right Auxiliary (Avionics)**: Agent telemetry, configuration controls, and audit queue — only renders when an agent is active
+- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, Employees, Tickets, Automations, Communications, Remote), utilities (Settings, Help)
+- **Center (Operations Deck)**: Tabbed workspace — Chat or Projects tab. Chat: AI thread + composer. Projects: operational swarm dashboard.
+- **Right Auxiliary (Avionics)**: Agent telemetry, configuration controls, audit queue, and live activity feed
 
 ## Dev Commands
 
@@ -45,19 +45,20 @@ bun run electron:preview # vite build + launch electron with production build
 │  Active              │  ← collapsible, status dots, Zap icon
 │  Favorites           │  ← collapsible, Star icon
 ├──────────────────────┤
-│  ▸ Projects [◈]      │  ← accordion core (scrollable)
+│  ▸ Projects [◈]     │  ← accordion core (scrollable)
 │  ▾ Employees  [◈]    │    defaultOpen, agent status dots
-│  ▸ Tickets    [◈]    │
+│  ▸ Tickets    [◈]   │
 │  ▸ Automations [◈]  │
 │  ▸ Communications[◈]│
+│  ▸ Remote     [?]   │  ← Coming Soon badge
 ├──────────────────────┤
 │  Settings      ?     │  ← utilities (sticky bottom)
 └──────────────────────┘
 ```
 
 **Accordion Core** (`src/components/left-nav/AccordionCore.tsx`):
-- `AccordionItem` — reusable accordion with CSS grid height animation (chevron rotates 90°, smooth expand/collapse)
-- `AccordionHeader` — same styling as AccordionItem but non-expandable (no chevron)
+- `AccordionItem` — reusable accordion with CSS grid height animation (chevron rotates 90°, smooth expand/collapse). Supports optional `badge` for inline labels (e.g. "Coming soon").
+- `AccordionHeader` — same styling as AccordionItem but non-expandable (no chevron placeholder)
 - `AgentListItem` — nested row with `StatusDot` for agent status visualization
 - `StatusDot` (`src/components/ui/StatusDot.tsx`) — colored dot + spinner for agent statuses:
   - 🟢 EXECUTING → green + pulse animation
@@ -70,7 +71,60 @@ bun run electron:preview # vite build + launch electron with production build
 - `HelpPopover` — anchored dark popover (Documentation / Changelog / Shortcuts)
 - Bell/Notifications removed in v1
 
-**Deleted**: `LeftNavFooter`, `FavoritesSection` (old standalone), `ActiveSection` (old standalone), `PrimaryNavList`, `data/left-nav.ts` (recreated), `data/mock/tasks.ts`
+## Center Workspace — Tabbed Layout
+
+Tabs: **Chat** · **Projects** (like browser tabs, independent views). ChatInput hidden on Projects tab.
+
+### Chat Tab
+- `ChatThread` — user/assistant message bubbles
+- `ChatInput` — textarea + model selectors + send
+- `ChatEmptyState` — suggestion grid when no thread
+
+### Projects Tab
+Full operational swarm dashboard. Compact, information-dense layout:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Superhive App (h1)                                        │
+├─────────────────────┬─────────────────────┬──────────────────┤
+│  To Do         3    │  Executing    2     │  Done       3   │
+│  [card]            │  [card] ▌           │  [card]           │
+│  [card]            │  [card] ▌           │  [card]           │
+│  [+1 more]         │                     │  [+2 more]        │
+├─────────────────────┴─────────────────────┴──────────────────┤
+│  Active Agents              │  Communications                │
+│  [agent] Marcus W. COMPILING│  [ch: Schema validation]      │
+│  [agent] Priya S.  WORKING  │  [ch: DB snapshot handoff]    │
+│  [agent] Sonia P.  COMPILING│  [ch: Design tokens]          │
+└─────────────────────────────┴────────────────────────────────┘
+```
+
+**Components** (`src/components/center-workspace/`):
+- `ProjectsView` — root layout container
+- `ExecutionStream` — 3-column kanban (To Do / Executing / Done). Max 2 visible cards per column; overflow shown as "+ N more" dashed button
+- `TicketCard` — ticket card with ID badge, bold title, agent avatar. EXECUTING cards have terracotta left border
+- `SwarmRoster` — active agent profile cards with status dots, role, assigned ticket pill
+- `Communications` — channel monitor rows with stacked avatar pairs, topic, last message preview, ticket pill, status indicator, unread dot
+
+**Mock data** (`src/data/mock/project.ts`):
+- `tickets` — 8 tickets (TODO/EXECUTING/DONE), assigned to agents
+- `projectAgents` — 5 agents with WORKING/COMPILING/IDLE status
+- `swarmActivity` — 6 inter-agent event log entries
+- `channels` — 5 active communication channels between agent pairs
+
+## Right Auxiliary (Avionics / Mission Control)
+
+Three tabs: **Overview** · **Manage** · **Inbox**
+
+### Overview Tab
+- `TelemetryDeck` — agent identity, brain usage bar, cost card, last actions, next step
+- `RightPanelActivityFeed` — compact activity log below TelemetryDeck (top 6 events, gates behind `USE_MOCK_DATA`). Single-line format: `timestamp · initials → initials · context`
+
+### Manage Tab
+- `ControlMatrix` — model engine cards, permission toggles, commit authority, thinking budget, terminate
+
+### Inbox Tab
+- `AuditQueue` — AUTH_INTERCEPT and DIFF_REVIEW cards with action buttons
 
 ## Design System
 
@@ -81,8 +135,7 @@ bun run electron:preview # vite build + launch electron with production build
 
 ## Data Architecture
 
-Employee/agent data is fully abstracted behind a store pattern in `src/data/employees/`:
-
+**Employee/agent store** (`src/data/employees/`):
 ```
 src/data/employees/
 ├── interface.ts   — Types + function signatures (the contract)
@@ -90,13 +143,23 @@ src/data/employees/
 └── store.ts       — Public API; USE_MOCK_DATA flag lives here
 ```
 
+**Project data** (`src/data/mock/project.ts`):
+```
+src/data/mock/project.ts
+├── Ticket, TicketStatus
+├── ProjectAgent, AgentCurrentStatus
+├── SwarmActivity
+├── CommunicationChannel, ChannelStatus
+└── tickets, projectAgents, swarmActivity, channels (mock data)
+```
+
 **Public API** (import from `@/data/employees/store`):
 ```ts
 listEmployees()        → Employee[]
-getEmployee(id)         → Employee | undefined
-getActiveEmployee()     → Employee | null
+getEmployee(id)        → Employee | undefined
+getActiveEmployee()    → Employee | null
 getTelemetry(id)       → Telemetry
-getPermissions(id)      → Permissions
+getPermissions(id)     → Permissions
 getAuditItems(id?)     → AuditItem[]
 getActionLog(id)       → ActionLogEntry[]
 getNextStep(id)        → string

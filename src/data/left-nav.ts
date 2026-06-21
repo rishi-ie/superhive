@@ -1,4 +1,4 @@
-import { Layers, Users, ClipboardCheck, Timer, MessageCircle } from 'lucide-react';
+import { Layers, Users, ClipboardCheck, Timer, MessageCircle, Monitor } from 'lucide-react';
 
 export type NavItem = {
   id: string;
@@ -12,4 +12,5 @@ export const mainNavItems: NavItem[] = [
   { id: 'tickets',       label: 'Tickets',       icon: ClipboardCheck },
   { id: 'automations',   label: 'Automations',  icon: Timer },
   { id: 'communications', label: 'Communications', icon: MessageCircle },
+  { id: 'remote',        label: 'Remote',        icon: Monitor },
 ];
