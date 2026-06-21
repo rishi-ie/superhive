@@ -5,8 +5,6 @@ import type { Page } from '@/App';
 import { workspaces, currentWorkspace } from '@/data/mock/workspaces';
 import { favorites } from '@/data/mock/favorites';
 import { activeEmployees } from '@/data/mock/employees';
-import { activeTasks } from '@/data/mock/tasks';
-import { notifications } from '@/data/mock/notifications';
 
 type DashboardProps = {
   leftWidth: number;
@@ -28,12 +26,6 @@ export function Dashboard({
   const workspaces_data = USE_MOCK_DATA ? workspaces : [];
   const favorites_data = USE_MOCK_DATA ? favorites : [];
   const employees_data = USE_MOCK_DATA ? activeEmployees : [];
-  const tasks_data = USE_MOCK_DATA ? activeTasks : [];
-  const notifications_data = USE_MOCK_DATA ? notifications : [];
-
-  const [notificationCount] = USE_MOCK_DATA
-    ? [notifications.filter((n) => !n.read).length]
-    : [0];
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -45,8 +37,6 @@ export function Dashboard({
         currentWorkspace={USE_MOCK_DATA ? currentWorkspace : undefined}
         favorites={favorites_data}
         activeEmployees={employees_data}
-        activeTasks={tasks_data}
-        notificationCount={notificationCount}
       />
       <CenterWorkspace />
       <RightAuxiliary

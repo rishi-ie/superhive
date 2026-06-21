@@ -18,7 +18,7 @@ export type ActiveTask = {
 
 type ActiveSectionProps = {
   employees: ActiveEmployee[];
-  tasks: ActiveTask[];
+  tasks: { id: string; title: string; assignedTo?: string }[];
   onEmployeeClick?: (id: string) => void;
   onTaskClick?: (id: string) => void;
 };

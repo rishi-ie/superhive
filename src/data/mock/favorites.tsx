@@ -1,5 +1,12 @@
-import { Layers, Users, Zap } from 'lucide-react';
-import type { FavoriteItem } from '@/components/left-nav/FavoritesSection';
+import type { ReactNode } from 'react';
+import { Layers, Users } from 'lucide-react';
+
+export type FavoriteItem = {
+  id: string;
+  label: string;
+  type: 'project' | 'employee';
+  icon?: ReactNode;
+};
 
 export const favorites: FavoriteItem[] = [
   { id: 'proj-1', label: 'Superhive App', type: 'project', icon: <Layers size={12} /> },

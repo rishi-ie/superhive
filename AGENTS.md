@@ -4,7 +4,7 @@
 
 **Superhive** is a digital employee workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
 
-- **Left Nav (Fleet Command)**: Workspace selector, favorites, active agents, main nav (Projects, Employees, Tickets, Automations, Communications)
+- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, Employees, Tickets, Automations, Communications), utilities (Settings, Help)
 - **Center (Operations Deck)**: AI chat workspace with breadcrumb, tab strip, chat area (empty state or thread), and composer
 - **Right Auxiliary (Avionics)**: Agent telemetry, configuration controls, and audit queue — only renders when an agent is active
 
@@ -29,28 +29,48 @@ bun run electron:preview # vite build + launch electron with production build
 ## Key Configs
 
 - `vite.config.ts`: Vite + React + electron plugins; `@` alias maps to `src/`
-- `tsconfig.json`: ESNext, bun types, bundler module resolution
+- `tsconfig.json`: ESNext, bun types, bundler resolution
 - `tailwind.config.js`: v4 (uses `@tailwindcss/postcss` plugin)
 - `postcss.config.js`: `@tailwindcss/postcss` + autoprefixer
 - `electron-builder.yml`: builds for mac/win/linux
 - `DESIGN.md`: Full design system documentation
 
-## Layout Structure
+## Left Nav Layout Structure
 
 ```
-┌─────────────┬──────────────────────────────┬──────────────┐
-│  Left Nav   │      Center Workspace           │   Right      │
-│  (280px)    │      (flex-1)                 │  Auxiliary   │
-│  resizable  │                              │  (340px)     │
-│             │  [Breadcrumb]                 │  resizable   │
-│  [Header]   │  [Tab Strip]                 │              │
-│  [Workspace]│  [Chat / Thread]             │  [Tabs]      │
-│  [Favorites]│  [Composer]                  │  [Content]   │
-│  [Active]   │                              │              │
-│  [Nav Items]│                              │              │
-│  [Footer]   │                              │              │
-└─────────────┴──────────────────────────────┴──────────────┘
+┌──────────────────────┐
+│  Header (drag)       │
+│  TeamSelector         │
+├──────────────────────┤
+│  Active              │  ← collapsible, status dots, Zap icon
+│  Favorites           │  ← collapsible, Star icon
+├──────────────────────┤
+│  ▸ Projects [◈]      │  ← accordion core (scrollable)
+│  ▾ Employees  [◈]    │    defaultOpen, agent status dots
+│  ▸ Tickets    [◈]    │
+│  ▸ Automations [◈]  │
+│  ▸ Communications[◈]│
+├──────────────────────┤
+│  Settings      ?     │  ← utilities (sticky bottom)
+└──────────────────────┘
 ```
+
+**Accordion Core** (`src/components/left-nav/AccordionCore.tsx`):
+- `AccordionItem` — reusable accordion with CSS grid height animation (chevron rotates 90°, smooth expand/collapse)
+- `AccordionHeader` — same styling as AccordionItem but non-expandable (no chevron)
+- `AgentListItem` — nested row with `StatusDot` for agent status visualization
+- `StatusDot` (`src/components/ui/StatusDot.tsx`) — colored dot + spinner for agent statuses:
+  - 🟢 EXECUTING → green + pulse animation
+  - 🟡 COMPILING → gold + spinning Loader2
+  - 🔴 ERROR_LOOP → red + pulse animation
+  - 🟠 AWAITING_HUMAN → terracotta (solid)
+  - ⚪ IDLE → muted gray
+
+**Smart Views / Utilities** (`src/components/left-nav/Utilities.tsx`):
+- `HelpPopover` — anchored dark popover (Documentation / Changelog / Shortcuts)
+- Bell/Notifications removed in v1
+
+**Deleted**: `LeftNavFooter`, `FavoritesSection` (old standalone), `ActiveSection` (old standalone), `PrimaryNavList`, `data/left-nav.ts` (recreated), `data/mock/tasks.ts`
 
 ## Design System
 

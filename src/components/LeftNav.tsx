@@ -1,10 +1,10 @@
 import { useRef, useEffect } from 'react';
 import { LeftNavHeader } from './left-nav/LeftNavHeader';
 import { TeamSelector, type Workspace } from './left-nav/TeamSelector';
-import { MainNavList } from './left-nav/PrimaryNavList';
+import { ActiveSection, type ActiveEmployee } from './left-nav/ActiveSection';
 import { FavoritesSection, type FavoriteItem } from './left-nav/FavoritesSection';
-import { ActiveSection, type ActiveEmployee, type ActiveTask } from './left-nav/ActiveSection';
-import { LeftNavFooter } from './left-nav/LeftNavFooter';
+import { AccordionCore } from './left-nav/AccordionCore';
+import { Utilities } from './left-nav/Utilities';
 
 type LeftNavProps = {
   width: number;
@@ -13,11 +13,10 @@ type LeftNavProps = {
   currentWorkspace?: Workspace;
   favorites?: FavoriteItem[];
   activeEmployees?: ActiveEmployee[];
-  activeTasks?: ActiveTask[];
+  activeTasks?: { id: string; title: string; assignedTo?: string }[];
   notificationCount?: number;
   onWorkspaceSelect?: (workspace: Workspace) => void;
   onSettingsClick?: () => void;
-  onNotificationsClick?: () => void;
   onFavoritesItemClick?: (id: string) => void;
   onActiveEmployeeClick?: (id: string) => void;
   onActiveTaskClick?: (id: string) => void;
@@ -35,10 +34,8 @@ export function LeftNav({
   favorites = [],
   activeEmployees = [],
   activeTasks = [],
-  notificationCount = 0,
   onWorkspaceSelect,
   onSettingsClick,
-  onNotificationsClick,
   onFavoritesItemClick,
   onActiveEmployeeClick,
   onActiveTaskClick,
@@ -92,24 +89,25 @@ export function LeftNav({
           onWorkspaceSelect={onWorkspaceSelect}
           onSettingsClick={onSettingsClick}
         />
-        <div className="flex-1 overflow-y-auto">
-          <FavoritesSection
-            items={favorites}
-            onItemClick={onFavoritesItemClick}
-          />
-          <ActiveSection
-            employees={activeEmployees}
-            tasks={activeTasks}
-            onEmployeeClick={onActiveEmployeeClick}
-            onTaskClick={onActiveTaskClick}
-          />
-          <MainNavList onItemClick={onNavItemClick} />
-        </div>
-        <LeftNavFooter
-          notificationCount={notificationCount}
-          onSettingsClick={onSettingsClick}
-          onNotificationsClick={onNotificationsClick}
+
+        <ActiveSection
+          employees={activeEmployees}
+          tasks={activeTasks}
+          onEmployeeClick={onActiveEmployeeClick}
+          onTaskClick={onActiveTaskClick}
         />
+        <FavoritesSection
+          items={favorites}
+          onItemClick={onFavoritesItemClick}
+        />
+
+        <div className="border-t border-sidebar-border/60 mx-2" />
+
+        <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <AccordionCore onItemClick={onNavItemClick} />
+        </div>
+
+        <Utilities onSettingsClick={onSettingsClick} />
       </div>
       <div
         className="w-px bg-sidebar-border/40 hover:bg-chart-1 cursor-ew-resize shrink-0 transition-colors"

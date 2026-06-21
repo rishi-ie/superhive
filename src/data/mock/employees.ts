@@ -1,4 +1,10 @@
-import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
+export type ActiveEmployee = {
+  id: string;
+  name: string;
+  avatar?: string;
+  status: 'active' | 'idle' | 'busy';
+  currentTask?: string;
+};
 
 export const activeEmployees: ActiveEmployee[] = [
   {

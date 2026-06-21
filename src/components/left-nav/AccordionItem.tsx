@@ -1,0 +1,64 @@
+import { useState, type ReactNode } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
+
+type AccordionItemProps = {
+  label: string;
+  icon?: ReactNode;
+  defaultOpen?: boolean;
+  children: ReactNode;
+};
+
+export function AccordionItem({ label, icon, defaultOpen = false, children }: AccordionItemProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <div className="px-2 py-0.5">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+      >
+        <ChevronRight
+          size={12}
+          strokeWidth={STROKE_WIDTH}
+          className={`shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+        />
+        {icon && <span className="shrink-0">{icon}</span>}
+        <span className="flex-1 text-left">{label}</span>
+      </button>
+
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+          isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="pl-4 pt-0.5 space-y-0.5">
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type AccordionHeaderProps = {
+  label: string;
+  icon?: ReactNode;
+  onClick?: () => void;
+};
+
+export function AccordionHeader({ label, icon, onClick }: AccordionHeaderProps) {
+  return (
+    <div className="px-2 py-0.5">
+      <button
+        onClick={onClick}
+        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+      >
+        <span className="shrink-0" style={{ width: 12, display: 'inline-block' }} />
+        {icon && <span className="shrink-0">{icon}</span>}
+        <span className="flex-1 text-left">{label}</span>
+      </button>
+    </div>
+  );
+}
