@@ -1,0 +1,125 @@
+import { Loader2 } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
+import { getTelemetry, getActionLog, getNextStep, type Employee } from '@/data/employees/store';
+import type { EmployeeStatus } from '@/data/employees/interface';
+
+function StatusPill({ status }: { status: EmployeeStatus }) {
+  const config: Record<EmployeeStatus, { label: string; className: string }> = {
+    EXECUTING:     { label: 'EXECUTING',     className: 'bg-chart-2/20 text-chart-2 border-chart-2/40' },
+    COMPILING:     { label: 'COMPILING',     className: 'bg-chart-3/20 text-chart-3 border-chart-3/40' },
+    AWAITING_HUMAN:{ label: 'AWAITING_HUMAN',className: 'bg-chart-1/20 text-chart-1 border-chart-1/40' },
+    IDLE:          { label: 'IDLE',          className: 'bg-muted/20 text-muted-foreground border-muted-foreground/40' },
+    ERROR_LOOP:    { label: 'ERROR_LOOP',   className: 'bg-chart-5/20 text-chart-5 border-chart-5/40' },
+  };
+  const { label, className } = config[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider ${className}`}>
+      {status === 'EXECUTING'     && <span className="size-1.5 rounded-full bg-chart-2 pulse-executing" />}
+      {status === 'COMPILING'     && <Loader2 size={8} className="animate-spin text-chart-3" strokeWidth={STROKE_WIDTH} />}
+      {status === 'ERROR_LOOP'    && <span className="size-1.5 rounded-full bg-chart-5 pulse-error" />}
+      {status === 'IDLE'          && <span className="size-1.5 rounded-full bg-muted-foreground/40" />}
+      {status}
+    </span>
+  );
+}
+
+function heartbeatColor(saturation: number): string {
+  if (saturation > 90) return 'bg-chart-1';
+  if (saturation > 70) return 'bg-chart-3';
+  return 'bg-chart-2';
+}
+
+function heartbeatLabel(saturation: number): string {
+  if (saturation > 90) return '— Overloaded';
+  if (saturation > 70) return '— Elevated';
+  return '— Healthy';
+}
+
+type TelemetryDeckProps = {
+  agent: Employee;
+};
+
+export function TelemetryDeck({ agent }: TelemetryDeckProps) {
+  const telemetry = getTelemetry(agent.id);
+  const actions = getActionLog(agent.id);
+  const nextStep = getNextStep(agent.id);
+  const budgetRemaining = (telemetry.budget - telemetry.sessionCost).toFixed(2);
+
+  return (
+    <div className="p-3 space-y-4">
+
+      {/* Identity Strip */}
+      <div className="flex items-center gap-2">
+        {agent.status === 'EXECUTING'     && <span className="size-2 rounded-full bg-chart-2 pulse-executing shrink-0" />}
+        {agent.status === 'COMPILING'     && <Loader2 size={10} className="animate-spin text-chart-3 shrink-0" strokeWidth={STROKE_WIDTH} />}
+        {agent.status === 'AWAITING_HUMAN'&& <span className="size-2 rounded-full bg-chart-1 shrink-0" />}
+        {agent.status === 'IDLE'          && <span className="size-2 rounded-full bg-muted-foreground/40 shrink-0" />}
+        {agent.status === 'ERROR_LOOP'    && <span className="size-2 rounded-full bg-chart-5 pulse-error shrink-0" />}
+        <span className="text-sm font-semibold text-foreground">{agent.name}</span>
+        <span className="text-muted-foreground text-xs">·</span>
+        <span className="text-xs text-muted-foreground">{agent.role}</span>
+        <span className="text-muted-foreground text-xs">·</span>
+        <span className="text-xs text-muted-foreground">active {agent.uptime}</span>
+      </div>
+
+      {/* Heartbeat Bar */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Brain Usage</span>
+          <span className={`text-[10px] font-mono ${telemetry.contextSaturation > 90 ? 'text-chart-1' : telemetry.contextSaturation > 70 ? 'text-chart-3' : 'text-chart-2'}`}>
+            {telemetry.contextSaturation}% {heartbeatLabel(telemetry.contextSaturation)}
+          </span>
+        </div>
+        <div className="h-1.5 rounded-full bg-input overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${heartbeatColor(telemetry.contextSaturation)}`}
+            style={{ width: `${telemetry.contextSaturation}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Cost Card */}
+      <div className="bg-card border border-border rounded-lg px-4 py-3 space-y-1">
+        <div className="flex items-baseline gap-1">
+          <span className="text-2xl font-mono font-bold text-foreground">${telemetry.currentCost.toFixed(4)}</span>
+          <span className="text-xs text-muted-foreground">current burn</span>
+        </div>
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+          <span>{telemetry.tokensPerSecond} tok/s</span>
+          <span>·</span>
+          <span>{telemetry.evolutionLoop} evolutions</span>
+          <span>·</span>
+          <span>{telemetry.logicKernelIntegrity}% kernel</span>
+        </div>
+        <div className="pt-1 border-t border-border flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground">Session total</span>
+          <span className="text-[10px] font-mono text-foreground">${telemetry.sessionCost.toFixed(2)}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground">Budget remaining</span>
+          <span className="text-[10px] font-mono text-chart-2">${budgetRemaining}</span>
+        </div>
+      </div>
+
+      {/* Last Actions */}
+      <div className="space-y-1.5">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Last Actions</span>
+        <div className="space-y-1">
+          {actions.length === 0 && <span className="text-[10px] text-muted-foreground/60 italic">No recent actions</span>}
+          {actions.map((item, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">{item.time}</span>
+              <span className="text-[10px] text-muted-foreground leading-relaxed">{item.action}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Next Step */}
+      <div className="border-t border-border pt-2">
+        <span className="text-[10px] text-muted-foreground/60 italic">{nextStep}</span>
+      </div>
+
+    </div>
+  );
+}

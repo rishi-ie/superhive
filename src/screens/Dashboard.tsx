@@ -52,7 +52,6 @@ export function Dashboard({
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}
-        notifications={notifications_data}
       />
     </div>
   );

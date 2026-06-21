@@ -1,26 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
-import { Eye } from 'lucide-react';
 import { RightPanelTabs } from './right-auxiliary/RightPanelTabs';
 import { FilterToolbar } from './right-auxiliary/FilterToolbar';
-import { OverviewPanel } from './right-auxiliary/OverviewPanel';
-import { ManagePanel } from './right-auxiliary/ManagePanel';
-import { InboxPanel } from './right-auxiliary/InboxPanel';
+import { TelemetryDeck } from './right-auxiliary/TelemetryDeck';
+import { ControlMatrix } from './right-auxiliary/ControlMatrix';
+import { AuditQueue } from './right-auxiliary/AuditQueue';
 import { MaximizeOnDoubleClick } from './ui/MaximizeOnDoubleClick';
 import { rightPanelTabs } from '@/data/right-panel-tabs';
-import type { Notification } from '@/data/mock/notifications';
+import { getActiveEmployee, type Employee } from '@/data/employees/store';
 
 type RightAuxiliaryProps = {
   width: number;
   onWidthChange: (width: number) => void;
-  notifications?: Notification[];
 };
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 500;
 
-export function RightAuxiliary({ width, onWidthChange, notifications = [] }: RightAuxiliaryProps) {
+export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
   const [activeTab, setActiveTab] = useState('overview');
   const isResizingRef = useRef(false);
+
+  const activeAgent: Employee | null = getActiveEmployee();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -74,9 +74,9 @@ export function RightAuxiliary({ width, onWidthChange, notifications = [] }: Rig
         />
         <FilterToolbar fileCount={0} />
         <div className="flex-1 overflow-y-auto">
-          {activeTab === 'overview' && <OverviewPanel />}
-          {activeTab === 'manage' && <ManagePanel />}
-          {activeTab === 'inbox' && <InboxPanel notifications={notifications} />}
+          {activeTab === 'overview' && activeAgent && <TelemetryDeck agent={activeAgent} />}
+          {activeTab === 'manage'   && activeAgent && <ControlMatrix agent={activeAgent} />}
+          {activeTab === 'inbox'    && <AuditQueue agent={activeAgent} />}
         </div>
       </div>
     </>
