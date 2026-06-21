@@ -28,7 +28,7 @@ export function LeftNavFooter({
         >
           <Bell size={16} strokeWidth={STROKE_WIDTH} className="shrink-0" />
           {notificationCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-chart-1 text-[9px] font-semibold text-highlight-foreground">
+            <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-chart-1 text-[9px] font-semibold text-highlight-foreground font-fustat">
               {notificationCount}
             </span>
           )}

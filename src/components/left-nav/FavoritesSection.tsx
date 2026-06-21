@@ -35,7 +35,7 @@ export function FavoritesSection({ items, onItemClick, selectedId }: FavoritesSe
         )}
         <Star size={12} strokeWidth={STROKE_WIDTH} className="shrink-0 text-chart-3" />
         <span className="flex-1 text-left">Favorites</span>
-        <span className="text-[10px] text-muted-foreground">{items.length}</span>
+        <span className="text-[10px] text-muted-foreground font-fustat">{items.length}</span>
       </button>
       {isExpanded && (
         <div className="mt-0.5 ml-2 space-y-0.5">

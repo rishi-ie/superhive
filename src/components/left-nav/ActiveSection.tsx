@@ -45,7 +45,7 @@ export function ActiveSection({ employees, tasks, onEmployeeClick, onTaskClick }
         )}
         <Zap size={12} strokeWidth={STROKE_WIDTH} className="shrink-0 text-chart-2" />
         <span className="flex-1 text-left">Active</span>
-        <span className="text-[10px] text-muted-foreground">
+        <span className="text-[10px] text-muted-foreground font-fustat">
           {activeCount > 0 ? `${activeCount} active` : 'none'}
         </span>
       </button>

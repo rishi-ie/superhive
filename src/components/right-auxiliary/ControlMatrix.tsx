@@ -47,7 +47,7 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
 
       {/* Live Config Summary */}
       <div className="bg-card border border-border rounded-md px-3 py-2 flex items-center gap-2 flex-wrap">
-        <span className="text-xs font-mono text-foreground">{permissions.modelEngine}</span>
+        <span className="text-xs font-fustat text-foreground">{permissions.modelEngine}</span>
         <span className="text-muted-foreground text-xs">·</span>
         <span className={`text-xs font-medium ${permissions.writeAccess ? 'text-chart-2' : 'text-muted-foreground'}`}>
           {permissions.writeAccess ? 'WRITE ON' : 'WRITE OFF'}
@@ -57,7 +57,7 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
           {permissions.commitAuthority === 'REVIEW_ONLY' ? 'REVIEW' : permissions.commitAuthority === 'AUTO_MERGE' ? 'AUTO-MERGE' : 'DIRECT PUSH'}
         </span>
         <span className="text-muted-foreground text-xs">·</span>
-        <span className="text-xs font-mono text-muted-foreground">{permissions.maxTokens.toLocaleString()} tok</span>
+        <span className="text-xs font-fustat text-muted-foreground">{permissions.maxTokens.toLocaleString()} tok</span>
       </div>
 
       {/* Engine Cards */}
@@ -78,13 +78,13 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
                 }`}
               >
                 <div className="flex w-full items-center justify-between">
-                  <span className={`text-xs font-medium ${selected ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <span className={`text-xs font-medium font-fustat ${selected ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {engine.label}
                   </span>
                   {selected && <Check size={10} strokeWidth={STROKE_WIDTH} className="text-chart-1" />}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[9px] text-muted-foreground">{engine.cost}</span>
+                  <span className="text-[9px] text-muted-foreground font-fustat">{engine.cost}</span>
                   <span className="text-[9px] text-muted-foreground/60">·</span>
                   <span className="text-[9px] text-chart-3">{engine.tag}</span>
                 </div>
@@ -149,7 +149,7 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Thinking Budget</label>
-          <span className="text-[10px] font-mono text-foreground">{sliderValue.toLocaleString()} tok</span>
+          <span className="text-[10px] font-fustat text-foreground">{sliderValue.toLocaleString()} tok</span>
         </div>
         <input
           type="range"
@@ -165,9 +165,9 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
           className="w-full accent-[#e07850] h-1 rounded-full bg-input cursor-pointer"
         />
         <div className="flex items-center justify-between">
-          <span className="text-[9px] text-muted-foreground/60">1K</span>
-          <span className="text-[10px] text-chart-3">{getTokenCostLabel(sliderValue)} estimated</span>
-          <span className="text-[9px] text-muted-foreground/60">16K</span>
+          <span className="text-[9px] text-muted-foreground/60 font-fustat">1K</span>
+          <span className="text-[10px] text-chart-3 font-fustat">{getTokenCostLabel(sliderValue)} estimated</span>
+          <span className="text-[9px] text-muted-foreground/60 font-fustat">16K</span>
         </div>
       </div>
 

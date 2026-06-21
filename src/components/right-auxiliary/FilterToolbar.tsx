@@ -23,7 +23,7 @@ export function FilterToolbar({
         <span>{changesLabel}</span>
         <ChevronDown size={12} />
       </button>
-      <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
+      <span className="text-[10px] font-fustat text-muted-foreground tabular-nums">
         {fileCount} files
       </span>
       <div className="flex-1" />

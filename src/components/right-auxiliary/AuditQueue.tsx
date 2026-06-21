@@ -39,7 +39,7 @@ export function AuditQueue({ agent }: AuditQueueProps) {
                 <div className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
                   {item.description}
                 </div>
-                <div className="text-[10px] text-muted-foreground/60 mt-1">{item.timestamp}</div>
+                <div className="text-[10px] text-muted-foreground/60 mt-1 font-fustat">{item.timestamp}</div>
               </div>
             </div>
             <div className="flex gap-2">

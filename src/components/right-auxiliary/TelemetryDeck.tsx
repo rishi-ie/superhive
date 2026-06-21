@@ -13,7 +13,7 @@ function StatusPill({ status }: { status: EmployeeStatus }) {
   };
   const { label, className } = config[status];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-fustat font-medium uppercase tracking-wider ${className}`}>
       {status === 'EXECUTING'     && <span className="size-1.5 rounded-full bg-chart-2 pulse-executing" />}
       {status === 'COMPILING'     && <Loader2 size={8} className="animate-spin text-chart-3" strokeWidth={STROKE_WIDTH} />}
       {status === 'ERROR_LOOP'    && <span className="size-1.5 rounded-full bg-chart-5 pulse-error" />}
@@ -59,14 +59,14 @@ export function TelemetryDeck({ agent }: TelemetryDeckProps) {
         <span className="text-muted-foreground text-xs">·</span>
         <span className="text-xs text-muted-foreground">{agent.role}</span>
         <span className="text-muted-foreground text-xs">·</span>
-        <span className="text-xs text-muted-foreground">active {agent.uptime}</span>
+        <span className="text-xs text-muted-foreground">active <span className="font-fustat">{agent.uptime}</span></span>
       </div>
 
       {/* Heartbeat Bar */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Brain Usage</span>
-          <span className={`text-[10px] font-mono ${telemetry.contextSaturation > 90 ? 'text-chart-1' : telemetry.contextSaturation > 70 ? 'text-chart-3' : 'text-chart-2'}`}>
+          <span className={`text-[10px] font-fustat ${telemetry.contextSaturation > 90 ? 'text-chart-1' : telemetry.contextSaturation > 70 ? 'text-chart-3' : 'text-chart-2'}`}>
             {telemetry.contextSaturation}% {heartbeatLabel(telemetry.contextSaturation)}
           </span>
         </div>
@@ -81,23 +81,23 @@ export function TelemetryDeck({ agent }: TelemetryDeckProps) {
       {/* Cost Card */}
       <div className="bg-card border border-border rounded-lg px-4 py-3 space-y-1">
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-mono font-bold text-foreground">${telemetry.currentCost.toFixed(4)}</span>
+          <span className="text-2xl font-fustat font-bold text-foreground">${telemetry.currentCost.toFixed(4)}</span>
           <span className="text-xs text-muted-foreground">current burn</span>
         </div>
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-          <span>{telemetry.tokensPerSecond} tok/s</span>
+          <span className="font-fustat">{telemetry.tokensPerSecond} tok/s</span>
           <span>·</span>
-          <span>{telemetry.evolutionLoop} evolutions</span>
+          <span className="font-fustat">{telemetry.evolutionLoop} evolutions</span>
           <span>·</span>
-          <span>{telemetry.logicKernelIntegrity}% kernel</span>
+          <span className="font-fustat">{telemetry.logicKernelIntegrity}% kernel</span>
         </div>
         <div className="pt-1 border-t border-border flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground">Session total</span>
-          <span className="text-[10px] font-mono text-foreground">${telemetry.sessionCost.toFixed(2)}</span>
+          <span className="text-[10px] font-fustat text-foreground">${telemetry.sessionCost.toFixed(2)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground">Budget remaining</span>
-          <span className="text-[10px] font-mono text-chart-2">${budgetRemaining}</span>
+          <span className="text-[10px] font-fustat text-chart-2">${budgetRemaining}</span>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export function TelemetryDeck({ agent }: TelemetryDeckProps) {
           {actions.length === 0 && <span className="text-[10px] text-muted-foreground/60 italic">No recent actions</span>}
           {actions.map((item, i) => (
             <div key={i} className="flex items-start gap-2">
-              <span className="text-[10px] font-mono text-muted-foreground/60 shrink-0 mt-0.5">{item.time}</span>
+              <span className="text-[10px] font-fustat text-muted-foreground/60 shrink-0 mt-0.5">{item.time}</span>
               <span className="text-[10px] text-muted-foreground leading-relaxed">{item.action}</span>
             </div>
           ))}

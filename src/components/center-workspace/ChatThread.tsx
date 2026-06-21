@@ -46,7 +46,7 @@ export function ChatThread({ thread }: ChatThreadProps) {
               >
                 {message.content}
               </div>
-              <span className="text-[10px] text-muted-foreground px-1">
+              <span className="text-[10px] text-muted-foreground px-1 font-fustat">
                 {formatTime(message.timestamp)}
               </span>
             </div>
