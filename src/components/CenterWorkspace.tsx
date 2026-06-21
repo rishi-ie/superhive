@@ -5,6 +5,7 @@ import { ChatEmptyState } from './center-workspace/ChatEmptyState';
 import { ChatInput } from './center-workspace/ChatInput';
 import { ChatThread } from './center-workspace/ChatThread';
 import { ProjectsView } from './center-workspace/ProjectsView';
+import { TicketsView } from './center-workspace/TicketsView';
 import { workspaceTabs } from '@/data/workspace-tabs';
 import { currentThread } from '@/data/mock/chat';
 
@@ -13,7 +14,6 @@ export function CenterWorkspace() {
   const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 
   const isChat = activeTab === 'chat';
-  const isProjects = activeTab === 'projects';
 
   return (
     <div className="flex h-full flex-1 flex-col min-w-0 bg-background">
@@ -25,9 +25,10 @@ export function CenterWorkspace() {
         onTabChange={setActiveTab}
       />
 
-      <div className="flex-1 overflow-y-auto flex flex-col">
-        {isChat && (USE_MOCK_DATA ? <ChatThread thread={currentThread} /> : <ChatEmptyState />)}
-        {isProjects && <ProjectsView />}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {activeTab === 'chat' && (USE_MOCK_DATA ? <ChatThread thread={currentThread} /> : <ChatEmptyState />)}
+        {activeTab === 'projects' && <ProjectsView />}
+        {activeTab === 'tickets' && <TicketsView />}
       </div>
 
       {isChat && <ChatInput />}
