@@ -17,10 +17,6 @@ const ticketRows = [
   { id: 'tkt-1', label: 'Fix auth regression' },
   { id: 'tkt-2', label: 'Update API docs' },
 ];
-const automationRows = [
-  { id: 'auto-1', label: 'Daily standup digest' },
-  { id: 'auto-2', label: 'PR review notifier' },
-];
 const commsRows = [
   { id: 'msg-1', label: 'Team chat' },
   { id: 'msg-2', label: 'Mentions' },
@@ -58,15 +54,17 @@ export function AccordionCore({ onItemClick }: AccordionCoreProps) {
         {ticketRows.map(t => <NavRow key={t.id} id={t.id} label={t.label} onItemClick={onItemClick} />)}
       </AccordionItem>
 
-      <AccordionItem label="Automations" icon={getIcon('automations')}>
-        {automationRows.map(a => <NavRow key={a.id} id={a.id} label={a.label} onItemClick={onItemClick} />)}
-      </AccordionItem>
-
       <AccordionItem label="Communications" icon={getIcon('communications')}>
         {commsRows.map(c => <NavRow key={c.id} id={c.id} label={c.label} onItemClick={onItemClick} />)}
       </AccordionItem>
 
-      <AccordionItem
+      <AccordionHeader
+        label="Meta Hive"
+        icon={getIcon('meta-hive')}
+        badge={<span className="text-[9px] text-muted-foreground/60 italic pr-1">Coming soon</span>}
+      />
+
+      <AccordionHeader
         label="Remote"
         icon={getIcon('remote')}
         badge={<span className="text-[9px] text-muted-foreground/60 italic pr-1">Coming soon</span>}
