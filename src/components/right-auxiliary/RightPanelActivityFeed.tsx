@@ -1,4 +1,4 @@
-import type { SwarmActivity, ProjectAgent } from '@/data/mock/project';
+import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
 
 type RightPanelActivityFeedProps = {
   items: SwarmActivity[];

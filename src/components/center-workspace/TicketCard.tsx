@@ -1,5 +1,5 @@
 import { Avatar } from '@/components/ui/Avatar';
-import type { Ticket, ProjectAgent } from '@/data/mock/project';
+import type { Ticket, ProjectAgent } from '@/data/projects/store';
 
 type TicketCardProps = {
   ticket: Ticket;

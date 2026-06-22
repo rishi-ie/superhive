@@ -1,4 +1,4 @@
-import { USE_MOCK_DATA } from '@/lib/feature-flags';
+import { isMockEnabled } from '@/lib/feature-flags';
 import { mockEmployeeStore } from './mock';
 import type { EmployeeStore, Employee, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
 
@@ -18,7 +18,7 @@ const emptyStore: EmployeeStore = {
   },
 };
 
-const store: EmployeeStore = USE_MOCK_DATA ? mockEmployeeStore : emptyStore;
+const store: EmployeeStore = isMockEnabled('employees') ? mockEmployeeStore : emptyStore;
 
 export function listEmployees(): Employee[] {
   return store.list();

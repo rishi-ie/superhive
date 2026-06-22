@@ -8,7 +8,7 @@ import { RightPanelActivityFeed } from './right-auxiliary/RightPanelActivityFeed
 import { MaximizeOnDoubleClick } from './ui/MaximizeOnDoubleClick';
 import { rightPanelTabs } from '@/data/right-panel-tabs';
 import { getActiveEmployee, type Employee } from '@/data/employees/store';
-import { swarmActivity, projectAgents } from '@/data/mock/project';
+import { listSwarmActivity, listProjectAgents } from '@/data/projects/store';
 
 type RightAuxiliaryProps = {
   width: number;
@@ -23,7 +23,8 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
   const isResizingRef = useRef(false);
 
   const activeAgent: Employee | null = getActiveEmployee();
-  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
+  const swarmActivity = listSwarmActivity();
+  const projectAgents = listProjectAgents();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -80,7 +81,7 @@ export function RightAuxiliary({ width, onWidthChange }: RightAuxiliaryProps) {
           {activeTab === 'overview' && activeAgent && (
             <>
               <TelemetryDeck agent={activeAgent} />
-              {USE_MOCK_DATA && (
+              {swarmActivity.length > 0 && (
                 <RightPanelActivityFeed items={swarmActivity} agents={projectAgents} />
               )}
             </>

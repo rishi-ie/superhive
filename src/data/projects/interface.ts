@@ -1,0 +1,42 @@
+export type TicketStatus = 'TODO' | 'EXECUTING' | 'DONE';
+
+export type Ticket = {
+  id: string;
+  title: string;
+  status: TicketStatus;
+  assignedAgentId: string;
+};
+
+export type AgentCurrentStatus = 'WORKING' | 'COMPILING' | 'IDLE';
+
+export type ProjectAgent = {
+  id: string;
+  name: string;
+  role: string;
+  currentStatus: AgentCurrentStatus;
+  assignedTicketId: string | null;
+  initials: string;
+};
+
+export type SwarmActivity = {
+  id: string;
+  timestamp: string;
+  primaryAgent: string;
+  action: string;
+  targetAgent: string;
+  context: string;
+};
+
+export type ChannelStatus = 'OPEN' | 'AWAITING_REPLY' | 'RESOLVED';
+
+export type CommunicationChannel = {
+  id: string;
+  participants: string[];
+  topic: string;
+  relatedTicketId: string;
+  status: ChannelStatus;
+  lastMessagePreview: string;
+  messageCount: number;
+  updatedAt: string;
+  unread?: boolean;
+};

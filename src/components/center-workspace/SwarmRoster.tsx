@@ -1,13 +1,13 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-import type { projectAgents as ProjectAgentsType } from '@/data/mock/project';
+import type { ProjectAgent } from '@/data/projects/store';
 
 type SwarmRosterProps = {
-  agents: typeof ProjectAgentsType;
+  agents: ProjectAgent[];
 };
 
-function AgentCard({ agent }: { agent: typeof ProjectAgentsType[number] }) {
+function AgentCard({ agent }: { agent: ProjectAgent }) {
   return (
     <div className="flex items-center gap-2 p-2 rounded-md border border-border bg-card hover:border-border/80 transition-colors">
       <Avatar size="xs" fallback={agent.initials} />

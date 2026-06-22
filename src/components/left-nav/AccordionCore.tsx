@@ -1,6 +1,6 @@
 import { AccordionItem, AccordionHeader } from './AccordionItem';
 import { AgentListItem } from './AgentListItem';
-import { accordionAgents } from '@/data/mock/accordion-employees';
+import { listAccordionAgents } from '@/data/left-nav/store';
 import { mainNavItems } from '@/data/left-nav';
 import { STROKE_WIDTH } from '@/lib/constants';
 
@@ -47,7 +47,7 @@ export function AccordionCore({ onItemClick }: AccordionCoreProps) {
       </AccordionItem>
 
       <AccordionItem label="Employees" icon={getIcon('employees')} defaultOpen>
-        {accordionAgents.map(agent => <AgentListItem key={agent.id} agent={agent} onClick={onItemClick} />)}
+        {listAccordionAgents().map(agent => <AgentListItem key={agent.id} agent={agent} onClick={onItemClick} />)}
       </AccordionItem>
 
       <AccordionItem label="Tickets" icon={getIcon('tickets')}>

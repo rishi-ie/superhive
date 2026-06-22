@@ -1,5 +1,5 @@
 import { Avatar } from '@/components/ui/Avatar';
-import type { Priority, TicketType, UniversalTicket } from '@/data/mock/tickets';
+import type { Priority, TicketType, UniversalTicket } from '@/data/tickets/store';
 
 type UniversalTicketCardProps = {
   ticket: UniversalTicket;

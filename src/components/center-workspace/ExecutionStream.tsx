@@ -1,9 +1,9 @@
 import { TicketCard } from './TicketCard';
-import type { tickets as TicketsType, projectAgents as ProjectAgentsType } from '@/data/mock/project';
+import type { Ticket, ProjectAgent } from '@/data/projects/store';
 
 type ExecutionStreamProps = {
-  tickets: typeof TicketsType;
-  agents: typeof ProjectAgentsType;
+  tickets: Ticket[];
+  agents: ProjectAgent[];
 };
 
 const VISIBLE_LIMIT = 2;
@@ -14,7 +14,7 @@ const columns: { status: 'TODO' | 'EXECUTING' | 'DONE'; label: string }[] = [
   { status: 'DONE',      label: 'Done' },
 ];
 
-function getAgentById(agents: typeof ProjectAgentsType, id: string) {
+function getAgentById(agents: ProjectAgent[], id: string) {
   return agents.find(a => a.id === id);
 }
 

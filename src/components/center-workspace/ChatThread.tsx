@@ -1,6 +1,6 @@
 import { Avatar } from '@/components/ui/Avatar';
 import { STROKE_WIDTH } from '@/lib/constants';
-import type { ChatThread as ChatThreadType } from '@/data/mock/chat';
+import type { ChatThread as ChatThreadType } from '@/data/chat/store';
 
 type ChatThreadProps = {
   thread: ChatThreadType;

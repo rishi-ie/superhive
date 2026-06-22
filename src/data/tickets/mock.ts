@@ -1,24 +1,6 @@
-export type UniversalTicketStatus = 'BACKLOG' | 'EXECUTING' | 'REVIEW' | 'MERGED';
-export type Priority = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TicketType = 'BUG' | 'FEATURE' | 'REFACTOR';
+import type { UniversalTicket } from './interface';
 
-export type Assignee = {
-  name: string;
-  avatarUrl?: string;
-  isAI: boolean;
-};
-
-export type UniversalTicket = {
-  id: string;
-  title: string;
-  projectName: string;
-  status: UniversalTicketStatus;
-  priority: Priority;
-  type: TicketType;
-  assignee: Assignee;
-};
-
-export const universalTickets: UniversalTicket[] = [
+const universalTickets: UniversalTicket[] = [
   { id: 'SH-142', title: 'Fix Auth Regression on Mobile Login',  projectName: 'Superhive App',     status: 'EXECUTING', priority: 'HIGH',   type: 'BUG',      assignee: { name: 'Marcus Webb',  isAI: true  } },
   { id: 'SH-143', title: 'Implement Onboarding Flow',           projectName: 'Superhive App',     status: 'BACKLOG',   priority: 'MEDIUM', type: 'FEATURE',  assignee: { name: 'Sonia Patel',  isAI: true  } },
   { id: 'SH-144', title: 'Add Dark Mode to Settings',           projectName: 'Superhive App',     status: 'BACKLOG',   priority: 'LOW',    type: 'FEATURE',  assignee: { name: 'Rishi Iyer',  isAI: false } },
@@ -40,3 +22,5 @@ export const universalTickets: UniversalTicket[] = [
   { id: 'PL-013', title: 'Build Side Project Dashboard',        projectName: 'Personal',          status: 'BACKLOG',   priority: 'LOW',    type: 'FEATURE',  assignee: { name: 'Rishi Iyer',  isAI: false } },
   { id: 'PL-014', title: 'Write Documentation for API',       projectName: 'Personal',          status: 'REVIEW',    priority: 'MEDIUM', type: 'FEATURE',  assignee: { name: 'Sonia Patel',  isAI: true  } },
 ];
+
+export { universalTickets };

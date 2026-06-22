@@ -1,18 +1,6 @@
-export type Message = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-};
+import type { ChatThread } from './interface';
 
-export type ChatThread = {
-  id: string;
-  title: string;
-  messages: Message[];
-  updatedAt: Date;
-};
-
-export const mockThreads: ChatThread[] = [
+const mockThreads: ChatThread[] = [
   {
     id: 'thread-1',
     title: 'Superhive onboarding flow',
@@ -46,4 +34,4 @@ export const mockThreads: ChatThread[] = [
   },
 ];
 
-export const currentThread = mockThreads[0]!;
+export { mockThreads };

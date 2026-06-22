@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KanbanBoard } from './KanbanBoard';
 import { STROKE_WIDTH } from '@/lib/constants';
-import { universalTickets } from '@/data/mock/tickets';
+import { listUniversalTickets } from '@/data/tickets/store';
 
 export function TicketsView() {
   return (
@@ -16,7 +16,7 @@ export function TicketsView() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <KanbanBoard tickets={universalTickets} />
+        <KanbanBoard tickets={listUniversalTickets()} />
       </div>
     </div>
   );

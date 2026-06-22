@@ -1,13 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronsUpDown, Check, Settings, LogOut } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import type { Workspace } from '@/data/workspaces/interface';
 
-export type Workspace = {
-  id: string;
-  name: string;
-  initials: string;
-  avatarColor?: string;
-};
+export type { Workspace };
 
 type TeamSelectorProps = {
   workspaces: Workspace[];

@@ -1,5 +1,5 @@
 import { KanbanColumn } from './KanbanColumn';
-import type { UniversalTicket, UniversalTicketStatus } from '@/data/mock/tickets';
+import type { UniversalTicket, UniversalTicketStatus } from '@/data/tickets/store';
 
 type KanbanBoardProps = {
   tickets: UniversalTicket[];

@@ -2,9 +2,10 @@ import { LeftNav } from '@/components/LeftNav';
 import { CenterWorkspace } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
-import { workspaces, currentWorkspace } from '@/data/mock/workspaces';
-import { favorites } from '@/data/mock/favorites';
-import { activeEmployees } from '@/data/mock/employees';
+import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
+import { listWorkspaces, getCurrentWorkspace } from '@/data/workspaces/store';
+import { listFavorites } from '@/data/favorites/store';
+import { listEmployees } from '@/data/employees/store';
 
 type DashboardProps = {
   leftWidth: number;
@@ -14,6 +15,19 @@ type DashboardProps = {
   onNavigate: (page: Page) => void;
 };
 
+function toActiveEmployee(employees: ReturnType<typeof listEmployees>): ActiveEmployee[] {
+  return employees.map((e) => ({
+    id: e.id,
+    name: e.name,
+    status: e.status === 'EXECUTING' || e.status === 'COMPILING' || e.status === 'AWAITING_HUMAN'
+      ? 'active'
+      : e.status === 'IDLE'
+      ? 'idle'
+      : 'busy',
+    currentTask: e.activeTask,
+  }));
+}
+
 export function Dashboard({
   leftWidth,
   rightWidth,
@@ -21,11 +35,10 @@ export function Dashboard({
   onRightWidthChange,
   onNavigate,
 }: DashboardProps) {
-  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
-
-  const workspaces_data = USE_MOCK_DATA ? workspaces : [];
-  const favorites_data = USE_MOCK_DATA ? favorites : [];
-  const employees_data = USE_MOCK_DATA ? activeEmployees : [];
+  const workspaces_data = listWorkspaces();
+  const currentWorkspace = getCurrentWorkspace();
+  const favorites_data = listFavorites();
+  const employees_data = toActiveEmployee(listEmployees());
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -34,7 +47,7 @@ export function Dashboard({
         onWidthChange={onLeftWidthChange}
         onSettingsClick={() => onNavigate('settings')}
         workspaces={workspaces_data}
-        currentWorkspace={USE_MOCK_DATA ? currentWorkspace : undefined}
+        currentWorkspace={currentWorkspace}
         favorites={favorites_data}
         activeEmployees={employees_data}
       />

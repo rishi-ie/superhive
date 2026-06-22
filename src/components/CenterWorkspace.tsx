@@ -7,12 +7,11 @@ import { ChatThread } from './center-workspace/ChatThread';
 import { ProjectsView } from './center-workspace/ProjectsView';
 import { TicketsView } from './center-workspace/TicketsView';
 import { workspaceTabs } from '@/data/workspace-tabs';
-import { currentThread } from '@/data/mock/chat';
+import { getCurrentThread } from '@/data/chat/store';
 
 export function CenterWorkspace() {
   const [activeTab, setActiveTab] = useState('chat');
-  const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
-
+  const currentThread = getCurrentThread();
   const isChat = activeTab === 'chat';
 
   return (
@@ -26,7 +25,7 @@ export function CenterWorkspace() {
       />
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        {activeTab === 'chat' && (USE_MOCK_DATA ? <ChatThread thread={currentThread} /> : <ChatEmptyState />)}
+        {activeTab === 'chat' && (currentThread ? <ChatThread thread={currentThread} /> : <ChatEmptyState />)}
         {activeTab === 'projects' && <ProjectsView />}
         {activeTab === 'tickets' && <TicketsView />}
       </div>

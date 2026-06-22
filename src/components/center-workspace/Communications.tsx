@@ -1,5 +1,5 @@
 import { Avatar } from '@/components/ui/Avatar';
-import type { CommunicationChannel, ProjectAgent } from '@/data/mock/project';
+import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type CommunicationsProps = {
   channels: CommunicationChannel[];
