@@ -4,19 +4,23 @@ import { TelemetryDeck } from './right-auxiliary/TelemetryDeck';
 import { ControlMatrix } from './right-auxiliary/ControlMatrix';
 import { AuditQueue } from './right-auxiliary/AuditQueue';
 import { RightPanelActivityFeed } from './right-auxiliary/RightPanelActivityFeed';
-import { rightPanelTabs } from '@/data/right-panel-tabs';
+import { SessionsView } from './right-auxiliary/SessionsView';
+import { ProgressView } from './right-auxiliary/ProgressView';
+import { ProjectOverviewTab } from './right-auxiliary/ProjectOverviewTab';
+import { ChannelOverviewTab } from './right-auxiliary/ChannelOverviewTab';
+import { getRightPanelTabs, type RightPanelContext, type RightPanelTabId } from '@/data/right-panel-tabs';
 import { getActiveEmployee, getEmployee } from '@/data/employees/store';
-import { listSwarmActivity as listProjActivity, listProjectAgents as listProjAgents } from '@/data/projects/store';
+import { listSwarmActivity as listProjActivity, listProjectAgents as listProjAgents, getProject } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 
 type RightAuxiliaryProps = {
   width: number;
   onWidthChange: (width: number) => void;
-  employeeId?: string | null;
-  tab?: 'overview' | 'manage' | 'inbox';
+  context: RightPanelContext;
+  tab: RightPanelTabId;
   ticketId?: string | null;
-  onTabChange?: (tab: 'overview' | 'manage' | 'inbox') => void;
+  onTabChange?: (tab: RightPanelTabId) => void;
   onApproveAudit?: (id: string) => void;
   onDenyAudit?: (id: string) => void;
 };
@@ -55,8 +59,8 @@ function TicketDetail({ ticket, agents }: { ticket: UniversalTicket; agents: Ret
 export function RightAuxiliary({
   width,
   onWidthChange,
-  employeeId,
-  tab = 'overview',
+  context,
+  tab,
   ticketId,
   onTabChange,
   onApproveAudit,
@@ -64,9 +68,11 @@ export function RightAuxiliary({
 }: RightAuxiliaryProps) {
   const isResizingRef = useRef(false);
 
-  const activeEmployee = getActiveEmployee(employeeId);
+  const rightPanelTabs = getRightPanelTabs(context);
+  const activeEmployee = context?.kind === 'employee' ? getEmployee(context.employeeId) ?? getActiveEmployee(context.employeeId) : getActiveEmployee(null);
   const swarmActivity = listProjActivity();
   const projectAgents = listProjAgents();
+  const selectedTicket = ticketId ? listUniversalTickets().find(t => t.id === ticketId) : null;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -100,8 +106,6 @@ export function RightAuxiliary({
     document.body.style.userSelect = 'none';
   };
 
-  const selectedTicket = ticketId ? listUniversalTickets().find(t => t.id === ticketId) : null;
-
   return (
     <>
       <div
@@ -116,10 +120,10 @@ export function RightAuxiliary({
         <RightPanelTabs
           tabs={rightPanelTabs}
           activeTab={tab}
-          onTabChange={(id) => onTabChange?.(id as typeof tab)}
+          onTabChange={(id) => onTabChange?.(id as RightPanelTabId)}
         />
         <div className="flex-1 overflow-y-auto">
-          {tab === 'overview' && activeEmployee && (
+          {tab === 'overview' && context?.kind === 'employee' && activeEmployee && (
             <>
               <TelemetryDeck agent={activeEmployee} />
               {swarmActivity.length > 0 && (
@@ -127,7 +131,27 @@ export function RightAuxiliary({
               )}
             </>
           )}
-          {tab === 'manage' && activeEmployee && <ControlMatrix agent={activeEmployee} />}
+          {tab === 'overview' && context?.kind === 'ticket' && (
+            <ProjectOverviewTab />
+          )}
+          {tab === 'overview' && context?.kind === 'project' && (
+            <ProjectOverviewTab />
+          )}
+          {tab === 'overview' && context?.kind === 'channel' && (
+            <ChannelOverviewTab />
+          )}
+          {tab === 'manage' && activeEmployee && (
+            <ControlMatrix agent={activeEmployee} />
+          )}
+          {tab === 'manage' && context?.kind === 'ticket' && (
+            <ProjectOverviewTab />
+          )}
+          {tab === 'manage' && context?.kind === 'project' && (
+            <ProjectOverviewTab />
+          )}
+          {tab === 'manage' && context?.kind === 'channel' && (
+            <ChannelOverviewTab />
+          )}
           {tab === 'inbox' && (
             <>
               {selectedTicket && <TicketDetail ticket={selectedTicket} agents={projectAgents} />}
@@ -137,6 +161,12 @@ export function RightAuxiliary({
                 onDeny={onDenyAudit}
               />
             </>
+          )}
+          {tab === 'sessions' && context?.kind === 'employee' && (
+            <SessionsView />
+          )}
+          {tab === 'progress' && context?.kind === 'ticket' && (
+            <ProgressView />
           )}
         </div>
       </div>

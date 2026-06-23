@@ -6,11 +6,13 @@ import { TicketsView } from './center-workspace/TicketsView';
 import { EmployeesView } from './center-workspace/EmployeesView';
 import { CommunicationsView } from './center-workspace/CommunicationsView';
 import { OnboardingWizard } from './center-workspace/OnboardingWizard';
+import { UniversalProjectsView } from './center-workspace/UniversalProjectsView';
+import { UniversalEmployeesView } from './center-workspace/UniversalEmployeesView';
 import { HOME_WIZARD_CONFIG, BLANK_CANVAS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import type { CenterTab, CenterTabType } from '@/data/tabs/interface';
 import type { OnboardingWizardProps } from './center-workspace/OnboardingWizard';
 
-export type CenterView = 'home' | 'employees' | 'communications';
+export type CenterView = 'home' | 'employees' | 'communications' | 'universal-projects' | 'universal-employees';
 
 type CenterWorkspaceProps = {
   tabs: CenterTab[];
@@ -26,16 +28,21 @@ type CenterWorkspaceProps = {
   onTicketSelect?: (id: string) => void;
   onEmployeeSelect?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
+  onProjectSelect?: (id: string, workspaceId: string) => void;
 };
 
 function getViewLabel(centerView: CenterView | null, activeTab: CenterTab | null): string {
   if (centerView === 'employees') return 'Employees';
   if (centerView === 'communications') return 'Communications';
+  if (centerView === 'universal-projects') return 'Projects';
+  if (centerView === 'universal-employees') return 'Employees';
   if (!activeTab) return '';
   const labels: Record<CenterTabType, string> = {
     chat: 'Chat',
     projects: 'Projects',
     tickets: 'Tickets',
+    project: 'Project',
+    channel: 'Channel',
   };
   return labels[activeTab.type];
 }
@@ -54,6 +61,7 @@ export function CenterWorkspace({
   onTicketSelect,
   onEmployeeSelect,
   onAction,
+  onProjectSelect,
 }: CenterWorkspaceProps) {
   const showChrome = centerView !== 'home';
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
@@ -94,6 +102,12 @@ export function CenterWorkspace({
         {centerView === 'communications' && (
           <CommunicationsView workspaceId={activeWorkspaceId} />
         )}
+        {centerView === 'universal-projects' && (
+          <UniversalProjectsView onProjectSelect={onProjectSelect} />
+        )}
+        {centerView === 'universal-employees' && (
+          <UniversalEmployeesView onEmployeeSelect={onEmployeeSelect} />
+        )}
         {!centerView && activeTab?.type === 'chat' && (
           <ChatView workspaceId={wsId} onAction={onAction} />
         )}
@@ -109,6 +123,16 @@ export function CenterWorkspace({
             workspaceId={activeTab.workspaceId}
             onTicketSelect={onTicketSelect}
           />
+        )}
+        {!centerView && activeTab?.type === 'project' && (
+          <ProjectsView
+            workspaceId={activeTab.workspaceId}
+            onTicketSelect={onTicketSelect}
+            onAction={onAction}
+          />
+        )}
+        {!centerView && activeTab?.type === 'channel' && (
+          <CommunicationsView workspaceId={wsId} />
         )}
       </div>
     </div>

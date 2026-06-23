@@ -1,281 +1,291 @@
 {
   "workspaces": [
-    { "id": "superhive", "name": "Superhive", "initials": "SH", "avatarColor": "bg-chart-1" },
-    { "id": "mumbrane", "name": "Mumbrane", "initials": "MB", "avatarColor": "bg-chart-2" },
-    { "id": "sidharda-co", "name": "Sidharda Co", "initials": "SC", "avatarColor": "bg-chart-3" },
-    { "id": "personal", "name": "Personal", "initials": "PL", "avatarColor": "bg-[#8b5cf6]" }
+    { "id": "vela", "name": "Vela", "initials": "VL", "avatarColor": "bg-chart-1" },
+    { "id": "widget", "name": "Widget Embed", "initials": "WE", "avatarColor": "bg-chart-2" },
+    { "id": "admin", "name": "Admin Dashboard", "initials": "AD", "avatarColor": "bg-chart-3" },
+    { "id": "mobile", "name": "Mobile SDK", "initials": "MS", "avatarColor": "bg-[#8b5cf6]" }
   ],
-  "currentWorkspaceId": "superhive",
+  "currentWorkspaceId": "vela",
   "projects": {
-    "superhive": {
-      "id": "proj-superhive",
-      "workspaceId": "superhive",
-      "title": "Superhive App",
+    "vela": {
+      "id": "proj-vela-platform",
+      "workspaceId": "vela",
+      "title": "Vela Platform",
       "tickets": [
-        { "id": "SH-142", "title": "Fix Auth Regression", "status": "TODO", "assignedAgentId": "sh-ava" },
-        { "id": "SH-143", "title": "Implement Onboarding Flow", "status": "TODO", "assignedAgentId": "sh-sonia" },
-        { "id": "SH-144", "title": "Add Dark Mode to Settings", "status": "TODO", "assignedAgentId": "sh-james" },
-        { "id": "SH-145", "title": "Refactor API Gateway", "status": "EXECUTING", "assignedAgentId": "sh-marcus" },
-        { "id": "SH-146", "title": "Optimize Database Queries", "status": "EXECUTING", "assignedAgentId": "sh-priya" },
-        { "id": "SH-140", "title": "Update Dependencies", "status": "DONE", "assignedAgentId": "sh-ava" },
-        { "id": "SH-141", "title": "Fix Login Bug", "status": "DONE", "assignedAgentId": "sh-sonia" },
-        { "id": "SH-139", "title": "Migrate to TypeScript Strict", "status": "DONE", "assignedAgentId": "sh-james" }
+        { "id": "VL-101", "title": "Fix ticket routing latency spike", "status": "EXECUTING", "assignedAgentId": "emp-elena" },
+        { "id": "VL-102", "title": "Implement intent classification v2", "status": "EXECUTING", "assignedAgentId": "emp-david" },
+        { "id": "VL-103", "title": "OAuth SSO for enterprise customers", "status": "TODO", "assignedAgentId": "emp-noah" },
+        { "id": "VL-104", "title": "Add response SLA monitoring", "status": "TODO", "assignedAgentId": "emp-fatima" },
+        { "id": "VL-105", "title": "Optimize embedding pipeline throughput", "status": "REVIEW", "assignedAgentId": "emp-marcus" },
+        { "id": "VL-106", "title": "Migrate to Postgres 16", "status": "DONE", "assignedAgentId": "emp-marcus" },
+        { "id": "VL-107", "title": "Implement bulk article import", "status": "DONE", "assignedAgentId": "emp-fatima" },
+        { "id": "VL-108", "title": "Add CSAT analytics dashboard", "status": "DONE", "assignedAgentId": "emp-james" }
       ],
       "agents": [
-        { "id": "sh-ava", "name": "Ava Chen", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "SH-142", "initials": "AC" },
-        { "id": "sh-marcus", "name": "Marcus Webb", "role": "API Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SH-145", "initials": "MW" },
-        { "id": "sh-priya", "name": "Priya Sharma", "role": "Database Engineer", "currentStatus": "WORKING", "assignedTicketId": "SH-146", "initials": "PS" },
-        { "id": "sh-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SH-143", "initials": "SP" },
-        { "id": "sh-james", "name": "James Liu", "role": "DevOps Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "JL" }
+        { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-101", "initials": "ER" },
+        { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "VL-105", "initials": "MW" },
+        { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "PS" },
+        { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "DK" },
+        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "NC" }
       ],
       "channels": [
-        { "id": "sh-ch-1", "participants": ["Marcus Webb", "Ava Chen"], "topic": "Schema validation", "relatedTicketId": "SH-145", "status": "OPEN", "lastMessagePreview": "Hey Ava, can you verify the response shape?", "messageCount": 4, "updatedAt": "10:42 AM", "unread": true },
-        { "id": "sh-ch-2", "participants": ["Priya Sharma", "Marcus Webb"], "topic": "DB snapshot handoff", "relatedTicketId": "SH-146", "status": "AWAITING_REPLY", "lastMessagePreview": "Snapshot ready, awaiting your review.", "messageCount": 2, "updatedAt": "10:38 AM" },
-        { "id": "sh-ch-3", "participants": ["Sonia Patel", "Ava Chen"], "topic": "Design tokens", "relatedTicketId": "SH-143", "status": "OPEN", "lastMessagePreview": "Tokens uploaded to /design/v2.", "messageCount": 7, "updatedAt": "10:31 AM" },
-        { "id": "sh-ch-4", "participants": ["Ava Chen", "James Liu"], "topic": "Code review", "relatedTicketId": "SH-140", "status": "RESOLVED", "lastMessagePreview": "Approved. Merging now.", "messageCount": 3, "updatedAt": "10:24 AM" },
-        { "id": "sh-ch-5", "participants": ["Marcus Webb", "James Liu"], "topic": "Deploy pipeline", "relatedTicketId": "SH-141", "status": "AWAITING_REPLY", "lastMessagePreview": "Pipeline queued, need approval to proceed.", "messageCount": 5, "updatedAt": "10:15 AM" }
+        { "id": "vl-ch-1", "participants": ["Elena Rodriguez", "David Kim"], "topic": "Intent classifier calibration", "relatedTicketId": "VL-102", "status": "OPEN", "lastMessagePreview": "F1 dropped 3pts on 'billing' intents. Retraining now.", "messageCount": 9, "updatedAt": "11:42 AM", "unread": true },
+        { "id": "vl-ch-2", "participants": ["Marcus Webb", "Elena Rodriguez"], "topic": "DB migration window", "relatedTicketId": "VL-106", "status": "RESOLVED", "lastMessagePreview": "Migration complete. Rolling back to 15 for now.", "messageCount": 6, "updatedAt": "11:20 AM" },
+        { "id": "vl-ch-3", "participants": ["Noah Chen", "Marcus Webb"], "topic": "OAuth scope review", "relatedTicketId": "VL-103", "status": "AWAITING_REPLY", "lastMessagePreview": "Need PKCE flow added before I can approve.", "messageCount": 4, "updatedAt": "10:55 AM" },
+        { "id": "vl-ch-4", "participants": ["Priya Sharma", "Elena Rodriguez"], "topic": "Latency profiling session", "relatedTicketId": "VL-101", "status": "OPEN", "lastMessagePreview": "p99 is 2.8s at 50k rpm. Blame is on the vector DB.", "messageCount": 12, "updatedAt": "10:30 AM", "unread": true },
+        { "id": "vl-ch-5", "participants": ["Fatima Al-Hassan", "Priya Sharma"], "topic": "SLA metrics definition", "relatedTicketId": "VL-104", "status": "OPEN", "lastMessagePreview": "First response SLA or resolution SLA? Need both.", "messageCount": 3, "updatedAt": "09:48 AM" }
       ],
       "activity": [
-        { "id": "sh-act-1", "timestamp": "10:42 AM", "primaryAgent": "Marcus Webb", "action": "requested schema validation from", "targetAgent": "Ava Chen", "context": "for SH-145" },
-        { "id": "sh-act-2", "timestamp": "10:38 AM", "primaryAgent": "Priya Sharma", "action": "shared database snapshot with", "targetAgent": "Marcus Webb", "context": "for SH-146" },
-        { "id": "sh-act-3", "timestamp": "10:31 AM", "primaryAgent": "Sonia Patel", "action": "handed off design tokens to", "targetAgent": "Ava Chen", "context": "for SH-143" },
-        { "id": "sh-act-4", "timestamp": "10:24 AM", "primaryAgent": "Ava Chen", "action": "requested code review from", "targetAgent": "James Liu", "context": "for SH-140" },
-        { "id": "sh-act-5", "timestamp": "10:15 AM", "primaryAgent": "Marcus Webb", "action": "requested deployment pipeline from", "targetAgent": "James Liu", "context": "for SH-141" },
-        { "id": "sh-act-6", "timestamp": "10:02 AM", "primaryAgent": "Priya Sharma", "action": "escalated timeout issue to", "targetAgent": "Ava Chen", "context": "for SH-142" }
+        { "id": "vl-act-1", "timestamp": "11:42 AM", "primaryAgent": "David Kim", "action": "shared classifier drift findings with", "targetAgent": "Elena Rodriguez", "context": "for VL-102" },
+        { "id": "vl-act-2", "timestamp": "11:20 AM", "primaryAgent": "Marcus Webb", "action": "rolled back database migration with", "targetAgent": "Elena Rodriguez", "context": "for VL-106" },
+        { "id": "vl-act-3", "timestamp": "10:55 AM", "primaryAgent": "Noah Chen", "action": "requested PKCE additions from", "targetAgent": "Marcus Webb", "context": "for VL-103" },
+        { "id": "vl-act-4", "timestamp": "10:30 AM", "primaryAgent": "Priya Sharma", "action": "escalated p99 regression to", "targetAgent": "Elena Rodriguez", "context": "for VL-101" },
+        { "id": "vl-act-5", "timestamp": "09:48 AM", "primaryAgent": "Fatima Al-Hassan", "action": "aligned SLA definitions with", "targetAgent": "Priya Sharma", "context": "for VL-104" }
       ]
     },
-    "mumbrane": {
-      "id": "proj-mumbrane",
-      "workspaceId": "mumbrane",
-      "title": "Mumbrane Platform",
+    "widget": {
+      "id": "proj-widget",
+      "workspaceId": "widget",
+      "title": "Widget Embed",
       "tickets": [
-        { "id": "MB-201", "title": "Implement Webhook Retry Logic", "status": "EXECUTING", "assignedAgentId": "mb-priya" },
-        { "id": "MB-202", "title": "Fix Memory Leak in WebSocket Layer", "status": "TODO", "assignedAgentId": "mb-marcus" },
-        { "id": "MB-203", "title": "Migrate Auth to OAuth 2.1", "status": "DONE", "assignedAgentId": "mb-ava" },
-        { "id": "MB-204", "title": "Add Audit Log Export to CSV", "status": "TODO", "assignedAgentId": "mb-rishi" },
-        { "id": "MB-205", "title": "Rate Limiting Middleware", "status": "EXECUTING", "assignedAgentId": "mb-marcus" },
-        { "id": "MB-206", "title": "Integrate Stripe Billing Webhooks", "status": "TODO", "assignedAgentId": "mb-priya" },
-        { "id": "MB-207", "title": "Fix CORS Preflight Caching", "status": "DONE", "assignedAgentId": "mb-ava" },
-        { "id": "MB-208", "title": "Add Prometheus Metrics Endpoint", "status": "DONE", "assignedAgentId": "mb-rishi" }
+        { "id": "WE-201", "title": "Add dark mode to widget SDK", "status": "EXECUTING", "assignedAgentId": "emp-ava" },
+        { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "status": "TODO", "assignedAgentId": "emp-ava" },
+        { "id": "WE-203", "title": "Implement keyboard navigation", "status": "DONE", "assignedAgentId": "emp-ava" },
+        { "id": "WE-204", "title": "Add widget to Notion integration", "status": "TODO", "assignedAgentId": "emp-james" },
+        { "id": "WE-205", "title": "Fix z-index冲突 with host page modals", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
+        { "id": "WE-206", "title": "Implement persistent session storage", "status": "REVIEW", "assignedAgentId": "emp-marcus" },
+        { "id": "WE-207", "title": "Add widget configuration API", "status": "DONE", "assignedAgentId": "emp-james" },
+        { "id": "WE-208", "title": "Accessibility audit — WCAG AA", "status": "DONE", "assignedAgentId": "emp-ava" }
       ],
       "agents": [
-        { "id": "mb-priya", "name": "Priya Sharma", "role": "Backend Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-201", "initials": "PS" },
-        { "id": "mb-marcus", "name": "Marcus Webb", "role": "Systems Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-202", "initials": "MW" },
-        { "id": "mb-ava", "name": "Ava Chen", "role": "Security Engineer", "currentStatus": "COMPILING", "assignedTicketId": "MB-203", "initials": "AC" },
-        { "id": "mb-rishi", "name": "Rishi Iyer", "role": "DevOps Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "RI" }
+        { "id": "emp-ava", "name": "Ava Chen", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-201", "initials": "AC" },
+        { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-204", "initials": "JL" },
+        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-205", "initials": "SP" },
+        { "id": "emp-marcus", "name": "Marcus Webb", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-206", "initials": "MW" }
       ],
       "channels": [
-        { "id": "mb-ch-1", "participants": ["Priya Sharma", "Marcus Webb"], "topic": "Webhook retry strategy", "relatedTicketId": "MB-201", "status": "OPEN", "lastMessagePreview": "Should we use exponential backoff or linear?", "messageCount": 6, "updatedAt": "11:05 AM", "unread": true },
-        { "id": "mb-ch-2", "participants": ["Ava Chen", "Marcus Webb"], "topic": "OAuth scope review", "relatedTicketId": "MB-203", "status": "AWAITING_REPLY", "lastMessagePreview": "The refresh token rotation looks good.", "messageCount": 3, "updatedAt": "10:55 AM" },
-        { "id": "mb-ch-3", "participants": ["Rishi Iyer", "Priya Sharma"], "topic": "Prometheus labels", "relatedTicketId": "MB-208", "status": "RESOLVED", "lastMessagePreview": "Deployed to staging. All green.", "messageCount": 4, "updatedAt": "10:30 AM" },
-        { "id": "mb-ch-4", "participants": ["Marcus Webb", "Rishi Iyer"], "topic": "CORS config sync", "relatedTicketId": "MB-207", "status": "OPEN", "lastMessagePreview": "Updated the allowed-origins list.", "messageCount": 2, "updatedAt": "09:45 AM" },
-        { "id": "mb-ch-5", "participants": ["Ava Chen", "Priya Sharma"], "topic": "Security audit findings", "relatedTicketId": "MB-203", "status": "OPEN", "lastMessagePreview": "One medium finding in the token validation.", "messageCount": 8, "updatedAt": "09:20 AM", "unread": true }
+        { "id": "we-ch-1", "participants": ["Ava Chen", "Sonia Patel"], "topic": "Dark mode design tokens", "relatedTicketId": "WE-201", "status": "OPEN", "lastMessagePreview": "Token set uploaded to Figma. Reviewing now.", "messageCount": 7, "updatedAt": "11:15 AM", "unread": true },
+        { "id": "we-ch-2", "participants": ["James Liu", "Ava Chen"], "topic": "Notion block renderer", "relatedTicketId": "WE-204", "status": "AWAITING_REPLY", "lastMessagePreview": "Notion API supports rich text — mapping to our schema.", "messageCount": 3, "updatedAt": "10:50 AM" },
+        { "id": "we-ch-3", "participants": ["Sonia Patel", "James Liu"], "topic": "Modal z-index stacking", "relatedTicketId": "WE-205", "status": "OPEN", "lastMessagePreview": "Portal approach is the cleanest. WDYT?", "messageCount": 5, "updatedAt": "10:20 AM" },
+        { "id": "we-ch-4", "participants": ["Marcus Webb", "James Liu"], "topic": "Session API contract", "relatedTicketId": "WE-206", "status": "RESOLVED", "lastMessagePreview": "Contract approved. Merging.", "messageCount": 4, "updatedAt": "09:55 AM" }
       ],
       "activity": [
-        { "id": "mb-act-1", "timestamp": "11:05 AM", "primaryAgent": "Priya Sharma", "action": "discussing retry strategy with", "targetAgent": "Marcus Webb", "context": "for MB-201" },
-        { "id": "mb-act-2", "timestamp": "10:55 AM", "primaryAgent": "Ava Chen", "action": "shared OAuth scope review with", "targetAgent": "Marcus Webb", "context": "for MB-203" },
-        { "id": "mb-act-3", "timestamp": "10:30 AM", "primaryAgent": "Rishi Iyer", "action": "shipped Prometheus metrics with", "targetAgent": "Priya Sharma", "context": "for MB-208" },
-        { "id": "mb-act-4", "timestamp": "10:10 AM", "primaryAgent": "Marcus Webb", "action": "filed CORS issue to", "targetAgent": "Rishi Iyer", "context": "for MB-207" },
-        { "id": "mb-act-5", "timestamp": "09:45 AM", "primaryAgent": "Marcus Webb", "action": "requested metrics labels from", "targetAgent": "Rishi Iyer", "context": "for MB-208" },
-        { "id": "mb-act-6", "timestamp": "09:20 AM", "primaryAgent": "Ava Chen", "action": "escalated security finding to", "targetAgent": "Priya Sharma", "context": "for MB-203" }
+        { "id": "we-act-1", "timestamp": "11:15 AM", "primaryAgent": "Ava Chen", "action": "shared dark mode tokens with", "targetAgent": "Sonia Patel", "context": "for WE-201" },
+        { "id": "we-act-2", "timestamp": "10:50 AM", "primaryAgent": "James Liu", "action": "mapped Notion blocks to widget schema with", "targetAgent": "Ava Chen", "context": "for WE-204" },
+        { "id": "we-act-3", "timestamp": "10:20 AM", "primaryAgent": "Sonia Patel", "action": "proposed portal solution to", "targetAgent": "James Liu", "context": "for WE-205" },
+        { "id": "we-act-4", "timestamp": "09:55 AM", "primaryAgent": "Marcus Webb", "action": "approved session API contract with", "targetAgent": "James Liu", "context": "for WE-206" }
       ]
     },
-    "sidharda-co": {
-      "id": "proj-sidharda",
-      "workspaceId": "sidharda-co",
-      "title": "Sidharda Website",
+    "admin": {
+      "id": "proj-admin",
+      "workspaceId": "admin",
+      "title": "Admin Dashboard",
       "tickets": [
-        { "id": "SC-088", "title": "Redesign Marketing Landing Page", "status": "DONE", "assignedAgentId": "sc-sonia" },
-        { "id": "SC-089", "title": "Fix Broken Image Links in Gallery", "status": "TODO", "assignedAgentId": "sc-rishi" },
-        { "id": "SC-090", "title": "Setup CI/CD Pipeline for Staging", "status": "EXECUTING", "assignedAgentId": "sc-james" },
-        { "id": "SC-091", "title": "Refactor CSS to Use Design Tokens", "status": "DONE", "assignedAgentId": "sc-sonia" },
-        { "id": "SC-092", "title": "Add Open Graph Meta Tags", "status": "TODO", "assignedAgentId": "sc-rishi" },
-        { "id": "SC-093", "title": "SEO Audit and Fix Canonical URLs", "status": "TODO", "assignedAgentId": "sc-james" }
+        { "id": "AD-301", "title": "Redesign agent performance view", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
+        { "id": "AD-302", "title": "Add CSV export to analytics reports", "status": "TODO", "assignedAgentId": "emp-james" },
+        { "id": "AD-303", "title": "Build rule-based routing configuration UI", "status": "TODO", "assignedAgentId": "emp-priya" },
+        { "id": "AD-304", "title": "Integrate Stripe billing portal", "status": "EXECUTING", "assignedAgentId": "emp-marcus" },
+        { "id": "AD-305", "title": "Fix timezone handling in report scheduler", "status": "DONE", "assignedAgentId": "emp-james" },
+        { "id": "AD-306", "title": "Add role-based access control", "status": "REVIEW", "assignedAgentId": "emp-noah" }
       ],
       "agents": [
-        { "id": "sc-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SC-088", "initials": "SP" },
-        { "id": "sc-rishi", "name": "Rishi Iyer", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "SC-089", "initials": "RI" },
-        { "id": "sc-james", "name": "James Liu", "role": "DevOps Engineer", "currentStatus": "WORKING", "assignedTicketId": "SC-090", "initials": "JL" }
+        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-301", "initials": "SP" },
+        { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-302", "initials": "JL" },
+        { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "AD-304", "initials": "MW" },
+        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-306", "initials": "NC" }
       ],
       "channels": [
-        { "id": "sc-ch-1", "participants": ["Sonia Patel", "Rishi Iyer"], "topic": "Landing page copy review", "relatedTicketId": "SC-088", "status": "OPEN", "lastMessagePreview": "Updated the hero section copy. Please check.", "messageCount": 5, "updatedAt": "09:15 AM", "unread": true },
-        { "id": "sc-ch-2", "participants": ["James Liu", "Rishi Iyer"], "topic": "CI/CD staging setup", "relatedTicketId": "SC-090", "status": "AWAITING_REPLY", "lastMessagePreview": "GitHub Actions workflow is ready.", "messageCount": 3, "updatedAt": "08:50 AM" },
-        { "id": "sc-ch-3", "participants": ["Sonia Patel", "James Liu"], "topic": "OG tags coordination", "relatedTicketId": "SC-092", "status": "OPEN", "lastMessagePreview": "We need OG image dimensions agreed first.", "messageCount": 2, "updatedAt": "08:30 AM" },
-        { "id": "sc-ch-4", "participants": ["Rishi Iyer", "James Liu"], "topic": "Broken gallery images", "relatedTicketId": "SC-089", "status": "RESOLVED", "lastMessagePreview": "Fixed the Cloudinary URL rewrites. All good.", "messageCount": 4, "updatedAt": "08:10 AM" }
+        { "id": "ad-ch-1", "participants": ["Sonia Patel", "James Liu"], "topic": "Agent table redesign", "relatedTicketId": "AD-301", "status": "OPEN", "lastMessagePreview": "Moved sentiment sparklines to the right column.", "messageCount": 8, "updatedAt": "11:30 AM", "unread": true },
+        { "id": "ad-ch-2", "participants": ["James Liu", "Marcus Webb"], "topic": "CSV streaming endpoint", "relatedTicketId": "AD-302", "status": "AWAITING_REPLY", "lastMessagePreview": "Backend can stream rows. Front just needs to buffer.", "messageCount": 3, "updatedAt": "10:45 AM" },
+        { "id": "ad-ch-3", "participants": ["Marcus Webb", "Noah Chen"], "topic": "RBAC schema review", "relatedTicketId": "AD-306", "status": "OPEN", "lastMessagePreview": "Need hierarchy: org → team → agent. Adding now.", "messageCount": 5, "updatedAt": "10:10 AM" },
+        { "id": "ad-ch-4", "participants": ["Marcus Webb", "James Liu"], "topic": "Stripe webhook handler", "relatedTicketId": "AD-304", "status": "AWAITING_REPLY", "lastMessagePreview": "Webhook signed. Syncing subscription state to our DB.", "messageCount": 4, "updatedAt": "09:30 AM" }
       ],
       "activity": [
-        { "id": "sc-act-1", "timestamp": "09:15 AM", "primaryAgent": "Sonia Patel", "action": "shared landing page update with", "targetAgent": "Rishi Iyer", "context": "for SC-088" },
-        { "id": "sc-act-2", "timestamp": "08:50 AM", "primaryAgent": "James Liu", "action": "requested CI/CD approval from", "targetAgent": "Rishi Iyer", "context": "for SC-090" },
-        { "id": "sc-act-3", "timestamp": "08:30 AM", "primaryAgent": "Sonia Patel", "action": "escalated OG image specs to", "targetAgent": "James Liu", "context": "for SC-092" },
-        { "id": "sc-act-4", "timestamp": "08:10 AM", "primaryAgent": "Rishi Iyer", "action": "fixed broken gallery links with", "targetAgent": "James Liu", "context": "for SC-089" },
-        { "id": "sc-act-5", "timestamp": "07:45 AM", "primaryAgent": "James Liu", "action": "requested SEO audit from", "targetAgent": "Rishi Iyer", "context": "for SC-093" }
+        { "id": "ad-act-1", "timestamp": "11:30 AM", "primaryAgent": "Sonia Patel", "action": "iterated on agent table layout with", "targetAgent": "James Liu", "context": "for AD-301" },
+        { "id": "ad-act-2", "timestamp": "10:45 AM", "primaryAgent": "James Liu", "action": "confirmed streaming strategy with", "targetAgent": "Marcus Webb", "context": "for AD-302" },
+        { "id": "ad-act-3", "timestamp": "10:10 AM", "primaryAgent": "Marcus Webb", "action": "requested RBAC schema addition from", "targetAgent": "Noah Chen", "context": "for AD-306" },
+        { "id": "ad-act-4", "timestamp": "09:30 AM", "primaryAgent": "Marcus Webb", "action": "verified Stripe signature with", "targetAgent": "James Liu", "context": "for AD-304" }
       ]
     },
-    "personal": {
-      "id": "proj-personal",
-      "workspaceId": "personal",
-      "title": "Personal Projects",
+    "mobile": {
+      "id": "proj-mobile",
+      "workspaceId": "mobile",
+      "title": "Mobile SDK",
       "tickets": [
-        { "id": "PL-013", "title": "Build Side Project Dashboard", "status": "TODO", "assignedAgentId": "pl-rishi" },
-        { "id": "PL-014", "title": "Write Documentation for API", "status": "DONE", "assignedAgentId": "pl-sonia" },
-        { "id": "PL-015", "title": "Set Up Monitoring for Side App", "status": "TODO", "assignedAgentId": "pl-rishi" },
-        { "id": "PL-016", "title": "Design Logo for Side Project", "status": "EXECUTING", "assignedAgentId": "pl-sonia" }
+        { "id": "MB-401", "title": "Implement push notification handling", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
+        { "id": "MB-402", "title": "Add offline message queue", "status": "TODO", "assignedAgentId": "emp-priya" },
+        { "id": "MB-403", "title": "iOS safe area layout fixes", "status": "DONE", "assignedAgentId": "emp-sonia" },
+        { "id": "MB-404", "title": "Add biometric authentication", "status": "TODO", "assignedAgentId": "emp-noah" },
+        { "id": "MB-405", "title": "Reduce SDK initialization time", "status": "EXECUTING", "assignedAgentId": "emp-james" }
       ],
       "agents": [
-        { "id": "pl-rishi", "name": "Rishi Iyer", "role": "Full-Stack Engineer", "currentStatus": "WORKING", "assignedTicketId": "PL-013", "initials": "RI" },
-        { "id": "pl-sonia", "name": "Sonia Patel", "role": "Designer", "currentStatus": "WORKING", "assignedTicketId": "PL-016", "initials": "SP" }
+        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-401", "initials": "SP" },
+        { "id": "emp-priya", "name": "Priya Sharma", "role": "Backend Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "PS" },
+        { "id": "emp-james", "name": "James Liu", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-405", "initials": "JL" },
+        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "COMPILING", "assignedTicketId": "MB-404", "initials": "NC" }
       ],
       "channels": [
-        { "id": "pl-ch-1", "participants": ["Rishi Iyer", "Sonia Patel"], "topic": "Dashboard wireframe review", "relatedTicketId": "PL-013", "status": "OPEN", "lastMessagePreview": "Wireframe v2 is uploaded. Thoughts?", "messageCount": 3, "updatedAt": "07:00 AM", "unread": true },
-        { "id": "pl-ch-2", "participants": ["Sonia Patel", "Rishi Iyer"], "topic": "Logo design direction", "relatedTicketId": "PL-016", "status": "AWAITING_REPLY", "lastMessagePreview": "Three directions ready for your review.", "messageCount": 2, "updatedAt": "06:45 AM" },
-        { "id": "pl-ch-3", "participants": ["Rishi Iyer", "Sonia Patel"], "topic": "API docs outline", "relatedTicketId": "PL-014", "status": "RESOLVED", "lastMessagePreview": "Docs are up on Notion. Closing this thread.", "messageCount": 6, "updatedAt": "06:30 AM" }
+        { "id": "mb-ch-1", "participants": ["Sonia Patel", "James Liu"], "topic": "Push notification architecture", "relatedTicketId": "MB-401", "status": "OPEN", "lastMessagePreview": "APNS certificate provisioned. Testing now.", "messageCount": 6, "updatedAt": "11:00 AM", "unread": true },
+        { "id": "mb-ch-2", "participants": ["Priya Sharma", "James Liu"], "topic": "Offline queue schema", "relatedTicketId": "MB-402", "status": "AWAITING_REPLY", "lastMessagePreview": "SQLite queue with exponential backoff on reconnect.", "messageCount": 2, "updatedAt": "10:15 AM" },
+        { "id": "mb-ch-3", "participants": ["Noah Chen", "Sonia Patel"], "topic": "Biometric auth scope", "relatedTicketId": "MB-404", "status": "OPEN", "lastMessagePreview": "Use LAContext on iOS, BiometricPrompt on Android.", "messageCount": 4, "updatedAt": "09:40 AM" }
       ],
       "activity": [
-        { "id": "pl-act-1", "timestamp": "07:00 AM", "primaryAgent": "Rishi Iyer", "action": "shared dashboard wireframe with", "targetAgent": "Sonia Patel", "context": "for PL-013" },
-        { "id": "pl-act-2", "timestamp": "06:45 AM", "primaryAgent": "Sonia Patel", "action": "presented logo directions to", "targetAgent": "Rishi Iyer", "context": "for PL-016" },
-        { "id": "pl-act-3", "timestamp": "06:30 AM", "primaryAgent": "Rishi Iyer", "action": "approved API docs outline with", "targetAgent": "Sonia Patel", "context": "for PL-014" },
-        { "id": "pl-act-4", "timestamp": "06:15 AM", "primaryAgent": "Sonia Patel", "action": "requested monitoring input from", "targetAgent": "Rishi Iyer", "context": "for PL-015" }
+        { "id": "mb-act-1", "timestamp": "11:00 AM", "primaryAgent": "Sonia Patel", "action": "provisioned APNS certificate with", "targetAgent": "James Liu", "context": "for MB-401" },
+        { "id": "mb-act-2", "timestamp": "10:15 AM", "primaryAgent": "Priya Sharma", "action": "proposed SQLite queue design to", "targetAgent": "James Liu", "context": "for MB-402" },
+        { "id": "mb-act-3", "timestamp": "09:40 AM", "primaryAgent": "Noah Chen", "action": "recommended native biometric APIs to", "targetAgent": "Sonia Patel", "context": "for MB-404" }
       ]
     }
   },
   "universalTickets": [
-    { "id": "SH-142", "title": "Fix Auth Regression on Mobile Login", "projectName": "Superhive App", "workspaceId": "superhive", "status": "EXECUTING", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Marcus Webb", "isAI": true } },
-    { "id": "SH-143", "title": "Implement Onboarding Flow", "projectName": "Superhive App", "workspaceId": "superhive", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
-    { "id": "SH-144", "title": "Add Dark Mode to Settings", "projectName": "Superhive App", "workspaceId": "superhive", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
-    { "id": "SH-145", "title": "Refactor API Gateway Routing", "projectName": "Superhive App", "workspaceId": "superhive", "status": "EXECUTING", "priority": "HIGH", "type": "REFACTOR", "assignee": { "name": "Marcus Webb", "isAI": true } },
-    { "id": "SH-146", "title": "Optimize Slow Database Queries", "projectName": "Superhive App", "workspaceId": "superhive", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Priya Sharma", "isAI": true } },
-    { "id": "SH-140", "title": "Update Outdated Dependencies", "projectName": "Superhive App", "workspaceId": "superhive", "status": "MERGED", "priority": "LOW", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
-    { "id": "SH-141", "title": "Fix Login Button Not Responding", "projectName": "Superhive App", "workspaceId": "superhive", "status": "MERGED", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
-    { "id": "MB-201", "title": "Implement Webhook Retry Logic", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
-    { "id": "MB-202", "title": "Fix Memory Leak in WebSocket Layer", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "BACKLOG", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Marcus Webb", "isAI": true } },
-    { "id": "MB-203", "title": "Migrate Auth to OAuth 2.1", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
-    { "id": "MB-204", "title": "Add Audit Log Export to CSV", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
-    { "id": "SC-088", "title": "Redesign Marketing Landing Page", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
-    { "id": "SC-089", "title": "Fix Broken Image Links in Gallery", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "BACKLOG", "priority": "LOW", "type": "BUG", "assignee": { "name": "Rishi Iyer", "isAI": false } },
-    { "id": "SC-090", "title": "Setup CI/CD Pipeline for Staging", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
-    { "id": "SC-091", "title": "Refactor CSS to Use Design Tokens", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "MERGED", "priority": "LOW", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
-    { "id": "PL-013", "title": "Build Side Project Dashboard", "projectName": "Personal", "workspaceId": "personal", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
-    { "id": "PL-014", "title": "Write Documentation for API", "projectName": "Personal", "workspaceId": "personal", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } }
+    { "id": "VL-101", "title": "Fix ticket routing latency spike", "projectName": "Vela Platform", "workspaceId": "vela", "status": "EXECUTING", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Elena Rodriguez", "isAI": true } },
+    { "id": "VL-102", "title": "Implement intent classification v2", "projectName": "Vela Platform", "workspaceId": "vela", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "David Kim", "isAI": true } },
+    { "id": "VL-103", "title": "OAuth SSO for enterprise customers", "projectName": "Vela Platform", "workspaceId": "vela", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Noah Chen", "isAI": false } },
+    { "id": "VL-104", "title": "Add response SLA monitoring", "projectName": "Vela Platform", "workspaceId": "vela", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Fatima Al-Hassan", "isAI": false } },
+    { "id": "VL-105", "title": "Optimize embedding pipeline throughput", "projectName": "Vela Platform", "workspaceId": "vela", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "VL-106", "title": "Migrate to Postgres 16", "projectName": "Vela Platform", "workspaceId": "vela", "status": "MERGED", "priority": "LOW", "type": "INFRA", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "VL-107", "title": "Implement bulk article import", "projectName": "Vela Platform", "workspaceId": "vela", "status": "MERGED", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Fatima Al-Hassan", "isAI": false } },
+    { "id": "WE-201", "title": "Add dark mode to widget SDK", "projectName": "Widget Embed", "workspaceId": "widget", "status": "EXECUTING", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "projectName": "Widget Embed", "workspaceId": "widget", "status": "BACKLOG", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "WE-203", "title": "Implement keyboard navigation", "projectName": "Widget Embed", "workspaceId": "widget", "status": "MERGED", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "WE-204", "title": "Add widget to Notion integration", "projectName": "Widget Embed", "workspaceId": "widget", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "WE-205", "title": "Fix z-index conflict with host page modals", "projectName": "Widget Embed", "workspaceId": "widget", "status": "EXECUTING", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "WE-206", "title": "Implement persistent session storage", "projectName": "Widget Embed", "workspaceId": "widget", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "WE-207", "title": "Add widget configuration API", "projectName": "Widget Embed", "workspaceId": "widget", "status": "MERGED", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "AD-301", "title": "Redesign agent performance view", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "AD-302", "title": "Add CSV export to analytics reports", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "AD-303", "title": "Build rule-based routing configuration UI", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
+    { "id": "AD-304", "title": "Integrate Stripe billing portal", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "AD-305", "title": "Fix timezone handling in report scheduler", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "MERGED", "priority": "MEDIUM", "type": "BUG", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "AD-306", "title": "Add role-based access control", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "REVIEW", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Noah Chen", "isAI": false } },
+    { "id": "MB-401", "title": "Implement push notification handling", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "MB-402", "title": "Add offline message queue", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
+    { "id": "MB-403", "title": "iOS safe area layout fixes", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "MERGED", "priority": "MEDIUM", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "MB-405", "title": "Reduce SDK initialization time", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "EXECUTING", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "James Liu", "isAI": true } }
   ],
   "employees": [
-    { "id": "emp-ava", "name": "Ava Chen", "role": "Logic Architect", "status": "COMPILING", "activeTask": "Building authentication middleware layer", "uptime": "2h 14m" },
-    { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "status": "ERROR_LOOP", "activeTask": "Recovering from recursive logic fault in payment processing", "uptime": "0h 38m" },
-    { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "status": "EXECUTING", "activeTask": "Integrating Stripe webhook endpoints", "uptime": "4h 02m" },
-    { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "status": "IDLE", "activeTask": "Standing by for new assignment", "uptime": "0h 11m" },
-    { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Systems Lead", "status": "COMPILING", "activeTask": "Publishing component library v1.4", "uptime": "1h 55m" },
-    { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "status": "EXECUTING", "activeTask": "Rolling out canary deployment for v2.4", "uptime": "1h 30m" },
-    { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "status": "EXECUTING", "activeTask": "Fine-tuning intent classification model", "uptime": "3h 45m" },
-    { "id": "emp-fatima", "name": "Fatima Al-Hassan", "role": "Product Manager", "status": "AWAITING_HUMAN", "activeTask": "Reviewing Q3 roadmap with stakeholders", "uptime": "0h 50m" },
-    { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "status": "COMPILING", "activeTask": "Running penetration test on auth service", "uptime": "2h 05m" }
+    { "id": "emp-ava", "name": "Ava Chen", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Implementing dark mode tokens for widget SDK", "uptime": "1h 48m" },
+    { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "status": "COMPILING", "activeTask": "Reviewing Stripe webhook handler", "uptime": "3h 12m" },
+    { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "status": "EXECUTING", "activeTask": "Calibrating intent classifier thresholds", "uptime": "2h 55m" },
+    { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Profiling SDK initialization bundle", "uptime": "0h 42m" },
+    { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "status": "EXECUTING", "activeTask": "Testing APNS certificate on staging", "uptime": "4h 08m" },
+    { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "status": "EXECUTING", "activeTask": "Investigating p99 latency regression", "uptime": "1h 22m" },
+    { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "status": "EXECUTING", "activeTask": "Retraining classifier on billing intents", "uptime": "3h 45m" },
+    { "id": "emp-fatima", "name": "Fatima Al-Hassan", "role": "Product Manager", "status": "AWAITING_HUMAN", "activeTask": "Reviewing SLA metric definitions with Priya", "uptime": "0h 30m" },
+    { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "status": "COMPILING", "activeTask": "Designing RBAC schema for Admin Dashboard", "uptime": "2h 17m" }
   ],
   "telemetry": {
-    "emp-ava":    { "contextSaturation": 67,  "tokensPerSecond": 142, "currentCost": 0.0234, "evolutionLoop": "47/100", "logicKernelIntegrity": 94,  "sessionCost": 1.42,  "budget": 5.00 },
-    "emp-marcus": { "contextSaturation": 100, "tokensPerSecond": 0,   "currentCost": 0.142,  "evolutionLoop": "8/100",  "logicKernelIntegrity": 23,  "sessionCost": 3.87,  "budget": 5.00 },
-    "emp-priya":  { "contextSaturation": 45,  "tokensPerSecond": 89,  "currentCost": 0.0187, "evolutionLoop": "12/100", "logicKernelIntegrity": 100, "sessionCost": 0.54,  "budget": 5.00 },
-    "emp-james":  { "contextSaturation": 12,  "tokensPerSecond": 0,   "currentCost": 0.0012, "evolutionLoop": "3/100",  "logicKernelIntegrity": 99,  "sessionCost": 0.12,  "budget": 5.00 },
-    "emp-sonia":  { "contextSaturation": 88,  "tokensPerSecond": 201, "currentCost": 0.0091, "evolutionLoop": "23/100", "logicKernelIntegrity": 87,  "sessionCost": 0.89,  "budget": 5.00 },
-    "emp-elena":  { "contextSaturation": 55,  "tokensPerSecond": 67,  "currentCost": 0.0312, "evolutionLoop": "31/100", "logicKernelIntegrity": 91,  "sessionCost": 2.14,  "budget": 8.00 },
-    "emp-david":  { "contextSaturation": 78,  "tokensPerSecond": 110, "currentCost": 0.0451, "evolutionLoop": "19/100", "logicKernelIntegrity": 96,  "sessionCost": 3.22,  "budget": 10.00 },
-    "emp-fatima": { "contextSaturation": 22,  "tokensPerSecond": 15,  "currentCost": 0.0034, "evolutionLoop": "5/100",  "logicKernelIntegrity": 100, "sessionCost": 0.18,  "budget": 2.00 },
-    "emp-noah":   { "contextSaturation": 61,  "tokensPerSecond": 95,  "currentCost": 0.0278, "evolutionLoop": "38/100", "logicKernelIntegrity": 88,  "sessionCost": 1.76,  "budget": 6.00 }
+    "emp-ava":    { "contextSaturation": 72,  "tokensPerSecond": 188, "currentCost": 0.0312, "evolutionLoop": "34/100", "logicKernelIntegrity": 96,  "sessionCost": 1.87,  "budget": 5.00 },
+    "emp-marcus": { "contextSaturation": 58,  "tokensPerSecond": 94,  "currentCost": 0.0189, "evolutionLoop": "21/100", "logicKernelIntegrity": 88,  "sessionCost": 0.94,  "budget": 5.00 },
+    "emp-priya":  { "contextSaturation": 65,  "tokensPerSecond": 210, "currentCost": 0.0441, "evolutionLoop": "18/100", "logicKernelIntegrity": 100, "sessionCost": 2.31,  "budget": 8.00 },
+    "emp-james":  { "contextSaturation": 41,  "tokensPerSecond": 133, "currentCost": 0.0098, "evolutionLoop": "12/100", "logicKernelIntegrity": 99,  "sessionCost": 0.44,  "budget": 5.00 },
+    "emp-sonia":  { "contextSaturation": 83,  "tokensPerSecond": 167, "currentCost": 0.0276, "evolutionLoop": "28/100", "logicKernelIntegrity": 92,  "sessionCost": 1.63,  "budget": 6.00 },
+    "emp-elena":  { "contextSaturation": 54,  "tokensPerSecond": 78,  "currentCost": 0.0521, "evolutionLoop": "9/100",  "logicKernelIntegrity": 87,  "sessionCost": 3.12,  "budget": 8.00 },
+    "emp-david":  { "contextSaturation": 91,  "tokensPerSecond": 44,  "currentCost": 0.0893, "evolutionLoop": "15/100", "logicKernelIntegrity": 94,  "sessionCost": 5.43,  "budget": 10.00 },
+    "emp-fatima": { "contextSaturation": 18,  "tokensPerSecond": 12,  "currentCost": 0.0011, "evolutionLoop": "3/100",  "logicKernelIntegrity": 100, "sessionCost": 0.08,  "budget": 2.00 },
+    "emp-noah":   { "contextSaturation": 47,  "tokensPerSecond": 61,  "currentCost": 0.0144, "evolutionLoop": "7/100",  "logicKernelIntegrity": 98,  "sessionCost": 0.77,  "budget": 6.00 }
   },
   "permissions": {
-    "emp-ava":    { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY", "maxTokens": 8192,  "writeMessages": true,  "installDeps": false },
-    "emp-marcus": { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "AUTO_MERGE",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-priya":  { "modelEngine": "Sonnet",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 4096,  "writeMessages": false, "installDeps": false },
-    "emp-james":  { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "DIRECT_MAIN", "maxTokens": 16384, "writeMessages": false, "installDeps": false },
-    "emp-sonia":  { "modelEngine": "Codex",    "writeAccess": false, "commitAuthority": "AUTO_MERGE",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-elena":  { "modelEngine": "Sonnet",   "writeAccess": true,  "commitAuthority": "DIRECT_MAIN", "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-david":  { "modelEngine": "Opus 4.8", "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 16384, "writeMessages": false, "installDeps": false },
-    "emp-fatima": { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 4096,  "writeMessages": true,  "installDeps": false },
-    "emp-noah":   { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY", "maxTokens": 8192,  "writeMessages": true,  "installDeps": false }
+    "emp-ava":    { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false },
+    "emp-marcus": { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-priya":  { "modelEngine": "Sonnet",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": false, "installDeps": false },
+    "emp-james":  { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "DIRECT_MAIN",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "emp-sonia":  { "modelEngine": "Codex",   "writeAccess": false, "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-elena":  { "modelEngine": "Sonnet",   "writeAccess": true,  "commitAuthority": "DIRECT_MAIN",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-david":  { "modelEngine": "Opus 4.8", "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "emp-fatima": { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": true,  "installDeps": false },
+    "emp-noah":   { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false }
   },
   "actionLogs": {
-    "emp-ava":    [{ "time": "12:34", "action": "Generated 247 lines of auth middleware" }, { "time": "12:32", "action": "Evaluated logic branch A — PASS" }, { "time": "12:30", "action": "Loaded context (1.2 MB, 247 modules)" }],
-    "emp-marcus": [{ "time": "12:41", "action": "Stuck in recursive loop — attempting recovery" }, { "time": "12:39", "action": "Opened PR #142 for review" }, { "time": "12:35", "action": "Ran full test suite — 98% pass rate" }],
-    "emp-priya":  [{ "time": "12:28", "action": "Integrated Stripe API endpoints" }, { "time": "12:24", "action": "Refactored user auth token flow" }, { "time": "12:20", "action": "Deployed staging build — healthy" }],
-    "emp-james":  [{ "time": "12:10", "action": "Idle — awaiting assignment" }, { "time": "11:58", "action": "Fixed CSS layout regression in NavBar" }, { "time": "11:45", "action": "Shipped hotfix v2.3.1 to prod" }],
-    "emp-sonia":  [{ "time": "12:31", "action": "Building design token system" }, { "time": "12:28", "action": "Published component library v1.4" }, { "time": "12:15", "action": "Ran accessibility audit — WCAG AA" }],
-    "emp-elena":  [{ "time": "12:20", "action": "Kicked off canary deployment to 5% traffic" }, { "time": "12:10", "action": "Validated health checks across all pods" }, { "time": "11:55", "action": "Updated Helm chart values for v2.4" }],
-    "emp-david":  [{ "time": "12:25", "action": "Training epoch 14 complete — loss 0.08" }, { "time": "12:10", "action": "Prepared training dataset (50K samples)" }, { "time": "11:50", "action": "Ran baseline evaluation — F1 0.91" }],
-    "emp-fatima": [{ "time": "12:00", "action": "Compiled Q3 roadmap summary for leadership" }, { "time": "11:40", "action": "Reviewed OKR progress with team leads" }, { "time": "11:20", "action": "Prioritized backlog items for sprint 23" }],
-    "emp-noah":   [{ "time": "12:18", "action": "Running SQL injection scan on auth endpoints" }, { "time": "12:05", "action": "Documented pen-test findings in report" }, { "time": "11:45", "action": "Configured OWASP ZAP scan profile" }]
+    "emp-ava":    [{ "time": "12:34", "action": "Built dark mode token map — 48 tokens across surface" }, { "time": "12:28", "action": "Ran tree-shake analysis on widget bundle — saved 18kb" }, { "time": "12:10", "action": "Fixed keyboard trap in modal — tab cycle now exits correctly" }],
+    "emp-marcus": [{ "time": "12:41", "action": "Reviewing Stripe webhook signature verification" }, { "time": "12:30", "action": "Merged PR #388 — Postgres 16 migration rollback" }, { "time": "12:15", "action": "Spun up Stripe test webhook tunnel" }],
+    "emp-priya":  [{ "time": "12:38", "action": "Adjusted confidence threshold for 'billing' intents — +7% precision" }, { "time": "12:20", "action": "Indexed new knowledge base articles — 1,240 chunks embedded" }, { "time": "11:55", "action": "Profiled vector DB query path — p99 340ms at full load" }],
+    "emp-james":  [{ "time": "12:44", "action": "Bundle splitting config added — lazy-loading non-critical modules" }, { "time": "12:15", "action": "Notion rich text → widget schema mapping written" }, { "time": "11:50", "action": "Fixed CSS `contain` property conflict with host page" }],
+    "emp-sonia":  [{ "time": "12:40", "action": "APNS sandbox cert uploaded — push payload testing in progress" }, { "time": "12:20", "action": "Iterated on z-index portal approach — 3rd draft reviewed" }, { "time": "11:45", "action": "Published agent performance table redesign to Figma" }],
+    "emp-elena":  [{ "time": "12:35", "action": "Correlated p99 spike with embedding queue backpressure" }, { "time": "12:10", "action": "Deployed canary for VL-101 fix — monitoring p99 at 50k rpm" }, { "time": "11:40", "action": "Wrote runbook for latency escalation — shared with Priya" }],
+    "emp-david":  [{ "time": "12:30", "action": "Retraining on billing intent class — 8k new samples added" }, { "time": "12:00", "action": "Evaluated classifier on holdout set — F1 0.94 (up from 0.89)" }, { "time": "11:30", "action": "Benchmarked model quantization — 40% latency reduction achieved" }],
+    "emp-fatima": [{ "time": "12:00", "action": "Compiled SLA definitions doc — 5 tier structure proposed" }, { "time": "11:30", "action": "Reviewed sprint burn-down with engineering leads" }, { "time": "10:50", "action": "Prioritized backlog — 12 items deprioritized for Q3" }],
+    "emp-noah":   [{ "time": "12:18", "action": "Drafted RBAC hierarchy: org → team → agent → viewer" }, { "time": "11:55", "action": "Ran static analysis on OAuth PKCE implementation — no findings" }, { "time": "11:20", "action": "Wrote threat model for widget embed CSP headers" }]
   },
   "nextSteps": {
-    "emp-ava":    "Next — Run Evolution Loop 48 in ~3 min",
-    "emp-marcus": "Next — Awaiting human intervention to break loop",
-    "emp-priya":  "Next — Ready to deploy after your approval",
-    "emp-james":  "Next — Standing by for new tasking",
-    "emp-sonia":  "Next — Evolution 24 queued for 14:00",
-    "emp-elena":  "Next — Monitor canary metrics for 30 min",
-    "emp-david":  "Next — Evaluate model on holdout set at epoch 20",
-    "emp-fatima": "Next — Awaiting stakeholder sign-off on Q3 goals",
-    "emp-noah":   "Next — Present pen-test findings to security team"
+    "emp-ava":    "Next — Apply dark mode tokens to widget iframe container",
+    "emp-marcus": "Next — Land Stripe webhook PR after Noah's sign-off",
+    "emp-priya":  "Next — Validate VL-102 on staging with live traffic replay",
+    "emp-james":  "Next — Measure SDK init delta after lazy-load split",
+    "emp-sonia":  "Next — Test push payload on physical iPhone 15 device",
+    "emp-elena":  "Next — Roll VL-101 fix to 10% if p99 holds below 800ms",
+    "emp-david":  "Next — Run VL-102 classifier against production shadow traffic",
+    "emp-fatima": "Next — Circulate SLA doc for final sign-off by EOD",
+    "emp-noah":   "Next — Present RBAC schema to Marcus and James by 14:00"
   },
   "auditItems": [
-    { "id": "audit-1", "type": "AUTH_INTERCEPT", "title": "Authorization Intercept", "description": "Attempting to modify core auth middleware. Elevated permission required.", "timestamp": "2m ago" },
-    { "id": "audit-2", "type": "DIFF_REVIEW", "title": "Evolution Loop 47 Complete", "description": "Simulated query speed +14%. Ready for integration review.", "timestamp": "5m ago" },
-    { "id": "audit-3", "type": "DIFF_REVIEW", "title": "Evolution Loop 23 Complete", "description": "Patch validated. Net improvement: +8% throughput.", "timestamp": "12m ago" },
-    { "id": "audit-4", "type": "AUTH_INTERCEPT", "title": "Elevated Scope Request", "description": "Agent is requesting write access to production database. Requires approval.", "timestamp": "1m ago" },
-    { "id": "audit-5", "type": "DIFF_REVIEW", "title": "Infrastructure Patch v3", "description": "Network latency improvements. +6% throughput gain on staging.", "timestamp": "8m ago" }
+    { "id": "audit-1", "type": "AUTH_INTERCEPT", "title": "Agent requests elevated write scope", "description": "Priya Sharma is requesting temporary write access to the intent classifier config. Needed to update threshold during VL-102 calibration.", "timestamp": "3m ago" },
+    { "id": "audit-2", "type": "DIFF_REVIEW", "title": "Embedding pipeline optimization", "description": "+23% throughput improvement on vector embedding pipeline. Caching layer added. Ready for integration review.", "timestamp": "7m ago" },
+    { "id": "audit-3", "type": "DIFF_REVIEW", "title": "Widget bundle size reduction — phase 1", "description": "Tree-shaking and lazy-loading reduced widget from 62kb → 38kb gzipped. Phase 2 targeting 28kb.", "timestamp": "15m ago" },
+    { "id": "audit-4", "type": "AUTH_INTERCEPT", "title": "Production DB write — RBAC bypass", "description": "Elena Rodriguez attempting direct writes to prod ticket_routing table. Suspected misconfiguration in RBAC enforcement.", "timestamp": "1m ago" },
+    { "id": "audit-5", "type": "DIFF_REVIEW", "title": "Admin RBAC schema v1", "description": "Org → Team → Agent hierarchy with 4 permission tiers. Security-reviewed. Ready for engineering sign-off.", "timestamp": "22m ago" }
   ],
   "chatThreads": [
     {
       "id": "thread-1",
-      "title": "Superhive onboarding flow",
+      "title": "Sprint 22 retrospective",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Build a landing page for Superhive that highlights the multi-model AI workspace concept.", "minutesAgo": 45 },
-        { "id": "msg-2", "role": "assistant", "content": "I've created a modern landing page design for Superhive. The layout features a hero section with the headline 'Your Workforce, Amplified' and a three-column feature grid showcasing multi-model AI, real-time collaboration, and project management. The color scheme uses your terracotta accent (#e07850) against the dark warm palette. Want me to implement this in code?", "minutesAgo": 44 },
-        { "id": "msg-3", "role": "user", "content": "Yes, please implement the hero section with responsive layout.", "minutesAgo": 30 },
-        { "id": "msg-4", "role": "assistant", "content": "I've implemented the hero section with a full-width layout, gradient background, and responsive grid. The hero includes your main headline, subheadline, and two CTA buttons. It adapts from single-column on mobile to a two-column layout on desktop.", "minutesAgo": 28 }
+        { "id": "msg-1", "role": "user", "content": "Let's run the Sprint 22 retro. Three themes stood out: the widget bundle regression, the classifier drift we caught late, and the good velocity on the Admin RBAC work.", "minutesAgo": 52 },
+        { "id": "msg-2", "role": "assistant", "content": "Good framing. On the bundle regression — the root cause was the rich text renderer pulling in the entire Notion SDK. James, want to own a pre-flight bundle audit step in CI?", "minutesAgo": 50 },
+        { "id": "msg-3", "role": "user", "content": "Yes, I'll add a bundle-size budget check that fails CI above 45kb. Also want to lock in the intent classifier monitoring — David, can you own a daily drift report?", "minutesAgo": 47 },
+        { "id": "msg-4", "role": "assistant", "content": "On it. I'll set up Evals API to run a daily batch on our top 50 intent classes and alert if F1 drops more than 2 points. Should catch drift before it hits production.", "minutesAgo": 45 }
       ],
-      "updatedAtMinutesAgo": 28
+      "updatedAtMinutesAgo": 45
     },
     {
       "id": "thread-2",
-      "title": "Mumbrane webhook architecture",
+      "title": "VL-101 latency investigation",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Design the webhook retry logic for Mumbrane. We need exponential backoff with jitter and dead-letter queue handling.", "minutesAgo": 120 },
-        { "id": "msg-2", "role": "assistant", "content": "Here's my proposed architecture: each webhook endpoint gets its own retry queue backed by Redis. On failure, we schedule retry with exponential backoff (base: 1s, max: 5min, jitter ±20%). After 5 failures, the event goes to a DLQ. Want me to generate the core implementation?", "minutesAgo": 118 },
-        { "id": "msg-3", "role": "user", "content": "Yes, and also add alerting when events hit the DLQ.", "minutesAgo": 110 },
-        { "id": "msg-4", "role": "assistant", "content": "Done. The DLQ handler now fires a PagerDuty alert via webhook whenever an event lands in the dead-letter queue. Retry count, last error, and timestamp are included in the alert payload. DLQ events also trigger a Slack notification to #alerts.", "minutesAgo": 105 }
+        { "id": "msg-1", "role": "user", "content": "We're seeing p99 at 2.8s on ticket routing. Started Tuesday after the embedding pipeline change. Priya and I have been digging — we think it's the vector DB connection pool.", "minutesAgo": 130 },
+        { "id": "msg-2", "role": "assistant", "content": "That's consistent with pool exhaustion under concurrent embedding requests. What's the pool size set to? And what's the embedding QPS at peak?", "minutesAgo": 128 },
+        { "id": "msg-3", "role": "user", "content": "Pool is 20 connections. Peak QPS is ~340/s during US business hours. Each embedding call holds a connection for ~300ms on cold path.", "minutesAgo": 125 },
+        { "id": "msg-4", "role": "assistant", "content": "Math checks out — 20 × (1000/300) = ~66 concurrent connections, but you're hitting 340 QPS. Connection pool is saturated. Options: increase pool size, add connection pooling sidecar, or implement embedding request batching. I'd go with batching first — smallest blast radius.", "minutesAgo": 122 }
       ],
-      "updatedAtMinutesAgo": 105
+      "updatedAtMinutesAgo": 122
     },
     {
       "id": "thread-3",
-      "title": "Sidharda SEO audit",
+      "title": "Widget dark mode design review",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Run a quick SEO audit on the Sidharda website and fix the top 3 issues.", "minutesAgo": 90 },
-        { "id": "msg-2", "role": "assistant", "content": "I've scanned the site. Top 3 issues: (1) Missing canonical URLs on /blog/* pages, causing duplicate content flags. (2) Hero images lack alt text — affecting accessibility and image search. (3) h1 hierarchy violations on landing page (two h1s). Should I fix all three?", "minutesAgo": 88 },
-        { "id": "msg-3", "role": "user", "content": "Fix all three, then give me a summary.", "minutesAgo": 85 },
-        { "id": "msg-4", "role": "assistant", "content": "All three fixed. Added canonical meta tags to all /blog/* routes, added descriptive alt text to all hero images, and consolidated the duplicate h1s into proper h1 + h2 hierarchy. The SEO score should improve from 68 → ~84 based on these changes.", "minutesAgo": 80 }
+        { "id": "msg-1", "role": "user", "content": "Ava, can you walk us through the dark mode token structure? I want to make sure we're covering contrast ratios for all interactive states before we finalize.", "minutesAgo": 88 },
+        { "id": "msg-2", "role": "assistant", "content": "Sure. I've defined 48 tokens across 6 groups: surface (background, card, modal), text (primary, secondary, muted, inverse), border (default, strong, focused), interactive (primary, secondary, danger, ghost), feedback (success, warning, error, info), and overlay (scrim, backdrop). All interactive tokens are WCAG AA at minimum — primary buttons are AAA.", "minutesAgo": 86 },
+        { "id": "msg-3", "role": "user", "content": "Looks solid. One gap — the ghost button text on dark surfaces. 'Ghost secondary' text is #64748b on #0f172a — that fails AA at 3.9:1. Should be #94a3b8 minimum.", "minutesAgo": 83 },
+        { "id": "msg-4", "role": "assistant", "content": "Good catch. Updated ghost secondary to #94a3b8 — that gets us to 4.6:1. I'll also add a ghost-tertiary for disabled states at #475569 (5.9:1). Pushing the revised token set to Figma now.", "minutesAgo": 80 }
       ],
       "updatedAtMinutesAgo": 80
     },
     {
       "id": "thread-4",
-      "title": "Personal dashboard wireframe review",
+      "title": "Q3 roadmap planning",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Review the wireframe for the personal project dashboard. Does the layout make sense for tracking multiple side projects?", "minutesAgo": 60 },
-        { "id": "msg-2", "role": "assistant", "content": "The layout is solid. A few suggestions: (1) Move the 'Recent Activity' feed above the kanban board — it's higher-value context. (2) Add a status summary bar at the top (X tasks in progress, Y done, Z blocked). (3) Consider grouping tickets by project within the kanban view since this is multi-project.", "minutesAgo": 58 },
-        { "id": "msg-3", "role": "user", "content": "Great feedback. Can you update the wireframe with those changes?", "minutesAgo": 55 },
-        { "id": "msg-4", "role": "assistant", "content": "Updated. The new layout has the summary bar at top, activity feed as the primary section, and the kanban now supports project-grouped columns. I've attached the Figma link in the project notes.", "minutesAgo": 50 }
+        { "id": "msg-1", "role": "user", "content": "Fatima, we need to finalize Q3 priorities. My top candidates: MLS-245 (handoff prediction), MLS-231 (customer-facing analytics), and MLS-198 ( Zendesk integration).", "minutesAgo": 210 },
+        { "id": "msg-2", "role": "assistant", "content": "I'd sequence them MLS-245 → MLS-198 → MLS-231. Handoff prediction unblocks both the integration and analytics work since it changes the data model. Also gives us a strong enterprise talking point for Q3.", "minutesAgo": 208 },
+        { "id": "msg-3", "role": "user", "content": "Agreed on sequence. Noah also flagged MLS-261 (SOC 2 Type II evidence collection) — that's compliance blocking Q4 enterprise deals. Needs to be in Q3.", "minutesAgo": 205 },
+        { "id": "msg-4", "role": "assistant", "content": "That pushes MLS-231 to Q4 then, unless we compress the analytics scope. Can we do MLS-231 v1 as a read-only dashboard with pre-computed aggregates, defer real-time to v2?", "minutesAgo": 202 }
       ],
-      "updatedAtMinutesAgo": 50
+      "updatedAtMinutesAgo": 202
     }
   ],
   "favorites": [
-    { "id": "emp-ava",    "label": "Ava Chen",         "type": "employee", "iconKey": "user" },
-    { "id": "emp-marcus", "label": "Marcus Webb",       "type": "employee", "iconKey": "user" },
-    { "id": "superhive",  "label": "Superhive App",     "type": "project",  "iconKey": "folder" },
-    { "id": "mumbrane",  "label": "Mumbrane Platform", "type": "project",  "iconKey": "folder" },
-    { "id": "sidharda-co","label": "Sidharda Website",  "type": "project",  "iconKey": "folder" }
+    { "id": "emp-elena", "label": "Elena Rodriguez", "type": "employee", "iconKey": "user" },
+    { "id": "emp-david", "label": "David Kim",       "type": "employee", "iconKey": "user" },
+    { "id": "vela",      "label": "Vela Platform",   "type": "project",  "iconKey": "folder" },
+    { "id": "widget",    "label": "Widget Embed",    "type": "project",  "iconKey": "folder" },
+    { "id": "admin",     "label": "Admin Dashboard", "type": "project",  "iconKey": "folder" }
   ],
   "accordionAgents": [
-    { "id": "ava",    "name": "Ava Chen",      "status": "EXECUTING",     "currentTask": "Writing onboarding flow" },
-    { "id": "marcus", "name": "Marcus Webb",   "status": "COMPILING",     "currentTask": "Reviewing PR #142" },
-    { "id": "priya",  "name": "Priya Sharma",  "status": "ERROR_LOOP",    "currentTask": "API integration stalled" },
-    { "id": "sonia",  "name": "Sonia Patel",   "status": "AWAITING_HUMAN", "currentTask": "Building design system" }
+    { "id": "emp-ava",    "name": "Ava Chen",       "status": "EXECUTING",     "currentTask": "Widget dark mode tokens" },
+    { "id": "emp-marcus", "name": "Marcus Webb",    "status": "COMPILING",     "currentTask": "Stripe webhook review" },
+    { "id": "emp-priya",  "name": "Priya Sharma",   "status": "EXECUTING",     "currentTask": "Intent classifier calibration" },
+    { "id": "emp-sonia",  "name": "Sonia Patel",    "status": "EXECUTING",     "currentTask": "Push notification testing" },
+    { "id": "emp-elena",  "name": "Elena Rodriguez","status": "EXECUTING",     "currentTask": "Latency regression investigation" },
+    { "id": "emp-james",  "name": "James Liu",      "status": "EXECUTING",     "currentTask": "SDK bundle profiling" },
+    { "id": "emp-david",  "name": "David Kim",       "status": "EXECUTING",     "currentTask": "Classifier retraining" },
+    { "id": "emp-noah",   "name": "Noah Chen",       "status": "COMPILING",     "currentTask": "RBAC schema design" },
+    { "id": "emp-fatima", "name": "Fatima Al-Hassan","status": "AWAITING_HUMAN","currentTask": "SLA doc review" }
   ]
 }

@@ -15,10 +15,12 @@ import {
   selectTab as selectTabOp,
   setTicketOnTab,
   getActiveTab,
+  openProjectTab,
 } from '@/data/tabs/store';
 import type { CenterTabType } from '@/data/tabs/interface';
 import type { Workspace } from '@/data/workspaces/interface';
 import type { FavoriteItem } from '@/data/favorites/interface';
+import { getRightPanelTabs, getDefaultRightPanelTab, type RightPanelContext, type RightPanelTabId } from '@/data/right-panel-tabs';
 
 type DashboardProps = {
   leftWidth: number;
@@ -52,7 +54,7 @@ export function Dashboard({
   const [centerView, setCenterView] = useState<CenterView | null>('home');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('superhive');
   const [activeEmployeeId, setActiveEmployeeId] = useState<string | null>(null);
-  const [rightPanelTab, setRightPanelTab] = useState<'overview' | 'manage' | 'inbox'>('overview');
+  const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
 
   const workspaces_data = listWorkspaces();
   const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' };
@@ -75,6 +77,20 @@ export function Dashboard({
     .map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedAgentId }));
 
   const activeTab = getActiveTab(tabState);
+
+  const rightPanelContext = useMemo<RightPanelContext>(() => {
+    if (!activeTab) return null;
+    if (activeTab.type === 'chat' && activeEmployeeId) return { kind: 'employee', employeeId: activeEmployeeId };
+    if (activeTab.type === 'tickets' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
+    if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId };
+    if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId };
+    if (activeTab.type === 'chat') return { kind: 'employee', employeeId: activeEmployeeId ?? '' };
+    return null;
+  }, [activeTab, activeEmployeeId]);
+
+  const rightPanelTabs = getRightPanelTabs(rightPanelContext);
+  const defaultRightTab = getDefaultRightPanelTab(rightPanelContext);
+  const currentRightPanelTab = rightPanelTabs.some(t => t.id === rightPanelTab) ? rightPanelTab : defaultRightTab;
 
   const handleOpenTab = useCallback((type: CenterTabType, workspaceId: string) => {
     setTabState(prev => openTabOp(prev, type, workspaceId));
@@ -104,14 +120,15 @@ export function Dashboard({
     if (tabState.activeTabId) {
       setTabState(prev => setTicketOnTab(prev, tabState.activeTabId!, ticketId));
     }
-    setRightPanelTab('inbox');
+    setRightPanelTab('overview');
   }, [tabState.activeTabId]);
 
   const handleNavItemClick = useCallback((id: string) => {
     if (id === 'home') { setCenterView('home'); return; }
-    if (id === 'employees') { setCenterView('employees'); return; }
+    if (id === 'employees' || id === 'universal-employees') { setCenterView('universal-employees'); return; }
     if (id === 'communications') { setCenterView('communications'); return; }
-    if (id === 'projects' || id === 'tickets' || id === 'chat') {
+    if (id === 'projects' || id === 'universal-projects') { setCenterView('universal-projects'); return; }
+    if (id === 'tickets' || id === 'chat') {
       handleOpenTab(id as CenterTabType, activeWorkspaceId);
     }
   }, [handleOpenTab, activeWorkspaceId]);
@@ -124,12 +141,20 @@ export function Dashboard({
   const handleEmployeeSelect = useCallback((id: string) => {
     setActiveEmployeeId(id);
     handleOpenTab('chat', activeWorkspaceId);
+    setRightPanelTab('overview');
   }, [handleOpenTab, activeWorkspaceId]);
+
+  const handleProjectSelect = useCallback((projectId: string, workspaceId: string) => {
+    setTabState(prev => openProjectTab(prev, projectId, workspaceId));
+    setCenterView(null);
+    setRightPanelTab('overview');
+  }, []);
 
   const handleFavoriteSelect = useCallback((item: FavoriteItem) => {
     if (item.type === 'employee') {
       setActiveEmployeeId(item.id);
       handleOpenTab('chat', activeWorkspaceId);
+      setRightPanelTab('overview');
     } else if (item.type === 'project') {
       handleOpenTab('projects', item.id);
     }
@@ -161,6 +186,7 @@ export function Dashboard({
         onNavItemClick={handleNavItemClick}
         currentView={centerView ?? activeTab?.type ?? 'home'}
         onEmployeeSelect={handleEmployeeSelect}
+        onProjectClick={handleProjectSelect}
       />
       <CenterWorkspace
         tabs={tabState.tabs}
@@ -175,13 +201,14 @@ export function Dashboard({
         onTabClose={handleCloseTab}
         onTicketSelect={handleTicketSelect}
         onEmployeeSelect={handleEmployeeSelect}
+        onProjectSelect={handleProjectSelect}
         onAction={handleWizardAction}
       />
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}
-        employeeId={activeEmployeeId}
-        tab={rightPanelTab}
+        context={rightPanelContext}
+        tab={currentRightPanelTab}
         ticketId={activeTab?.selectedTicketId ?? null}
         onTabChange={setRightPanelTab}
         onApproveAudit={approveAudit}

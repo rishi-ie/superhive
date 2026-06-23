@@ -22,6 +22,7 @@ type LeftNavProps = {
   onEmployeeSelect?: (id: string) => void;
   onActiveTaskClick?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
+  onProjectClick?: (projectId: string, workspaceId: string) => void;
   currentView?: string;
 };
 
@@ -42,6 +43,7 @@ export function LeftNav({
   onActiveEmployeeClick,
   onActiveTaskClick,
   onNavItemClick,
+  onProjectClick,
   currentView,
   onEmployeeSelect,
 }: LeftNavProps) {
@@ -108,7 +110,7 @@ export function LeftNav({
         <div className="border-t border-sidebar-border/60 mx-2" />
 
         <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onEmployeeSelect} />
+          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onEmployeeSelect} onProjectClick={onProjectClick} />
         </div>
 
         <Utilities onSettingsClick={onSettingsClick} />

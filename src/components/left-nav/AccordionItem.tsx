@@ -23,6 +23,11 @@ export function AccordionItem({ label, icon, badge, defaultOpen = false, active 
     }
   };
 
+  const handleChevronClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="px-2 py-0.5">
       <button
@@ -33,11 +38,17 @@ export function AccordionItem({ label, icon, badge, defaultOpen = false, active 
             : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
         }`}
       >
-        <ChevronRight
-          size={12}
-          strokeWidth={STROKE_WIDTH}
-          className={`shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
-        />
+        <button
+          onClick={handleChevronClick}
+          className="shrink-0 p-0.5 hover:bg-sidebar-accent/50 rounded transition-colors"
+          aria-label="Toggle expand"
+        >
+          <ChevronRight
+            size={12}
+            strokeWidth={STROKE_WIDTH}
+            className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+          />
+        </button>
         {icon && <span className="shrink-0">{icon}</span>}
         <span className="flex-1 text-left">{label}</span>
         {badge && <span className="shrink-0">{badge}</span>}

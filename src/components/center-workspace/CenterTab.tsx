@@ -1,4 +1,4 @@
-import { MessageSquare, Layers, ClipboardCheck, X } from 'lucide-react';
+import { MessageSquare, Layers, ClipboardCheck, FolderOpen, MessageCircle, X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/data/tabs/interface';
 
@@ -6,12 +6,16 @@ const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
   chat: MessageSquare,
   projects: Layers,
   tickets: ClipboardCheck,
+  project: FolderOpen,
+  channel: MessageCircle,
 };
 
 const TAB_LABELS: Record<TabType, string> = {
   chat: 'Chat',
   projects: 'Projects',
   tickets: 'Tickets',
+  project: 'Project',
+  channel: 'Channel',
 };
 
 type CenterTabProps = {
