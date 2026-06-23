@@ -1,6 +1,61 @@
 import { isMockEnabled } from '@/lib/feature-flags';
-import { mockEmployeeStore } from './mock';
+import mockData from '../mock.json';
+import type { MockData } from '../mock-types';
 import type { EmployeeStore, Employee, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
+
+const data = mockData as MockData;
+
+const employees: Employee[] = data.employees;
+const telemetryMap: Record<string, Telemetry> = data.telemetry;
+const permissionsMap: Record<string, Permissions> = data.permissions;
+const actionLogMap: Record<string, ActionLogEntry[]> = data.actionLogs;
+const nextStepMap: Record<string, string> = data.nextSteps;
+
+let auditItemsMutable: AuditItem[] = structuredClone(data.auditItems);
+
+const DEFAULT_TELEMETRY: Telemetry = {
+  contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5.00,
+};
+
+const DEFAULT_PERMISSIONS: Permissions = {
+  modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false,
+};
+
+const mockEmployeeStore: EmployeeStore = {
+  list() {
+    return employees;
+  },
+  get(id: string) {
+    return employees.find((e) => e.id === id);
+  },
+  getTelemetry(employeeId: string) {
+    return telemetryMap[employeeId] ?? null;
+  },
+  getPermissions(employeeId: string) {
+    return permissionsMap[employeeId] ?? null;
+  },
+  getAuditItems(_employeeId?: string) {
+    return auditItemsMutable;
+  },
+  getActionLog(employeeId: string) {
+    return actionLogMap[employeeId] ?? [];
+  },
+  getNextStep(employeeId: string) {
+    return nextStepMap[employeeId] ?? 'Next — Standing by';
+  },
+  getDefaultTelemetry() {
+    return DEFAULT_TELEMETRY;
+  },
+  getDefaultPermissions() {
+    return DEFAULT_PERMISSIONS;
+  },
+  approveAudit(id: string) {
+    auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
+  },
+  denyAudit(id: string) {
+    auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
+  },
+};
 
 const emptyStore: EmployeeStore = {
   list() { return []; },

@@ -1,6 +1,10 @@
 import { isMockEnabled } from '@/lib/feature-flags';
-import { accordionAgents } from './mock';
+import mockData from '../mock.json';
+import type { MockData } from '../mock-types';
 import type { AccordionAgent } from './interface';
+
+const data = mockData as MockData;
+const accordionAgents: AccordionAgent[] = data.accordionAgents;
 
 interface LeftNavStore {
   listAccordionAgents(): AccordionAgent[];

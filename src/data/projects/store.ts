@@ -1,5 +1,6 @@
 import { isMockEnabled } from '@/lib/feature-flags';
-import { projectsByWorkspace } from './mock';
+import mockData from '../mock.json';
+import type { MockData } from '../mock-types';
 import type {
   Ticket,
   ProjectAgent,
@@ -7,6 +8,9 @@ import type {
   CommunicationChannel,
   Project,
 } from './interface';
+
+const data = mockData as MockData;
+const projectsByWorkspace: Record<string, Project> = data.projects;
 
 interface ProjectsStore {
   listProjects(): Project[];

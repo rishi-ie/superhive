@@ -1,6 +1,12 @@
 import { isMockEnabled } from '@/lib/feature-flags';
-import { workspaces, currentWorkspace } from './mock';
+import mockData from '../mock.json';
+import type { MockData } from '../mock-types';
 import type { Workspace } from './interface';
+
+const data = mockData as MockData;
+
+const workspaces: Workspace[] = data.workspaces;
+const currentWorkspace: Workspace = workspaces.find(w => w.id === data.currentWorkspaceId) ?? workspaces[0]!;
 
 interface WorkspacesStore {
   list(): Workspace[];

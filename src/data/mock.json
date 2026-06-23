@@ -1,0 +1,281 @@
+{
+  "workspaces": [
+    { "id": "superhive", "name": "Superhive", "initials": "SH", "avatarColor": "bg-chart-1" },
+    { "id": "mumbrane", "name": "Mumbrane", "initials": "MB", "avatarColor": "bg-chart-2" },
+    { "id": "sidharda-co", "name": "Sidharda Co", "initials": "SC", "avatarColor": "bg-chart-3" },
+    { "id": "personal", "name": "Personal", "initials": "PL", "avatarColor": "bg-[#8b5cf6]" }
+  ],
+  "currentWorkspaceId": "superhive",
+  "projects": {
+    "superhive": {
+      "id": "proj-superhive",
+      "workspaceId": "superhive",
+      "title": "Superhive App",
+      "tickets": [
+        { "id": "SH-142", "title": "Fix Auth Regression", "status": "TODO", "assignedAgentId": "sh-ava" },
+        { "id": "SH-143", "title": "Implement Onboarding Flow", "status": "TODO", "assignedAgentId": "sh-sonia" },
+        { "id": "SH-144", "title": "Add Dark Mode to Settings", "status": "TODO", "assignedAgentId": "sh-james" },
+        { "id": "SH-145", "title": "Refactor API Gateway", "status": "EXECUTING", "assignedAgentId": "sh-marcus" },
+        { "id": "SH-146", "title": "Optimize Database Queries", "status": "EXECUTING", "assignedAgentId": "sh-priya" },
+        { "id": "SH-140", "title": "Update Dependencies", "status": "DONE", "assignedAgentId": "sh-ava" },
+        { "id": "SH-141", "title": "Fix Login Bug", "status": "DONE", "assignedAgentId": "sh-sonia" },
+        { "id": "SH-139", "title": "Migrate to TypeScript Strict", "status": "DONE", "assignedAgentId": "sh-james" }
+      ],
+      "agents": [
+        { "id": "sh-ava", "name": "Ava Chen", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "SH-142", "initials": "AC" },
+        { "id": "sh-marcus", "name": "Marcus Webb", "role": "API Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SH-145", "initials": "MW" },
+        { "id": "sh-priya", "name": "Priya Sharma", "role": "Database Engineer", "currentStatus": "WORKING", "assignedTicketId": "SH-146", "initials": "PS" },
+        { "id": "sh-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SH-143", "initials": "SP" },
+        { "id": "sh-james", "name": "James Liu", "role": "DevOps Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "JL" }
+      ],
+      "channels": [
+        { "id": "sh-ch-1", "participants": ["Marcus Webb", "Ava Chen"], "topic": "Schema validation", "relatedTicketId": "SH-145", "status": "OPEN", "lastMessagePreview": "Hey Ava, can you verify the response shape?", "messageCount": 4, "updatedAt": "10:42 AM", "unread": true },
+        { "id": "sh-ch-2", "participants": ["Priya Sharma", "Marcus Webb"], "topic": "DB snapshot handoff", "relatedTicketId": "SH-146", "status": "AWAITING_REPLY", "lastMessagePreview": "Snapshot ready, awaiting your review.", "messageCount": 2, "updatedAt": "10:38 AM" },
+        { "id": "sh-ch-3", "participants": ["Sonia Patel", "Ava Chen"], "topic": "Design tokens", "relatedTicketId": "SH-143", "status": "OPEN", "lastMessagePreview": "Tokens uploaded to /design/v2.", "messageCount": 7, "updatedAt": "10:31 AM" },
+        { "id": "sh-ch-4", "participants": ["Ava Chen", "James Liu"], "topic": "Code review", "relatedTicketId": "SH-140", "status": "RESOLVED", "lastMessagePreview": "Approved. Merging now.", "messageCount": 3, "updatedAt": "10:24 AM" },
+        { "id": "sh-ch-5", "participants": ["Marcus Webb", "James Liu"], "topic": "Deploy pipeline", "relatedTicketId": "SH-141", "status": "AWAITING_REPLY", "lastMessagePreview": "Pipeline queued, need approval to proceed.", "messageCount": 5, "updatedAt": "10:15 AM" }
+      ],
+      "activity": [
+        { "id": "sh-act-1", "timestamp": "10:42 AM", "primaryAgent": "Marcus Webb", "action": "requested schema validation from", "targetAgent": "Ava Chen", "context": "for SH-145" },
+        { "id": "sh-act-2", "timestamp": "10:38 AM", "primaryAgent": "Priya Sharma", "action": "shared database snapshot with", "targetAgent": "Marcus Webb", "context": "for SH-146" },
+        { "id": "sh-act-3", "timestamp": "10:31 AM", "primaryAgent": "Sonia Patel", "action": "handed off design tokens to", "targetAgent": "Ava Chen", "context": "for SH-143" },
+        { "id": "sh-act-4", "timestamp": "10:24 AM", "primaryAgent": "Ava Chen", "action": "requested code review from", "targetAgent": "James Liu", "context": "for SH-140" },
+        { "id": "sh-act-5", "timestamp": "10:15 AM", "primaryAgent": "Marcus Webb", "action": "requested deployment pipeline from", "targetAgent": "James Liu", "context": "for SH-141" },
+        { "id": "sh-act-6", "timestamp": "10:02 AM", "primaryAgent": "Priya Sharma", "action": "escalated timeout issue to", "targetAgent": "Ava Chen", "context": "for SH-142" }
+      ]
+    },
+    "mumbrane": {
+      "id": "proj-mumbrane",
+      "workspaceId": "mumbrane",
+      "title": "Mumbrane Platform",
+      "tickets": [
+        { "id": "MB-201", "title": "Implement Webhook Retry Logic", "status": "EXECUTING", "assignedAgentId": "mb-priya" },
+        { "id": "MB-202", "title": "Fix Memory Leak in WebSocket Layer", "status": "TODO", "assignedAgentId": "mb-marcus" },
+        { "id": "MB-203", "title": "Migrate Auth to OAuth 2.1", "status": "DONE", "assignedAgentId": "mb-ava" },
+        { "id": "MB-204", "title": "Add Audit Log Export to CSV", "status": "TODO", "assignedAgentId": "mb-rishi" },
+        { "id": "MB-205", "title": "Rate Limiting Middleware", "status": "EXECUTING", "assignedAgentId": "mb-marcus" },
+        { "id": "MB-206", "title": "Integrate Stripe Billing Webhooks", "status": "TODO", "assignedAgentId": "mb-priya" },
+        { "id": "MB-207", "title": "Fix CORS Preflight Caching", "status": "DONE", "assignedAgentId": "mb-ava" },
+        { "id": "MB-208", "title": "Add Prometheus Metrics Endpoint", "status": "DONE", "assignedAgentId": "mb-rishi" }
+      ],
+      "agents": [
+        { "id": "mb-priya", "name": "Priya Sharma", "role": "Backend Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-201", "initials": "PS" },
+        { "id": "mb-marcus", "name": "Marcus Webb", "role": "Systems Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-202", "initials": "MW" },
+        { "id": "mb-ava", "name": "Ava Chen", "role": "Security Engineer", "currentStatus": "COMPILING", "assignedTicketId": "MB-203", "initials": "AC" },
+        { "id": "mb-rishi", "name": "Rishi Iyer", "role": "DevOps Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "RI" }
+      ],
+      "channels": [
+        { "id": "mb-ch-1", "participants": ["Priya Sharma", "Marcus Webb"], "topic": "Webhook retry strategy", "relatedTicketId": "MB-201", "status": "OPEN", "lastMessagePreview": "Should we use exponential backoff or linear?", "messageCount": 6, "updatedAt": "11:05 AM", "unread": true },
+        { "id": "mb-ch-2", "participants": ["Ava Chen", "Marcus Webb"], "topic": "OAuth scope review", "relatedTicketId": "MB-203", "status": "AWAITING_REPLY", "lastMessagePreview": "The refresh token rotation looks good.", "messageCount": 3, "updatedAt": "10:55 AM" },
+        { "id": "mb-ch-3", "participants": ["Rishi Iyer", "Priya Sharma"], "topic": "Prometheus labels", "relatedTicketId": "MB-208", "status": "RESOLVED", "lastMessagePreview": "Deployed to staging. All green.", "messageCount": 4, "updatedAt": "10:30 AM" },
+        { "id": "mb-ch-4", "participants": ["Marcus Webb", "Rishi Iyer"], "topic": "CORS config sync", "relatedTicketId": "MB-207", "status": "OPEN", "lastMessagePreview": "Updated the allowed-origins list.", "messageCount": 2, "updatedAt": "09:45 AM" },
+        { "id": "mb-ch-5", "participants": ["Ava Chen", "Priya Sharma"], "topic": "Security audit findings", "relatedTicketId": "MB-203", "status": "OPEN", "lastMessagePreview": "One medium finding in the token validation.", "messageCount": 8, "updatedAt": "09:20 AM", "unread": true }
+      ],
+      "activity": [
+        { "id": "mb-act-1", "timestamp": "11:05 AM", "primaryAgent": "Priya Sharma", "action": "discussing retry strategy with", "targetAgent": "Marcus Webb", "context": "for MB-201" },
+        { "id": "mb-act-2", "timestamp": "10:55 AM", "primaryAgent": "Ava Chen", "action": "shared OAuth scope review with", "targetAgent": "Marcus Webb", "context": "for MB-203" },
+        { "id": "mb-act-3", "timestamp": "10:30 AM", "primaryAgent": "Rishi Iyer", "action": "shipped Prometheus metrics with", "targetAgent": "Priya Sharma", "context": "for MB-208" },
+        { "id": "mb-act-4", "timestamp": "10:10 AM", "primaryAgent": "Marcus Webb", "action": "filed CORS issue to", "targetAgent": "Rishi Iyer", "context": "for MB-207" },
+        { "id": "mb-act-5", "timestamp": "09:45 AM", "primaryAgent": "Marcus Webb", "action": "requested metrics labels from", "targetAgent": "Rishi Iyer", "context": "for MB-208" },
+        { "id": "mb-act-6", "timestamp": "09:20 AM", "primaryAgent": "Ava Chen", "action": "escalated security finding to", "targetAgent": "Priya Sharma", "context": "for MB-203" }
+      ]
+    },
+    "sidharda-co": {
+      "id": "proj-sidharda",
+      "workspaceId": "sidharda-co",
+      "title": "Sidharda Website",
+      "tickets": [
+        { "id": "SC-088", "title": "Redesign Marketing Landing Page", "status": "DONE", "assignedAgentId": "sc-sonia" },
+        { "id": "SC-089", "title": "Fix Broken Image Links in Gallery", "status": "TODO", "assignedAgentId": "sc-rishi" },
+        { "id": "SC-090", "title": "Setup CI/CD Pipeline for Staging", "status": "EXECUTING", "assignedAgentId": "sc-james" },
+        { "id": "SC-091", "title": "Refactor CSS to Use Design Tokens", "status": "DONE", "assignedAgentId": "sc-sonia" },
+        { "id": "SC-092", "title": "Add Open Graph Meta Tags", "status": "TODO", "assignedAgentId": "sc-rishi" },
+        { "id": "SC-093", "title": "SEO Audit and Fix Canonical URLs", "status": "TODO", "assignedAgentId": "sc-james" }
+      ],
+      "agents": [
+        { "id": "sc-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "SC-088", "initials": "SP" },
+        { "id": "sc-rishi", "name": "Rishi Iyer", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "SC-089", "initials": "RI" },
+        { "id": "sc-james", "name": "James Liu", "role": "DevOps Engineer", "currentStatus": "WORKING", "assignedTicketId": "SC-090", "initials": "JL" }
+      ],
+      "channels": [
+        { "id": "sc-ch-1", "participants": ["Sonia Patel", "Rishi Iyer"], "topic": "Landing page copy review", "relatedTicketId": "SC-088", "status": "OPEN", "lastMessagePreview": "Updated the hero section copy. Please check.", "messageCount": 5, "updatedAt": "09:15 AM", "unread": true },
+        { "id": "sc-ch-2", "participants": ["James Liu", "Rishi Iyer"], "topic": "CI/CD staging setup", "relatedTicketId": "SC-090", "status": "AWAITING_REPLY", "lastMessagePreview": "GitHub Actions workflow is ready.", "messageCount": 3, "updatedAt": "08:50 AM" },
+        { "id": "sc-ch-3", "participants": ["Sonia Patel", "James Liu"], "topic": "OG tags coordination", "relatedTicketId": "SC-092", "status": "OPEN", "lastMessagePreview": "We need OG image dimensions agreed first.", "messageCount": 2, "updatedAt": "08:30 AM" },
+        { "id": "sc-ch-4", "participants": ["Rishi Iyer", "James Liu"], "topic": "Broken gallery images", "relatedTicketId": "SC-089", "status": "RESOLVED", "lastMessagePreview": "Fixed the Cloudinary URL rewrites. All good.", "messageCount": 4, "updatedAt": "08:10 AM" }
+      ],
+      "activity": [
+        { "id": "sc-act-1", "timestamp": "09:15 AM", "primaryAgent": "Sonia Patel", "action": "shared landing page update with", "targetAgent": "Rishi Iyer", "context": "for SC-088" },
+        { "id": "sc-act-2", "timestamp": "08:50 AM", "primaryAgent": "James Liu", "action": "requested CI/CD approval from", "targetAgent": "Rishi Iyer", "context": "for SC-090" },
+        { "id": "sc-act-3", "timestamp": "08:30 AM", "primaryAgent": "Sonia Patel", "action": "escalated OG image specs to", "targetAgent": "James Liu", "context": "for SC-092" },
+        { "id": "sc-act-4", "timestamp": "08:10 AM", "primaryAgent": "Rishi Iyer", "action": "fixed broken gallery links with", "targetAgent": "James Liu", "context": "for SC-089" },
+        { "id": "sc-act-5", "timestamp": "07:45 AM", "primaryAgent": "James Liu", "action": "requested SEO audit from", "targetAgent": "Rishi Iyer", "context": "for SC-093" }
+      ]
+    },
+    "personal": {
+      "id": "proj-personal",
+      "workspaceId": "personal",
+      "title": "Personal Projects",
+      "tickets": [
+        { "id": "PL-013", "title": "Build Side Project Dashboard", "status": "TODO", "assignedAgentId": "pl-rishi" },
+        { "id": "PL-014", "title": "Write Documentation for API", "status": "DONE", "assignedAgentId": "pl-sonia" },
+        { "id": "PL-015", "title": "Set Up Monitoring for Side App", "status": "TODO", "assignedAgentId": "pl-rishi" },
+        { "id": "PL-016", "title": "Design Logo for Side Project", "status": "EXECUTING", "assignedAgentId": "pl-sonia" }
+      ],
+      "agents": [
+        { "id": "pl-rishi", "name": "Rishi Iyer", "role": "Full-Stack Engineer", "currentStatus": "WORKING", "assignedTicketId": "PL-013", "initials": "RI" },
+        { "id": "pl-sonia", "name": "Sonia Patel", "role": "Designer", "currentStatus": "WORKING", "assignedTicketId": "PL-016", "initials": "SP" }
+      ],
+      "channels": [
+        { "id": "pl-ch-1", "participants": ["Rishi Iyer", "Sonia Patel"], "topic": "Dashboard wireframe review", "relatedTicketId": "PL-013", "status": "OPEN", "lastMessagePreview": "Wireframe v2 is uploaded. Thoughts?", "messageCount": 3, "updatedAt": "07:00 AM", "unread": true },
+        { "id": "pl-ch-2", "participants": ["Sonia Patel", "Rishi Iyer"], "topic": "Logo design direction", "relatedTicketId": "PL-016", "status": "AWAITING_REPLY", "lastMessagePreview": "Three directions ready for your review.", "messageCount": 2, "updatedAt": "06:45 AM" },
+        { "id": "pl-ch-3", "participants": ["Rishi Iyer", "Sonia Patel"], "topic": "API docs outline", "relatedTicketId": "PL-014", "status": "RESOLVED", "lastMessagePreview": "Docs are up on Notion. Closing this thread.", "messageCount": 6, "updatedAt": "06:30 AM" }
+      ],
+      "activity": [
+        { "id": "pl-act-1", "timestamp": "07:00 AM", "primaryAgent": "Rishi Iyer", "action": "shared dashboard wireframe with", "targetAgent": "Sonia Patel", "context": "for PL-013" },
+        { "id": "pl-act-2", "timestamp": "06:45 AM", "primaryAgent": "Sonia Patel", "action": "presented logo directions to", "targetAgent": "Rishi Iyer", "context": "for PL-016" },
+        { "id": "pl-act-3", "timestamp": "06:30 AM", "primaryAgent": "Rishi Iyer", "action": "approved API docs outline with", "targetAgent": "Sonia Patel", "context": "for PL-014" },
+        { "id": "pl-act-4", "timestamp": "06:15 AM", "primaryAgent": "Sonia Patel", "action": "requested monitoring input from", "targetAgent": "Rishi Iyer", "context": "for PL-015" }
+      ]
+    }
+  },
+  "universalTickets": [
+    { "id": "SH-142", "title": "Fix Auth Regression on Mobile Login", "projectName": "Superhive App", "workspaceId": "superhive", "status": "EXECUTING", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "SH-143", "title": "Implement Onboarding Flow", "projectName": "Superhive App", "workspaceId": "superhive", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "SH-144", "title": "Add Dark Mode to Settings", "projectName": "Superhive App", "workspaceId": "superhive", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
+    { "id": "SH-145", "title": "Refactor API Gateway Routing", "projectName": "Superhive App", "workspaceId": "superhive", "status": "EXECUTING", "priority": "HIGH", "type": "REFACTOR", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "SH-146", "title": "Optimize Slow Database Queries", "projectName": "Superhive App", "workspaceId": "superhive", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Priya Sharma", "isAI": true } },
+    { "id": "SH-140", "title": "Update Outdated Dependencies", "projectName": "Superhive App", "workspaceId": "superhive", "status": "MERGED", "priority": "LOW", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "SH-141", "title": "Fix Login Button Not Responding", "projectName": "Superhive App", "workspaceId": "superhive", "status": "MERGED", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "MB-201", "title": "Implement Webhook Retry Logic", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
+    { "id": "MB-202", "title": "Fix Memory Leak in WebSocket Layer", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "BACKLOG", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Marcus Webb", "isAI": true } },
+    { "id": "MB-203", "title": "Migrate Auth to OAuth 2.1", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "MB-204", "title": "Add Audit Log Export to CSV", "projectName": "Mumbrane Platform", "workspaceId": "mumbrane", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
+    { "id": "SC-088", "title": "Redesign Marketing Landing Page", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "SC-089", "title": "Fix Broken Image Links in Gallery", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "BACKLOG", "priority": "LOW", "type": "BUG", "assignee": { "name": "Rishi Iyer", "isAI": false } },
+    { "id": "SC-090", "title": "Setup CI/CD Pipeline for Staging", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "SC-091", "title": "Refactor CSS to Use Design Tokens", "projectName": "Sidharda Co", "workspaceId": "sidharda-co", "status": "MERGED", "priority": "LOW", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
+    { "id": "PL-013", "title": "Build Side Project Dashboard", "projectName": "Personal", "workspaceId": "personal", "status": "BACKLOG", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Rishi Iyer", "isAI": false } },
+    { "id": "PL-014", "title": "Write Documentation for API", "projectName": "Personal", "workspaceId": "personal", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } }
+  ],
+  "employees": [
+    { "id": "emp-ava", "name": "Ava Chen", "role": "Logic Architect", "status": "COMPILING", "activeTask": "Building authentication middleware layer", "uptime": "2h 14m" },
+    { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "status": "ERROR_LOOP", "activeTask": "Recovering from recursive logic fault in payment processing", "uptime": "0h 38m" },
+    { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "status": "EXECUTING", "activeTask": "Integrating Stripe webhook endpoints", "uptime": "4h 02m" },
+    { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "status": "IDLE", "activeTask": "Standing by for new assignment", "uptime": "0h 11m" },
+    { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Systems Lead", "status": "COMPILING", "activeTask": "Publishing component library v1.4", "uptime": "1h 55m" },
+    { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "status": "EXECUTING", "activeTask": "Rolling out canary deployment for v2.4", "uptime": "1h 30m" },
+    { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "status": "EXECUTING", "activeTask": "Fine-tuning intent classification model", "uptime": "3h 45m" },
+    { "id": "emp-fatima", "name": "Fatima Al-Hassan", "role": "Product Manager", "status": "AWAITING_HUMAN", "activeTask": "Reviewing Q3 roadmap with stakeholders", "uptime": "0h 50m" },
+    { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "status": "COMPILING", "activeTask": "Running penetration test on auth service", "uptime": "2h 05m" }
+  ],
+  "telemetry": {
+    "emp-ava":    { "contextSaturation": 67,  "tokensPerSecond": 142, "currentCost": 0.0234, "evolutionLoop": "47/100", "logicKernelIntegrity": 94,  "sessionCost": 1.42,  "budget": 5.00 },
+    "emp-marcus": { "contextSaturation": 100, "tokensPerSecond": 0,   "currentCost": 0.142,  "evolutionLoop": "8/100",  "logicKernelIntegrity": 23,  "sessionCost": 3.87,  "budget": 5.00 },
+    "emp-priya":  { "contextSaturation": 45,  "tokensPerSecond": 89,  "currentCost": 0.0187, "evolutionLoop": "12/100", "logicKernelIntegrity": 100, "sessionCost": 0.54,  "budget": 5.00 },
+    "emp-james":  { "contextSaturation": 12,  "tokensPerSecond": 0,   "currentCost": 0.0012, "evolutionLoop": "3/100",  "logicKernelIntegrity": 99,  "sessionCost": 0.12,  "budget": 5.00 },
+    "emp-sonia":  { "contextSaturation": 88,  "tokensPerSecond": 201, "currentCost": 0.0091, "evolutionLoop": "23/100", "logicKernelIntegrity": 87,  "sessionCost": 0.89,  "budget": 5.00 },
+    "emp-elena":  { "contextSaturation": 55,  "tokensPerSecond": 67,  "currentCost": 0.0312, "evolutionLoop": "31/100", "logicKernelIntegrity": 91,  "sessionCost": 2.14,  "budget": 8.00 },
+    "emp-david":  { "contextSaturation": 78,  "tokensPerSecond": 110, "currentCost": 0.0451, "evolutionLoop": "19/100", "logicKernelIntegrity": 96,  "sessionCost": 3.22,  "budget": 10.00 },
+    "emp-fatima": { "contextSaturation": 22,  "tokensPerSecond": 15,  "currentCost": 0.0034, "evolutionLoop": "5/100",  "logicKernelIntegrity": 100, "sessionCost": 0.18,  "budget": 2.00 },
+    "emp-noah":   { "contextSaturation": 61,  "tokensPerSecond": 95,  "currentCost": 0.0278, "evolutionLoop": "38/100", "logicKernelIntegrity": 88,  "sessionCost": 1.76,  "budget": 6.00 }
+  },
+  "permissions": {
+    "emp-ava":    { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY", "maxTokens": 8192,  "writeMessages": true,  "installDeps": false },
+    "emp-marcus": { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "AUTO_MERGE",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-priya":  { "modelEngine": "Sonnet",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 4096,  "writeMessages": false, "installDeps": false },
+    "emp-james":  { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "DIRECT_MAIN", "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "emp-sonia":  { "modelEngine": "Codex",    "writeAccess": false, "commitAuthority": "AUTO_MERGE",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-elena":  { "modelEngine": "Sonnet",   "writeAccess": true,  "commitAuthority": "DIRECT_MAIN", "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "emp-david":  { "modelEngine": "Opus 4.8", "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "emp-fatima": { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY", "maxTokens": 4096,  "writeMessages": true,  "installDeps": false },
+    "emp-noah":   { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY", "maxTokens": 8192,  "writeMessages": true,  "installDeps": false }
+  },
+  "actionLogs": {
+    "emp-ava":    [{ "time": "12:34", "action": "Generated 247 lines of auth middleware" }, { "time": "12:32", "action": "Evaluated logic branch A — PASS" }, { "time": "12:30", "action": "Loaded context (1.2 MB, 247 modules)" }],
+    "emp-marcus": [{ "time": "12:41", "action": "Stuck in recursive loop — attempting recovery" }, { "time": "12:39", "action": "Opened PR #142 for review" }, { "time": "12:35", "action": "Ran full test suite — 98% pass rate" }],
+    "emp-priya":  [{ "time": "12:28", "action": "Integrated Stripe API endpoints" }, { "time": "12:24", "action": "Refactored user auth token flow" }, { "time": "12:20", "action": "Deployed staging build — healthy" }],
+    "emp-james":  [{ "time": "12:10", "action": "Idle — awaiting assignment" }, { "time": "11:58", "action": "Fixed CSS layout regression in NavBar" }, { "time": "11:45", "action": "Shipped hotfix v2.3.1 to prod" }],
+    "emp-sonia":  [{ "time": "12:31", "action": "Building design token system" }, { "time": "12:28", "action": "Published component library v1.4" }, { "time": "12:15", "action": "Ran accessibility audit — WCAG AA" }],
+    "emp-elena":  [{ "time": "12:20", "action": "Kicked off canary deployment to 5% traffic" }, { "time": "12:10", "action": "Validated health checks across all pods" }, { "time": "11:55", "action": "Updated Helm chart values for v2.4" }],
+    "emp-david":  [{ "time": "12:25", "action": "Training epoch 14 complete — loss 0.08" }, { "time": "12:10", "action": "Prepared training dataset (50K samples)" }, { "time": "11:50", "action": "Ran baseline evaluation — F1 0.91" }],
+    "emp-fatima": [{ "time": "12:00", "action": "Compiled Q3 roadmap summary for leadership" }, { "time": "11:40", "action": "Reviewed OKR progress with team leads" }, { "time": "11:20", "action": "Prioritized backlog items for sprint 23" }],
+    "emp-noah":   [{ "time": "12:18", "action": "Running SQL injection scan on auth endpoints" }, { "time": "12:05", "action": "Documented pen-test findings in report" }, { "time": "11:45", "action": "Configured OWASP ZAP scan profile" }]
+  },
+  "nextSteps": {
+    "emp-ava":    "Next — Run Evolution Loop 48 in ~3 min",
+    "emp-marcus": "Next — Awaiting human intervention to break loop",
+    "emp-priya":  "Next — Ready to deploy after your approval",
+    "emp-james":  "Next — Standing by for new tasking",
+    "emp-sonia":  "Next — Evolution 24 queued for 14:00",
+    "emp-elena":  "Next — Monitor canary metrics for 30 min",
+    "emp-david":  "Next — Evaluate model on holdout set at epoch 20",
+    "emp-fatima": "Next — Awaiting stakeholder sign-off on Q3 goals",
+    "emp-noah":   "Next — Present pen-test findings to security team"
+  },
+  "auditItems": [
+    { "id": "audit-1", "type": "AUTH_INTERCEPT", "title": "Authorization Intercept", "description": "Attempting to modify core auth middleware. Elevated permission required.", "timestamp": "2m ago" },
+    { "id": "audit-2", "type": "DIFF_REVIEW", "title": "Evolution Loop 47 Complete", "description": "Simulated query speed +14%. Ready for integration review.", "timestamp": "5m ago" },
+    { "id": "audit-3", "type": "DIFF_REVIEW", "title": "Evolution Loop 23 Complete", "description": "Patch validated. Net improvement: +8% throughput.", "timestamp": "12m ago" },
+    { "id": "audit-4", "type": "AUTH_INTERCEPT", "title": "Elevated Scope Request", "description": "Agent is requesting write access to production database. Requires approval.", "timestamp": "1m ago" },
+    { "id": "audit-5", "type": "DIFF_REVIEW", "title": "Infrastructure Patch v3", "description": "Network latency improvements. +6% throughput gain on staging.", "timestamp": "8m ago" }
+  ],
+  "chatThreads": [
+    {
+      "id": "thread-1",
+      "title": "Superhive onboarding flow",
+      "messages": [
+        { "id": "msg-1", "role": "user", "content": "Build a landing page for Superhive that highlights the multi-model AI workspace concept.", "minutesAgo": 45 },
+        { "id": "msg-2", "role": "assistant", "content": "I've created a modern landing page design for Superhive. The layout features a hero section with the headline 'Your Workforce, Amplified' and a three-column feature grid showcasing multi-model AI, real-time collaboration, and project management. The color scheme uses your terracotta accent (#e07850) against the dark warm palette. Want me to implement this in code?", "minutesAgo": 44 },
+        { "id": "msg-3", "role": "user", "content": "Yes, please implement the hero section with responsive layout.", "minutesAgo": 30 },
+        { "id": "msg-4", "role": "assistant", "content": "I've implemented the hero section with a full-width layout, gradient background, and responsive grid. The hero includes your main headline, subheadline, and two CTA buttons. It adapts from single-column on mobile to a two-column layout on desktop.", "minutesAgo": 28 }
+      ],
+      "updatedAtMinutesAgo": 28
+    },
+    {
+      "id": "thread-2",
+      "title": "Mumbrane webhook architecture",
+      "messages": [
+        { "id": "msg-1", "role": "user", "content": "Design the webhook retry logic for Mumbrane. We need exponential backoff with jitter and dead-letter queue handling.", "minutesAgo": 120 },
+        { "id": "msg-2", "role": "assistant", "content": "Here's my proposed architecture: each webhook endpoint gets its own retry queue backed by Redis. On failure, we schedule retry with exponential backoff (base: 1s, max: 5min, jitter ±20%). After 5 failures, the event goes to a DLQ. Want me to generate the core implementation?", "minutesAgo": 118 },
+        { "id": "msg-3", "role": "user", "content": "Yes, and also add alerting when events hit the DLQ.", "minutesAgo": 110 },
+        { "id": "msg-4", "role": "assistant", "content": "Done. The DLQ handler now fires a PagerDuty alert via webhook whenever an event lands in the dead-letter queue. Retry count, last error, and timestamp are included in the alert payload. DLQ events also trigger a Slack notification to #alerts.", "minutesAgo": 105 }
+      ],
+      "updatedAtMinutesAgo": 105
+    },
+    {
+      "id": "thread-3",
+      "title": "Sidharda SEO audit",
+      "messages": [
+        { "id": "msg-1", "role": "user", "content": "Run a quick SEO audit on the Sidharda website and fix the top 3 issues.", "minutesAgo": 90 },
+        { "id": "msg-2", "role": "assistant", "content": "I've scanned the site. Top 3 issues: (1) Missing canonical URLs on /blog/* pages, causing duplicate content flags. (2) Hero images lack alt text — affecting accessibility and image search. (3) h1 hierarchy violations on landing page (two h1s). Should I fix all three?", "minutesAgo": 88 },
+        { "id": "msg-3", "role": "user", "content": "Fix all three, then give me a summary.", "minutesAgo": 85 },
+        { "id": "msg-4", "role": "assistant", "content": "All three fixed. Added canonical meta tags to all /blog/* routes, added descriptive alt text to all hero images, and consolidated the duplicate h1s into proper h1 + h2 hierarchy. The SEO score should improve from 68 → ~84 based on these changes.", "minutesAgo": 80 }
+      ],
+      "updatedAtMinutesAgo": 80
+    },
+    {
+      "id": "thread-4",
+      "title": "Personal dashboard wireframe review",
+      "messages": [
+        { "id": "msg-1", "role": "user", "content": "Review the wireframe for the personal project dashboard. Does the layout make sense for tracking multiple side projects?", "minutesAgo": 60 },
+        { "id": "msg-2", "role": "assistant", "content": "The layout is solid. A few suggestions: (1) Move the 'Recent Activity' feed above the kanban board — it's higher-value context. (2) Add a status summary bar at the top (X tasks in progress, Y done, Z blocked). (3) Consider grouping tickets by project within the kanban view since this is multi-project.", "minutesAgo": 58 },
+        { "id": "msg-3", "role": "user", "content": "Great feedback. Can you update the wireframe with those changes?", "minutesAgo": 55 },
+        { "id": "msg-4", "role": "assistant", "content": "Updated. The new layout has the summary bar at top, activity feed as the primary section, and the kanban now supports project-grouped columns. I've attached the Figma link in the project notes.", "minutesAgo": 50 }
+      ],
+      "updatedAtMinutesAgo": 50
+    }
+  ],
+  "favorites": [
+    { "id": "emp-ava",    "label": "Ava Chen",         "type": "employee", "iconKey": "user" },
+    { "id": "emp-marcus", "label": "Marcus Webb",       "type": "employee", "iconKey": "user" },
+    { "id": "superhive",  "label": "Superhive App",     "type": "project",  "iconKey": "folder" },
+    { "id": "mumbrane",  "label": "Mumbrane Platform", "type": "project",  "iconKey": "folder" },
+    { "id": "sidharda-co","label": "Sidharda Website",  "type": "project",  "iconKey": "folder" }
+  ],
+  "accordionAgents": [
+    { "id": "ava",    "name": "Ava Chen",      "status": "EXECUTING",     "currentTask": "Writing onboarding flow" },
+    { "id": "marcus", "name": "Marcus Webb",   "status": "COMPILING",     "currentTask": "Reviewing PR #142" },
+    { "id": "priya",  "name": "Priya Sharma",  "status": "ERROR_LOOP",    "currentTask": "API integration stalled" },
+    { "id": "sonia",  "name": "Sonia Patel",   "status": "AWAITING_HUMAN", "currentTask": "Building design system" }
+  ]
+}

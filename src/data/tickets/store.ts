@@ -1,5 +1,6 @@
 import { isMockEnabled } from '@/lib/feature-flags';
-import { universalTickets } from './mock';
+import mockData from '../mock.json';
+import type { MockData } from '../mock-types';
 import type {
   UniversalTicket,
   UniversalTicketStatus,
@@ -7,6 +8,9 @@ import type {
   TicketType,
   Assignee,
 } from './interface';
+
+const data = mockData as MockData;
+const universalTickets: UniversalTicket[] = data.universalTickets;
 
 interface TicketsStore {
   list(workspaceId?: string): UniversalTicket[];
