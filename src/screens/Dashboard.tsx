@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { LeftNav } from '@/components/LeftNav';
-import { CenterWorkspace } from '@/components/CenterWorkspace';
+import { CenterWorkspace, type CenterView } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
@@ -28,6 +29,8 @@ function toActiveEmployee(employees: ReturnType<typeof listEmployees>): ActiveEm
   }));
 }
 
+type LeftNavView = 'home' | 'projects' | 'employees' | 'tickets' | 'communications';
+
 export function Dashboard({
   leftWidth,
   rightWidth,
@@ -35,6 +38,8 @@ export function Dashboard({
   onRightWidthChange,
   onNavigate,
 }: DashboardProps) {
+  const [centerView, setCenterView] = useState<CenterView>('home');
+
   const workspaces_data = listWorkspaces();
   const currentWorkspace = getCurrentWorkspace();
   const favorites_data = listFavorites();
@@ -50,8 +55,21 @@ export function Dashboard({
         currentWorkspace={currentWorkspace}
         favorites={favorites_data}
         activeEmployees={employees_data}
+        currentView={centerView}
+        onNavItemClick={(id) => {
+          if (id === 'home' || id === 'projects' || id === 'employees' || id === 'tickets' || id === 'communications') {
+            setCenterView(id as CenterView);
+          }
+        }}
       />
-      <CenterWorkspace />
+      <CenterWorkspace
+        view={centerView}
+        onAction={(actionId) => {
+          if (actionId === 'skip') {
+            setCenterView('home');
+          }
+        }}
+      />
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}

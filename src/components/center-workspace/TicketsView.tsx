@@ -1,10 +1,24 @@
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KanbanBoard } from './KanbanBoard';
+import { OnboardingWizard } from './OnboardingWizard';
+import { TICKETS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { listUniversalTickets } from '@/data/tickets/store';
+import type { OnboardingWizardProps } from './OnboardingWizard';
 
-export function TicketsView() {
+export function TicketsView({ onAction }: { onAction?: OnboardingWizardProps['onAction'] }) {
+  const tickets = listUniversalTickets();
+
+  if (tickets.length === 0) {
+    return (
+      <OnboardingWizard
+        config={TICKETS_WIZARD_CONFIG}
+        onAction={onAction}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden">
       <div className="flex items-center justify-between pb-3 border-b border-border px-4 pt-3 shrink-0">
@@ -16,7 +30,7 @@ export function TicketsView() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <KanbanBoard tickets={listUniversalTickets()} />
+        <KanbanBoard tickets={tickets} />
       </div>
     </div>
   );

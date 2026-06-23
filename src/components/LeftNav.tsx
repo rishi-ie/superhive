@@ -21,6 +21,7 @@ type LeftNavProps = {
   onActiveEmployeeClick?: (id: string) => void;
   onActiveTaskClick?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
+  currentView?: string;
 };
 
 const MIN_WIDTH = 180;
@@ -40,6 +41,7 @@ export function LeftNav({
   onActiveEmployeeClick,
   onActiveTaskClick,
   onNavItemClick,
+  currentView,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -104,7 +106,7 @@ export function LeftNav({
         <div className="border-t border-sidebar-border/60 mx-2" />
 
         <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <AccordionCore onItemClick={onNavItemClick} />
+          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} />
         </div>
 
         <Utilities onSettingsClick={onSettingsClick} />

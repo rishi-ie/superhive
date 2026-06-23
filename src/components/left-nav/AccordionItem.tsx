@@ -7,17 +7,31 @@ type AccordionItemProps = {
   icon?: ReactNode;
   badge?: ReactNode;
   defaultOpen?: boolean;
+  active?: boolean;
+  onClick?: () => void;
   children?: ReactNode;
 };
 
-export function AccordionItem({ label, icon, badge, defaultOpen = false, children }: AccordionItemProps) {
+export function AccordionItem({ label, icon, badge, defaultOpen = false, active = false, onClick, children }: AccordionItemProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
 
   return (
     <div className="px-2 py-0.5">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+        onClick={handleClick}
+        className={`flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+          active
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+            : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+        }`}
       >
         <ChevronRight
           size={12}
@@ -48,15 +62,20 @@ type AccordionHeaderProps = {
   label: string;
   icon?: ReactNode;
   badge?: ReactNode;
+  active?: boolean;
   onClick?: () => void;
 };
 
-export function AccordionHeader({ label, icon, badge, onClick }: AccordionHeaderProps) {
+export function AccordionHeader({ label, icon, badge, active = false, onClick }: AccordionHeaderProps) {
   return (
     <div className="px-2 py-0.5">
       <button
         onClick={onClick}
-        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+        className={`flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors ${
+          active
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+            : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+        }`}
       >
         <span className="shrink-0" style={{ width: 12, display: 'inline-block' }} />
         {icon && <span className="shrink-0">{icon}</span>}

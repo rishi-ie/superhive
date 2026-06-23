@@ -1,0 +1,172 @@
+import { Sparkles, Layers, ClipboardCheck, Bot, MessageCircle, Users, GitBranch } from 'lucide-react';
+import type { WizardConfig } from '@/components/center-workspace/OnboardingWizard';
+
+export const HOME_WIZARD_CONFIG: WizardConfig = {
+  icon: Sparkles,
+  title: 'Welcome to Superhive',
+  subtitle: 'Orchestrate autonomous agents across your projects',
+  skipLabel: 'Or skip the wizard and start with a blank workspace',
+  actions: [
+    {
+      id: 'create-project',
+      icon: Layers,
+      title: 'Create your first project',
+      description: 'Set up a workspace and assign agents to ship your work',
+      recommended: true,
+    },
+    {
+      id: 'invite-team',
+      icon: Users,
+      title: 'Invite your team',
+      description: 'Bring collaborators and assign roles to coordinate the swarm',
+    },
+    {
+      id: 'configure-agent',
+      icon: Bot,
+      title: 'Configure your first agent',
+      description: 'Pick a model, set permissions, and define its scope',
+    },
+    {
+      id: 'connect-repo',
+      icon: GitBranch,
+      title: 'Connect a repository',
+      description: 'Link GitHub, GitLab, or a local folder to start tracking work',
+    },
+  ],
+};
+
+export const PROJECTS_WIZARD_CONFIG: WizardConfig = {
+  icon: Layers,
+  title: 'Set up your first project',
+  subtitle: 'Projects are containers for tickets, agents, and communications',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'create-project',
+      icon: Layers,
+      title: 'Create new project',
+      description: 'Start from scratch with a fresh workspace',
+      recommended: true,
+    },
+    {
+      id: 'import-repo',
+      icon: MessageCircle,
+      title: 'Import existing repo',
+      description: 'Connect GitHub, GitLab, or a local folder',
+    },
+    {
+      id: 'use-template',
+      icon: Bot,
+      title: 'Use a template',
+      description: 'Pick from a curated starter (SaaS, mobile, API)',
+    },
+    {
+      id: 'migrate',
+      icon: Bot,
+      title: 'Migrate from another tool',
+      description: 'Bring work from Jira, Linear, or Asana',
+    },
+  ],
+};
+
+export const TICKETS_WIZARD_CONFIG: WizardConfig = {
+  icon: ClipboardCheck,
+  title: 'Create your first ticket',
+  subtitle: 'Tickets break work into trackable units for the swarm',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'create-ticket',
+      icon: ClipboardCheck,
+      title: 'Create a ticket',
+      description: 'Define a single unit of work for an agent',
+      recommended: true,
+    },
+    {
+      id: 'use-template',
+      icon: ClipboardCheck,
+      title: 'Use a template',
+      description: 'Bug report, feature request, or refactor task',
+    },
+    {
+      id: 'bulk-import',
+      icon: Layers,
+      title: 'Bulk import',
+      description: 'Paste a CSV or import from Jira/Linear',
+    },
+    {
+      id: 'auto-generate',
+      icon: Bot,
+      title: 'Auto-generate from PRD',
+      description: 'Paste a spec and let agents break it down',
+    },
+  ],
+};
+
+export const EMPLOYEES_WIZARD_CONFIG: WizardConfig = {
+  icon: Bot,
+  title: 'Add your first agent',
+  subtitle: 'AI agents execute work, monitor systems, and coordinate with the swarm',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'configure-agent',
+      icon: Bot,
+      title: 'Configure new agent',
+      description: 'Pick a model, permissions, and scope',
+      recommended: true,
+    },
+    {
+      id: 'use-template',
+      icon: ClipboardCheck,
+      title: 'Use a template',
+      description: 'Sonnet, Opus 4.8, or Codex starter profiles',
+    },
+    {
+      id: 'clone-agent',
+      icon: Users,
+      title: 'Clone from existing',
+      description: 'Duplicate an agent and customize it',
+    },
+    {
+      id: 'browse-marketplace',
+      icon: Layers,
+      title: 'Browse agent marketplace',
+      description: 'Find pre-built agents for common tasks',
+    },
+  ],
+};
+
+export const COMMUNICATIONS_WIZARD_CONFIG: WizardConfig = {
+  icon: MessageCircle,
+  title: 'Set up your first channel',
+  subtitle: 'Channels are where agents and humans coordinate work',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'create-channel',
+      icon: MessageCircle,
+      title: 'Create a channel',
+      description: 'Start a topic-scoped thread for the swarm',
+      recommended: true,
+    },
+    {
+      id: 'connect-slack',
+      icon: MessageCircle,
+      title: 'Connect Slack',
+      description: 'Sync messages from your existing workspace',
+    },
+    {
+      id: 'connect-discord',
+      icon: Bot,
+      title: 'Connect Discord',
+      description: 'Bring community conversations into the swarm',
+    },
+    {
+      id: 'use-template',
+      icon: ClipboardCheck,
+      title: 'Use a template',
+      description: 'Standup, code-review, incident-response channels',
+    },
+  ],
+};
