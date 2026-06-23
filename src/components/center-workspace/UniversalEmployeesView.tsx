@@ -1,20 +1,208 @@
+import { useMemo, useState } from 'react';
+import { Avatar } from '@/components/ui/Avatar';
+import { StatusDot } from '@/components/ui/StatusDot';
+import { SearchBar } from '@/components/ui/SearchBar';
+import { StatusFilter } from '@/components/ui/StatusFilter';
+import { NewButton } from '@/components/ui/NewButton';
+import { UniversalListCard } from '@/components/ui/UniversalListCard';
+import { listEmployees, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/employees/store';
+import type { EmployeeStatus } from '@/data/employees/interface';
+import { STROKE_WIDTH } from '@/lib/constants';
+
+type SortKey = 'status' | 'name' | 'uptime';
+
+const STATUS_OPTIONS = [
+  { value: 'ALL' as const, label: 'All' },
+  { value: 'EXECUTING' as const, label: 'Working' },
+  { value: 'COMPILING' as const, label: 'Compiling' },
+  { value: 'IDLE' as const, label: 'Idle' },
+  { value: 'AWAITING_HUMAN' as const, label: 'Awaiting' },
+  { value: 'ERROR_LOOP' as const, label: 'Error' },
+] as const;
+
+function ContextBar({ value }: { value: number }) {
+  const pct = Math.round(value * 100);
+  const filled = Math.round((value / 1) * 12);
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex gap-0.5">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span
+            key={i}
+            className={`inline-block w-1 h-1.5 rounded-sm ${i < filled ? 'bg-chart-2' : 'bg-muted-foreground/30'}`}
+          />
+        ))}
+      </div>
+      <span className="text-[10px] text-muted-foreground">{pct}%</span>
+    </div>
+  );
+}
+
 type UniversalEmployeesViewProps = {
   onEmployeeSelect?: (id: string) => void;
 };
 
 export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesViewProps) {
-  return (
-    <div className="flex flex-col h-full">
-      <div className="px-6 py-4">
-        <h2 className="text-sm font-semibold text-foreground">All Employees</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Universal employees view — coming soon</p>
-      </div>
-      <div className="flex-1 px-6 pb-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
-            <p className="text-sm font-medium text-foreground">Placeholder</p>
-          </div>
+  const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | EmployeeStatus>('ALL');
+  const [sort, setSort] = useState<SortKey>('status');
+
+  const employees = listEmployees();
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: employees.length };
+    for (const e of employees) {
+      counts[e.status] = (counts[e.status] ?? 0) + 1;
+    }
+    return counts;
+  }, [employees]);
+
+  const filterOptions = useMemo(() =>
+    STATUS_OPTIONS.map(o => ({ ...o, count: statusCounts[o.value === 'ALL' ? 'ALL' : o.value] ?? 0 })),
+    [statusCounts]
+  );
+
+  const filtered = useMemo(() => {
+    let result = employees;
+    if (statusFilter !== 'ALL') {
+      result = result.filter(e => e.status === statusFilter);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      result = result.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        e.role.toLowerCase().includes(q) ||
+        e.activeTask.toLowerCase().includes(q)
+      );
+    }
+    return [...result].sort((a, b) => {
+      if (sort === 'name') return a.name.localeCompare(b.name);
+      if (sort === 'uptime') return 0;
+      const order: Record<EmployeeStatus, number> = { EXECUTING: 0, COMPILING: 1, ERROR_LOOP: 2, AWAITING_HUMAN: 3, IDLE: 4 };
+      return (order[a.status] ?? 5) - (order[b.status] ?? 5);
+    });
+  }, [employees, query, statusFilter, sort]);
+
+  if (employees.length === 0) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="px-6 pt-5 pb-3">
+          <h1 className="text-base font-bold text-foreground">All Employees</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">No employees found</p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-6 pt-5 pb-3 shrink-0">
+        <h1 className="text-base font-bold text-foreground">All Employees</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Universal employees · {employees.length} agent{employees.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      <div className="px-6 pb-3 flex items-center gap-3 shrink-0">
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          placeholder="Search employees..."
+          className="flex-1"
+        />
+        <select
+          value={sort}
+          onChange={e => setSort(e.target.value as SortKey)}
+          className="rounded-md border border-border bg-input px-2 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+        >
+          <option value="status">Sort: Status</option>
+          <option value="name">Sort: Name</option>
+          <option value="uptime">Sort: Uptime</option>
+        </select>
+        <NewButton label="New Employee" />
+      </div>
+
+      <div className="px-6 pb-3 shrink-0">
+        <StatusFilter
+          options={filterOptions}
+          value={statusFilter}
+          onChange={setStatusFilter}
+        />
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-sm text-muted-foreground">No employees match &ldquo;{query}&rdquo;</p>
+            <button
+              type="button"
+              onClick={() => { setQuery(''); setStatusFilter('ALL'); }}
+              className="mt-2 text-xs text-chart-1 hover:underline"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {filtered.map(employee => {
+              const telemetry = getTelemetry(employee.id);
+              const permissions = getPermissions(employee.id);
+              const audits = getAuditItems(employee.id);
+              const actionLog = getActionLog(employee.id);
+              const nextStep = getNextStep(employee.id);
+              const initials = employee.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+              const lastAction = actionLog[0];
+
+              return (
+                <UniversalListCard
+                  key={employee.id}
+                  onClick={() => onEmployeeSelect?.(employee.id)}
+                  className="flex flex-col gap-1.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <Avatar size="xs" fallback={initials} />
+                    <StatusDot status={employee.status} />
+                    <span className="text-xs font-semibold text-foreground">{employee.name}</span>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground truncate flex-1">{employee.role}</span>
+                    {permissions && (
+                      <span className="text-[10px] text-muted-foreground shrink-0 font-fustat">
+                        {permissions.modelEngine}
+                      </span>
+                    )}
+                    {employee.uptime && (
+                      <span className="text-[10px] text-muted-foreground shrink-0">{employee.uptime}</span>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground truncate pl-px leading-4">
+                    {employee.activeTask}
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <ContextBar value={telemetry?.contextSaturation ?? 0} />
+                    {audits.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {audits.length} pending audit{audits.length !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {lastAction && (
+                      <span className="text-[10px] text-muted-foreground">
+                        · last {lastAction.action.toLowerCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  {nextStep && (
+                    <p className="text-[10px] text-muted-foreground/70 truncate leading-3">
+                      → next: {nextStep}
+                    </p>
+                  )}
+                </UniversalListCard>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
