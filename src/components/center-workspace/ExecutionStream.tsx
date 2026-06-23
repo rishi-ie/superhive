@@ -4,6 +4,7 @@ import type { Ticket, ProjectAgent } from '@/data/projects/store';
 type ExecutionStreamProps = {
   tickets: Ticket[];
   agents: ProjectAgent[];
+  onTicketSelect?: (id: string) => void;
 };
 
 const VISIBLE_LIMIT = 2;
@@ -18,7 +19,7 @@ function getAgentById(agents: ProjectAgent[], id: string) {
   return agents.find(a => a.id === id);
 }
 
-export function ExecutionStream({ tickets, agents }: ExecutionStreamProps) {
+export function ExecutionStream({ tickets, agents, onTicketSelect }: ExecutionStreamProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
       {columns.map(col => {
@@ -42,6 +43,7 @@ export function ExecutionStream({ tickets, agents }: ExecutionStreamProps) {
                   key={ticket.id}
                   ticket={ticket}
                   agent={getAgentById(agents, ticket.assignedAgentId)}
+                  onClick={onTicketSelect ? () => onTicketSelect(ticket.id) : undefined}
                 />
               ))}
               {overflow > 0 && (

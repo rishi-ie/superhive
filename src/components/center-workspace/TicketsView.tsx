@@ -7,8 +7,14 @@ import { STROKE_WIDTH } from '@/lib/constants';
 import { listUniversalTickets } from '@/data/tickets/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
-export function TicketsView({ onAction }: { onAction?: OnboardingWizardProps['onAction'] }) {
-  const tickets = listUniversalTickets();
+type TicketsViewProps = {
+  workspaceId: string;
+  onTicketSelect?: (id: string) => void;
+  onAction?: OnboardingWizardProps['onAction'];
+};
+
+export function TicketsView({ workspaceId, onTicketSelect, onAction }: TicketsViewProps) {
+  const tickets = listUniversalTickets(workspaceId);
 
   if (tickets.length === 0) {
     return (
@@ -30,7 +36,7 @@ export function TicketsView({ onAction }: { onAction?: OnboardingWizardProps['on
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <KanbanBoard tickets={tickets} />
+        <KanbanBoard tickets={tickets} onTicketSelect={onTicketSelect} />
       </div>
     </div>
   );

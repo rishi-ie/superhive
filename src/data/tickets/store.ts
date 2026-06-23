@@ -9,7 +9,7 @@ import type {
 } from './interface';
 
 interface TicketsStore {
-  list(): UniversalTicket[];
+  list(workspaceId?: string): UniversalTicket[];
 }
 
 const emptyStore: TicketsStore = {
@@ -17,13 +17,16 @@ const emptyStore: TicketsStore = {
 };
 
 const mockStore: TicketsStore = {
-  list() { return universalTickets; },
+  list(workspaceId?: string) {
+    if (!workspaceId) return universalTickets;
+    return universalTickets.filter(t => t.workspaceId === workspaceId);
+  },
 };
 
 const store: TicketsStore = isMockEnabled('tickets') ? mockStore : emptyStore;
 
-export function listUniversalTickets(): UniversalTicket[] {
-  return store.list();
+export function listUniversalTickets(workspaceId?: string): UniversalTicket[] {
+  return store.list(workspaceId);
 }
 
 export type {

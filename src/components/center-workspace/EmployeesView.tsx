@@ -15,9 +15,21 @@ function StatusDot({ status }: { status: EmployeeStatus }) {
   return <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />;
 }
 
-function EmployeeCard({ employee }: { employee: ReturnType<typeof listEmployees>[number] }) {
+type EmployeeCardProps = {
+  employee: ReturnType<typeof listEmployees>[number];
+  selected?: boolean;
+  onClick?: () => void;
+};
+
+function EmployeeCard({ employee, selected, onClick }: EmployeeCardProps) {
   return (
-    <div className="flex items-center gap-2 p-2 rounded-md border border-border bg-card hover:border-border/80 transition-colors">
+    <button
+      onClick={onClick}
+      type="button"
+      className={`flex items-center gap-2 p-2 rounded-md border bg-card hover:border-border/80 transition-colors w-full text-left ${
+        selected ? 'border-chart-1' : 'border-border'
+      }`}
+    >
       <Avatar size="xs" fallback={employee.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)} />
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <div className="flex items-center gap-1.5">
@@ -29,11 +41,17 @@ function EmployeeCard({ employee }: { employee: ReturnType<typeof listEmployees>
       {employee.uptime && (
         <span className="text-[9px] font-fustat text-muted-foreground shrink-0">{employee.uptime}</span>
       )}
-    </div>
+    </button>
   );
 }
 
-export function EmployeesView({ onAction }: { onAction?: OnboardingWizardProps['onAction'] }) {
+type EmployeesViewProps = {
+  onEmployeeSelect?: (id: string) => void;
+  selectedEmployeeId?: string | null;
+  onAction?: OnboardingWizardProps['onAction'];
+};
+
+export function EmployeesView({ onEmployeeSelect, selectedEmployeeId, onAction }: EmployeesViewProps) {
   const employees = listEmployees();
 
   if (employees.length === 0) {
@@ -53,7 +71,12 @@ export function EmployeesView({ onAction }: { onAction?: OnboardingWizardProps['
       </div>
       <div className="flex flex-col gap-1.5">
         {employees.map(employee => (
-          <EmployeeCard key={employee.id} employee={employee} />
+          <EmployeeCard
+            key={employee.id}
+            employee={employee}
+            selected={selectedEmployeeId === employee.id}
+            onClick={() => onEmployeeSelect?.(employee.id)}
+          />
         ))}
       </div>
     </div>

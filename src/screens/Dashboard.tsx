@@ -4,9 +4,12 @@ import { CenterWorkspace, type CenterView } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
-import { listWorkspaces, getCurrentWorkspace } from '@/data/workspaces/store';
+import { listWorkspaces } from '@/data/workspaces/store';
+import { listProjectAgents } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listEmployees } from '@/data/employees/store';
+import { listEmployees, approveAudit, denyAudit } from '@/data/employees/store';
+import type { Workspace } from '@/data/workspaces/interface';
+import type { FavoriteItem } from '@/data/favorites/interface';
 
 type DashboardProps = {
   leftWidth: number;
@@ -29,8 +32,6 @@ function toActiveEmployee(employees: ReturnType<typeof listEmployees>): ActiveEm
   }));
 }
 
-type LeftNavView = 'home' | 'projects' | 'employees' | 'tickets' | 'communications';
-
 export function Dashboard({
   leftWidth,
   rightWidth,
@@ -39,40 +40,86 @@ export function Dashboard({
   onNavigate,
 }: DashboardProps) {
   const [centerView, setCenterView] = useState<CenterView>('home');
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('superhive');
+  const [activeEmployeeId, setActiveEmployeeId] = useState<string | null>(null);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+  const [rightPanelTab, setRightPanelTab] = useState<'overview' | 'manage' | 'inbox'>('overview');
 
   const workspaces_data = listWorkspaces();
-  const currentWorkspace = getCurrentWorkspace();
+  const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' };
   const favorites_data = listFavorites();
-  const employees_data = toActiveEmployee(listEmployees());
+  const workspaceAgents = listProjectAgents(activeWorkspaceId);
+  const workspaceAgentNames = new Set(workspaceAgents.map(a => a.name));
+  const employees_data = toActiveEmployee(
+    listEmployees().filter(e => workspaceAgentNames.has(e.name))
+  );
+
+  const handleNavItemClick = (id: string) => {
+    if (id === 'home' || id === 'projects' || id === 'employees' || id === 'tickets' || id === 'communications') {
+      setCenterView(id as CenterView);
+    }
+  };
+
+  const handleWorkspaceSelect = (workspace: Workspace) => {
+    setActiveWorkspaceId(workspace.id);
+  };
+
+  const handleEmployeeSelect = (id: string) => {
+    setActiveEmployeeId(id);
+    setCenterView('employees');
+  };
+
+  const handleTicketSelect = (id: string) => {
+    setSelectedTicketId(id);
+    setRightPanelTab('inbox');
+  };
+
+  const handleFavoriteSelect = (item: FavoriteItem) => {
+    if (item.type === 'employee') {
+      setActiveEmployeeId(item.id);
+      setCenterView('employees');
+    } else if (item.type === 'project') {
+      const wsId = workspaces_data.find(w => w.id === item.id)?.id;
+      if (wsId) setActiveWorkspaceId(wsId);
+      setCenterView('projects');
+    }
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <LeftNav
         width={leftWidth}
         onWidthChange={onLeftWidthChange}
-        onSettingsClick={() => onNavigate('settings')}
         workspaces={workspaces_data}
         currentWorkspace={currentWorkspace}
         favorites={favorites_data}
         activeEmployees={employees_data}
+        activeTasks={[]}
+        onWorkspaceSelect={handleWorkspaceSelect}
+        onSettingsClick={() => onNavigate('settings')}
+        onFavoritesItemClick={handleFavoriteSelect}
+        onActiveEmployeeClick={handleEmployeeSelect}
+        onActiveTaskClick={(id) => setSelectedTicketId(id)}
+        onNavItemClick={handleNavItemClick}
         currentView={centerView}
-        onNavItemClick={(id) => {
-          if (id === 'home' || id === 'projects' || id === 'employees' || id === 'tickets' || id === 'communications') {
-            setCenterView(id as CenterView);
-          }
-        }}
+        onEmployeeSelect={handleEmployeeSelect}
       />
       <CenterWorkspace
         view={centerView}
-        onAction={(actionId) => {
-          if (actionId === 'skip') {
-            setCenterView('home');
-          }
-        }}
+        workspaceId={activeWorkspaceId}
+        activeEmployeeId={activeEmployeeId}
+        onTicketSelect={handleTicketSelect}
+        onEmployeeSelect={handleEmployeeSelect}
       />
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}
+        employeeId={activeEmployeeId}
+        tab={rightPanelTab}
+        ticketId={selectedTicketId}
+        onTabChange={setRightPanelTab}
+        onApproveAudit={approveAudit}
+        onDenyAudit={denyAudit}
       />
     </div>
   );

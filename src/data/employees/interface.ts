@@ -53,4 +53,6 @@ export interface EmployeeStore {
   getNextStep(employeeId: string): string;
   getDefaultTelemetry(): Telemetry;
   getDefaultPermissions(): Permissions;
+  approveAudit(id: string): void;
+  denyAudit(id: string): void;
 }

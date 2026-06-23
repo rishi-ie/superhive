@@ -5,9 +5,10 @@ type KanbanColumnProps = {
   label: string;
   status: UniversalTicketStatus;
   tickets: UniversalTicket[];
+  onTicketSelect?: (id: string) => void;
 };
 
-export function KanbanColumn({ label, status, tickets }: KanbanColumnProps) {
+export function KanbanColumn({ label, status, tickets, onTicketSelect }: KanbanColumnProps) {
   return (
     <div className="flex flex-col gap-2 min-w-[240px] w-[260px] shrink-0 h-full">
       <div className="flex items-center gap-1.5 px-1 shrink-0">
@@ -22,7 +23,11 @@ export function KanbanColumn({ label, status, tickets }: KanbanColumnProps) {
       <div className="flex-1 min-h-0 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex flex-col gap-2 pb-1">
           {tickets.map((ticket) => (
-            <UniversalTicketCard key={ticket.id} ticket={ticket} />
+            <UniversalTicketCard
+              key={ticket.id}
+              ticket={ticket}
+              onClick={onTicketSelect ? () => onTicketSelect(ticket.id) : undefined}
+            />
           ))}
         </div>
       </div>

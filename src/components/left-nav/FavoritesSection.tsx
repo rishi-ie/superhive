@@ -1,17 +1,11 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronRight, Star } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-
-export type FavoriteItem = {
-  id: string;
-  label: string;
-  type: 'project' | 'employee';
-  icon?: ReactNode;
-};
+import type { FavoriteItem } from '@/data/favorites/interface';
 
 type FavoritesSectionProps = {
   items: FavoriteItem[];
-  onItemClick?: (id: string) => void;
+  onItemClick?: (item: FavoriteItem) => void;
   selectedId?: string;
 };
 
@@ -42,7 +36,7 @@ export function FavoritesSection({ items, onItemClick, selectedId }: FavoritesSe
           {items.map((item) => (
             <button
               key={item.id}
-              onClick={() => onItemClick?.(item.id)}
+              onClick={() => onItemClick?.(item)}
               className={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors ${
                 selectedId === item.id
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -58,3 +52,5 @@ export function FavoritesSection({ items, onItemClick, selectedId }: FavoritesSe
     </div>
   );
 }
+
+export type { FavoriteItem };

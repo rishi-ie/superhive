@@ -12,6 +12,7 @@ export type UniversalTicket = {
   id: string;
   title: string;
   projectName: string;
+  workspaceId: string;
   status: UniversalTicketStatus;
   priority: Priority;
   type: TicketType;

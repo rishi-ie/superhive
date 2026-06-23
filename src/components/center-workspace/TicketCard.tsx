@@ -4,13 +4,15 @@ import type { Ticket, ProjectAgent } from '@/data/projects/store';
 type TicketCardProps = {
   ticket: Ticket;
   agent?: ProjectAgent;
+  onClick?: () => void;
 };
 
-export function TicketCard({ ticket, agent }: TicketCardProps) {
+export function TicketCard({ ticket, agent, onClick }: TicketCardProps) {
   const isExecuting = ticket.status === 'EXECUTING';
 
   return (
     <button
+      onClick={onClick}
       className={`
         flex flex-col gap-1.5 p-2 rounded-md border bg-card text-left
         hover:bg-card/80 transition-colors w-full

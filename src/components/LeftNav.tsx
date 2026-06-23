@@ -17,8 +17,9 @@ type LeftNavProps = {
   notificationCount?: number;
   onWorkspaceSelect?: (workspace: Workspace) => void;
   onSettingsClick?: () => void;
-  onFavoritesItemClick?: (id: string) => void;
+  onFavoritesItemClick?: (item: FavoriteItem) => void;
   onActiveEmployeeClick?: (id: string) => void;
+  onEmployeeSelect?: (id: string) => void;
   onActiveTaskClick?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
   currentView?: string;
@@ -42,6 +43,7 @@ export function LeftNav({
   onActiveTaskClick,
   onNavItemClick,
   currentView,
+  onEmployeeSelect,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -106,7 +108,7 @@ export function LeftNav({
         <div className="border-t border-sidebar-border/60 mx-2" />
 
         <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} />
+          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onEmployeeSelect} />
         </div>
 
         <Utilities onSettingsClick={onSettingsClick} />

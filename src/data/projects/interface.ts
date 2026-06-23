@@ -40,3 +40,13 @@ export type CommunicationChannel = {
   updatedAt: string;
   unread?: boolean;
 };
+
+export type Project = {
+  id: string;
+  workspaceId: string;
+  title: string;
+  tickets: Ticket[];
+  agents: ProjectAgent[];
+  channels: CommunicationChannel[];
+  activity: SwarmActivity[];
+};

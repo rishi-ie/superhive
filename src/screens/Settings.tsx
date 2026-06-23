@@ -22,8 +22,8 @@ export function Settings({ onBack }: SettingsProps) {
         <div className="mx-auto max-w-3xl px-12 pt-16 pb-24">
           {activeSection === "account" && (
             <AccountSettings
-              name="Rishi Sidharda"
-              email="nandipati.sidharda@gmail.com"
+              name="Your Name"
+              email="you@example.com"
             />
           )}
           {activeSection !== "account" && (

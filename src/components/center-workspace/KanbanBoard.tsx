@@ -3,6 +3,7 @@ import type { UniversalTicket, UniversalTicketStatus } from '@/data/tickets/stor
 
 type KanbanBoardProps = {
   tickets: UniversalTicket[];
+  onTicketSelect?: (id: string) => void;
 };
 
 const columns: { status: UniversalTicketStatus; label: string }[] = [
@@ -12,7 +13,7 @@ const columns: { status: UniversalTicketStatus; label: string }[] = [
   { status: 'MERGED',    label: 'Merged' },
 ];
 
-export function KanbanBoard({ tickets }: KanbanBoardProps) {
+export function KanbanBoard({ tickets, onTicketSelect }: KanbanBoardProps) {
   return (
     <div className="flex gap-2 h-full px-3 py-2 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {columns.map((col) => (
@@ -21,6 +22,7 @@ export function KanbanBoard({ tickets }: KanbanBoardProps) {
           label={col.label}
           status={col.status}
           tickets={tickets.filter((t) => t.status === col.status)}
+          onTicketSelect={onTicketSelect}
         />
       ))}
     </div>

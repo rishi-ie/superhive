@@ -16,6 +16,8 @@ const emptyStore: EmployeeStore = {
   getDefaultPermissions() {
     return { modelEngine: '—', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 0, writeMessages: false, installDeps: false };
   },
+  approveAudit() {},
+  denyAudit() {},
 };
 
 const store: EmployeeStore = isMockEnabled('employees') ? mockEmployeeStore : emptyStore;
@@ -28,8 +30,11 @@ export function getEmployee(id: string): Employee | undefined {
   return store.get(id);
 }
 
-export function getActiveEmployee(): Employee | null {
+export function getActiveEmployee(preferredId?: string | null): Employee | null {
   const employees = store.list();
+  if (preferredId) {
+    return employees.find(e => e.id === preferredId) ?? employees[0] ?? null;
+  }
   return (
     employees.find((e) => e.status === 'EXECUTING') ??
     employees.find((e) => e.status === 'COMPILING') ??
@@ -56,6 +61,14 @@ export function getActionLog(employeeId: string): ActionLogEntry[] {
 
 export function getNextStep(employeeId: string): string {
   return store.getNextStep(employeeId);
+}
+
+export function approveAudit(id: string): void {
+  store.approveAudit(id);
+}
+
+export function denyAudit(id: string): void {
+  store.denyAudit(id);
 }
 
 export { type Employee, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry };

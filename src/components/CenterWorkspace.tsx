@@ -10,18 +10,22 @@ export type CenterView = 'home' | 'projects' | 'employees' | 'tickets' | 'commun
 
 type CenterWorkspaceProps = {
   view: CenterView;
+  workspaceId: string;
+  activeEmployeeId?: string | null;
   onAction?: OnboardingWizardProps['onAction'];
+  onTicketSelect?: (id: string) => void;
+  onEmployeeSelect?: (id: string) => void;
 };
 
-export function CenterWorkspace({ view, onAction }: CenterWorkspaceProps) {
+export function CenterWorkspace({ view, workspaceId, activeEmployeeId, onAction, onTicketSelect, onEmployeeSelect }: CenterWorkspaceProps) {
   return (
     <div className="flex h-full flex-1 flex-col min-w-0 bg-background">
       <div className="h-2 shrink-0" />
       {view === 'home' && <OnboardingWizard config={HOME_WIZARD_CONFIG} onAction={onAction} />}
-      {view === 'projects' && <ProjectsView onAction={onAction} />}
-      {view === 'employees' && <EmployeesView onAction={onAction} />}
-      {view === 'tickets' && <TicketsView onAction={onAction} />}
-      {view === 'communications' && <CommunicationsView onAction={onAction} />}
+      {view === 'projects' && <ProjectsView workspaceId={workspaceId} onTicketSelect={onTicketSelect} onAction={onAction} />}
+      {view === 'employees' && <EmployeesView onEmployeeSelect={onEmployeeSelect} selectedEmployeeId={activeEmployeeId} />}
+      {view === 'tickets' && <TicketsView workspaceId={workspaceId} onTicketSelect={onTicketSelect} />}
+      {view === 'communications' && <CommunicationsView workspaceId={workspaceId} />}
     </div>
   );
 }

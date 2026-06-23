@@ -7,6 +7,7 @@ import { STROKE_WIDTH } from '@/lib/constants';
 type AccordionCoreProps = {
   currentView?: string;
   onItemClick?: (id: string) => void;
+  onAgentClick?: (id: string) => void;
 };
 
 function getIcon(id: string) {
@@ -15,7 +16,7 @@ function getIcon(id: string) {
   return <item.icon size={12} strokeWidth={STROKE_WIDTH} />;
 }
 
-export function AccordionCore({ currentView, onItemClick }: AccordionCoreProps) {
+export function AccordionCore({ currentView, onItemClick, onAgentClick }: AccordionCoreProps) {
   const accordionAgents = listAccordionAgents();
 
   return (
@@ -48,7 +49,7 @@ export function AccordionCore({ currentView, onItemClick }: AccordionCoreProps) 
           active={currentView === 'employees'}
           onClick={() => onItemClick?.('employees')}
         >
-          {accordionAgents.map(agent => <AgentListItem key={agent.id} agent={agent} onClick={onItemClick} />)}
+          {accordionAgents.map(agent => <AgentListItem key={agent.id} agent={agent} onClick={onAgentClick} />)}
         </AccordionItem>
       )}
 

@@ -4,9 +4,11 @@ import { getAuditItems, type Employee } from '@/data/employees/store';
 
 type AuditQueueProps = {
   agent?: Employee | null;
+  onApprove?: (id: string) => void;
+  onDeny?: (id: string) => void;
 };
 
-export function AuditQueue({ agent }: AuditQueueProps) {
+export function AuditQueue({ agent, onApprove, onDeny }: AuditQueueProps) {
   const items = getAuditItems(agent?.id);
 
   if (items.length === 0) {
@@ -47,12 +49,14 @@ export function AuditQueue({ agent }: AuditQueueProps) {
                 <>
                   <button
                     type="button"
+                    onClick={() => onApprove?.(item.id)}
                     className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
                   >
                     Grant One-Time Access
                   </button>
                   <button
                     type="button"
+                    onClick={() => onDeny?.(item.id)}
                     className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
                   >
                     Deny
@@ -68,6 +72,7 @@ export function AuditQueue({ agent }: AuditQueueProps) {
                   </button>
                   <button
                     type="button"
+                    onClick={() => onApprove?.(item.id)}
                     className="flex-1 rounded-md bg-chart-1 px-2 py-1 text-[10px] font-medium text-highlight-foreground hover:bg-chart-1/90 transition-colors"
                   >
                     Approve & Merge

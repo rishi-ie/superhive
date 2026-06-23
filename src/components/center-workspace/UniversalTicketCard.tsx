@@ -3,6 +3,7 @@ import type { Priority, TicketType, UniversalTicket } from '@/data/tickets/store
 
 type UniversalTicketCardProps = {
   ticket: UniversalTicket;
+  onClick?: () => void;
 };
 
 function PriorityTag({ priority }: { priority: Priority }) {
@@ -28,12 +29,14 @@ function TypeTag({ type }: { type: TicketType }) {
   );
 }
 
-export function UniversalTicketCard({ ticket }: UniversalTicketCardProps) {
+export function UniversalTicketCard({ ticket, onClick }: UniversalTicketCardProps) {
   const isExecuting = ticket.status === 'EXECUTING';
   const initials = ticket.assignee.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 
   return (
-    <div
+    <button
+      onClick={onClick}
+      type="button"
       className={`
         flex flex-col p-2 rounded-md border bg-card text-left
         hover:bg-card/80 transition-colors w-full
@@ -65,6 +68,6 @@ export function UniversalTicketCard({ ticket }: UniversalTicketCardProps) {
           <span className="size-1.5 rounded-full bg-chart-2 pulse-executing shrink-0" aria-label="AI processing" />
         )}
       </div>
-    </div>
+    </button>
   );
 }

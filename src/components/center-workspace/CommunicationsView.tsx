@@ -4,9 +4,14 @@ import { COMMUNICATIONS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import { listChannels, listProjectAgents } from '@/data/projects/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
-export function CommunicationsView({ onAction }: { onAction?: OnboardingWizardProps['onAction'] }) {
-  const channels = listChannels();
-  const agents = listProjectAgents();
+type CommunicationsViewProps = {
+  workspaceId: string;
+  onAction?: OnboardingWizardProps['onAction'];
+};
+
+export function CommunicationsView({ workspaceId, onAction }: CommunicationsViewProps) {
+  const channels = listChannels(workspaceId);
+  const agents = listProjectAgents(workspaceId);
 
   if (channels.length === 0) {
     return (

@@ -28,7 +28,7 @@ export function AccountSettings({ name, email }: AccountSettingsProps) {
           onMouseEnter={() => setAvatarHovered(true)}
           onMouseLeave={() => setAvatarHovered(false)}
         >
-          <Avatar size="xl" fallback="Rishi Sidharda" className="cursor-pointer" />
+          <Avatar size="xl" fallback="?" className="cursor-pointer" />
           {avatarHovered && (
             <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-xs text-foreground font-medium">
               Change
