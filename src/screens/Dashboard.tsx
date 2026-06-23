@@ -5,7 +5,7 @@ import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents } from '@/data/projects/store';
+import { listProjectAgents, listTickets } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listEmployees, approveAudit, denyAudit } from '@/data/employees/store';
 import {
@@ -70,6 +70,10 @@ export function Dashboard({
 
   const hasData = workspaces_data.length > 0 || listEmployees().length > 0;
 
+  const activeTasks = listTickets(activeWorkspaceId)
+    .filter(t => t.status === 'EXECUTING')
+    .map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedAgentId }));
+
   const activeTab = getActiveTab(tabState);
 
   const handleOpenTab = useCallback((type: CenterTabType, workspaceId: string) => {
@@ -119,17 +123,17 @@ export function Dashboard({
 
   const handleEmployeeSelect = useCallback((id: string) => {
     setActiveEmployeeId(id);
-    setCenterView('employees');
-  }, []);
+    handleOpenTab('chat', activeWorkspaceId);
+  }, [handleOpenTab, activeWorkspaceId]);
 
   const handleFavoriteSelect = useCallback((item: FavoriteItem) => {
     if (item.type === 'employee') {
       setActiveEmployeeId(item.id);
-      setCenterView('employees');
+      handleOpenTab('chat', activeWorkspaceId);
     } else if (item.type === 'project') {
       handleOpenTab('projects', item.id);
     }
-  }, [handleOpenTab]);
+  }, [handleOpenTab, activeWorkspaceId]);
 
   const handleWizardAction = useCallback((actionId: string) => {
     if (actionId === 'open-project') {
@@ -148,7 +152,7 @@ export function Dashboard({
         currentWorkspace={currentWorkspace}
         favorites={favorites_data}
         activeEmployees={employees_data}
-        activeTasks={[]}
+        activeTasks={activeTasks}
         onWorkspaceSelect={handleWorkspaceSelect}
         onSettingsClick={() => onNavigate('settings')}
         onFavoritesItemClick={handleFavoriteSelect}
