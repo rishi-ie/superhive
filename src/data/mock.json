@@ -271,21 +271,10 @@
     }
   ],
   "favorites": [
-    { "id": "emp-elena", "label": "Elena Rodriguez", "type": "employee", "iconKey": "user" },
-    { "id": "emp-david", "label": "David Kim",       "type": "employee", "iconKey": "user" },
-    { "id": "vela",      "label": "Vela Platform",   "type": "project",  "iconKey": "folder" },
-    { "id": "widget",    "label": "Widget Embed",    "type": "project",  "iconKey": "folder" },
-    { "id": "admin",     "label": "Admin Dashboard", "type": "project",  "iconKey": "folder" }
-  ],
-  "accordionAgents": [
-    { "id": "emp-ava",    "name": "Ava Chen",       "status": "EXECUTING",     "currentTask": "Widget dark mode tokens" },
-    { "id": "emp-marcus", "name": "Marcus Webb",    "status": "COMPILING",     "currentTask": "Stripe webhook review" },
-    { "id": "emp-priya",  "name": "Priya Sharma",   "status": "EXECUTING",     "currentTask": "Intent classifier calibration" },
-    { "id": "emp-sonia",  "name": "Sonia Patel",    "status": "EXECUTING",     "currentTask": "Push notification testing" },
-    { "id": "emp-elena",  "name": "Elena Rodriguez","status": "EXECUTING",     "currentTask": "Latency regression investigation" },
-    { "id": "emp-james",  "name": "James Liu",      "status": "EXECUTING",     "currentTask": "SDK bundle profiling" },
-    { "id": "emp-david",  "name": "David Kim",       "status": "EXECUTING",     "currentTask": "Classifier retraining" },
-    { "id": "emp-noah",   "name": "Noah Chen",       "status": "COMPILING",     "currentTask": "RBAC schema design" },
-    { "id": "emp-fatima", "name": "Fatima Al-Hassan","status": "AWAITING_HUMAN","currentTask": "SLA doc review" }
+    { "id": "emp-elena", "type": "employee" },
+    { "id": "emp-david", "type": "employee" },
+    { "id": "proj-vela-platform", "type": "project" },
+    { "id": "proj-widget", "type": "project" },
+    { "id": "proj-admin", "type": "project" }
   ]
 }

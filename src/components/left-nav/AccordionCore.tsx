@@ -1,10 +1,11 @@
 import { AccordionItem, AccordionHeader } from './AccordionItem';
 import { AgentListItem } from './AgentListItem';
 import { ProjectListItem } from './ProjectListItem';
-import { listAccordionAgents } from '@/data/left-nav/store';
+import { listEmployees } from '@/data/employees/store';
 import { listUniversalProjects } from '@/data/universal-projects/store';
 import { mainNavItems } from '@/data/left-nav';
 import { STROKE_WIDTH } from '@/lib/constants';
+import type { AgentStatus } from '@/types/agent';
 
 type AccordionCoreProps = {
   currentView?: string;
@@ -20,8 +21,13 @@ function getIcon(id: string) {
 }
 
 export function AccordionCore({ currentView, onItemClick, onAgentClick, onProjectClick }: AccordionCoreProps) {
-  const accordionAgents = listAccordionAgents();
   const projects = listUniversalProjects();
+  const employees = listEmployees().map(e => ({
+    id: e.id,
+    name: e.name,
+    status: e.status,
+    currentTask: e.activeTask,
+  }));
 
   return (
     <div className="py-1">
@@ -47,7 +53,7 @@ export function AccordionCore({ currentView, onItemClick, onAgentClick, onProjec
         active={currentView === 'universal-employees'}
         onClick={() => onItemClick?.('universal-employees')}
       >
-        {accordionAgents.map(agent => (
+        {employees.map(agent => (
           <AgentListItem key={agent.id} agent={agent} onClick={onAgentClick} />
         ))}
       </AccordionItem>

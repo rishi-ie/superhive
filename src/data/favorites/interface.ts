@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 
-export type FavoriteItem = {
+export type FavoriteRef = {
   id: string;
-  label: string;
   type: 'project' | 'employee';
-  icon?: ReactNode;
+};
+
+export type FavoriteItem = FavoriteRef & {
+  label: string;
+  icon: ReactNode;
 };

@@ -5,20 +5,22 @@ import { ControlMatrix } from './right-auxiliary/ControlMatrix';
 import { AuditQueue } from './right-auxiliary/AuditQueue';
 import { RightPanelActivityFeed } from './right-auxiliary/RightPanelActivityFeed';
 import { SessionsView } from './right-auxiliary/SessionsView';
-import { ProgressView } from './right-auxiliary/ProgressView';
-import { ProjectOverviewTab } from './right-auxiliary/ProjectOverviewTab';
+import { TicketOverviewTab } from './right-auxiliary/TicketOverviewTab';
+import { ProjectDetailsTab } from './right-auxiliary/ProjectDetailsTab';
 import { ChannelOverviewTab } from './right-auxiliary/ChannelOverviewTab';
+import { PanelEmptyState } from './right-auxiliary/PanelEmptyState';
 import { getRightPanelTabs, type RightPanelContext, type RightPanelTabId } from '@/data/right-panel-tabs';
 import { getActiveEmployee, getEmployee } from '@/data/employees/store';
-import { listSwarmActivity as listProjActivity, listProjectAgents as listProjAgents, getProject } from '@/data/projects/store';
+import { listSwarmActivity as listProjActivity, listProjectAgents as listProjAgents } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import type { UniversalTicket } from '@/data/tickets/store';
+import { Sliders } from 'lucide-react';
 
 type RightAuxiliaryProps = {
   width: number;
   onWidthChange: (width: number) => void;
   context: RightPanelContext;
-  tab: RightPanelTabId;
+  tab: RightPanelTabId | null;
   ticketId?: string | null;
   onTabChange?: (tab: RightPanelTabId) => void;
   onApproveAudit?: (id: string) => void;
@@ -31,7 +33,7 @@ const MAX_WIDTH = 500;
 function TicketDetail({ ticket, agents }: { ticket: UniversalTicket; agents: ReturnType<typeof listProjAgents> }) {
   const initials = ticket.assignee.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
   const priorityColors: Record<string, string> = { HIGH: 'bg-chart-5/15 text-chart-5 border-chart-5/40', MEDIUM: 'bg-chart-3/15 text-chart-3 border-chart-3/40', LOW: 'bg-secondary/40 text-muted-foreground border-border' };
-  const typeLabels: Record<string, string> = { BUG: 'Bug', FEATURE: 'Feature', REFACTOR: 'Refactor' };
+  const typeLabels: Record<string, string> = { BUG: 'Bug', FEATURE: 'Feature', REFACTOR: 'Refactor', INFRA: 'Infra' };
 
   return (
     <div className="p-3 space-y-3 border-b border-border">
@@ -106,6 +108,9 @@ export function RightAuxiliary({
     document.body.style.userSelect = 'none';
   };
 
+  const showEmptyState = !context || rightPanelTabs.length === 0;
+  const effectiveTab = rightPanelTabs.some(t => t.id === tab) ? tab : (rightPanelTabs[0]?.id ?? null);
+
   return (
     <>
       <div
@@ -117,58 +122,67 @@ export function RightAuxiliary({
         style={{ width: `${width}px`, minWidth: `${width}px` }}
       >
         <div className="h-9 shrink-0" />
-        <RightPanelTabs
-          tabs={rightPanelTabs}
-          activeTab={tab}
-          onTabChange={(id) => onTabChange?.(id as RightPanelTabId)}
-        />
-        <div className="flex-1 overflow-y-auto">
-          {tab === 'overview' && context?.kind === 'employee' && activeEmployee && (
-            <>
-              <TelemetryDeck agent={activeEmployee} />
-              {swarmActivity.length > 0 && (
-                <RightPanelActivityFeed items={swarmActivity} agents={projectAgents} />
+        {showEmptyState ? (
+          <PanelEmptyState
+            title="No selection"
+            description="Select a project, employee, or ticket to see details here."
+          />
+        ) : (
+          <>
+            <RightPanelTabs
+              tabs={rightPanelTabs}
+              activeTab={effectiveTab ?? undefined}
+              onTabChange={(id) => onTabChange?.(id as RightPanelTabId)}
+            />
+            <div className="flex-1 overflow-y-auto">
+              {effectiveTab === 'overview' && context?.kind === 'employee' && activeEmployee && (
+                <>
+                  <TelemetryDeck agent={activeEmployee} />
+                  {swarmActivity.length > 0 && (
+                    <RightPanelActivityFeed items={swarmActivity} agents={projectAgents} />
+                  )}
+                </>
               )}
-            </>
-          )}
-          {tab === 'overview' && context?.kind === 'ticket' && (
-            <ProjectOverviewTab />
-          )}
-          {tab === 'overview' && context?.kind === 'project' && (
-            <ProjectOverviewTab />
-          )}
-          {tab === 'overview' && context?.kind === 'channel' && (
-            <ChannelOverviewTab />
-          )}
-          {tab === 'manage' && activeEmployee && (
-            <ControlMatrix agent={activeEmployee} />
-          )}
-          {tab === 'manage' && context?.kind === 'ticket' && (
-            <ProjectOverviewTab />
-          )}
-          {tab === 'manage' && context?.kind === 'project' && (
-            <ProjectOverviewTab />
-          )}
-          {tab === 'manage' && context?.kind === 'channel' && (
-            <ChannelOverviewTab />
-          )}
-          {tab === 'inbox' && (
-            <>
-              {selectedTicket && <TicketDetail ticket={selectedTicket} agents={projectAgents} />}
-              <AuditQueue
-                agent={activeEmployee}
-                onApprove={onApproveAudit}
-                onDeny={onDenyAudit}
-              />
-            </>
-          )}
-          {tab === 'sessions' && context?.kind === 'employee' && (
-            <SessionsView />
-          )}
-          {tab === 'progress' && context?.kind === 'ticket' && (
-            <ProgressView />
-          )}
-        </div>
+              {effectiveTab === 'overview' && context?.kind === 'ticket' && (
+                <TicketOverviewTab />
+              )}
+              {effectiveTab === 'overview' && context?.kind === 'project' && (
+                <ProjectDetailsTab />
+              )}
+              {effectiveTab === 'overview' && context?.kind === 'channel' && (
+                <ChannelOverviewTab />
+              )}
+              {effectiveTab === 'manage' && context?.kind === 'employee' && activeEmployee && (
+                <ControlMatrix agent={activeEmployee} />
+              )}
+              {effectiveTab === 'manage' && context?.kind === 'ticket' && (
+                <TicketOverviewTab />
+              )}
+              {effectiveTab === 'manage' && context?.kind === 'project' && (
+                <ProjectDetailsTab />
+              )}
+              {effectiveTab === 'manage' && context?.kind === 'channel' && (
+                <ChannelOverviewTab />
+              )}
+              {effectiveTab === 'project' && context?.kind === 'project' && (
+                <ProjectDetailsTab />
+              )}
+              {effectiveTab === 'inbox' && (
+                <>
+                  {selectedTicket && <TicketDetail ticket={selectedTicket} agents={projectAgents} />}
+                  <AuditQueue
+                    agent={activeEmployee}
+                    onApprove={onApproveAudit}
+                    onDeny={onDenyAudit}
+                  />
+                </>
+              )}
+              {effectiveTab === 'sessions' && context?.kind === 'employee' && (
+                <SessionsView />
+              )}
+            </div>
+          </>
+        )}
       </div>
     </>
   );

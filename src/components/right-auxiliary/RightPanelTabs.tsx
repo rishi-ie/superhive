@@ -8,7 +8,7 @@ type RightPanelTabsProps = {
     label: string;
     icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
   }>;
-  activeTab: string;
+  activeTab?: string;
   onTabChange: (id: string) => void;
   onRefresh?: () => void;
 };

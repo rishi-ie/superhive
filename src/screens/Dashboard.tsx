@@ -5,7 +5,7 @@ import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents, listTickets } from '@/data/projects/store';
+import { listProjectAgents, listTickets, getProject } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listEmployees, approveAudit, denyAudit } from '@/data/employees/store';
 import {
@@ -156,9 +156,12 @@ export function Dashboard({
       handleOpenTab('chat', activeWorkspaceId);
       setRightPanelTab('overview');
     } else if (item.type === 'project') {
-      handleOpenTab('projects', item.id);
+      const project = getProject(item.id);
+      if (project) {
+        handleProjectSelect(project.id, project.workspaceId);
+      }
     }
-  }, [handleOpenTab, activeWorkspaceId]);
+  }, [handleOpenTab, activeWorkspaceId, handleProjectSelect]);
 
   const handleWizardAction = useCallback((actionId: string) => {
     if (actionId === 'open-project') {

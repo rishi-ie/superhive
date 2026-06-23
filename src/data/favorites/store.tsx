@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { isMockEnabled } from '@/lib/feature-flags';
 import mockData from '../mock.json';
 import type { MockData, IconKey } from '../mock-types';
-import type { FavoriteItem } from './interface';
+import type { FavoriteItem, FavoriteRef } from './interface';
 
 const data = mockData as MockData;
 
@@ -12,7 +12,25 @@ const ICONS: Record<IconKey, ReactNode> = {
   folder: <Layers size={12} />,
 };
 
-const favorites: FavoriteItem[] = data.favorites.map(f => ({ ...f, icon: ICONS[f.iconKey] }));
+function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
+  return refs.map(ref => {
+    let label: string;
+    let iconKey: IconKey;
+    if (ref.type === 'project') {
+      const project = Object.values(data.projects).find(p => p.id === ref.id);
+      label = project?.title ?? ref.id;
+      iconKey = 'folder';
+    } else {
+      const employee = data.employees.find(e => e.id === ref.id);
+      label = employee?.name ?? ref.id;
+      iconKey = 'user';
+    }
+    return { id: ref.id, type: ref.type, label, icon: ICONS[iconKey] };
+  });
+}
+
+const rawFavorites: FavoriteRef[] = data.favorites as FavoriteRef[];
+const resolvedFavorites = resolveFavorites(rawFavorites);
 
 interface FavoritesStore {
   list(): FavoriteItem[];
@@ -23,7 +41,7 @@ const emptyStore: FavoritesStore = {
 };
 
 const mockStore: FavoritesStore = {
-  list() { return favorites; },
+  list() { return resolvedFavorites; },
 };
 
 const store: FavoritesStore = isMockEnabled('favorites') ? mockStore : emptyStore;
@@ -32,4 +50,4 @@ export function listFavorites(): FavoriteItem[] {
   return store.list();
 }
 
-export type { FavoriteItem };
+export type { FavoriteRef, FavoriteItem };

@@ -1,11 +1,11 @@
-import { Eye, Settings, Inbox, Activity, Clock } from 'lucide-react';
+import { Eye, Settings, Inbox, Clock, Layers } from 'lucide-react';
 
 export type RightPanelTabId =
   | 'overview'
   | 'manage'
   | 'inbox'
   | 'sessions'
-  | 'progress';
+  | 'project';
 
 export type RightPanelContext =
   | { kind: 'employee'; employeeId: string }
@@ -29,13 +29,12 @@ const employeeTabs: RightPanelTab[] = [
 
 const ticketTabs: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'progress',  label: 'Progress',  icon: Activity },
   { id: 'manage',    label: 'Manage',    icon: Settings },
 ];
 
 const projectTabs: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'manage',    label: 'Manage',    icon: Settings },
+  { id: 'project',   label: 'Project',   icon: Layers },
   { id: 'inbox',     label: 'Inbox',     icon: Inbox },
 ];
 
@@ -45,7 +44,7 @@ const channelTabs: RightPanelTab[] = [
 ];
 
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
-  if (!context) return employeeTabs;
+  if (!context) return [];
   switch (context.kind) {
     case 'employee': return employeeTabs;
     case 'ticket':   return ticketTabs;
@@ -54,7 +53,7 @@ export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
   }
 }
 
-export function getDefaultRightPanelTab(context: RightPanelContext): RightPanelTabId {
+export function getDefaultRightPanelTab(context: RightPanelContext): RightPanelTabId | null {
   const tabs = getRightPanelTabs(context);
-  return tabs[0]?.id ?? 'overview';
+  return tabs[0]?.id ?? null;
 }

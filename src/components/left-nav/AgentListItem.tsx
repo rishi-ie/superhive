@@ -1,5 +1,5 @@
 import { StatusDot } from '@/components/ui/StatusDot';
-import type { AccordionAgent } from '@/data/left-nav/store';
+import type { AccordionAgent } from '@/data/left-nav/interface';
 
 type AgentListItemProps = {
   agent: AccordionAgent;
