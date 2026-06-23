@@ -35,6 +35,27 @@ export const HOME_WIZARD_CONFIG: WizardConfig = {
   ],
 };
 
+export const BLANK_CANVAS_WIZARD_CONFIG: WizardConfig = {
+  icon: Sparkles,
+  title: 'Blank canvas',
+  subtitle: 'Open a project or view your team to get started',
+  actions: [
+    {
+      id: 'open-project',
+      icon: Layers,
+      title: 'Open a project',
+      description: 'See tickets, agents, and channels for this workspace',
+      recommended: true,
+    },
+    {
+      id: 'view-employees',
+      icon: Bot,
+      title: 'View employees',
+      description: 'Browse your agent roster and their activity',
+    },
+  ],
+};
+
 export const PROJECTS_WIZARD_CONFIG: WizardConfig = {
   icon: Layers,
   title: 'Set up your first project',
@@ -133,6 +154,40 @@ export const EMPLOYEES_WIZARD_CONFIG: WizardConfig = {
       icon: Layers,
       title: 'Browse agent marketplace',
       description: 'Find pre-built agents for common tasks',
+    },
+  ],
+};
+
+export const CHAT_WIZARD_CONFIG: WizardConfig = {
+  icon: MessageCircle,
+  title: 'Start your first chat thread',
+  subtitle: 'Chat with an agent to brainstorm, delegate, or just talk',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'new-thread',
+      icon: MessageCircle,
+      title: 'New chat thread',
+      description: 'Start a conversation with your agent workforce',
+      recommended: true,
+    },
+    {
+      id: 'use-template',
+      icon: ClipboardCheck,
+      title: 'Use a template',
+      description: 'Standup, retro, code review — start with a structure',
+    },
+    {
+      id: 'invite-agent',
+      icon: Bot,
+      title: 'Invite an agent',
+      description: 'Add a specialized agent to the conversation',
+    },
+    {
+      id: 'import-thread',
+      icon: Layers,
+      title: 'Import conversation',
+      description: 'Bring in an existing thread from Slack or email',
     },
   ],
 };
