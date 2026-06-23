@@ -10,7 +10,7 @@ import { ProjectDetailsTab } from './right-auxiliary/ProjectDetailsTab';
 import { ChannelOverviewTab } from './right-auxiliary/ChannelOverviewTab';
 import { PanelEmptyState } from './right-auxiliary/PanelEmptyState';
 import { getRightPanelTabs, type RightPanelContext, type RightPanelTabId } from '@/data/right-panel-tabs';
-import { getActiveEmployee, getEmployee } from '@/data/employees/store';
+import { getActiveAgent, getAgent } from '@/data/agents/store';
 import { listSwarmActivity as listProjActivity, listProjectAgents as listProjAgents } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import type { UniversalTicket } from '@/data/tickets/store';
@@ -71,7 +71,7 @@ export function RightAuxiliary({
   const isResizingRef = useRef(false);
 
   const rightPanelTabs = getRightPanelTabs(context);
-  const activeEmployee = context?.kind === 'employee' ? getEmployee(context.employeeId) ?? getActiveEmployee(context.employeeId) : getActiveEmployee(null);
+  const activeAgent = context?.kind === 'agent' ? getAgent(context.agentId) ?? getActiveAgent(context.agentId) : getActiveAgent(null);
   const swarmActivity = listProjActivity();
   const projectAgents = listProjAgents();
   const selectedTicket = ticketId ? listUniversalTickets().find(t => t.id === ticketId) : null;
@@ -125,7 +125,7 @@ export function RightAuxiliary({
         {showEmptyState ? (
           <PanelEmptyState
             title="No selection"
-            description="Select a project, employee, or ticket to see details here."
+            description="Select a project, agent, or ticket to see details here."
           />
         ) : (
           <>
@@ -135,9 +135,9 @@ export function RightAuxiliary({
               onTabChange={(id) => onTabChange?.(id as RightPanelTabId)}
             />
             <div className="flex-1 overflow-y-auto">
-              {effectiveTab === 'overview' && context?.kind === 'employee' && activeEmployee && (
+              {effectiveTab === 'overview' && context?.kind === 'agent' && activeAgent && (
                 <>
-                  <TelemetryDeck agent={activeEmployee} />
+                  <TelemetryDeck agent={activeAgent} />
                   {swarmActivity.length > 0 && (
                     <RightPanelActivityFeed items={swarmActivity} agents={projectAgents} />
                   )}
@@ -152,8 +152,8 @@ export function RightAuxiliary({
               {effectiveTab === 'overview' && context?.kind === 'channel' && (
                 <ChannelOverviewTab />
               )}
-              {effectiveTab === 'manage' && context?.kind === 'employee' && activeEmployee && (
-                <ControlMatrix agent={activeEmployee} />
+              {effectiveTab === 'manage' && context?.kind === 'agent' && activeAgent && (
+                <ControlMatrix agent={activeAgent} />
               )}
               {effectiveTab === 'manage' && context?.kind === 'ticket' && (
                 <TicketOverviewTab />
@@ -171,13 +171,13 @@ export function RightAuxiliary({
                 <>
                   {selectedTicket && <TicketDetail ticket={selectedTicket} agents={projectAgents} />}
                   <AuditQueue
-                    agent={activeEmployee}
+                    agent={activeAgent}
                     onApprove={onApproveAudit}
                     onDeny={onDenyAudit}
                   />
                 </>
               )}
-              {effectiveTab === 'sessions' && context?.kind === 'employee' && (
+              {effectiveTab === 'sessions' && context?.kind === 'agent' && (
                 <SessionsView />
               )}
             </div>

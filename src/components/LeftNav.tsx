@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { LeftNavHeader } from './left-nav/LeftNavHeader';
 import { TeamSelector, type Workspace } from './left-nav/TeamSelector';
-import { ActiveSection, type ActiveEmployee } from './left-nav/ActiveSection';
+import { ActiveSection, type ActiveAgent } from './left-nav/ActiveSection';
 import { FavoritesSection, type FavoriteItem } from './left-nav/FavoritesSection';
 import { AccordionCore } from './left-nav/AccordionCore';
 import { Utilities } from './left-nav/Utilities';
@@ -12,14 +12,14 @@ type LeftNavProps = {
   workspaces?: Workspace[];
   currentWorkspace?: Workspace;
   favorites?: FavoriteItem[];
-  activeEmployees?: ActiveEmployee[];
+  activeAgents?: ActiveAgent[];
   activeTasks?: { id: string; title: string; assignedTo?: string }[];
   notificationCount?: number;
   onWorkspaceSelect?: (workspace: Workspace) => void;
   onSettingsClick?: () => void;
   onFavoritesItemClick?: (item: FavoriteItem) => void;
-  onActiveEmployeeClick?: (id: string) => void;
-  onEmployeeSelect?: (id: string) => void;
+  onActiveAgentClick?: (id: string) => void;
+  onAgentSelect?: (id: string) => void;
   onActiveTaskClick?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
   onProjectClick?: (projectId: string, workspaceId: string) => void;
@@ -35,17 +35,17 @@ export function LeftNav({
   workspaces = [],
   currentWorkspace = { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' },
   favorites = [],
-  activeEmployees = [],
+  activeAgents = [],
   activeTasks = [],
   onWorkspaceSelect,
   onSettingsClick,
   onFavoritesItemClick,
-  onActiveEmployeeClick,
+  onActiveAgentClick,
   onActiveTaskClick,
   onNavItemClick,
   onProjectClick,
   currentView,
-  onEmployeeSelect,
+  onAgentSelect,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -97,9 +97,9 @@ export function LeftNav({
         />
 
         <ActiveSection
-          employees={activeEmployees}
+          agents={activeAgents}
           tasks={activeTasks}
-          onEmployeeClick={onActiveEmployeeClick}
+          onAgentClick={onActiveAgentClick}
           onTaskClick={onActiveTaskClick}
         />
         <FavoritesSection
@@ -110,7 +110,7 @@ export function LeftNav({
         <div className="border-t border-sidebar-border/60 mx-2" />
 
         <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onEmployeeSelect} onProjectClick={onProjectClick} />
+          <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onAgentSelect} onProjectClick={onProjectClick} />
         </div>
 
         <Utilities onSettingsClick={onSettingsClick} />

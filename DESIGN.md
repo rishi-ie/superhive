@@ -2,7 +2,7 @@
 
 ## App Overview
 
-**Superhive** is a digital employee workspace — a command center for orchestrating autonomous AI agents. Built with Electron + React + Tailwind v4.
+**Superhive** is a digital agent workspace — a command center for orchestrating autonomous AI agents. Built with Electron + React + Tailwind v4.
 
 ## Design Language
 
@@ -74,9 +74,9 @@ Dark, warm productivity tool — premium code editor meets AI assistant. Think V
 ### Left Navigation
 - **LeftNavHeader**: Drag area with window controls
 - **TeamSelector**: Workspace avatar + name dropdown
-- **FavoritesSection**: Pinned items (projects + employees)
-- **ActiveSection**: Active employees with status dots and current tasks
-- **MainNavList**: Projects, Employees, Tickets, Automations, Communications
+- **FavoritesSection**: Pinned items (projects + agents)
+- **ActiveSection**: Active agents with status dots and current tasks
+- **MainNavList**: Projects, agents, Tickets, Automations, Communications
 - **LeftNavFooter**: Settings icon + Notifications bell with count badge
 
 ### Center Workspace
@@ -107,7 +107,7 @@ Shown when an agent is active. Form-based configuration.
 - **Permissions List**: Three rows (WRITE FILES, SEND MESSAGES, INSTALL DEPENDENCIES) each with label, description, ON/OFF badge, and toggle
 - **Commit Authority**: 3-segment horizontal control (Review · Auto-Merge · Direct Push); Direct Push has danger tint
 - **Thinking Budget**: Range slider with live `$/task` cost estimate
-- **Danger Zone**: Warning banner + full-width "Terminate Employee" red outline button
+- **Danger Zone**: Warning banner + full-width "Terminate agent" red outline button
 
 #### Tab: Inbox (Audit Queue)
 Shows actionable audit cards regardless of whether an agent is selected.
@@ -133,7 +133,7 @@ When no agent is active, all tabs show an empty/placeholder state.
 - 2x3 grid of suggested action cards (Zap icon + text)
 - Suggestions: Build landing page, Research competitors, Create product spec, Generate marketing plan, Analyze codebase
 
-## Employee Data Model
+## agent Data Model
 
 Types defined in `src/types/agent.ts`:
 
@@ -160,7 +160,7 @@ type Permissions = {
   installDeps: boolean;
 };
 
-type Employee = {
+type agent = {
   id: string;
   name: string;
   role: string;
@@ -287,7 +287,7 @@ src/
 │   │   ├── LeftNavHeader.tsx
 │   │   ├── TeamSelector.tsx
 │   │   ├── FavoritesSection.tsx
-│   │   ├── ActiveSection.tsx    — (used for active employees list)
+│   │   ├── ActiveSection.tsx    — (used for active agents list)
 │   │   ├── MainNavList.tsx
 │   │   └── LeftNavFooter.tsx
 │   ├── center-workspace/
@@ -320,18 +320,13 @@ src/
 │   │   └── RadioOption.tsx       — (Mission Control)
 │   └── archived/                — Archived unused components
 ├── data/
-│   ├── employees/               — Employee data abstraction layer
+│   ├── agents/               — Agent data abstraction layer
 │   │   ├── interface.ts         — Types + function signatures
-│   │   ├── mock.ts             — Mock employee data
-│   │   └── store.ts            — Public API + USE_MOCK_DATA routing
-│   ├── mock/                   — Legacy mock data (LeftNav, chat, etc.)
-│   │   ├── workspaces.ts
-│   │   ├── favorites.tsx
-│   │   ├── employees.ts
-│   │   ├── tasks.ts
-│   │   ├── notifications.ts
-│   │   ├── chat.ts
-│   │   └── ...
+│   │   ├── store.ts            — Public API + USE_MOCK_DATA routing
+│   │   └── api.ts             — Real API placeholder
+│   ├── mock.json               — All mock data (agents, projects, tickets, channels)
+│   ├── mock-types.ts           — TypeScript types for mock data
+│   ├── favorites/
 │   ├── left-nav.ts
 │   ├── models.ts
 │   ├── right-panel-tabs.ts
@@ -339,8 +334,6 @@ src/
 ├── lib/
 │   ├── constants.ts             — STROKE_WIDTH = 1.5
 │   └── use-double-click.ts
-├── types/
-│   └── agent.ts                 — AgentStatus, CommitAuthority types
 └── hooks/
     └── use-double-click.ts
 ```

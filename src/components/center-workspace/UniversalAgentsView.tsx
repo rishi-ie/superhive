@@ -5,8 +5,8 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
-import { listEmployees, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/employees/store';
-import type { EmployeeStatus } from '@/data/employees/interface';
+import { listAgents, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/agents/store';
+import type { AgentStatus } from '@/data/agents/interface';
 import { STROKE_WIDTH } from '@/lib/constants';
 
 type SortKey = 'status' | 'name' | 'uptime';
@@ -38,24 +38,24 @@ function ContextBar({ value }: { value: number }) {
   );
 }
 
-type UniversalEmployeesViewProps = {
-  onEmployeeSelect?: (id: string) => void;
+type UniversalAgentsViewProps = {
+  onAgentSelect?: (id: string) => void;
 };
 
-export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesViewProps) {
+export function UniversalAgentsView({ onAgentSelect }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | EmployeeStatus>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
 
-  const employees = listEmployees();
+  const agents = listAgents();
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { ALL: employees.length };
-    for (const e of employees) {
-      counts[e.status] = (counts[e.status] ?? 0) + 1;
+    const counts: Record<string, number> = { ALL: agents.length };
+    for (const a of agents) {
+      counts[a.status] = (counts[a.status] ?? 0) + 1;
     }
     return counts;
-  }, [employees]);
+  }, [agents]);
 
   const filterOptions = useMemo(() =>
     STATUS_OPTIONS.map(o => ({ ...o, count: statusCounts[o.value === 'ALL' ? 'ALL' : o.value] ?? 0 })),
@@ -63,32 +63,32 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
   );
 
   const filtered = useMemo(() => {
-    let result = employees;
+    let result = agents;
     if (statusFilter !== 'ALL') {
-      result = result.filter(e => e.status === statusFilter);
+      result = result.filter(a => a.status === statusFilter);
     }
     if (query.trim()) {
       const q = query.toLowerCase();
-      result = result.filter(e =>
-        e.name.toLowerCase().includes(q) ||
-        e.role.toLowerCase().includes(q) ||
-        e.activeTask.toLowerCase().includes(q)
+      result = result.filter(a =>
+        a.name.toLowerCase().includes(q) ||
+        a.role.toLowerCase().includes(q) ||
+        a.activeTask.toLowerCase().includes(q)
       );
     }
     return [...result].sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
       if (sort === 'uptime') return 0;
-      const order: Record<EmployeeStatus, number> = { EXECUTING: 0, COMPILING: 1, ERROR_LOOP: 2, AWAITING_HUMAN: 3, IDLE: 4 };
+      const order: Record<AgentStatus, number> = { EXECUTING: 0, COMPILING: 1, ERROR_LOOP: 2, AWAITING_HUMAN: 3, IDLE: 4 };
       return (order[a.status] ?? 5) - (order[b.status] ?? 5);
     });
-  }, [employees, query, statusFilter, sort]);
+  }, [agents, query, statusFilter, sort]);
 
-  if (employees.length === 0) {
+  if (agents.length === 0) {
     return (
       <div className="flex flex-col h-full">
         <div className="px-6 pt-5 pb-3">
-          <h1 className="text-base font-bold text-foreground">All Employees</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">No employees found</p>
+          <h1 className="text-base font-bold text-foreground">All Agents</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">No agents found</p>
         </div>
       </div>
     );
@@ -97,9 +97,9 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-6 pt-5 pb-3 shrink-0">
-        <h1 className="text-base font-bold text-foreground">All Employees</h1>
+        <h1 className="text-base font-bold text-foreground">All Agents</h1>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Universal employees · {employees.length} agent{employees.length !== 1 ? 's' : ''}
+          Universal agents · {agents.length} agent{agents.length !== 1 ? 's' : ''}
         </p>
       </div>
 
@@ -107,7 +107,7 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
         <SearchBar
           value={query}
           onChange={setQuery}
-          placeholder="Search employees..."
+          placeholder="Search agents..."
           className="flex-1"
         />
         <select
@@ -119,7 +119,7 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
           <option value="name">Sort: Name</option>
           <option value="uptime">Sort: Uptime</option>
         </select>
-        <NewButton label="New Employee" />
+        <NewButton label="New Agent" />
       </div>
 
       <div className="px-6 pb-3 shrink-0">
@@ -133,7 +133,7 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
       <div className="flex-1 overflow-y-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-sm text-muted-foreground">No employees match &ldquo;{query}&rdquo;</p>
+            <p className="text-sm text-muted-foreground">No agents match &ldquo;{query}&rdquo;</p>
             <button
               type="button"
               onClick={() => { setQuery(''); setStatusFilter('ALL'); }}
@@ -144,39 +144,39 @@ export function UniversalEmployeesView({ onEmployeeSelect }: UniversalEmployeesV
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {filtered.map(employee => {
-              const telemetry = getTelemetry(employee.id);
-              const permissions = getPermissions(employee.id);
-              const audits = getAuditItems(employee.id);
-              const actionLog = getActionLog(employee.id);
-              const nextStep = getNextStep(employee.id);
-              const initials = employee.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+            {filtered.map(agent => {
+              const telemetry = getTelemetry(agent.id);
+              const permissions = getPermissions(agent.id);
+              const audits = getAuditItems(agent.id);
+              const actionLog = getActionLog(agent.id);
+              const nextStep = getNextStep(agent.id);
+              const initials = agent.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
               const lastAction = actionLog[0];
 
               return (
                 <UniversalListCard
-                  key={employee.id}
-                  onClick={() => onEmployeeSelect?.(employee.id)}
+                  key={agent.id}
+                  onClick={() => onAgentSelect?.(agent.id)}
                   className="flex flex-col gap-1.5"
                 >
                   <div className="flex items-center gap-2">
                     <Avatar size="xs" fallback={initials} />
-                    <StatusDot status={employee.status} />
-                    <span className="text-xs font-semibold text-foreground">{employee.name}</span>
+                    <StatusDot status={agent.status} />
+                    <span className="text-xs font-semibold text-foreground">{agent.name}</span>
                     <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground truncate flex-1">{employee.role}</span>
+                    <span className="text-xs text-muted-foreground truncate flex-1">{agent.role}</span>
                     {permissions && (
                       <span className="text-[10px] text-muted-foreground shrink-0 font-fustat">
                         {permissions.modelEngine}
                       </span>
                     )}
-                    {employee.uptime && (
-                      <span className="text-[10px] text-muted-foreground shrink-0">{employee.uptime}</span>
+                    {agent.uptime && (
+                      <span className="text-[10px] text-muted-foreground shrink-0">{agent.uptime}</span>
                     )}
                   </div>
 
                   <p className="text-[11px] text-muted-foreground truncate pl-px leading-4">
-                    {employee.activeTask}
+                    {agent.activeTask}
                   </p>
 
                   <div className="flex items-center gap-3">

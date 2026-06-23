@@ -3,16 +3,16 @@ import { CenterTabStrip } from './center-workspace/CenterTabStrip';
 import { ChatView } from './center-workspace/ChatView';
 import { ProjectsView } from './center-workspace/ProjectsView';
 import { TicketsView } from './center-workspace/TicketsView';
-import { EmployeesView } from './center-workspace/EmployeesView';
+import { AgentsView } from './center-workspace/AgentsView';
 import { CommunicationsView } from './center-workspace/CommunicationsView';
 import { OnboardingWizard } from './center-workspace/OnboardingWizard';
 import { UniversalProjectsView } from './center-workspace/UniversalProjectsView';
-import { UniversalEmployeesView } from './center-workspace/UniversalEmployeesView';
+import { UniversalAgentsView } from './center-workspace/UniversalAgentsView';
 import { HOME_WIZARD_CONFIG, BLANK_CANVAS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import type { CenterTab, CenterTabType } from '@/data/tabs/interface';
 import type { OnboardingWizardProps } from './center-workspace/OnboardingWizard';
 
-export type CenterView = 'home' | 'employees' | 'communications' | 'universal-projects' | 'universal-employees' | 'tickets';
+export type CenterView = 'home' | 'agents' | 'communications' | 'universal-projects' | 'universal-agents' | 'tickets';
 
 type CenterWorkspaceProps = {
   tabs: CenterTab[];
@@ -20,23 +20,23 @@ type CenterWorkspaceProps = {
   workspaceMap: Record<string, string>;
   centerView: CenterView | null;
   activeWorkspaceId: string;
-  activeEmployeeId?: string | null;
+  activeAgentId?: string | null;
   selectedTicketId?: string | null;
   hasData: boolean;
   onTabClick: (id: string) => void;
   onTabClose: (id: string) => void;
   onTicketSelect?: (id: string) => void;
-  onEmployeeSelect?: (id: string) => void;
+  onAgentSelect?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
   onProjectSelect?: (id: string, workspaceId: string) => void;
 };
 
 function getViewLabel(centerView: CenterView | null, activeTab: CenterTab | null): string {
-  if (centerView === 'employees') return 'Employees';
+  if (centerView === 'agents') return 'Agents';
   if (centerView === 'communications') return 'Communications';
   if (centerView === 'tickets') return 'Tickets';
   if (centerView === 'universal-projects') return 'Projects';
-  if (centerView === 'universal-employees') return 'Employees';
+  if (centerView === 'universal-agents') return 'Agents';
   if (!activeTab) return '';
   const labels: Record<CenterTabType, string> = {
     chat: 'Chat',
@@ -54,13 +54,13 @@ export function CenterWorkspace({
   workspaceMap,
   centerView,
   activeWorkspaceId,
-  activeEmployeeId,
+  activeAgentId,
   selectedTicketId,
   hasData,
   onTabClick,
   onTabClose,
   onTicketSelect,
-  onEmployeeSelect,
+  onAgentSelect,
   onAction,
   onProjectSelect,
 }: CenterWorkspaceProps) {
@@ -94,10 +94,10 @@ export function CenterWorkspace({
             <OnboardingWizard config={HOME_WIZARD_CONFIG} onAction={onAction} />
           )
         )}
-        {centerView === 'employees' && (
-          <EmployeesView
-            onEmployeeSelect={onEmployeeSelect}
-            selectedEmployeeId={activeEmployeeId}
+        {centerView === 'agents' && (
+          <AgentsView
+            onAgentSelect={onAgentSelect}
+            selectedAgentId={activeAgentId}
           />
         )}
         {centerView === 'communications' && (
@@ -106,8 +106,8 @@ export function CenterWorkspace({
         {centerView === 'universal-projects' && (
           <UniversalProjectsView onProjectSelect={onProjectSelect} />
         )}
-        {centerView === 'universal-employees' && (
-          <UniversalEmployeesView onEmployeeSelect={onEmployeeSelect} />
+        {centerView === 'universal-agents' && (
+          <UniversalAgentsView onAgentSelect={onAgentSelect} />
         )}
         {centerView === 'tickets' && (
           <TicketsView

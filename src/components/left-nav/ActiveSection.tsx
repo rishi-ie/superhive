@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, Circle, Zap } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 
-export type ActiveEmployee = {
+export type ActiveAgent = {
   id: string;
   name: string;
   avatar?: string;
@@ -17,18 +17,18 @@ export type ActiveTask = {
 };
 
 type ActiveSectionProps = {
-  employees: ActiveEmployee[];
+  agents: ActiveAgent[];
   tasks: { id: string; title: string; assignedTo?: string }[];
-  onEmployeeClick?: (id: string) => void;
+  onAgentClick?: (id: string) => void;
   onTaskClick?: (id: string) => void;
 };
 
-export function ActiveSection({ employees, tasks, onEmployeeClick, onTaskClick }: ActiveSectionProps) {
+export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: ActiveSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const activeCount = employees.filter((e) => e.status === 'active' || e.status === 'busy').length;
+  const activeCount = agents.filter((a) => a.status === 'active' || a.status === 'busy').length;
 
-  if (employees.length === 0 && tasks.length === 0) {
+  if (agents.length === 0 && tasks.length === 0) {
     return null;
   }
 
@@ -51,27 +51,27 @@ export function ActiveSection({ employees, tasks, onEmployeeClick, onTaskClick }
       </button>
       {isExpanded && (
         <div className="mt-0.5 ml-2 space-y-0.5">
-          {employees.slice(0, 5).map((employee) => (
+          {agents.slice(0, 5).map((agent) => (
             <button
-              key={employee.id}
-              onClick={() => onEmployeeClick?.(employee.id)}
+              key={agent.id}
+              onClick={() => onAgentClick?.(agent.id)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
             >
               <Circle
                 size={6}
                 strokeWidth={STROKE_WIDTH}
                 className={`shrink-0 ${
-                  employee.status === 'busy'
+                  agent.status === 'busy'
                     ? 'text-chart-1 fill-chart-1'
-                    : employee.status === 'active'
+                    : agent.status === 'active'
                     ? 'text-chart-2 fill-chart-2'
                     : 'text-muted-foreground fill-muted-foreground'
                 }`}
               />
-              <span className="flex-1 truncate text-left text-xs">{employee.name}</span>
-              {employee.currentTask && (
+              <span className="flex-1 truncate text-left text-xs">{agent.name}</span>
+              {agent.currentTask && (
                 <span className="truncate text-[10px] text-muted-foreground/60">
-                  {employee.currentTask}
+                  {agent.currentTask}
                 </span>
               )}
             </button>

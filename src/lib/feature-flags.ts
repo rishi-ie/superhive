@@ -3,7 +3,7 @@ export const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 export type MockDomain =
   | 'workspaces'
   | 'favorites'
-  | 'employees'
+  | 'agents'
   | 'chat'
   | 'projects'
   | 'tickets'

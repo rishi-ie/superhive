@@ -1,10 +1,10 @@
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-import { getTelemetry, getActionLog, getNextStep, type Employee } from '@/data/employees/store';
-import type { EmployeeStatus } from '@/data/employees/interface';
+import { getTelemetry, getActionLog, getNextStep, type Agent } from '@/data/agents/store';
+import type { AgentStatus } from '@/data/agents/interface';
 
-function StatusPill({ status }: { status: EmployeeStatus }) {
-  const config: Record<EmployeeStatus, { label: string; className: string }> = {
+function StatusPill({ status }: { status: AgentStatus }) {
+  const config: Record<AgentStatus, { label: string; className: string }> = {
     EXECUTING:     { label: 'EXECUTING',     className: 'bg-chart-2/20 text-chart-2 border-chart-2/40' },
     COMPILING:     { label: 'COMPILING',     className: 'bg-chart-3/20 text-chart-3 border-chart-3/40' },
     AWAITING_HUMAN:{ label: 'AWAITING_HUMAN',className: 'bg-chart-1/20 text-chart-1 border-chart-1/40' },
@@ -36,7 +36,7 @@ function heartbeatLabel(saturation: number): string {
 }
 
 type TelemetryDeckProps = {
-  agent: Employee;
+  agent: Agent;
 };
 
 export function TelemetryDeck({ agent }: TelemetryDeckProps) {

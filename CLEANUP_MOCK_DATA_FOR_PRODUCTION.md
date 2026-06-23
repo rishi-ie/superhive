@@ -43,7 +43,7 @@ Delete the entire `src/data/mock/` directory. It contains:
 src/data/mock/
 ├── workspaces.ts
 ├── favorites.tsx
-├── employees.ts
+├── agents.ts
 ├── tasks.ts
 ├── notifications.ts
 ├── chat.ts
@@ -70,7 +70,7 @@ Delete these 5 import statements:
 // REMOVE THESE:
 import { workspaces, currentWorkspace } from '@/data/mock/workspaces';
 import { favorites } from '@/data/mock/favorites';
-import { activeEmployees } from '@/data/mock/employees';
+import { activeagents } from '@/data/mock/agents';
 import { activeTasks } from '@/data/mock/tasks';
 import { notifications } from '@/data/mock/notifications';
 ```
@@ -85,7 +85,7 @@ const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
 
 const workspaces_data = USE_MOCK_DATA ? workspaces : [];
 const favorites_data = USE_MOCK_DATA ? favorites : [];
-const employees_data = USE_MOCK_DATA ? activeEmployees : [];
+const agents_data = USE_MOCK_DATA ? activeagents : [];
 const tasks_data = USE_MOCK_DATA ? activeTasks : [];
 const notifications_data = USE_MOCK_DATA ? notifications : [];
 
@@ -103,7 +103,7 @@ Change the LeftNav props from this:
   workspaces={USE_MOCK_DATA ? workspaces : []}
   currentWorkspace={USE_MOCK_DATA ? currentWorkspace : undefined}
   favorites={USE_MOCK_DATA ? favorites : []}
-  activeEmployees={USE_MOCK_DATA ? activeEmployees : []}
+  activeagents={USE_MOCK_DATA ? activeagents : []}
   activeTasks={USE_MOCK_DATA ? activeTasks : []}
   notificationCount={notificationCount}
 />
@@ -115,7 +115,7 @@ to this (empty arrays / defaults only):
 <LeftNav
   workspaces={[]}
   favorites={[]}
-  activeEmployees={[]}
+  activeagents={[]}
   activeTasks={[]}
   notificationCount={0}
 />
@@ -181,7 +181,7 @@ export function Dashboard({
         onSettingsClick={() => onNavigate('settings')}
         workspaces={[]}
         favorites={[]}
-        activeEmployees={[]}
+        activeagents={[]}
         activeTasks={[]}
         notificationCount={0}
       />
@@ -310,7 +310,7 @@ you can delete the file. Otherwise, just remove the `VITE_USE_MOCK_DATA` line.
 |------|--------|-------|
 | LeftNav workspace dropdown | Shows 4 workspaces | Empty dropdown |
 | LeftNav favorites | Shows 5 items | Empty section (hidden) |
-| LeftNav active employees | Shows 5 employees with status | Empty section (hidden) |
+| LeftNav active agents | Shows 5 agents with status | Empty section (hidden) |
 | LeftNav active tasks | Shows 3 tasks | Empty section (hidden) |
 | LeftNav notifications | Badge shows "2" | No badge |
 | Center workspace | Shows chat thread with messages | Shows ChatEmptyState with suggestions |
@@ -339,6 +339,6 @@ Or restore individual files:
 ```bash
 git checkout HEAD -- \
   src/data/mock/workspaces.ts \
-  src/data/mock/employees.ts \
+  src/data/mock/agents.ts \
   src/data/mock/chat.ts
 ```

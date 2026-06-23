@@ -1,13 +1,13 @@
 import type { Workspace } from './workspaces/interface';
 import type { Project } from './projects/interface';
 import type { UniversalTicket } from './tickets/interface';
-import type { Employee, Telemetry, Permissions, AuditItem, ActionLogEntry } from './employees/interface';
+import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from './agents/interface';
 
 export type IconKey = 'user' | 'folder';
 
 export type FavoriteSeed = {
   id: string;
-  type: 'project' | 'employee';
+  type: 'project' | 'agent';
 };
 
 export type ChatMessageSeed = {
@@ -29,7 +29,7 @@ export type MockData = {
   currentWorkspaceId: string;
   projects: Record<string, Project>;
   universalTickets: UniversalTicket[];
-  employees: Employee[];
+  agents: Agent[];
   telemetry: Record<string, Telemetry>;
   permissions: Record<string, Permissions>;
   actionLogs: Record<string, ActionLogEntry[]>;

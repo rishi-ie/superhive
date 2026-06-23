@@ -1,4 +1,4 @@
-import type { AgentStatus } from '@/types/agent';
+import type { AgentStatus } from '@/data/agents/interface';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 

@@ -8,7 +8,7 @@ export type NavItem = {
 
 export const mainNavItems: NavItem[] = [
   { id: 'projects',      label: 'Projects',      icon: Layers },
-  { id: 'employees',     label: 'Employees',     icon: Users },
+  { id: 'agents',        label: 'Agents',        icon: Users },
   { id: 'tickets',       label: 'Tickets',       icon: ClipboardCheck },
   { id: 'communications', label: 'Communications', icon: MessageCircle },
   { id: 'meta-hive',     label: 'Meta Hive',     icon: Hexagon },

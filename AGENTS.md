@@ -2,9 +2,9 @@
 
 ## What is this?
 
-**Superhive** is a digital employee workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
+**Superhive** is a digital agent workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
 
-- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, Employees, Tickets, Automations, Communications, Remote), utilities (Settings, Help)
+- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, agents, Tickets, Automations, Communications, Remote), utilities (Settings, Help)
 - **Center (Operations Deck)**: Tabbed workspace — Chat or Projects tab. Chat: AI thread + composer. Projects: operational swarm dashboard.
 - **Right Auxiliary (Avionics)**: Agent telemetry, configuration controls, audit queue, and live activity feed
 
@@ -46,7 +46,7 @@ bun run electron:preview # vite build + launch electron with production build
 │  Favorites           │  ← collapsible, Star icon
 ├──────────────────────┤
 │  ▸ Projects [◈]     │  ← accordion core (scrollable)
-│  ▾ Employees  [◈]    │    defaultOpen, agent status dots
+│  ▾ agents  [◈]    │    defaultOpen, agent status dots
 │  ▸ Tickets    [◈]   │
 │  ▸ Automations [◈]  │
 │  ▸ Communications[◈]│
@@ -135,12 +135,12 @@ Three tabs: **Overview** · **Manage** · **Inbox**
 
 ## Data Architecture
 
-**Employee/agent store** (`src/data/employees/`):
+**Agent/agent store** (`src/data/agents/`):
 ```
-src/data/employees/
+src/data/agents/
 ├── interface.ts   — Types + function signatures (the contract)
-├── mock.ts        — All mock employee data + implementations
-└── store.ts       — Public API; USE_MOCK_DATA flag lives here
+├── store.ts       — Public API; USE_MOCK_DATA flag lives here
+└── api.ts         — Real API placeholder (swap in for real backend)
 ```
 
 **Project data** (`src/data/mock/project.ts`):
@@ -153,11 +153,11 @@ src/data/mock/project.ts
 └── tickets, projectAgents, swarmActivity, channels (mock data)
 ```
 
-**Public API** (import from `@/data/employees/store`):
+**Public API** (import from `@/data/agents/store`):
 ```ts
-listEmployees()        → Employee[]
-getEmployee(id)        → Employee | undefined
-getActiveEmployee()    → Employee | null
+listAgents()        → Agent[]
+getAgent(id)        → Agent | undefined
+getActiveAgent()    → Agent | null
 getTelemetry(id)       → Telemetry
 getPermissions(id)     → Permissions
 getAuditItems(id?)     → AuditItem[]
@@ -165,7 +165,7 @@ getActionLog(id)       → ActionLogEntry[]
 getNextStep(id)        → string
 ```
 
-**To swap in a real DB**: create `src/data/employees/api.ts` with the same signatures, then edit `store.ts` to import from `./api` instead of `./mock`.
+**To swap in a real DB**: create `src/data/agents/api.ts` with the same signatures, then edit `store.ts` to import from `./api` instead of the mock data source.
 
 ## Mock Data Toggle
 

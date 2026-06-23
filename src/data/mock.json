@@ -12,21 +12,21 @@
       "workspaceId": "vela",
       "title": "Vela Platform",
       "tickets": [
-        { "id": "VL-101", "title": "Fix ticket routing latency spike", "status": "EXECUTING", "assignedAgentId": "emp-elena" },
-        { "id": "VL-102", "title": "Implement intent classification v2", "status": "EXECUTING", "assignedAgentId": "emp-david" },
-        { "id": "VL-103", "title": "OAuth SSO for enterprise customers", "status": "TODO", "assignedAgentId": "emp-noah" },
-        { "id": "VL-104", "title": "Add response SLA monitoring", "status": "TODO", "assignedAgentId": "emp-fatima" },
-        { "id": "VL-105", "title": "Optimize embedding pipeline throughput", "status": "REVIEW", "assignedAgentId": "emp-marcus" },
-        { "id": "VL-106", "title": "Migrate to Postgres 16", "status": "DONE", "assignedAgentId": "emp-marcus" },
-        { "id": "VL-107", "title": "Implement bulk article import", "status": "DONE", "assignedAgentId": "emp-fatima" },
-        { "id": "VL-108", "title": "Add CSAT analytics dashboard", "status": "DONE", "assignedAgentId": "emp-james" }
+        { "id": "VL-101", "title": "Fix ticket routing latency spike", "status": "EXECUTING", "assignedAgentId": "agent-elena" },
+        { "id": "VL-102", "title": "Implement intent classification v2", "status": "EXECUTING", "assignedAgentId": "agent-david" },
+        { "id": "VL-103", "title": "OAuth SSO for enterprise customers", "status": "TODO", "assignedAgentId": "agent-noah" },
+        { "id": "VL-104", "title": "Add response SLA monitoring", "status": "TODO", "assignedAgentId": "agent-fatima" },
+        { "id": "VL-105", "title": "Optimize embedding pipeline throughput", "status": "REVIEW", "assignedAgentId": "agent-marcus" },
+        { "id": "VL-106", "title": "Migrate to Postgres 16", "status": "DONE", "assignedAgentId": "agent-marcus" },
+        { "id": "VL-107", "title": "Implement bulk article import", "status": "DONE", "assignedAgentId": "agent-fatima" },
+        { "id": "VL-108", "title": "Add CSAT analytics dashboard", "status": "DONE", "assignedAgentId": "agent-james" }
       ],
       "agents": [
-        { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-101", "initials": "ER" },
-        { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "VL-105", "initials": "MW" },
-        { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "PS" },
-        { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "DK" },
-        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "NC" }
+        { "id": "agent-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-101", "initials": "ER" },
+        { "id": "agent-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "VL-105", "initials": "MW" },
+        { "id": "agent-priya", "name": "Priya Sharma", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "PS" },
+        { "id": "agent-david", "name": "David Kim", "role": "ML Engineer", "currentStatus": "WORKING", "assignedTicketId": "VL-102", "initials": "DK" },
+        { "id": "agent-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "NC" }
       ],
       "channels": [
         { "id": "vl-ch-1", "participants": ["Elena Rodriguez", "David Kim"], "topic": "Intent classifier calibration", "relatedTicketId": "VL-102", "status": "OPEN", "lastMessagePreview": "F1 dropped 3pts on 'billing' intents. Retraining now.", "messageCount": 9, "updatedAt": "11:42 AM", "unread": true },
@@ -48,20 +48,20 @@
       "workspaceId": "widget",
       "title": "Widget Embed",
       "tickets": [
-        { "id": "WE-201", "title": "Add dark mode to widget SDK", "status": "EXECUTING", "assignedAgentId": "emp-ava" },
-        { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "status": "TODO", "assignedAgentId": "emp-ava" },
-        { "id": "WE-203", "title": "Implement keyboard navigation", "status": "DONE", "assignedAgentId": "emp-ava" },
-        { "id": "WE-204", "title": "Add widget to Notion integration", "status": "TODO", "assignedAgentId": "emp-james" },
-        { "id": "WE-205", "title": "Fix z-index冲突 with host page modals", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
-        { "id": "WE-206", "title": "Implement persistent session storage", "status": "REVIEW", "assignedAgentId": "emp-marcus" },
-        { "id": "WE-207", "title": "Add widget configuration API", "status": "DONE", "assignedAgentId": "emp-james" },
-        { "id": "WE-208", "title": "Accessibility audit — WCAG AA", "status": "DONE", "assignedAgentId": "emp-ava" }
+        { "id": "WE-201", "title": "Add dark mode to widget SDK", "status": "EXECUTING", "assignedAgentId": "agent-ava" },
+        { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "status": "TODO", "assignedAgentId": "agent-ava" },
+        { "id": "WE-203", "title": "Implement keyboard navigation", "status": "DONE", "assignedAgentId": "agent-ava" },
+        { "id": "WE-204", "title": "Add widget to Notion integration", "status": "TODO", "assignedAgentId": "agent-james" },
+        { "id": "WE-205", "title": "Fix z-index冲突 with host page modals", "status": "EXECUTING", "assignedAgentId": "agent-sonia" },
+        { "id": "WE-206", "title": "Implement persistent session storage", "status": "REVIEW", "assignedAgentId": "agent-marcus" },
+        { "id": "WE-207", "title": "Add widget configuration API", "status": "DONE", "assignedAgentId": "agent-james" },
+        { "id": "WE-208", "title": "Accessibility audit — WCAG AA", "status": "DONE", "assignedAgentId": "agent-ava" }
       ],
       "agents": [
-        { "id": "emp-ava", "name": "Ava Chen", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-201", "initials": "AC" },
-        { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-204", "initials": "JL" },
-        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-205", "initials": "SP" },
-        { "id": "emp-marcus", "name": "Marcus Webb", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-206", "initials": "MW" }
+        { "id": "agent-ava", "name": "Ava Chen", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-201", "initials": "AC" },
+        { "id": "agent-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-204", "initials": "JL" },
+        { "id": "agent-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "COMPILING", "assignedTicketId": "WE-205", "initials": "SP" },
+        { "id": "agent-marcus", "name": "Marcus Webb", "role": "API Engineer", "currentStatus": "WORKING", "assignedTicketId": "WE-206", "initials": "MW" }
       ],
       "channels": [
         { "id": "we-ch-1", "participants": ["Ava Chen", "Sonia Patel"], "topic": "Dark mode design tokens", "relatedTicketId": "WE-201", "status": "OPEN", "lastMessagePreview": "Token set uploaded to Figma. Reviewing now.", "messageCount": 7, "updatedAt": "11:15 AM", "unread": true },
@@ -81,18 +81,18 @@
       "workspaceId": "admin",
       "title": "Admin Dashboard",
       "tickets": [
-        { "id": "AD-301", "title": "Redesign agent performance view", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
-        { "id": "AD-302", "title": "Add CSV export to analytics reports", "status": "TODO", "assignedAgentId": "emp-james" },
-        { "id": "AD-303", "title": "Build rule-based routing configuration UI", "status": "TODO", "assignedAgentId": "emp-priya" },
-        { "id": "AD-304", "title": "Integrate Stripe billing portal", "status": "EXECUTING", "assignedAgentId": "emp-marcus" },
-        { "id": "AD-305", "title": "Fix timezone handling in report scheduler", "status": "DONE", "assignedAgentId": "emp-james" },
-        { "id": "AD-306", "title": "Add role-based access control", "status": "REVIEW", "assignedAgentId": "emp-noah" }
+        { "id": "AD-301", "title": "Redesign agent performance view", "status": "EXECUTING", "assignedAgentId": "agent-sonia" },
+        { "id": "AD-302", "title": "Add CSV export to analytics reports", "status": "TODO", "assignedAgentId": "agent-james" },
+        { "id": "AD-303", "title": "Build rule-based routing configuration UI", "status": "TODO", "assignedAgentId": "agent-priya" },
+        { "id": "AD-304", "title": "Integrate Stripe billing portal", "status": "EXECUTING", "assignedAgentId": "agent-marcus" },
+        { "id": "AD-305", "title": "Fix timezone handling in report scheduler", "status": "DONE", "assignedAgentId": "agent-james" },
+        { "id": "AD-306", "title": "Add role-based access control", "status": "REVIEW", "assignedAgentId": "agent-noah" }
       ],
       "agents": [
-        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-301", "initials": "SP" },
-        { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-302", "initials": "JL" },
-        { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "AD-304", "initials": "MW" },
-        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-306", "initials": "NC" }
+        { "id": "agent-sonia", "name": "Sonia Patel", "role": "Design Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-301", "initials": "SP" },
+        { "id": "agent-james", "name": "James Liu", "role": "Frontend Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-302", "initials": "JL" },
+        { "id": "agent-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "currentStatus": "COMPILING", "assignedTicketId": "AD-304", "initials": "MW" },
+        { "id": "agent-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "WORKING", "assignedTicketId": "AD-306", "initials": "NC" }
       ],
       "channels": [
         { "id": "ad-ch-1", "participants": ["Sonia Patel", "James Liu"], "topic": "Agent table redesign", "relatedTicketId": "AD-301", "status": "OPEN", "lastMessagePreview": "Moved sentiment sparklines to the right column.", "messageCount": 8, "updatedAt": "11:30 AM", "unread": true },
@@ -112,17 +112,17 @@
       "workspaceId": "mobile",
       "title": "Mobile SDK",
       "tickets": [
-        { "id": "MB-401", "title": "Implement push notification handling", "status": "EXECUTING", "assignedAgentId": "emp-sonia" },
-        { "id": "MB-402", "title": "Add offline message queue", "status": "TODO", "assignedAgentId": "emp-priya" },
-        { "id": "MB-403", "title": "iOS safe area layout fixes", "status": "DONE", "assignedAgentId": "emp-sonia" },
-        { "id": "MB-404", "title": "Add biometric authentication", "status": "TODO", "assignedAgentId": "emp-noah" },
-        { "id": "MB-405", "title": "Reduce SDK initialization time", "status": "EXECUTING", "assignedAgentId": "emp-james" }
+        { "id": "MB-401", "title": "Implement push notification handling", "status": "EXECUTING", "assignedAgentId": "agent-sonia" },
+        { "id": "MB-402", "title": "Add offline message queue", "status": "TODO", "assignedAgentId": "agent-priya" },
+        { "id": "MB-403", "title": "iOS safe area layout fixes", "status": "DONE", "assignedAgentId": "agent-sonia" },
+        { "id": "MB-404", "title": "Add biometric authentication", "status": "TODO", "assignedAgentId": "agent-noah" },
+        { "id": "MB-405", "title": "Reduce SDK initialization time", "status": "EXECUTING", "assignedAgentId": "agent-james" }
       ],
       "agents": [
-        { "id": "emp-sonia", "name": "Sonia Patel", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-401", "initials": "SP" },
-        { "id": "emp-priya", "name": "Priya Sharma", "role": "Backend Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "PS" },
-        { "id": "emp-james", "name": "James Liu", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-405", "initials": "JL" },
-        { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "COMPILING", "assignedTicketId": "MB-404", "initials": "NC" }
+        { "id": "agent-sonia", "name": "Sonia Patel", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-401", "initials": "SP" },
+        { "id": "agent-priya", "name": "Priya Sharma", "role": "Backend Engineer", "currentStatus": "IDLE", "assignedTicketId": null, "initials": "PS" },
+        { "id": "agent-james", "name": "James Liu", "role": "Mobile Engineer", "currentStatus": "WORKING", "assignedTicketId": "MB-405", "initials": "JL" },
+        { "id": "agent-noah", "name": "Noah Chen", "role": "Security Engineer", "currentStatus": "COMPILING", "assignedTicketId": "MB-404", "initials": "NC" }
       ],
       "channels": [
         { "id": "mb-ch-1", "participants": ["Sonia Patel", "James Liu"], "topic": "Push notification architecture", "relatedTicketId": "MB-401", "status": "OPEN", "lastMessagePreview": "APNS certificate provisioned. Testing now.", "messageCount": 6, "updatedAt": "11:00 AM", "unread": true },
@@ -162,60 +162,60 @@
     { "id": "MB-403", "title": "iOS safe area layout fixes", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "MERGED", "priority": "MEDIUM", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
     { "id": "MB-405", "title": "Reduce SDK initialization time", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "EXECUTING", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "James Liu", "isAI": true } }
   ],
-  "employees": [
-    { "id": "emp-ava", "name": "Ava Chen", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Implementing dark mode tokens for widget SDK", "uptime": "1h 48m" },
-    { "id": "emp-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "status": "COMPILING", "activeTask": "Reviewing Stripe webhook handler", "uptime": "3h 12m" },
-    { "id": "emp-priya", "name": "Priya Sharma", "role": "API Engineer", "status": "EXECUTING", "activeTask": "Calibrating intent classifier thresholds", "uptime": "2h 55m" },
-    { "id": "emp-james", "name": "James Liu", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Profiling SDK initialization bundle", "uptime": "0h 42m" },
-    { "id": "emp-sonia", "name": "Sonia Patel", "role": "Design Engineer", "status": "EXECUTING", "activeTask": "Testing APNS certificate on staging", "uptime": "4h 08m" },
-    { "id": "emp-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "status": "EXECUTING", "activeTask": "Investigating p99 latency regression", "uptime": "1h 22m" },
-    { "id": "emp-david", "name": "David Kim", "role": "ML Engineer", "status": "EXECUTING", "activeTask": "Retraining classifier on billing intents", "uptime": "3h 45m" },
-    { "id": "emp-fatima", "name": "Fatima Al-Hassan", "role": "Product Manager", "status": "AWAITING_HUMAN", "activeTask": "Reviewing SLA metric definitions with Priya", "uptime": "0h 30m" },
-    { "id": "emp-noah", "name": "Noah Chen", "role": "Security Engineer", "status": "COMPILING", "activeTask": "Designing RBAC schema for Admin Dashboard", "uptime": "2h 17m" }
+  "agents": [
+    { "id": "agent-ava", "name": "Ava Chen", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Implementing dark mode tokens for widget SDK", "uptime": "1h 48m" },
+    { "id": "agent-marcus", "name": "Marcus Webb", "role": "Backend Engineer", "status": "COMPILING", "activeTask": "Reviewing Stripe webhook handler", "uptime": "3h 12m" },
+    { "id": "agent-priya", "name": "Priya Sharma", "role": "API Engineer", "status": "EXECUTING", "activeTask": "Calibrating intent classifier thresholds", "uptime": "2h 55m" },
+    { "id": "agent-james", "name": "James Liu", "role": "Frontend Engineer", "status": "EXECUTING", "activeTask": "Profiling SDK initialization bundle", "uptime": "0h 42m" },
+    { "id": "agent-sonia", "name": "Sonia Patel", "role": "Design Engineer", "status": "EXECUTING", "activeTask": "Testing APNS certificate on staging", "uptime": "4h 08m" },
+    { "id": "agent-elena", "name": "Elena Rodriguez", "role": "DevOps Engineer", "status": "EXECUTING", "activeTask": "Investigating p99 latency regression", "uptime": "1h 22m" },
+    { "id": "agent-david", "name": "David Kim", "role": "ML Engineer", "status": "EXECUTING", "activeTask": "Retraining classifier on billing intents", "uptime": "3h 45m" },
+    { "id": "agent-fatima", "name": "Fatima Al-Hassan", "role": "Product Manager", "status": "AWAITING_HUMAN", "activeTask": "Reviewing SLA metric definitions with Priya", "uptime": "0h 30m" },
+    { "id": "agent-noah", "name": "Noah Chen", "role": "Security Engineer", "status": "COMPILING", "activeTask": "Designing RBAC schema for Admin Dashboard", "uptime": "2h 17m" }
   ],
   "telemetry": {
-    "emp-ava":    { "contextSaturation": 72,  "tokensPerSecond": 188, "currentCost": 0.0312, "evolutionLoop": "34/100", "logicKernelIntegrity": 96,  "sessionCost": 1.87,  "budget": 5.00 },
-    "emp-marcus": { "contextSaturation": 58,  "tokensPerSecond": 94,  "currentCost": 0.0189, "evolutionLoop": "21/100", "logicKernelIntegrity": 88,  "sessionCost": 0.94,  "budget": 5.00 },
-    "emp-priya":  { "contextSaturation": 65,  "tokensPerSecond": 210, "currentCost": 0.0441, "evolutionLoop": "18/100", "logicKernelIntegrity": 100, "sessionCost": 2.31,  "budget": 8.00 },
-    "emp-james":  { "contextSaturation": 41,  "tokensPerSecond": 133, "currentCost": 0.0098, "evolutionLoop": "12/100", "logicKernelIntegrity": 99,  "sessionCost": 0.44,  "budget": 5.00 },
-    "emp-sonia":  { "contextSaturation": 83,  "tokensPerSecond": 167, "currentCost": 0.0276, "evolutionLoop": "28/100", "logicKernelIntegrity": 92,  "sessionCost": 1.63,  "budget": 6.00 },
-    "emp-elena":  { "contextSaturation": 54,  "tokensPerSecond": 78,  "currentCost": 0.0521, "evolutionLoop": "9/100",  "logicKernelIntegrity": 87,  "sessionCost": 3.12,  "budget": 8.00 },
-    "emp-david":  { "contextSaturation": 91,  "tokensPerSecond": 44,  "currentCost": 0.0893, "evolutionLoop": "15/100", "logicKernelIntegrity": 94,  "sessionCost": 5.43,  "budget": 10.00 },
-    "emp-fatima": { "contextSaturation": 18,  "tokensPerSecond": 12,  "currentCost": 0.0011, "evolutionLoop": "3/100",  "logicKernelIntegrity": 100, "sessionCost": 0.08,  "budget": 2.00 },
-    "emp-noah":   { "contextSaturation": 47,  "tokensPerSecond": 61,  "currentCost": 0.0144, "evolutionLoop": "7/100",  "logicKernelIntegrity": 98,  "sessionCost": 0.77,  "budget": 6.00 }
+    "agent-ava":    { "contextSaturation": 72,  "tokensPerSecond": 188, "currentCost": 0.0312, "evolutionLoop": "34/100", "logicKernelIntegrity": 96,  "sessionCost": 1.87,  "budget": 5.00 },
+    "agent-marcus": { "contextSaturation": 58,  "tokensPerSecond": 94,  "currentCost": 0.0189, "evolutionLoop": "21/100", "logicKernelIntegrity": 88,  "sessionCost": 0.94,  "budget": 5.00 },
+    "agent-priya":  { "contextSaturation": 65,  "tokensPerSecond": 210, "currentCost": 0.0441, "evolutionLoop": "18/100", "logicKernelIntegrity": 100, "sessionCost": 2.31,  "budget": 8.00 },
+    "agent-james":  { "contextSaturation": 41,  "tokensPerSecond": 133, "currentCost": 0.0098, "evolutionLoop": "12/100", "logicKernelIntegrity": 99,  "sessionCost": 0.44,  "budget": 5.00 },
+    "agent-sonia":  { "contextSaturation": 83,  "tokensPerSecond": 167, "currentCost": 0.0276, "evolutionLoop": "28/100", "logicKernelIntegrity": 92,  "sessionCost": 1.63,  "budget": 6.00 },
+    "agent-elena":  { "contextSaturation": 54,  "tokensPerSecond": 78,  "currentCost": 0.0521, "evolutionLoop": "9/100",  "logicKernelIntegrity": 87,  "sessionCost": 3.12,  "budget": 8.00 },
+    "agent-david":  { "contextSaturation": 91,  "tokensPerSecond": 44,  "currentCost": 0.0893, "evolutionLoop": "15/100", "logicKernelIntegrity": 94,  "sessionCost": 5.43,  "budget": 10.00 },
+    "agent-fatima": { "contextSaturation": 18,  "tokensPerSecond": 12,  "currentCost": 0.0011, "evolutionLoop": "3/100",  "logicKernelIntegrity": 100, "sessionCost": 0.08,  "budget": 2.00 },
+    "agent-noah":   { "contextSaturation": 47,  "tokensPerSecond": 61,  "currentCost": 0.0144, "evolutionLoop": "7/100",  "logicKernelIntegrity": 98,  "sessionCost": 0.77,  "budget": 6.00 }
   },
   "permissions": {
-    "emp-ava":    { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false },
-    "emp-marcus": { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-priya":  { "modelEngine": "Sonnet",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": false, "installDeps": false },
-    "emp-james":  { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "DIRECT_MAIN",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
-    "emp-sonia":  { "modelEngine": "Codex",   "writeAccess": false, "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-elena":  { "modelEngine": "Sonnet",   "writeAccess": true,  "commitAuthority": "DIRECT_MAIN",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
-    "emp-david":  { "modelEngine": "Opus 4.8", "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
-    "emp-fatima": { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": true,  "installDeps": false },
-    "emp-noah":   { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false }
+    "agent-ava":    { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false },
+    "agent-marcus": { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "agent-priya":  { "modelEngine": "Sonnet",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": false, "installDeps": false },
+    "agent-james":  { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "DIRECT_MAIN",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "agent-sonia":  { "modelEngine": "Codex",   "writeAccess": false, "commitAuthority": "AUTO_MERGE",   "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "agent-elena":  { "modelEngine": "Sonnet",   "writeAccess": true,  "commitAuthority": "DIRECT_MAIN",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": true  },
+    "agent-david":  { "modelEngine": "Opus 4.8", "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 16384, "writeMessages": false, "installDeps": false },
+    "agent-fatima": { "modelEngine": "Claude",   "writeAccess": false, "commitAuthority": "REVIEW_ONLY",  "maxTokens": 4096,  "writeMessages": true,  "installDeps": false },
+    "agent-noah":   { "modelEngine": "Opus 4.8", "writeAccess": true,  "commitAuthority": "REVIEW_ONLY",  "maxTokens": 8192,  "writeMessages": true,  "installDeps": false }
   },
   "actionLogs": {
-    "emp-ava":    [{ "time": "12:34", "action": "Built dark mode token map — 48 tokens across surface" }, { "time": "12:28", "action": "Ran tree-shake analysis on widget bundle — saved 18kb" }, { "time": "12:10", "action": "Fixed keyboard trap in modal — tab cycle now exits correctly" }],
-    "emp-marcus": [{ "time": "12:41", "action": "Reviewing Stripe webhook signature verification" }, { "time": "12:30", "action": "Merged PR #388 — Postgres 16 migration rollback" }, { "time": "12:15", "action": "Spun up Stripe test webhook tunnel" }],
-    "emp-priya":  [{ "time": "12:38", "action": "Adjusted confidence threshold for 'billing' intents — +7% precision" }, { "time": "12:20", "action": "Indexed new knowledge base articles — 1,240 chunks embedded" }, { "time": "11:55", "action": "Profiled vector DB query path — p99 340ms at full load" }],
-    "emp-james":  [{ "time": "12:44", "action": "Bundle splitting config added — lazy-loading non-critical modules" }, { "time": "12:15", "action": "Notion rich text → widget schema mapping written" }, { "time": "11:50", "action": "Fixed CSS `contain` property conflict with host page" }],
-    "emp-sonia":  [{ "time": "12:40", "action": "APNS sandbox cert uploaded — push payload testing in progress" }, { "time": "12:20", "action": "Iterated on z-index portal approach — 3rd draft reviewed" }, { "time": "11:45", "action": "Published agent performance table redesign to Figma" }],
-    "emp-elena":  [{ "time": "12:35", "action": "Correlated p99 spike with embedding queue backpressure" }, { "time": "12:10", "action": "Deployed canary for VL-101 fix — monitoring p99 at 50k rpm" }, { "time": "11:40", "action": "Wrote runbook for latency escalation — shared with Priya" }],
-    "emp-david":  [{ "time": "12:30", "action": "Retraining on billing intent class — 8k new samples added" }, { "time": "12:00", "action": "Evaluated classifier on holdout set — F1 0.94 (up from 0.89)" }, { "time": "11:30", "action": "Benchmarked model quantization — 40% latency reduction achieved" }],
-    "emp-fatima": [{ "time": "12:00", "action": "Compiled SLA definitions doc — 5 tier structure proposed" }, { "time": "11:30", "action": "Reviewed sprint burn-down with engineering leads" }, { "time": "10:50", "action": "Prioritized backlog — 12 items deprioritized for Q3" }],
-    "emp-noah":   [{ "time": "12:18", "action": "Drafted RBAC hierarchy: org → team → agent → viewer" }, { "time": "11:55", "action": "Ran static analysis on OAuth PKCE implementation — no findings" }, { "time": "11:20", "action": "Wrote threat model for widget embed CSP headers" }]
+    "agent-ava":    [{ "time": "12:34", "action": "Built dark mode token map — 48 tokens across surface" }, { "time": "12:28", "action": "Ran tree-shake analysis on widget bundle — saved 18kb" }, { "time": "12:10", "action": "Fixed keyboard trap in modal — tab cycle now exits correctly" }],
+    "agent-marcus": [{ "time": "12:41", "action": "Reviewing Stripe webhook signature verification" }, { "time": "12:30", "action": "Merged PR #388 — Postgres 16 migration rollback" }, { "time": "12:15", "action": "Spun up Stripe test webhook tunnel" }],
+    "agent-priya":  [{ "time": "12:38", "action": "Adjusted confidence threshold for 'billing' intents — +7% precision" }, { "time": "12:20", "action": "Indexed new knowledge base articles — 1,240 chunks embedded" }, { "time": "11:55", "action": "Profiled vector DB query path — p99 340ms at full load" }],
+    "agent-james":  [{ "time": "12:44", "action": "Bundle splitting config added — lazy-loading non-critical modules" }, { "time": "12:15", "action": "Notion rich text → widget schema mapping written" }, { "time": "11:50", "action": "Fixed CSS `contain` property conflict with host page" }],
+    "agent-sonia":  [{ "time": "12:40", "action": "APNS sandbox cert uploaded — push payload testing in progress" }, { "time": "12:20", "action": "Iterated on z-index portal approach — 3rd draft reviewed" }, { "time": "11:45", "action": "Published agent performance table redesign to Figma" }],
+    "agent-elena":  [{ "time": "12:35", "action": "Correlated p99 spike with embedding queue backpressure" }, { "time": "12:10", "action": "Deployed canary for VL-101 fix — monitoring p99 at 50k rpm" }, { "time": "11:40", "action": "Wrote runbook for latency escalation — shared with Priya" }],
+    "agent-david":  [{ "time": "12:30", "action": "Retraining on billing intent class — 8k new samples added" }, { "time": "12:00", "action": "Evaluated classifier on holdout set — F1 0.94 (up from 0.89)" }, { "time": "11:30", "action": "Benchmarked model quantization — 40% latency reduction achieved" }],
+    "agent-fatima": [{ "time": "12:00", "action": "Compiled SLA definitions doc — 5 tier structure proposed" }, { "time": "11:30", "action": "Reviewed sprint burn-down with engineering leads" }, { "time": "10:50", "action": "Prioritized backlog — 12 items deprioritized for Q3" }],
+    "agent-noah":   [{ "time": "12:18", "action": "Drafted RBAC hierarchy: org → team → agent → viewer" }, { "time": "11:55", "action": "Ran static analysis on OAuth PKCE implementation — no findings" }, { "time": "11:20", "action": "Wrote threat model for widget embed CSP headers" }]
   },
   "nextSteps": {
-    "emp-ava":    "Next — Apply dark mode tokens to widget iframe container",
-    "emp-marcus": "Next — Land Stripe webhook PR after Noah's sign-off",
-    "emp-priya":  "Next — Validate VL-102 on staging with live traffic replay",
-    "emp-james":  "Next — Measure SDK init delta after lazy-load split",
-    "emp-sonia":  "Next — Test push payload on physical iPhone 15 device",
-    "emp-elena":  "Next — Roll VL-101 fix to 10% if p99 holds below 800ms",
-    "emp-david":  "Next — Run VL-102 classifier against production shadow traffic",
-    "emp-fatima": "Next — Circulate SLA doc for final sign-off by EOD",
-    "emp-noah":   "Next — Present RBAC schema to Marcus and James by 14:00"
+    "agent-ava":    "Next — Apply dark mode tokens to widget iframe container",
+    "agent-marcus": "Next — Land Stripe webhook PR after Noah's sign-off",
+    "agent-priya":  "Next — Validate VL-102 on staging with live traffic replay",
+    "agent-james":  "Next — Measure SDK init delta after lazy-load split",
+    "agent-sonia":  "Next — Test push payload on physical iPhone 15 device",
+    "agent-elena":  "Next — Roll VL-101 fix to 10% if p99 holds below 800ms",
+    "agent-david":  "Next — Run VL-102 classifier against production shadow traffic",
+    "agent-fatima": "Next — Circulate SLA doc for final sign-off by EOD",
+    "agent-noah":   "Next — Present RBAC schema to Marcus and James by 14:00"
   },
   "auditItems": [
     { "id": "audit-1", "type": "AUTH_INTERCEPT", "title": "Agent requests elevated write scope", "description": "Priya Sharma is requesting temporary write access to the intent classifier config. Needed to update threshold during VL-102 calibration.", "timestamp": "3m ago" },
@@ -271,8 +271,8 @@
     }
   ],
   "favorites": [
-    { "id": "emp-elena", "type": "employee" },
-    { "id": "emp-david", "type": "employee" },
+    { "id": "agent-elena", "type": "agent" },
+    { "id": "agent-david", "type": "agent" },
     { "id": "proj-vela-platform", "type": "project" },
     { "id": "proj-widget", "type": "project" },
     { "id": "proj-admin", "type": "project" }

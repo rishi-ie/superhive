@@ -21,8 +21,8 @@ function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
       label = project?.title ?? ref.id;
       iconKey = 'folder';
     } else {
-      const employee = data.employees.find(e => e.id === ref.id);
-      label = employee?.name ?? ref.id;
+      const agent = data.agents.find(a => a.id === ref.id);
+      label = agent?.name ?? ref.id;
       iconKey = 'user';
     }
     return { id: ref.id, type: ref.type, label, icon: ICONS[iconKey] };

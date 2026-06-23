@@ -3,11 +3,11 @@ import { LeftNav } from '@/components/LeftNav';
 import { CenterWorkspace, type CenterView } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
-import type { ActiveEmployee } from '@/components/left-nav/ActiveSection';
+import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listProjectAgents, listTickets, getProject } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listEmployees, approveAudit, denyAudit } from '@/data/employees/store';
+import { listAgents, approveAudit, denyAudit } from '@/data/agents/store';
 import {
   makeInitialTabState,
   openTab as openTabOp,
@@ -30,16 +30,16 @@ type DashboardProps = {
   onNavigate: (page: Page) => void;
 };
 
-function toActiveEmployee(employees: ReturnType<typeof listEmployees>): ActiveEmployee[] {
-  return employees.map((e) => ({
-    id: e.id,
-    name: e.name,
-    status: e.status === 'EXECUTING' || e.status === 'COMPILING' || e.status === 'AWAITING_HUMAN'
+function toActiveAgent(agents: ReturnType<typeof listAgents>): ActiveAgent[] {
+  return agents.map((a) => ({
+    id: a.id,
+    name: a.name,
+    status: a.status === 'EXECUTING' || a.status === 'COMPILING' || a.status === 'AWAITING_HUMAN'
       ? 'active'
-      : e.status === 'IDLE'
+      : a.status === 'IDLE'
       ? 'idle'
       : 'busy',
-    currentTask: e.activeTask,
+    currentTask: a.activeTask,
   }));
 }
 
@@ -53,7 +53,7 @@ export function Dashboard({
   const [tabState, setTabState] = useState(() => makeInitialTabState('superhive'));
   const [centerView, setCenterView] = useState<CenterView | null>('home');
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('vela');
-  const [activeEmployeeId, setActiveEmployeeId] = useState<string | null>(null);
+  const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
 
   const workspaces_data = listWorkspaces();
@@ -61,8 +61,8 @@ export function Dashboard({
   const favorites_data = listFavorites();
   const workspaceAgents = listProjectAgents(activeWorkspaceId);
   const workspaceAgentNames = new Set(workspaceAgents.map(a => a.name));
-  const employees_data = toActiveEmployee(
-    listEmployees().filter(e => workspaceAgentNames.has(e.name))
+  const agents_data = toActiveAgent(
+    listAgents().filter(a => workspaceAgentNames.has(a.name))
   );
 
   const workspaceMap = useMemo(
@@ -70,7 +70,7 @@ export function Dashboard({
     [],
   );
 
-  const hasData = workspaces_data.length > 0 || listEmployees().length > 0;
+  const hasData = workspaces_data.length > 0 || listAgents().length > 0;
 
   const activeTasks = listTickets(activeWorkspaceId)
     .filter(t => t.status === 'EXECUTING')
@@ -80,13 +80,13 @@ export function Dashboard({
 
   const rightPanelContext = useMemo<RightPanelContext>(() => {
     if (!activeTab) return null;
-    if (activeTab.type === 'chat' && activeEmployeeId) return { kind: 'employee', employeeId: activeEmployeeId };
+    if (activeTab.type === 'chat' && activeAgentId) return { kind: 'agent', agentId: activeAgentId };
     if (activeTab.type === 'tickets' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
     if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId };
     if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId };
-    if (activeTab.type === 'chat') return { kind: 'employee', employeeId: activeEmployeeId ?? '' };
+    if (activeTab.type === 'chat') return { kind: 'agent', agentId: activeAgentId ?? '' };
     return null;
-  }, [activeTab, activeEmployeeId]);
+  }, [activeTab, activeAgentId]);
 
   const rightPanelTabs = getRightPanelTabs(rightPanelContext);
   const defaultRightTab = getDefaultRightPanelTab(rightPanelContext);
@@ -125,7 +125,7 @@ export function Dashboard({
 
   const handleNavItemClick = useCallback((id: string) => {
     if (id === 'home') { setCenterView('home'); return; }
-    if (id === 'employees' || id === 'universal-employees') { setCenterView('universal-employees'); return; }
+    if (id === 'agents' || id === 'universal-agents') { setCenterView('universal-agents'); return; }
     if (id === 'communications') { setCenterView('communications'); return; }
     if (id === 'projects' || id === 'universal-projects') { setCenterView('universal-projects'); return; }
     if (id === 'tickets') { setCenterView('tickets'); return; }
@@ -137,8 +137,8 @@ export function Dashboard({
     handleOpenTab('projects', workspace.id);
   }, [handleOpenTab]);
 
-  const handleEmployeeSelect = useCallback((id: string) => {
-    setActiveEmployeeId(id);
+  const handleAgentSelect = useCallback((id: string) => {
+    setActiveAgentId(id);
     handleOpenTab('chat', activeWorkspaceId);
     setRightPanelTab('overview');
   }, [handleOpenTab, activeWorkspaceId]);
@@ -150,8 +150,8 @@ export function Dashboard({
   }, []);
 
   const handleFavoriteSelect = useCallback((item: FavoriteItem) => {
-    if (item.type === 'employee') {
-      setActiveEmployeeId(item.id);
+    if (item.type === 'agent') {
+      setActiveAgentId(item.id);
       handleOpenTab('chat', activeWorkspaceId);
       setRightPanelTab('overview');
     } else if (item.type === 'project') {
@@ -165,8 +165,8 @@ export function Dashboard({
   const handleWizardAction = useCallback((actionId: string) => {
     if (actionId === 'open-project') {
       handleOpenTab('projects', activeWorkspaceId);
-    } else if (actionId === 'view-employees') {
-      setCenterView('employees');
+    } else if (actionId === 'view-agents') {
+      setCenterView('agents');
     }
   }, [handleOpenTab, activeWorkspaceId]);
 
@@ -178,16 +178,16 @@ export function Dashboard({
         workspaces={workspaces_data}
         currentWorkspace={currentWorkspace}
         favorites={favorites_data}
-        activeEmployees={employees_data}
+        activeAgents={agents_data}
         activeTasks={activeTasks}
         onWorkspaceSelect={handleWorkspaceSelect}
         onSettingsClick={() => onNavigate('settings')}
         onFavoritesItemClick={handleFavoriteSelect}
-        onActiveEmployeeClick={handleEmployeeSelect}
+        onActiveAgentClick={handleAgentSelect}
         onActiveTaskClick={(id) => handleTicketSelect(id)}
         onNavItemClick={handleNavItemClick}
         currentView={centerView ?? activeTab?.type ?? 'home'}
-        onEmployeeSelect={handleEmployeeSelect}
+        onAgentSelect={handleAgentSelect}
         onProjectClick={handleProjectSelect}
       />
       <CenterWorkspace
@@ -196,13 +196,13 @@ export function Dashboard({
         workspaceMap={workspaceMap}
         centerView={centerView}
         activeWorkspaceId={activeWorkspaceId}
-        activeEmployeeId={activeEmployeeId}
+        activeAgentId={activeAgentId}
         selectedTicketId={activeTab?.selectedTicketId ?? null}
         hasData={hasData}
         onTabClick={handleSelectTab}
         onTabClose={handleCloseTab}
         onTicketSelect={handleTicketSelect}
-        onEmployeeSelect={handleEmployeeSelect}
+        onAgentSelect={handleAgentSelect}
         onProjectSelect={handleProjectSelect}
         onAction={handleWizardAction}
       />

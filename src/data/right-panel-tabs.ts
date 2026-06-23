@@ -8,7 +8,7 @@ export type RightPanelTabId =
   | 'project';
 
 export type RightPanelContext =
-  | { kind: 'employee'; employeeId: string }
+  | { kind: 'agent'; agentId: string }
   | { kind: 'ticket'; ticketId: string }
   | { kind: 'project'; projectId: string }
   | { kind: 'channel'; channelId: string }
@@ -20,7 +20,7 @@ export type RightPanelTab = {
   icon: typeof Eye;
 };
 
-const employeeTabs: RightPanelTab[] = [
+const agentTabs: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
   { id: 'manage',    label: 'Manage',    icon: Settings },
   { id: 'inbox',     label: 'Inbox',     icon: Inbox },
@@ -46,7 +46,7 @@ const channelTabs: RightPanelTab[] = [
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
   if (!context) return [];
   switch (context.kind) {
-    case 'employee': return employeeTabs;
+    case 'agent': return agentTabs;
     case 'ticket':   return ticketTabs;
     case 'project':  return projectTabs;
     case 'channel':  return channelTabs;

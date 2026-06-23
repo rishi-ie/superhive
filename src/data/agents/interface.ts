@@ -1,12 +1,10 @@
-import type { AgentStatus } from '@/types/agent';
+export type AgentStatus = 'EXECUTING' | 'COMPILING' | 'AWAITING_HUMAN' | 'IDLE' | 'ERROR_LOOP';
 
-export type EmployeeStatus = 'EXECUTING' | 'COMPILING' | 'AWAITING_HUMAN' | 'IDLE' | 'ERROR_LOOP';
-
-export type Employee = {
+export type Agent = {
   id: string;
   name: string;
   role: string;
-  status: EmployeeStatus;
+  status: AgentStatus;
   activeTask: string;
   uptime: string;
 };
@@ -29,10 +27,12 @@ export type AuditItem = {
   timestamp: string;
 };
 
+export type CommitAuthority = 'REVIEW_ONLY' | 'AUTO_MERGE' | 'DIRECT_MAIN';
+
 export type Permissions = {
   modelEngine: string;
   writeAccess: boolean;
-  commitAuthority: 'REVIEW_ONLY' | 'AUTO_MERGE' | 'DIRECT_MAIN';
+  commitAuthority: CommitAuthority;
   maxTokens: number;
   writeMessages: boolean;
   installDeps: boolean;
@@ -43,14 +43,14 @@ export type ActionLogEntry = {
   action: string;
 };
 
-export interface EmployeeStore {
-  list(): Employee[];
-  get(id: string): Employee | undefined;
-  getTelemetry(employeeId: string): Telemetry | null;
-  getPermissions(employeeId: string): Permissions | null;
-  getAuditItems(employeeId?: string): AuditItem[];
-  getActionLog(employeeId: string): ActionLogEntry[];
-  getNextStep(employeeId: string): string;
+export interface AgentStore {
+  list(): Agent[];
+  get(id: string): Agent | undefined;
+  getTelemetry(agentId: string): Telemetry | null;
+  getPermissions(agentId: string): Permissions | null;
+  getAuditItems(agentId?: string): AuditItem[];
+  getActionLog(agentId: string): ActionLogEntry[];
+  getNextStep(agentId: string): string;
   getDefaultTelemetry(): Telemetry;
   getDefaultPermissions(): Permissions;
   approveAudit(id: string): void;

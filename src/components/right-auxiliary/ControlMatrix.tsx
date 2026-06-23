@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { Toggle } from '@/components/ui/Toggle';
-import { getPermissions, type Employee, type Permissions } from '@/data/employees/store';
-import type { CommitAuthority } from '@/types/agent';
+import { getPermissions, type Agent, type Permissions } from '@/data/agents/store';
+import type { CommitAuthority } from '@/data/agents/interface';
 
 type ControlMatrixProps = {
-  agent: Employee;
+  agent: Agent;
 };
 
 const ENGINES = [
@@ -184,7 +184,7 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
           type="button"
           className="flex w-full items-center justify-center gap-2 rounded-md border border-chart-5 px-3 py-2 text-sm font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
         >
-          Terminate Employee
+          Terminate Agent
         </button>
       </div>
 

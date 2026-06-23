@@ -48,9 +48,9 @@ export const BLANK_CANVAS_WIZARD_CONFIG: WizardConfig = {
       recommended: true,
     },
     {
-      id: 'view-employees',
+      id: 'view-agents',
       icon: Bot,
-      title: 'View employees',
+      title: 'View agents',
       description: 'Browse your agent roster and their activity',
     },
   ],
@@ -124,7 +124,7 @@ export const TICKETS_WIZARD_CONFIG: WizardConfig = {
   ],
 };
 
-export const EMPLOYEES_WIZARD_CONFIG: WizardConfig = {
+export const AGENTS_WIZARD_CONFIG: WizardConfig = {
   icon: Bot,
   title: 'Add your first agent',
   subtitle: 'AI agents execute work, monitor systems, and coordinate with the swarm',

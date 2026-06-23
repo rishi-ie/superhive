@@ -1,9 +1,9 @@
 import { ShieldAlert, GitMerge } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-import { getAuditItems, type Employee } from '@/data/employees/store';
+import { getAuditItems, type Agent } from '@/data/agents/store';
 
 type AuditQueueProps = {
-  agent?: Employee | null;
+  agent?: Agent | null;
   onApprove?: (id: string) => void;
   onDeny?: (id: string) => void;
 };

@@ -1,4 +1,4 @@
-import type { AgentStatus } from '@/types/agent';
+import type { AgentStatus } from '@/data/agents/interface';
 
 export type AccordionAgent = {
   id: string;

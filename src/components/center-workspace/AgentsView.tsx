@@ -2,12 +2,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { OnboardingWizard } from './OnboardingWizard';
-import { EMPLOYEES_WIZARD_CONFIG } from '@/data/wizard-configs';
-import { listEmployees } from '@/data/employees/store';
-import type { EmployeeStatus } from '@/data/employees/interface';
+import { AGENTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { listAgents } from '@/data/agents/store';
+import type { AgentStatus } from '@/data/agents/interface';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
-function StatusDot({ status }: { status: EmployeeStatus }) {
+function StatusDot({ status }: { status: AgentStatus }) {
   if (status === 'EXECUTING') return <span className="size-1.5 rounded-full bg-chart-2 pulse-executing shrink-0" />;
   if (status === 'COMPILING') return <Loader2 size={8} strokeWidth={STROKE_WIDTH} className="shrink-0 animate-spin text-chart-3" />;
   if (status === 'IDLE') return <span className="size-1.5 rounded-full bg-muted-foreground/40 shrink-0" />;
@@ -15,13 +15,13 @@ function StatusDot({ status }: { status: EmployeeStatus }) {
   return <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />;
 }
 
-type EmployeeCardProps = {
-  employee: ReturnType<typeof listEmployees>[number];
+type AgentCardProps = {
+  agent: ReturnType<typeof listAgents>[number];
   selected?: boolean;
   onClick?: () => void;
 };
 
-function EmployeeCard({ employee, selected, onClick }: EmployeeCardProps) {
+function AgentCard({ agent, selected, onClick }: AgentCardProps) {
   return (
     <button
       onClick={onClick}
@@ -30,34 +30,34 @@ function EmployeeCard({ employee, selected, onClick }: EmployeeCardProps) {
         selected ? 'border-chart-1' : 'border-border'
       }`}
     >
-      <Avatar size="xs" fallback={employee.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)} />
+      <Avatar size="xs" fallback={agent.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)} />
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <div className="flex items-center gap-1.5">
-          <StatusDot status={employee.status} />
-          <span className="text-xs font-semibold text-foreground truncate">{employee.name}</span>
+          <StatusDot status={agent.status} />
+          <span className="text-xs font-semibold text-foreground truncate">{agent.name}</span>
         </div>
-        <span className="text-[10px] text-muted-foreground truncate">{employee.role}</span>
+        <span className="text-[10px] text-muted-foreground truncate">{agent.role}</span>
       </div>
-      {employee.uptime && (
-        <span className="text-[9px] font-fustat text-muted-foreground shrink-0">{employee.uptime}</span>
+      {agent.uptime && (
+        <span className="text-[9px] font-fustat text-muted-foreground shrink-0">{agent.uptime}</span>
       )}
     </button>
   );
 }
 
-type EmployeesViewProps = {
-  onEmployeeSelect?: (id: string) => void;
-  selectedEmployeeId?: string | null;
+type AgentsViewProps = {
+  onAgentSelect?: (id: string) => void;
+  selectedAgentId?: string | null;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function EmployeesView({ onEmployeeSelect, selectedEmployeeId, onAction }: EmployeesViewProps) {
-  const employees = listEmployees();
+export function AgentsView({ onAgentSelect, selectedAgentId, onAction }: AgentsViewProps) {
+  const agents = listAgents();
 
-  if (employees.length === 0) {
+  if (agents.length === 0) {
     return (
       <OnboardingWizard
-        config={EMPLOYEES_WIZARD_CONFIG}
+        config={AGENTS_WIZARD_CONFIG}
         onAction={onAction}
       />
     );
@@ -66,16 +66,16 @@ export function EmployeesView({ onEmployeeSelect, selectedEmployeeId, onAction }
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-foreground">Employees</h1>
-        <span className="text-xs text-muted-foreground">{employees.length} agent{employees.length !== 1 ? 's' : ''}</span>
+        <h1 className="text-lg font-bold text-foreground">Agents</h1>
+        <span className="text-xs text-muted-foreground">{agents.length} agent{agents.length !== 1 ? 's' : ''}</span>
       </div>
       <div className="flex flex-col gap-1.5">
-        {employees.map(employee => (
-          <EmployeeCard
-            key={employee.id}
-            employee={employee}
-            selected={selectedEmployeeId === employee.id}
-            onClick={() => onEmployeeSelect?.(employee.id)}
+        {agents.map(agent => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            selected={selectedAgentId === agent.id}
+            onClick={() => onAgentSelect?.(agent.id)}
           />
         ))}
       </div>
