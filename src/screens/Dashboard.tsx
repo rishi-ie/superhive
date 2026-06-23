@@ -52,7 +52,7 @@ export function Dashboard({
 }: DashboardProps) {
   const [tabState, setTabState] = useState(() => makeInitialTabState('superhive'));
   const [centerView, setCenterView] = useState<CenterView | null>('home');
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('superhive');
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('vela');
   const [activeEmployeeId, setActiveEmployeeId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
 
@@ -128,9 +128,8 @@ export function Dashboard({
     if (id === 'employees' || id === 'universal-employees') { setCenterView('universal-employees'); return; }
     if (id === 'communications') { setCenterView('communications'); return; }
     if (id === 'projects' || id === 'universal-projects') { setCenterView('universal-projects'); return; }
-    if (id === 'tickets' || id === 'chat') {
-      handleOpenTab(id as CenterTabType, activeWorkspaceId);
-    }
+    if (id === 'tickets') { setCenterView('tickets'); return; }
+    if (id === 'chat') { handleOpenTab('chat', activeWorkspaceId); }
   }, [handleOpenTab, activeWorkspaceId]);
 
   const handleWorkspaceSelect = useCallback((workspace: Workspace) => {

@@ -12,7 +12,7 @@ import { HOME_WIZARD_CONFIG, BLANK_CANVAS_WIZARD_CONFIG } from '@/data/wizard-co
 import type { CenterTab, CenterTabType } from '@/data/tabs/interface';
 import type { OnboardingWizardProps } from './center-workspace/OnboardingWizard';
 
-export type CenterView = 'home' | 'employees' | 'communications' | 'universal-projects' | 'universal-employees';
+export type CenterView = 'home' | 'employees' | 'communications' | 'universal-projects' | 'universal-employees' | 'tickets';
 
 type CenterWorkspaceProps = {
   tabs: CenterTab[];
@@ -34,6 +34,7 @@ type CenterWorkspaceProps = {
 function getViewLabel(centerView: CenterView | null, activeTab: CenterTab | null): string {
   if (centerView === 'employees') return 'Employees';
   if (centerView === 'communications') return 'Communications';
+  if (centerView === 'tickets') return 'Tickets';
   if (centerView === 'universal-projects') return 'Projects';
   if (centerView === 'universal-employees') return 'Employees';
   if (!activeTab) return '';
@@ -107,6 +108,12 @@ export function CenterWorkspace({
         )}
         {centerView === 'universal-employees' && (
           <UniversalEmployeesView onEmployeeSelect={onEmployeeSelect} />
+        )}
+        {centerView === 'tickets' && (
+          <TicketsView
+            workspaceId={activeWorkspaceId}
+            onTicketSelect={onTicketSelect}
+          />
         )}
         {!centerView && activeTab?.type === 'chat' && (
           <ChatView workspaceId={wsId} onAction={onAction} />
