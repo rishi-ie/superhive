@@ -226,48 +226,116 @@
   ],
   "chatThreads": [
     {
-      "id": "thread-1",
-      "title": "Sprint 22 retrospective",
+      "id": "thread-ava-1",
+      "title": "Dark mode token audit",
+      "agentId": "agent-ava",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Let's run the Sprint 22 retro. Three themes stood out: the widget bundle regression, the classifier drift we caught late, and the good velocity on the Admin RBAC work.", "minutesAgo": 52 },
-        { "id": "msg-2", "role": "assistant", "content": "Good framing. On the bundle regression — the root cause was the rich text renderer pulling in the entire Notion SDK. James, want to own a pre-flight bundle audit step in CI?", "minutesAgo": 50 },
-        { "id": "msg-3", "role": "user", "content": "Yes, I'll add a bundle-size budget check that fails CI above 45kb. Also want to lock in the intent classifier monitoring — David, can you own a daily drift report?", "minutesAgo": 47 },
-        { "id": "msg-4", "role": "assistant", "content": "On it. I'll set up Evals API to run a daily batch on our top 50 intent classes and alert if F1 drops more than 2 points. Should catch drift before it hits production.", "minutesAgo": 45 }
+        { "id": "ava-msg-1", "role": "user", "content": "Can you audit our dark mode tokens for accessibility issues? I want to make sure we're covering contrast ratios for all interactive states.", "minutesAgo": 2880 },
+        { "id": "ava-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 412, "durationMs": 2840, "content": "I'll check the contrast ratios across all surface tokens.\n\n**Current state:**\n- `bg-background`: 4.2:1 (fails WCAG AA for body text)\n- `bg-card`: 4.8:1 (passes)\n\n**Interactive tokens:**\n- Primary button: 7.1:1 ✓\n- Ghost button text: 3.9:1 ✗ (fails AA)\n\n**Recommendation:**\n```css\n--bg-background: #1a1816;  /* → 4.5:1 for body text */\n```\n\nWant me to draft the PR?", "minutesAgo": 2760 },
+        { "id": "ava-msg-3", "role": "user", "content": "Yes, and also check the focus ring. The focus indicator on dark surfaces feels too subtle.", "minutesAgo": 1440 },
+        { "id": "ava-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 198, "durationMs": 1200, "content": "Focus ring is `--ring: #3a3837` — that's 2.8:1 on background. Too subtle.\n\nProposed update:\n```css\n--ring: #e07850;  /* chart-1 — 4.1:1 on dark bg */\n--ring-offset: #151110;\n```\n\nThis gives a clear terracotta focus ring that matches the brand. Width stays at 2px.", "minutesAgo": 1420 },
+        { "id": "ava-msg-5", "role": "user", "content": "Perfect. Ship both changes — background and focus ring. Also add a disabled state token.", "minutesAgo": 120 },
+        { "id": "ava-msg-6", "role": "assistant", "model": "Opus 4.8", "tokenCount": 156, "durationMs": 890, "content": "Done. Added:\n```css\n--disabled-opacity: 0.4;\n--disabled-text: #64748b;  /* 4.1:1 on card bg */\n```\n\nPR is up: `feat/design-tokens-002`", "minutesAgo": 100 }
       ],
-      "updatedAtMinutesAgo": 45
+      "updatedAtMinutesAgo": 100
     },
     {
-      "id": "thread-2",
-      "title": "VL-101 latency investigation",
+      "id": "thread-noah-1",
+      "title": "SQLite offline queue investigation",
+      "agentId": "agent-noah",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "We're seeing p99 at 2.8s on ticket routing. Started Tuesday after the embedding pipeline change. Priya and I have been digging — we think it's the vector DB connection pool.", "minutesAgo": 130 },
-        { "id": "msg-2", "role": "assistant", "content": "That's consistent with pool exhaustion under concurrent embedding requests. What's the pool size set to? And what's the embedding QPS at peak?", "minutesAgo": 128 },
-        { "id": "msg-3", "role": "user", "content": "Pool is 20 connections. Peak QPS is ~340/s during US business hours. Each embedding call holds a connection for ~300ms on cold path.", "minutesAgo": 125 },
-        { "id": "msg-4", "role": "assistant", "content": "Math checks out — 20 × (1000/300) = ~66 concurrent connections, but you're hitting 340 QPS. Connection pool is saturated. Options: increase pool size, add connection pooling sidecar, or implement embedding request batching. I'd go with batching first — smallest blast radius.", "minutesAgo": 122 }
+        { "id": "noah-msg-1", "role": "user", "content": "We're seeing messages get dropped when the mobile app goes offline for more than 30 minutes. The queue doesn't seem to be persisting correctly.", "minutesAgo": 4320 },
+        { "id": "noah-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 340, "durationMs": 2100, "content": "Checked the SQLite WAL mode settings. The DB is in DELETE mode instead of WAL — this means writers block readers during checkpoint.\n\n```sql\nPRAGMA journal_mode=DELETE;  -- current\n-- should be:\nPRAGMA journal_mode=WAL;\n```\n\nWAL mode gives you reader-writer concurrency and better crash recovery. Try the migration and I'll re-run the offline durability test.", "minutesAgo": 4300 },
+        { "id": "noah-msg-3", "role": "user", "content": "Migration ran. What's the reconnection backoff strategy? Messages pile up on the client when offline.", "minutesAgo": 180 },
+        { "id": "noah-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 220, "durationMs": 1550, "content": "Current backoff is a flat 5s retry — not great. Proposed exponential backoff:\n\n```typescript\nconst baseDelay = 1000;    // 1s\nconst ceiling = 60000;     // 60s\nconst multiplier = 2;\nconst maxRetries = 8;\n```\n\nAfter 8 failures (ceiling reached), switch to dead-letter queue. Want me to implement this?", "minutesAgo": 160 }
       ],
-      "updatedAtMinutesAgo": 122
+      "updatedAtMinutesAgo": 160
     },
     {
-      "id": "thread-3",
-      "title": "Widget dark mode design review",
+      "id": "thread-elena-1",
+      "title": "Intent classifier drift report",
+      "agentId": "agent-elena",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Ava, can you walk us through the dark mode token structure? I want to make sure we're covering contrast ratios for all interactive states before we finalize.", "minutesAgo": 88 },
-        { "id": "msg-2", "role": "assistant", "content": "Sure. I've defined 48 tokens across 6 groups: surface (background, card, modal), text (primary, secondary, muted, inverse), border (default, strong, focused), interactive (primary, secondary, danger, ghost), feedback (success, warning, error, info), and overlay (scrim, backdrop). All interactive tokens are WCAG AA at minimum — primary buttons are AAA.", "minutesAgo": 86 },
-        { "id": "msg-3", "role": "user", "content": "Looks solid. One gap — the ghost button text on dark surfaces. 'Ghost secondary' text is #64748b on #0f172a — that fails AA at 3.9:1. Should be #94a3b8 minimum.", "minutesAgo": 83 },
-        { "id": "msg-4", "role": "assistant", "content": "Good catch. Updated ghost secondary to #94a3b8 — that gets us to 4.6:1. I'll also add a ghost-tertiary for disabled states at #475569 (5.9:1). Pushing the revised token set to Figma now.", "minutesAgo": 80 }
+        { "id": "elena-msg-1", "role": "user", "content": "Can you run the daily intent classifier eval? I want to check if 'billing' and 'subscription_cancelled' have drifted since last week's training data refresh.", "minutesAgo": 1440 },
+        { "id": "elena-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 388, "durationMs": 3400, "content": "Ran Evals batch on top 50 intent classes (12k samples).\n\n**Results:**\n| Class | F1 (prev) | F1 (now) | Delta |\n|-------|-----------|----------|-------|\n| billing | 0.91 | 0.88 | **-3pts** |\n| subscription_cancelled | 0.93 | 0.87 | **-6pts** |\n| plan_upgrade | 0.89 | 0.88 | -1pt |\n\nBoth billing classes share the 'cancel' stem — seems like a targeted data drift. I'd retrain on the last 7 days of support transcripts.", "minutesAgo": 1420 },
+        { "id": "elena-msg-3", "role": "user", "content": "Confirmed — billing recall fell from 0.91 to 0.88. What's causing it? Those two classes were rock solid at 0.95+ for months.", "minutesAgo": 180 },
+        { "id": "elena-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 264, "durationMs": 1900, "content": "Root cause: new Zendesk ticket format was introduced 10 days ago. The 'cancel' intent phrasing changed — users now say 'I want to stop being charged' instead of 'cancel subscription'. Both surface the same semantic intent but the lexical overlap is lower.\n\nFix: Add 2k labeled samples with the new phrasing to the training set. I'll curate from this week's support transcripts.", "minutesAgo": 165 }
       ],
-      "updatedAtMinutesAgo": 80
+      "updatedAtMinutesAgo": 165
     },
     {
-      "id": "thread-4",
-      "title": "Q3 roadmap planning",
+      "id": "thread-david-1",
+      "title": "Connection pool sizing",
+      "agentId": "agent-david",
       "messages": [
-        { "id": "msg-1", "role": "user", "content": "Fatima, we need to finalize Q3 priorities. My top candidates: MLS-245 (handoff prediction), MLS-231 (customer-facing analytics), and MLS-198 ( Zendesk integration).", "minutesAgo": 210 },
-        { "id": "msg-2", "role": "assistant", "content": "I'd sequence them MLS-245 → MLS-198 → MLS-231. Handoff prediction unblocks both the integration and analytics work since it changes the data model. Also gives us a strong enterprise talking point for Q3.", "minutesAgo": 208 },
-        { "id": "msg-3", "role": "user", "content": "Agreed on sequence. Noah also flagged MLS-261 (SOC 2 Type II evidence collection) — that's compliance blocking Q4 enterprise deals. Needs to be in Q3.", "minutesAgo": 205 },
-        { "id": "msg-4", "role": "assistant", "content": "That pushes MLS-231 to Q4 then, unless we compress the analytics scope. Can we do MLS-231 v1 as a read-only dashboard with pre-computed aggregates, defer real-time to v2?", "minutesAgo": 202 }
+        { "id": "david-msg-1", "role": "user", "content": "We're seeing p99 at 2.8s on ticket routing. Started Tuesday after the embedding pipeline change. Priya thinks it's the vector DB connection pool.", "minutesAgo": 5760 },
+        { "id": "david-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 310, "durationMs": 2400, "content": "That's consistent with pool exhaustion under concurrent embedding requests.\n\n**Math:**\n- Pool size: 20 connections\n- Embedding latency (cold): ~300ms\n- Peak QPS: ~340/s\n- Max concurrent: 20 × (1000/300) = 66 connections\n- Actual demand: 340 QPS\n\n**Pool is saturated.** Options:\n1. Increase pool size to 100\n2. Add PgBouncer sidecar\n3. Batch embedding requests (preferred — lowest blast radius)", "minutesAgo": 5740 },
+        { "id": "david-msg-3", "role": "user", "content": "Let's go with request batching. What's the batching strategy?", "minutesAgo": 120 },
+        { "id": "david-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 180, "durationMs": 1300, "content": "Group incoming embedding requests by customer tier:\n- Enterprise: batch of 1 (immediate)\n- Pro: batch up to 8, flush every 50ms\n- Starter: batch up to 32, flush every 200ms\n\nThis drops pool utilization by ~40% for non-enterprise tiers. Enterprise stays latency-optimized.", "minutesAgo": 105 }
       ],
-      "updatedAtMinutesAgo": 202
+      "updatedAtMinutesAgo": 105
+    },
+    {
+      "id": "thread-marcus-1",
+      "title": "Admin RBAC schema review",
+      "agentId": "agent-marcus",
+      "messages": [
+        { "id": "marcus-msg-1", "role": "user", "content": "James, can you review the Admin RBAC schema? I need sign-off before we can finalize the org → team → agent permission hierarchy.", "minutesAgo": 4320 },
+        { "id": "marcus-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 480, "durationMs": 3100, "content": "Reviewed. The hierarchy is sound — org owns teams, teams own agents. One issue:\n\n```sql\nALTER TABLE agent_permissions\nADD COLUMN resource_scope TEXT DEFAULT '*';\n```\n\nThis column is nullable but should be NOT NULL with DEFAULT '*' (wildcard = all resources). Right now a NULL scope could grant unintended access. Fix before merge.", "minutesAgo": 4300 },
+        { "id": "marcus-msg-3", "role": "user", "content": "Fixed the NOT NULL constraint. Also added a migration for existing rows. Ready for re-review.", "minutesAgo": 2400 },
+        { "id": "marcus-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 195, "durationMs": 1400, "content": "LGTM. Schema is clean.\n\nOne nit: add a UNIQUE constraint on (team_id, agent_id) in the team_agents join table — currently nothing prevents duplicate agent assignments.", "minutesAgo": 2380 },
+        { "id": "marcus-msg-5", "role": "user", "content": "Added. Migration is safe — it will reject duplicate inserts. Approved for merge?", "minutesAgo": 180 },
+        { "id": "marcus-msg-6", "role": "assistant", "model": "Opus 4.8", "tokenCount": 88, "durationMs": 650, "content": "Approved. Merge at will.", "minutesAgo": 170 }
+      ],
+      "updatedAtMinutesAgo": 170
+    },
+    {
+      "id": "thread-priya-1",
+      "title": "CSV export pipeline",
+      "agentId": "agent-priya",
+      "messages": [
+        { "id": "priya-msg-1", "role": "user", "content": "The CSV export for analytics data is timing out for customers with > 500k rows. We need to make it streaming.", "minutesAgo": 7200 },
+        { "id": "priya-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 295, "durationMs": 2200, "content": "Switch to streaming writes to GCS:\n\n```python\nfrom google.cloud import storage\n\nclient = storage.Client()\nbucket = client.bucket('customer-exports')\nblob = bucket.blob(f'{customer_id}/{export_id}.csv')\n\nwith blob.open('wb', chunk_size=10 * 1024 * 1024) as f:  # 10MB chunks\n    for batch in chunked_query(rows, chunk_size=50000):\n        f.write(batch.to_csv(index=False))\n```\n\nThis avoids loading all rows into memory. Chunk size of 50k rows = ~10MB per write, well within GCS per-chunk limits.", "minutesAgo": 7180 },
+        { "id": "priya-msg-3", "role": "user", "content": "What's the GCS bucket retention policy? We need to make sure exports are available long enough for customers to download.", "minutesAgo": 120 },
+        { "id": "priya-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 120, "durationMs": 950, "content": "Current policy: 7-day rolling window, auto-deleted after. That's the compliance minimum. Happy to extend to 30 days if customers need it — just update the lifecycle rule:\n\n```bash\ngsutil lifecycle set lifecycle-config.json gs://customer-exports\n```\n\nConfig: `{ \"rule\": [{ \"action\": { \"type\": \"Delete\" }, \"condition\": { \"age\": 30 } }] }`", "minutesAgo": 105 }
+      ],
+      "updatedAtMinutesAgo": 105
+    },
+    {
+      "id": "thread-fatima-1",
+      "title": "SLA metric definitions",
+      "agentId": "agent-fatima",
+      "messages": [
+        { "id": "fatima-msg-1", "role": "user", "content": "We need to define SLA metrics for the enterprise tier. First response and resolution time. What are good baseline targets?", "minutesAgo": 8640 },
+        { "id": "fatima-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 380, "durationMs": 2600, "content": "Looking at our current p50/p95 data across enterprise customers:\n\n**First Response SLA:**\n- Pro: 4h p50, 8h p95 → propose: 4h first response, 95th percentile\n- Starter: 24h first response\n\n**Resolution SLA:**\n- Pro: 72h p50, 5d p95 → propose: 72h resolution, business days\n- Starter: 7d resolution\n\nBoth measured in business hours. Non-business-hour tickets clock starts at 9am next business day.", "minutesAgo": 8620 },
+        { "id": "fatima-msg-3", "role": "user", "content": "Add breach notifications. When a ticket is 1h from breaching first response SLA, send a Slack alert to the on-call rotation.", "minutesAgo": 120 },
+        { "id": "fatima-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 140, "durationMs": 980, "content": "Added SLA breach webhook:\n```json\n{\n  \"event\": \"sla.first_response.approaching\",\n  \"ticket_id\": \"...\",\n  \"breach_at\": \"2024-01-15T14:00:00Z\",\n  \"minutes_remaining\": 60\n}\n```\n\nAlert routing rule: route to `#eng-oncall` Slack channel when `minutes_remaining <= 60`.", "minutesAgo": 100 }
+      ],
+      "updatedAtMinutesAgo": 100
+    },
+    {
+      "id": "thread-sonia-1",
+      "title": "OAuth PKCE review",
+      "agentId": "agent-sonia",
+      "messages": [
+        { "id": "sonia-msg-1", "role": "user", "content": "Noah, we need PKCE flow added to the OAuth implementation before the enterprise SSO feature ships. What's the current status?", "minutesAgo": 11520 },
+        { "id": "sonia-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 260, "durationMs": 1950, "content": "PKCE is on the OAuth scope list. Adding S256 challenge method now.\n\nRFC 7636 requires:\n- `code_challenge = BASE64URL(SHA256(code_verifier))`\n- `code_challenge_method = S256`\n\nThe auth server stores the hash and compares on token exchange. No code_verifier in the URL — it's sent only to the token endpoint over TLS.", "minutesAgo": 11500 },
+        { "id": "sonia-msg-3", "role": "user", "content": "What's the fallback when PKCE isn't supported by the client?", "minutesAgo": 2400 },
+        { "id": "sonia-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 190, "durationMs": 1400, "content": "Per RFC 8628, PKCE is optional for public clients but RECOMMENDED. If client doesn't send `code_challenge`, we allow it with a `security_notes` flag on the client record — it can't be used for sensitive scopes.\n\nEnterprise SSO clients must use PKCE. Regular OAuth clients (native apps, SPAs) get the fallback.", "minutesAgo": 2380 }
+      ],
+      "updatedAtMinutesAgo": 2380
+    },
+    {
+      "id": "thread-james-1",
+      "title": "Widget bundle regression",
+      "agentId": "agent-james",
+      "messages": [
+        { "id": "james-msg-1", "role": "user", "content": "Bundle size on the widget iframe is up 38kb since last Thursday. Can you investigate?", "minutesAgo": 5040 },
+        { "id": "james-msg-2", "role": "assistant", "model": "Opus 4.8", "tokenCount": 445, "durationMs": 3200, "content": "Found it. The rich text renderer is pulling in the entire Notion SDK:\n\n```javascript\n// Before\nimport { Client } from '@notionhq/client';\n\n// Problem: full SDK is 340kb minified\n// We only use: blocks.getBlockChildren()\n```\n\nReplaced with a targeted fetch:\n```javascript\n// After\nconst response = await fetch(\n  `https://api.notion.com/v1/blocks/${blockId}/children`,\n  { headers: { Authorization: `Bearer ${token}` } }\n);\n// ~2kb for just the endpoint we need\n```\n\nBundle impact: -34kb. CI bundle budget updated to 45kb max.", "minutesAgo": 5000 },
+        { "id": "james-msg-3", "role": "user", "content": "Can you also add a pre-flight bundle audit step to CI? I don't want this to regress again.", "minutesAgo": 240 },
+        { "id": "james-msg-4", "role": "assistant", "model": "Opus 4.8", "tokenCount": 170, "durationMs": 1100, "content": "Done. Added to the build pipeline:\n\n```yaml\n- name: Check bundle size\n  run: |\n    BUNDLE_SIZE=$(stat -f%z dist/widget.js)\n    if [ \"$BUNDLE_SIZE\" -gt 46000 ]; then\n      echo \"Bundle exceeds budget: ${BUNDLE_SIZE}b > 45kb\"\n      exit 1\n    fi\n```\n\nFails CI with a clear error. Should I add bundle visualization to the PR comment too?", "minutesAgo": 220 }
+      ],
+      "updatedAtMinutesAgo": 220
     }
   ],
   "favorites": [

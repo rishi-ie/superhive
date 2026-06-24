@@ -15,11 +15,15 @@ export type ChatMessageSeed = {
   role: 'user' | 'assistant';
   content: string;
   minutesAgo: number;
+  model?: string;
+  tokenCount?: number;
+  durationMs?: number;
 };
 
 export type ChatThreadSeed = {
   id: string;
   title: string;
+  agentId?: string;
   messages: ChatMessageSeed[];
   updatedAtMinutesAgo: number;
 };

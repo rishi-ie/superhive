@@ -1,39 +1,138 @@
+import { useState, useCallback } from 'react';
+import { getAgent, getTelemetry } from '@/data/agents/store';
+import { getCurrentThread, listThreads, addMessageToActiveThread, createThreadForAgent } from '@/data/chat/store';
+import type { ChatThread as ChatThreadType } from '@/data/chat/store';
+import { ChatHeader } from './ChatHeader';
+import { ChatThreadList } from './ChatThreadList';
 import { ChatThread } from './ChatThread';
 import { ChatInput } from './ChatInput';
-import { OnboardingWizard } from './OnboardingWizard';
-import { CHAT_WIZARD_CONFIG } from '@/data/wizard-configs';
-import { listThreads, getCurrentThread } from '@/data/chat/store';
-import { getAgent } from '@/data/agents/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
+import { ChatEmptyState } from './ChatEmptyState';
 
 type ChatViewProps = {
   workspaceId: string;
   agentId?: string | null;
   onSend?: (message: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
+  onAction?: (actionId: string) => void;
 };
 
 export function ChatView({ workspaceId, agentId, onSend, onAction }: ChatViewProps) {
-  const threads = listThreads();
-  const currentThread = getCurrentThread();
-  const agent = agentId ? getAgent(agentId) : null;
+  const agent = agentId ? getAgent(agentId) ?? null : null;
+  const allThreads = listThreads();
+
+  const agentThread = agentId
+    ? allThreads.find(t => t.agentId === agentId) ?? null
+    : allThreads[0] ?? null;
+
+  const [activeThread, setActiveThread] = useState<ChatThreadType | null>(agentThread);
+  const threads = agentId
+    ? allThreads.filter(t => t.agentId === agentId)
+    : allThreads;
+
+  const agentInitials = agent?.name
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) ?? '??';
+
+  const handleThreadSelect = useCallback((thread: ChatThreadType) => {
+    setActiveThread(thread);
+  }, []);
+
+  const handleNewThread = useCallback(() => {
+    if (!agentId) return;
+    const title = `Chat with ${agent?.name ?? 'Agent'}`;
+    const thread = createThreadForAgent(agentId, title);
+    setActiveThread(thread);
+  }, [agentId, agent]);
+
+  const handleSubmit = useCallback(
+    (text: string, _model: string) => {
+      if (!activeThread) {
+        if (!agentId) return;
+        const thread = createThreadForAgent(agentId, `Chat with ${agent?.name ?? 'Agent'}`);
+        setActiveThread(thread);
+        addMessageToActiveThread(text, agentId);
+        onSend?.(text);
+      } else {
+        addMessageToActiveThread(text, activeThread.agentId);
+        onSend?.(text);
+      }
+    },
+    [activeThread, agentId, agent, onSend],
+  );
+
+  const handleSuggestion = useCallback(
+    (text: string) => {
+      if (!activeThread && agentId) {
+        const thread = createThreadForAgent(agentId, `Chat with ${agent?.name ?? 'Agent'}`);
+        setActiveThread(thread);
+        addMessageToActiveThread(text, agentId);
+        onSend?.(text);
+      } else if (activeThread) {
+        addMessageToActiveThread(text, activeThread.agentId);
+        onSend?.(text);
+      }
+    },
+    [activeThread, agentId, agent, onSend],
+  );
+
+  const handleRegenerate = useCallback(
+    (messageId: string) => {
+      if (!activeThread) return;
+      const idx = activeThread.messages.findIndex(m => m.id === messageId);
+      if (idx <= 1) return;
+      const userMsg = activeThread.messages[idx - 1];
+      if (userMsg?.role === 'user') {
+        addMessageToActiveThread(userMsg.content, activeThread.agentId);
+        onSend?.(userMsg.content);
+      }
+    },
+    [activeThread, onSend],
+  );
+
+  const tokenCount = activeThread?.messages.reduce((sum, m) => sum + (m.tokenCount ?? 0), 0) ?? 0;
+  const sessionCost = activeThread?.messages.reduce((sum, m) => {
+    if (m.role !== 'assistant') return sum;
+    return sum + ((m.tokenCount ?? 0) * 0.00001);
+  }, 0) ?? 0;
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {agent && (
-        <div className="shrink-0 px-4 py-2 border-b border-border/40">
-          <span className="text-xs text-muted-foreground">Chatting with </span>
-          <span className="text-xs font-semibold text-foreground">{agent.name}</span>
-        </div>
+    <div className="flex flex-col h-full min-h-0 bg-background">
+      <ChatHeader
+        agent={agent ?? null}
+        tokenCount={tokenCount > 0 ? tokenCount : undefined}
+        sessionCost={sessionCost > 0 ? sessionCost : undefined}
+      />
+
+      {threads.length > 0 && (
+        <ChatThreadList
+          threads={threads}
+          activeThreadId={activeThread?.id}
+          onThreadSelect={handleThreadSelect}
+          onNewThread={agentId ? handleNewThread : undefined}
+        />
       )}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        {currentThread ? (
-          <ChatThread thread={currentThread} />
-        ) : (
-          <OnboardingWizard config={CHAT_WIZARD_CONFIG} onAction={onAction} />
-        )}
-      </div>
-      <ChatInput onSubmit={onSend} />
+
+      {activeThread ? (
+        <ChatThread
+          thread={activeThread}
+          agentName={agent?.name}
+          agentInitials={agentInitials}
+          onRegenerate={handleRegenerate}
+          empty={
+            <ChatEmptyState agentName={agent?.name ?? undefined} onSuggestionClick={handleSuggestion} />
+          }
+        />
+      ) : (
+        <ChatEmptyState agentName={agent?.name ?? undefined} onSuggestionClick={handleSuggestion} />
+      )}
+
+      <ChatInput
+        agentId={agentId ?? undefined}
+        onSubmit={handleSubmit}
+        placeholder={agent ? `Message ${agent.name}…` : 'Describe an objective…'}
+      />
     </div>
   );
 }
