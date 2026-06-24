@@ -40,9 +40,10 @@ function ContextBar({ value }: { value: number }) {
 
 type UniversalAgentsViewProps = {
   onAgentSelect?: (id: string) => void;
+  selectedAgentId?: string | null;
 };
 
-export function UniversalAgentsView({ onAgentSelect }: UniversalAgentsViewProps) {
+export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -156,6 +157,7 @@ export function UniversalAgentsView({ onAgentSelect }: UniversalAgentsViewProps)
               return (
                 <UniversalListCard
                   key={agent.id}
+                  selected={selectedAgentId === agent.id}
                   onClick={() => onAgentSelect?.(agent.id)}
                   className="flex flex-col gap-1.5"
                 >

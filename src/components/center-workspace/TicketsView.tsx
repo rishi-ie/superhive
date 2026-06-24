@@ -25,11 +25,12 @@ const PRIORITY_ORDER: Record<Priority, number> = {
 
 type TicketsViewProps = {
   workspaceId: string;
+  selectedTicketId?: string | null;
   onTicketSelect?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function TicketsView({ workspaceId, onTicketSelect, onAction }: TicketsViewProps) {
+export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onAction }: TicketsViewProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('status');
 
@@ -94,7 +95,7 @@ export function TicketsView({ workspaceId, onTicketSelect, onAction }: TicketsVi
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <KanbanBoard tickets={filtered} onTicketSelect={onTicketSelect} />
+        <KanbanBoard tickets={filtered} selectedTicketId={selectedTicketId} onTicketSelect={onTicketSelect} />
       </div>
     </div>
   );

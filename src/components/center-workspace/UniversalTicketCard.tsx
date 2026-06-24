@@ -3,6 +3,7 @@ import type { Priority, TicketType, UniversalTicket } from '@/data/tickets/store
 
 type UniversalTicketCardProps = {
   ticket: UniversalTicket;
+  selected?: boolean;
   onClick?: () => void;
 };
 
@@ -29,7 +30,7 @@ function TypeTag({ type }: { type: TicketType }) {
   );
 }
 
-export function UniversalTicketCard({ ticket, onClick }: UniversalTicketCardProps) {
+export function UniversalTicketCard({ ticket, selected, onClick }: UniversalTicketCardProps) {
   const isExecuting = ticket.status === 'EXECUTING';
   const initials = ticket.assignee.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 
@@ -41,6 +42,7 @@ export function UniversalTicketCard({ ticket, onClick }: UniversalTicketCardProp
         flex flex-col p-2 rounded-md border bg-card text-left
         hover:bg-card/80 transition-colors w-full
         ${isExecuting ? 'border-l-2 border-l-chart-1 border-border' : 'border-border'}
+        ${selected ? 'ring-1 ring-chart-1 bg-chart-1/5' : ''}
       `}
     >
       <div className="flex items-center justify-between mb-1 gap-1">

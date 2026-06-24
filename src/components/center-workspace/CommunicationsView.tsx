@@ -47,10 +47,12 @@ function relativeTime(updatedAt: string): string {
 
 type CommunicationsViewProps = {
   workspaceId: string;
+  selectedChannelId?: string | null;
+  onChannelSelect?: (id: string, workspaceId: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function CommunicationsView({ workspaceId, onAction }: CommunicationsViewProps) {
+export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSelect, onAction }: CommunicationsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ChannelStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -176,6 +178,8 @@ export function CommunicationsView({ workspaceId, onAction }: CommunicationsView
                 <UniversalListCard
                   key={channel.id}
                   className="flex flex-col gap-1"
+                  selected={selectedChannelId === channel.id}
+                  onClick={onChannelSelect ? () => onChannelSelect(channel.id, workspaceId) : undefined}
                 >
                   <div className="flex items-center gap-2">
                     <div className="relative shrink-0 size-7">

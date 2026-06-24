@@ -8,11 +8,12 @@ import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type ChatViewProps = {
   workspaceId: string;
+  agentId?: string | null;
   onSend?: (message: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function ChatView({ workspaceId, onSend, onAction }: ChatViewProps) {
+export function ChatView({ workspaceId, agentId, onSend, onAction }: ChatViewProps) {
   const threads = listThreads();
   const currentThread = threads[0] ?? null;
 

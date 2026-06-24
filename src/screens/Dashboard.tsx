@@ -1,26 +1,30 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { LeftNav } from '@/components/LeftNav';
-import { CenterWorkspace, type CenterView } from '@/components/CenterWorkspace';
+import { CenterWorkspace } from '@/components/CenterWorkspace';
 import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listProjectAgents, listTickets, getProject } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listAgents, approveAudit, denyAudit } from '@/data/agents/store';
+import { listAgents, approveAudit, denyAudit, getAgentWorkspace } from '@/data/agents/store';
 import {
   makeInitialTabState,
-  openTab as openTabOp,
+  openOrFocusTab as openTabOp,
   closeTab as closeTabOp,
   selectTab as selectTabOp,
-  setTicketOnTab,
+  setSelection,
   getActiveTab,
-  openProjectTab,
 } from '@/data/tabs/store';
-import type { CenterTabType } from '@/data/tabs/interface';
+import type { CenterTabType, CenterTab } from '@/data/tabs/interface';
 import type { Workspace } from '@/data/workspaces/interface';
 import type { FavoriteItem } from '@/data/favorites/interface';
-import { getRightPanelTabs, getDefaultRightPanelTab, type RightPanelContext, type RightPanelTabId } from '@/data/right-panel-tabs';
+import {
+  getRightPanelTabs,
+  getDefaultRightPanelTab,
+  type RightPanelContext,
+  type RightPanelTabId,
+} from '@/data/right-panel-tabs';
 
 type DashboardProps = {
   leftWidth: number;
@@ -43,6 +47,20 @@ function toActiveAgent(agents: ReturnType<typeof listAgents>): ActiveAgent[] {
   }));
 }
 
+function buildTab(
+  type: CenterTabType,
+  workspaceId: string,
+  title: string,
+  extra: Partial<Pick<CenterTab, 'selectedAgentId' | 'selectedProjectId' | 'selectedTicketId' | 'selectedChannelId' | 'subtitle'>> = {},
+) {
+  return { type, workspaceId, title, subtitle: extra.subtitle, pinned: false, modified: false,
+    selectedAgentId: extra.selectedAgentId ?? null,
+    selectedProjectId: extra.selectedProjectId ?? null,
+    selectedTicketId: extra.selectedTicketId ?? null,
+    selectedChannelId: extra.selectedChannelId ?? null,
+  };
+}
+
 export function Dashboard({
   leftWidth,
   rightWidth,
@@ -50,10 +68,8 @@ export function Dashboard({
   onRightWidthChange,
   onNavigate,
 }: DashboardProps) {
-  const [tabState, setTabState] = useState(() => makeInitialTabState('superhive'));
-  const [centerView, setCenterView] = useState<CenterView | null>('home');
+  const [tabState, setTabState] = useState(() => makeInitialTabState('vela'));
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('vela');
-  const [activeAgentId, setActiveAgentId] = useState<string | null>(null);
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
 
   const workspaces_data = listWorkspaces();
@@ -71,7 +87,6 @@ export function Dashboard({
   );
 
   const hasData = workspaces_data.length > 0 || listAgents().length > 0;
-
   const activeTasks = listTickets(activeWorkspaceId)
     .filter(t => t.status === 'EXECUTING')
     .map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedAgentId }));
@@ -80,95 +95,162 @@ export function Dashboard({
 
   const rightPanelContext = useMemo<RightPanelContext>(() => {
     if (!activeTab) return null;
-    if (activeTab.type === 'chat' && activeAgentId) return { kind: 'agent', agentId: activeAgentId };
-    if (activeTab.type === 'tickets' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
+    if (activeTab.type === 'agent' && activeTab.selectedAgentId) return { kind: 'agent', agentId: activeTab.selectedAgentId };
+    if (activeTab.type === 'ticket' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
     if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId };
     if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId };
-    if (activeTab.type === 'chat') return { kind: 'agent', agentId: activeAgentId ?? '' };
     return null;
-  }, [activeTab, activeAgentId]);
+  }, [activeTab]);
 
   const rightPanelTabs = getRightPanelTabs(rightPanelContext);
   const defaultRightTab = getDefaultRightPanelTab(rightPanelContext);
   const currentRightPanelTab = rightPanelTabs.some(t => t.id === rightPanelTab) ? rightPanelTab : defaultRightTab;
 
-  const handleOpenTab = useCallback((type: CenterTabType, workspaceId: string) => {
-    setTabState(prev => openTabOp(prev, type, workspaceId));
-    setCenterView(null);
+  // ─── Tab operations ────────────────────────────────────────────────
+
+  const openTab = useCallback((tab: Omit<CenterTab, 'id' | 'createdAt'>) => {
+    setTabState(prev => openTabOp(prev, tab));
   }, []);
 
-  const handleCloseTab = useCallback((tabId: string) => {
-    setTabState(prev => {
-      const next = closeTabOp(prev, tabId);
-      if (next.tabs.length === 0) {
-        setCenterView('home');
-        return next;
-      }
-      if (next.activeTabId !== prev.activeTabId) {
-        setCenterView(null);
-      }
-      return next;
-    });
-  }, []);
+  const openOrReuseTab = useCallback((type: CenterTabType, workspaceId: string, extra: Parameters<typeof buildTab>[3] = {}) => {
+    openTab(buildTab(type, workspaceId, '', extra));
+  }, [openTab]);
 
-  const handleSelectTab = useCallback((tabId: string) => {
-    setTabState(prev => selectTabOp(prev, tabId));
-    setCenterView(null);
-  }, []);
-
-  const handleTicketSelect = useCallback((ticketId: string) => {
-    if (tabState.activeTabId) {
-      setTabState(prev => setTicketOnTab(prev, tabState.activeTabId!, ticketId));
-    }
-    setRightPanelTab('overview');
-  }, [tabState.activeTabId]);
+  // ─── Click handlers ───────────────────────────────────────────────
 
   const handleNavItemClick = useCallback((id: string) => {
-    if (id === 'home') { setCenterView('home'); return; }
-    if (id === 'agents' || id === 'universal-agents') { setCenterView('universal-agents'); return; }
-    if (id === 'communications') { setCenterView('communications'); return; }
-    if (id === 'projects' || id === 'universal-projects') { setCenterView('universal-projects'); return; }
-    if (id === 'tickets') { setCenterView('tickets'); return; }
-    if (id === 'chat') { handleOpenTab('chat', activeWorkspaceId); }
-  }, [handleOpenTab, activeWorkspaceId]);
+    const ws = activeWorkspaceId;
+    if (id === 'agents' || id === 'universal-agents') {
+      openTab(buildTab('universal-agents', ws, 'Agents'));
+    } else if (id === 'communications') {
+      openTab(buildTab('channels', ws, 'Comms'));
+    } else if (id === 'projects' || id === 'universal-projects') {
+      openTab(buildTab('universal-projects', ws, 'Projects'));
+    } else if (id === 'tickets') {
+      openTab(buildTab('tickets', ws, 'Tickets'));
+    }
+  }, [openTab, activeWorkspaceId]);
 
   const handleWorkspaceSelect = useCallback((workspace: Workspace) => {
     setActiveWorkspaceId(workspace.id);
-    handleOpenTab('projects', workspace.id);
-  }, [handleOpenTab]);
+  }, []);
 
   const handleAgentSelect = useCallback((id: string) => {
-    setActiveAgentId(id);
-    handleOpenTab('chat', activeWorkspaceId);
-    setRightPanelTab('overview');
-  }, [handleOpenTab, activeWorkspaceId]);
+    const ws = getAgentWorkspace(id) ?? activeWorkspaceId;
+    const agent = listAgents().find(a => a.id === id);
+    openTab(buildTab('agent', ws, agent?.name ?? 'Agent', { selectedAgentId: id }));
+  }, [openTab, activeWorkspaceId]);
 
   const handleProjectSelect = useCallback((projectId: string, workspaceId: string) => {
-    setTabState(prev => openProjectTab(prev, projectId, workspaceId));
-    setCenterView(null);
+    const project = getProject(projectId);
+    openTab(buildTab('project', workspaceId, project?.title ?? 'Project', { selectedProjectId: projectId }));
+  }, [openTab]);
+
+  const handleTicketSelect = useCallback((ticketId: string) => {
+    if (activeTab && !activeTab.pinned) {
+      setTabState(prev => setSelection(prev, activeTab.id, { selectedTicketId: ticketId }));
+    } else {
+      openTab(buildTab('ticket', activeWorkspaceId, ticketId, { selectedTicketId: ticketId }));
+    }
     setRightPanelTab('overview');
-  }, []);
+  }, [activeTab, activeWorkspaceId, openTab]);
+
+  const handleChannelSelect = useCallback((channelId: string, workspaceId: string) => {
+    openTab(buildTab('channel', workspaceId, 'Channel', { selectedChannelId: channelId }));
+  }, [openTab]);
 
   const handleFavoriteSelect = useCallback((item: FavoriteItem) => {
     if (item.type === 'agent') {
-      setActiveAgentId(item.id);
-      handleOpenTab('chat', activeWorkspaceId);
-      setRightPanelTab('overview');
+      handleAgentSelect(item.id);
     } else if (item.type === 'project') {
       const project = getProject(item.id);
       if (project) {
         handleProjectSelect(project.id, project.workspaceId);
       }
     }
-  }, [handleOpenTab, activeWorkspaceId, handleProjectSelect]);
+  }, [handleAgentSelect, handleProjectSelect]);
+
+  const handleTabClick = useCallback((tabId: string) => {
+    setTabState(prev => selectTabOp(prev, tabId));
+  }, []);
+
+  const handleTabClose = useCallback((tabId: string) => {
+    setTabState(prev => {
+      const next = closeTabOp(prev, tabId);
+      return next;
+    });
+  }, []);
+
+  const handleNewTab = useCallback((type: CenterTabType, workspaceId: string) => {
+    const TYPE_TITLES: Partial<Record<CenterTabType, string>> = {
+      agent: 'Chat',
+      projects: 'Projects',
+      tickets: 'Tickets',
+      ticket: 'Ticket',
+      project: 'Project',
+      channels: 'Comms',
+      channel: 'Channel',
+      agents: 'Agents',
+      'universal-agents': 'Agents',
+      'universal-projects': 'Projects',
+    };
+    openTab(buildTab(type, workspaceId, TYPE_TITLES[type] ?? ''));
+  }, [openTab]);
+
+  const handleBreadcrumbJump = useCallback((workspaceId: string, section?: string) => {
+    if (section) {
+      const SECTION_TAB: Record<string, CenterTabType> = {
+        Projects: 'projects',
+        Tickets: 'tickets',
+        Comms: 'channels',
+        Agents: 'agents',
+      };
+      const type = SECTION_TAB[section];
+      if (type) openTab(buildTab(type, workspaceId, section));
+    } else {
+      openTab(buildTab('projects', workspaceId, 'Projects', {},));
+    }
+  }, [openTab]);
 
   const handleWizardAction = useCallback((actionId: string) => {
+    const ws = activeWorkspaceId;
     if (actionId === 'open-project') {
-      handleOpenTab('projects', activeWorkspaceId);
-    } else if (actionId === 'view-agents') {
-      setCenterView('agents');
+      openTab(buildTab('projects', ws, 'Projects'));
+    } else if (actionId === 'view-agents' || actionId === 'open-agents') {
+      openTab(buildTab('agents', ws, 'Agents'));
+    } else if (actionId === 'browse-agents' || actionId === 'open-agents') {
+      openTab(buildTab('universal-agents', ws, 'Agents'));
+    } else if (actionId === 'browse-projects' || actionId === 'open-projects') {
+      openTab(buildTab('universal-projects', ws, 'Projects'));
+    } else if (actionId === 'open-tickets') {
+      openTab(buildTab('tickets', ws, 'Tickets'));
+    } else if (actionId === 'open-comms') {
+      openTab(buildTab('channels', ws, 'Comms'));
     }
-  }, [handleOpenTab, activeWorkspaceId]);
+  }, [openTab, activeWorkspaceId]);
+
+  // ─── Keyboard shortcuts ───────────────────────────────────────────
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      if (e.key === 'w') {
+        e.preventDefault();
+        if (activeTab && !activeTab.pinned) {
+          handleTabClose(activeTab.id);
+        }
+      }
+      if (e.key >= '1' && e.key <= '9') {
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        const tab = tabState.tabs[idx];
+        if (tab) handleTabClick(tab.id);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, tabState.tabs, handleTabClose, handleTabClick]);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -186,7 +268,7 @@ export function Dashboard({
         onActiveAgentClick={handleAgentSelect}
         onActiveTaskClick={(id) => handleTicketSelect(id)}
         onNavItemClick={handleNavItemClick}
-        currentView={centerView ?? activeTab?.type ?? 'home'}
+        currentView={activeTab?.type ?? 'projects'}
         onAgentSelect={handleAgentSelect}
         onProjectClick={handleProjectSelect}
       />
@@ -194,16 +276,13 @@ export function Dashboard({
         tabs={tabState.tabs}
         activeTabId={tabState.activeTabId}
         workspaceMap={workspaceMap}
-        centerView={centerView}
-        activeWorkspaceId={activeWorkspaceId}
-        activeAgentId={activeAgentId}
-        selectedTicketId={activeTab?.selectedTicketId ?? null}
-        hasData={hasData}
-        onTabClick={handleSelectTab}
-        onTabClose={handleCloseTab}
+        onTabClick={handleTabClick}
+        onTabClose={handleTabClose}
+        onBreadcrumbJump={handleBreadcrumbJump}
         onTicketSelect={handleTicketSelect}
         onAgentSelect={handleAgentSelect}
         onProjectSelect={handleProjectSelect}
+        onChannelSelect={handleChannelSelect}
         onAction={handleWizardAction}
       />
       <RightAuxiliary

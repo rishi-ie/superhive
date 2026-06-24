@@ -13,12 +13,13 @@ import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type ProjectsViewProps = {
   workspaceId: string;
+  projectId?: string;
   onTicketSelect?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function ProjectsView({ workspaceId, onTicketSelect, onAction }: ProjectsViewProps) {
-  const title = getProjectTitle(workspaceId);
+export function ProjectsView({ workspaceId, projectId, onTicketSelect, onAction }: ProjectsViewProps) {
+  const title = projectId ? getProjectTitle(workspaceId) : getProjectTitle(workspaceId);
 
   if (!title) {
     return (

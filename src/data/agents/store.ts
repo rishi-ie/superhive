@@ -2,10 +2,12 @@ import { isMockEnabled } from '@/lib/feature-flags';
 import mockData from '../mock.json';
 import type { MockData } from '../mock-types';
 import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
+import type { Project } from '@/data/projects/store';
 
 const data = mockData as MockData;
 
 const agents: Agent[] = data.agents as Agent[];
+const projectsByWorkspace: Record<string, Project> = data.projects;
 const telemetryMap: Record<string, Telemetry> = data.telemetry as Record<string, Telemetry>;
 const permissionsMap: Record<string, Permissions> = data.permissions as Record<string, Permissions>;
 const actionLogMap: Record<string, ActionLogEntry[]> = data.actionLogs as Record<string, ActionLogEntry[]>;
@@ -116,6 +118,15 @@ export function getActionLog(agentId: string): ActionLogEntry[] {
 
 export function getNextStep(agentId: string): string {
   return store.getNextStep(agentId);
+}
+
+export function getAgentWorkspace(agentId: string): string | null {
+  for (const project of Object.values(projectsByWorkspace)) {
+    if (project.agents.some(a => a.id === agentId)) {
+      return project.workspaceId;
+    }
+  }
+  return null;
 }
 
 export function approveAudit(id: string): void {

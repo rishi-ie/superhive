@@ -37,9 +37,10 @@ function relativeTime(timestamp: string): string {
 
 type UniversalProjectsViewProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
+  selectedProjectId?: string | null;
 };
 
-export function UniversalProjectsView({ onProjectSelect }: UniversalProjectsViewProps) {
+export function UniversalProjectsView({ onProjectSelect, selectedProjectId }: UniversalProjectsViewProps) {
   const [query, setQuery] = useState('');
   const [workspaceFilter, setWorkspaceFilter] = useState<WorkspaceFilter>('ALL');
   const [sort, setSort] = useState<SortKey>('activity');
@@ -164,6 +165,7 @@ export function UniversalProjectsView({ onProjectSelect }: UniversalProjectsView
               return (
                 <UniversalListCard
                   key={project.id}
+                  selected={selectedProjectId === project.id}
                   onClick={() => onProjectSelect?.(project.id, project.workspaceId)}
                   className="flex flex-col gap-1.5"
                 >

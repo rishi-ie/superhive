@@ -1,4 +1,4 @@
-import { Sparkles, Layers, ClipboardCheck, Bot, MessageCircle, Users, GitBranch } from 'lucide-react';
+import { Sparkles, Layers, ClipboardCheck, Bot, MessageCircle, Users, GitBranch, FolderOpen, MessageSquare, UsersRound } from 'lucide-react';
 import type { WizardConfig } from '@/components/center-workspace/OnboardingWizard';
 
 export const HOME_WIZARD_CONFIG: WizardConfig = {
@@ -222,6 +222,52 @@ export const COMMUNICATIONS_WIZARD_CONFIG: WizardConfig = {
       icon: ClipboardCheck,
       title: 'Use a template',
       description: 'Standup, code-review, incident-response channels',
+    },
+  ],
+};
+
+export const CENTER_EMPTY_STATE_CONFIG: WizardConfig = {
+  icon: Sparkles,
+  title: 'No tab open',
+  subtitle: 'Select a project, agent, ticket, or channel from the sidebar to get started',
+  skipLabel: undefined,
+  actions: [
+    {
+      id: 'open-projects',
+      icon: Layers,
+      title: 'Open Projects',
+      description: 'View the workspace kanban dashboard',
+    },
+    {
+      id: 'open-agents',
+      icon: Bot,
+      title: 'Open Agents',
+      description: 'Browse and chat with workspace agents',
+      recommended: true,
+    },
+    {
+      id: 'open-tickets',
+      icon: ClipboardCheck,
+      title: 'Open Tickets',
+      description: 'View the workspace ticket board',
+    },
+    {
+      id: 'open-comms',
+      icon: MessageCircle,
+      title: 'Open Communications',
+      description: 'View agent-to-agent communication channels',
+    },
+    {
+      id: 'browse-projects',
+      icon: FolderOpen,
+      title: 'Browse Projects',
+      description: 'Explore all projects across workspaces',
+    },
+    {
+      id: 'browse-agents',
+      icon: UsersRound,
+      title: 'Browse All Agents',
+      description: 'View all agents across workspaces',
     },
   ],
 };

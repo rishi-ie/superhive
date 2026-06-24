@@ -71,46 +71,66 @@ bun run electron:preview # vite build + launch electron with production build
 - `HelpPopover` — anchored dark popover (Documentation / Changelog / Shortcuts)
 - Bell/Notifications removed in v1
 
-## Center Workspace — Tabbed Layout
+## Center Workspace — Multi-Tab Layout
 
-Tabs: **Chat** · **Projects** (like browser tabs, independent views). ChatInput hidden on Projects tab.
+The center panel uses a full multi-tab model. Every view (project, agent, ticket, channel) opens in its own tab. The tab strip is always visible when tabs exist.
 
-### Chat Tab
-- `ChatThread` — user/assistant message bubbles
-- `ChatInput` — textarea + model selectors + send
-- `ChatEmptyState` — suggestion grid when no thread
-
-### Projects Tab
-Full operational swarm dashboard. Compact, information-dense layout:
+### Tab Model (`src/data/tabs/`)
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│  Superhive App (h1)                                        │
-├─────────────────────┬─────────────────────┬──────────────────┤
-│  To Do         3    │  Executing    2     │  Done       3   │
-│  [card]            │  [card] ▌           │  [card]           │
-│  [card]            │  [card] ▌           │  [card]           │
-│  [+1 more]         │                     │  [+2 more]        │
-├─────────────────────┴─────────────────────┴──────────────────┤
-│  Active Agents              │  Communications                │
-│  [agent] Marcus W. COMPILING│  [ch: Schema validation]      │
-│  [agent] Priya S.  WORKING  │  [ch: DB snapshot handoff]    │
-│  [agent] Sonia P.  COMPILING│  [ch: Design tokens]          │
-└─────────────────────────────┴────────────────────────────────┘
+CenterTabType = 'projects' | 'project' | 'tickets' | 'ticket'
+              | 'channels' | 'channel' | 'agents' | 'agent'
+              | 'universal-agents' | 'universal-projects'
 ```
 
-**Components** (`src/components/center-workspace/`):
-- `ProjectsView` — root layout container
-- `ExecutionStream` — 3-column kanban (To Do / Executing / Done). Max 2 visible cards per column; overflow shown as "+ N more" dashed button
-- `TicketCard` — ticket card with ID badge, bold title, agent avatar. EXECUTING cards have terracotta left border
-- `SwarmRoster` — active agent profile cards with status dots, role, assigned ticket pill
-- `Communications` — channel monitor rows with stacked avatar pairs, topic, last message preview, ticket pill, status indicator, unread dot
+| Tab type | Description |
+|---|---|
+| `projects` | Workspace kanban dashboard (To Do / Executing / Done) |
+| `project` | Single project detail (with selectedProjectId) |
+| `tickets` | Workspace-wide ticket kanban (Backlog / Executing / Review / Merged) |
+| `ticket` | Single ticket detail (with selectedTicketId) |
+| `channels` | Workspace channel list |
+| `channel` | Single channel detail (with selectedChannelId) |
+| `agents` | Workspace agents list |
+| `agent` | Single agent chat + telemetry (with selectedAgentId) |
+| `universal-agents` | All agents across workspaces |
+| `universal-projects` | All projects across workspaces |
 
-**Mock data** (`src/data/mock/project.ts`):
-- `tickets` — 8 tickets (TODO/EXECUTING/DONE), assigned to agents
-- `projectAgents` — 5 agents with WORKING/COMPILING/IDLE status
-- `swarmActivity` — 6 inter-agent event log entries
-- `channels` — 5 active communication channels between agent pairs
+**`src/data/tabs/store.ts`** — immutable state operations:
+- `openOrFocusTab(state, tab)` — opens a new tab or reuses an existing one (dedup by type + workspaceId + entityId)
+- `closeTab(state, tabId)` — closes a tab (pinned tabs cannot be closed)
+- `selectTab(state, tabId)` — switches active tab
+- `setSelection(state, tabId, selection)` — updates selectedAgentId/ProjectId/TicketId/ChannelId on a tab
+- `getActiveTab(state)` — returns the active tab
+- `makeInitialTabState(workspaceId)` — seeds one pinned `projects` tab
+
+**Breadcrumb** — always 2–3 segments: `Workspace · Section · [Item]`. First two segments are clickable (jump to that section/workspace).
+
+**Tab strip** — horizontal scrollable strip. `+` button opens a new tab picker for the active workspace. Keyboard: `Cmd+W` closes active tab, `Cmd+1..9` switches to tab N. Pinned tabs show a lock icon and cannot be closed.
+
+**When no tabs exist** — `CenterEmptyState` shows a quick-start prompt with options to open Projects, Agents, Tickets, Comms, or browse lists.
+
+### Components (`src/components/center-workspace/`)
+
+- `CenterWorkspace` — root container; `switch (activeTab.type)` renders the correct view
+- `CenterTabStrip` — tab strip with `+` new-tab picker
+- `CenterTab` — individual tab pill (icon + label + close X, or lock if pinned)
+- `CenterBreadcrumb` — 2–3 segment breadcrumb with workspace avatar
+- `ProjectsView` — workspace kanban dashboard (3-column: To Do / Executing / Done) + SwarmRoster + Communications grid
+- `TicketsView` — 4-column kanban (Backlog / Executing / Review / Merged) with search + sort + workspace filter
+- `CommunicationsView` — channel list with status filter + unread indicators
+- `AgentsView` — workspace agent list with status dots
+- `UniversalAgentsView` — all agents across workspaces with search + sort + status filter
+- `UniversalProjectsView` — all projects across workspaces with search + sort + workspace filter
+- `ChatView` — chat thread with ChatInput at bottom
+- `OnboardingWizard` — used for empty states (not as a persistent tab)
+
+**Mock data** (`src/data/mock.json`):
+- `tickets` — 8 per workspace (TODO/EXECUTING/DONE), assigned to agents
+- `projectAgents` — 5 per workspace with WORKING/COMPILING/IDLE status
+- `swarmActivity` — 6 inter-agent event log entries per workspace
+- `channels` — 5 active communication channels per workspace
+- `universalTickets` — 24 cross-workspace tickets with BACKLOG/EXECUTING/REVIEW/MERGED status
 
 ## Right Auxiliary (Avionics / Mission Control)
 

@@ -4,6 +4,7 @@ import { STROKE_WIDTH } from '@/lib/constants';
 import { OnboardingWizard } from './OnboardingWizard';
 import { AGENTS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import { listAgents } from '@/data/agents/store';
+import { listProjectAgents } from '@/data/projects/store';
 import type { AgentStatus } from '@/data/agents/interface';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
@@ -46,13 +47,20 @@ function AgentCard({ agent, selected, onClick }: AgentCardProps) {
 }
 
 type AgentsViewProps = {
+  workspaceId?: string;
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function AgentsView({ onAgentSelect, selectedAgentId, onAction }: AgentsViewProps) {
-  const agents = listAgents();
+export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId, onAction }: AgentsViewProps) {
+  const allAgents = listAgents();
+  const workspaceAgentIds = workspaceId
+    ? new Set(listProjectAgents(workspaceId).map(a => a.id))
+    : null;
+  const agents = workspaceAgentIds
+    ? allAgents.filter(a => workspaceAgentIds.has(a.id))
+    : allAgents;
 
   if (agents.length === 0) {
     return (

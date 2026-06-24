@@ -1,64 +1,67 @@
-import type { CenterTab, CenterTabType, TabState } from './interface';
+import type { CenterTab, CenterTabType, TabState, TabSelection } from './interface';
 
-export function makeInitialTabState(defaultWorkspaceId: string): TabState {
+function tabKey(tab: CenterTab): string {
+  if (tab.type === 'project') return `project:${tab.selectedProjectId}`;
+  if (tab.type === 'ticket') return `ticket:${tab.selectedTicketId}`;
+  if (tab.type === 'channel') return `channel:${tab.selectedChannelId}`;
+  if (tab.type === 'agent') return `agent:${tab.selectedAgentId}`;
+  return `${tab.type}:${tab.workspaceId}`;
+}
+
+function matchesKey(tab: CenterTab, type: CenterTabType, workspaceId: string, entityId?: string | null): boolean {
+  if (tab.type !== type) return false;
+  if (tab.type === 'project') return tab.selectedProjectId === entityId;
+  if (tab.type === 'ticket') return tab.selectedTicketId === entityId;
+  if (tab.type === 'channel') return tab.selectedChannelId === entityId;
+  if (tab.type === 'agent') return tab.selectedAgentId === entityId;
+  if (tab.type === 'universal-agents' || tab.type === 'universal-projects') return true;
+  return tab.workspaceId === workspaceId;
+}
+
+export function makeInitialTabState(workspaceId: string): TabState {
   const id = crypto.randomUUID();
   return {
-    tabs: [{ id, type: 'projects', workspaceId: defaultWorkspaceId, selectedTicketId: null, selectedProjectId: null, selectedChannelId: null }],
+    tabs: [
+      {
+        id,
+        type: 'projects',
+        workspaceId,
+        title: 'Projects',
+        pinned: true,
+        selectedAgentId: null,
+        selectedProjectId: null,
+        selectedTicketId: null,
+        selectedChannelId: null,
+        createdAt: Date.now(),
+      },
+    ],
     activeTabId: id,
   };
 }
 
-export function openTab(state: TabState, type: CenterTabType, workspaceId: string): TabState {
-  const existing = state.tabs.find(t => t.type === type && t.workspaceId === workspaceId && !t.selectedProjectId && !t.selectedChannelId);
-  if (existing) {
-    return { ...state, activeTabId: existing.id };
-  }
-  const newTab: CenterTab = {
-    id: crypto.randomUUID(),
-    type,
-    workspaceId,
-    selectedTicketId: null,
-    selectedProjectId: null,
-    selectedChannelId: null,
-  };
-  return {
-    tabs: [...state.tabs, newTab],
-    activeTabId: newTab.id,
-  };
-}
+export function openOrFocusTab(state: TabState, partial: Omit<CenterTab, 'id' | 'createdAt'>): TabState {
+  const entityId =
+    partial.selectedAgentId ??
+    partial.selectedProjectId ??
+    partial.selectedTicketId ??
+    partial.selectedChannelId ??
+    null;
 
-export function openProjectTab(state: TabState, projectId: string, workspaceId: string): TabState {
-  const existing = state.tabs.find(t => t.type === 'project' && t.selectedProjectId === projectId);
+  const existing = state.tabs.find(t => matchesKey(t, partial.type, partial.workspaceId, entityId));
   if (existing) {
     return { ...state, activeTabId: existing.id };
   }
-  const newTab: CenterTab = {
-    id: crypto.randomUUID(),
-    type: 'project',
-    workspaceId,
-    selectedTicketId: null,
-    selectedProjectId: projectId,
-    selectedChannelId: null,
-  };
-  return {
-    tabs: [...state.tabs, newTab],
-    activeTabId: newTab.id,
-  };
-}
 
-export function openChannelTab(state: TabState, channelId: string, workspaceId: string): TabState {
-  const existing = state.tabs.find(t => t.type === 'channel' && t.selectedChannelId === channelId);
-  if (existing) {
-    return { ...state, activeTabId: existing.id };
-  }
   const newTab: CenterTab = {
+    ...partial,
     id: crypto.randomUUID(),
-    type: 'channel',
-    workspaceId,
-    selectedTicketId: null,
-    selectedProjectId: null,
-    selectedChannelId: channelId,
+    createdAt: Date.now(),
+    selectedAgentId: partial.selectedAgentId ?? null,
+    selectedProjectId: partial.selectedProjectId ?? null,
+    selectedTicketId: partial.selectedTicketId ?? null,
+    selectedChannelId: partial.selectedChannelId ?? null,
   };
+
   return {
     tabs: [...state.tabs, newTab],
     activeTabId: newTab.id,
@@ -68,14 +71,20 @@ export function openChannelTab(state: TabState, channelId: string, workspaceId: 
 export function closeTab(state: TabState, tabId: string): TabState {
   const idx = state.tabs.findIndex(t => t.id === tabId);
   if (idx === -1) return state;
+
+  const tab = state.tabs[idx]!;
+  if (tab.pinned) return state;
+
   const newTabs = state.tabs.filter(t => t.id !== tabId);
   if (newTabs.length === 0) {
     return { tabs: [], activeTabId: null };
   }
+
   let newActiveTabId = state.activeTabId;
   if (state.activeTabId === tabId) {
     newActiveTabId = newTabs[idx]?.id ?? newTabs[idx - 1]?.id ?? null;
   }
+
   return { tabs: newTabs, activeTabId: newActiveTabId };
 }
 
@@ -83,31 +92,31 @@ export function selectTab(state: TabState, tabId: string): TabState {
   return { ...state, activeTabId: tabId };
 }
 
-export function setTicketOnTab(state: TabState, tabId: string, ticketId: string | null): TabState {
+export function setSelection(state: TabState, tabId: string, selection: Partial<TabSelection>): TabState {
   return {
     ...state,
-    tabs: state.tabs.map(t => t.id === tabId ? { ...t, selectedTicketId: ticketId } : t),
+    tabs: state.tabs.map(t =>
+      t.id === tabId
+        ? {
+            ...t,
+            selectedAgentId: selection.selectedAgentId ?? t.selectedAgentId,
+            selectedProjectId: selection.selectedProjectId ?? t.selectedProjectId,
+            selectedTicketId: selection.selectedTicketId ?? t.selectedTicketId,
+            selectedChannelId: selection.selectedChannelId ?? t.selectedChannelId,
+          }
+        : t,
+    ),
   };
 }
 
-export function setProjectOnTab(state: TabState, tabId: string, projectId: string | null): TabState {
-  return {
-    ...state,
-    tabs: state.tabs.map(t => t.id === tabId ? { ...t, selectedProjectId: projectId } : t),
-  };
-}
-
-export function setChannelOnTab(state: TabState, tabId: string, channelId: string | null): TabState {
-  return {
-    ...state,
-    tabs: state.tabs.map(t => t.id === tabId ? { ...t, selectedChannelId: channelId } : t),
-  };
+export function pinTab(state: TabState, tabId: string, pinned: boolean): TabState {
+  return { ...state, tabs: state.tabs.map(t => t.id === tabId ? { ...t, pinned } : t) };
 }
 
 export function getActiveTab(state: TabState): CenterTab | null {
   return state.tabs.find(t => t.id === state.activeTabId) ?? null;
 }
 
-export function findTab(state: TabState, type: CenterTabType, workspaceId: string): CenterTab | null {
-  return state.tabs.find(t => t.type === type && t.workspaceId === workspaceId) ?? null;
+export function findTab(state: TabState, type: CenterTabType, workspaceId?: string, entityId?: string | null): CenterTab | null {
+  return state.tabs.find(t => matchesKey(t, type, workspaceId ?? t.workspaceId, entityId)) ?? null;
 }

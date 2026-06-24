@@ -5,10 +5,11 @@ type KanbanColumnProps = {
   label: string;
   status: UniversalTicketStatus;
   tickets: UniversalTicket[];
+  selectedTicketId?: string | null;
   onTicketSelect?: (id: string) => void;
 };
 
-export function KanbanColumn({ label, status, tickets, onTicketSelect }: KanbanColumnProps) {
+export function KanbanColumn({ label, status, tickets, selectedTicketId, onTicketSelect }: KanbanColumnProps) {
   return (
     <div className="flex flex-col gap-2 min-w-[240px] w-[260px] shrink-0 h-full">
       <div className="flex items-center gap-1.5 px-1 shrink-0">
@@ -26,6 +27,7 @@ export function KanbanColumn({ label, status, tickets, onTicketSelect }: KanbanC
             <UniversalTicketCard
               key={ticket.id}
               ticket={ticket}
+              selected={selectedTicketId === ticket.id}
               onClick={onTicketSelect ? () => onTicketSelect(ticket.id) : undefined}
             />
           ))}

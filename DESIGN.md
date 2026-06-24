@@ -80,9 +80,9 @@ Dark, warm productivity tool — premium code editor meets AI assistant. Think V
 - **LeftNavFooter**: Settings icon + Notifications bell with count badge
 
 ### Center Workspace
-- **Breadcrumb**: Clickable path segments with branch selector dropdown
-- **TabStrip**: Underline-style tabs with active terracotta bottom border
-- **ChatEmptyState**: "What would you like your workforce to do?" + 2x3 suggestion grid
+- **Breadcrumb**: 2–3 segments: `Workspace · Section · [Item]`. First two segments are clickable. Workspace segment shows workspace avatar.
+- **TabStrip**: Horizontal scrollable strip. Tab pills show icon + label + close X (lock icon for pinned tabs). `+` button opens new-tab picker. Keyboard: `Cmd+W` closes active, `Cmd+1..9` switches tabs.
+- **Tab types**: `projects` · `project` · `tickets` · `ticket` · `channels` · `channel` · `agents` · `agent` · `universal-agents` · `universal-projects`
 - **ChatThread**: User/assistant message bubbles with avatars and timestamps
 - **ChatInput**: Textarea with model selectors, attach, voice, send (terracotta)
 
