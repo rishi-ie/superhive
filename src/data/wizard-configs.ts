@@ -1,61 +1,6 @@
 import { Sparkles, Layers, ClipboardCheck, Bot, MessageCircle, Users, GitBranch, FolderOpen, MessageSquare, UsersRound } from 'lucide-react';
 import type { WizardConfig } from '@/components/center-workspace/OnboardingWizard';
 
-export const HOME_WIZARD_CONFIG: WizardConfig = {
-  icon: Sparkles,
-  title: 'Welcome to Superhive',
-  subtitle: 'Orchestrate autonomous agents across your projects',
-  skipLabel: 'Or skip the wizard and start with a blank workspace',
-  actions: [
-    {
-      id: 'create-project',
-      icon: Layers,
-      title: 'Create your first project',
-      description: 'Set up a workspace and assign agents to ship your work',
-      recommended: true,
-    },
-    {
-      id: 'invite-team',
-      icon: Users,
-      title: 'Invite your team',
-      description: 'Bring collaborators and assign roles to coordinate the swarm',
-    },
-    {
-      id: 'configure-agent',
-      icon: Bot,
-      title: 'Configure your first agent',
-      description: 'Pick a model, set permissions, and define its scope',
-    },
-    {
-      id: 'connect-repo',
-      icon: GitBranch,
-      title: 'Connect a repository',
-      description: 'Link GitHub, GitLab, or a local folder to start tracking work',
-    },
-  ],
-};
-
-export const BLANK_CANVAS_WIZARD_CONFIG: WizardConfig = {
-  icon: Sparkles,
-  title: 'Blank canvas',
-  subtitle: 'Open a project or view your team to get started',
-  actions: [
-    {
-      id: 'open-project',
-      icon: Layers,
-      title: 'Open a project',
-      description: 'See tickets, agents, and channels for this workspace',
-      recommended: true,
-    },
-    {
-      id: 'view-agents',
-      icon: Bot,
-      title: 'View agents',
-      description: 'Browse your agent roster and their activity',
-    },
-  ],
-};
-
 export const PROJECTS_WIZARD_CONFIG: WizardConfig = {
   icon: Layers,
   title: 'Set up your first project',

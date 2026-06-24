@@ -5,9 +5,12 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
+import { OnboardingWizard } from './OnboardingWizard';
+import { AGENTS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import { listAgents, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/agents/store';
 import type { AgentStatus } from '@/data/agents/interface';
 import { STROKE_WIDTH } from '@/lib/constants';
+import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'name' | 'uptime';
 
@@ -41,9 +44,10 @@ function ContextBar({ value }: { value: number }) {
 type UniversalAgentsViewProps = {
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
+  onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: UniversalAgentsViewProps) {
+export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -86,12 +90,7 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: Universa
 
   if (agents.length === 0) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="px-6 pt-5 pb-3">
-          <h1 className="text-base font-bold text-foreground">All Agents</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">No agents found</p>
-        </div>
-      </div>
+      <OnboardingWizard config={AGENTS_WIZARD_CONFIG} onAction={onAction} />
     );
   }
 

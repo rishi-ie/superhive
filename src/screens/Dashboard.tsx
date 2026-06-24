@@ -5,17 +5,16 @@ import { RightAuxiliary } from '@/components/RightAuxiliary';
 import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents, listTickets, getProject } from '@/data/projects/store';
+import { listProjectAgents, listTickets, getProject, getProjectByWorkspace } from '@/data/projects/store';
+import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, approveAudit, denyAudit, getAgentWorkspace, nameToAgentId } from '@/data/agents/store';
-import { getProjectIdByTicketId } from '@/data/projects/store';
 import { addMessageToActiveThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
   openOrFocusTab as openTabOp,
   closeTab as closeTabOp,
   selectTab as selectTabOp,
-  setSelection,
   getActiveTab,
 } from '@/data/tabs/store';
 import type { CenterTabType, CenterTab } from '@/data/tabs/interface';
@@ -153,13 +152,12 @@ export function Dashboard({
   }, [openTab]);
 
   const handleTicketSelect = useCallback((ticketId: string) => {
-    if (activeTab && !activeTab.pinned) {
-      setTabState(prev => setSelection(prev, activeTab.id, { selectedTicketId: ticketId }));
-    } else {
-      openTab(buildTab('ticket', activeWorkspaceId, ticketId, { selectedTicketId: ticketId }));
-    }
+    const ticket = listUniversalTickets().find(t => t.id === ticketId);
+    const ws = ticket?.workspaceId ?? activeWorkspaceId;
+    const title = ticket?.title ?? `Ticket ${ticketId}`;
+    openTab(buildTab('ticket', ws, title, { selectedTicketId: ticketId, subtitle: ticket?.id }));
     setRightPanelTab('overview');
-  }, [activeTab, activeWorkspaceId, openTab]);
+  }, [activeWorkspaceId, openTab]);
 
   const handleChannelSelect = useCallback((channelId: string, workspaceId: string) => {
     openTab(buildTab('channel', workspaceId, 'Channel', { selectedChannelId: channelId }));
@@ -273,17 +271,14 @@ export function Dashboard({
     if (id) handleAgentSelect(id);
   }, [handleAgentSelect]);
 
-  const handleProjectSelectByTicket = useCallback((ticketId: string) => {
-    const projectId = getProjectIdByTicketId(ticketId);
-    if (projectId) {
-      const project = getProject(projectId);
-      if (project) openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: projectId }));
-    }
-  }, [openTab]);
-
   const handleProjectClick = useCallback((projectId: string, workspaceId: string) => {
     const project = getProject(projectId);
     if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: projectId }));
+  }, [openTab]);
+
+  const handleProjectSelectByWorkspace = useCallback((workspaceId: string) => {
+    const project = getProjectByWorkspace(workspaceId);
+    if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: project.id }));
   }, [openTab]);
 
   const handleChannelClick = useCallback((channelId: string, workspaceId: string) => {
@@ -384,6 +379,7 @@ export function Dashboard({
         onAuditCountClick={handleAuditCountClick}
         onAgentClick={handleAgentSelect}
         onProjectClick={handleProjectClick}
+        onProjectSelect={handleProjectSelectByWorkspace}
         onChannelClick={handleChannelClick}
         onTicketClick={handleTicketSelect}
         onThreadSelect={handleThreadSelect}

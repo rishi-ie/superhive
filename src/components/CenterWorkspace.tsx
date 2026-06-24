@@ -2,6 +2,7 @@ import { CenterBreadcrumb } from './center-workspace/CenterBreadcrumb';
 import { CenterTabStrip } from './center-workspace/CenterTabStrip';
 import { ChatView } from './center-workspace/ChatView';
 import { ProjectsView } from './center-workspace/ProjectsView';
+import { ProjectDetailView } from './center-workspace/ProjectDetailView';
 import { TicketsView } from './center-workspace/TicketsView';
 import { AgentsView } from './center-workspace/AgentsView';
 import { CommunicationsView } from './center-workspace/CommunicationsView';
@@ -9,6 +10,7 @@ import { OnboardingWizard } from './center-workspace/OnboardingWizard';
 import { UniversalProjectsView } from './center-workspace/UniversalProjectsView';
 import { UniversalAgentsView } from './center-workspace/UniversalAgentsView';
 import { CENTER_EMPTY_STATE_CONFIG } from '@/data/wizard-configs';
+import { getProject } from '@/data/projects/store';
 import type { CenterTab, CenterTabType } from '@/data/tabs/interface';
 import type { OnboardingWizardProps } from './center-workspace/OnboardingWizard';
 
@@ -119,11 +121,11 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
         />
       );
 
-    case 'project':
+    case 'project': {
+      const project = tab.selectedProjectId ? getProject(tab.selectedProjectId) : null;
       return (
-        <ProjectsView
-          workspaceId={tab.workspaceId}
-          projectId={tab.selectedProjectId ?? undefined}
+        <ProjectDetailView
+          project={project}
           onTicketSelect={onTicketSelect}
           onAgentClick={onAgentSelect}
           onChannelClick={onChannelSelect}
@@ -131,6 +133,7 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
           onAction={onAction}
         />
       );
+    }
 
     case 'tickets':
       return (
@@ -190,6 +193,7 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
         <UniversalAgentsView
           onAgentSelect={onAgentSelect}
           selectedAgentId={tab.selectedAgentId ?? undefined}
+          onAction={onAction}
         />
       );
 
@@ -198,6 +202,7 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
         <UniversalProjectsView
           onProjectSelect={onProjectSelect}
           selectedProjectId={tab.selectedProjectId ?? undefined}
+          onAction={onAction}
         />
       );
 

@@ -5,10 +5,13 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter, type FilterOption } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
+import { OnboardingWizard } from './OnboardingWizard';
+import { PROJECTS_WIZARD_CONFIG } from '@/data/wizard-configs';
 import { listProjects } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import type { TicketStatus } from '@/data/projects/interface';
 import type { Project } from '@/data/projects/interface';
+import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'name' | 'activity' | 'tickets';
 
@@ -38,9 +41,10 @@ function relativeTime(timestamp: string): string {
 type UniversalProjectsViewProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   selectedProjectId?: string | null;
+  onAction?: OnboardingWizardProps['onAction'];
 };
 
-export function UniversalProjectsView({ onProjectSelect, selectedProjectId }: UniversalProjectsViewProps) {
+export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAction }: UniversalProjectsViewProps) {
   const [query, setQuery] = useState('');
   const [workspaceFilter, setWorkspaceFilter] = useState<WorkspaceFilter>('ALL');
   const [sort, setSort] = useState<SortKey>('activity');
@@ -96,12 +100,7 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId }: Un
 
   if (projects.length === 0) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="px-6 pt-5 pb-3">
-          <h1 className="text-base font-bold text-foreground">All Projects</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">No projects found</p>
-        </div>
-      </div>
+      <OnboardingWizard config={PROJECTS_WIZARD_CONFIG} onAction={onAction} />
     );
   }
 

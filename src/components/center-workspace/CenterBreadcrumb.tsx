@@ -11,16 +11,13 @@ type CenterBreadcrumbProps = {
 
 type TabSegment = { label: string; onClick?: () => void; isLast: boolean };
 
-function getBreadcrumbSegments(tab: CenterTab, workspaceName: string): TabSegment[] {
-  const segments: TabSegment[] = [];
-
-  segments.push({
-    label: workspaceName,
-    onClick: undefined,
-    isLast: false,
-  });
-
-  const sectionLabel: Record<CenterTab['type'], string | null> = {
+function getBreadcrumbSegments(
+  tab: CenterTab,
+  workspaceName: string,
+  workspaceId: string,
+  onJump?: (workspaceId: string, section?: string) => void,
+): TabSegment[] {
+  const sections: Record<CenterTab['type'], string | null> = {
     projects: 'Projects',
     project: 'Project',
     tickets: 'Tickets',
@@ -34,16 +31,36 @@ function getBreadcrumbSegments(tab: CenterTab, workspaceName: string): TabSegmen
     settings: 'Settings',
   };
 
-  const section = sectionLabel[tab.type];
-  if (!section) return segments;
+  const tabLabel: Record<CenterTab['type'], string> = {
+    projects: 'Projects',
+    project: tab.title || 'Project',
+    tickets: 'Tickets',
+    ticket: tab.title || 'Ticket',
+    channels: 'Comms',
+    channel: tab.title || 'Channel',
+    agents: 'Agents',
+    agent: tab.title || 'Agent',
+    'universal-agents': 'Agents',
+    'universal-projects': 'Projects',
+    settings: 'Settings',
+  };
 
-  const isUniversal = tab.type === 'universal-agents' || tab.type === 'universal-projects';
+  const segments: TabSegment[] = [];
 
   segments.push({
-    label: section,
-    onClick: undefined,
+    label: workspaceName,
+    onClick: onJump ? () => onJump(workspaceId) : undefined,
     isLast: false,
   });
+
+  const section = sections[tab.type];
+  if (section) {
+    segments.push({
+      label: section,
+      onClick: onJump ? () => onJump(workspaceId, section) : undefined,
+      isLast: tab.type === 'universal-agents' || tab.type === 'universal-projects' || !tab.subtitle,
+    });
+  }
 
   if (tab.subtitle) {
     segments.push({
@@ -62,7 +79,8 @@ function getBreadcrumbSegments(tab: CenterTab, workspaceName: string): TabSegmen
 }
 
 export function CenterBreadcrumb({ tab, workspaceName, onJump }: CenterBreadcrumbProps) {
-  const segments = getBreadcrumbSegments(tab, workspaceName);
+  const workspaceId = tab.workspaceId;
+  const segments = getBreadcrumbSegments(tab, workspaceName, workspaceId, onJump);
 
   return (
     <MaximizeOnDoubleClick className="flex items-center h-9 border-b border-border px-4">

@@ -1,13 +1,15 @@
+import { Avatar } from '@/components/ui/Avatar';
 import { nameToAgentId } from '@/data/agents/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
+import { getProjectByWorkspace } from '@/data/projects/store';
 
 type TicketOverviewTabProps = {
   ticket: UniversalTicket;
   projectAgents: ProjectAgent[];
   recentActivity: SwarmActivity[];
   onAgentClick?: (id: string) => void;
-  onProjectClick?: (projectId: string, workspaceId: string) => void;
+  onProjectSelect?: (workspaceId: string) => void;
   onChannelClick?: (channelId: string, workspaceId: string) => void;
 };
 
@@ -36,7 +38,7 @@ export function TicketOverviewTab({
   projectAgents,
   recentActivity,
   onAgentClick,
-  onProjectClick,
+  onProjectSelect,
   onChannelClick,
 }: TicketOverviewTabProps) {
   const initials = ticket.assignee.name
@@ -80,9 +82,9 @@ export function TicketOverviewTab({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => { if (assigneeId && onAgentClick) onAgentClick(assigneeId); }}
-            className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[9px] font-bold text-sidebar-primary-foreground hover:opacity-80 transition-opacity shrink-0"
+            className="shrink-0"
           >
-            {initials}
+            <Avatar size="xs" fallback={initials} />
           </button>
           <button
             onClick={() => { if (assigneeId && onAgentClick) onAgentClick(assigneeId); }}
@@ -98,7 +100,7 @@ export function TicketOverviewTab({
         <div className="text-[10px] text-muted-foreground bg-secondary/40 rounded px-2 py-1.5">
           Project:{' '}
           <button
-            onClick={() => onProjectClick?.(ticket.id, ticket.workspaceId)}
+            onClick={() => onProjectSelect?.(ticket.workspaceId)}
             className="text-foreground hover:text-chart-1 transition-colors"
           >
             {ticket.projectName}

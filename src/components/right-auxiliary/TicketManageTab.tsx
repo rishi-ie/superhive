@@ -52,7 +52,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
     <div className="p-3 space-y-4">
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Status</label>
-        <div className="flex rounded-md border border-border overflow-hidden">
+        <div className="flex rounded-md border border-border/40 overflow-hidden">
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -61,7 +61,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
               className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                 status === opt.value
                   ? STATUS_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
               }`}
             >
               {opt.label}
@@ -72,7 +72,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
 
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Priority</label>
-        <div className="flex rounded-md border border-border overflow-hidden">
+        <div className="flex rounded-md border border-border/40 overflow-hidden">
           {PRIORITY_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -81,7 +81,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
               className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                 priority === opt.value
                   ? PRIORITY_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
               }`}
             >
               {opt.label}
@@ -92,7 +92,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
 
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Type</label>
-        <div className="flex rounded-md border border-border overflow-hidden">
+        <div className="flex rounded-md border border-border/40 overflow-hidden">
           {TYPE_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -101,7 +101,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
               className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                 type === opt.value
                   ? 'border-chart-1 bg-chart-1/10 text-chart-1'
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
               }`}
             >
               {opt.label}
@@ -119,27 +119,21 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
         />
       </div>
 
-      <div className="border-t border-border pt-3 space-y-2">
+      <div className="border-t border-border/40 pt-3 space-y-2">
         <div className="flex gap-2">
           <button
             type="button"
-            className="flex-1 rounded-md border border-border px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
+            className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
           >
             Close Ticket
           </button>
           <button
             type="button"
-            className="flex-1 rounded-md border border-border px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
+            className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
           >
-            Reopen
+            Archive Ticket
           </button>
         </div>
-        <button
-          type="button"
-          className="w-full rounded-md border border-border px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
-        >
-          Archive
-        </button>
       </div>
     </div>
   );

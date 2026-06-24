@@ -69,7 +69,7 @@ export function ChannelThreadTab({
                   </button>
                   <span className="text-[9px] text-muted-foreground/60 font-fustat">{msg.timestamp}</span>
                   {msg.isAI && (
-                    <span className="size-1 rounded-full bg-chart-2 shrink-0" />
+                    <span className="text-[8px] font-medium uppercase tracking-wider rounded border border-chart-2/40 bg-chart-2/10 text-chart-2 px-1 py-0.5">AI</span>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">{msg.content}</p>

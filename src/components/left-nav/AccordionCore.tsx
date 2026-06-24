@@ -67,7 +67,7 @@ export function AccordionCore({ currentView, onItemClick, onAgentClick, onProjec
       <AccordionHeader
         label="Communications"
         icon={getIcon('communications')}
-        active={currentView === 'communications'}
+        active={currentView === 'channels' || currentView === 'channel'}
         onClick={() => onItemClick?.('communications')}
       />
 

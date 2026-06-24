@@ -2,6 +2,7 @@ import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { getTelemetry, getActionLog, getNextStep, type Agent } from '@/data/agents/store';
 import type { AgentStatus } from '@/data/agents/interface';
+import { Avatar } from '@/components/ui/Avatar';
 
 function StatusPill({ status }: { status: AgentStatus }) {
   const config: Record<AgentStatus, { label: string; className: string }> = {
@@ -50,6 +51,7 @@ export function TelemetryDeck({ agent }: TelemetryDeckProps) {
 
       {/* Identity Strip */}
       <div className="flex items-center gap-2">
+        <Avatar size="xs" fallback={agent.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)} />
         {agent.status === 'EXECUTING'     && <span className="size-2 rounded-full bg-chart-2 pulse-executing shrink-0" />}
         {agent.status === 'COMPILING'     && <Loader2 size={10} className="animate-spin text-chart-3 shrink-0" strokeWidth={STROKE_WIDTH} />}
         {agent.status === 'AWAITING_HUMAN'&& <span className="size-2 rounded-full bg-chart-1 shrink-0" />}

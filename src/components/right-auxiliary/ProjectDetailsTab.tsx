@@ -18,9 +18,8 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 }
 
 export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onChannelClick }: ProjectOverviewTabProps) {
-  const todo = project.tickets.filter(t => t.status === 'TODO').length;
   const executing = project.tickets.filter(t => t.status === 'EXECUTING').length;
-  const done = project.tickets.filter(t => t.status === 'DONE').length;
+  const activeAgents = project.agents.filter(a => a.currentStatus === 'WORKING' || a.currentStatus === 'COMPILING').length;
   const openChannels = project.channels.filter(c => c.status !== 'RESOLVED').length;
   const lastActivity = project.activity[0];
 
@@ -28,7 +27,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
   const recentActivity = project.activity.slice(0, 5);
 
   return (
-    <div className="p-3 space-y-3">
+    <div className="p-3 space-y-4">
       <div className="space-y-1">
         <h2 className="text-sm font-semibold text-foreground">{project.title}</h2>
         {lastActivity && (
@@ -38,26 +37,22 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5">
-        <StatCard label="Todo" value={todo} />
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label="Total Tickets" value={project.tickets.length} />
         <StatCard label="Executing" value={executing} color="text-chart-3" />
-        <StatCard label="Done" value={done} color="text-chart-2" />
-      </div>
-
-      <div className="grid grid-cols-2 gap-1.5">
-        <StatCard label="Agents" value={project.agents.length} />
-        <StatCard label="Channels" value={openChannels} />
+        <StatCard label="Active Agents" value={activeAgents} color="text-chart-2" />
+        <StatCard label="Open Channels" value={openChannels} />
       </div>
 
       {topAgents.length > 0 && (
-        <div className="border-t border-border pt-2 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Contributors</span>
+        <div className="border-t border-border/40 pt-3 space-y-2">
+          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Contributors</span>
           <div className="space-y-1">
             {topAgents.map(agent => (
-              <div key={agent.id} className="flex items-center gap-1.5">
+              <div key={agent.id} className="flex items-center gap-2 group cursor-pointer">
                 <button
                   onClick={() => onAgentClick?.(agent.id)}
-                  className="size-4 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground hover:opacity-80 transition-opacity shrink-0"
+                  className="size-4 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0"
                 >
                   {agent.initials}
                 </button>
@@ -75,9 +70,9 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
       )}
 
       {recentActivity.length > 0 && (
-        <div className="border-t border-border pt-2 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Recent Activity</span>
-          <div className="space-y-0.5">
+        <div className="border-t border-border/40 pt-3 space-y-2">
+          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Recent Activity</span>
+          <div className="space-y-1">
             {recentActivity.map(item => {
               const agent = project.agents.find(a => a.name === item.primaryAgent);
               return (

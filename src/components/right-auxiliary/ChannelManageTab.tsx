@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-import { TextInput } from '@/components/ui/TextInput';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type ChannelManageTabProps = {
@@ -33,9 +32,9 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
 
   return (
     <div className="p-3 space-y-4">
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Status</label>
-        <div className="flex rounded-md border border-border overflow-hidden">
+      <div className="space-y-2">
+        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Status</label>
+        <div className="flex rounded-md border border-border/40 overflow-hidden">
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -44,7 +43,7 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
               className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                 status === opt.value
                   ? STATUS_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30'
+                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
               }`}
             >
               {opt.label}
@@ -53,30 +52,36 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Topic</label>
-        <TextInput
+      <div className="space-y-2">
+        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Topic</label>
+        <input
+          type="text"
           value={topic}
           onChange={e => setTopic(e.target.value)}
-          size="sm"
+          className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Participants ({participants.length})</label>
+      <div className="space-y-2">
+        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
+          Participants ({participants.length})
+        </label>
         <div className="space-y-1">
           {participants.map(name => {
             const agent = availableAgents.find(a => a.name === name);
             return (
-              <div key={name} className="flex items-center gap-2 p-2 rounded-md border border-border bg-card">
-                <div className="size-4 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
+              <div
+                key={name}
+                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+              >
+                <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
                   {agent?.initials ?? name.slice(0, 2).toUpperCase()}
                 </div>
                 <span className="text-xs text-foreground flex-1 truncate">{name}</span>
                 <button
                   onClick={() => removeParticipant(name)}
                   type="button"
-                  className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
+                  className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
                 >
                   <X size={12} strokeWidth={STROKE_WIDTH} />
                 </button>
@@ -86,7 +91,7 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
         </div>
         {availableToAdd.length > 0 && (
           <select
-            className="w-full rounded-md border border-border bg-input px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+            className="w-full rounded-md border border-border/40 bg-input px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-white/5 transition-colors"
             onChange={e => {
               if (e.target.value) {
                 setParticipants(prev => [...prev, e.target.value]);
@@ -101,15 +106,6 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
             ))}
           </select>
         )}
-      </div>
-
-      <div className="border-t border-border pt-3 space-y-2">
-        <button
-          type="button"
-          className="w-full rounded-md border border-border px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
-        >
-          Archive Channel
-        </button>
       </div>
     </div>
   );

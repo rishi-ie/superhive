@@ -22,6 +22,7 @@ import {
   listAgents,
   nameToAgentId,
   getAuditItems,
+  getAgentWorkspace,
   type Agent,
 } from '@/data/agents/store';
 import {
@@ -54,6 +55,7 @@ type RightAuxiliaryProps = {
   onAuditCountClick?: (agentId: string) => void;
   onAgentClick?: (agentId: string) => void;
   onProjectClick?: (projectId: string, workspaceId: string) => void;
+  onProjectSelect?: (workspaceId: string) => void;
   onChannelClick?: (channelId: string, workspaceId: string) => void;
   onTicketClick?: (ticketId: string) => void;
   onThreadSelect?: (threadId: string) => void;
@@ -76,6 +78,7 @@ export function RightAuxiliary({
   onAuditCountClick,
   onAgentClick,
   onProjectClick,
+  onProjectSelect,
   onChannelClick,
   onTicketClick,
   onThreadSelect,
@@ -96,7 +99,11 @@ export function RightAuxiliary({
   const projectData = context?.kind === 'project' && context.projectId
     ? getProject(context.projectId)
     : null;
-  const projectWorkspaceId = context?.kind === 'project' ? context.workspaceId : 'vela';
+  const projectWorkspaceId = context?.kind === 'project'
+    ? context.workspaceId
+    : context?.kind === 'agent' && context.agentId
+    ? getAgentWorkspace(context.agentId) ?? 'vela'
+    : 'vela';
 
   const channelData = context?.kind === 'channel'
     ? listChannels(context.workspaceId).find(c => c.id === context.channelId)
@@ -134,12 +141,7 @@ export function RightAuxiliary({
     ? universalTickets.find(t => t.id === channelData.relatedTicketId) ?? null
     : null;
 
-  const projectInboxAuditItems = projectData
-    ? getAuditItems().filter(item => {
-        const agentIds = projectData.agents.map(a => a.id);
-        return true; // show all audit items for project agents
-      })
-    : [];
+  const projectInboxAuditItems = projectData ? getAuditItems() : [];
 
   const listChannelsData = context?.kind === 'channels-list'
     ? listChannels(context.workspaceId)
@@ -199,7 +201,7 @@ export function RightAuxiliary({
         onMouseDown={startResize}
       />
       <div
-        className="flex h-full flex-col bg-sidebar border-l border-sidebar-border/40"
+        className="flex h-full flex-col bg-sidebar border-l border-border/50"
         style={{ width: `${width}px`, minWidth: `${width}px` }}
       >
         <div className="h-9 shrink-0" />
@@ -254,7 +256,7 @@ export function RightAuxiliary({
                   projectAgents={ticketProjectAgents}
                   recentActivity={ticketSwarmActivity}
                   onAgentClick={onAgentClick}
-                  onProjectClick={onProjectClick}
+                  onProjectSelect={onProjectSelect}
                   onChannelClick={onChannelClick}
                 />
               )}

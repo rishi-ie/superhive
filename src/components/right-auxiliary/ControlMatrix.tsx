@@ -186,7 +186,7 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
           className="flex w-full items-center justify-center gap-2 rounded-md border border-chart-5 px-3 py-2 text-sm font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
           onClick={() => onTerminate?.(agent.id)}
         >
-          Terminate Agent
+          Terminate Agent Execution
         </button>
       </div>
 

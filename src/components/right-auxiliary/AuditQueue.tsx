@@ -71,7 +71,7 @@ export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueP
                     className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
                     onClick={() => onViewDiff?.(item.id)}
                   >
-                    View Diff
+                    View Code Diff
                   </button>
                   <button
                     type="button"

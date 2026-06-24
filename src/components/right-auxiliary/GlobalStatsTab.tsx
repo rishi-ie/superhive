@@ -1,4 +1,3 @@
-import { BarChart3 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 import type { Agent } from '@/data/agents/store';
@@ -20,6 +19,21 @@ type GlobalStatsTabProps = {
   onProjectClick?: (id: string, workspaceId: string) => void;
 };
 
+function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
+  return (
+    <div className="flex flex-col gap-0.5 p-2 rounded-md border border-border/40 bg-card">
+      <span className={`text-lg font-fustat font-bold ${color ?? 'text-foreground'}`}>{value}</span>
+      <span className="text-[10px] tracking-wider font-medium text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[10px] tracking-wider font-medium text-muted-foreground">{children}</span>
+  );
+}
+
 function ChannelStats({ channels, onChannelClick }: {
   channels: CommunicationChannel[];
   onChannelClick?: GlobalStatsTabProps['onChannelClick'];
@@ -33,24 +47,12 @@ function ChannelStats({ channels, onChannelClick }: {
     .slice(0, 4);
 
   return (
-    <div className="p-3 space-y-3">
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-foreground">{channels.length}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Total</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-2">{open}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Open</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-3">{awaiting}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Awaiting</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-muted-foreground">{resolved}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Resolved</div>
-        </div>
+    <div className="p-3 space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label="Total" value={channels.length} />
+        <StatCard label="Open" value={open} color="text-chart-2" />
+        <StatCard label="Awaiting" value={awaiting} color="text-chart-3" />
+        <StatCard label="Resolved" value={resolved} />
       </div>
 
       {unread > 0 && (
@@ -60,14 +62,14 @@ function ChannelStats({ channels, onChannelClick }: {
       )}
 
       {mostActive.length > 0 && (
-        <div className="border-t border-border pt-2 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Most Active</span>
-          <div className="space-y-0.5">
+        <div className="border-t border-border/40 pt-3 space-y-2">
+          <SectionLabel>Most Active</SectionLabel>
+          <div className="space-y-1">
             {mostActive.map(ch => (
               <button
                 key={ch.id}
                 onClick={() => onChannelClick?.(ch.id, '')}
-                className="w-full text-left p-1.5 rounded border border-border bg-card hover:bg-card/80 transition-colors"
+                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors"
                 type="button"
               >
                 <div className="text-[10px] font-medium text-foreground truncate">{ch.topic}</div>
@@ -81,34 +83,26 @@ function ChannelStats({ channels, onChannelClick }: {
   );
 }
 
-function AgentStats({ agents, projectAgents, onAgentClick }: {
+function AgentStats({ agents, onAgentClick }: {
   agents: Agent[];
-  projectAgents: ProjectAgent[];
   onAgentClick?: GlobalStatsTabProps['onAgentClick'];
 }) {
   const statusCounts: Record<string, number> = {};
   for (const a of agents) {
     statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
   }
-
   const activeAgents = agents.filter(a => a.status === 'EXECUTING' || a.status === 'COMPILING');
 
   return (
-    <div className="p-3 space-y-3">
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-foreground">{agents.length}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Total</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-2">{activeAgents.length}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Active</div>
-        </div>
+    <div className="p-3 space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label="Total" value={agents.length} />
+        <StatCard label="Active" value={activeAgents.length} color="text-chart-2" />
       </div>
 
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {Object.entries(statusCounts).map(([status, count]) => (
-          <div key={status} className="flex items-center justify-between p-1.5 rounded border border-border bg-card">
+          <div key={status} className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-card">
             <span className="text-[10px] text-muted-foreground capitalize">
               {status.replace('_', ' ').toLowerCase()}
             </span>
@@ -118,14 +112,14 @@ function AgentStats({ agents, projectAgents, onAgentClick }: {
       </div>
 
       {activeAgents.length > 0 && (
-        <div className="border-t border-border pt-2 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Top Active</span>
-          <div className="space-y-0.5">
+        <div className="border-t border-border/40 pt-3 space-y-2">
+          <SectionLabel>Top Active</SectionLabel>
+          <div className="space-y-1">
             {activeAgents.slice(0, 4).map(a => (
               <button
                 key={a.id}
                 onClick={() => onAgentClick?.(a.id)}
-                className="w-full text-left p-1.5 rounded border border-border bg-card hover:bg-card/80 transition-colors"
+                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors"
                 type="button"
               >
                 <div className="text-[10px] font-medium text-foreground truncate">{a.name}</div>
@@ -149,48 +143,33 @@ function UniversalAgentStats({ agents, workspaces, onAgentClick }: {
     statusCounts[a.status] = (statusCounts[a.status] ?? 0) + 1;
   }
 
-  const workspaceCounts: Record<string, number> = {};
-  for (const w of workspaces) {
-    workspaceCounts[w.id] = agents.filter(a => {
-      const projId = a.id.replace('agent-', 'proj-');
-      return projId.includes(w.id) || a.name.toLowerCase().includes(w.id);
-    }).length;
-  }
-
   return (
-    <div className="p-3 space-y-3">
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-foreground">{agents.length}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Total</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-2">
-            {agents.filter(a => a.status === 'EXECUTING').length}
-          </div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Executing</div>
-        </div>
+    <div className="p-3 space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label="Total" value={agents.length} />
+        <StatCard label="Executing" value={agents.filter(a => a.status === 'EXECUTING').length} color="text-chart-2" />
       </div>
 
-      <div className="border-t border-border pt-2 space-y-1">
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">By Status</span>
-        {Object.entries(statusCounts).map(([status, count]) => (
-          <div key={status} className="flex items-center justify-between p-1.5 rounded border border-border bg-card">
-            <span className="text-[10px] text-muted-foreground capitalize">
-              {status.replace('_', ' ').toLowerCase()}
-            </span>
-            <span className="text-[10px] font-fustat font-bold text-foreground">{count}</span>
-          </div>
-        ))}
+      <div className="border-t border-border/40 pt-3 space-y-2">
+        <SectionLabel>By Status</SectionLabel>
+        <div className="space-y-1">
+          {Object.entries(statusCounts).map(([status, count]) => (
+            <div key={status} className="flex items-center justify-between p-2 rounded-md border border-border/40 bg-card">
+              <span className="text-[10px] text-muted-foreground capitalize">
+                {status.replace('_', ' ').toLowerCase()}
+              </span>
+              <span className="text-[10px] font-fustat font-bold text-foreground">{count}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function UniversalProjectStats({ projects, universalTickets, workspaces, onProjectClick }: {
+function UniversalProjectStats({ projects, universalTickets, onProjectClick }: {
   projects: Project[];
   universalTickets: UniversalTicket[];
-  workspaces: Workspace[];
   onProjectClick?: GlobalStatsTabProps['onProjectClick'];
 }) {
   const backlog = universalTickets.filter(t => t.status === 'BACKLOG').length;
@@ -199,24 +178,12 @@ function UniversalProjectStats({ projects, universalTickets, workspaces, onProje
   const merged = universalTickets.filter(t => t.status === 'MERGED').length;
 
   return (
-    <div className="p-3 space-y-3">
-      <div className="grid grid-cols-2 gap-1.5">
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-foreground">{projects.length}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Projects</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-2">{executing}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Executing</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-3">{review}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Review</div>
-        </div>
-        <div className="p-2 rounded-md border border-border bg-card">
-          <div className="text-lg font-fustat font-bold text-chart-2">{merged}</div>
-          <div className="text-[9px] text-muted-foreground uppercase tracking-wider">Merged</div>
-        </div>
+    <div className="p-3 space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <StatCard label="Projects" value={projects.length} />
+        <StatCard label="Executing" value={executing} color="text-chart-2" />
+        <StatCard label="Review" value={review} color="text-chart-3" />
+        <StatCard label="Merged" value={merged} />
       </div>
 
       <div className="text-[10px] text-muted-foreground bg-secondary/40 rounded px-2 py-1.5">
@@ -233,32 +200,13 @@ export function GlobalStatsTab(props: GlobalStatsTabProps) {
       return <ChannelStats channels={props.channels} onChannelClick={props.onChannelClick} />;
     case 'agents-list':
       if (!props.agents) return <div className="p-3 text-xs text-muted-foreground">No agent data</div>;
-      return (
-        <AgentStats
-          agents={props.agents}
-          projectAgents={props.projectAgents ?? []}
-          onAgentClick={props.onAgentClick}
-        />
-      );
+      return <AgentStats agents={props.agents} onAgentClick={props.onAgentClick} />;
     case 'universal-agents':
       if (!props.agents || !props.workspaces) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
-      return (
-        <UniversalAgentStats
-          agents={props.agents}
-          workspaces={props.workspaces}
-          onAgentClick={props.onAgentClick}
-        />
-      );
+      return <UniversalAgentStats agents={props.agents} workspaces={props.workspaces} onAgentClick={props.onAgentClick} />;
     case 'universal-projects':
       if (!props.projects || !props.universalTickets || !props.workspaces) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
-      return (
-        <UniversalProjectStats
-          projects={props.projects}
-          universalTickets={props.universalTickets}
-          workspaces={props.workspaces}
-          onProjectClick={props.onProjectClick}
-        />
-      );
+      return <UniversalProjectStats projects={props.projects} universalTickets={props.universalTickets} onProjectClick={props.onProjectClick} />;
     default:
       return <div className="p-3 text-xs text-muted-foreground">No data available</div>;
   }
