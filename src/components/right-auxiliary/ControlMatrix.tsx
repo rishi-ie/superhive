@@ -7,6 +7,7 @@ import type { CommitAuthority } from '@/data/agents/interface';
 
 type ControlMatrixProps = {
   agent: Agent;
+  onTerminate?: (agentId: string) => void;
 };
 
 const ENGINES = [
@@ -32,7 +33,7 @@ function getTokenCostLabel(tokens: number): string {
   return `~$${(tokens * 0.00003).toFixed(2)} / task`;
 }
 
-export function ControlMatrix({ agent }: ControlMatrixProps) {
+export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
   const initial = getPermissions(agent.id);
   const [permissions, setPermissions] = useState<Permissions>({ ...initial });
   const [sliderValue, setSliderValue] = useState(permissions.maxTokens);
@@ -183,6 +184,7 @@ export function ControlMatrix({ agent }: ControlMatrixProps) {
         <button
           type="button"
           className="flex w-full items-center justify-center gap-2 rounded-md border border-chart-5 px-3 py-2 text-sm font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
+          onClick={() => onTerminate?.(agent.id)}
         >
           Terminate Agent
         </button>

@@ -3,10 +3,15 @@ import { IconButton } from '@/components/ui/IconButton';
 import { MaximizeOnDoubleClick } from '@/components/ui/MaximizeOnDoubleClick';
 import { STROKE_WIDTH } from '@/lib/constants';
 
-export function LeftNavHeader() {
+type LeftNavHeaderProps = {
+  onToggleLeft?: () => void;
+  onToggleRight?: () => void;
+};
+
+export function LeftNavHeader({ onToggleLeft, onToggleRight }: LeftNavHeaderProps) {
   return (
     <MaximizeOnDoubleClick className="drag flex items-center gap-1 pl-20 pr-3 h-9 shrink-0">
-      <IconButton aria-label="Toggle sidebar">
+      <IconButton aria-label="Toggle sidebar" onClick={onToggleLeft}>
         <PanelLeftClose size={16} strokeWidth={STROKE_WIDTH} />
       </IconButton>
       <IconButton aria-label="Back" disabled>
@@ -16,7 +21,7 @@ export function LeftNavHeader() {
         <ArrowRight size={16} strokeWidth={STROKE_WIDTH} />
       </IconButton>
       <div className="flex-1" />
-      <IconButton aria-label="Toggle right panel">
+      <IconButton aria-label="Toggle right panel" onClick={onToggleRight}>
         <Columns2 size={16} strokeWidth={STROKE_WIDTH} />
       </IconButton>
     </MaximizeOnDoubleClick>

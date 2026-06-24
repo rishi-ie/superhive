@@ -1,8 +1,117 @@
-export function ChannelOverviewTab() {
+import { Avatar } from '@/components/ui/Avatar';
+import { nameToAgentId } from '@/data/agents/store';
+import type { CommunicationChannel, ProjectAgent, ChannelMessage } from '@/data/projects/store';
+import type { UniversalTicket } from '@/data/tickets/store';
+
+type ChannelOverviewTabProps = {
+  channel: CommunicationChannel;
+  workspaceId: string;
+  relatedTicket: UniversalTicket | null;
+  participants: ProjectAgent[];
+  recentMessages: ChannelMessage[];
+  onParticipantClick?: (name: string) => void;
+  onTicketClick?: (id: string) => void;
+};
+
+function ChannelStatusPill({ status }: { status: CommunicationChannel['status'] }) {
+  const map: Record<CommunicationChannel['status'], { color: string; label: string }> = {
+    OPEN:           { color: 'bg-chart-2',     label: 'OPEN' },
+    AWAITING_REPLY: { color: 'bg-chart-3',     label: 'AWAITING' },
+    RESOLVED:       { color: 'bg-muted-foreground/40', label: 'RESOLVED' },
+  };
+  const cfg = map[status];
   return (
-    <div className="p-4">
-      <div className="text-sm font-medium text-muted-foreground">Channel Overview</div>
-      <p className="mt-2 text-xs text-muted-foreground/60">Coming soon — channel overview</p>
+    <span className="inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+      <span className={`size-1 rounded-full ${cfg.color}`} />
+      {cfg.label}
+    </span>
+  );
+}
+
+export function ChannelOverviewTab({
+  channel,
+  workspaceId,
+  relatedTicket,
+  participants,
+  recentMessages,
+  onParticipantClick,
+  onTicketClick,
+}: ChannelOverviewTabProps) {
+  const p0 = participants[0];
+  const p1 = participants[1];
+
+  return (
+    <div className="p-3 space-y-3">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-fustat text-muted-foreground bg-secondary/60 rounded px-1.5 py-0.5">
+            {channel.id}
+          </span>
+          <ChannelStatusPill status={channel.status} />
+        </div>
+        <p className="text-sm font-semibold text-foreground leading-tight">{channel.topic}</p>
+      </div>
+
+      <div className="border-t border-border pt-2 space-y-1.5">
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Participants</span>
+        <div className="flex flex-col gap-1">
+          {[p0, p1].filter(Boolean).map((p) => (
+            <button
+              key={p!.id}
+              onClick={() => onParticipantClick?.(p!.name)}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <Avatar size="xs" fallback={p!.initials} />
+              <span className="text-xs text-foreground">{p!.name}</span>
+              <span className="text-[10px] text-muted-foreground">{p!.role}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {relatedTicket && (
+        <div className="border-t border-border pt-2 space-y-1">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Related Ticket</span>
+          <button
+            onClick={() => onTicketClick?.(relatedTicket.id)}
+            className="text-[10px] font-fustat text-muted-foreground bg-secondary/60 rounded px-1.5 py-0.5 hover:text-foreground transition-colors"
+          >
+            {relatedTicket.id} · {relatedTicket.title}
+          </button>
+        </div>
+      )}
+
+      <div className="border-t border-border pt-2 space-y-1">
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+          <span>{channel.messageCount} messages</span>
+          <span>·</span>
+          <span>{channel.updatedAt}</span>
+          {channel.unread && (
+            <>
+              <span>·</span>
+              <span className="text-chart-1">unread</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {recentMessages.length > 0 && (
+        <div className="border-t border-border pt-2 space-y-1">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Recent Messages</span>
+          <div className="space-y-1">
+            {recentMessages.slice(0, 2).map(msg => {
+              const agent = participants.find(p => p.name === msg.senderName);
+              return (
+                <div key={msg.id} className="flex items-start gap-1.5 text-[10px]">
+                  <span className="text-muted-foreground/60 shrink-0 font-fustat">{msg.timestamp}</span>
+                  <span className="font-semibold text-foreground shrink-0">{agent?.initials ?? msg.senderName.slice(0, 2).toUpperCase()}</span>
+                  <span className="text-muted-foreground/80 truncate flex-1">{msg.content}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

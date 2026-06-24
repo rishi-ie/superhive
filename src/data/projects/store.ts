@@ -7,10 +7,13 @@ import type {
   SwarmActivity,
   CommunicationChannel,
   Project,
+  ChannelMessage,
 } from './interface';
 
 const data = mockData as MockData;
 const projectsByWorkspace: Record<string, Project> = data.projects;
+
+let channelMessagesMutable: ChannelMessage[] = (data.channelMessages ?? []).map(m => ({ ...m }));
 
 interface ProjectsStore {
   listProjects(): Project[];
@@ -21,6 +24,7 @@ interface ProjectsStore {
   listProjectAgents(workspaceId?: string): ProjectAgent[];
   listSwarmActivity(workspaceId?: string): SwarmActivity[];
   listChannels(workspaceId?: string): CommunicationChannel[];
+  listChannelMessages(channelId: string): ChannelMessage[];
 }
 
 const emptyStore: ProjectsStore = {
@@ -32,6 +36,7 @@ const emptyStore: ProjectsStore = {
   listProjectAgents() { return []; },
   listSwarmActivity() { return []; },
   listChannels() { return []; },
+  listChannelMessages() { return []; },
 };
 
 const mockStore: ProjectsStore = {
@@ -74,6 +79,9 @@ const mockStore: ProjectsStore = {
     }
     return projectsByWorkspace[workspaceId]?.channels ?? [];
   },
+  listChannelMessages(channelId: string) {
+    return channelMessagesMutable.filter(m => m.channelId === channelId);
+  },
 };
 
 const store: ProjectsStore = isMockEnabled('projects') ? mockStore : emptyStore;
@@ -86,5 +94,24 @@ export function listTickets(workspaceId?: string): Ticket[] { return store.listT
 export function listProjectAgents(workspaceId?: string): ProjectAgent[] { return store.listProjectAgents(workspaceId); }
 export function listSwarmActivity(workspaceId?: string): SwarmActivity[] { return store.listSwarmActivity(workspaceId); }
 export function listChannels(workspaceId?: string): CommunicationChannel[] { return store.listChannels(workspaceId); }
+export function listChannelMessages(channelId: string): ChannelMessage[] { return store.listChannelMessages(channelId); }
+export function addChannelMessage(channelId: string, senderName: string, content: string, isAI: boolean = true): void {
+  channelMessagesMutable.push({
+    id: `cmsg-${crypto.randomUUID().slice(0, 8)}`,
+    channelId,
+    senderName,
+    content,
+    timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    isAI,
+  });
+}
+export function getProjectIdByTicketId(ticketId: string): string | null {
+  for (const project of Object.values(projectsByWorkspace)) {
+    if (project.tickets.some(t => t.id === ticketId)) {
+      return project.id;
+    }
+  }
+  return null;
+}
 
-export type { Ticket, ProjectAgent, SwarmActivity, CommunicationChannel, Project };
+export type { Ticket, ProjectAgent, SwarmActivity, CommunicationChannel, Project, ChannelMessage };

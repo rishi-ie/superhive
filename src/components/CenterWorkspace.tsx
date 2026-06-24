@@ -24,6 +24,8 @@ type CenterWorkspaceProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
+  onSend?: (message: string) => void;
+  onOpenTickets?: () => void;
 };
 
 export function CenterWorkspace({
@@ -38,6 +40,8 @@ export function CenterWorkspace({
   onProjectSelect,
   onChannelSelect,
   onAction,
+  onSend,
+  onOpenTickets,
 }: CenterWorkspaceProps) {
   const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
 
@@ -82,6 +86,8 @@ export function CenterWorkspace({
           onProjectSelect={onProjectSelect}
           onChannelSelect={onChannelSelect}
           onAction={onAction}
+          onSend={onSend}
+          onOpenTickets={onOpenTickets}
         />
       </div>
     </div>
@@ -95,15 +101,20 @@ type TabBodyProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
+  onSend?: (message: string) => void;
+  onOpenTickets?: () => void;
 };
 
-function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChannelSelect, onAction }: TabBodyProps) {
+function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChannelSelect, onAction, onSend, onOpenTickets }: TabBodyProps) {
   switch (tab.type) {
     case 'projects':
       return (
         <ProjectsView
           workspaceId={tab.workspaceId}
           onTicketSelect={onTicketSelect}
+          onAgentClick={onAgentSelect}
+          onChannelClick={onChannelSelect}
+          onOpenTickets={onOpenTickets}
           onAction={onAction}
         />
       );
@@ -114,6 +125,9 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
           workspaceId={tab.workspaceId}
           projectId={tab.selectedProjectId ?? undefined}
           onTicketSelect={onTicketSelect}
+          onAgentClick={onAgentSelect}
+          onChannelClick={onChannelSelect}
+          onOpenTickets={onOpenTickets}
           onAction={onAction}
         />
       );
@@ -167,6 +181,7 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
           workspaceId={tab.workspaceId}
           agentId={tab.selectedAgentId ?? undefined}
           onAction={onAction}
+          onSend={onSend}
         />
       );
 

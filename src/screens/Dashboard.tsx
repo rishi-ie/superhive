@@ -7,7 +7,9 @@ import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listProjectAgents, listTickets, getProject } from '@/data/projects/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listAgents, approveAudit, denyAudit, getAgentWorkspace } from '@/data/agents/store';
+import { listAgents, approveAudit, denyAudit, getAgentWorkspace, nameToAgentId } from '@/data/agents/store';
+import { getProjectIdByTicketId } from '@/data/projects/store';
+import { addMessageToActiveThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
   openOrFocusTab as openTabOp,
@@ -97,8 +99,12 @@ export function Dashboard({
     if (!activeTab) return null;
     if (activeTab.type === 'agent' && activeTab.selectedAgentId) return { kind: 'agent', agentId: activeTab.selectedAgentId };
     if (activeTab.type === 'ticket' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
-    if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId };
-    if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId };
+    if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId, workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId, workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'channels') return { kind: 'channels-list', workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'agents') return { kind: 'agents-list', workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'universal-agents') return { kind: 'universal-agents' };
+    if (activeTab.type === 'universal-projects') return { kind: 'universal-projects' };
     return null;
   }, [activeTab]);
 
@@ -229,6 +235,81 @@ export function Dashboard({
     }
   }, [openTab, activeWorkspaceId]);
 
+  const handleAuditCountClick = useCallback((agentId: string) => {
+    handleAgentSelect(agentId);
+    setRightPanelTab('inbox');
+  }, [handleAgentSelect]);
+
+  const handleTerminateAgent = useCallback((agentId: string) => {
+    console.warn('[TODO] Terminate agent:', agentId);
+  }, []);
+
+  const handleViewDiff = useCallback((auditItemId: string) => {
+    console.warn('[TODO] View diff for audit item:', auditItemId);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    console.warn('[TODO] Refresh right panel');
+  }, []);
+
+  const handleNewTicket = useCallback(() => {
+    console.warn('[TODO] Create new ticket');
+  }, []);
+
+  const handleNewChannel = useCallback(() => {
+    console.warn('[TODO] Create new channel');
+  }, []);
+
+  const handleNewAgent = useCallback(() => {
+    console.warn('[TODO] Create new agent');
+  }, []);
+
+  const handleNewProject = useCallback(() => {
+    console.warn('[TODO] Create new project');
+  }, []);
+
+  const handleAgentSelectByName = useCallback((name: string) => {
+    const id = nameToAgentId(name);
+    if (id) handleAgentSelect(id);
+  }, [handleAgentSelect]);
+
+  const handleProjectSelectByTicket = useCallback((ticketId: string) => {
+    const projectId = getProjectIdByTicketId(ticketId);
+    if (projectId) {
+      const project = getProject(projectId);
+      if (project) openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: projectId }));
+    }
+  }, [openTab]);
+
+  const handleProjectClick = useCallback((projectId: string, workspaceId: string) => {
+    const project = getProject(projectId);
+    if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: projectId }));
+  }, [openTab]);
+
+  const handleChannelClick = useCallback((channelId: string, workspaceId: string) => {
+    openTab(buildTab('channel', workspaceId, 'Channel', { selectedChannelId: channelId }));
+  }, [openTab]);
+
+  const handleThreadSelect = useCallback((threadId: string) => {
+    console.warn('[TODO] Reopen thread:', threadId);
+  }, []);
+
+  const handleSendMessage = useCallback((message: string) => {
+    addMessageToActiveThread(message);
+  }, []);
+
+  const handleToggleLeftPanel = useCallback(() => {
+    onLeftWidthChange(leftWidth === 0 ? 280 : 0);
+  }, [leftWidth, onLeftWidthChange]);
+
+  const handleToggleRightPanel = useCallback(() => {
+    onRightWidthChange(rightWidth === 0 ? 340 : 0);
+  }, [rightWidth, onRightWidthChange]);
+
+  const handleOpenTickets = useCallback(() => {
+    openTab(buildTab('tickets', activeWorkspaceId, 'Tickets'));
+  }, [openTab, activeWorkspaceId]);
+
   // ─── Keyboard shortcuts ───────────────────────────────────────────
 
   useEffect(() => {
@@ -271,6 +352,8 @@ export function Dashboard({
         currentView={activeTab?.type ?? 'projects'}
         onAgentSelect={handleAgentSelect}
         onProjectClick={handleProjectSelect}
+        onToggleLeftPanel={handleToggleLeftPanel}
+        onToggleRightPanel={handleToggleRightPanel}
       />
       <CenterWorkspace
         tabs={tabState.tabs}
@@ -284,16 +367,26 @@ export function Dashboard({
         onProjectSelect={handleProjectSelect}
         onChannelSelect={handleChannelSelect}
         onAction={handleWizardAction}
+        onSend={handleSendMessage}
+        onOpenTickets={handleOpenTickets}
       />
       <RightAuxiliary
         width={rightWidth}
         onWidthChange={onRightWidthChange}
         context={rightPanelContext}
         tab={currentRightPanelTab}
-        ticketId={activeTab?.selectedTicketId ?? null}
         onTabChange={setRightPanelTab}
         onApproveAudit={approveAudit}
         onDenyAudit={denyAudit}
+        onRefresh={handleRefresh}
+        onTerminate={handleTerminateAgent}
+        onViewDiff={handleViewDiff}
+        onAuditCountClick={handleAuditCountClick}
+        onAgentClick={handleAgentSelect}
+        onProjectClick={handleProjectClick}
+        onChannelClick={handleChannelClick}
+        onTicketClick={handleTicketSelect}
+        onThreadSelect={handleThreadSelect}
       />
     </div>
   );

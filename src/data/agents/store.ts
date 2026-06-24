@@ -129,6 +129,11 @@ export function getAgentWorkspace(agentId: string): string | null {
   return null;
 }
 
+export function nameToAgentId(name: string): string | null {
+  const lower = name.toLowerCase();
+  return agents.find(a => a.name.toLowerCase() === lower)?.id ?? null;
+}
+
 export function approveAudit(id: string): void {
   store.approveAudit(id);
 }

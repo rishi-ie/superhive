@@ -6,9 +6,11 @@ type AuditQueueProps = {
   agent?: Agent | null;
   onApprove?: (id: string) => void;
   onDeny?: (id: string) => void;
+  onViewDiff?: (auditItemId: string) => void;
+  onAuditCountClick?: (agentId: string) => void;
 };
 
-export function AuditQueue({ agent, onApprove, onDeny }: AuditQueueProps) {
+export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueProps) {
   const items = getAuditItems(agent?.id);
 
   if (items.length === 0) {
@@ -67,6 +69,7 @@ export function AuditQueue({ agent, onApprove, onDeny }: AuditQueueProps) {
                   <button
                     type="button"
                     className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
+                    onClick={() => onViewDiff?.(item.id)}
                   >
                     View Diff
                   </button>

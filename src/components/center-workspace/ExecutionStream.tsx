@@ -5,6 +5,7 @@ type ExecutionStreamProps = {
   tickets: Ticket[];
   agents: ProjectAgent[];
   onTicketSelect?: (id: string) => void;
+  onOpenTickets?: () => void;
 };
 
 const VISIBLE_LIMIT = 2;
@@ -19,7 +20,7 @@ function getAgentById(agents: ProjectAgent[], id: string) {
   return agents.find(a => a.id === id);
 }
 
-export function ExecutionStream({ tickets, agents, onTicketSelect }: ExecutionStreamProps) {
+export function ExecutionStream({ tickets, agents, onTicketSelect, onOpenTickets }: ExecutionStreamProps) {
   return (
     <div className="grid grid-cols-3 gap-3">
       {columns.map(col => {
@@ -47,7 +48,10 @@ export function ExecutionStream({ tickets, agents, onTicketSelect }: ExecutionSt
                 />
               ))}
               {overflow > 0 && (
-                <button className="text-[10px] text-muted-foreground/70 hover:text-foreground transition-colors text-center py-1 rounded border border-dashed border-border/60 hover:border-border/80">
+                <button
+                  onClick={onOpenTickets}
+                  className="text-[10px] text-muted-foreground/70 hover:text-foreground transition-colors text-center py-1 rounded border border-dashed border-border/60 hover:border-border/80 cursor-pointer"
+                >
                   + {overflow} more
                 </button>
               )}

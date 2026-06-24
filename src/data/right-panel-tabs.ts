@@ -1,17 +1,22 @@
-import { Eye, Settings, Inbox, Clock, Layers } from 'lucide-react';
+import { Eye, Settings, Inbox, Clock, MessageSquare, BarChart3 } from 'lucide-react';
 
 export type RightPanelTabId =
   | 'overview'
   | 'manage'
   | 'inbox'
   | 'sessions'
-  | 'project';
+  | 'thread'
+  | 'global-stats';
 
 export type RightPanelContext =
   | { kind: 'agent'; agentId: string }
   | { kind: 'ticket'; ticketId: string }
-  | { kind: 'project'; projectId: string }
-  | { kind: 'channel'; channelId: string }
+  | { kind: 'project'; projectId: string; workspaceId: string }
+  | { kind: 'channel'; channelId: string; workspaceId: string }
+  | { kind: 'channels-list'; workspaceId: string }
+  | { kind: 'agents-list'; workspaceId: string }
+  | { kind: 'universal-agents' }
+  | { kind: 'universal-projects' }
   | null;
 
 export type RightPanelTab = {
@@ -34,22 +39,43 @@ const ticketTabs: RightPanelTab[] = [
 
 const projectTabs: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'project',   label: 'Project',   icon: Layers },
+  { id: 'manage',    label: 'Manage',    icon: Settings },
   { id: 'inbox',     label: 'Inbox',     icon: Inbox },
 ];
 
 const channelTabs: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
   { id: 'manage',    label: 'Manage',    icon: Settings },
+  { id: 'thread',    label: 'Thread',     icon: MessageSquare },
+];
+
+const channelsListTabs: RightPanelTab[] = [
+  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
+];
+
+const agentsListTabs: RightPanelTab[] = [
+  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
+];
+
+const universalAgentsTabs: RightPanelTab[] = [
+  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
+];
+
+const universalProjectsTabs: RightPanelTab[] = [
+  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
 ];
 
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
   if (!context) return [];
   switch (context.kind) {
     case 'agent': return agentTabs;
-    case 'ticket':   return ticketTabs;
-    case 'project':  return projectTabs;
-    case 'channel':  return channelTabs;
+    case 'ticket': return ticketTabs;
+    case 'project': return projectTabs;
+    case 'channel': return channelTabs;
+    case 'channels-list': return channelsListTabs;
+    case 'agents-list': return agentsListTabs;
+    case 'universal-agents': return universalAgentsTabs;
+    case 'universal-projects': return universalProjectsTabs;
   }
 }
 

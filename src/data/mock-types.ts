@@ -24,6 +24,15 @@ export type ChatThreadSeed = {
   updatedAtMinutesAgo: number;
 };
 
+export type ChannelMessageSeed = {
+  id: string;
+  channelId: string;
+  senderName: string;
+  content: string;
+  timestamp: string;
+  isAI: boolean;
+};
+
 export type MockData = {
   workspaces: Workspace[];
   currentWorkspaceId: string;
@@ -37,4 +46,5 @@ export type MockData = {
   auditItems: AuditItem[];
   chatThreads: ChatThreadSeed[];
   favorites: FavoriteSeed[];
+  channelMessages: ChannelMessageSeed[];
 };

@@ -5,7 +5,7 @@ import type { ChatThread, Message } from './interface';
 
 const data = mockData as MockData;
 
-const mockThreads: ChatThread[] = data.chatThreads.map(thread => ({
+let mockThreads: ChatThread[] = data.chatThreads.map(thread => ({
   id: thread.id,
   title: thread.title,
   messages: thread.messages.map(msg => ({
@@ -18,16 +18,29 @@ const mockThreads: ChatThread[] = data.chatThreads.map(thread => ({
 interface ChatStore {
   list(): ChatThread[];
   getCurrent(): ChatThread | undefined;
+  addMessage(threadId: string, content: string): void;
 }
 
 const emptyStore: ChatStore = {
   list() { return []; },
   getCurrent() { return undefined; },
+  addMessage() {},
 };
 
 const mockStore: ChatStore = {
   list() { return mockThreads; },
   getCurrent() { return mockThreads[0]; },
+  addMessage(threadId: string, content: string) {
+    const thread = mockThreads.find(t => t.id === threadId);
+    if (!thread) return;
+    thread.messages.push({
+      id: crypto.randomUUID(),
+      role: 'user',
+      content,
+      timestamp: new Date(),
+    });
+    thread.updatedAt = new Date();
+  },
 };
 
 const store: ChatStore = isMockEnabled('chat') ? mockStore : emptyStore;
@@ -38,6 +51,13 @@ export function listThreads(): ChatThread[] {
 
 export function getCurrentThread(): ChatThread | undefined {
   return store.getCurrent();
+}
+
+export function addMessageToActiveThread(content: string): void {
+  const thread = store.getCurrent();
+  if (thread) {
+    store.addMessage(thread.id, content);
+  }
 }
 
 export type { ChatThread };

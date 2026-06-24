@@ -24,6 +24,8 @@ type LeftNavProps = {
   onNavItemClick?: (id: string) => void;
   onProjectClick?: (projectId: string, workspaceId: string) => void;
   currentView?: string;
+  onToggleLeftPanel?: () => void;
+  onToggleRightPanel?: () => void;
 };
 
 const MIN_WIDTH = 180;
@@ -46,6 +48,8 @@ export function LeftNav({
   onProjectClick,
   currentView,
   onAgentSelect,
+  onToggleLeftPanel,
+  onToggleRightPanel,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -88,7 +92,10 @@ export function LeftNav({
         style={{ width: `${width}px`, minWidth: `${width}px` }}
       >
         <div className="drag h-2 shrink-0" />
-        <LeftNavHeader />
+        <LeftNavHeader
+          onToggleLeft={onToggleLeftPanel}
+          onToggleRight={onToggleRightPanel}
+        />
         <TeamSelector
           workspaces={workspaces}
           currentWorkspace={currentWorkspace}

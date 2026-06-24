@@ -50,3 +50,12 @@ export type Project = {
   channels: CommunicationChannel[];
   activity: SwarmActivity[];
 };
+
+export type ChannelMessage = {
+  id: string;
+  channelId: string;
+  senderName: string;
+  content: string;
+  timestamp: string;
+  isAI: boolean;
+};

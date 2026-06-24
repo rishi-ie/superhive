@@ -1,11 +1,13 @@
 import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
+import { nameToAgentId } from '@/data/agents/store';
 
 type RightPanelActivityFeedProps = {
   items: SwarmActivity[];
   agents: ProjectAgent[];
+  onAgentClick?: (agentId: string) => void;
 };
 
-export function RightPanelActivityFeed({ items, agents }: RightPanelActivityFeedProps) {
+export function RightPanelActivityFeed({ items, agents, onAgentClick }: RightPanelActivityFeedProps) {
   const recent = items.slice(0, 6);
 
   return (
@@ -27,10 +29,20 @@ export function RightPanelActivityFeed({ items, agents }: RightPanelActivityFeed
             <div key={item.id} className="flex items-start gap-1.5 text-[10px]">
               <span className="text-muted-foreground/60 shrink-0 font-fustat">{item.timestamp}</span>
               <span className="text-muted-foreground/60 shrink-0">·</span>
-              <span className="font-semibold text-foreground shrink-0">{primaryInitials}</span>
+              <button
+                onClick={() => { const id = nameToAgentId(item.primaryAgent); if (id && onAgentClick) onAgentClick(id); }}
+                className="font-semibold text-foreground shrink-0 hover:text-chart-1 transition-colors cursor-pointer"
+              >
+                {primaryInitials}
+              </button>
               <span className="text-muted-foreground/80 truncate flex-1">{shortVerb}</span>
               <span className="text-muted-foreground/80 shrink-0">→</span>
-              <span className="font-semibold text-foreground shrink-0">{targetInitials}</span>
+              <button
+                onClick={() => { const id = nameToAgentId(item.targetAgent); if (id && onAgentClick) onAgentClick(id); }}
+                className="font-semibold text-foreground shrink-0 hover:text-chart-1 transition-colors cursor-pointer"
+              >
+                {targetInitials}
+              </button>
               <span className="text-muted-foreground/60 shrink-0">·</span>
               <span className="text-muted-foreground/60 shrink-0">{item.context}</span>
             </div>
