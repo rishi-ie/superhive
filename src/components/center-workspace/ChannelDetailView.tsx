@@ -1,26 +1,15 @@
+/**
+ * Single channel detail with message thread and compose input.
+ */
 import { useState, useRef, useEffect } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
-import { Send, Paperclip, ExternalLink } from 'lucide-react';
+import { Send, Paperclip } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { ChannelStatusPill } from '@/components/channels';
 import { listChannelMessages, addChannelMessage, listProjectAgents, getChannel } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
-import type { ChannelMessage, CommunicationChannel } from '@/data/projects/store';
+import type { ChannelMessage } from '@/data/projects/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
-
-function ChannelStatusPill({ status }: { status: CommunicationChannel['status'] }) {
-  const map: Record<CommunicationChannel['status'], { color: string; label: string }> = {
-    OPEN:           { color: 'bg-chart-2',     label: 'OPEN' },
-    AWAITING_REPLY: { color: 'bg-chart-3',     label: 'AWAITING' },
-    RESOLVED:       { color: 'bg-muted-foreground/40', label: 'RESOLVED' },
-  };
-  const cfg = map[status] ?? { color: 'bg-muted-foreground/40', label: 'UNKNOWN' };
-  return (
-    <span className="inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-      <span className={`size-1 rounded-full ${cfg.color}`} />
-      {cfg.label}
-    </span>
-  );
-}
 
 type ChannelDetailViewProps = {
   channelId: string;
@@ -69,6 +58,13 @@ function ChannelMessageItem({ msg, agentMap, onParticipantClick }: {
   );
 }
 
+/**
+ * @param channelId - Channel to display
+ * @param workspaceId - Current workspace ID
+ * @param onParticipantClick - Called when a participant is clicked
+ * @param onTicketClick - Called when a related ticket is clicked
+ * @param onAgentSelect - Called when an agent is selected
+ */
 export function ChannelDetailView({
   channelId,
   workspaceId,

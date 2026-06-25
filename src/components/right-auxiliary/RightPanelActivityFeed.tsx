@@ -1,3 +1,6 @@
+/**
+ * Compact activity log feed for the right panel — inter-agent events.
+ */
 import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
 import { nameToAgentId } from '@/data/agents/store';
 
@@ -7,6 +10,12 @@ type RightPanelActivityFeedProps = {
   onAgentClick?: (agentId: string) => void;
 };
 
+/**
+ * Compact activity log feed for the right panel — inter-agent events.
+ * @param items - Swarm activity events to display
+ * @param agents - Project agents for resolving initials
+ * @param onAgentClick - Called when agent initials are clicked
+ */
 export function RightPanelActivityFeed({ items, agents, onAgentClick }: RightPanelActivityFeedProps) {
   const recent = items.slice(0, 6);
 

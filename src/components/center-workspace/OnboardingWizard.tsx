@@ -1,4 +1,6 @@
-import { Sparkles } from 'lucide-react';
+/**
+ * Empty-state onboarding wizard with action cards.
+ */
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { LucideIcon } from 'lucide-react';
 
@@ -23,6 +25,10 @@ export type OnboardingWizardProps = {
   onAction?: (actionId: string) => void;
 };
 
+/**
+ * @param config - Wizard configuration (icon, title, actions)
+ * @param onAction - Called when an action or skip is clicked
+ */
 export function OnboardingWizard({ config, onAction }: OnboardingWizardProps) {
   const { icon: Icon, title, subtitle, actions, skipLabel } = config;
 

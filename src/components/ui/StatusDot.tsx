@@ -1,3 +1,6 @@
+/**
+ * Agent status indicator dot with pulse/spinner for active states.
+ */
 import type { AgentStatus } from '@/data/agents/interface';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -15,6 +18,12 @@ const colorMap: Record<AgentStatus, string> = {
   ERROR_LOOP:     'bg-chart-5',
 };
 
+/**
+ * Agent status indicator dot with pulse/spinner for active states.
+ * Used by agent list items and swarm roster.
+ * @param status - Agent status: EXECUTING, COMPILING, AWAITING_HUMAN, IDLE, ERROR_LOOP
+ * @param className - Additional CSS classes
+ */
 export function StatusDot({ status, className = '' }: StatusDotProps) {
   if (status === 'COMPILING') {
     return (

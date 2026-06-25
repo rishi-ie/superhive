@@ -1,3 +1,6 @@
+/**
+ * Scrollable message thread with day separators.
+ */
 import { useEffect, useRef } from 'react';
 import type { ChatThread, Message } from '@/data/chat/store';
 import { ChatMessage } from './ChatMessage';
@@ -11,7 +14,6 @@ type ChatThreadProps = {
 };
 
 function groupMessagesByDay(messages: Message[]): Array<{ label: string; messages: Message[] }> {
-  const groups: Array<{ label: string; messages: Message[] }> = [];
   const dayMap = new Map<string, Message[]>();
 
   for (const msg of messages) {
@@ -38,6 +40,13 @@ function DaySeparator({ label }: { label: string }) {
   );
 }
 
+/**
+ * @param thread - Thread to display
+ * @param agentName - Display name of the agent
+ * @param agentInitials - Initials of the agent
+ * @param onRegenerate - Called when regenerate is clicked
+ * @param empty - Node to show when thread has no messages
+ */
 export function ChatThread({ thread, agentName, agentInitials, onRegenerate, empty }: ChatThreadProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -54,7 +63,7 @@ export function ChatThread({ thread, agentName, agentInitials, onRegenerate, emp
         <div key={group.label}>
           <DaySeparator label={group.label} />
           <div className="space-y-4">
-            {group.messages.map((message, i) => (
+            {group.messages.map((message) => (
               <ChatMessage
                 key={message.id}
                 message={message}

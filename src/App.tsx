@@ -1,16 +1,24 @@
+/**
+ * Root shell — toggles between main Dashboard and Settings screen.
+ * Handles resizable panel width state for left nav and right auxiliary.
+ */
 import { useState } from 'react';
+import {
+  DEFAULT_LEFT_WIDTH,
+  DEFAULT_RIGHT_WIDTH,
+  MIN_LEFT_WIDTH,
+  MAX_LEFT_WIDTH,
+  MIN_RIGHT_WIDTH,
+  MAX_RIGHT_WIDTH,
+} from '@/lib/constants';
 import { Dashboard } from './screens/Dashboard';
 import { Settings } from './screens/Settings';
 
 export type Page = 'main' | 'settings';
 
-const DEFAULT_LEFT_WIDTH = 280;
-const DEFAULT_RIGHT_WIDTH = 340;
-const MIN_LEFT_WIDTH = 180;
-const MAX_LEFT_WIDTH = 400;
-const MIN_RIGHT_WIDTH = 200;
-const MAX_RIGHT_WIDTH = 500;
-
+/**
+ * Root shell component — renders Dashboard or Settings based on page state.
+ */
 function App() {
   const [page, setPage] = useState<Page>('main');
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT_WIDTH);

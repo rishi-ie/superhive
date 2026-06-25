@@ -1,8 +1,8 @@
 import { Layers, Users } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { isMockEnabled } from '@/lib/feature-flags';
+import { isMockEnabled } from '@/data/mock/feature-flags';
 import mockData from '../mock.json';
-import type { MockData, IconKey } from '../mock-types';
+import type { MockData, IconKey } from '../mock/types';
 import type { FavoriteItem, FavoriteRef } from './interface';
 
 const data = mockData as MockData;

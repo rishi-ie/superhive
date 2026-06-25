@@ -1,3 +1,6 @@
+/**
+ * Channel management tab — status, topic, and participant management.
+ */
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -20,6 +23,11 @@ const STATUS_SELECTED: Record<CommunicationChannel['status'], string> = {
   RESOLVED:       'border-muted-foreground/40 bg-muted/10 text-muted-foreground',
 };
 
+/**
+ * Channel management tab — status, topic, and participant management.
+ * @param channel - Channel to manage
+ * @param availableAgents - Agents available to add as participants
+ */
 export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabProps) {
   const [topic, setTopic] = useState(channel.topic);
   const [status, setStatus] = useState(channel.status);

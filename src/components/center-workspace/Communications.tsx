@@ -1,4 +1,8 @@
+/**
+ * Project communications grid showing channels and participants.
+ */
 import { Avatar } from '@/components/ui/Avatar';
+import { ChannelStatusPill } from '@/components/channels';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type CommunicationsProps = {
@@ -9,21 +13,13 @@ type CommunicationsProps = {
   onTicketClick?: (id: string) => void;
 };
 
-function ChannelStatusPill({ status }: { status: CommunicationChannel['status'] }) {
-  const map = {
-    OPEN:           { color: 'bg-chart-2',     label: 'OPEN' },
-    AWAITING_REPLY: { color: 'bg-chart-3',     label: 'AWAITING' },
-    RESOLVED:       { color: 'bg-muted-foreground/40', label: 'RESOLVED' },
-  };
-  const cfg = map[status];
-  return (
-    <span className="inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-      <span className={`size-1 rounded-full ${cfg.color}`} />
-      {cfg.label}
-    </span>
-  );
-}
-
+/**
+ * @param channels - Channels to display
+ * @param agents - Available agents for participant resolution
+ * @param onChannelClick - Called when a channel is clicked
+ * @param onParticipantClick - Called when a participant name is clicked
+ * @param onTicketClick - Called when a related ticket is clicked
+ */
 export function Communications({ channels, agents, onChannelClick, onParticipantClick, onTicketClick }: CommunicationsProps) {
   return (
     <div className="flex flex-col gap-2">

@@ -1,11 +1,18 @@
-import { useState } from "react";
-import { SettingsSidebar } from "@/components/settings/SettingsSidebar";
-import { AccountSettings } from "@/components/settings/AccountSettings";
+/**
+ * Full-screen settings view — left sidebar navigation + right content area.
+ */
+import { useState } from 'react';
+import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
+import { AccountSettings } from '@/components/settings/AccountSettings';
 
 type SettingsProps = {
   onBack: () => void;
 };
 
+/**
+ * Full-screen settings view with sidebar navigation.
+ * @param onBack - Callback to return to the main Dashboard
+ */
 export function Settings({ onBack }: SettingsProps) {
   const [activeSection, setActiveSection] = useState("account");
 

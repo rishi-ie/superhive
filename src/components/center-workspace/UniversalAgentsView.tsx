@@ -1,3 +1,6 @@
+/**
+ * All agents across workspaces with search, status filter, and sort.
+ */
 import { useMemo, useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
@@ -6,10 +9,9 @@ import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { OnboardingWizard } from './OnboardingWizard';
-import { AGENTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { AGENTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listAgents, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/agents/store';
 import type { AgentStatus } from '@/data/agents/interface';
-import { STROKE_WIDTH } from '@/lib/constants';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'name' | 'uptime';
@@ -47,6 +49,11 @@ type UniversalAgentsViewProps = {
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param onAgentSelect - Called when an agent is selected
+ * @param selectedAgentId - Currently selected agent ID
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');

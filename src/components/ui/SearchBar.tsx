@@ -1,4 +1,6 @@
-import type { HTMLAttributes } from 'react';
+/**
+ * Search input with integrated search icon.
+ */
 import { Search } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 
@@ -9,6 +11,13 @@ type SearchBarProps = {
   className?: string;
 };
 
+/**
+ * Search input with integrated search icon.
+ * @param value - Current search value
+ * @param onChange - Callback when search value changes
+ * @param placeholder - Input placeholder text
+ * @param className - Additional CSS classes
+ */
 export function SearchBar({ value, onChange, placeholder = 'Search...', className = '' }: SearchBarProps) {
   return (
     <div className={`relative ${className}`}>

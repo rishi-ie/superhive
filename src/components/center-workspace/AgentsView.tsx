@@ -1,20 +1,13 @@
+/**
+ * Workspace agent list with status indicators.
+ */
 import { Avatar } from '@/components/ui/Avatar';
-import { Loader2 } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
+import { StatusDot } from '@/components/ui/StatusDot';
 import { OnboardingWizard } from './OnboardingWizard';
-import { AGENTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { AGENTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listAgents } from '@/data/agents/store';
 import { listProjectAgents } from '@/data/projects/store';
-import type { AgentStatus } from '@/data/agents/interface';
 import type { OnboardingWizardProps } from './OnboardingWizard';
-
-function StatusDot({ status }: { status: AgentStatus }) {
-  if (status === 'EXECUTING') return <span className="size-1.5 rounded-full bg-chart-2 pulse-executing shrink-0" />;
-  if (status === 'COMPILING') return <Loader2 size={8} strokeWidth={STROKE_WIDTH} className="shrink-0 animate-spin text-chart-3" />;
-  if (status === 'IDLE') return <span className="size-1.5 rounded-full bg-muted-foreground/40 shrink-0" />;
-  if (status === 'ERROR_LOOP') return <span className="size-1.5 rounded-full bg-chart-5 pulse-error shrink-0" />;
-  return <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />;
-}
 
 type AgentCardProps = {
   agent: ReturnType<typeof listAgents>[number];
@@ -53,6 +46,12 @@ type AgentsViewProps = {
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param workspaceId - Optional workspace to filter agents
+ * @param onAgentSelect - Called when an agent is selected
+ * @param selectedAgentId - Currently selected agent ID
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId, onAction }: AgentsViewProps) {
   const allAgents = listAgents();
   const workspaceAgentIds = workspaceId

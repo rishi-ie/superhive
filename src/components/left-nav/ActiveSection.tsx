@@ -1,3 +1,6 @@
+/**
+ * Collapsible Active section — shows active agents and tasks with status indicators.
+ */
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Circle, Zap } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -23,6 +26,13 @@ type ActiveSectionProps = {
   onTaskClick?: (id: string) => void;
 };
 
+/**
+ * Collapsible Active section — shows active agents and tasks with status indicators.
+ * @param agents - Active agents to display
+ * @param tasks - Active tasks to display
+ * @param onAgentClick - Called when agent is clicked
+ * @param onTaskClick - Called when task is clicked
+ */
 export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: ActiveSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 

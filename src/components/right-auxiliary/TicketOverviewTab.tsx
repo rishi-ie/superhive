@@ -1,8 +1,10 @@
+/**
+ * Ticket overview tab — displays ticket details, assignee, and related activity.
+ */
 import { Avatar } from '@/components/ui/Avatar';
 import { nameToAgentId } from '@/data/agents/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
-import { getProjectByWorkspace } from '@/data/projects/store';
 
 type TicketOverviewTabProps = {
   ticket: UniversalTicket;
@@ -33,13 +35,21 @@ const STATUS_LABELS: Record<string, string> = {
   MERGED: 'Merged',
 };
 
+/**
+ * Ticket overview tab — displays ticket details, assignee, and related activity.
+ * @param ticket - Ticket to display
+ * @param projectAgents - Agents for resolving activity initials
+ * @param recentActivity - Swarm activity to show related events
+ * @param onAgentClick - Called when assignee is clicked
+ * @param onProjectSelect - Called when project is selected
+ * @param onChannelClick - Called when related channel is clicked
+ */
 export function TicketOverviewTab({
   ticket,
   projectAgents,
   recentActivity,
   onAgentClick,
   onProjectSelect,
-  onChannelClick,
 }: TicketOverviewTabProps) {
   const initials = ticket.assignee.name
     .split(' ')

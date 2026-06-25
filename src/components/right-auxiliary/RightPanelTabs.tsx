@@ -1,6 +1,9 @@
-import { RefreshCw } from "lucide-react";
-import { IconButton } from "@/components/ui/IconButton";
-import { STROKE_WIDTH } from "@/lib/constants";
+/**
+ * Tab strip for the right panel — Overview / Manage / Inbox / Sessions.
+ */
+import { RefreshCw } from 'lucide-react';
+import { IconButton } from '@/components/ui/IconButton';
+import { STROKE_WIDTH } from '@/lib/constants';
 
 type RightPanelTabsProps = {
   tabs: ReadonlyArray<{
@@ -13,6 +16,13 @@ type RightPanelTabsProps = {
   onRefresh?: () => void;
 };
 
+/**
+ * Tab strip for the right panel — Overview / Manage / Inbox / Sessions.
+ * @param tabs - Available tabs to render
+ * @param activeTab - Currently active tab id
+ * @param onTabChange - Called when tab is selected
+ * @param onRefresh - Called when refresh button is clicked
+ */
 export function RightPanelTabs({
   tabs,
   activeTab,

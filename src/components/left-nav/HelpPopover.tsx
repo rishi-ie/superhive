@@ -1,3 +1,6 @@
+/**
+ * Help popover anchored to the help button — docs, changelog, shortcuts.
+ */
 import { useEffect, useRef } from 'react';
 import { Book, Sparkles, Command } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -14,6 +17,12 @@ const items = [
   { id: 'shortcuts', label: 'Shortcuts',     Icon: Command },
 ];
 
+/**
+ * Help popover anchored to the help button — docs, changelog, shortcuts.
+ * @param anchorRef - Ref to the element to anchor the popover to
+ * @param open - Whether the popover is visible
+ * @param onClose - Called when popover should close
+ */
 export function HelpPopover({ anchorRef, open, onClose }: HelpPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 

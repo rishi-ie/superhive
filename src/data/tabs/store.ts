@@ -1,13 +1,5 @@
 import type { CenterTab, CenterTabType, TabState, TabSelection } from './interface';
 
-function tabKey(tab: CenterTab): string {
-  if (tab.type === 'project') return `project:${tab.selectedProjectId}`;
-  if (tab.type === 'ticket') return `ticket:${tab.selectedTicketId}`;
-  if (tab.type === 'channel') return `channel:${tab.selectedChannelId}`;
-  if (tab.type === 'agent') return `agent:${tab.selectedAgentId}`;
-  return `${tab.type}:${tab.workspaceId}`;
-}
-
 function matchesKey(tab: CenterTab, type: CenterTabType, workspaceId: string, entityId?: string | null): boolean {
   if (tab.type !== type) return false;
   if (tab.type === 'project') return tab.selectedProjectId === entityId;

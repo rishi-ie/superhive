@@ -1,3 +1,6 @@
+/**
+ * Active agent cards for a project.
+ */
 import { Avatar } from '@/components/ui/Avatar';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -51,6 +54,11 @@ function AgentCard({ agent, onAgentClick, onTicketClick }: { agent: ProjectAgent
   );
 }
 
+/**
+ * @param agents - List of project agents to display
+ * @param onAgentClick - Called when an agent is clicked
+ * @param onTicketClick - Called when an assigned ticket is clicked
+ */
 export function SwarmRoster({ agents, onAgentClick, onTicketClick }: SwarmRosterProps) {
   const activeAgents = agents.filter(a => a.currentStatus !== 'IDLE');
 

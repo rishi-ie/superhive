@@ -1,3 +1,6 @@
+/**
+ * Settings sidebar — searchable nav with categorized sections (Personal, Editor & Workflow, Organization).
+ */
 import {
   User,
   Paintbrush,
@@ -21,7 +24,6 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
-import { MaximizeOnDoubleClick } from '@/components/ui/MaximizeOnDoubleClick';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { LucideIcon } from 'lucide-react';
 
@@ -81,6 +83,12 @@ type SettingsSidebarProps = {
   onBack: () => void;
 };
 
+/**
+ * Settings sidebar — searchable nav with categorized sections (Personal, Editor & Workflow, Organization).
+ * @param activeSection - Currently active section ID
+ * @param onSectionChange - Callback when a new section is selected
+ * @param onBack - Callback to return to the main Dashboard
+ */
 export function SettingsSidebar({ activeSection, onSectionChange, onBack }: SettingsSidebarProps) {
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border/40">

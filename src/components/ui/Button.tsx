@@ -1,3 +1,6 @@
+/**
+ * Reusable button with variant (solid/outline/ghost) and size (sm/md/lg) options.
+ */
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 
 type ButtonVariant = 'solid' | 'outline' | 'ghost';
@@ -22,6 +25,13 @@ const sizeMap: Record<ButtonSize, string> = {
   lg: 'h-11 px-6 text-base',
 };
 
+/**
+ * Reusable button with variant and size options, plus loading spinner.
+ * @param variant - Visual style: solid, outline, or ghost
+ * @param size - Button size: sm, md, or lg
+ * @param loading - Shows spinner and disables the button
+ * @param className - Additional CSS classes
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'solid', size = 'md', loading = false, disabled, className = '', children, ...rest }, ref) => {
     return (

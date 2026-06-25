@@ -1,16 +1,19 @@
+/**
+ * All channels across workspaces with search, filter, and sort.
+ */
 import { useMemo, useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter, type FilterOption } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
+import { ChannelStatusPill } from '@/components/channels';
 import { OnboardingWizard } from './OnboardingWizard';
-import { UNIVERSAL_CHANNELS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { UNIVERSAL_CHANNELS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listChannels, listProjectAgents } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
-import type { CommunicationChannel } from '@/data/projects/store';
+import { formatRelativeTime } from '@/lib/relative-time';
 import type { ChannelStatus } from '@/data/projects/interface';
-import { STROKE_WIDTH } from '@/lib/constants';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'recent' | 'messages';
@@ -22,39 +25,17 @@ const STATUS_OPTIONS = [
   { value: 'RESOLVED' as const, label: 'Resolved' },
 ] as const;
 
-function ChannelStatusPill({ status }: { status: ChannelStatus }) {
-  const map: Record<ChannelStatus, { color: string; label: string }> = {
-    OPEN:           { color: 'bg-chart-2',     label: 'OPEN' },
-    AWAITING_REPLY: { color: 'bg-chart-3',     label: 'AWAITING' },
-    RESOLVED:       { color: 'bg-muted-foreground/40', label: 'RESOLVED' },
-  };
-  const cfg = map[status] ?? { color: 'bg-muted-foreground/40', label: 'UNKNOWN' };
-  return (
-    <span className="inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-      <span className={`size-1 rounded-full ${cfg.color}`} />
-      {cfg.label}
-    </span>
-  );
-}
-
-function relativeTime(updatedAt: string): string {
-  const now = Date.now();
-  const diff = now - new Date(`today ${updatedAt}`).getTime();
-  if (isNaN(diff)) return updatedAt;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 type UniversalChannelsViewProps = {
   onChannelSelect?: (id: string, workspaceId: string) => void;
   selectedChannelId?: string | null;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param onChannelSelect - Called when a channel is selected
+ * @param selectedChannelId - Currently selected channel ID
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAction }: UniversalChannelsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ChannelStatus>('ALL');
@@ -212,7 +193,7 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAc
                       <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />
                     )}
                     <span className="text-[10px] text-muted-foreground shrink-0">
-                      {relativeTime(channel.updatedAt)}
+                      {formatRelativeTime(channel.updatedAt)}
                     </span>
                   </div>
 

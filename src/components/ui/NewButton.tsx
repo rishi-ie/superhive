@@ -1,3 +1,6 @@
+/**
+ * Create/new action button with plus icon.
+ */
 import { Plus } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 
@@ -6,6 +9,11 @@ type NewButtonProps = {
   onClick?: () => void;
 };
 
+/**
+ * Create/new action button with plus icon.
+ * @param label - Button label text
+ * @param onClick - Click handler
+ */
 export function NewButton({ label, onClick }: NewButtonProps) {
   return (
     <button

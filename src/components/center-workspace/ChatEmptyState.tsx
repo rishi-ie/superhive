@@ -1,3 +1,6 @@
+/**
+ * Empty state with quick-start suggestion cards.
+ */
 import { Zap, Search, Code2, FileText, BarChart3, Bot, Layers } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 
@@ -15,6 +18,10 @@ const QUICK_START = [
   { icon: Bot, label: 'Configure an agent', description: 'Set up permissions and scope', category: 'Agents' },
 ];
 
+/**
+ * @param agentName - Name of agent (shown in prompt if set)
+ * @param onSuggestionClick - Called when a quick-start card is clicked
+ */
 export function ChatEmptyState({ agentName, onSuggestionClick }: ChatEmptyStateProps) {
   return (
     <div className="flex flex-1 items-center justify-center px-6">

@@ -1,14 +1,19 @@
+/**
+ * Three-panel workspace shell — LeftNav + CenterWorkspace + RightAuxiliary.
+ * Orchestrates tab state, workspace selection, and cross-panel event routing.
+ */
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { LeftNav } from '@/components/LeftNav';
-import { CenterWorkspace } from '@/components/CenterWorkspace';
-import { RightAuxiliary } from '@/components/RightAuxiliary';
+import { LeftNav } from '@/components/left-nav/LeftNav';
+import { CenterWorkspace } from '@/components/center-workspace/CenterWorkspace';
+import { RightAuxiliary } from '@/components/right-auxiliary/RightAuxiliary';
+import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from '@/lib/constants';
 import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listProjectAgents, listTickets, getProject, getProjectByWorkspace } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listAgents, approveAudit, denyAudit, getAgentWorkspace, nameToAgentId } from '@/data/agents/store';
+import { listAgents, approveAudit, denyAudit, getAgentWorkspace } from '@/data/agents/store';
 import { addMessageToActiveThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
@@ -25,7 +30,7 @@ import {
   getDefaultRightPanelTab,
   type RightPanelContext,
   type RightPanelTabId,
-} from '@/data/right-panel-tabs';
+} from '@/data/config/right-panel-tabs';
 
 type DashboardProps = {
   leftWidth: number;
@@ -62,6 +67,14 @@ function buildTab(
   };
 }
 
+/**
+ * Three-panel workspace shell — LeftNav + CenterWorkspace + RightAuxiliary.
+ * @param leftWidth - Current width of the left navigation panel
+ * @param rightWidth - Current width of the right auxiliary panel
+ * @param onLeftWidthChange - Callback when left panel width changes
+ * @param onRightWidthChange - Callback when right panel width changes
+ * @param onNavigate - Callback when user navigates to a different page (e.g. settings)
+ */
 export function Dashboard({
   leftWidth,
   rightWidth,
@@ -87,7 +100,6 @@ export function Dashboard({
     [],
   );
 
-  const hasData = workspaces_data.length > 0 || listAgents().length > 0;
   const activeTasks = listTickets(activeWorkspaceId)
     .filter(t => t.status === 'EXECUTING')
     .map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedAgentId }));
@@ -117,10 +129,6 @@ export function Dashboard({
   const openTab = useCallback((tab: Omit<CenterTab, 'id' | 'createdAt'>) => {
     setTabState(prev => openTabOp(prev, tab));
   }, []);
-
-  const openOrReuseTab = useCallback((type: CenterTabType, workspaceId: string, extra: Parameters<typeof buildTab>[3] = {}) => {
-    openTab(buildTab(type, workspaceId, '', extra));
-  }, [openTab]);
 
   // ─── Click handlers ───────────────────────────────────────────────
 
@@ -186,23 +194,6 @@ export function Dashboard({
     });
   }, []);
 
-  const handleNewTab = useCallback((type: CenterTabType, workspaceId: string) => {
-    const TYPE_TITLES: Partial<Record<CenterTabType, string>> = {
-      agent: 'Chat',
-      projects: 'Projects',
-      tickets: 'Tickets',
-      ticket: 'Ticket',
-      project: 'Project',
-      channels: 'Comms',
-      channel: 'Channel',
-      agents: 'Agents',
-      'universal-agents': 'Agents',
-      'universal-projects': 'Projects',
-      'universal-channels': 'Channels',
-    };
-    openTab(buildTab(type, workspaceId, TYPE_TITLES[type] ?? ''));
-  }, [openTab]);
-
   const handleBreadcrumbJump = useCallback((workspaceId: string, section?: string) => {
     if (section) {
       const SECTION_TAB: Record<string, CenterTabType> = {
@@ -254,27 +245,6 @@ export function Dashboard({
     console.warn('[TODO] Refresh right panel');
   }, []);
 
-  const handleNewTicket = useCallback(() => {
-    console.warn('[TODO] Create new ticket');
-  }, []);
-
-  const handleNewChannel = useCallback(() => {
-    console.warn('[TODO] Create new channel');
-  }, []);
-
-  const handleNewAgent = useCallback(() => {
-    console.warn('[TODO] Create new agent');
-  }, []);
-
-  const handleNewProject = useCallback(() => {
-    console.warn('[TODO] Create new project');
-  }, []);
-
-  const handleAgentSelectByName = useCallback((name: string) => {
-    const id = nameToAgentId(name);
-    if (id) handleAgentSelect(id);
-  }, [handleAgentSelect]);
-
   const handleProjectClick = useCallback((projectId: string, workspaceId: string) => {
     const project = getProject(projectId);
     if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: projectId }));
@@ -298,11 +268,11 @@ export function Dashboard({
   }, []);
 
   const handleToggleLeftPanel = useCallback(() => {
-    onLeftWidthChange(leftWidth === 0 ? 280 : 0);
+    onLeftWidthChange(leftWidth === 0 ? DEFAULT_LEFT_WIDTH : 0);
   }, [leftWidth, onLeftWidthChange]);
 
   const handleToggleRightPanel = useCallback(() => {
-    onRightWidthChange(rightWidth === 0 ? 340 : 0);
+    onRightWidthChange(rightWidth === 0 ? DEFAULT_RIGHT_WIDTH : 0);
   }, [rightWidth, onRightWidthChange]);
 
   const handleOpenTickets = useCallback(() => {

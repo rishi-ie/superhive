@@ -1,3 +1,6 @@
+/**
+ * User avatar with image fallback to initials.
+ */
 import type { HTMLAttributes } from 'react';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -17,6 +20,13 @@ const sizeMap: Record<AvatarSize, string> = {
   xl: 'size-20 text-xl',
 };
 
+/**
+ * User avatar with image fallback to initials.
+ * @param size - Avatar size: xs, sm, md, lg, or xl
+ * @param src - Image URL
+ * @param alt - Image alt text
+ * @param fallback - Name used to generate initials
+ */
 export function Avatar({ size = 'md', src, alt, fallback, className = '', ...rest }: AvatarProps) {
   const initials = fallback
     ? fallback

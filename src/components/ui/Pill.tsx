@@ -1,4 +1,7 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+/**
+ * Compact toggleable pill button for filters and tags.
+ */
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
 type PillProps = {
   active?: boolean;
@@ -6,6 +9,12 @@ type PillProps = {
   children: ReactNode;
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children">;
 
+/**
+ * Compact toggleable pill button for filters and tags.
+ * @param active - Whether the pill is in active/selected state
+ * @param className - Additional CSS classes
+ * @param children - Pill content
+ */
 export const Pill = forwardRef<HTMLButtonElement, PillProps>(
   ({ active = false, className = "", children, ...rest }, ref) => {
     return (

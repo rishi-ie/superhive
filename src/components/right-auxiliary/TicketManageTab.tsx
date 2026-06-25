@@ -1,6 +1,7 @@
+/**
+ * Ticket management tab — status, priority, type, and assignee controls.
+ */
 import { useState } from 'react';
-import { X } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
 import { Select } from '@/components/ui/Select';
 import type { UniversalTicket, UniversalTicketStatus, Priority, TicketType } from '@/data/tickets/store';
 import type { Agent } from '@/data/agents/store';
@@ -42,6 +43,11 @@ const PRIORITY_SELECTED: Record<Priority, string> = {
   LOW:    'border-border bg-secondary/40 text-muted-foreground',
 };
 
+/**
+ * Ticket management tab — status, priority, type, and assignee controls.
+ * @param ticket - Ticket to manage
+ * @param agents - Available agents for reassignment
+ */
 export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
   const [status, setStatus] = useState<UniversalTicketStatus>(ticket.status);
   const [priority, setPriority] = useState<Priority>(ticket.priority);

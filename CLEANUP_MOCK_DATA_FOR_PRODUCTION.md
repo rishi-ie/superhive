@@ -1,306 +1,127 @@
 # Deleting Mock Data for Production
 
-This guide explains how to cleanly remove all mock data from the Superhive app
-when preparing for a production build. Follow each step in order.
+This guide explains how to cleanly remove all mock data from the Superhive app when preparing for a production build. Follow each step in order.
 
 ---
 
 ## Overview
 
-Mock data is isolated to a single directory: `src/data/mock/`
+Mock data is controlled by the `VITE_USE_MOCK_DATA` env var and isolated to `src/data/mock/`. The app uses a per-domain mock flag system (`isMockEnabled(domain)`) so each data domain can be independently toggled.
 
-All UI components (LeftNav, CenterWorkspace, RightAuxiliary, ChatThread, etc.)
-remain in place after cleanup — they just receive empty data instead of mock data.
-
-The `VITE_USE_MOCK_DATA` env var controls whether mock data is used at runtime.
+UI components (LeftNav, CenterWorkspace, RightAuxiliary, etc.) remain in place after cleanup — they just receive empty data instead of mock data.
 
 ---
 
-## Step 1 — Set the environment flag to false
+## Architecture
+
+**Mock config**: `src/data/mock/feature-flags.ts`
+- `USE_MOCK_DATA` — global master toggle (true/unset = mock on, false = mock off)
+- `isMockEnabled(domain)` — per-domain override check
+
+**Mock types**: `src/data/mock/types.ts` — shared TypeScript types for mock data structures
+
+**Data stores** (6 domains, each checks `isMockEnabled`):
+- `src/data/workspaces/store.ts`
+- `src/data/agents/store.ts`
+- `src/data/favorites/store.tsx`
+- `src/data/projects/store.ts`
+- `src/data/tickets/store.ts`
+- `src/data/chat/store.ts`
+
+---
+
+## Step 1 — Set the global flag to false
 
 Open `.env.local` (or your production env file) and change:
 
-```
+```sh
 VITE_USE_MOCK_DATA=true
 ```
 
 to:
 
-```
+```sh
 VITE_USE_MOCK_DATA=false
 ```
 
-If deploying to a hosting platform (Vercel, Netlify, etc.), set this as an
-environment variable there instead: `VITE_USE_MOCK_DATA=false`
+If deploying to a hosting platform (Vercel, Netlify, etc.), set this as an environment variable there instead: `VITE_USE_MOCK_DATA=false`
 
 ---
 
 ## Step 2 — Delete the mock data directory
 
-Delete the entire `src/data/mock/` directory. It contains:
-
-```
-src/data/mock/
-├── workspaces.ts
-├── favorites.tsx
-├── agents.ts
-├── tasks.ts
-├── notifications.ts
-├── chat.ts
-└── right-panel.ts
-```
-
-You can do this from the terminal:
+Delete `src/data/mock/`. It contains only the mock configuration:
 
 ```bash
 rm -rf src/data/mock/
 ```
 
+This will break imports in the 6 data stores unless you also update them (Step 3).
+
 ---
 
-## Step 3 — Update Dashboard.tsx
+## Step 3 — Update the data stores
 
-Open `src/screens/Dashboard.tsx` and follow these sub-steps carefully:
+Each store imports from `src/data/mock/feature-flags`. After deleting that file, update each store to remove or stub the mock check.
 
-### 3a. Remove the mock data import lines
+### 3a. Remove the feature-flags import from each store
 
-Delete these 5 import statements:
-
-```ts
-// REMOVE THESE:
-import { workspaces, currentWorkspace } from '@/data/mock/workspaces';
-import { favorites } from '@/data/mock/favorites';
-import { activeagents } from '@/data/mock/agents';
-import { activeTasks } from '@/data/mock/tasks';
-import { notifications } from '@/data/mock/notifications';
-```
-
-### 3b. Remove the USE_MOCK_DATA guard and conditional assignments
-
-Delete everything between the `USE_MOCK_DATA` const and the `LeftNav` render:
+Delete this line from each of the 6 stores listed above:
 
 ```ts
-// REMOVE THIS BLOCK:
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
-
-const workspaces_data = USE_MOCK_DATA ? workspaces : [];
-const favorites_data = USE_MOCK_DATA ? favorites : [];
-const agents_data = USE_MOCK_DATA ? activeagents : [];
-const tasks_data = USE_MOCK_DATA ? activeTasks : [];
-const notifications_data = USE_MOCK_DATA ? notifications : [];
-
-const [notificationCount] = USE_MOCK_DATA
-  ? [notifications.filter((n) => !n.read).length]
-  : [0];
+import { isMockEnabled } from '@/data/mock/feature-flags';
 ```
 
-### 3c. Replace prop values in LeftNav
+### 3b. Remove mock checks from each store
 
-Change the LeftNav props from this:
-
-```tsx
-<LeftNav
-  workspaces={USE_MOCK_DATA ? workspaces : []}
-  currentWorkspace={USE_MOCK_DATA ? currentWorkspace : undefined}
-  favorites={USE_MOCK_DATA ? favorites : []}
-  activeagents={USE_MOCK_DATA ? activeagents : []}
-  activeTasks={USE_MOCK_DATA ? activeTasks : []}
-  notificationCount={notificationCount}
-/>
-```
-
-to this (empty arrays / defaults only):
-
-```tsx
-<LeftNav
-  workspaces={[]}
-  favorites={[]}
-  activeagents={[]}
-  activeTasks={[]}
-  notificationCount={0}
-/>
-```
-
-### 3d. Replace prop values in RightAuxiliary
-
-Change:
-
-```tsx
-<RightAuxiliary
-  width={rightWidth}
-  onWidthChange={onRightWidthChange}
-  notifications={USE_MOCK_DATA ? notifications : []}
-/>
-```
-
-to:
-
-```tsx
-<RightAuxiliary
-  width={rightWidth}
-  onWidthChange={onRightWidthChange}
-/>
-```
-
-### 3e. Remove the useState import if unused
-
-If `useState` is no longer used after removing `notificationCount`, also remove:
+In each store, find and remove blocks like:
 
 ```ts
-import { useState } from 'react';
+if (!isMockEnabled('workspaces')) return [];
 ```
 
-### Final Dashboard.tsx should look like:
+Replace with direct data access or empty arrays:
 
-```tsx
-import { LeftNav } from '@/components/LeftNav';
-import { CenterWorkspace } from '@/components/CenterWorkspace';
-import { RightAuxiliary } from '@/components/RightAuxiliary';
-import type { Page } from '@/App';
+```ts
+// Before:
+export function listWorkspaces(): Workspace[] {
+  if (!isMockEnabled('workspaces')) return [];
+  return mockData.workspaces;
+}
 
-type DashboardProps = {
-  leftWidth: number;
-  rightWidth: number;
-  onLeftWidthChange: (width: number) => void;
-  onRightWidthChange: (width: number) => void;
-  onNavigate: (page: Page) => void;
-};
-
-export function Dashboard({
-  leftWidth,
-  rightWidth,
-  onLeftWidthChange,
-  onRightWidthChange,
-  onNavigate,
-}: DashboardProps) {
-  return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      <LeftNav
-        width={leftWidth}
-        onWidthChange={onLeftWidthChange}
-        onSettingsClick={() => onNavigate('settings')}
-        workspaces={[]}
-        favorites={[]}
-        activeagents={[]}
-        activeTasks={[]}
-        notificationCount={0}
-      />
-      <CenterWorkspace />
-      <RightAuxiliary
-        width={rightWidth}
-        onWidthChange={onRightWidthChange}
-      />
-    </div>
-  );
+// After:
+export function listWorkspaces(): Workspace[] {
+  // TODO: replace with real API call
+  return [];
 }
 ```
 
----
+### Stores to update
 
-## Step 4 — Update CenterWorkspace.tsx
-
-Open `src/components/CenterWorkspace.tsx` and follow these sub-steps:
-
-### 4a. Remove the mock data import
-
-Delete this import line:
-
-```ts
-// REMOVE THIS:
-import { currentThread } from '@/data/mock/chat';
-```
-
-### 4b. Remove the ChatThread import if unused
-
-Check if any other code references `ChatThread`. If not, also remove:
-
-```ts
-import { ChatThread } from './center-workspace/ChatThread';
-```
-
-### 4c. Remove the USE_MOCK_DATA guard
-
-Delete the const:
-
-```ts
-// REMOVE THIS:
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA !== 'false';
-```
-
-### 4d. Replace the conditional render
-
-Change:
-
-```tsx
-<div className="flex-1 overflow-y-auto flex flex-col">
-  {USE_MOCK_DATA ? <ChatThread thread={currentThread} /> : <ChatEmptyState />}
-</div>
-```
-
-to:
-
-```tsx
-<div className="flex-1 overflow-y-auto flex flex-col">
-  <ChatEmptyState />
-</div>
-```
-
-### 4e. Remove the useState import if unused
-
-If `useState` is no longer used (it was only for `activeTab` which is still used),
-check — `useState` is still needed for `activeTab`, so keep it.
-
-### Final CenterWorkspace.tsx should look like:
-
-```tsx
-import { useState } from 'react';
-import { Breadcrumb } from './center-workspace/Breadcrumb';
-import { TabStrip } from './center-workspace/TabStrip';
-import { ChatEmptyState } from './center-workspace/ChatEmptyState';
-import { ChatInput } from './center-workspace/ChatInput';
-import { workspaceTabs } from '@/data/workspace-tabs';
-
-export function CenterWorkspace() {
-  const [activeTab, setActiveTab] = useState('chat');
-
-  return (
-    <div className="flex h-full flex-1 flex-col min-w-0 bg-background">
-      <div className="h-2 shrink-0" />
-      <Breadcrumb segments={['Superhive', 'Workspace']} branchName="main" />
-      <TabStrip
-        tabs={workspaceTabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
-      <div className="flex-1 overflow-y-auto flex flex-col">
-        <ChatEmptyState />
-      </div>
-      <ChatInput />
-    </div>
-  );
-}
-```
+| Store | Domain flag | File |
+|-------|-------------|------|
+| `listWorkspaces` | `isMockEnabled('workspaces')` | `src/data/workspaces/store.ts` |
+| `listAgents` / `getAgent` | `isMockEnabled('agents')` | `src/data/agents/store.ts` |
+| `listFavorites` | `isMockEnabled('favorites')` | `src/data/favorites/store.tsx` |
+| `listProjects` / `getProject` | `isMockEnabled('projects')` | `src/data/projects/store.ts` |
+| `listUniversalTickets` | `isMockEnabled('tickets')` | `src/data/tickets/store.ts` |
+| `listThreads` / `listMessages` | `isMockEnabled('chat')` | `src/data/chat/store.ts` |
 
 ---
 
-## Step 5 — Verify the build
+## Step 4 — Verify the build
 
-Run:
-
-```bash
+```sh
 bun run build
 ```
 
-There should be NO TypeScript errors. If you see errors about missing modules
-like `@/data/mock/workspaces` or `@/data/mock/chat`, return to Step 3 or 4 —
-a mock import was likely missed.
+There should be NO TypeScript errors. If you see errors about missing `@/data/mock/` modules, return to Step 3 — a mock import was likely missed.
 
 ---
 
-## Step 6 — Clean up .env.local (optional)
+## Step 5 — Clean up .env.local (optional)
 
-If `.env.local` only contains `VITE_USE_MOCK_DATA=true` and nothing else,
-you can delete the file. Otherwise, just remove the `VITE_USE_MOCK_DATA` line.
+If `.env.local` only contains `VITE_USE_MOCK_DATA=true` and nothing else, you can delete the file. Otherwise, just remove the `VITE_USE_MOCK_DATA` line.
 
 ---
 
@@ -308,18 +129,15 @@ you can delete the file. Otherwise, just remove the `VITE_USE_MOCK_DATA` line.
 
 | Area | Before | After |
 |------|--------|-------|
-| LeftNav workspace dropdown | Shows 4 workspaces | Empty dropdown |
-| LeftNav favorites | Shows 5 items | Empty section (hidden) |
-| LeftNav active agents | Shows 5 agents with status | Empty section (hidden) |
-| LeftNav active tasks | Shows 3 tasks | Empty section (hidden) |
-| LeftNav notifications | Badge shows "2" | No badge |
-| Center workspace | Shows chat thread with messages | Shows ChatEmptyState with suggestions |
-| Right panel Overview | Shows stat cards | Empty / placeholder |
-| Right panel Manage | Shows team members | Empty / placeholder |
-| Right panel Inbox | Shows notifications | Empty / placeholder |
+| Left nav workspace dropdown | Shows workspaces | Empty |
+| Left nav favorites | Shows favorites | Empty section hidden |
+| Left nav active agents | Shows agents with status | Empty section hidden |
+| Center workspace | Shows Projects/Agents/Tickets/Channels | Empty tab with empty state |
+| Right panel Overview | Shows telemetry/stats | Empty panel |
+| Right panel Manage | Shows controls | Empty panel |
+| Right panel Inbox | Shows audit queue | Empty panel |
 
-All UI components, button clicks, panel resizing, and navigation remain fully
-functional — they just have no data to display until a real backend is connected.
+All UI components, button clicks, panel resizing, and tab navigation remain fully functional — they just have no data to display until a real backend is connected.
 
 ---
 
@@ -327,18 +145,10 @@ functional — they just have no data to display until a real backend is connect
 
 To turn mock data back on:
 
-1. Set `VITE_USE_MOCK_DATA=true` in `.env.local`
-2. Restore the `src/data/mock/` directory from git:
+1. Restore the `src/data/mock/` directory from git:
+   ```bash
+   git checkout HEAD -- src/data/mock/
+   ```
+2. Set `VITE_USE_MOCK_DATA=true` in `.env.local`
 
-```bash
-git checkout HEAD -- src/data/mock/
-```
-
-Or restore individual files:
-
-```bash
-git checkout HEAD -- \
-  src/data/mock/workspaces.ts \
-  src/data/mock/agents.ts \
-  src/data/mock/chat.ts
-```
+Or set `VITE_USE_MOCK_DATA=true` without restoring files — each store will use its in-memory mock data defaults.

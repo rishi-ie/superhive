@@ -1,9 +1,18 @@
+/**
+ * Toggle switch with animated knob for boolean settings.
+ */
 type ToggleProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
   size?: 'sm' | 'md';
 };
 
+/**
+ * Toggle switch with animated knob for boolean settings.
+ * @param checked - Current toggle state
+ * @param onChange - Callback when toggle state changes
+ * @param size - Toggle size: sm or md
+ */
 export function Toggle({ checked, onChange, size = 'md' }: ToggleProps) {
   const trackClass = checked
     ? 'bg-chart-1'

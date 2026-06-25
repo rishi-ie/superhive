@@ -1,5 +1,8 @@
+/**
+ * Channel overview tab — displays channel topic, participants, related ticket, messages.
+ */
 import { Avatar } from '@/components/ui/Avatar';
-import { nameToAgentId } from '@/data/agents/store';
+import { ChannelStatusPill } from '@/components/channels';
 import type { CommunicationChannel, ProjectAgent, ChannelMessage } from '@/data/projects/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 
@@ -13,24 +16,18 @@ type ChannelOverviewTabProps = {
   onTicketClick?: (id: string) => void;
 };
 
-function ChannelStatusPill({ status }: { status: CommunicationChannel['status'] }) {
-  const map: Record<CommunicationChannel['status'], { color: string; label: string }> = {
-    OPEN:           { color: 'bg-chart-2',     label: 'OPEN' },
-    AWAITING_REPLY: { color: 'bg-chart-3',     label: 'AWAITING' },
-    RESOLVED:       { color: 'bg-muted-foreground/40', label: 'RESOLVED' },
-  };
-  const cfg = map[status];
-  return (
-    <span className="inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
-      <span className={`size-1 rounded-full ${cfg.color}`} />
-      {cfg.label}
-    </span>
-  );
-}
-
+/**
+ * Channel overview tab — displays channel topic, participants, related ticket, messages.
+ * @param channel - Channel to display
+ * @param workspaceId - Current workspace id
+ * @param relatedTicket - Related ticket if any
+ * @param participants - Channel participants
+ * @param recentMessages - Recent messages to preview
+ * @param onParticipantClick - Called when participant is clicked
+ * @param onTicketClick - Called when related ticket is clicked
+ */
 export function ChannelOverviewTab({
   channel,
-  workspaceId,
   relatedTicket,
   participants,
   recentMessages,

@@ -1,3 +1,6 @@
+/**
+ * Auto-expanding textarea with model picker and token counter.
+ */
 import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, ChevronDown } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -20,6 +23,12 @@ function countTokens(text: string): number {
 const DRAFT_KEY = (agentId?: string) =>
   agentId ? `superhive-draft-${agentId}` : 'superhive-draft';
 
+/**
+ * @param placeholder - Input placeholder text
+ * @param defaultModel - Default selected model
+ * @param onSubmit - Called with (text, model) when send is clicked
+ * @param agentId - Agent ID for draft persistence
+ */
 export function ChatInput({ placeholder = 'Describe an objective…', defaultModel = 'Auto', onSubmit, agentId }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [model, setModel] = useState(defaultModel);

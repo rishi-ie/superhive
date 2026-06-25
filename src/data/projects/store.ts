@@ -1,6 +1,6 @@
-import { isMockEnabled } from '@/lib/feature-flags';
+import { isMockEnabled } from '@/data/mock/feature-flags';
 import mockData from '../mock.json';
-import type { MockData } from '../mock-types';
+import type { MockData } from '../mock/types';
 import type {
   Ticket,
   ProjectAgent,

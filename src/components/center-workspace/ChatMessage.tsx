@@ -1,8 +1,12 @@
+/**
+ * Single chat message with markdown rendering and feedback buttons.
+ */
 import { useState } from 'react';
 import { Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { parseMarkdown, type MarkdownBlock, type InlineElement } from '@/lib/markdown';
+import { formatTime, formatDuration } from '@/components/chat/format';
 import type { Message } from '@/data/chat/store';
 import { setMessageFeedback } from '@/data/chat/store';
 
@@ -13,24 +17,6 @@ type ChatMessageProps = {
   agentStatusColor?: string;
   onRegenerate?: (messageId: string) => void;
 };
-
-function formatTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return 'just now';
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return 'yesterday';
-  return `${diffDays}d ago`;
-}
-
-function formatDuration(ms: number): string {
-  if (ms < 1000) return `${ms}ms`;
-  return `${(ms / 1000).toFixed(1)}s`;
-}
 
 function renderInline(inline: InlineElement, key: number) {
   switch (inline.kind) {
@@ -85,6 +71,13 @@ function renderBlock(block: MarkdownBlock, key: number) {
   );
 }
 
+/**
+ * @param message - Message to display
+ * @param agentName - Display name of the agent
+ * @param agentInitials - Initials of the agent
+ * @param agentStatusColor - Status color for agent avatar (unused but kept for interface)
+ * @param onRegenerate - Called when regenerate is clicked
+ */
 export function ChatMessage({ message, agentName, agentInitials, onRegenerate }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';

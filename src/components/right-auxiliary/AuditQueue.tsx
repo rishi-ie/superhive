@@ -1,3 +1,6 @@
+/**
+ * Audit queue — AUTH_INTERCEPT and DIFF_REVIEW items with approve/deny actions.
+ */
 import { ShieldAlert, GitMerge } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { getAuditItems, type Agent } from '@/data/agents/store';
@@ -10,6 +13,13 @@ type AuditQueueProps = {
   onAuditCountClick?: (agentId: string) => void;
 };
 
+/**
+ * Audit queue — AUTH_INTERCEPT and DIFF_REVIEW items with approve/deny actions.
+ * @param agent - Optional agent to filter audit items
+ * @param onApprove - Called when item is approved
+ * @param onDeny - Called when item is denied
+ * @param onViewDiff - Called when viewing code diff
+ */
 export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueProps) {
   const items = getAuditItems(agent?.id);
 

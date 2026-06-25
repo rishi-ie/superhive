@@ -1,3 +1,6 @@
+/**
+ * Channel thread tab — message list with compose input.
+ */
 import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Send } from 'lucide-react';
@@ -13,6 +16,14 @@ type ChannelThreadTabProps = {
   onParticipantClick?: (agentId: string) => void;
 };
 
+/**
+ * Channel thread tab — message list with compose input.
+ * @param channelId - Channel id for sending messages
+ * @param messages - Messages to display
+ * @param agents - Agents for avatar/initials resolution
+ * @param onSend - Called when message is sent
+ * @param onParticipantClick - Called when participant avatar is clicked
+ */
 export function ChannelThreadTab({
   channelId,
   messages,

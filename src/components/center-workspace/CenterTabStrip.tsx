@@ -1,3 +1,6 @@
+/**
+ * Horizontal tab strip with add-tab menu.
+ */
 import { useRef, useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { CenterTab } from './CenterTab';
@@ -22,6 +25,15 @@ const NEW_TAB_OPTIONS: { type: NewTabType; label: string; icon: string }[] = [
   { type: 'agents', label: 'Agents', icon: '🤖' },
 ];
 
+/**
+ * @param tabs - All open tabs
+ * @param activeTabId - Currently active tab ID
+ * @param activeWorkspaceId - Active workspace ID
+ * @param workspaceMap - Map of workspace ID to name
+ * @param onTabClick - Called when a tab is clicked
+ * @param onTabClose - Called when a tab close button is clicked
+ * @param onNewTab - Called when new tab is created from menu
+ */
 export function CenterTabStrip({
   tabs,
   activeTabId,

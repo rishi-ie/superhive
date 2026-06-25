@@ -1,6 +1,10 @@
+/**
+ * Collapsible thread list for switching between chat threads.
+ */
 import { useState } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { formatRelativeTime } from '@/lib/relative-time';
 import type { ChatThread } from '@/data/chat/store';
 
 type ChatThreadListProps = {
@@ -10,18 +14,12 @@ type ChatThreadListProps = {
   onNewThread?: () => void;
 };
 
-function formatRelativeTime(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins}m`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return '1d';
-  return `${diffDays}d`;
-}
-
+/**
+ * @param threads - List of threads for the agent
+ * @param activeThreadId - Currently active thread ID
+ * @param onThreadSelect - Called when a thread is selected
+ * @param onNewThread - Called when new thread button is clicked
+ */
 export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewThread }: ChatThreadListProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -65,7 +63,7 @@ export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewT
                   {thread.title}
                 </div>
                 <div className="text-[9px] text-muted-foreground/50 font-fustat">
-                  {thread.messages.length} msgs · {formatRelativeTime(thread.updatedAt)} ago
+                  {thread.messages.length} msgs · {formatRelativeTime(thread.updatedAt)}
                 </div>
               </div>
             </button>

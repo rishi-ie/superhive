@@ -1,3 +1,6 @@
+/**
+ * Single agent row inside the Agents accordion section with status dot.
+ */
 import { StatusDot } from '@/components/ui/StatusDot';
 import type { AccordionAgent } from '@/data/left-nav/interface';
 
@@ -6,6 +9,11 @@ type AgentListItemProps = {
   onClick?: (id: string) => void;
 };
 
+/**
+ * Single agent row inside the Agents accordion section with status dot.
+ * @param agent - Agent data including id, name, status, currentTask
+ * @param onClick - Called when agent row is clicked
+ */
 export function AgentListItem({ agent, onClick }: AgentListItemProps) {
   return (
     <button

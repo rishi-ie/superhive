@@ -1,3 +1,6 @@
+/**
+ * Square icon-only button with ghost/solid/outline variants.
+ */
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
 export type IconButtonSize = 'xs' | 'sm' | 'md' | 'lg';
@@ -27,6 +30,13 @@ const variantMap: Record<IconButtonVariant, string> = {
     'border border-border bg-secondary text-foreground hover:bg-tertiary',
 };
 
+/**
+ * Square icon-only button with size and variant options.
+ * @param size - Button size: xs, sm, md, or lg
+ * @param variant - Visual style: ghost, solid, or outline
+ * @param className - Additional CSS classes
+ * @param children - Icon element(s)
+ */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ size = 'md', variant = 'ghost', className = '', children, ...rest }, ref) => {
     return (

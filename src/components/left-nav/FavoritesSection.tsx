@@ -1,3 +1,6 @@
+/**
+ * Collapsible Favorites section with star icon and item list.
+ */
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Star } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -9,6 +12,12 @@ type FavoritesSectionProps = {
   selectedId?: string;
 };
 
+/**
+ * Collapsible Favorites section with star icon and item list.
+ * @param items - Favorite items to display
+ * @param onItemClick - Called when a favorite item is clicked
+ * @param selectedId - Currently selected item id
+ */
 export function FavoritesSection({ items, onItemClick, selectedId }: FavoritesSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 

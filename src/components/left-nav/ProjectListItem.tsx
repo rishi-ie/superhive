@@ -1,3 +1,6 @@
+/**
+ * Single project row inside the Projects accordion section.
+ */
 import { Layers } from 'lucide-react';
 
 type ProjectListItemProps = {
@@ -6,6 +9,12 @@ type ProjectListItemProps = {
   onClick?: (id: string) => void;
 };
 
+/**
+ * Single project row inside the Projects accordion section.
+ * @param id - Project id
+ * @param name - Project display name
+ * @param onClick - Called when project is clicked
+ */
 export function ProjectListItem({ id, name, onClick }: ProjectListItemProps) {
   return (
     <button

@@ -1,4 +1,7 @@
-import { TicketCard } from './TicketCard';
+/**
+ * Three-column project ticket stream (To Do / Executing / Done).
+ */
+import { TicketCard } from './tickets/TicketCard';
 import type { Ticket, ProjectAgent } from '@/data/projects/store';
 
 type ExecutionStreamProps = {
@@ -20,6 +23,12 @@ function getAgentById(agents: ProjectAgent[], id: string) {
   return agents.find(a => a.id === id);
 }
 
+/**
+ * @param tickets - Project tickets to display
+ * @param agents - Project agents for ticket assignment
+ * @param onTicketSelect - Called when a ticket is selected
+ * @param onOpenTickets - Called when overflow "more" button is clicked
+ */
 export function ExecutionStream({ tickets, agents, onTicketSelect, onOpenTickets }: ExecutionStreamProps) {
   return (
     <div className="grid grid-cols-3 gap-3">

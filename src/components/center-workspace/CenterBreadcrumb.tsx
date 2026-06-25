@@ -1,3 +1,6 @@
+/**
+ * Renders clickable workspace > section > item breadcrumb trail.
+ */
 import { ChevronRight } from 'lucide-react';
 import { MaximizeOnDoubleClick } from '@/components/ui/MaximizeOnDoubleClick';
 import { Avatar } from '@/components/ui/Avatar';
@@ -26,21 +29,6 @@ function getBreadcrumbSegments(
     channel: 'Comms',
     agents: 'Agents',
     agent: 'Agents',
-    'universal-agents': 'Agents',
-    'universal-projects': 'Projects',
-    'universal-channels': 'Channels',
-    settings: 'Settings',
-  };
-
-  const tabLabel: Record<CenterTab['type'], string> = {
-    projects: 'Projects',
-    project: tab.title || 'Project',
-    tickets: 'Tickets',
-    ticket: tab.title || 'Ticket',
-    channels: 'Comms',
-    channel: tab.title || 'Channel',
-    agents: 'Agents',
-    agent: tab.title || 'Agent',
     'universal-agents': 'Agents',
     'universal-projects': 'Projects',
     'universal-channels': 'Channels',
@@ -80,6 +68,11 @@ function getBreadcrumbSegments(
   return segments;
 }
 
+/**
+ * @param tab - The active tab providing breadcrumb context
+ * @param workspaceName - Display name of the workspace
+ * @param onJump - Called when a breadcrumb segment is clicked
+ */
 export function CenterBreadcrumb({ tab, workspaceName, onJump }: CenterBreadcrumbProps) {
   const workspaceId = tab.workspaceId;
   const segments = getBreadcrumbSegments(tab, workspaceName, workspaceId, onJump);

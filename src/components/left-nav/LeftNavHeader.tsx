@@ -1,3 +1,6 @@
+/**
+ * Left nav header — navigation controls and panel toggles.
+ */
 import { PanelLeftClose, ArrowLeft, ArrowRight, Columns2 } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
 import { MaximizeOnDoubleClick } from '@/components/ui/MaximizeOnDoubleClick';
@@ -8,6 +11,11 @@ type LeftNavHeaderProps = {
   onToggleRight?: () => void;
 };
 
+/**
+ * Left nav header — navigation controls and panel toggles.
+ * @param onToggleLeft - Called to collapse/expand left panel
+ * @param onToggleRight - Called to collapse/expand right panel
+ */
 export function LeftNavHeader({ onToggleLeft, onToggleRight }: LeftNavHeaderProps) {
   return (
     <MaximizeOnDoubleClick className="drag flex items-center gap-1 pl-20 pr-3 h-9 shrink-0">

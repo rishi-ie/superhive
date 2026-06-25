@@ -1,9 +1,12 @@
-import { AccordionItem, AccordionHeader } from './AccordionItem';
+/**
+ * Accordion navigation core — renders Projects/Agents sections and static nav headers.
+ */
+import { AccordionItem, AccordionHeader } from './accordion';
 import { AgentListItem } from './AgentListItem';
 import { ProjectListItem } from './ProjectListItem';
 import { listAgents } from '@/data/agents/store';
 import { listUniversalProjects } from '@/data/universal-projects/store';
-import { mainNavItems } from '@/data/left-nav';
+import { mainNavItems } from '@/data/config/left-nav';
 import { STROKE_WIDTH } from '@/lib/constants';
 
 type AccordionCoreProps = {
@@ -19,6 +22,13 @@ function getIcon(id: string) {
   return <item.icon size={12} strokeWidth={STROKE_WIDTH} />;
 }
 
+/**
+ * Accordion navigation core — renders Projects/Agents sections and static nav headers.
+ * @param currentView - Currently active view id
+ * @param onItemClick - Called when nav item is clicked
+ * @param onAgentClick - Called when agent in accordion is clicked
+ * @param onProjectClick - Called when project is clicked
+ */
 export function AccordionCore({ currentView, onItemClick, onAgentClick, onProjectClick }: AccordionCoreProps) {
   const projects = listUniversalProjects();
   const agents = listAgents().map(a => ({

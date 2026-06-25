@@ -1,3 +1,6 @@
+/**
+ * Project inbox tab — delegates to AuditQueue for a project's pending audit items.
+ */
 import { AuditQueue } from './AuditQueue';
 import type { AuditItem } from '@/data/agents/store';
 
@@ -10,6 +13,15 @@ type ProjectInboxTabProps = {
   onAuditCountClick?: (agentId: string) => void;
 };
 
+/**
+ * Project inbox tab — delegates to AuditQueue for a project's pending audit items.
+ * @param projectName - Project name for header
+ * @param auditItems - Audit items to display
+ * @param onApprove - Called when item is approved
+ * @param onDeny - Called when item is denied
+ * @param onViewDiff - Called when viewing code diff
+ * @param onAuditCountClick - Called when audit count is clicked
+ */
 export function ProjectInboxTab({
   projectName,
   auditItems,

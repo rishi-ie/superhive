@@ -1,3 +1,6 @@
+/**
+ * Workspace selector dropdown — lists workspaces and provides settings access.
+ */
 import { useState, useRef, useEffect } from 'react';
 import { ChevronsUpDown, Check, Settings, LogOut } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -12,6 +15,13 @@ type TeamSelectorProps = {
   onSettingsClick?: () => void;
 };
 
+/**
+ * Workspace selector dropdown — lists workspaces and provides settings access.
+ * @param workspaces - Available workspaces
+ * @param currentWorkspace - Currently selected workspace
+ * @param onWorkspaceSelect - Called when workspace is selected
+ * @param onSettingsClick - Called when settings is clicked
+ */
 export function TeamSelector({
   workspaces,
   currentWorkspace,

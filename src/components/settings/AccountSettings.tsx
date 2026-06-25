@@ -1,3 +1,6 @@
+/**
+ * Account settings form — displays editable name, email, and avatar.
+ */
 import { useState } from 'react';
 import { TextInput } from '@/components/ui/TextInput';
 import { Button } from '@/components/ui/Button';
@@ -8,6 +11,11 @@ type AccountSettingsProps = {
   email: string;
 };
 
+/**
+ * Account settings panel — avatar, name, and email fields.
+ * @param name - Display name of the current user
+ * @param email - Email address of the current user
+ */
 export function AccountSettings({ name, email }: AccountSettingsProps) {
   const [avatarHovered, setAvatarHovered] = useState(false);
 

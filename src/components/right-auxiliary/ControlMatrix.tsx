@@ -1,6 +1,9 @@
+/**
+ * Agent control matrix — model engine, permissions, commit authority, thinking budget.
+ */
 import { useState } from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
+import { STROKE_WIDTH, COST_PER_TASK } from '@/lib/constants';
 import { Toggle } from '@/components/ui/Toggle';
 import { getPermissions, type Agent, type Permissions } from '@/data/agents/store';
 import type { CommitAuthority } from '@/data/agents/interface';
@@ -30,9 +33,14 @@ const PERMISSION_ROWS: { key: keyof Omit<Permissions, 'modelEngine' | 'commitAut
 ];
 
 function getTokenCostLabel(tokens: number): string {
-  return `~$${(tokens * 0.00003).toFixed(2)} / task`;
+  return `~$${(tokens * COST_PER_TASK).toFixed(2)} / task`;
 }
 
+/**
+ * Agent control matrix — model engine, permissions, commit authority, thinking budget.
+ * @param agent - Agent to configure
+ * @param onTerminate - Called when termination is requested
+ */
 export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
   const initial = getPermissions(agent.id);
   const [permissions, setPermissions] = useState<Permissions>({ ...initial });

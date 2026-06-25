@@ -1,3 +1,6 @@
+/**
+ * Styled native select dropdown with chevron icon.
+ */
 import { ChevronDown } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 
@@ -13,6 +16,13 @@ type SelectProps = {
   className?: string;
 };
 
+/**
+ * Styled native select dropdown with chevron icon.
+ * @param value - Currently selected value
+ * @param options - Array of { label, value } options
+ * @param onChange - Callback when selection changes
+ * @param className - Additional CSS classes
+ */
 export function Select({ value, options, onChange, className = '' }: SelectProps) {
   return (
     <div className={`relative ${className}`}>

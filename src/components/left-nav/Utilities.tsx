@@ -1,3 +1,6 @@
+/**
+ * Sticky bottom utilities bar — settings and help popover.
+ */
 import { useRef, useState } from 'react';
 import { Settings, HelpCircle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -7,6 +10,10 @@ type UtilitiesProps = {
   onSettingsClick?: () => void;
 };
 
+/**
+ * Sticky bottom utilities bar — settings and help popover.
+ * @param onSettingsClick - Called when settings button is clicked
+ */
 export function Utilities({ onSettingsClick }: UtilitiesProps) {
   const [helpOpen, setHelpOpen] = useState(false);
   const helpBtnRef = useRef<HTMLButtonElement>(null);

@@ -1,3 +1,6 @@
+/**
+ * Chat header showing agent info, status, token count, and cost.
+ */
 import { MoreHorizontal, ChevronDown } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
@@ -16,6 +19,11 @@ function formatCost(dollars: number): string {
   return `$${dollars.toFixed(4)}`;
 }
 
+/**
+ * @param agent - Agent to display (null for unknown)
+ * @param tokenCount - Running token count for session
+ * @param sessionCost - Running cost for session
+ */
 export function ChatHeader({ agent, tokenCount, sessionCost }: ChatHeaderProps) {
   const initials = agent?.name
     .split(' ')

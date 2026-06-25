@@ -1,6 +1,6 @@
-import { isMockEnabled } from '@/lib/feature-flags';
+import { isMockEnabled } from '@/data/mock/feature-flags';
 import mockData from '../mock.json';
-import type { MockData } from '../mock-types';
+import type { MockData } from '../mock/types';
 import type { ChatThread, Message } from './interface';
 
 const data = mockData as MockData;
@@ -120,7 +120,7 @@ export function addMessageToActiveThread(content: string, agentId?: string): voi
   if (thread) store.addMessage(thread.id, content, 'user');
 }
 
-export function addAssistantMessage(threadId: string, content: string, model?: string): Message {
+export function addAssistantMessage(threadId: string, content: string): Message {
   return store.addMessage(threadId, content, 'assistant');
 }
 

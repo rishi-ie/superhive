@@ -1,6 +1,9 @@
+/**
+ * Individual tab pill with icon, label, and close button.
+ */
 import {
   MessageSquare, Layers, ClipboardCheck, FolderOpen,
-  MessageCircle, Bot, Users, Settings, Lock, X, Star,
+  MessageCircle, Bot, Users, Settings, Lock, X,
 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/data/tabs/interface';
@@ -43,6 +46,13 @@ type CenterTabProps = {
   onClose: () => void;
 };
 
+/**
+ * @param tab - Tab data to render
+ * @param workspaceName - Workspace display name
+ * @param isActive - Whether this tab is active
+ * @param onClick - Called when tab is clicked
+ * @param onClose - Called when close button is clicked
+ */
 export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: CenterTabProps) {
   const Icon = TAB_ICONS[tab.type];
   const typeLabel = TYPE_LABELS[tab.type];

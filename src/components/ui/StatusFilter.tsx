@@ -1,5 +1,6 @@
-import { STROKE_WIDTH } from '@/lib/constants';
-
+/**
+ * Horizontal filter button group for status filtering with optional counts.
+ */
 export type FilterOption<T extends string> = {
   value: T;
   label: string;
@@ -12,6 +13,12 @@ type StatusFilterProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
+/**
+ * Horizontal filter button group for status filtering with optional counts.
+ * @param options - Array of filter options with value, label, and optional count
+ * @param value - Currently selected filter value
+ * @param onChange - Callback when filter selection changes
+ */
 export function StatusFilter<T extends string>({ options, value, onChange }: StatusFilterProps<T>) {
   return (
     <div className="flex items-center gap-1 flex-wrap">

@@ -1,8 +1,11 @@
+/**
+ * Workspace kanban dashboard: execution stream, swarm roster, and communications grid.
+ */
 import { ExecutionStream } from './ExecutionStream';
 import { SwarmRoster } from './SwarmRoster';
 import { Communications } from './Communications';
 import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import {
   getProjectTitle,
   listTickets,
@@ -21,6 +24,15 @@ type ProjectsViewProps = {
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param workspaceId - Current workspace ID
+ * @param projectId - Optional selected project ID
+ * @param onTicketSelect - Called when a ticket is selected
+ * @param onAgentClick - Called when an agent is clicked
+ * @param onChannelClick - Called when a channel is clicked
+ * @param onOpenTickets - Called when "open tickets" is clicked
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function ProjectsView({ workspaceId, projectId, onTicketSelect, onAgentClick, onChannelClick, onOpenTickets, onAction }: ProjectsViewProps) {
   const title = projectId ? getProjectTitle(workspaceId) : getProjectTitle(workspaceId);
 

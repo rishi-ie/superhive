@@ -1,10 +1,14 @@
+/**
+ * Single project detail with stats, execution stream, swarm roster, and communications.
+ */
 import { ExecutionStream } from './ExecutionStream';
 import { SwarmRoster } from './SwarmRoster';
 import { Communications } from './Communications';
 import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import type { Project } from '@/data/projects/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
+import { StatCard } from '@/components/ui/StatCard';
 
 type ProjectDetailViewProps = {
   project?: Project | null;
@@ -15,15 +19,14 @@ type ProjectDetailViewProps = {
   onAction?: OnboardingWizardProps['onAction'];
 };
 
-function StatCard({ label, value, color }: { label: string; value: string | number; color?: string }) {
-  return (
-    <div className="flex flex-col gap-0.5 p-2 rounded-md border border-border/40 bg-card">
-      <span className={`text-lg font-fustat font-bold ${color ?? 'text-foreground'}`}>{value}</span>
-      <span className="text-[10px] tracking-wider font-medium text-muted-foreground">{label}</span>
-    </div>
-  );
-}
-
+/**
+ * @param project - Project to display (null shows onboarding)
+ * @param onTicketSelect - Called when a ticket is selected
+ * @param onAgentClick - Called when an agent is clicked
+ * @param onChannelClick - Called when a channel is clicked
+ * @param onOpenTickets - Called when "open tickets" is clicked
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function ProjectDetailView({
   project,
   onTicketSelect,

@@ -1,5 +1,83 @@
 # Superhive — Electron + React Desktop App
 
+---
+
+## Refactoring Progress
+
+### Phase 1 ✅ Complete
+Split 8 multi-component files into 20 individual files across 6 new subdirectories:
+- `CenterWorkspace.tsx` → `CenterWorkspace.tsx` (orchestrator) + `TabBody.tsx` (dispatcher)
+- `right-auxiliary/GlobalStatsTab.tsx` → `global-stats/` (7 files + dispatcher + index.ts barrel)
+- `right-auxiliary/SessionsView.tsx` → `sessions/` (SessionsView + ThreadRow + index.ts barrel)
+- `right-auxiliary/ProjectDetailsTab.tsx` → renamed to `project/ProjectOverviewTab.tsx`
+- `right-auxiliary/TelemetryDeck.tsx` → `telemetry/` (TelemetryDeck + StatusPill + index.ts barrel)
+- `left-nav/AccordionItem.tsx` → `accordion/` (AccordionItem + AccordionHeader + index.ts barrel)
+- `center-workspace/UniversalTicketCard.tsx` → `tickets/` (UniversalTicketCard + PriorityTag + TypeTag + index.ts barrel)
+- `archived/NewChatAccordion.tsx` deleted (not imported anywhere, had colliding `ChatEmptyState`)
+- All import paths updated in `RightAuxiliary.tsx`, `AccordionCore.tsx`, `KanbanColumn.tsx`
+- Build verified clean after Phase 1
+
+### Phase 2 ✅ Complete
+Extracted duplicated helpers to canonical homes:
+- `src/lib/relative-time.ts` — canonical `formatRelativeTime()` (was in 5 files: CommunicationsView, UniversalChannelsView, UniversalProjectsView, ThreadRow, ChatThreadList)
+- `src/components/ui/StatCard.tsx` — shared (was in GlobalStatsTab + ProjectOverviewTab + ProjectDetailView)
+- `src/components/ui/SectionLabel.tsx` — shared (was in GlobalStatsTab)
+- `src/components/channels/ChannelStatusPill.tsx` — shared (was in 5 files: Communications, CommunicationsView, UniversalChannelsView, ChannelDetailView, ChannelOverviewTab)
+- `src/components/chat/format.ts` — shared `formatTime` + `formatDuration` (was in ChatMessage only)
+- Updated all consuming files to use shared imports
+- Build verified clean after Phase 2
+
+### Phase 3 ✅ Complete
+Moved loose config files into proper subdirectories:
+- `wizard-configs.ts` → `src/data/config/wizard-configs.ts`
+- `models.ts` → `src/data/config/models.ts`
+- `right-panel-tabs.ts` → `src/data/config/right-panel-tabs.ts`
+- `left-nav.ts` → `src/data/config/left-nav.ts`
+- `feature-flags.ts` → `src/data/mock/feature-flags.ts` (from `src/lib/`)
+- `mock-types.ts` → `src/data/mock/types.ts`
+All 22 import paths updated across components, screens, and data stores.
+
+### Phase 4 ✅ Complete
+Resolved naming/duplicate issues:
+- Deleted orphaned `src/components/ui/PanelEmptyState.tsx` (unused, simpler duplicate)
+- `global-stats/StatCard.tsx` + `global-stats/SectionLabel.tsx` deleted — updated 4 subcomponents to import from canonical `src/components/ui/`
+- Barrel `global-stats/index.ts` updated to remove re-exports of deleted local components
+
+### Phase 5 ✅ Complete
+Added top-of-file JSDoc blocks and component-level JSDoc on all ~86 TSX exports across:
+- `center-workspace/` (33 files)
+- `left-nav/` + `right-auxiliary/` (30 files)
+- `ui/` + `channels/` + `archived/` (17 files)
+- `screens/` + root `App.tsx` + `main.tsx` (6 files)
+
+### Phase 6 ✅ Complete
+- Deleted stale docs: `README.md`, `CLAUDE.md`, `DESIGN.md`, `design-spec.md`
+- `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` completely rewritten to match current architecture (per-domain `isMockEnabled()` mock flag system, not the old single-directory approach)
+
+### Phase 7 ✅ Complete
+Centralized magic numbers into `src/lib/constants.ts`:
+- Panel sizing: `DEFAULT_LEFT_WIDTH=280`, `DEFAULT_RIGHT_WIDTH=340`, `MIN/MAX_LEFT_WIDTH=180/400`, `MIN/MAX_RIGHT_WIDTH=200/500`
+- Token cost math: `COST_PER_TOKEN=0.00001` (ChatView), `COST_PER_TASK=0.00003` (ControlMatrix)
+- `App.tsx`, `Dashboard.tsx`, `ChatView.tsx`, `ControlMatrix.tsx` all now import from canonical constants
+
+### Phase 8 ✅ Complete (Tier 1 — Quick Wins)
+- Deleted 4 orphaned UI components (`DropdownTrigger`, `NavItem`, `RadioOption`, `ModelToolbar`)
+- Deleted empty `src/hooks/` directory
+- Deleted 6 orphaned `api.ts` placeholder files (agents, workspaces, projects, tickets, chat, favorites)
+- Moved root-level containers to proper subdirectories:
+  - `CenterWorkspace.tsx` → `center-workspace/CenterWorkspace.tsx`
+  - `LeftNav.tsx` → `left-nav/LeftNav.tsx`
+  - `RightAuxiliary.tsx` → `right-auxiliary/RightAuxiliary.tsx`
+  - `TicketCard.tsx` → `center-workspace/tickets/TicketCard.tsx`
+- Fixed `AgentsView.tsx` redundant inline `StatusDot` — now imports canonical from `ui/StatusDot`
+- Added missing JSDoc on 4 files (`SettingsSidebar`, `ChannelStatusPill`, `StatCard`, `SectionLabel`)
+- Added `typecheck` npm script; enabled `noUnusedLocals` and `noUnusedParameters` in tsconfig
+- Fixed 61 unused imports/variables across 30 files (surfaced by strict tsconfig)
+- Fixed double-quote import inconsistency in 3 files (`Settings.tsx`, `RightPanelTabs.tsx`, `Pill.tsx`)
+- Created `.editorconfig` for cross-editor consistency
+
+---
+
 ## What is this?
 
 **Superhive** is a digital agent workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
@@ -13,6 +91,7 @@
 ```sh
 bun run dev           # Start Vite dev server + Electron (hot reload)
 bun run electron:dev  # Alias for dev
+bun run typecheck     # TypeScript type check (no emit)
 bun run build        # TypeScript compile + Vite production build
 bun run electron:build  # build + electron-builder (produces dmg/zip in release/)
 bun run electron:preview # vite build + launch electron with production build
@@ -29,11 +108,11 @@ bun run electron:preview # vite build + launch electron with production build
 ## Key Configs
 
 - `vite.config.ts`: Vite + React + electron plugins; `@` alias maps to `src/`
-- `tsconfig.json`: ESNext, bun types, bundler resolution
+- `tsconfig.json`: ESNext, bun types, bundler resolution; `strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true`
 - `tailwind.config.js`: v4 (uses `@tailwindcss/postcss` plugin)
 - `postcss.config.js`: `@tailwindcss/postcss` + autoprefixer
 - `electron-builder.yml`: builds for mac/win/linux
-- `DESIGN.md`: Full design system documentation
+- `.editorconfig`: cross-editor consistency (indent, charset, newline)
 
 ## Left Nav Layout Structure
 

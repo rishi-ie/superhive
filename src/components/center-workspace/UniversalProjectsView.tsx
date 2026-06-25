@@ -1,3 +1,6 @@
+/**
+ * All projects across workspaces with search, workspace filter, and sort.
+ */
 import { useMemo, useState } from 'react';
 import { FolderOpen } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -6,16 +9,13 @@ import { StatusFilter, type FilterOption } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listProjects } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
-import type { TicketStatus } from '@/data/projects/interface';
-import type { Project } from '@/data/projects/interface';
+import { formatRelativeTime } from '@/lib/relative-time';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'name' | 'activity' | 'tickets';
-
-const BACKLOG_STATUSES: TicketStatus[] = ['TODO'];
 
 const STATUS_OPTIONS = [
   { value: 'ALL' as const, label: 'All' },
@@ -27,23 +27,17 @@ const STATUS_OPTIONS = [
 
 type WorkspaceFilter = 'ALL' | string;
 
-function relativeTime(timestamp: string): string {
-  const now = Date.now();
-  const diff = now - new Date(timestamp).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
-}
-
 type UniversalProjectsViewProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   selectedProjectId?: string | null;
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param onProjectSelect - Called when a project is selected
+ * @param selectedProjectId - Currently selected project ID
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAction }: UniversalProjectsViewProps) {
   const [query, setQuery] = useState('');
   const [workspaceFilter, setWorkspaceFilter] = useState<WorkspaceFilter>('ALL');
@@ -185,7 +179,7 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAc
                     </span>
                     {lastActivity && (
                       <span className="text-[10px] text-muted-foreground shrink-0 ml-auto">
-                        {relativeTime(lastActivity.timestamp)}
+                        {formatRelativeTime(lastActivity.timestamp)}
                       </span>
                     )}
                   </div>

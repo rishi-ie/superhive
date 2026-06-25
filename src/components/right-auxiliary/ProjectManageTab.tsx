@@ -1,3 +1,6 @@
+/**
+ * Project management tab — title, members, and channels management.
+ */
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -8,7 +11,12 @@ type ProjectManageTabProps = {
   availableAgents: ProjectAgent[];
 };
 
-export function ProjectManageTab({ project, availableAgents }: ProjectManageTabProps) {
+/**
+ * Project management tab — title, members, and channels management.
+ * @param project - Project to manage
+ * @param availableAgents - Agents available to add as members
+ */
+export function ProjectManageTab({ project }: ProjectManageTabProps) {
   const [title, setTitle] = useState(project.title);
   const [members, setMembers] = useState(project.agents);
   const [channels, setChannels] = useState(project.channels);

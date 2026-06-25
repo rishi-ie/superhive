@@ -1,11 +1,14 @@
+/**
+ * Workspace-wide ticket kanban with search, sort, and workspace filter.
+ */
 import { useMemo, useState } from 'react';
 import { KanbanBoard } from './KanbanBoard';
 import { OnboardingWizard } from './OnboardingWizard';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { NewButton } from '@/components/ui/NewButton';
-import { TICKETS_WIZARD_CONFIG } from '@/data/wizard-configs';
+import { TICKETS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listUniversalTickets } from '@/data/tickets/store';
-import type { UniversalTicket, UniversalTicketStatus, Priority } from '@/data/tickets/store';
+import type { UniversalTicketStatus, Priority } from '@/data/tickets/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'priority' | 'recent';
@@ -30,6 +33,12 @@ type TicketsViewProps = {
   onAction?: OnboardingWizardProps['onAction'];
 };
 
+/**
+ * @param workspaceId - Current workspace ID
+ * @param selectedTicketId - Currently selected ticket ID
+ * @param onTicketSelect - Called when a ticket is selected
+ * @param onAction - Called when an onboarding action is taken
+ */
 export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onAction }: TicketsViewProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('status');

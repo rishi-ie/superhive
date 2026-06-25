@@ -1,6 +1,10 @@
+/**
+ * Agent chat view with thread list, message thread, and composer.
+ */
 import { useState, useCallback } from 'react';
-import { getAgent, getTelemetry } from '@/data/agents/store';
-import { getCurrentThread, listThreads, addMessageToActiveThread, createThreadForAgent } from '@/data/chat/store';
+import { getAgent } from '@/data/agents/store';
+import { listThreads, addMessageToActiveThread, createThreadForAgent } from '@/data/chat/store';
+import { COST_PER_TOKEN } from '@/lib/constants';
 import type { ChatThread as ChatThreadType } from '@/data/chat/store';
 import { ChatHeader } from './ChatHeader';
 import { ChatThreadList } from './ChatThreadList';
@@ -15,7 +19,13 @@ type ChatViewProps = {
   onAction?: (actionId: string) => void;
 };
 
-export function ChatView({ workspaceId, agentId, onSend, onAction }: ChatViewProps) {
+/**
+ * @param workspaceId - Current workspace ID
+ * @param agentId - Agent to chat with (null for no agent)
+ * @param onSend - Called when a message is sent
+ * @param onAction - Called when an action button is clicked
+ */
+export function ChatView({ agentId, onSend }: ChatViewProps) {
   const agent = agentId ? getAgent(agentId) ?? null : null;
   const allThreads = listThreads();
 
@@ -94,7 +104,7 @@ export function ChatView({ workspaceId, agentId, onSend, onAction }: ChatViewPro
   const tokenCount = activeThread?.messages.reduce((sum, m) => sum + (m.tokenCount ?? 0), 0) ?? 0;
   const sessionCost = activeThread?.messages.reduce((sum, m) => {
     if (m.role !== 'assistant') return sum;
-    return sum + ((m.tokenCount ?? 0) * 0.00001);
+    return sum + ((m.tokenCount ?? 0) * COST_PER_TOKEN);
   }, 0) ?? 0;
 
   return (

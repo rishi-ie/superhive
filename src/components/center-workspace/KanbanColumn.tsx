@@ -1,4 +1,7 @@
-import { UniversalTicketCard } from './UniversalTicketCard';
+/**
+ * Single kanban column for a ticket status.
+ */
+import { UniversalTicketCard } from './tickets/UniversalTicketCard';
 import type { UniversalTicket, UniversalTicketStatus } from '@/data/tickets/store';
 
 type KanbanColumnProps = {
@@ -9,7 +12,14 @@ type KanbanColumnProps = {
   onTicketSelect?: (id: string) => void;
 };
 
-export function KanbanColumn({ label, status, tickets, selectedTicketId, onTicketSelect }: KanbanColumnProps) {
+/**
+ * @param label - Column display label
+ * @param status - Ticket status this column represents
+ * @param tickets - Tickets to display in this column
+ * @param selectedTicketId - Currently selected ticket ID
+ * @param onTicketSelect - Called when a ticket is selected
+ */
+export function KanbanColumn({ label, tickets, selectedTicketId, onTicketSelect }: KanbanColumnProps) {
   return (
     <div className="flex flex-col gap-2 min-w-[240px] w-[260px] shrink-0 h-full">
       <div className="flex items-center gap-1.5 px-1 shrink-0">

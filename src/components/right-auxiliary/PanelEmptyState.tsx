@@ -1,3 +1,6 @@
+/**
+ * Empty state placeholder for panels with no content.
+ */
 import type { ReactNode } from 'react';
 
 type PanelEmptyStateProps = {
@@ -6,6 +9,12 @@ type PanelEmptyStateProps = {
   description?: string;
 };
 
+/**
+ * Empty state placeholder for panels with no content.
+ * @param icon - Optional icon node
+ * @param title - Empty state title
+ * @param description - Optional description text
+ */
 export function PanelEmptyState({ icon, title, description }: PanelEmptyStateProps) {
   return (
     <div className="flex flex-1 items-center justify-center">
