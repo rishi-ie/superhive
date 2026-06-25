@@ -28,6 +28,7 @@ function getBreadcrumbSegments(
     agent: 'Agents',
     'universal-agents': 'Agents',
     'universal-projects': 'Projects',
+    'universal-channels': 'Channels',
     settings: 'Settings',
   };
 
@@ -42,6 +43,7 @@ function getBreadcrumbSegments(
     agent: tab.title || 'Agent',
     'universal-agents': 'Agents',
     'universal-projects': 'Projects',
+    'universal-channels': 'Channels',
     settings: 'Settings',
   };
 
@@ -58,7 +60,7 @@ function getBreadcrumbSegments(
     segments.push({
       label: section,
       onClick: onJump ? () => onJump(workspaceId, section) : undefined,
-      isLast: tab.type === 'universal-agents' || tab.type === 'universal-projects' || !tab.subtitle,
+      isLast: tab.type === 'universal-agents' || tab.type === 'universal-projects' || tab.type === 'universal-channels' || !tab.subtitle,
     });
   }
 

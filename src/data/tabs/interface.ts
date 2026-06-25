@@ -9,6 +9,7 @@ export type CenterTabType =
   | 'agent'             // single agent — chat + telemetry
   | 'universal-agents'  // all agents across workspaces
   | 'universal-projects'// all projects across workspaces
+  | 'universal-channels'// all channels across workspaces
   | 'settings';        // (future)
 
 export type TabSelection = {

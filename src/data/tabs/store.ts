@@ -14,7 +14,7 @@ function matchesKey(tab: CenterTab, type: CenterTabType, workspaceId: string, en
   if (tab.type === 'ticket') return tab.selectedTicketId === entityId;
   if (tab.type === 'channel') return tab.selectedChannelId === entityId;
   if (tab.type === 'agent') return tab.selectedAgentId === entityId;
-  if (tab.type === 'universal-agents' || tab.type === 'universal-projects') return true;
+  if (tab.type === 'universal-agents' || tab.type === 'universal-projects' || tab.type === 'universal-channels') return true;
   return tab.workspaceId === workspaceId;
 }
 

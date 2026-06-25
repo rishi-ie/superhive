@@ -24,6 +24,7 @@ interface ProjectsStore {
   listProjectAgents(workspaceId?: string): ProjectAgent[];
   listSwarmActivity(workspaceId?: string): SwarmActivity[];
   listChannels(workspaceId?: string): CommunicationChannel[];
+  getChannel(id: string): CommunicationChannel | undefined;
   listChannelMessages(channelId: string): ChannelMessage[];
 }
 
@@ -37,6 +38,7 @@ const emptyStore: ProjectsStore = {
   listSwarmActivity() { return []; },
   listChannels() { return []; },
   listChannelMessages() { return []; },
+  getChannel() { return undefined; },
 };
 
 const mockStore: ProjectsStore = {
@@ -75,12 +77,21 @@ const mockStore: ProjectsStore = {
   },
   listChannels(workspaceId?: string) {
     if (!workspaceId) {
-      return Object.values(projectsByWorkspace).flatMap(p => p.channels);
+      return Object.values(projectsByWorkspace).flatMap(p =>
+        p.channels.map(ch => ({ ...ch, workspaceId: p.workspaceId }))
+      );
     }
-    return projectsByWorkspace[workspaceId]?.channels ?? [];
+    return (projectsByWorkspace[workspaceId]?.channels ?? []).map(ch => ({ ...ch, workspaceId }));
   },
   listChannelMessages(channelId: string) {
     return channelMessagesMutable.filter(m => m.channelId === channelId);
+  },
+  getChannel(id: string) {
+    for (const project of Object.values(projectsByWorkspace)) {
+      const ch = project.channels.find(c => c.id === id);
+      if (ch) return { ...ch, workspaceId: project.workspaceId };
+    }
+    return undefined;
   },
 };
 
@@ -95,6 +106,7 @@ export function listProjectAgents(workspaceId?: string): ProjectAgent[] { return
 export function listSwarmActivity(workspaceId?: string): SwarmActivity[] { return store.listSwarmActivity(workspaceId); }
 export function listChannels(workspaceId?: string): CommunicationChannel[] { return store.listChannels(workspaceId); }
 export function listChannelMessages(channelId: string): ChannelMessage[] { return store.listChannelMessages(channelId); }
+export function getChannel(id: string): CommunicationChannel | undefined { return store.getChannel(id); }
 export function addChannelMessage(channelId: string, senderName: string, content: string, isAI: boolean = true): void {
   channelMessagesMutable.push({
     id: `cmsg-${crypto.randomUUID().slice(0, 8)}`,

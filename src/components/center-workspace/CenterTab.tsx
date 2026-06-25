@@ -16,6 +16,7 @@ const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
   agent: Bot,
   'universal-agents': Users,
   'universal-projects': FolderOpen,
+  'universal-channels': MessageSquare,
   settings: Settings,
 };
 
@@ -30,6 +31,7 @@ const TYPE_LABELS: Record<TabType, string> = {
   agent: 'Agent',
   'universal-agents': 'Agents',
   'universal-projects': 'Projects',
+  'universal-channels': 'Channels',
   settings: 'Settings',
 };
 
@@ -44,7 +46,7 @@ type CenterTabProps = {
 export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: CenterTabProps) {
   const Icon = TAB_ICONS[tab.type];
   const typeLabel = TYPE_LABELS[tab.type];
-  const isUniversal = tab.type === 'universal-agents' || tab.type === 'universal-projects';
+  const isUniversal = tab.type === 'universal-agents' || tab.type === 'universal-projects' || tab.type === 'universal-channels';
 
   const label = tab.title
     ? tab.subtitle

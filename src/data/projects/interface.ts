@@ -39,6 +39,7 @@ export type CommunicationChannel = {
   messageCount: number;
   updatedAt: string;
   unread?: boolean;
+  workspaceId?: string;
 };
 
 export type Project = {

@@ -104,6 +104,7 @@ export function Dashboard({
     if (activeTab.type === 'agents') return { kind: 'agents-list', workspaceId: activeTab.workspaceId };
     if (activeTab.type === 'universal-agents') return { kind: 'universal-agents' };
     if (activeTab.type === 'universal-projects') return { kind: 'universal-projects' };
+    if (activeTab.type === 'universal-channels') return { kind: 'universal-channels' };
     return null;
   }, [activeTab]);
 
@@ -197,6 +198,7 @@ export function Dashboard({
       agents: 'Agents',
       'universal-agents': 'Agents',
       'universal-projects': 'Projects',
+      'universal-channels': 'Channels',
     };
     openTab(buildTab(type, workspaceId, TYPE_TITLES[type] ?? ''));
   }, [openTab]);
@@ -230,6 +232,8 @@ export function Dashboard({
       openTab(buildTab('tickets', ws, 'Tickets'));
     } else if (actionId === 'open-comms') {
       openTab(buildTab('channels', ws, 'Comms'));
+    } else if (actionId === 'browse-channels') {
+      openTab(buildTab('universal-channels', ws, 'Channels'));
     }
   }, [openTab, activeWorkspaceId]);
 

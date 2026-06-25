@@ -17,6 +17,7 @@ export type RightPanelContext =
   | { kind: 'agents-list'; workspaceId: string }
   | { kind: 'universal-agents' }
   | { kind: 'universal-projects' }
+  | { kind: 'universal-channels' }
   | null;
 
 export type RightPanelTab = {
@@ -65,6 +66,10 @@ const universalProjectsTabs: RightPanelTab[] = [
   { id: 'global-stats', label: 'Stats', icon: BarChart3 },
 ];
 
+const universalChannelsTabs: RightPanelTab[] = [
+  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
+];
+
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
   if (!context) return [];
   switch (context.kind) {
@@ -76,6 +81,7 @@ export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
     case 'agents-list': return agentsListTabs;
     case 'universal-agents': return universalAgentsTabs;
     case 'universal-projects': return universalProjectsTabs;
+    case 'universal-channels': return universalChannelsTabs;
   }
 }
 

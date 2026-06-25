@@ -9,6 +9,8 @@ import { CommunicationsView } from './center-workspace/CommunicationsView';
 import { OnboardingWizard } from './center-workspace/OnboardingWizard';
 import { UniversalProjectsView } from './center-workspace/UniversalProjectsView';
 import { UniversalAgentsView } from './center-workspace/UniversalAgentsView';
+import { UniversalChannelsView } from './center-workspace/UniversalChannelsView';
+import { ChannelDetailView } from './center-workspace/ChannelDetailView';
 import { CENTER_EMPTY_STATE_CONFIG } from '@/data/wizard-configs';
 import { getProject } from '@/data/projects/store';
 import type { CenterTab, CenterTabType } from '@/data/tabs/interface';
@@ -162,10 +164,11 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
 
     case 'channel':
       return (
-        <CommunicationsView
+        <ChannelDetailView
+          channelId={tab.selectedChannelId ?? ''}
           workspaceId={tab.workspaceId}
-          selectedChannelId={tab.selectedChannelId ?? undefined}
-          onChannelSelect={onChannelSelect ? (id) => onChannelSelect(id, tab.workspaceId) : undefined}
+          onTicketClick={onTicketSelect}
+          onAgentSelect={onAgentSelect}
         />
       );
 
@@ -202,6 +205,15 @@ function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChanne
         <UniversalProjectsView
           onProjectSelect={onProjectSelect}
           selectedProjectId={tab.selectedProjectId ?? undefined}
+          onAction={onAction}
+        />
+      );
+
+    case 'universal-channels':
+      return (
+        <UniversalChannelsView
+          onChannelSelect={onChannelSelect}
+          selectedChannelId={tab.selectedChannelId ?? undefined}
           onAction={onAction}
         />
       );

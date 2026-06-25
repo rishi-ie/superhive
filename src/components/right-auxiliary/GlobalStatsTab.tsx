@@ -6,7 +6,7 @@ import type { UniversalTicket } from '@/data/tickets/store';
 import type { Workspace } from '@/data/workspaces/interface';
 
 type GlobalStatsTabProps = {
-  kind: 'channels-list' | 'agents-list' | 'universal-agents' | 'universal-projects';
+  kind: 'channels-list' | 'agents-list' | 'universal-agents' | 'universal-projects' | 'universal-channels';
   workspaceId?: string;
   channels?: CommunicationChannel[];
   agents?: Agent[];
@@ -207,6 +207,9 @@ export function GlobalStatsTab(props: GlobalStatsTabProps) {
     case 'universal-projects':
       if (!props.projects || !props.universalTickets || !props.workspaces) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
       return <UniversalProjectStats projects={props.projects} universalTickets={props.universalTickets} onProjectClick={props.onProjectClick} />;
+    case 'universal-channels':
+      if (!props.channels) return <div className="p-3 text-xs text-muted-foreground">No channel data</div>;
+      return <ChannelStats channels={props.channels} onChannelClick={props.onChannelClick} />;
     default:
       return <div className="p-3 text-xs text-muted-foreground">No data available</div>;
   }

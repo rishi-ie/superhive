@@ -66,7 +66,7 @@ export function Communications({ channels, agents, onChannelClick, onParticipant
               </div>
 
               <button
-                onClick={() => onChannelClick?.(ch.id, ch.relatedTicketId)}
+                onClick={() => onChannelClick?.(ch.id, ch.workspaceId ?? '')}
                 type="button"
                 className="flex-1 min-w-0 flex flex-col gap-0.5 text-left"
               >

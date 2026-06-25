@@ -171,6 +171,40 @@ export const COMMUNICATIONS_WIZARD_CONFIG: WizardConfig = {
   ],
 };
 
+export const UNIVERSAL_CHANNELS_WIZARD_CONFIG: WizardConfig = {
+  icon: MessageSquare,
+  title: 'Browse all channels',
+  subtitle: 'Channels are where agents and humans coordinate work',
+  skipLabel: 'Skip and go home',
+  actions: [
+    {
+      id: 'browse-channels',
+      icon: MessageSquare,
+      title: 'Browse all channels',
+      description: 'View communications across all workspaces',
+      recommended: true,
+    },
+    {
+      id: 'create-channel',
+      icon: MessageCircle,
+      title: 'Create a channel',
+      description: 'Start a topic-scoped thread for the swarm',
+    },
+    {
+      id: 'connect-slack',
+      icon: MessageCircle,
+      title: 'Connect Slack',
+      description: 'Sync messages from your existing workspace',
+    },
+    {
+      id: 'use-template',
+      icon: ClipboardCheck,
+      title: 'Use a template',
+      description: 'Standup, code-review, incident-response channels',
+    },
+  ],
+};
+
 export const CENTER_EMPTY_STATE_CONFIG: WizardConfig = {
   icon: Sparkles,
   title: 'No tab open',

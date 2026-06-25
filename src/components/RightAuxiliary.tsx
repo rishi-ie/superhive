@@ -162,6 +162,10 @@ export function RightAuxiliary({
     ? workspacesData.map(w => getProjectByWorkspace(w.id)).filter((p): p is NonNullable<typeof p> => p !== undefined)
     : [];
 
+  const universalChannelsData = context?.kind === 'universal-channels'
+    ? listChannels()
+    : [];
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizingRef.current) return;
@@ -360,7 +364,16 @@ export function RightAuxiliary({
                   projects={universalProjectsData}
                   universalTickets={universalTickets}
                   workspaces={workspacesData}
-                  onProjectClick={onProjectClick}
+                  onProjectClick={onProjectSelect}
+                />
+              )}
+
+              {/* ── UNIVERSAL CHANNELS ── */}
+              {effectiveTab === 'global-stats' && context?.kind === 'universal-channels' && (
+                <GlobalStatsTab
+                  kind="universal-channels"
+                  channels={universalChannelsData}
+                  onChannelClick={onChannelClick}
                 />
               )}
 
