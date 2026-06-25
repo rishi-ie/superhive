@@ -24,7 +24,6 @@ function getBreadcrumbSegments(
     projects: 'Projects',
     project: 'Project',
     tickets: 'Tickets',
-    ticket: 'Tickets',
     channels: 'Comms',
     channel: 'Comms',
     agents: 'Agents',

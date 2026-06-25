@@ -68,14 +68,6 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
       return (
         <TicketsView
           workspaceId={tab.workspaceId}
-          onTicketSelect={onTicketSelect}
-        />
-      );
-
-    case 'ticket':
-      return (
-        <TicketsView
-          workspaceId={tab.workspaceId}
           selectedTicketId={tab.selectedTicketId ?? undefined}
           onTicketSelect={onTicketSelect}
         />

@@ -126,7 +126,7 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
           <option value="recent">Sort: Recent</option>
           <option value="messages">Sort: Messages</option>
         </select>
-        <NewButton label="New Channel" />
+        <NewButton label="New Channel" onClick={() => onAction?.('create-channel')} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

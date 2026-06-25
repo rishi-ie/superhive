@@ -21,6 +21,8 @@ import {
   closeTab as closeTabOp,
   selectTab as selectTabOp,
   getActiveTab,
+  findTab,
+  setSelection,
 } from '@/data/tabs/store';
 import type { CenterTabType, CenterTab } from '@/data/tabs/interface';
 import type { Workspace } from '@/data/workspaces/interface';
@@ -109,7 +111,7 @@ export function Dashboard({
   const rightPanelContext = useMemo<RightPanelContext>(() => {
     if (!activeTab) return null;
     if (activeTab.type === 'agent' && activeTab.selectedAgentId) return { kind: 'agent', agentId: activeTab.selectedAgentId };
-    if (activeTab.type === 'ticket' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
+    if (activeTab.type === 'tickets' && activeTab.selectedTicketId) return { kind: 'ticket', ticketId: activeTab.selectedTicketId };
     if (activeTab.type === 'project' && activeTab.selectedProjectId) return { kind: 'project', projectId: activeTab.selectedProjectId, workspaceId: activeTab.workspaceId };
     if (activeTab.type === 'channel' && activeTab.selectedChannelId) return { kind: 'channel', channelId: activeTab.selectedChannelId, workspaceId: activeTab.workspaceId };
     if (activeTab.type === 'channels') return { kind: 'channels-list', workspaceId: activeTab.workspaceId };
@@ -163,10 +165,17 @@ export function Dashboard({
   const handleTicketSelect = useCallback((ticketId: string) => {
     const ticket = listUniversalTickets().find(t => t.id === ticketId);
     const ws = ticket?.workspaceId ?? activeWorkspaceId;
-    const title = ticket?.title ?? `Ticket ${ticketId}`;
-    openTab(buildTab('ticket', ws, title, { selectedTicketId: ticketId, subtitle: ticket?.id }));
+
+    setTabState(prev => {
+      const existing = findTab(prev, 'tickets', ws, null);
+      if (existing) {
+        const updated = setSelection(prev, existing.id, { selectedTicketId: ticketId });
+        return selectTabOp(updated, existing.id);
+      }
+      return openTabOp(prev, buildTab('tickets', ws, 'Tickets', { selectedTicketId: ticketId }));
+    });
     setRightPanelTab('overview');
-  }, [activeWorkspaceId, openTab]);
+  }, [activeWorkspaceId]);
 
   const handleChannelSelect = useCallback((channelId: string, workspaceId: string) => {
     openTab(buildTab('channel', workspaceId, 'Channel', { selectedChannelId: channelId }));
@@ -211,19 +220,19 @@ export function Dashboard({
 
   const handleWizardAction = useCallback((actionId: string) => {
     const ws = activeWorkspaceId;
-    if (actionId === 'open-project') {
+    if (actionId === 'open-project' || actionId === 'create-project') {
       openTab(buildTab('projects', ws, 'Projects'));
-    } else if (actionId === 'view-agents' || actionId === 'open-agents') {
+    } else if (actionId === 'view-agents' || actionId === 'open-agents' || actionId === 'configure-agent') {
       openTab(buildTab('agents', ws, 'Agents'));
     } else if (actionId === 'browse-agents' || actionId === 'open-agents') {
       openTab(buildTab('universal-agents', ws, 'Agents'));
     } else if (actionId === 'browse-projects' || actionId === 'open-projects') {
       openTab(buildTab('universal-projects', ws, 'Projects'));
-    } else if (actionId === 'open-tickets') {
+    } else if (actionId === 'open-tickets' || actionId === 'create-ticket') {
       openTab(buildTab('tickets', ws, 'Tickets'));
-    } else if (actionId === 'open-comms') {
+    } else if (actionId === 'open-comms' || actionId === 'create-channel') {
       openTab(buildTab('channels', ws, 'Comms'));
-    } else if (actionId === 'browse-channels') {
+    } else if (actionId === 'browse-channels' || actionId === 'create-universal-channel') {
       openTab(buildTab('universal-channels', ws, 'Channels'));
     }
   }, [openTab, activeWorkspaceId]);
@@ -245,19 +254,13 @@ export function Dashboard({
     console.warn('[TODO] Refresh right panel');
   }, []);
 
-  const handleProjectClick = useCallback((projectId: string, workspaceId: string) => {
-    const project = getProject(projectId);
-    if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: projectId }));
-  }, [openTab]);
-
   const handleProjectSelectByWorkspace = useCallback((workspaceId: string) => {
     const project = getProjectByWorkspace(workspaceId);
     if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: project.id }));
   }, [openTab]);
 
-  const handleChannelClick = useCallback((channelId: string, workspaceId: string) => {
-    openTab(buildTab('channel', workspaceId, 'Channel', { selectedChannelId: channelId }));
-  }, [openTab]);
+  const handleProjectClick = handleProjectSelect;
+  const handleChannelClick = handleChannelSelect;
 
   const handleThreadSelect = useCallback((threadId: string) => {
     console.warn('[TODO] Reopen thread:', threadId);

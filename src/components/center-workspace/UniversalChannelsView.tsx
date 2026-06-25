@@ -132,7 +132,7 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAc
           <option value="status">Sort: Status</option>
           <option value="messages">Sort: Messages</option>
         </select>
-        <NewButton label="New Channel" />
+        <NewButton label="New Channel" onClick={() => onAction?.('create-universal-channel')} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

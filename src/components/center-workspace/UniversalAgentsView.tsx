@@ -126,7 +126,7 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }
           <option value="name">Sort: Name</option>
           <option value="uptime">Sort: Uptime</option>
         </select>
-        <NewButton label="New Agent" />
+        <NewButton label="New Agent" onClick={() => onAction?.('configure-agent')} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

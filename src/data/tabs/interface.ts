@@ -2,7 +2,6 @@ export type CenterTabType =
   | 'projects'           // workspace kanban dashboard
   | 'project'            // single project detail
   | 'tickets'           // workspace-wide tickets kanban
-  | 'ticket'            // single ticket detail
   | 'channels'          // workspace-wide channels list
   | 'channel'           // single channel detail
   | 'agents'            // workspace's agents list

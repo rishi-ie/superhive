@@ -11,7 +11,6 @@ import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/dat
 const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
   projects: Layers,
   tickets: ClipboardCheck,
-  ticket: ClipboardCheck,
   project: FolderOpen,
   channels: MessageCircle,
   channel: MessageCircle,
@@ -26,7 +25,6 @@ const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
 const TYPE_LABELS: Record<TabType, string> = {
   projects: 'Projects',
   tickets: 'Tickets',
-  ticket: 'Ticket',
   project: 'Project',
   channels: 'Comms',
   channel: 'Channel',

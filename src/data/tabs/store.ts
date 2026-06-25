@@ -3,7 +3,6 @@ import type { CenterTab, CenterTabType, TabState, TabSelection } from './interfa
 function matchesKey(tab: CenterTab, type: CenterTabType, workspaceId: string, entityId?: string | null): boolean {
   if (tab.type !== type) return false;
   if (tab.type === 'project') return tab.selectedProjectId === entityId;
-  if (tab.type === 'ticket') return tab.selectedTicketId === entityId;
   if (tab.type === 'channel') return tab.selectedChannelId === entityId;
   if (tab.type === 'agent') return tab.selectedAgentId === entityId;
   if (tab.type === 'universal-agents' || tab.type === 'universal-projects' || tab.type === 'universal-channels') return true;

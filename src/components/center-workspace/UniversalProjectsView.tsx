@@ -123,7 +123,7 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAc
           <option value="name">Sort: Name</option>
           <option value="tickets">Sort: Tickets</option>
         </select>
-        <NewButton label="New Project" />
+        <NewButton label="New Project" onClick={() => onAction?.('create-project')} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

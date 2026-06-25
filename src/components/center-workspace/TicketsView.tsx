@@ -100,7 +100,7 @@ export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onA
           <option value="priority">Sort: Priority</option>
           <option value="recent">Sort: Recent</option>
         </select>
-        <NewButton label="New Ticket" />
+        <NewButton label="New Ticket" onClick={() => onAction?.('create-ticket')} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
