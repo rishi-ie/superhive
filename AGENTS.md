@@ -1,295 +1,293 @@
-# Superhive — Electron + React Desktop App
+# Superhive — Contributor Guide
+
+## Project
+
+Digital agent workspace — a command center for orchestrating autonomous AI agents.
+Three-panel layout: Left Nav (Fleet Command) · Center (Operations Deck) · Right Auxiliary (Avionics).
+Electron + React + Vite + TypeScript + Tailwind v4.
 
 ---
 
-## Refactoring Progress
-
-### Phase 1 ✅ Complete
-Split 8 multi-component files into 20 individual files across 6 new subdirectories:
-- `CenterWorkspace.tsx` → `CenterWorkspace.tsx` (orchestrator) + `TabBody.tsx` (dispatcher)
-- `right-auxiliary/GlobalStatsTab.tsx` → `global-stats/` (7 files + dispatcher + index.ts barrel)
-- `right-auxiliary/SessionsView.tsx` → `sessions/` (SessionsView + ThreadRow + index.ts barrel)
-- `right-auxiliary/ProjectDetailsTab.tsx` → renamed to `project/ProjectOverviewTab.tsx`
-- `right-auxiliary/TelemetryDeck.tsx` → `telemetry/` (TelemetryDeck + StatusPill + index.ts barrel)
-- `left-nav/AccordionItem.tsx` → `accordion/` (AccordionItem + AccordionHeader + index.ts barrel)
-- `center-workspace/UniversalTicketCard.tsx` → `tickets/` (UniversalTicketCard + PriorityTag + TypeTag + index.ts barrel)
-- `archived/NewChatAccordion.tsx` deleted (not imported anywhere, had colliding `ChatEmptyState`)
-- All import paths updated in `RightAuxiliary.tsx`, `AccordionCore.tsx`, `KanbanColumn.tsx`
-- Build verified clean after Phase 1
-
-### Phase 2 ✅ Complete
-Extracted duplicated helpers to canonical homes:
-- `src/lib/relative-time.ts` — canonical `formatRelativeTime()` (was in 5 files: CommunicationsView, UniversalChannelsView, UniversalProjectsView, ThreadRow, ChatThreadList)
-- `src/components/ui/StatCard.tsx` — shared (was in GlobalStatsTab + ProjectOverviewTab + ProjectDetailView)
-- `src/components/ui/SectionLabel.tsx` — shared (was in GlobalStatsTab)
-- `src/components/channels/ChannelStatusPill.tsx` — shared (was in 5 files: Communications, CommunicationsView, UniversalChannelsView, ChannelDetailView, ChannelOverviewTab)
-- `src/components/chat/format.ts` — shared `formatTime` + `formatDuration` (was in ChatMessage only)
-- Updated all consuming files to use shared imports
-- Build verified clean after Phase 2
-
-### Phase 3 ✅ Complete
-Moved loose config files into proper subdirectories:
-- `wizard-configs.ts` → `src/data/config/wizard-configs.ts`
-- `models.ts` → `src/data/config/models.ts`
-- `right-panel-tabs.ts` → `src/data/config/right-panel-tabs.ts`
-- `left-nav.ts` → `src/data/config/left-nav.ts`
-- `feature-flags.ts` → `src/data/mock/feature-flags.ts` (from `src/lib/`)
-- `mock-types.ts` → `src/data/mock/types.ts`
-All 22 import paths updated across components, screens, and data stores.
-
-### Phase 4 ✅ Complete
-Resolved naming/duplicate issues:
-- Deleted orphaned `src/components/ui/PanelEmptyState.tsx` (unused, simpler duplicate)
-- `global-stats/StatCard.tsx` + `global-stats/SectionLabel.tsx` deleted — updated 4 subcomponents to import from canonical `src/components/ui/`
-- Barrel `global-stats/index.ts` updated to remove re-exports of deleted local components
-
-### Phase 5 ✅ Complete
-Added top-of-file JSDoc blocks and component-level JSDoc on all ~86 TSX exports across:
-- `center-workspace/` (33 files)
-- `left-nav/` + `right-auxiliary/` (30 files)
-- `ui/` + `channels/` + `archived/` (17 files)
-- `screens/` + root `App.tsx` + `main.tsx` (6 files)
-
-### Phase 6 ✅ Complete
-- Deleted stale docs: `README.md`, `CLAUDE.md`, `DESIGN.md`, `design-spec.md`
-- `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` completely rewritten to match current architecture (per-domain `isMockEnabled()` mock flag system, not the old single-directory approach)
-
-### Phase 7 ✅ Complete
-Centralized magic numbers into `src/lib/constants.ts`:
-- Panel sizing: `DEFAULT_LEFT_WIDTH=280`, `DEFAULT_RIGHT_WIDTH=340`, `MIN/MAX_LEFT_WIDTH=180/400`, `MIN/MAX_RIGHT_WIDTH=200/500`
-- Token cost math: `COST_PER_TOKEN=0.00001` (ChatView), `COST_PER_TASK=0.00003` (ControlMatrix)
-- `App.tsx`, `Dashboard.tsx`, `ChatView.tsx`, `ControlMatrix.tsx` all now import from canonical constants
-
-### Phase 8 ✅ Complete (Tier 1 — Quick Wins)
-- Deleted 4 orphaned UI components (`DropdownTrigger`, `NavItem`, `RadioOption`, `ModelToolbar`)
-- Deleted empty `src/hooks/` directory
-- Deleted 6 orphaned `api.ts` placeholder files (agents, workspaces, projects, tickets, chat, favorites)
-- Moved root-level containers to proper subdirectories:
-  - `CenterWorkspace.tsx` → `center-workspace/CenterWorkspace.tsx`
-  - `LeftNav.tsx` → `left-nav/LeftNav.tsx`
-  - `RightAuxiliary.tsx` → `right-auxiliary/RightAuxiliary.tsx`
-  - `TicketCard.tsx` → `center-workspace/tickets/TicketCard.tsx`
-- Fixed `AgentsView.tsx` redundant inline `StatusDot` — now imports canonical from `ui/StatusDot`
-- Added missing JSDoc on 4 files (`SettingsSidebar`, `ChannelStatusPill`, `StatCard`, `SectionLabel`)
-- Added `typecheck` npm script; enabled `noUnusedLocals` and `noUnusedParameters` in tsconfig
-- Fixed 61 unused imports/variables across 30 files (surfaced by strict tsconfig)
-- Fixed double-quote import inconsistency in 3 files (`Settings.tsx`, `RightPanelTabs.tsx`, `Pill.tsx`)
-- Created `.editorconfig` for cross-editor consistency
-
----
-
-## What is this?
-
-**Superhive** is a digital agent workspace — a command center for orchestrating autonomous AI agents. It features a three-panel layout:
-
-- **Left Nav (Fleet Command)**: Workspace selector, active agents, favorites, accordion core (Projects, agents, Tickets, Automations, Communications, Remote), utilities (Settings, Help)
-- **Center (Operations Deck)**: Tabbed workspace — Chat or Projects tab. Chat: AI thread + composer. Projects: operational swarm dashboard.
-- **Right Auxiliary (Avionics)**: Agent telemetry, configuration controls, audit queue, and live activity feed
-
-## Dev Commands
+## Quick Commands
 
 ```sh
-bun run dev           # Start Vite dev server + Electron (hot reload)
-bun run electron:dev  # Alias for dev
-bun run typecheck     # TypeScript type check (no emit)
-bun run build        # TypeScript compile + Vite production build
-bun run electron:build  # build + electron-builder (produces dmg/zip in release/)
-bun run electron:preview # vite build + launch electron with production build
+bun install              # Install dependencies
+bun run dev             # Dev server + Electron (hot reload)
+bun run typecheck       # TypeScript check (strict: noUnusedLocals, noUnusedParameters)
+bun run build           # typecheck + production build
+bun run electron:build  # build + electron-builder (dmg/zip/nsis in release/)
+bun run electron:preview # Preview packaged build
 ```
 
-## Architecture
+**Mock data** — controlled by `VITE_USE_MOCK_DATA` in `.env.local` (defaults to `true`).
+See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for production cleanup steps.
 
-- **Electron main process**: `electron/main.ts` → compiled to `dist-electron/main.js`
-- **Preload**: `electron/preload.ts` → compiled to `dist-electron/preload.js`
-- **Renderer**: React app in `src/`, entry `src/main.tsx`, served from `dist/`
-- `vite-plugin-electron` handles compiling + watching electron main/preload separately from the renderer
-- `VITE_DEV_SERVER_URL` env var tells electron where to load the dev server
+---
 
-## Key Configs
-
-- `vite.config.ts`: Vite + React + electron plugins; `@` alias maps to `src/`
-- `tsconfig.json`: ESNext, bun types, bundler resolution; `strict: true`, `noUnusedLocals: true`, `noUnusedParameters: true`
-- `tailwind.config.js`: v4 (uses `@tailwindcss/postcss` plugin)
-- `postcss.config.js`: `@tailwindcss/postcss` + autoprefixer
-- `electron-builder.yml`: builds for mac/win/linux
-- `.editorconfig`: cross-editor consistency (indent, charset, newline)
-
-## Left Nav Layout Structure
+## Directory Map
 
 ```
-┌──────────────────────┐
-│  Header (drag)       │
-│  TeamSelector         │
-├──────────────────────┤
-│  Active              │  ← collapsible, status dots, Zap icon
-│  Favorites           │  ← collapsible, Star icon
-├──────────────────────┤
-│  ▸ Projects [◈]     │  ← accordion core (scrollable)
-│  ▾ agents  [◈]    │    defaultOpen, agent status dots
-│  ▸ Tickets    [◈]   │
-│  ▸ Automations [◈]  │
-│  ▸ Communications[◈]│
-│  ▸ Remote     [?]   │  ← Coming Soon badge
-├──────────────────────┤
-│  Settings      ?     │  ← utilities (sticky bottom)
-└──────────────────────┘
+src/
+├── App.tsx                    # Root shell — Dashboard or Settings
+├── main.tsx                  # React entry point
+├── index.css                 # Tailwind + CSS variables (dark warm theme, terracotta accent)
+│
+├── screens/
+│   ├── Dashboard.tsx          # Main 3-panel layout (LeftNav + CenterWorkspace + RightAuxiliary)
+│   └── Settings.tsx           # Settings screen
+│
+├── components/
+│   ├── center-workspace/      # Center panel — all tab content lives here
+│   │   ├── CenterWorkspace.tsx
+│   │   ├── CenterTabStrip.tsx
+│   │   ├── CenterTab.tsx
+│   │   ├── CenterBreadcrumb.tsx
+│   │   ├── TabBody.tsx       # Tab dispatcher — switch(activeTab.type) renders correct view
+│   │   ├── ProjectsView.tsx   # Kanban: To Do / Executing / Done
+│   │   ├── ProjectDetailView.tsx
+│   │   ├── TicketsView.tsx     # Kanban: Backlog / Executing / Review / Merged
+│   │   ├── KanbanBoard.tsx
+│   │   ├── KanbanColumn.tsx
+│   │   ├── SwarmRoster.tsx
+│   │   ├── ExecutionStream.tsx
+│   │   ├── Communications.tsx
+│   │   ├── CommunicationsView.tsx
+│   │   ├── ChannelDetailView.tsx
+│   │   ├── UniversalChannelsView.tsx
+│   │   ├── UniversalProjectsView.tsx
+│   │   ├── AgentsView.tsx
+│   │   ├── UniversalAgentsView.tsx
+│   │   ├── ChatView.tsx
+│   │   ├── ChatThread.tsx
+│   │   ├── ChatThreadList.tsx
+│   │   ├── ChatMessage.tsx
+│   │   ├── ChatInput.tsx
+│   │   ├── ChatHeader.tsx
+│   │   ├── ChatEmptyState.tsx
+│   │   ├── OnboardingWizard.tsx
+│   │   ├── TicketCard.tsx     # Single workspace ticket card (used in ExecutionStream)
+│   │   └── tickets/           # Ticket-related shared components
+│   │       ├── UniversalTicketCard.tsx
+│   │       ├── TicketCard.tsx
+│   │       ├── PriorityTag.tsx
+│   │       ├── TypeTag.tsx
+│   │       └── index.ts
+│   │
+│   ├── left-nav/             # Left sidebar — workspace selector, active, favorites, accordion
+│   │   ├── LeftNav.tsx
+│   │   ├── LeftNavHeader.tsx
+│   │   ├── TeamSelector.tsx
+│   │   ├── ActiveSection.tsx
+│   │   ├── FavoritesSection.tsx
+│   │   ├── AccordionCore.tsx
+│   │   ├── ProjectListItem.tsx
+│   │   ├── AgentListItem.tsx
+│   │   ├── HelpPopover.tsx
+│   │   ├── Utilities.tsx
+│   │   └── accordion/        # Accordion primitives
+│   │       ├── AccordionItem.tsx
+│   │       ├── AccordionHeader.tsx
+│   │       └── index.ts
+│   │
+│   ├── right-auxiliary/      # Right sidebar — telemetry, controls, audit
+│   │   ├── RightAuxiliary.tsx
+│   │   ├── RightPanelTabs.tsx
+│   │   ├── RightPanelActivityFeed.tsx
+│   │   ├── PanelEmptyState.tsx
+│   │   ├── ControlMatrix.tsx
+│   │   ├── AuditQueue.tsx
+│   │   ├── TicketOverviewTab.tsx
+│   │   ├── TicketManageTab.tsx
+│   │   ├── ChannelOverviewTab.tsx
+│   │   ├── ChannelManageTab.tsx
+│   │   ├── ChannelThreadTab.tsx
+│   │   ├── ProjectInboxTab.tsx
+│   │   ├── ProjectManageTab.tsx
+│   │   ├── global-stats/     # Stats views for universal/channels-lists views
+│   │   │   ├── GlobalStatsTab.tsx
+│   │   │   ├── ChannelStats.tsx
+│   │   │   ├── AgentStats.tsx
+│   │   │   ├── UniversalAgentStats.tsx
+│   │   │   ├── UniversalProjectStats.tsx
+│   │   │   └── index.ts
+│   │   ├── sessions/         # Chat sessions
+│   │   │   ├── SessionsView.tsx
+│   │   │   ├── ThreadRow.tsx
+│   │   │   └── index.ts
+│   │   ├── telemetry/       # Agent telemetry
+│   │   │   ├── TelemetryDeck.tsx
+│   │   │   ├── StatusPill.tsx
+│   │   │   └── index.ts
+│   │   └── project/         # Project context panel
+│   │       ├── ProjectOverviewTab.tsx
+│   │       └── index.ts
+│   │
+│   ├── ui/                  # Shared primitives — use these, don't reinvent
+│   │   ├── Avatar.tsx
+│   │   ├── Button.tsx
+│   │   ├── IconButton.tsx
+│   │   ├── NewButton.tsx
+│   │   ├── SearchBar.tsx
+│   │   ├── Select.tsx
+│   │   ├── TextInput.tsx
+│   │   ├── Toggle.tsx
+│   │   ├── Pill.tsx
+│   │   ├── StatusDot.tsx     # Agent status indicator — EXECUTING/COMPILING/IDLE/ERROR_LOOP/AWAITING_HUMAN
+│   │   ├── StatusFilter.tsx
+│   │   ├── UniversalListCard.tsx
+│   │   ├── SectionLabel.tsx  # Section heading for stat panels
+│   │   ├── StatCard.tsx      # Stat card for global stats views
+│   │   ├── MaximizeOnDoubleClick.tsx
+│   │   └── index.ts          # (intentionally incomplete — direct imports preferred for tree-shaking)
+│   │
+│   ├── channels/            # Channel-specific shared components
+│   │   ├── ChannelStatusPill.tsx
+│   │   └── index.ts
+│   │
+│   ├── chat/               # Chat-specific helpers (no React dependencies)
+│   │   └── format.ts        # formatTime(), formatDuration()
+│   │
+│   └── settings/           # Settings screen subcomponents
+│       ├── SettingsSidebar.tsx
+│       └── AccountSettings.tsx
+│
+├── data/                    # Domain data layer — one subdirectory per domain
+│   ├── agents/             # listAgents(), getAgent(), getTelemetry(), getPermissions(), etc.
+│   ├── chat/               # listThreads(), addMessageToActiveThread(), etc.
+│   ├── favorites/          # listFavorites(), etc.
+│   ├── projects/           # listProjects(), getProject(), listChannels(), etc.
+│   ├── tickets/            # listUniversalTickets(), etc.
+│   ├── universal-projects/
+│   ├── workspaces/
+│   ├── tabs/              # Tab state: openTab(), closeTab(), selectTab(), setSelection()
+│   │
+│   ├── config/             # Static config — wizard definitions, nav items, right panel tabs
+│   │   ├── wizard-configs.ts
+│   │   ├── left-nav.ts
+│   │   ├── right-panel-tabs.ts
+│   │   └── models.ts
+│   │
+│   └── mock/               # Mock data config and types
+│       ├── feature-flags.ts  # isMockEnabled(domain) — per-domain mock toggle
+│       └── types.ts          # Shared mock seed types (FavoriteSeed, ChatThreadSeed, etc.)
+│
+└── lib/                     # Pure utilities — no React
+    ├── constants.ts          # Panel sizing, token costs, STROKE_WIDTH
+    ├── relative-time.ts     # formatRelativeTime()
+    ├── markdown.ts          # parseMarkdown()
+    └── use-double-click.ts
 ```
 
-**Accordion Core** (`src/components/left-nav/AccordionCore.tsx`):
-- `AccordionItem` — reusable accordion with CSS grid height animation (chevron rotates 90°, smooth expand/collapse). Supports optional `badge` for inline labels (e.g. "Coming soon").
-- `AccordionHeader` — same styling as AccordionItem but non-expandable (no chevron placeholder)
-- `AgentListItem` — nested row with `StatusDot` for agent status visualization
-- `StatusDot` (`src/components/ui/StatusDot.tsx`) — colored dot + spinner for agent statuses:
-  - 🟢 EXECUTING → green + pulse animation
-  - 🟡 COMPILING → gold + spinning Loader2
-  - 🔴 ERROR_LOOP → red + pulse animation
-  - 🟠 AWAITING_HUMAN → terracotta (solid)
-  - ⚪ IDLE → muted gray
+---
 
-**Smart Views / Utilities** (`src/components/left-nav/Utilities.tsx`):
-- `HelpPopover` — anchored dark popover (Documentation / Changelog / Shortcuts)
-- Bell/Notifications removed in v1
+## Module Conventions
 
-## Center Workspace — Multi-Tab Layout
+These rules are enforced by TypeScript (`noUnusedLocals: true`, `noUnusedParameters: true`) and review. Every contributor — human or agent — follows them.
 
-The center panel uses a full multi-tab model. Every view (project, agent, ticket, channel) opens in its own tab. The tab strip is always visible when tabs exist.
+### One component per file
+File name matches the default export name. No multi-export files except:
+- `index.ts` barrels that re-export sibling components
+- Co-located type-only exports (e.g. `type FooProps` in `Foo.tsx` beside `Foo`)
 
-### Tab Model (`src/data/tabs/`)
+### JSDoc required
+Every `.tsx` file needs:
+1. A top-of-file `/** ... */` block describing what the file provides
+2. A `/** ... */` on the main exported component/function with `@param` for each prop
 
-```
-CenterTabType = 'projects' | 'project' | 'tickets' | 'ticket'
-              | 'channels' | 'channel' | 'agents' | 'agent'
-              | 'universal-agents' | 'universal-projects'
-```
+### Imports
+- Always use `@/` alias — never `../../` or other relative paths crossing directory boundaries
+- Sibling imports within the same directory: `./SiblingName`
+- Never import sibling files via parent: no `./ParentDir/Child` from within `ParentDir/`
 
-| Tab type | Description |
+### Centralization rules
+| What | Where |
 |---|---|
-| `projects` | Workspace kanban dashboard (To Do / Executing / Done) |
-| `project` | Single project detail (with selectedProjectId) |
-| `tickets` | Workspace-wide ticket kanban (Backlog / Executing / Review / Merged) |
-| `ticket` | Single ticket detail (with selectedTicketId) |
-| `channels` | Workspace channel list |
-| `channel` | Single channel detail (with selectedChannelId) |
-| `agents` | Workspace agents list |
-| `agent` | Single agent chat + telemetry (with selectedAgentId) |
-| `universal-agents` | All agents across workspaces |
-| `universal-projects` | All projects across workspaces |
+| Magic numbers (panel sizes, token costs, animation durations, debounce ms) | `src/lib/constants.ts` |
+| Formatting helpers with no React deps (time, cost, text utils) | `src/lib/` or `src/components/chat/format.ts` |
+| Reusable UI primitives | `src/components/ui/` |
+| Channel-specific shared | `src/components/channels/` |
+| Chat-specific shared helpers | `src/components/chat/` |
+| Static config (wizards, nav, tabs) | `src/data/config/` |
+| Domain data | `src/data/{domain}/store.ts` |
 
-**`src/data/tabs/store.ts`** — immutable state operations:
-- `openOrFocusTab(state, tab)` — opens a new tab or reuses an existing one (dedup by type + workspaceId + entityId)
-- `closeTab(state, tabId)` — closes a tab (pinned tabs cannot be closed)
-- `selectTab(state, tabId)` — switches active tab
-- `setSelection(state, tabId, selection)` — updates selectedAgentId/ProjectId/TicketId/ChannelId on a tab
-- `getActiveTab(state)` — returns the active tab
-- `makeInitialTabState(workspaceId)` — seeds one pinned `projects` tab
+### No new files at `src/components/` root
+Every new component goes in the correct subdirectory (see Component Placement below).
 
-**Breadcrumb** — always 2–3 segments: `Workspace · Section · [Item]`. First two segments are clickable (jump to that section/workspace).
+### Barrel files
+Create `index.ts` in any new subdirectory with 2+ sibling files. Keep barrels focused — don't re-export from parent directories.
 
-**Tab strip** — horizontal scrollable strip. `+` button opens a new tab picker for the active workspace. Keyboard: `Cmd+W` closes active tab, `Cmd+1..9` switches to tab N. Pinned tabs show a lock icon and cannot be closed.
+### Tailwind / CSS
+- No inline magic hex colors — use CSS variables (`--chart-1`, `--accent`, etc.) defined in `src/index.css`
+- No invented arbitrary values — use existing design tokens
 
-**When no tabs exist** — `CenterEmptyState` shows a quick-start prompt with options to open Projects, Agents, Tickets, Comms, or browse lists.
+### TypeScript
+- `noUnusedLocals: true` and `noUnusedParameters: true` are enforced — fix all errors before committing
+- Run `bun run typecheck` before every commit
 
-### Components (`src/components/center-workspace/`)
+### Style
+- Single quotes for imports and strings
+- `.editorconfig` at root enforces: 2-space indent, UTF-8, LF, trim-trailing-whitespace
 
-- `CenterWorkspace` — root container; `switch (activeTab.type)` renders the correct view
-- `CenterTabStrip` — tab strip with `+` new-tab picker
-- `CenterTab` — individual tab pill (icon + label + close X, or lock if pinned)
-- `CenterBreadcrumb` — 2–3 segment breadcrumb with workspace avatar
-- `ProjectsView` — workspace kanban dashboard (3-column: To Do / Executing / Done) + SwarmRoster + Communications grid
-- `TicketsView` — 4-column kanban (Backlog / Executing / Review / Merged) with search + sort + workspace filter
-- `CommunicationsView` — channel list with status filter + unread indicators
-- `AgentsView` — workspace agent list with status dots
-- `UniversalAgentsView` — all agents across workspaces with search + sort + status filter
-- `UniversalProjectsView` — all projects across workspaces with search + sort + workspace filter
-- `ChatView` — chat thread with ChatInput at bottom
-- `OnboardingWizard` — used for empty states (not as a persistent tab)
+---
 
-**Mock data** (`src/data/mock.json`):
-- `tickets` — 8 per workspace (TODO/EXECUTING/DONE), assigned to agents
-- `projectAgents` — 5 per workspace with WORKING/COMPILING/IDLE status
-- `swarmActivity` — 6 inter-agent event log entries per workspace
-- `channels` — 5 active communication channels per workspace
-- `universalTickets` — 24 cross-workspace tickets with BACKLOG/EXECUTING/REVIEW/MERGED status
+## Component Placement
 
-## Right Auxiliary (Avionics / Mission Control)
+Use this table to decide where a new file belongs.
 
-Three tabs: **Overview** · **Manage** · **Inbox**
+| New thing | Put it in |
+|---|---|
+| Reusable across any panel (Button, Avatar, Badge, etc.) | `src/components/ui/` |
+| Channel status display | `src/components/channels/` |
+| Chat formatting helpers (no React) | `src/components/chat/` |
+| Center panel content | `src/components/center-workspace/` or a subdirectory inside it |
+| Left sidebar content | `src/components/left-nav/` |
+| Right sidebar content | `src/components/right-auxiliary/` |
+| A distinct group of related components inside a panel | `src/components/{panel}/{feature}/` with `index.ts` barrel |
+| Pure utility (no React) | `src/lib/` |
+| Static app config (wizard, nav, tabs) | `src/data/config/` |
+| A data domain | `src/data/{domain}/` with `interface.ts` + `store.ts` |
 
-### Overview Tab
-- `TelemetryDeck` — agent identity, brain usage bar, cost card, last actions, next step
-- `RightPanelActivityFeed` — compact activity log below TelemetryDeck (top 6 events, gates behind `USE_MOCK_DATA`). Single-line format: `timestamp · initials → initials · context`
+---
 
-### Manage Tab
-- `ControlMatrix` — model engine cards, permission toggles, commit authority, thinking budget, terminate
+## Data Layer Contract
 
-### Inbox Tab
-- `AuditQueue` — AUTH_INTERCEPT and DIFF_REVIEW cards with action buttons
+Every domain follows this pattern:
 
-## Design System
-
-- **Theme**: Dark warm palette with terracotta accent (`#e07850`)
-- **Colors**: CSS variables in `src/index.css`
-- **Components**: Hand-rolled, no external UI library; Lucide icons with `STROKE_WIDTH` from `src/lib/constants.ts`
-- **Panel sizing**: Left nav 280px default (180-400px range), Right panel 340px default (200-500px range)
-
-## Data Architecture
-
-**Agent/agent store** (`src/data/agents/`):
 ```
-src/data/agents/
-├── interface.ts   — Types + function signatures (the contract)
-├── store.ts       — Public API; USE_MOCK_DATA flag lives here
-└── api.ts         — Real API placeholder (swap in for real backend)
+src/data/{domain}/
+├── interface.ts   # Type definitions + function signatures
+└── store.ts       # Public API implementation (imports from interface)
 ```
 
-**Project data** (`src/data/mock/project.ts`):
+The store is the **only** public API for a domain. Components never import from sibling mock files — they always go through the store.
+
+Mock data is gated behind `isMockEnabled(domain)` in `src/data/mock/feature-flags.ts`. When disabled, stores return empty arrays — UI must handle empty states gracefully.
+
+To add a new domain: create the `interface.ts` + `store.ts` pair, add mock data to `src/data/mock.json` if needed, wire into the appropriate dispatcher.
+
+---
+
+## Common Gotchas
+
+- **Wrong dev command**: `bun run index.ts` does not work — this is an Electron app. Use `bun run dev`.
+- **Main process logging**: use `electron-log` — `console.log` in `electron/main.ts` won't appear in devtools.
+- **Bun-native libs**: `better-sqlite3`, `ioredis`, `express`, `ws` don't work in the Electron main process without native rebuilds.
+- **vite-plugin-electron ≠ Bun.serve** — don't apply Bun HTTP server patterns here.
+- **`src/components/archived/`** does not exist — no files go there.
+- **No `api.ts` placeholder files** — if a domain needs a real backend, wire it directly into the store; don't create dormant `api.ts` files.
+
+---
+
+## Adding a New Feature
+
 ```
-src/data/mock/project.ts
-├── Ticket, TicketStatus
-├── ProjectAgent, AgentCurrentStatus
-├── SwarmActivity
-├── CommunicationChannel, ChannelStatus
-└── tickets, projectAgents, swarmActivity, channels (mock data)
+1. Domain data — add types to src/data/{domain}/interface.ts, implement in store.ts
+2. Mock data — extend src/data/mock.json (domain seed) + src/data/mock/types.ts if needed
+3. Component — create file in correct subdirectory (see Component Placement)
+   - Top-of-file JSDoc block
+   - Component JSDoc with @param for each prop
+4. Wire it — add to TabBody.tsx dispatcher, RightAuxiliary.tsx, or AccordionCore.tsx
+5. TypeScript — bun run typecheck (must pass, no unused locals/params)
+6. Build — bun run build (must pass)
+7. Update this guide if you add a new convention or shared utility location
 ```
-
-**Public API** (import from `@/data/agents/store`):
-```ts
-listAgents()        → Agent[]
-getAgent(id)        → Agent | undefined
-getActiveAgent()    → Agent | null
-getTelemetry(id)       → Telemetry
-getPermissions(id)     → Permissions
-getAuditItems(id?)     → AuditItem[]
-getActionLog(id)       → ActionLogEntry[]
-getNextStep(id)        → string
-```
-
-**To swap in a real DB**: create `src/data/agents/api.ts` with the same signatures, then edit `store.ts` to import from `./api` instead of the mock data source.
-
-## Mock Data Toggle
-
-`VITE_USE_MOCK_DATA` env var controls whether mock data is used:
-- `true` / unset → full mock data throughout the app
-- `false` → empty states, safe for production
-
-Set in `.env.local` (gitignored). See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for full cleanup steps.
-
-## Archived Components
-
-Located in `src/components/archived/`:
-- **ModelToolbar**: Pill-based model selector with Set Run button
-- **NewChatAccordion**: Expandable section header with split/close actions
-
-## Common Mistakes
-
-- Do NOT use `bun run index.ts` — this is an Electron app, not a Bun HTTP server. Use `bun run dev`.
-- The `vite-plugin-electron` dev server is NOT `Bun.serve`. Do not apply CLAUDE.md's `Bun.serve()` patterns here.
-- Do NOT use `better-sqlite3`, `ioredis`, `express`, or `ws` — Bun-native libs don't work in standard Electron main process without native rebuilds.
-- `electron-log` is used for logging in the main process, not `console.log`.
-
-## Dependencies
-
-- `electron-log` for main process logging (initialized in `electron/main.ts`)
-- `vite-plugin-electron` + `vite-plugin-electron-renderer` for build
-- `@tailwindcss/postcss` (Tailwind v4) for CSS
-- `lucide-react` for icons
