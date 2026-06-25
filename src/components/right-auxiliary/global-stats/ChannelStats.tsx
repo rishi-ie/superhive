@@ -46,7 +46,7 @@ export function ChannelStats({ channels, onChannelClick }: ChannelStatsProps) {
             {mostActive.map(ch => (
               <button
                 key={ch.id}
-                onClick={() => onChannelClick?.(ch.id, '')}
+                onClick={() => onChannelClick?.(ch.id, ch.workspaceId ?? '')}
                 className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors"
                 type="button"
               >

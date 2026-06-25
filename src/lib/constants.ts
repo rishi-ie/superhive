@@ -30,3 +30,25 @@ export const COST_PER_TOKEN = 0.00001;
 
 /** Estimated cost per task (in dollars) per token, used in ControlMatrix. */
 export const COST_PER_TASK = 0.00003;
+
+// ─── Token limits (ControlMatrix slider) ────────────────────────────────────
+
+/** Minimum token limit for agent context. */
+export const MIN_TOKENS = 1024;
+
+/** Maximum token limit for agent context. */
+export const MAX_TOKENS = 16384;
+
+/** Step increment for token limit slider. */
+export const TOKEN_STEP = 512;
+
+// ─── UI limits ───────────────────────────────────────────────────────────────
+
+/** Max visible messages in channel thread before scroll. */
+export const MAX_CHANNEL_MESSAGES = 50;
+
+/** Max visible participants shown without scrolling. */
+export const MAX_VISIBLE_PARTICIPANTS = 5;
+
+/** Toast auto-dismiss duration in ms. */
+export const TOAST_DURATION_MS = 3000;

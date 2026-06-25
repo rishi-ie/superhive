@@ -20,7 +20,8 @@ export const Pill = forwardRef<HTMLButtonElement, PillProps>(
     return (
       <button
         ref={ref}
-        className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
+        aria-pressed={active}
+        className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-sidebar ${
           active
             ? "bg-chart-1 text-highlight-foreground"
             : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary"

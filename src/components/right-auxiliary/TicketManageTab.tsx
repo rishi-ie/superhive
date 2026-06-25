@@ -1,8 +1,11 @@
 /**
- * Ticket management tab — status, priority, type, and assignee controls.
+ * Ticket management tab — status, priority, type, and assignee controls with save/cancel.
  */
 import { useState } from 'react';
 import { Select } from '@/components/ui/Select';
+import { SaveCancelBar } from './shared/SaveCancelBar';
+import { ConfirmationModal } from './shared/ConfirmationModal';
+import { useToast } from '@/lib/toast-context';
 import type { UniversalTicket, UniversalTicketStatus, Priority, TicketType } from '@/data/tickets/store';
 import type { Agent } from '@/data/agents/store';
 
@@ -28,6 +31,7 @@ const TYPE_OPTIONS: { value: TicketType; label: string }[] = [
   { value: 'BUG',     label: 'Bug' },
   { value: 'FEATURE', label: 'Feature' },
   { value: 'REFACTOR', label: 'Refactor' },
+  { value: 'INFRA',   label: 'Infra' },
 ];
 
 const STATUS_SELECTED: Record<UniversalTicketStatus, string> = {
@@ -44,7 +48,7 @@ const PRIORITY_SELECTED: Record<Priority, string> = {
 };
 
 /**
- * Ticket management tab — status, priority, type, and assignee controls.
+ * Ticket management tab — status, priority, type, and assignee controls with save/cancel.
  * @param ticket - Ticket to manage
  * @param agents - Available agents for reassignment
  */
@@ -53,94 +57,160 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
   const [priority, setPriority] = useState<Priority>(ticket.priority);
   const [type, setType] = useState<TicketType>(ticket.type);
   const [assignee, setAssignee] = useState(ticket.assignee.name);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const toast = useToast();
+
+  const markDirty = (updater: () => void) => {
+    updater();
+    setIsDirty(true);
+  };
+
+  const handleSave = () => {
+    toast({ title: 'Saved', description: ticket.title });
+    setIsDirty(false);
+  };
+
+  const handleCancel = () => {
+    setStatus(ticket.status);
+    setPriority(ticket.priority);
+    setType(ticket.type);
+    setAssignee(ticket.assignee.name);
+    setIsDirty(false);
+  };
+
+  const handleCloseConfirm = () => {
+    setStatus('MERGED');
+    setShowCloseModal(false);
+    toast({ title: 'Ticket closed', description: ticket.title });
+    setIsDirty(true);
+  };
+
+  const handleArchiveConfirm = () => {
+    setShowArchiveModal(false);
+    toast({ title: 'Ticket archived', description: ticket.title });
+  };
 
   return (
-    <div className="p-3 space-y-4">
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Status</label>
-        <div className="flex rounded-md border border-border/40 overflow-hidden">
-          {STATUS_OPTIONS.map(opt => (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Status</label>
+          <div className="flex rounded-md border border-border/40 overflow-hidden">
+            {STATUS_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => markDirty(() => setStatus(opt.value))}
+                className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
+                  status === opt.value
+                    ? STATUS_SELECTED[opt.value]
+                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Priority</label>
+          <div className="flex rounded-md border border-border/40 overflow-hidden">
+            {PRIORITY_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => markDirty(() => setPriority(opt.value))}
+                className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
+                  priority === opt.value
+                    ? PRIORITY_SELECTED[opt.value]
+                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Type</label>
+          <div className="flex rounded-md border border-border/40 overflow-hidden">
+            {TYPE_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => markDirty(() => setType(opt.value))}
+                className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
+                  type === opt.value
+                    ? 'border-chart-1 bg-chart-1/10 text-chart-1'
+                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Assignee</label>
+          <Select
+            value={assignee}
+            onChange={(val) => markDirty(() => setAssignee(val))}
+            options={agents.map(a => ({ value: a.name, label: a.name }))}
+          />
+        </div>
+
+        <div className="border-t border-border/40 pt-3 space-y-2">
+          <div className="flex gap-2">
             <button
-              key={opt.value}
               type="button"
-              onClick={() => setStatus(opt.value)}
-              className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
-                status === opt.value
-                  ? STATUS_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
-              }`}
+              onClick={() => setShowCloseModal(true)}
+              className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
             >
-              {opt.label}
+              Close Ticket
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => setShowArchiveModal(true)}
+              className="flex-1 rounded-md border border-chart-5/40 px-3 py-2 text-[10px] font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
+            >
+              Archive Ticket
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Priority</label>
-        <div className="flex rounded-md border border-border/40 overflow-hidden">
-          {PRIORITY_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setPriority(opt.value)}
-              className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
-                priority === opt.value
-                  ? PRIORITY_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SaveCancelBar
+        onSave={handleSave}
+        onCancel={handleCancel}
+        disabled={!isDirty}
+      />
 
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Type</label>
-        <div className="flex rounded-md border border-border/40 overflow-hidden">
-          {TYPE_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setType(opt.value)}
-              className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
-                type === opt.value
-                  ? 'border-chart-1 bg-chart-1/10 text-chart-1'
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Assignee</label>
-        <Select
-          value={assignee}
-          onChange={setAssignee}
-          options={agents.map(a => ({ value: a.name, label: a.name }))}
+      {showCloseModal && (
+        <ConfirmationModal
+          title="Close Ticket"
+          description="Mark this ticket as closed? This will set its status to Merged."
+          confirmLabel="Close Ticket"
+          onConfirm={handleCloseConfirm}
+          onCancel={() => setShowCloseModal(false)}
         />
-      </div>
+      )}
 
-      <div className="border-t border-border/40 pt-3 space-y-2">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-          >
-            Close Ticket
-          </button>
-          <button
-            type="button"
-            className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-          >
-            Archive Ticket
-          </button>
-        </div>
-      </div>
+      {showArchiveModal && (
+        <ConfirmationModal
+          title="Archive Ticket"
+          description="Archive this ticket? It will be hidden from default views."
+          confirmLabel="Archive"
+          destructive
+          confirmText="ARCHIVE"
+          onConfirm={handleArchiveConfirm}
+          onCancel={() => setShowArchiveModal(false)}
+        />
+      )}
     </div>
   );
 }

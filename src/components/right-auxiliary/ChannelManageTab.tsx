@@ -1,9 +1,12 @@
 /**
- * Channel management tab — status, topic, and participant management.
+ * Channel management tab — status, topic, and participant management with save/cancel.
  */
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Select } from '@/components/ui/Select';
+import { SaveCancelBar } from './shared/SaveCancelBar';
+import { useToast } from '@/lib/toast-context';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type ChannelManageTabProps = {
@@ -24,7 +27,7 @@ const STATUS_SELECTED: Record<CommunicationChannel['status'], string> = {
 };
 
 /**
- * Channel management tab — status, topic, and participant management.
+ * Channel management tab — status, topic, description, and participant management.
  * @param channel - Channel to manage
  * @param availableAgents - Agents available to add as participants
  */
@@ -32,89 +35,109 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
   const [topic, setTopic] = useState(channel.topic);
   const [status, setStatus] = useState(channel.status);
   const [participants, setParticipants] = useState(channel.participants);
+  const [isDirty, setIsDirty] = useState(false);
+  const toast = useToast();
 
-  const removeParticipant = (name: string) => setParticipants(prev => prev.filter(p => p !== name));
+  const markDirty = (updater: () => void) => {
+    updater();
+    setIsDirty(true);
+  };
+
+  const handleSave = () => {
+    toast({ title: 'Saved', description: channel.topic });
+    setIsDirty(false);
+  };
+
+  const handleCancel = () => {
+    setTopic(channel.topic);
+    setStatus(channel.status);
+    setParticipants(channel.participants);
+    setIsDirty(false);
+  };
+
+  const removeParticipant = (name: string) => markDirty(() => setParticipants(prev => prev.filter(p => p !== name)));
+  const addParticipant = (name: string) => markDirty(() => setParticipants(prev => [...prev, name]));
 
   const currentParticipantNames = new Set(participants);
   const availableToAdd = availableAgents.filter(a => !currentParticipantNames.has(a.name));
 
   return (
-    <div className="p-3 space-y-4">
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Status</label>
-        <div className="flex rounded-md border border-border/40 overflow-hidden">
-          {STATUS_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setStatus(opt.value)}
-              className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
-                status === opt.value
-                  ? STATUS_SELECTED[opt.value]
-                  : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
 
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Topic</label>
-        <input
-          type="text"
-          value={topic}
-          onChange={e => setTopic(e.target.value)}
-          className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
-          Participants ({participants.length})
-        </label>
-        <div className="space-y-1">
-          {participants.map(name => {
-            const agent = availableAgents.find(a => a.name === name);
-            return (
-              <div
-                key={name}
-                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Status</label>
+          <div className="flex rounded-md border border-border/40 overflow-hidden">
+            {STATUS_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => markDirty(() => setStatus(opt.value))}
+                className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
+                  status === opt.value
+                    ? STATUS_SELECTED[opt.value]
+                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
+                }`}
               >
-                <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
-                  {agent?.initials ?? name.slice(0, 2).toUpperCase()}
-                </div>
-                <span className="text-xs text-foreground flex-1 truncate">{name}</span>
-                <button
-                  onClick={() => removeParticipant(name)}
-                  type="button"
-                  className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
-                >
-                  <X size={12} strokeWidth={STROKE_WIDTH} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        {availableToAdd.length > 0 && (
-          <select
-            className="w-full rounded-md border border-border/40 bg-input px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer hover:bg-white/5 transition-colors"
-            onChange={e => {
-              if (e.target.value) {
-                setParticipants(prev => [...prev, e.target.value]);
-                e.target.value = '';
-              }
-            }}
-            value=""
-          >
-            <option value="">Add participant...</option>
-            {availableToAdd.map(a => (
-              <option key={a.id} value={a.name}>{a.name}</option>
+                {opt.label}
+              </button>
             ))}
-          </select>
-        )}
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Topic</label>
+          <input
+            type="text"
+            value={topic}
+            onChange={e => markDirty(() => setTopic(e.target.value))}
+            className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
+            Participants ({participants.length})
+          </label>
+          <div className="space-y-1">
+            {participants.map(name => {
+              const agent = availableAgents.find(a => a.name === name);
+              return (
+                <div
+                  key={name}
+                  className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+                >
+                  <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
+                    {agent?.initials ?? name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-xs text-foreground flex-1 truncate">{name}</span>
+                  <button
+                    onClick={() => removeParticipant(name)}
+                    type="button"
+                    className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                  >
+                    <X size={12} strokeWidth={STROKE_WIDTH} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          {availableToAdd.length > 0 && (
+            <Select
+              value=""
+              onChange={addParticipant}
+              options={[{ value: '', label: 'Add participant...' }, ...availableToAdd.map(a => ({ value: a.name, label: a.name }))]}
+            />
+          )}
+        </div>
+
       </div>
+
+      <SaveCancelBar
+        onSave={handleSave}
+        onCancel={handleCancel}
+        disabled={!isDirty}
+      />
     </div>
   );
 }

@@ -1,104 +1,134 @@
 /**
- * Project management tab — title, members, and channels management.
+ * Project management tab — title, members, and channels with save/cancel.
  */
 import { useState } from 'react';
-import { X } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
-import type { Project, ProjectAgent } from '@/data/projects/store';
+import { SaveCancelBar } from './shared/SaveCancelBar';
+import { ConfirmationModal } from './shared/ConfirmationModal';
+import { useToast } from '@/lib/toast-context';
+import type { Project } from '@/data/projects/store';
 
 type ProjectManageTabProps = {
   project: Project;
-  availableAgents: ProjectAgent[];
 };
 
 /**
- * Project management tab — title, members, and channels management.
+ * Project management tab — title, members, and channels with save/cancel.
  * @param project - Project to manage
- * @param availableAgents - Agents available to add as members
  */
 export function ProjectManageTab({ project }: ProjectManageTabProps) {
   const [title, setTitle] = useState(project.title);
   const [members, setMembers] = useState(project.agents);
   const [channels, setChannels] = useState(project.channels);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const toast = useToast();
 
-  const removeMember = (id: string) => setMembers(prev => prev.filter(m => m.id !== id));
-  const removeChannel = (id: string) => setChannels(prev => prev.filter(c => c.id !== id));
+  const markDirty = (updater: () => void) => {
+    updater();
+    setIsDirty(true);
+  };
+
+  const handleSave = () => {
+    toast({ title: 'Saved', description: project.title });
+    setIsDirty(false);
+  };
+
+  const handleCancel = () => {
+    setTitle(project.title);
+    setMembers(project.agents);
+    setChannels(project.channels);
+    setIsDirty(false);
+  };
+
+  const handleArchiveConfirm = () => {
+    setShowArchiveModal(false);
+    toast({ title: 'Project archived', description: project.title });
+  };
 
   return (
-    <div className="p-3 space-y-4">
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Title</label>
-        <input
-          type="text"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+
+        <div className="space-y-2">
+          <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Title</label>
+          <input
+            type="text"
+            value={title}
+            onChange={e => markDirty(() => setTitle(e.target.value))}
+            className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
+            Members ({members.length})
+          </label>
+          <div className="space-y-1">
+            {members.map(agent => (
+              <div
+                key={agent.id}
+                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+              >
+                <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
+                  {agent.initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-foreground truncate">{agent.name}</div>
+                  <div className="text-[9px] text-muted-foreground truncate">{agent.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
+            Channels ({channels.length})
+          </label>
+          <div className="space-y-1">
+            {channels.slice(0, 5).map(channel => (
+              <div
+                key={channel.id}
+                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-foreground truncate">{channel.topic}</div>
+                  <div className="text-[9px] text-muted-foreground">{channel.id} · {channel.lastMessagePreview}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border-t border-border/40 pt-3">
+          <button
+            type="button"
+            onClick={() => setShowArchiveModal(true)}
+            className="w-full rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          >
+            Archive Project
+          </button>
+        </div>
+
+      </div>
+
+      <SaveCancelBar
+        onSave={handleSave}
+        onCancel={handleCancel}
+        disabled={!isDirty}
+      />
+
+      {showArchiveModal && (
+        <ConfirmationModal
+          title="Archive Project"
+          description="Archive this project? It will be hidden from default views."
+          confirmLabel="Archive"
+          destructive
+          confirmText="ARCHIVE"
+          onConfirm={handleArchiveConfirm}
+          onCancel={() => setShowArchiveModal(false)}
         />
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
-          Members ({members.length})
-        </label>
-        <div className="space-y-1">
-          {members.map(agent => (
-            <div
-              key={agent.id}
-              className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
-            >
-              <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
-                {agent.initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-foreground truncate">{agent.name}</div>
-                <div className="text-[9px] text-muted-foreground truncate">{agent.role}</div>
-              </div>
-              <button
-                onClick={() => removeMember(agent.id)}
-                type="button"
-                className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
-              >
-                <X size={12} strokeWidth={STROKE_WIDTH} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-[10px] tracking-wider font-medium text-muted-foreground">
-          Channels ({channels.length})
-        </label>
-        <div className="space-y-1">
-          {channels.slice(0, 5).map(channel => (
-            <div
-              key={channel.id}
-              className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-foreground truncate">{channel.topic}</div>
-                <div className="text-[9px] text-muted-foreground">{channel.id}</div>
-              </div>
-              <button
-                onClick={() => removeChannel(channel.id)}
-                type="button"
-                className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
-              >
-                <X size={12} strokeWidth={STROKE_WIDTH} />
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-border/40 pt-3 space-y-2">
-        <button
-          type="button"
-          className="w-full rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-        >
-          Archive Project
-        </button>
-      </div>
+      )}
     </div>
   );
 }

@@ -170,3 +170,20 @@ body {
 }
 .pulse-executing { animation: pulse-soft 1.5s ease-in-out infinite; }
 .pulse-error { animation: pulse-soft 0.8s ease-in-out infinite; }
+
+/* Scrollbar suppression */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Toast entrance animation */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-toast-in {
+  animation: toast-in 200ms ease-out forwards;
+}

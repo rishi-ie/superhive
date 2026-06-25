@@ -1,12 +1,10 @@
-import { Eye, Settings, Inbox, Clock, MessageSquare, BarChart3 } from 'lucide-react';
+import { Eye, Settings, Inbox, Clock } from 'lucide-react';
 
 export type RightPanelTabId =
   | 'overview'
   | 'manage'
   | 'inbox'
-  | 'sessions'
-  | 'thread'
-  | 'global-stats';
+  | 'sessions';
 
 export type RightPanelContext =
   | { kind: 'agent'; agentId: string }
@@ -18,6 +16,7 @@ export type RightPanelContext =
   | { kind: 'universal-agents' }
   | { kind: 'universal-projects' }
   | { kind: 'universal-channels' }
+  | { kind: 'dashboard' }
   | null;
 
 export type RightPanelTab = {
@@ -26,63 +25,30 @@ export type RightPanelTab = {
   icon: typeof Eye;
 };
 
-const agentTabs: RightPanelTab[] = [
+const ALL_TABS: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
   { id: 'manage',    label: 'Manage',    icon: Settings },
   { id: 'inbox',     label: 'Inbox',     icon: Inbox },
   { id: 'sessions',  label: 'Sessions',  icon: Clock },
 ];
 
-const ticketTabs: RightPanelTab[] = [
-  { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'manage',    label: 'Manage',    icon: Settings },
-];
-
-const projectTabs: RightPanelTab[] = [
-  { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'manage',    label: 'Manage',    icon: Settings },
-  { id: 'inbox',     label: 'Inbox',     icon: Inbox },
-];
-
-const channelTabs: RightPanelTab[] = [
-  { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'manage',    label: 'Manage',    icon: Settings },
-  { id: 'thread',    label: 'Thread',     icon: MessageSquare },
-];
-
-const channelsListTabs: RightPanelTab[] = [
-  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
-];
-
-const agentsListTabs: RightPanelTab[] = [
-  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
-];
-
-const universalAgentsTabs: RightPanelTab[] = [
-  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
-];
-
-const universalProjectsTabs: RightPanelTab[] = [
-  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
-];
-
-const universalChannelsTabs: RightPanelTab[] = [
-  { id: 'global-stats', label: 'Stats', icon: BarChart3 },
-];
+const CONTEXT_VISIBLE_TABS: Record<string, RightPanelTabId[]> = {
+  agent:             ['overview', 'manage', 'inbox', 'sessions'],
+  ticket:            ['overview', 'manage', 'inbox'],
+  project:           ['overview', 'manage', 'inbox'],
+  channel:           ['overview', 'manage', 'inbox'],
+  'channels-list':   ['overview'],
+  'agents-list':     ['overview'],
+  'universal-agents': ['overview'],
+  'universal-projects': ['overview'],
+  'universal-channels': ['overview'],
+  dashboard:         ['overview', 'inbox'],
+};
 
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {
   if (!context) return [];
-  switch (context.kind) {
-    case 'agent': return agentTabs;
-    case 'ticket': return ticketTabs;
-    case 'project': return projectTabs;
-    case 'channel': return channelTabs;
-    case 'channels-list': return channelsListTabs;
-    case 'agents-list': return agentsListTabs;
-    case 'universal-agents': return universalAgentsTabs;
-    case 'universal-projects': return universalProjectsTabs;
-    case 'universal-channels': return universalChannelsTabs;
-  }
+  const visible = CONTEXT_VISIBLE_TABS[context.kind] ?? [];
+  return ALL_TABS.filter(t => visible.includes(t.id));
 }
 
 export function getDefaultRightPanelTab(context: RightPanelContext): RightPanelTabId | null {

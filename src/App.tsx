@@ -13,6 +13,7 @@ import {
 } from '@/lib/constants';
 import { Dashboard } from './screens/Dashboard';
 import { Settings } from './screens/Settings';
+import { ToastProvider } from './lib/toast-context';
 
 export type Page = 'main' | 'settings';
 
@@ -36,18 +37,20 @@ function App() {
     setPage(target);
   };
 
-  if (page === 'settings') {
-    return <Settings onBack={() => setPage('main')} />;
-  }
-
   return (
-    <Dashboard
-      leftWidth={leftWidth}
-      rightWidth={rightWidth}
-      onLeftWidthChange={handleLeftWidthChange}
-      onRightWidthChange={handleRightWidthChange}
-      onNavigate={handleNavigate}
-    />
+    <ToastProvider>
+      {page === 'settings' ? (
+        <Settings onBack={() => setPage('main')} />
+      ) : (
+        <Dashboard
+          leftWidth={leftWidth}
+          rightWidth={rightWidth}
+          onLeftWidthChange={handleLeftWidthChange}
+          onRightWidthChange={handleRightWidthChange}
+          onNavigate={handleNavigate}
+        />
+      )}
+    </ToastProvider>
   );
 }
 

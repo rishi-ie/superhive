@@ -52,7 +52,7 @@
         { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "status": "TODO", "assignedAgentId": "agent-ava" },
         { "id": "WE-203", "title": "Implement keyboard navigation", "status": "DONE", "assignedAgentId": "agent-ava" },
         { "id": "WE-204", "title": "Add widget to Notion integration", "status": "TODO", "assignedAgentId": "agent-james" },
-        { "id": "WE-205", "title": "Fix z-index冲突 with host page modals", "status": "EXECUTING", "assignedAgentId": "agent-sonia" },
+        { "id": "WE-205", "title": "Fix z-index conflict with host page modals", "status": "EXECUTING", "assignedAgentId": "agent-sonia" },
         { "id": "WE-206", "title": "Implement persistent session storage", "status": "REVIEW", "assignedAgentId": "agent-marcus" },
         { "id": "WE-207", "title": "Add widget configuration API", "status": "DONE", "assignedAgentId": "agent-james" },
         { "id": "WE-208", "title": "Accessibility audit — WCAG AA", "status": "DONE", "assignedAgentId": "agent-ava" }
@@ -144,6 +144,7 @@
     { "id": "VL-105", "title": "Optimize embedding pipeline throughput", "projectName": "Vela Platform", "workspaceId": "vela", "status": "REVIEW", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Marcus Webb", "isAI": true } },
     { "id": "VL-106", "title": "Migrate to Postgres 16", "projectName": "Vela Platform", "workspaceId": "vela", "status": "MERGED", "priority": "LOW", "type": "INFRA", "assignee": { "name": "Marcus Webb", "isAI": true } },
     { "id": "VL-107", "title": "Implement bulk article import", "projectName": "Vela Platform", "workspaceId": "vela", "status": "MERGED", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "Fatima Al-Hassan", "isAI": false } },
+    { "id": "VL-108", "title": "Add CSAT analytics dashboard", "projectName": "Vela Platform", "workspaceId": "vela", "status": "MERGED", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
     { "id": "WE-201", "title": "Add dark mode to widget SDK", "projectName": "Widget Embed", "workspaceId": "widget", "status": "EXECUTING", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Ava Chen", "isAI": true } },
     { "id": "WE-202", "title": "Reduce widget bundle size below 40kb", "projectName": "Widget Embed", "workspaceId": "widget", "status": "BACKLOG", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "Ava Chen", "isAI": true } },
     { "id": "WE-203", "title": "Implement keyboard navigation", "projectName": "Widget Embed", "workspaceId": "widget", "status": "MERGED", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Ava Chen", "isAI": true } },
@@ -151,6 +152,7 @@
     { "id": "WE-205", "title": "Fix z-index conflict with host page modals", "projectName": "Widget Embed", "workspaceId": "widget", "status": "EXECUTING", "priority": "HIGH", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
     { "id": "WE-206", "title": "Implement persistent session storage", "projectName": "Widget Embed", "workspaceId": "widget", "status": "REVIEW", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Marcus Webb", "isAI": true } },
     { "id": "WE-207", "title": "Add widget configuration API", "projectName": "Widget Embed", "workspaceId": "widget", "status": "MERGED", "priority": "LOW", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
+    { "id": "WE-208", "title": "Accessibility audit — WCAG AA", "projectName": "Widget Embed", "workspaceId": "widget", "status": "MERGED", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Ava Chen", "isAI": true } },
     { "id": "AD-301", "title": "Redesign agent performance view", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
     { "id": "AD-302", "title": "Add CSV export to analytics reports", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "James Liu", "isAI": true } },
     { "id": "AD-303", "title": "Build rule-based routing configuration UI", "projectName": "Admin Dashboard", "workspaceId": "admin", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
@@ -160,6 +162,7 @@
     { "id": "MB-401", "title": "Implement push notification handling", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "EXECUTING", "priority": "HIGH", "type": "FEATURE", "assignee": { "name": "Sonia Patel", "isAI": true } },
     { "id": "MB-402", "title": "Add offline message queue", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "BACKLOG", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Priya Sharma", "isAI": true } },
     { "id": "MB-403", "title": "iOS safe area layout fixes", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "MERGED", "priority": "MEDIUM", "type": "BUG", "assignee": { "name": "Sonia Patel", "isAI": true } },
+    { "id": "MB-404", "title": "Add biometric authentication", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "TODO", "priority": "MEDIUM", "type": "FEATURE", "assignee": { "name": "Noah Chen", "isAI": false } },
     { "id": "MB-405", "title": "Reduce SDK initialization time", "projectName": "Mobile SDK", "workspaceId": "mobile", "status": "EXECUTING", "priority": "MEDIUM", "type": "REFACTOR", "assignee": { "name": "James Liu", "isAI": true } }
   ],
   "agents": [

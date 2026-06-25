@@ -1,5 +1,5 @@
 /**
- * Ticket overview tab — displays ticket details, assignee, and related activity.
+ * Ticket overview tab — displays ticket details, assignee, project, and activity preview.
  */
 import { Avatar } from '@/components/ui/Avatar';
 import { nameToAgentId } from '@/data/agents/store';
@@ -28,15 +28,15 @@ const TYPE_LABELS: Record<string, string> = {
   INFRA: 'Infra',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  BACKLOG: 'Backlog',
-  EXECUTING: 'Executing',
-  REVIEW: 'Review',
-  MERGED: 'Merged',
+const STATUS_COLORS: Record<string, string> = {
+  BACKLOG:   'bg-secondary/40 text-muted-foreground border-muted-foreground/40',
+  EXECUTING: 'bg-chart-2/15 text-chart-2 border-chart-2/40',
+  REVIEW:    'bg-chart-3/15 text-chart-3 border-chart-3/40',
+  MERGED:    'bg-muted/20 text-muted-foreground border-muted-foreground/40',
 };
 
 /**
- * Ticket overview tab — displays ticket details, assignee, and related activity.
+ * Ticket overview tab — displays ticket details, assignee, project, and activity preview.
  * @param ticket - Ticket to display
  * @param projectAgents - Agents for resolving activity initials
  * @param recentActivity - Swarm activity to show related events
@@ -62,10 +62,12 @@ export function TicketOverviewTab({
 
   const relatedActivity = recentActivity
     .filter(a => a.context.includes(ticket.id))
-    .slice(0, 4);
+    .slice(0, 3);
 
   return (
     <div className="p-3 space-y-3">
+
+      {/* Header */}
       <div className="space-y-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-fustat font-bold text-chart-2 bg-chart-2/10 rounded px-1.5 py-0.5">
@@ -77,17 +79,14 @@ export function TicketOverviewTab({
           <span className="text-[9px] text-muted-foreground rounded border border-border bg-secondary/40 px-1.5 py-0.5">
             {TYPE_LABELS[ticket.type] ?? ticket.type}
           </span>
-          <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${
-            ticket.status === 'EXECUTING' ? 'bg-chart-2/15 text-chart-2 border-chart-2/40' :
-            ticket.status === 'REVIEW' ? 'bg-chart-3/15 text-chart-3 border-chart-3/40' :
-            'bg-muted/20 text-muted-foreground border-muted-foreground/40'
-          }`}>
-            {STATUS_LABELS[ticket.status] ?? ticket.status}
+          <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border ${STATUS_COLORS[ticket.status]}`}>
+            {ticket.status}
           </span>
         </div>
         <p className="text-sm font-semibold text-foreground leading-tight">{ticket.title}</p>
       </div>
 
+      {/* Assignee + Project */}
       <div className="border-t border-border pt-2 space-y-1.5">
         <div className="flex items-center gap-1.5">
           <button
@@ -118,15 +117,18 @@ export function TicketOverviewTab({
         </div>
       </div>
 
+      {/* Activity Preview */}
       {relatedActivity.length > 0 && (
         <div className="border-t border-border pt-2 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Activity</span>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Activity</span>
+          </div>
           <div className="space-y-1">
-            {relatedActivity.map(item => {
+            {relatedActivity.map((item, idx) => {
               const agent = projectAgents.find(a => a.name === item.primaryAgent);
               const initials = agent?.initials ?? item.primaryAgent.slice(0, 2).toUpperCase();
               return (
-                <div key={item.id} className="flex items-start gap-1.5 text-[10px]">
+                <div key={idx} className="flex items-start gap-1.5 text-[10px]">
                   <span className="text-muted-foreground/60 shrink-0 font-fustat">{item.timestamp}</span>
                   <span className="text-muted-foreground/60 shrink-0">·</span>
                   <span className="font-semibold text-foreground shrink-0">{initials}</span>

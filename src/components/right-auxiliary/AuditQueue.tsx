@@ -10,7 +10,6 @@ type AuditQueueProps = {
   onApprove?: (id: string) => void;
   onDeny?: (id: string) => void;
   onViewDiff?: (auditItemId: string) => void;
-  onAuditCountClick?: (agentId: string) => void;
 };
 
 /**
@@ -32,15 +31,16 @@ export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueP
   }
 
   return (
-    <div className="p-3 space-y-2">
+    <div role="list" aria-label="Pending audit items" className="p-3 space-y-2">
       {items.map((item) => {
         const isIntercept = item.type === 'AUTH_INTERCEPT';
         return (
           <div
             key={item.id}
-            className={`rounded-md border bg-card p-3 ${
-              isIntercept ? 'border-l-2 border-l-chart-1 border-t-0 border-r-0 border-b-0' : 'border-border'
-            }`}
+            role="listitem"
+            className={`rounded-md border border-border border-l-2 ${
+              isIntercept ? 'border-l-chart-1' : 'border-l-chart-2'
+            } bg-card p-3`}
           >
             <div className="flex items-start gap-2 mb-2">
               {isIntercept ? (

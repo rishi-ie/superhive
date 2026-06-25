@@ -3,7 +3,7 @@
  */
 import { useState } from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
-import { STROKE_WIDTH, COST_PER_TASK } from '@/lib/constants';
+import { STROKE_WIDTH, COST_PER_TASK, MIN_TOKENS, MAX_TOKENS, TOKEN_STEP } from '@/lib/constants';
 import { Toggle } from '@/components/ui/Toggle';
 import { getPermissions, type Agent, type Permissions } from '@/data/agents/store';
 import type { CommitAuthority } from '@/data/agents/interface';
@@ -162,16 +162,20 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         </div>
         <input
           type="range"
-          min={1024}
-          max={16384}
-          step={512}
+          min={MIN_TOKENS}
+          max={MAX_TOKENS}
+          step={TOKEN_STEP}
           value={sliderValue}
+          aria-label="Thinking budget in tokens"
+          aria-valuemin={MIN_TOKENS}
+          aria-valuemax={MAX_TOKENS}
+          aria-valuenow={sliderValue}
           onChange={(e) => {
             const val = parseInt(e.target.value);
             setSliderValue(val);
             set('maxTokens', val);
           }}
-          className="w-full accent-[#e07850] h-1 rounded-full bg-input cursor-pointer"
+          className="w-full accent-chart-1 h-1 rounded-full bg-input cursor-pointer"
         />
         <div className="flex items-center justify-between">
           <span className="text-[9px] text-muted-foreground/60 font-fustat">1K</span>

@@ -22,12 +22,15 @@ const sizeClasses: Record<string, string> = {
  */
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   ({ size = 'md', error = false, className = '', ...rest }, ref) => {
-    const errorClasses = error ? 'border-destructive ring-destructive' : 'border-border ring-ring focus:ring-1 focus:ring-ring';
-
     return (
       <input
         ref={ref}
-        className={`w-full rounded-md border bg-input ${sizeClasses[size]} text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 disabled:pointer-events-none transition-colors ${errorClasses} ${className}`}
+        aria-invalid={error}
+        className={`w-full rounded-md border bg-input focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar disabled:opacity-50 disabled:pointer-events-none transition-colors ${
+          error
+            ? 'border-destructive focus-visible:ring-destructive/40'
+            : 'border-border'
+        } ${sizeClasses[size]} text-foreground placeholder:text-muted-foreground ${className}`}
         {...rest}
       />
     );

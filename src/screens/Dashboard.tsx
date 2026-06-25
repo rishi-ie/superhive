@@ -13,7 +13,7 @@ import { listWorkspaces } from '@/data/workspaces/store';
 import { listProjectAgents, listTickets, getProject, getProjectByWorkspace } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
-import { listAgents, approveAudit, denyAudit, getAgentWorkspace } from '@/data/agents/store';
+import { listAgents, getAgentWorkspace } from '@/data/agents/store';
 import { addMessageToActiveThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
@@ -237,17 +237,8 @@ export function Dashboard({
     }
   }, [openTab, activeWorkspaceId]);
 
-  const handleAuditCountClick = useCallback((agentId: string) => {
-    handleAgentSelect(agentId);
-    setRightPanelTab('inbox');
-  }, [handleAgentSelect]);
-
   const handleTerminateAgent = useCallback((agentId: string) => {
     console.warn('[TODO] Terminate agent:', agentId);
-  }, []);
-
-  const handleViewDiff = useCallback((auditItemId: string) => {
-    console.warn('[TODO] View diff for audit item:', auditItemId);
   }, []);
 
   const handleRefresh = useCallback(() => {
@@ -259,7 +250,16 @@ export function Dashboard({
     if (project) openTab(buildTab('project', workspaceId, project.title, { selectedProjectId: project.id }));
   }, [openTab]);
 
-  const handleProjectClick = handleProjectSelect;
+  const handleOpenTab = useCallback((kind: string) => {
+    if (kind === 'tickets') {
+      openTab(buildTab('tickets', activeWorkspaceId, 'Tickets'));
+    } else if (kind === 'universal-channels') {
+      openTab(buildTab('universal-channels', activeWorkspaceId, 'Channels'));
+    } else if (kind === 'universal-agents') {
+      openTab(buildTab('universal-agents', activeWorkspaceId, 'Agents'));
+    }
+  }, [openTab, activeWorkspaceId]);
+
   const handleChannelClick = handleChannelSelect;
 
   const handleThreadSelect = useCallback((threadId: string) => {
@@ -348,18 +348,14 @@ export function Dashboard({
         context={rightPanelContext}
         tab={currentRightPanelTab}
         onTabChange={setRightPanelTab}
-        onApproveAudit={approveAudit}
-        onDenyAudit={denyAudit}
         onRefresh={handleRefresh}
         onTerminate={handleTerminateAgent}
-        onViewDiff={handleViewDiff}
-        onAuditCountClick={handleAuditCountClick}
         onAgentClick={handleAgentSelect}
-        onProjectClick={handleProjectClick}
         onProjectSelect={handleProjectSelectByWorkspace}
         onChannelClick={handleChannelClick}
         onTicketClick={handleTicketSelect}
         onThreadSelect={handleThreadSelect}
+        onOpenTab={handleOpenTab}
       />
     </div>
   );

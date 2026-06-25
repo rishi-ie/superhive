@@ -29,7 +29,7 @@ export function Select({ value, options, onChange, className = '' }: SelectProps
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="flex w-full appearance-none items-center gap-2 rounded-md border border-border bg-input px-3 py-2 pr-8 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 transition-colors cursor-pointer"
+        className="flex w-full appearance-none items-center gap-2 rounded-md border border-border bg-input px-3 py-2 pr-8 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar transition-colors"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>

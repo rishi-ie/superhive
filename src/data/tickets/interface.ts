@@ -1,6 +1,6 @@
 export type UniversalTicketStatus = 'BACKLOG' | 'EXECUTING' | 'REVIEW' | 'MERGED';
 export type Priority = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TicketType = 'BUG' | 'FEATURE' | 'REFACTOR';
+export type TicketType = 'BUG' | 'FEATURE' | 'REFACTOR' | 'INFRA';
 
 export type Assignee = {
   name: string;

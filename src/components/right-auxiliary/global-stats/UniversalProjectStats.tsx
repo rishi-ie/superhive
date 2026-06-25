@@ -17,7 +17,7 @@ type UniversalProjectStatsProps = {
  * @param universalTickets - All tickets for status aggregation
  * @param onProjectClick - Called when project is clicked
  */
-export function UniversalProjectStats({ projects, universalTickets }: UniversalProjectStatsProps) {
+export function UniversalProjectStats({ projects, universalTickets, onProjectClick }: UniversalProjectStatsProps) {
   const backlog = universalTickets.filter(t => t.status === 'BACKLOG').length;
   const executing = universalTickets.filter(t => t.status === 'EXECUTING').length;
   const review = universalTickets.filter(t => t.status === 'REVIEW').length;
@@ -35,6 +35,25 @@ export function UniversalProjectStats({ projects, universalTickets }: UniversalP
       <div className="text-[10px] text-muted-foreground bg-secondary/40 rounded px-2 py-1.5">
         {backlog} backlog tickets across all workspaces
       </div>
+
+      {onProjectClick && projects.length > 0 && (
+        <div className="border-t border-border/40 pt-3 space-y-1">
+          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+            Projects
+          </span>
+          {projects.slice(0, 5).map(p => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => onProjectClick(p.id, p.workspaceId)}
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-border/40 hover:bg-white/5 transition-colors text-left"
+            >
+              <span className="text-xs text-foreground truncate">{p.title}</span>
+              <span className="text-[9px] text-muted-foreground shrink-0 ml-2">{p.workspaceId}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

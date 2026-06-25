@@ -51,7 +51,7 @@ export function GlobalStatsTab(props: GlobalStatsTabProps) {
       if (!props.agents || !props.workspaces) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
       return <UniversalAgentStats agents={props.agents} workspaces={props.workspaces} onAgentClick={props.onAgentClick} />;
     case 'universal-projects':
-      if (!props.projects || !props.universalTickets || !props.workspaces) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
+      if (!props.projects || !props.universalTickets) return <div className="p-3 text-xs text-muted-foreground">No data</div>;
       return <UniversalProjectStats projects={props.projects} universalTickets={props.universalTickets} onProjectClick={props.onProjectClick} />;
     case 'universal-channels':
       if (!props.channels) return <div className="p-3 text-xs text-muted-foreground">No channel data</div>;
