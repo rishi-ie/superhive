@@ -1,16 +1,9 @@
-import { Layers, Users } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '../mock.json';
-import type { MockData, IconKey } from '../mock/types';
+import mockData from '@/data/mock.json';
+import type { MockData, IconKey } from '@/data/mock/types';
 import type { FavoriteItem, FavoriteRef } from './interface';
 
 const data = mockData as MockData;
-
-const ICONS: Record<IconKey, ReactNode> = {
-  user: <Users size={12} />,
-  folder: <Layers size={12} />,
-};
 
 function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
   return refs.map(ref => {
@@ -25,7 +18,7 @@ function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
       label = agent?.name ?? ref.id;
       iconKey = 'user';
     }
-    return { id: ref.id, type: ref.type, label, icon: ICONS[iconKey] };
+    return { id: ref.id, type: ref.type, label, iconKey };
   });
 }
 

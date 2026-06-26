@@ -185,9 +185,11 @@ src/
 These rules are enforced by TypeScript (`noUnusedLocals: true`, `noUnusedParameters: true`) and review. Every contributor — human or agent — follows them.
 
 ### One component per file
-File name matches the default export name. No multi-export files except:
+File name matches the exported name. Every `.tsx` file exports exactly one component (named export). No multi-component files except:
 - `index.ts` barrels that re-export sibling components
 - Co-located type-only exports (e.g. `type FooProps` in `Foo.tsx` beside `Foo`)
+
+The codebase uses named exports throughout (`export function Foo()`) — `export default` is not used.
 
 ### JSDoc required
 Every `.tsx` file needs:

@@ -1,6 +1,6 @@
 import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '../mock.json';
-import type { MockData } from '../mock/types';
+import mockData from '@/data/mock.json';
+import type { MockData } from '@/data/mock/types';
 import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
 import type { Project } from '@/data/projects/store';
 

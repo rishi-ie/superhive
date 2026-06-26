@@ -1,7 +1,7 @@
-import type { Workspace } from '../workspaces/interface';
-import type { Project } from '../projects/interface';
-import type { UniversalTicket } from '../tickets/interface';
-import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from '../agents/interface';
+import type { Workspace } from '@/data/workspaces/interface';
+import type { Project } from '@/data/projects/interface';
+import type { UniversalTicket } from '@/data/tickets/interface';
+import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from '@/data/agents/interface';
 
 export type IconKey = 'user' | 'folder';
 

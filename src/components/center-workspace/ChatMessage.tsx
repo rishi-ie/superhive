@@ -61,7 +61,7 @@ function renderBlock(block: MarkdownBlock, key: number) {
  * @param message - Message to display
  * @param agentName - Display name of the agent
  * @param agentInitials - Initials of the agent
- * @param agentStatusColor - Status color for agent avatar (unused but kept for interface)
+ * @param agentStatusColor - Accepted but unused (kept for interface compatibility)
  * @param onRegenerate - Called when regenerate is clicked
  */
 export function ChatMessage({ message, agentName, agentInitials, onRegenerate }: ChatMessageProps) {

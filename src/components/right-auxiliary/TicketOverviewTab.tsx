@@ -44,7 +44,6 @@ const STATUS_COLORS: Record<string, string> = {
  * @param recentActivity - Swarm activity to show related events
  * @param onAgentClick - Called when assignee is clicked
  * @param onProjectSelect - Called when project is selected
- * @param onChannelClick - Called when related channel is clicked
  */
 export function TicketOverviewTab({
   ticket,

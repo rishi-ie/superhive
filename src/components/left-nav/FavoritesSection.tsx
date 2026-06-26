@@ -2,9 +2,15 @@
  * Collapsible Favorites section with star icon and item list.
  */
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Star } from 'lucide-react';
+import { ChevronDown, ChevronRight, Star, Users, Layers } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import type { IconKey } from '@/data/mock/types';
 import type { FavoriteItem } from '@/data/favorites/interface';
+
+const ITEM_ICONS: Record<IconKey, React.ReactElement> = {
+  user: <Users size={12} strokeWidth={STROKE_WIDTH} />,
+  folder: <Layers size={12} strokeWidth={STROKE_WIDTH} />,
+};
 
 type FavoritesSectionProps = {
   items: FavoriteItem[];
@@ -52,7 +58,7 @@ export function FavoritesSection({ items, onItemClick, selectedId }: FavoritesSe
                   : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
               }`}
             >
-              <span className="shrink-0">{item.icon || <Star size={12} strokeWidth={STROKE_WIDTH} />}</span>
+              <span className="shrink-0">{ITEM_ICONS[item.iconKey]}</span>
               <span className="flex-1 truncate text-left text-xs">{item.label}</span>
             </button>
           ))}

@@ -23,6 +23,12 @@ const CODE_THEMES: Record<string, { bg: string; text: string }> = {
   'solarized-dark': { bg: '#002b36', text: '#839496' },
 };
 
+/**
+ * @param children - Code content (alternative to code prop)
+ * @param code - Raw code string
+ * @param lang - Language label shown in header
+ * @param className - Additional CSS classes
+ */
 export function CodeBlock({ children, code, lang = 'code', className }: CodeBlockProps) {
   const { settings } = useSettings();
   const theme = CODE_THEMES[settings.appearance.codeSyntaxTheme] ?? CODE_THEMES['github-dark']!;

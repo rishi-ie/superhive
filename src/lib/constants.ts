@@ -3,8 +3,6 @@
  */
 export const STROKE_WIDTH = 1.5;
 
-// ─── Panel sizing ────────────────────────────────────────────────────────────
-
 /** Default width of the left navigation panel in pixels. */
 export const DEFAULT_LEFT_WIDTH = 280;
 
@@ -23,15 +21,11 @@ export const MIN_RIGHT_WIDTH = 200;
 /** Maximum allowed width of the right auxiliary panel. */
 export const MAX_RIGHT_WIDTH = 500;
 
-// ─── Token / cost math ───────────────────────────────────────────────────────
-
 /** Cost per token (in dollars) for assistant messages, used in ChatView session cost calculation. */
 export const COST_PER_TOKEN = 0.00001;
 
 /** Estimated cost per task (in dollars) per token, used in ControlMatrix. */
 export const COST_PER_TASK = 0.00003;
-
-// ─── Token limits (ControlMatrix slider) ────────────────────────────────────
 
 /** Minimum token limit for agent context. */
 export const MIN_TOKENS = 1024;
@@ -41,8 +35,6 @@ export const MAX_TOKENS = 16384;
 
 /** Step increment for token limit slider. */
 export const TOKEN_STEP = 512;
-
-// ─── UI limits ───────────────────────────────────────────────────────────────
 
 /** Max visible messages in channel thread before scroll. */
 export const MAX_CHANNEL_MESSAGES = 50;

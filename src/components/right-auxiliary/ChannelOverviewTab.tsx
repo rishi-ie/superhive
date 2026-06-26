@@ -28,7 +28,6 @@ type ChannelOverviewTabProps = {
 /**
  * Channel overview tab — displays channel topic, participants, related ticket, and full message thread.
  * @param channel - Channel to display
- * @param workspaceId - Current workspace id
  * @param relatedTicket - Related ticket if any
  * @param participants - Channel participants
  * @param messages - Messages to display

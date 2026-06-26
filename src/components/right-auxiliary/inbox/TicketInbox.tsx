@@ -1,7 +1,7 @@
 /**
  * Ticket Inbox tab — mentions and comments for a specific ticket.
  */
-import { EmptyState } from '../shared/EmptyState';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { CheckCircle } from 'lucide-react';
 
 type TicketInboxProps = {

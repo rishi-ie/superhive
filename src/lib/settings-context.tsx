@@ -116,6 +116,9 @@ function applySettingsToDOM(settings: Settings) {
 
 const SettingsContext = createContext<SettingsStore | null>(null);
 
+/**
+ * @param children - App content wrapped by the settings context
+ */
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(loadSettings);
   const isFirstRender = useRef(true);

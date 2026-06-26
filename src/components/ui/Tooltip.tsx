@@ -12,17 +12,6 @@ type TooltipProps = {
 };
 
 /**
- * Tooltip provider — wrap the app or relevant subtree once.
- */
-export function TooltipProvider({ children, delayDuration = 300 }: { children: ReactNode; delayDuration?: number }) {
-  return (
-    <RadixTooltip.Provider delayDuration={delayDuration}>
-      {children}
-    </RadixTooltip.Provider>
-  );
-}
-
-/**
  * Tooltip wrapper — pairs a trigger with a floating tooltip.
  * @param children - The interactive trigger element
  * @param content - The tooltip content (string or JSX)

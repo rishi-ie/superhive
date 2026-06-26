@@ -2,9 +2,9 @@
  * Project Inbox tab — project-scoped backlog tickets needing attention.
  */
 import { useState } from 'react';
-import { FilterChips } from '../shared/FilterChips';
-import { BulkActionBar } from '../shared/BulkActionBar';
-import { EmptyState } from '../shared/EmptyState';
+import { BulkActionBar } from '@/components/right-auxiliary/shared/BulkActionBar';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { FilterChips } from '@/components/right-auxiliary/shared/FilterChips';
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';

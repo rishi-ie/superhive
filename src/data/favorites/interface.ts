@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { IconKey } from '@/data/mock/types';
 
 export type FavoriteRef = {
   id: string;
@@ -7,5 +7,5 @@ export type FavoriteRef = {
 
 export type FavoriteItem = FavoriteRef & {
   label: string;
-  icon: ReactNode;
+  iconKey: IconKey;
 };

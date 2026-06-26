@@ -1,5 +1,8 @@
 /**
  * Compact stat card used across global stats views.
+ */
+
+/**
  * @param label - Stat label text
  * @param value - Stat value (string or number)
  * @param color - Optional text color class

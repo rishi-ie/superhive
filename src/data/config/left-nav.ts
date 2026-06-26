@@ -15,12 +15,3 @@ export const mainNavItems: NavItem[] = [
   { id: 'remote',        label: 'Remote',        icon: Monitor },
 ];
 
-// Canonical nav-item IDs must match the keys used in Dashboard.handleNavItemClick.
-// These are NOT the same as CenterTabType values — they are an intermediate set:
-//   'projects'       → 'universal-projects'
-//   'agents'         → 'universal-agents'
-//   'tickets'        → 'tickets'
-//   'communications'  → 'channels'
-//   'meta-hive'      → (Coming Soon, no tab)
-//   'remote'         → (Coming Soon, no tab)
-

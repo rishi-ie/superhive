@@ -115,14 +115,6 @@ export type CostUsageSettings = {
   perAgentSpendingEnabled: boolean;
   spendAlert: SpendAlert;
   resetCycleDay: number;
-  usageData: UsageDataPoint[];
-};
-
-export type UsageDataPoint = {
-  date: string;
-  cost: number;
-  agentId: string;
-  workspaceId: string;
 };
 
 export type AgentsSettings = {

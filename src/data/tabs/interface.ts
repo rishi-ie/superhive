@@ -1,15 +1,15 @@
 export type CenterTabType =
-  | 'projects'           // workspace kanban dashboard
-  | 'project'            // single project detail
-  | 'tickets'           // workspace-wide tickets kanban
-  | 'channels'          // workspace-wide channels list
-  | 'channel'           // single channel detail
-  | 'agents'            // workspace's agents list
-  | 'agent'             // single agent — chat + telemetry
-  | 'universal-agents'  // all agents across workspaces
-  | 'universal-projects'// all projects across workspaces
-  | 'universal-channels'// all channels across workspaces
-  | 'settings';        // (future)
+  | 'projects'
+  | 'project'
+  | 'tickets'
+  | 'channels'
+  | 'channel'
+  | 'agents'
+  | 'agent'
+  | 'universal-agents'
+  | 'universal-projects'
+  | 'universal-channels'
+  | 'settings';
 
 export type TabSelection = {
   selectedAgentId: string | null;

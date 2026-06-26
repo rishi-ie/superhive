@@ -5,7 +5,7 @@
 import { CheckCircle, AlertTriangle, Layers, MessageCircle, Bot } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionLabel } from '@/components/ui/SectionLabel';
-import { EmptyState } from '../shared/EmptyState';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listAgents } from '@/data/agents/store';
 
@@ -29,8 +29,7 @@ function getToday(): string {
 /**
  * Dashboard Overview tab.
  * @param onTicketClick - Called when a ticket is clicked
- * @param onChannelClick - Called when a channel is clicked
- * @param onAgentClick - Called when an agent is clicked
+ * @param onOpenTab - Called to open a tab
  */
 export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOverviewProps) {
   const allTickets = listUniversalTickets();

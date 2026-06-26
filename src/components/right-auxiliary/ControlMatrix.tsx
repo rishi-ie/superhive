@@ -56,7 +56,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
   return (
     <div className="p-3 space-y-4">
 
-      {/* Live Config Summary */}
       <div className="bg-card border border-border rounded-md px-3 py-2 flex items-center gap-2 flex-wrap">
         <span className="text-xs font-fustat text-foreground">{permissions.modelEngine}</span>
         <span className="text-muted-foreground text-xs">·</span>
@@ -71,7 +70,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         <span className="text-xs font-fustat text-muted-foreground">{permissions.maxTokens.toLocaleString()} tok</span>
       </div>
 
-      {/* Engine Cards */}
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Model Engine</label>
         <div className="grid grid-cols-2 gap-1.5">
@@ -102,7 +100,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         </div>
       </div>
 
-      {/* Permissions */}
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Permissions</label>
         <div className="space-y-1">
@@ -126,7 +123,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         </div>
       </div>
 
-      {/* Commit Authority */}
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Commit Authority</label>
         <SegmentedControl
@@ -138,7 +134,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         <p className="text-[10px] text-muted-foreground leading-relaxed">{commitDesc}</p>
       </div>
 
-      {/* Thinking Budget */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Thinking Budget</label>
@@ -168,7 +163,6 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         </div>
       </div>
 
-      {/* Danger Zone */}
       <div className="border-t border-border pt-3 space-y-2">
         <div className="flex items-center gap-2">
           <AlertTriangle size={12} strokeWidth={STROKE_WIDTH} className="text-chart-5 shrink-0" />

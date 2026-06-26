@@ -66,8 +66,8 @@ export function RightPanelTabs({
               onKeyDown={e => handleKeyDown(e, index)}
               className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
                 activeTab === tab.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
               }`}
             >
               <Icon size={12} strokeWidth={STROKE_WIDTH} />

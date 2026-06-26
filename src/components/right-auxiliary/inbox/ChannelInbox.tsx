@@ -1,7 +1,7 @@
 /**
  * Channel Inbox tab — mentions in a specific channel.
  */
-import { EmptyState } from '../shared/EmptyState';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { CheckCircle } from 'lucide-react';
 
 type ChannelInboxProps = {
