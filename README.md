@@ -30,7 +30,7 @@ A digital agent workspace — a command center for orchestrating autonomous AI a
 |---|---|
 | `Avatar` | User avatar with image fallback to initials. Sizes: xs–xl + xs2/xs3 |
 | `Badge` | Status label — active, current, recommended, coming soon, AI |
-| `Button` | Push button. Variants: solid, outline, ghost. Sizes: sm/md/lg |
+| `Button` | Push button. Variants: default, destructive, outline, secondary, ghost, link. Sizes: sm/md/lg/icon |
 | `Checkbox` | Multi-select checkbox. Radix-wrapped for full keyboard/ARIA support |
 | `IconButton` | Square icon-only button. Variants: ghost, solid, outline. Sizes: xs–lg |
 | `NewButton` | Create action with plus icon |
@@ -38,12 +38,11 @@ A digital agent workspace — a command center for orchestrating autonomous AI a
 | `SearchBar` | Search input with integrated icon |
 | `SectionLabel` | Small uppercase label for grouping items. Sizes: sm/md |
 | `Select` | Native dropdown with chevron |
-| `SelectableCard` | Bordered tile for theme/engine/integration pickers |
 | `SegmentedControl` | Multi-option button group (2–4 options) |
 | `StatCard` | Compact stat display with label, value, and optional subtitle |
 | `StatusDot` | Agent status indicator — EXECUTING/COMPILING/IDLE/ERROR_LOOP/AWAITING_HUMAN. Sizes: xs/sm |
 | `StatusFilter` | Horizontal filter button group with optional counts |
-| `Tabs` | Tab strip. Radix-wrapped — Tabs.Root / List / Trigger / Content |
+| `Tabs` | Tab strip. Radix-wrapped — Tabs / TabsList / TabsTrigger / TabsContent |
 | `Textarea` | Multi-line text input |
 | `TextInput` | Styled text input. Sizes: sm/md |
 | `Switch` | Boolean toggle. Radix Switch — terracotta accent on-state |
@@ -117,6 +116,7 @@ VITE_MOCK_AGENTS=false
 VITE_MOCK_PROJECTS=false
 VITE_MOCK_TICKETS=false
 VITE_MOCK_CHAT=false
+VITE_MOCK_COSTUSAGE=false
 VITE_MOCK_FAVORITES=false
 ```
 
@@ -127,34 +127,47 @@ See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for full cleanup steps when going to p
 ```
 src/
 ├── App.tsx              # Root shell — Dashboard or Settings
-├── main.tsx             # React entry point
-├── index.css            # Tailwind + CSS variables (theme)
+├── main.tsx            # React entry point
+├── index.css           # Tailwind v4 + CSS variables (dark warm theme, terracotta accent)
+├── hooks/
+│   └── use-mobile.ts   # Mobile breakpoint detection
+├── types/
+│   └── electron.d.ts   # Electron IPC types
 ├── screens/
 │   ├── Dashboard.tsx    # Main 3-panel layout
-│   └── Settings.tsx      # Settings screen
+│   └── Settings.tsx    # Settings screen
 ├── components/
-│   ├── center-workspace/ # Projects, agents, tickets, channels, chat tabs
-│   ├── left-nav/         # Fleet command sidebar
-│   ├── right-auxiliary/  # Telemetry, controls, audit queue
-│   ├── ui/               # Shared primitives (Button, Avatar, StatusDot…)
-│   ├── channels/         # ChannelStatusPill
-│   ├── chat/             # formatTime / formatDuration helpers
-│   └── settings/         # SettingsSidebar, AccountSettings
+│   ├── center-workspace/  # Projects, agents, tickets, channels, chat tabs
+│   ├── left-nav/          # Fleet command sidebar
+│   ├── right-auxiliary/   # Telemetry, controls, audit queue + dashboard/inbox/inbox panels
+│   ├── ui/                # Shared primitives (Button, Avatar, StatusDot, Switch…)
+│   ├── channels/          # ChannelStatusPill
+│   ├── chat/              # formatTime / formatDuration helpers
+│   └── settings/          # SettingsSidebar, 14 settings pages, shared primitives
 ├── data/
 │   ├── agents/           # listAgents(), getAgent(), getTelemetry()…
 │   ├── chat/
+│   ├── cost-usage/       # listCostUsage()
 │   ├── favorites/
+│   ├── left-nav/         # AccordionAgent type (interface only)
 │   ├── projects/
+│   ├── settings/         # Settings type + seeded defaults (settings.json)
 │   ├── tickets/
+│   ├── tabs/             # Tab open/focus/close state
 │   ├── universal-projects/
 │   ├── workspaces/
-│   ├── tabs/             # Tab open/focus/close state
-│   ├── config/           # Wizard configs, nav items, right panel tabs
+│   ├── config/           # Wizard configs, nav items, right panel tabs, themes
 │   └── mock/             # feature-flags.ts, types.ts
 └── lib/
     ├── constants.ts      # Panel sizing, token costs, STROKE_WIDTH
-    ├── relative-time.ts  # formatRelativeTime()
+    ├── debounce.ts
+    ├── initials.ts
     ├── markdown.ts       # parseMarkdown()
+    ├── pluralize.ts
+    ├── relative-time.ts # formatRelativeTime()
+    ├── settings-context.tsx  # SettingsProvider — applies appearance to DOM
+    ├── toast-context.tsx     # ToastProvider — sonner toast context
+    ├── utils.ts          # cn() — shadcn utility
     └── use-double-click.ts
 ```
 

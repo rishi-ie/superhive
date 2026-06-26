@@ -34,6 +34,9 @@ src/
 ├── hooks/                    # Shared React hooks
 │   └── use-mobile.ts         # Mobile breakpoint detection (shadcn utility)
 │
+├── types/                    # Type declarations
+│   └── electron.d.ts         # Electron IPC types
+│
 ├── screens/
 │   ├── Dashboard.tsx          # Main 3-panel layout (LeftNav + CenterWorkspace + RightAuxiliary)
 │   └── Settings.tsx           # Settings screen
@@ -94,17 +97,17 @@ src/
 │   ├── right-auxiliary/      # Right sidebar — telemetry, controls, audit
 │   │   ├── RightAuxiliary.tsx
 │   │   ├── RightPanelTabs.tsx
-│   │   ├── RightPanelActivityFeed.tsx
-│   │   ├── PanelEmptyState.tsx
 │   │   ├── ControlMatrix.tsx
 │   │   ├── AuditQueue.tsx
 │   │   ├── TicketOverviewTab.tsx
 │   │   ├── TicketManageTab.tsx
 │   │   ├── ChannelOverviewTab.tsx
 │   │   ├── ChannelManageTab.tsx
-│   │   ├── ChannelThreadTab.tsx
-│   │   ├── ProjectInboxTab.tsx
 │   │   ├── ProjectManageTab.tsx
+│   │   ├── dashboard/       # Inbox + overview for dashboard context
+│   │   │   ├── DashboardOverview.tsx
+│   │   │   ├── DashboardInbox.tsx
+│   │   │   └── index.ts
 │   │   ├── global-stats/     # Stats views for universal/channels-lists views
 │   │   │   ├── GlobalStatsTab.tsx
 │   │   │   ├── ChannelStats.tsx
@@ -112,9 +115,21 @@ src/
 │   │   │   ├── UniversalAgentStats.tsx
 │   │   │   ├── UniversalProjectStats.tsx
 │   │   │   └── index.ts
-│   │   ├── sessions/         # Chat sessions
+│   │   ├── inbox/           # Per-entity inbox panels
+│   │   │   ├── AgentInbox.tsx
+│   │   │   ├── ChannelInbox.tsx
+│   │   │   ├── ProjectInbox.tsx
+│   │   │   ├── TicketInbox.tsx
+│   │   │   └── index.ts
+│   │   ├── sessions/        # Chat sessions
 │   │   │   ├── SessionsView.tsx
 │   │   │   ├── ThreadRow.tsx
+│   │   │   └── index.ts
+│   │   ├── shared/          # ConfirmationModal, BulkActionBar, EmptyState, FilterChips
+│   │   │   ├── ConfirmationModal.tsx
+│   │   │   ├── BulkActionBar.tsx
+│   │   │   ├── EmptyState.tsx
+│   │   │   ├── FilterChips.tsx
 │   │   │   └── index.ts
 │   │   ├── telemetry/       # Agent telemetry
 │   │   │   ├── TelemetryDeck.tsx
@@ -166,6 +181,7 @@ src/
 │   │   ├── TabsTrigger.tsx
 │   │   ├── TextInput.tsx
 │   │   ├── Textarea.tsx
+│   │   ├── Toast.tsx            # Sonner toast — exported from ui/index.ts
 │   │   ├── Tooltip.tsx
 │   │   ├── TooltipProvider.tsx
 │   │   ├── UniversalListCard.tsx
@@ -210,12 +226,15 @@ src/
 ├── data/                    # Domain data layer — one subdirectory per domain
 │   ├── agents/             # listAgents(), getAgent(), getTelemetry(), getPermissions(), etc.
 │   ├── chat/               # listThreads(), addMessageToActiveThread(), etc.
+│   ├── cost-usage/         # listCostUsage() — cost and usage history
 │   ├── favorites/          # listFavorites(), etc.
+│   ├── left-nav/           # AccordionAgent type (interface only; data reshaped in AccordionCore)
 │   ├── projects/           # listProjects(), getProject(), listChannels(), etc.
+│   ├── settings/           # Settings type + seeded defaults (settings.json) — canonical source
 │   ├── tickets/            # listUniversalTickets(), etc.
+│   ├── tabs/               # Tab state: openTab(), closeTab(), selectTab(), setSelection()
 │   ├── universal-projects/
 │   ├── workspaces/
-│   ├── tabs/              # Tab state: openTab(), closeTab(), selectTab(), setSelection()
 │   │
 │   ├── config/             # Static config — wizard definitions, nav items, right panel tabs, themes
 │   │   ├── wizard-configs.ts
@@ -229,11 +248,16 @@ src/
 │       ├── feature-flags.ts  # isMockEnabled(domain) — per-domain mock toggle
 │       └── types.ts          # Shared mock seed types (FavoriteSeed, ChatThreadSeed, etc.)
 │
-└── lib/                     # Pure utilities — no React
+└── lib/                     # Pure utilities — no React (except contexts below)
     ├── constants.ts          # Panel sizing, token costs, STROKE_WIDTH
-    ├── relative-time.ts     # formatRelativeTime()
-    ├── markdown.ts          # parseMarkdown()
-    ├── utils.ts             # cn() — shadcn utility (clsx + tailwind-merge)
+    ├── debounce.ts           # Debounce utility
+    ├── initials.ts           # Initials extraction utility
+    ├── markdown.ts           # parseMarkdown()
+    ├── pluralize.ts          # Pluralization helper
+    ├── relative-time.ts      # formatRelativeTime()
+    ├── settings-context.tsx  # SettingsProvider + useSettings() — applies appearance to DOM
+    ├── toast-context.tsx    # ToastProvider — sonner toast context
+    ├── utils.ts              # cn() — shadcn utility (clsx + tailwind-merge)
     └── use-double-click.ts
 ```
 
