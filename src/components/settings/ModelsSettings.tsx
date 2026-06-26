@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
@@ -192,6 +193,9 @@ export function ModelsSettings() {
           ))}
         </div>
       </SettingSection>
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="models" />
+      </div>
     </div>
   );
 }

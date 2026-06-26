@@ -201,7 +201,7 @@ Every `.tsx` file needs:
 
 ### Centralization rules
 | What | Where |
-|---|---|
+|---|---|---|
 | Magic numbers (panel sizes, token costs, animation durations, debounce ms) | `src/lib/constants.ts` |
 | Formatting helpers with no React deps (time, cost, text utils) | `src/lib/` or `src/components/chat/format.ts` |
 | Reusable UI primitives | `src/components/ui/` |
@@ -209,6 +209,26 @@ Every `.tsx` file needs:
 | Chat-specific shared helpers | `src/components/chat/` |
 | Static config (wizards, nav, tabs) | `src/data/config/` |
 | Domain data | `src/data/{domain}/store.ts` |
+| User settings defaults | `src/data/settings/settings.json` |
+
+### Settings architecture
+
+Settings live in `src/data/settings/settings.json` (seeded defaults) + `localStorage` (user overrides). The `SettingsProvider` in `src/lib/settings-context.tsx` merges them: if `localStorage` has a value for a key, it wins over the JSON default.
+
+The `Settings` type in `src/data/settings/interface.ts` defines the shape. All settings pages live under `src/components/settings/` and update via `useSettings().update(domain, patch)`.
+
+**Appearance settings** are applied directly to the DOM via `applySettingsToDOM()`:
+- `appearance.theme` → CSS vars + `data-theme` on `<html>`
+- `appearance.accentColor` → `--highlight`, `--accent`, `--chart-1`, `--sidebar-primary`
+- `appearance.fontScale` → `font-size` on `<html>` (rem-based text scales; pixel-arbitrary `text-[Npx]` classes do not)
+- `appearance.reduceMotion` → `data-reduce-motion` attr; CSS kills all transitions when `"true"`
+- `appearance.codeSyntaxTheme` → `CodeBlock` component uses this for `<pre>` background/foreground
+
+**Adaptive wiring rule**: every setting must drive visible UI. If a setting is stored but never consumed outside its settings page, it is a bug — fix it in the same PR that adds the setting.
+
+**Adding a new setting**: update `settings.json`, add the type in `interface.ts`, add the UI in the appropriate `*Settings.tsx` page, and consume it in the component that needs it. All four in the same PR.
+
+**`account.accentColor`** was removed — it was a duplicate of `appearance.accentColor`. Always use `appearance.accentColor`.
 
 ### No new files at `src/components/` root
 Every new component goes in the correct subdirectory (see Component Placement below).

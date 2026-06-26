@@ -3,6 +3,7 @@
  */
 import { Check } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
+import { ResetSection } from './shared/ResetSection';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { EngineId } from '@/data/settings/interface';
@@ -70,6 +71,9 @@ export function AgentsSettings() {
           })}
         </div>
       </SettingSection>
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="agents" />
+      </div>
     </div>
   );
 }

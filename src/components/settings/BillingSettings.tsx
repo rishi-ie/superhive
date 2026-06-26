@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { CheckCircle2, CreditCard, X } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
+import { ResetSection } from './shared/ResetSection';
 import { Button } from '@/components/ui/Button';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
@@ -208,6 +209,9 @@ export function BillingSettings() {
           </div>
         </div>
       )}
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="billing" />
+      </div>
     </div>
   );
 }

@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { GitBranch, Hash, FileText, Ticket, Webhook, Unplug, Plug, CheckCircle2 } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
+import { ResetSection } from './shared/ResetSection';
 import { Button } from '@/components/ui/Button';
 import { Toggle } from '@/components/ui/Toggle';
 import { useSettings } from '@/lib/settings-context';
@@ -238,6 +239,9 @@ export function IntegrationsSettings() {
             </div>
           )}
         </div>
+      </div>
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="integrations" />
       </div>
     </div>
   );

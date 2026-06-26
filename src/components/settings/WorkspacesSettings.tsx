@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Plus, Archive, Pencil } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { IconButton } from '@/components/ui/IconButton';
@@ -183,6 +184,9 @@ export function WorkspacesSettings() {
           onCancel={() => setShowArchive(null)}
         />
       )}
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="workspaces" />
+      </div>
     </div>
   );
 }

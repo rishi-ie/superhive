@@ -70,6 +70,8 @@ const DEFAULT_THEMES = [
   },
 ];
 
+const ALL_THEME_VARS = new Set(DEFAULT_THEMES.flatMap(t => Object.keys(t.vars)));
+
 export { DEFAULT_THEMES };
 export type { Theme } from '@/data/settings/interface';
 
@@ -86,8 +88,9 @@ function loadSettings(): Settings {
 function applySettingsToDOM(settings: Settings) {
   const root = document.documentElement;
 
+  ALL_THEME_VARS.forEach(k => root.style.removeProperty(k));
+
   const theme = DEFAULT_THEMES.find(t => t.id === settings.appearance.theme) ?? DEFAULT_THEMES[0]!;
-  const vars = theme.vars;
 
   if (settings.appearance.theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -95,9 +98,7 @@ function applySettingsToDOM(settings: Settings) {
     Object.entries(sysTheme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
     root.setAttribute('data-theme', 'system');
   } else {
-    if (Object.keys(vars).length > 0) {
-      Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
-    }
+    Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
     root.setAttribute('data-theme', theme.id);
   }
 
@@ -107,7 +108,8 @@ function applySettingsToDOM(settings: Settings) {
   root.setAttribute('data-reduce-motion', String(settings.appearance.reduceMotion || settings.accessibility.reduceMotion));
 
   root.style.setProperty('--highlight', settings.appearance.accentColor);
-  root.style.setProperty('--highlight-foreground', '#ffffff');
+  root.style.setProperty('--accent', settings.appearance.accentColor);
+  root.style.setProperty('--accent-foreground', '#ffffff');
   root.style.setProperty('--sidebar-primary', settings.appearance.accentColor);
   root.style.setProperty('--chart-1', settings.appearance.accentColor);
 }

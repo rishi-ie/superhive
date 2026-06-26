@@ -3,6 +3,7 @@
  */
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { Toggle } from '@/components/ui/Toggle';
 import { Select } from '@/components/ui/Select';
 import { SelectableCard } from '@/components/ui/SelectableCard';
@@ -153,6 +154,10 @@ export function AppearanceSettings() {
           }
         />
       </SettingSection>
+
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="appearance" />
+      </div>
     </div>
   );
 }

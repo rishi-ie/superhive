@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
@@ -163,6 +164,9 @@ export function PrivacySettings() {
           onCancel={() => setShowDeleteAccount(false)}
         />
       )}
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="privacy" />
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Toggle } from '@/components/ui/Toggle';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { GitBranch, Globe, Apple } from 'lucide-react';
@@ -47,32 +48,28 @@ export function AccountSettings() {
   const [name, setName] = useState(acc.name);
   const [email, setEmail] = useState(acc.email);
   const [username, setUsername] = useState(acc.username);
-  const [accentColor, setAccentColor] = useState(acc.accentColor);
   const [timezone, setTimezone] = useState(acc.timezone);
   const [defaultWorkspaceId, setDefaultWorkspaceId] = useState(acc.defaultWorkspaceId ?? '');
 
   const [nameDirty, setNameDirty] = useState(false);
   const [emailDirty, setEmailDirty] = useState(false);
   const [usernameDirty, setUsernameDirty] = useState(false);
-  const [accentColorDirty, setAccentColorDirty] = useState(false);
   const [timezoneDirty, setTimezoneDirty] = useState(false);
   const [workspaceDirty, setWorkspaceDirty] = useState(false);
 
-  const anyDirty = nameDirty || emailDirty || usernameDirty || accentColorDirty || timezoneDirty || workspaceDirty;
+  const anyDirty = nameDirty || emailDirty || usernameDirty || timezoneDirty || workspaceDirty;
 
   const saveAccount = () => {
     update('account', {
       name: name.trim() || 'Your Name',
       email: email.trim() || 'you@example.com',
       username: username.trim() || 'you',
-      accentColor,
       timezone,
       defaultWorkspaceId: defaultWorkspaceId || null,
     });
     setNameDirty(false);
     setEmailDirty(false);
     setUsernameDirty(false);
-    setAccentColorDirty(false);
     setTimezoneDirty(false);
     setWorkspaceDirty(false);
     toast({ title: 'Account settings saved' });
@@ -82,7 +79,6 @@ export function AccountSettings() {
     setName(acc.name); setNameDirty(false);
     setEmail(acc.email); setEmailDirty(false);
     setUsername(acc.username); setUsernameDirty(false);
-    setAccentColor(acc.accentColor); setAccentColorDirty(false);
     setTimezone(acc.timezone); setTimezoneDirty(false);
     setDefaultWorkspaceId(acc.defaultWorkspaceId ?? ''); setWorkspaceDirty(false);
   };
@@ -194,14 +190,14 @@ export function AccountSettings() {
             <div className="flex items-center gap-2">
               <input
                 type="color"
-                value={accentColor}
-                onChange={e => { setAccentColor(e.target.value); setAccentColorDirty(true); }}
+                value={settings.appearance.accentColor}
+                onChange={e => update('appearance', { accentColor: e.target.value })}
                 className="size-8 rounded-md cursor-pointer border border-border bg-transparent"
                 aria-label="Pick accent color"
               />
               <TextInput
-                value={accentColor}
-                onChange={e => { setAccentColor(e.target.value); setAccentColorDirty(true); }}
+                value={settings.appearance.accentColor}
+                onChange={e => update('appearance', { accentColor: e.target.value })}
                 className="w-28"
               />
             </div>
@@ -264,6 +260,10 @@ export function AccountSettings() {
           </div>
         </div>
       )}
+
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="account" />
+      </div>
 
       {/* Session / sign out */}
       <SettingSection title="Session">

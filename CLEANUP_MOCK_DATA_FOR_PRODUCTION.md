@@ -10,6 +10,8 @@ Mock data is controlled by the `VITE_USE_MOCK_DATA` env var and isolated to `src
 
 UI components (LeftNav, CenterWorkspace, RightAuxiliary, etc.) remain in place after cleanup — they just receive empty data instead of mock data.
 
+**Note:** `src/data/settings/settings.json` is the user settings seed and is NOT mock data. It lives in the same `src/data/` directory but is never deleted by this cleanup process — it is always kept regardless of `VITE_USE_MOCK_DATA`.
+
 ---
 
 ## Architecture

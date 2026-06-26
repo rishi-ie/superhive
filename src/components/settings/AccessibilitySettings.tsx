@@ -3,6 +3,7 @@
  */
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
+import { ResetSection } from './shared/ResetSection';
 import { Toggle } from '@/components/ui/Toggle';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
@@ -45,6 +46,9 @@ export function AccessibilitySettings() {
           }
         />
       </SettingSection>
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="accessibility" />
+      </div>
     </div>
   );
 }

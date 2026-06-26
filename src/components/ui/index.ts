@@ -6,6 +6,7 @@ export { Avatar } from './Avatar';
 export { Badge } from './Badge';
 export { Button } from './Button';
 export { Checkbox } from './Checkbox';
+export { CodeBlock } from './CodeBlock';
 export { IconButton } from './IconButton';
 export { NewButton } from './NewButton';
 export { Pill } from './Pill';

@@ -1,0 +1,247 @@
+{
+  "appearance": {
+    "theme": "dark",
+    "accentColor": "#e07850",
+    "fontScale": 1,
+    "reduceMotion": false,
+    "codeSyntaxTheme": "github-dark"
+  },
+  "notifications": {
+    "quietHours": {
+      "enabled": false,
+      "start": "22:00",
+      "end": "08:00",
+      "days": [0, 1, 2, 3, 4]
+    }
+  },
+  "privacy": {
+    "exportDataLastRun": null,
+    "conversationRetentionDays": 90
+  },
+  "accessibility": {
+    "reduceMotion": false
+  },
+  "defaults": {
+    "startupView": "last",
+    "defaultWorkspaceId": null,
+    "viewMode": "comfortable",
+    "timeFormat": "relative",
+    "defaultKanbanColumns": ["todo", "executing", "review", "merged"],
+    "rightPanelDefaultTab": "overview"
+  },
+  "keyboard": {
+    "groups": [
+      {
+        "label": "Global",
+        "shortcuts": [
+          { "keys": "⌘K", "description": "Open command palette" },
+          { "keys": "⌘.", "description": "Open settings" },
+          { "keys": "⌘1–9", "description": "Switch workspace" }
+        ]
+      },
+      {
+        "label": "Tabs",
+        "shortcuts": [
+          { "keys": "⌘T", "description": "New tab" },
+          { "keys": "⌘W", "description": "Close tab" },
+          { "keys": "⌘⇧[", "description": "Previous tab" },
+          { "keys": "⌘⇧]", "description": "Next tab" }
+        ]
+      },
+      {
+        "label": "Right Panel",
+        "shortcuts": [
+          { "keys": "⌘⇧O", "description": "Overview tab" },
+          { "keys": "⌘⇧M", "description": "Manage tab" },
+          { "keys": "⌘⇧I", "description": "Inbox tab" },
+          { "keys": "⌘⇧S", "description": "Sessions tab" },
+          { "keys": "Esc", "description": "Dismiss panel" }
+        ]
+      },
+      {
+        "label": "Tickets & Channels",
+        "shortcuts": [
+          { "keys": "N", "description": "New ticket" },
+          { "keys": "M", "description": "Send message (in channel)" },
+          { "keys": "@", "description": "Open mention picker" }
+        ]
+      }
+    ]
+  },
+  "models": {
+    "engines": [
+      { "id": "opus", "label": "Opus 4.8", "enabled": true },
+      { "id": "sonnet", "label": "Sonnet 4", "enabled": true },
+      { "id": "claude", "label": "Claude 3.5", "enabled": true },
+      { "id": "codex", "label": "Codex", "enabled": true }
+    ],
+    "providers": [
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "apiKey": "",
+        "fallbackOrder": ["sonnet", "claude"],
+        "customEndpointUrl": ""
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "apiKey": "",
+        "fallbackOrder": ["opus", "sonnet"],
+        "customEndpointUrl": ""
+      },
+      {
+        "id": "google",
+        "label": "Google AI",
+        "apiKey": "",
+        "fallbackOrder": ["claude", "sonnet"],
+        "customEndpointUrl": ""
+      }
+    ]
+  },
+  "workflows": {
+    "workflows": [
+      {
+        "id": "wf-1",
+        "name": "Daily Standup Summary",
+        "type": "schedule",
+        "cronExpression": "0 9 * * 1-5",
+        "lastRun": "2026-06-25T09:00:00Z"
+      },
+      {
+        "id": "wf-2",
+        "name": "Ticket Review Reminder",
+        "type": "schedule",
+        "cronExpression": "0 14 * * 5",
+        "lastRun": "2026-06-20T14:00:00Z"
+      }
+    ]
+  },
+  "costUsage": {
+    "monthlyBudgetCap": 500,
+    "monthlyBudgetEnabled": false,
+    "perAgentSpendingLimit": 100,
+    "perAgentSpendingEnabled": false,
+    "spendAlert": {
+      "thresholdPercent": 80,
+      "enabled": true
+    },
+    "resetCycleDay": 1,
+    "usageData": [
+      { "date": "2026-06-01", "cost": 12.4, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-02", "cost": 8.2, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-03", "cost": 15.7, "agentId": "agent-2", "workspaceId": "ws-1" },
+      { "date": "2026-06-04", "cost": 6.1, "agentId": "agent-1", "workspaceId": "ws-2" },
+      { "date": "2026-06-05", "cost": 22.3, "agentId": "agent-3", "workspaceId": "ws-1" },
+      { "date": "2026-06-08", "cost": 9.8, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-09", "cost": 11.2, "agentId": "agent-2", "workspaceId": "ws-2" },
+      { "date": "2026-06-10", "cost": 7.5, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-11", "cost": 18.9, "agentId": "agent-3", "workspaceId": "ws-1" },
+      { "date": "2026-06-12", "cost": 5.4, "agentId": "agent-1", "workspaceId": "ws-2" },
+      { "date": "2026-06-15", "cost": 14.1, "agentId": "agent-2", "workspaceId": "ws-1" },
+      { "date": "2026-06-16", "cost": 8.7, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-17", "cost": 21.3, "agentId": "agent-3", "workspaceId": "ws-2" },
+      { "date": "2026-06-18", "cost": 6.9, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-19", "cost": 10.2, "agentId": "agent-2", "workspaceId": "ws-1" },
+      { "date": "2026-06-22", "cost": 13.5, "agentId": "agent-1", "workspaceId": "ws-2" },
+      { "date": "2026-06-23", "cost": 7.8, "agentId": "agent-3", "workspaceId": "ws-1" },
+      { "date": "2026-06-24", "cost": 19.4, "agentId": "agent-1", "workspaceId": "ws-1" },
+      { "date": "2026-06-25", "cost": 9.1, "agentId": "agent-2", "workspaceId": "ws-2" }
+    ]
+  },
+  "agents": {
+    "defaultEngine": "sonnet"
+  },
+  "workspaces": {
+    "workspaces": [
+      {
+        "id": "ws-vela",
+        "name": "Vela",
+        "dataRetentionDays": 90,
+        "createdAt": "2026-01-15T00:00:00Z"
+      },
+      {
+        "id": "ws-cosmos",
+        "name": "Cosmos",
+        "dataRetentionDays": 90,
+        "createdAt": "2026-02-20T00:00:00Z"
+      }
+    ]
+  },
+  "integrations": {
+    "integrations": [
+      {
+        "id": "int-github",
+        "provider": "github",
+        "label": "GitHub",
+        "connected": true,
+        "channels": [
+          { "id": "ch-github-1", "name": "superhive/repo", "events": ["push", "pull_request", "issue"] }
+        ]
+      },
+      {
+        "id": "int-slack",
+        "provider": "slack",
+        "label": "Slack",
+        "connected": false,
+        "channels": []
+      },
+      {
+        "id": "int-linear",
+        "provider": "linear",
+        "label": "Linear",
+        "connected": false,
+        "channels": []
+      },
+      {
+        "id": "int-notion",
+        "provider": "notion",
+        "label": "Notion",
+        "connected": false,
+        "channels": []
+      },
+      {
+        "id": "int-jira",
+        "provider": "jira",
+        "label": "Jira",
+        "connected": false,
+        "channels": []
+      },
+      {
+        "id": "int-webhook",
+        "provider": "webhook",
+        "label": "Custom Webhook",
+        "connected": false,
+        "channels": []
+      }
+    ]
+  },
+  "billing": {
+    "plan": {
+      "tier": "pro",
+      "name": "Pro",
+      "priceMonthly": 49,
+      "includedQuota": "50 agent-hours / month",
+      "seats": 5,
+      "canUpgrade": true
+    },
+    "paymentMethod": {
+      "brand": "Visa",
+      "last4": "4242",
+      "expiry": "12/27"
+    }
+  },
+  "account": {
+    "name": "Your Name",
+    "email": "you@example.com",
+    "username": "you",
+    "avatarUrl": null,
+    "connectedAccounts": [
+      { "provider": "github", "label": "GitHub", "connected": true, "email": "you@github.com" },
+      { "provider": "google", "label": "Google", "connected": false, "email": null },
+      { "provider": "apple", "label": "Apple", "connected": false, "email": null }
+    ],
+    "defaultWorkspaceId": null,
+    "timezone": "America/New_York"
+  }
+}

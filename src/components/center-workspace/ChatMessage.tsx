@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
+import { CodeBlock } from '@/components/ui/CodeBlock';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { parseMarkdown, type MarkdownBlock, type InlineElement } from '@/lib/markdown';
 import { formatTime, formatDuration } from '@/components/chat/format';
@@ -44,25 +45,8 @@ function renderInline(inline: InlineElement, key: number) {
 
 function renderBlock(block: MarkdownBlock, key: number) {
   if (block.kind === 'codeblock') {
-    const lang = block.lang || 'code';
     return (
-      <div key={key} className="my-2 rounded-md border border-border/40 bg-sidebar overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-secondary/50">
-          <span className="text-[9px] font-fustat uppercase tracking-wider text-muted-foreground/60">{lang}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex items-center gap-1 text-[9px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-            onClick={() => navigator.clipboard.writeText(block.code)}
-          >
-            <Copy size={10} strokeWidth={STROKE_WIDTH} />
-            copy
-          </Button>
-        </div>
-        <pre className="p-3 text-[11px] font-fustat text-foreground overflow-x-auto leading-relaxed whitespace-pre-wrap">
-          <code>{block.code}</code>
-        </pre>
-      </div>
+      <CodeBlock key={key} code={block.code} lang={block.lang} />
     );
   }
 
