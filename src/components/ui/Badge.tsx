@@ -1,57 +1,66 @@
 /**
  * Small status badge for Active, Current, Recommended, Coming soon, and AI labels.
+ * Variants: default (active/current/recommended), secondary (coming-soon), destructive (error), outline, link.
  */
-import type { ReactNode } from 'react';
+import { cva } from 'class-variance-authority';
 import { CheckCircle2, Check, Lock } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
-type BadgeVariant = 'active' | 'current' | 'recommended' | 'coming-soon' | 'ai';
-type BadgeTone = 'primary' | 'muted' | 'ai';
+const badgeVariants = cva(
+  'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+  {
+    variants: {
+      variant: {
+        default:       'bg-chart-1/20 text-chart-1',
+        current:      'bg-chart-1/20 text-chart-1',
+        recommended:  'bg-chart-2/20 text-chart-2',
+        'coming-soon':'bg-muted text-muted-foreground',
+        ai:           'bg-chart-2/10 text-chart-2 border border-chart-2/40',
+        secondary:    'bg-secondary text-secondary-foreground',
+        destructive:  'bg-destructive/20 text-destructive',
+        outline:      'border border-current bg-transparent text-foreground',
+        link:         'text-primary underline-offset-4 hover:underline',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-type BadgeProps = {
-  variant?: BadgeVariant;
-  tone?: BadgeTone;
-  icon?: ReactNode;
-  children?: ReactNode;
+export type BadgeProps = {
+  variant?: 'active' | 'current' | 'recommended' | 'coming-soon' | 'ai' | 'secondary' | 'destructive' | 'outline' | 'link';
+  children?: React.ReactNode;
   className?: string;
 };
 
-const variantStyles: Record<BadgeVariant, string> = {
-  active:       'bg-chart-1/20 text-chart-1',
-  current:      'bg-chart-1/20 text-chart-1',
-  recommended:  'bg-chart-2/20 text-chart-2',
-  'coming-soon':'bg-muted text-muted-foreground',
-  ai:           'bg-chart-2/10 text-chart-2 border border-chart-2/40',
+const variantIcons: Record<string, React.ReactNode | undefined> = {
+  active:        <CheckCircle2 size={9} strokeWidth={STROKE_WIDTH} />,
+  current:       <Check size={9} strokeWidth={STROKE_WIDTH * 1.5} />,
+  recommended:   <Check size={9} strokeWidth={STROKE_WIDTH * 1.5} />,
+  'coming-soon': <Lock size={9} strokeWidth={STROKE_WIDTH} />,
 };
 
-const variantIcons: Partial<Record<BadgeVariant, ReactNode>> = {
-  active:       <CheckCircle2 size={9} strokeWidth={STROKE_WIDTH} />,
-  current:      <Check size={9} strokeWidth={STROKE_WIDTH * 1.5} />,
-  recommended:  <Check size={9} strokeWidth={STROKE_WIDTH * 1.5} />,
-  'coming-soon':<Lock size={9} strokeWidth={STROKE_WIDTH} />,
+const labelMap: Record<string, string> = {
+  active: 'Active', current: 'Current', recommended: 'Recommended',
+  'coming-soon': 'Coming Soon', ai: 'AI',
 };
 
 /**
- * Small status badge for Active, Current, Recommended, Coming soon, and AI labels.
+ * Small status badge with optional icon and custom label via children.
  * @param variant - Badge variant determines colors and optional icon
- * @param tone - Color tone override: primary (chart-1), muted, ai (chart-2)
- * @param icon - Optional icon override
- * @param children - Badge text (defaults to variant label if omitted)
+ * @param children - Badge text label (defaults to variant name if omitted)
  * @param className - Additional CSS classes
  */
-export function Badge({ variant = 'active', tone, icon, children, className = '' }: BadgeProps) {
-  const label = children ?? variant.replace('-', ' ');
-  const showIcon = icon ?? variantIcons[variant];
-
-  const toneClass = tone === 'muted'
-    ? 'bg-muted text-muted-foreground'
-    : tone === 'ai'
-    ? 'bg-chart-2/10 text-chart-2 border border-chart-2/40'
-    : variantStyles[variant];
+export function Badge({ variant = 'active', children, className = '' }: BadgeProps) {
+  const cvVariant = variant === 'active' ? 'default' : variant;
+  const label = children ?? labelMap[variant] ?? variant;
+  const icon = variantIcons[variant];
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ${toneClass} ${className}`}>
-      {showIcon}
+    <span className={cn(badgeVariants({ variant: cvVariant }), className)}>
+      {icon}
       {label}
     </span>
   );

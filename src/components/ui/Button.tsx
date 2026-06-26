@@ -1,44 +1,64 @@
 /**
- * Reusable button with variant (solid/outline/ghost) and size (sm/md/lg) options.
+ * Reusable button with variant and size options, plus loading spinner.
  */
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
-type ButtonVariant = 'solid' | 'outline' | 'ghost';
-type ButtonSize = 'sm' | 'md' | 'lg';
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
+  {
+    variants: {
+      variant: {
+        default:     'bg-chart-1 text-highlight-foreground hover:bg-chart-1/90 active:bg-chart-1/80',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline:    'border border-border bg-secondary text-foreground hover:bg-tertiary active:bg-tertiary-active',
+        secondary:  'bg-secondary text-secondary-foreground hover:bg-tertiary',
+        ghost:      'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 active:bg-sidebar-accent',
+        link:       'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        sm:  'h-7 px-3 text-xs',
+        md:  'h-9 px-4 text-sm',
+        lg:  'h-11 px-6 text-base',
+        icon: 'h-9 w-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  }
+);
 
-type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> & {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+export type ButtonProps = {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   loading?: boolean;
+  asChild?: boolean;
   className?: string;
-};
-
-const variantMap: Record<ButtonVariant, string> = {
-  solid: 'bg-chart-1 text-highlight-foreground hover:bg-chart-1/90 active:bg-chart-1/80',
-  outline: 'border border-border bg-secondary text-foreground hover:bg-tertiary active:bg-tertiary-active',
-  ghost: 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 active:bg-sidebar-accent',
-};
-
-const sizeMap: Record<ButtonSize, string> = {
-  sm: 'h-7 px-3 text-xs',
-  md: 'h-9 px-4 text-sm',
-  lg: 'h-11 px-6 text-base',
-};
+  children?: React.ReactNode;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'size' | 'className' | 'children'>;
 
 /**
  * Reusable button with variant and size options, plus loading spinner.
- * @param variant - Visual style: solid, outline, or ghost
- * @param size - Button size: sm, md, or lg
+ * @param variant - Visual style: default (solid), destructive, outline, secondary, ghost, or link
+ * @param size - Button size: sm, md, lg, or icon
  * @param loading - Shows spinner and disables the button
+ * @param asChild - Use Slot to merge props onto the child element
  * @param className - Additional CSS classes
+ * @param children - Button label or content
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'solid', size = 'md', loading = false, disabled, className = '', children, ...rest }, ref) => {
+  ({ variant = 'default', size = 'md', loading = false, asChild = false, disabled, className = '', children, ...rest }, ref) => {
+    const Comp = asChild ? Slot : 'button';
+
     return (
-      <button
+      <Comp
         ref={ref}
         disabled={disabled || loading}
-        className={`inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${variantMap[variant]} ${sizeMap[size]} ${className}`}
+        className={cn(buttonVariants({ variant, size }), className)}
         {...rest}
       >
         {loading && (
@@ -48,7 +68,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           </svg>
         )}
         {children}
-      </button>
+      </Comp>
     );
   }
 );

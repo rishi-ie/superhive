@@ -1,18 +1,17 @@
 /**
  * Compact toggleable pill button for filters and tags.
  */
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-type PillSize = 'sm' | 'md' | 'lg';
-
-type PillProps = {
+export type PillProps = {
   active?: boolean;
-  size?: PillSize;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
-  children: ReactNode;
-} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children'>;
+  children: React.ReactNode;
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children' | 'className'>;
 
-const sizeMap: Record<PillSize, string> = {
+const sizeMap: Record<string, string> = {
   sm: 'px-2 py-0.5 text-[10px]',
   md: 'px-2.5 py-1 text-xs',
   lg: 'px-3 py-1.5 text-sm',
@@ -31,17 +30,18 @@ export const Pill = forwardRef<HTMLButtonElement, PillProps>(
       <button
         ref={ref}
         aria-pressed={active}
-        className={`flex items-center gap-1.5 font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed ${sizeMap[size]} ${
-          active
-            ? 'bg-chart-1 text-highlight-foreground'
-            : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary'
-        } ${className}`}
+        className={cn(
+          'flex items-center gap-1.5 font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
+          active ? 'bg-chart-1 text-highlight-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary',
+          sizeMap[size],
+          className
+        )}
         {...rest}
       >
         {children}
       </button>
     );
-  },
+  }
 );
 
 Pill.displayName = 'Pill';

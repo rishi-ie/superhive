@@ -183,7 +183,7 @@ export function ModelsSettings() {
                     </div>
                   </div>
                   <div className="flex justify-end pt-2">
-                    <Button variant="solid" size="sm" onClick={() => handleSaveProvider(provider.id)}>
+                    <Button variant="default" size="sm" onClick={() => handleSaveProvider(provider.id)}>
                       Save provider
                     </Button>
                   </div>

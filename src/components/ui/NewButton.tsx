@@ -1,28 +1,30 @@
 /**
- * Create/new action button with plus icon.
+ * Create/new action button — thin wrapper around Button with a plus icon.
  */
 import { Plus } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
+import { Button } from './Button';
 
-type NewButtonProps = {
+export type NewButtonProps = {
   label: string;
   onClick?: () => void;
+  className?: string;
 };
 
 /**
  * Create/new action button with plus icon.
  * @param label - Button label text
  * @param onClick - Click handler
+ * @param className - Additional CSS classes
  */
-export function NewButton({ label, onClick }: NewButtonProps) {
+export function NewButton({ label, onClick, className = '' }: NewButtonProps) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="default"
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-md bg-chart-1 px-3 py-2 text-xs font-semibold text-highlight-foreground hover:bg-chart-1/90 transition-colors border border-sidebar-border shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      className={className}
     >
-      <Plus size={12} strokeWidth={STROKE_WIDTH} />
+      <Plus size={12} strokeWidth={2} />
       {label}
-    </button>
+    </Button>
   );
 }

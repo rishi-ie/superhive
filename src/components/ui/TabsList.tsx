@@ -1,15 +1,28 @@
 /**
  * Tabs list — container for tab triggers.
- * @param children - Tab trigger buttons
+ */
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { cn } from '@/lib/utils';
+
+export type TabsListProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+/**
+ * Tabs list — container for tab triggers.
+ * @param children - TabsTrigger components
  * @param className - Additional CSS classes
  */
-import * as RadixTabs from '@radix-ui/react-tabs';
-import type { ReactNode } from 'react';
-
-export function TabsList({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function TabsList({ children, className = '' }: TabsListProps) {
   return (
-    <RadixTabs.List className={`flex items-center gap-1 ${className}`}>
+    <TabsPrimitive.List
+      className={cn(
+        'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        className
+      )}
+    >
       {children}
-    </RadixTabs.List>
+    </TabsPrimitive.List>
   );
 }

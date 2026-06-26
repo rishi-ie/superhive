@@ -95,7 +95,7 @@ export function WorkflowsSettings() {
                     />
                     <div className="flex justify-end gap-2 pt-1">
                       <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-                      <Button variant="solid" size="sm" onClick={saveEdit}>Save</Button>
+                      <Button variant="default" size="sm" onClick={saveEdit}>Save</Button>
                     </div>
                   </div>
                 ) : (

@@ -30,7 +30,9 @@ See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for production cleanup steps.
 src/
 ├── App.tsx                    # Root shell — Dashboard or Settings
 ├── main.tsx                  # React entry point
-├── index.css                 # Tailwind + CSS variables (dark warm theme, terracotta accent)
+├── index.css                 # Tailwind v4 + CSS variables (dark warm theme, terracotta accent)
+├── hooks/                    # Shared React hooks
+│   └── use-mobile.ts         # Mobile breakpoint detection (shadcn utility)
 │
 ├── screens/
 │   ├── Dashboard.tsx          # Main 3-panel layout (LeftNav + CenterWorkspace + RightAuxiliary)
@@ -122,23 +124,55 @@ src/
 │   │       ├── ProjectOverviewTab.tsx
 │   │       └── index.ts
 │   │
-│   ├── ui/                  # Shared primitives — use these, don't reinvent
+│   ├── ui/                  # Shared primitives — use these, don't reinvent (shadcn/ui + custom)
+│   │   ├── Accordion.tsx
+│   │   ├── AccordionContent.tsx
+│   │   ├── AccordionItem.tsx
+│   │   ├── AccordionTrigger.tsx
 │   │   ├── Avatar.tsx
-│   │   ├── Button.tsx
+│   │   ├── Badge.tsx
+│   │   ├── Button.tsx         # CVA variants: default/destructive/outline/secondary/ghost/link
+│   │   ├── Card.tsx           # Card/CardHeader/CardTitle/CardDescription/CardContent/CardFooter
+│   │   ├── Checkbox.tsx
+│   │   ├── Collapsible.tsx
+│   │   ├── Command.tsx
+│   │   ├── Dialog.tsx         # Dialog/DialogContent/DialogHeader/DialogTitle/DialogDescription etc.
+│   │   ├── DropdownMenu.tsx   # DropdownMenu/DropdownMenuContent/DropdownMenuItem etc.
+│   │   ├── HoverCard.tsx
 │   │   ├── IconButton.tsx
+│   │   ├── Label.tsx
 │   │   ├── NewButton.tsx
-│   │   ├── SearchBar.tsx
-│   │   ├── Select.tsx
-│   │   ├── TextInput.tsx
-│   │   ├── Toggle.tsx
 │   │   ├── Pill.tsx
+│   │   ├── Popover.tsx
+│   │   ├── Progress.tsx
+│   │   ├── RadioGroup.tsx
+│   │   ├── ScrollArea.tsx
+│   │   ├── SearchBar.tsx
+│   │   ├── SectionLabel.tsx  # Section heading for stat panels
+│   │   ├── Select.tsx         # Radix Select — SelectTrigger/SelectContent/SelectItem
+│   │   ├── SelectableCard.tsx
+│   │   ├── Separator.tsx
+│   │   ├── SegmentedControl.tsx
+│   │   ├── Sheet.tsx          # Sheet/SheetContent/SheetHeader/SheetTitle etc.
+│   │   ├── Skeleton.tsx
+│   │   ├── Slider.tsx
+│   │   ├── StatCard.tsx      # Stat card for global stats views
 │   │   ├── StatusDot.tsx     # Agent status indicator — EXECUTING/COMPILING/IDLE/ERROR_LOOP/AWAITING_HUMAN
 │   │   ├── StatusFilter.tsx
+│   │   ├── Switch.tsx         # Radix Switch — for form on/off toggles
+│   │   ├── Tabs.tsx
+│   │   ├── TabsContent.tsx
+│   │   ├── TabsList.tsx
+│   │   ├── TabsTrigger.tsx
+│   │   ├── TextInput.tsx
+│   │   ├── Textarea.tsx
+│   │   ├── Toggle.tsx         # Radix Switch — for settings boolean toggles
+│   │   ├── Tooltip.tsx
+│   │   ├── TooltipProvider.tsx
 │   │   ├── UniversalListCard.tsx
-│   │   ├── SectionLabel.tsx  # Section heading for stat panels
-│   │   ├── StatCard.tsx      # Stat card for global stats views
+│   │   ├── CodeBlock.tsx      # Syntax-highlighted code (uses appearance.codeSyntaxTheme)
 │   │   ├── MaximizeOnDoubleClick.tsx
-│   │   └── index.ts          # (intentionally incomplete — direct imports preferred for tree-shaking)
+│   │   └── index.ts
 │   │
 │   ├── channels/            # Channel-specific shared components
 │   │   ├── ChannelStatusPill.tsx
@@ -175,6 +209,7 @@ src/
     ├── constants.ts          # Panel sizing, token costs, STROKE_WIDTH
     ├── relative-time.ts     # formatRelativeTime()
     ├── markdown.ts          # parseMarkdown()
+    ├── utils.ts             # cn() — shadcn utility (clsx + tailwind-merge)
     └── use-double-click.ts
 ```
 
@@ -241,6 +276,20 @@ Create `index.ts` in any new subdirectory with 2+ sibling files. Keep barrels fo
 ### Tailwind / CSS
 - No inline magic hex colors — use CSS variables (`--chart-1`, `--accent`, etc.) defined in `src/index.css`
 - No invented arbitrary values — use existing design tokens
+- Animation utilities (`animate-in`, `fade-in-0`, `zoom-in-95`, etc.) are provided by `tw-animate-css` — import via `src/index.css`
+- shadcn components use `@theme inline` CSS variables (see `src/index.css`) for theming — use them instead of hardcoded values
+
+### shadcn/ui conventions
+This project uses shadcn/ui as the component foundation. Key conventions:
+- **Add new shadcn components**: run `bunx shadcn@latest add <component-name>` (CLI adds to `src/components/ui/`)
+- **Filename convention**: PascalCase (`Button.tsx`, not `button.tsx`) — preserves existing import paths
+- **Variant naming**: `Button` uses `variant="default"` (not `"solid"`) and `variant="outline"` — existing `variant="solid"` call sites were migrated to `variant="default"` in the initial shadcn overhaul
+- **cn() utility**: shadcn components use `cn()` from `@/lib/utils` (clsx + tailwind-merge) for composing class names
+- **CVA for variants**: use `class-variance-authority` (CVA) for components with multiple variant/size axes (Button, Badge, Pill)
+- **Radix primitives**: shadcn is built on Radix UI primitives (`@radix-ui/react-*`); import them from the radix package directly, not from shadcn
+- **`verbatimModuleSyntax: true`**: TypeScript requires explicit named imports for all used identifiers — always write `import { forwardRef } from 'react'` not just `import React from 'react'` when using React types
+- **Theme tokens**: shadcn components read CSS variables from `src/index.css` — our custom `--chart-1..5`, `--highlight`, `--tertiary` etc. are available and used by custom components
+- **Domain components**: IconButton, StatusDot, StatusFilter, SegmentedControl, CodeBlock, SectionLabel, StatCard, SelectableCard, UniversalListCard, MaximizeOnDoubleClick, AccordionCore, FavoritesSection — these are custom domain primitives, not in shadcn; keep them as-is
 
 ### TypeScript
 - `noUnusedLocals: true` and `noUnusedParameters: true` are enforced — fix all errors before committing
@@ -308,6 +357,8 @@ To add a new domain: create the `interface.ts` + `store.ts` pair, add mock data 
 3. Component — create file in correct subdirectory (see Component Placement)
    - Top-of-file JSDoc block
    - Component JSDoc with @param for each prop
+   - Prefer shadcn primitives if available (see shadcn/ui conventions)
+   - For new UI primitives, use CVA for variants + cn() for class composition
 4. Wire it — add to TabBody.tsx dispatcher, RightAuxiliary.tsx, or AccordionCore.tsx
 5. TypeScript — bun run typecheck (must pass, no unused locals/params)
 6. Build — bun run build (must pass)

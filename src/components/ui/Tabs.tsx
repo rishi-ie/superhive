@@ -1,7 +1,7 @@
 /**
- * Tabs component using Radix UI for accessible keyboard navigation.
+ * Tabs — accessible tabbed interface using @radix-ui/react-tabs.
  */
-import * as RadixTabs from '@radix-ui/react-tabs';
+import * as TabsPrimitive from '@radix-ui/react-tabs';
 import type { ReactNode } from 'react';
 
 /**
@@ -20,13 +20,13 @@ export function Tabs({ defaultValue, value, onValueChange, children, className =
   className?: string;
 }) {
   return (
-    <RadixTabs.Root
+    <TabsPrimitive.Root
       defaultValue={defaultValue}
       value={value}
       onValueChange={onValueChange}
       className={className}
     >
       {children}
-    </RadixTabs.Root>
+    </TabsPrimitive.Root>
   );
 }

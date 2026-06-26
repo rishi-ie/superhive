@@ -1,15 +1,24 @@
 /**
- * Tooltip provider — wrap the app or relevant subtree once.
- * @param children - The wrapped subtree
- * @param delayDuration - Hover delay before showing (ms)
+ * Tooltip provider — wraps the application to enable tooltips globally.
  */
-import * as RadixTooltip from '@radix-ui/react-tooltip';
-import type { ReactNode } from 'react';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
-export function TooltipProvider({ children, delayDuration = 300 }: { children: ReactNode; delayDuration?: number }) {
+export type TooltipProviderProps = {
+  children: React.ReactNode;
+  delayDuration?: number;
+  skipDelayDuration?: number;
+};
+
+/**
+ * Tooltip provider — wrap your app root to enable accessible tooltips.
+ * @param children - App content
+ * @param delayDuration - Hover delay before showing (ms, default 400)
+ * @param skipDelayDuration - Delay for subsequent tooltips (ms)
+ */
+export function TooltipProvider({ children, delayDuration = 400, skipDelayDuration = 0 }: TooltipProviderProps) {
   return (
-    <RadixTooltip.Provider delayDuration={delayDuration}>
+    <TooltipPrimitive.Provider delayDuration={delayDuration} skipDelayDuration={skipDelayDuration}>
       {children}
-    </RadixTooltip.Provider>
+    </TooltipPrimitive.Provider>
   );
 }

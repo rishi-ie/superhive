@@ -1,18 +1,20 @@
 /**
- * User avatar with image fallback to initials.
+ * Avatar — user avatar with image fallback to initials.
+ * Uses @radix-ui/react-avatar for accessible rendering.
  */
-import type { HTMLAttributes } from 'react';
+import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { getInitials } from '@/lib/initials';
 
-type AvatarSize = 'xs' | 'xs2' | 'xs3' | 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = 'xs' | 'xs2' | 'xs3' | 'sm' | 'md' | 'lg' | 'xl';
 
-type AvatarProps = HTMLAttributes<HTMLDivElement> & {
+export type AvatarProps = {
   size?: AvatarSize;
   src?: string;
   alt?: string;
   fallback?: string;
   name?: string;
   color?: string;
+  className?: string;
 };
 
 const sizeMap: Record<AvatarSize, string> = {
@@ -32,7 +34,7 @@ const sizeMap: Record<AvatarSize, string> = {
  * @param alt - Image alt text
  * @param fallback - Explicit initials string (overrides name)
  * @param name - Full name used to derive initials via getInitials()
- * @param color - Additional CSS classes for background color (e.g. "bg-chart-2")
+ * @param color - Additional CSS classes for background color
  * @param className - Additional CSS classes
  */
 export function Avatar({
@@ -43,20 +45,24 @@ export function Avatar({
   name,
   color,
   className = '',
-  ...rest
 }: AvatarProps) {
   const initials = fallback ?? (name ? getInitials(name) : '?');
 
   return (
-    <div
-      className={`relative flex shrink-0 items-center justify-center rounded-full bg-sidebar-accent border border-sidebar-border font-bold text-sidebar-accent-foreground overflow-hidden ${sizeMap[size]} ${color ?? ''} ${className}`}
-      {...rest}
+    <AvatarPrimitive.Root
+      className={`relative flex shrink-0 items-center justify-center rounded-full overflow-hidden bg-sidebar-accent border border-sidebar-border font-bold text-sidebar-accent-foreground ${sizeMap[size]} ${color ?? ''} ${className}`}
     >
-      {src ? (
-        <img src={src} alt={alt ?? fallback ?? 'Avatar'} className="h-full w-full object-cover" />
-      ) : (
-        <span>{initials}</span>
-      )}
-    </div>
+      <AvatarPrimitive.Image
+        src={src}
+        alt={alt ?? fallback ?? 'Avatar'}
+        className="h-full w-full object-cover"
+      />
+      <AvatarPrimitive.Fallback
+        className="flex h-full w-full items-center justify-center"
+        delayMs={600}
+      >
+        {initials}
+      </AvatarPrimitive.Fallback>
+    </AvatarPrimitive.Root>
   );
 }

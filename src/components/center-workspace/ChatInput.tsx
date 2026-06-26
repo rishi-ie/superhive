@@ -153,7 +153,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
           </div>
 
           <Button
-            variant="solid"
+            variant="default"
             size="sm"
             onClick={handleSubmit}
             disabled={!value.trim()}

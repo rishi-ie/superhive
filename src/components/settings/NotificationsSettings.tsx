@@ -132,7 +132,7 @@ export function NotificationsSettings() {
             <Button variant="ghost" size="sm" onClick={discardChanges}>
               Discard
             </Button>
-            <Button variant="solid" size="sm" onClick={save}>
+            <Button variant="default" size="sm" onClick={save}>
               Save changes
             </Button>
           </div>

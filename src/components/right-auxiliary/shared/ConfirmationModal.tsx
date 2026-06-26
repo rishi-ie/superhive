@@ -123,7 +123,7 @@ export function ConfirmationModal({
             Cancel
           </Button>
           <Button
-            variant={destructive ? 'outline' : 'solid'}
+            variant={destructive ? 'outline' : 'default'}
             size="sm"
             className="flex-1"
             disabled={!canConfirm}

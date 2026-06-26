@@ -92,7 +92,7 @@ export function WorkspacesSettings() {
           <h2 className="text-2xl font-semibold text-foreground">Workspaces</h2>
           <p className="mt-2 text-sm text-muted-foreground">Manage your organization's workspaces and data retention policies.</p>
         </div>
-        <Button variant="solid" size="md" onClick={handleCreate} className="gap-1.5 shrink-0">
+        <Button variant="default" size="md" onClick={handleCreate} className="gap-1.5 shrink-0">
           <Plus size={14} />
           New workspace
         </Button>
@@ -119,7 +119,7 @@ export function WorkspacesSettings() {
                           if (e.key === 'Escape') cancelEdit();
                         }}
                       />
-                      <Button variant="solid" size="sm" onClick={saveEdit}>Save</Button>
+                      <Button variant="default" size="sm" onClick={saveEdit}>Save</Button>
                       <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
                     </div>
                   ) : (

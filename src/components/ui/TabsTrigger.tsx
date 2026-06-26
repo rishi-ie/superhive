@@ -1,26 +1,35 @@
 /**
- * Tab trigger — a single selectable tab.
- * @param value - The value this tab represents
- * @param children - Tab label
+ * Tab trigger — individual tab button.
+ */
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { cn } from '@/lib/utils';
+
+export type TabsTriggerProps = {
+  value: string;
+  children: React.ReactNode;
+  className?: string;
+  disabled?: boolean;
+};
+
+/**
+ * Tab trigger — individual tab button.
+ * @param value - The tab value this trigger activates
+ * @param children - Tab label content
  * @param className - Additional CSS classes
  * @param disabled - Prevents tab selection
  */
-import * as RadixTabs from '@radix-ui/react-tabs';
-import type { ReactNode } from 'react';
-
-export function TabsTrigger({ value, children, className = '', disabled = false }: {
-  value: string;
-  children: ReactNode;
-  className?: string;
-  disabled?: boolean;
-}) {
+export function TabsTrigger({ value, children, className = '', disabled = false }: TabsTriggerProps) {
   return (
-    <RadixTabs.Trigger
+    <TabsPrimitive.Trigger
       value={value}
       disabled={disabled}
-      className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=active]:bg-sidebar-accent data-[state=active]:text-sidebar-accent-foreground text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={cn(
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+        'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow',
+        className
+      )}
     >
       {children}
-    </RadixTabs.Trigger>
+    </TabsPrimitive.Trigger>
   );
 }

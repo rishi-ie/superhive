@@ -231,7 +231,7 @@ export function ChannelDetailView({
             className="flex-1 resize-none"
           />
           <Button
-            variant="solid"
+            variant="default"
             size="sm"
             onClick={handleSend}
             disabled={!input.trim()}

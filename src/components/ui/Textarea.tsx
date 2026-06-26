@@ -2,8 +2,9 @@
  * Styled textarea with size and error state options.
  */
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+export type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   size?: 'sm' | 'md';
   error?: boolean;
   className?: string;
@@ -26,11 +27,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       <textarea
         ref={ref}
         aria-invalid={error}
-        className={`flex w-full resize-none rounded-md border bg-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-          error
-            ? 'border-destructive focus-visible:ring-destructive/40'
-            : 'border-border'
-        } ${sizeClasses[size]} text-foreground placeholder:text-muted-foreground ${className}`}
+        className={cn(
+          'flex w-full resize-none rounded-md border bg-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+          error ? 'border-destructive focus-visible:ring-destructive/40' : 'border-border',
+          sizeClasses[size],
+          'text-foreground placeholder:text-muted-foreground',
+          className
+        )}
         {...rest}
       />
     );

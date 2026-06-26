@@ -2,16 +2,17 @@
  * Styled text input with size and error state options.
  */
 import { forwardRef, type InputHTMLAttributes } from 'react';
+import { cn } from '@/lib/utils';
 
-type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+export type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   size?: 'sm' | 'md';
   error?: boolean;
   className?: string;
 };
 
 const sizeClasses: Record<string, string> = {
-  sm: 'px-2.5 py-1.5 text-xs',
-  md: 'px-3 py-2 text-sm',
+  sm: 'h-7 px-2.5 py-1.5 text-xs',
+  md: 'h-9 px-3 py-2 text-sm',
 };
 
 /**
@@ -26,11 +27,12 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
       <input
         ref={ref}
         aria-invalid={error}
-        className={`w-full rounded-md border bg-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-          error
-            ? 'border-destructive focus-visible:ring-destructive/40'
-            : 'border-border'
-        } ${sizeClasses[size]} text-foreground placeholder:text-muted-foreground ${className}`}
+        className={cn(
+          'flex w-full rounded-md border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors',
+          error ? 'border-destructive focus-visible:ring-destructive/40' : 'border-border',
+          sizeClasses[size],
+          className
+        )}
         {...rest}
       />
     );

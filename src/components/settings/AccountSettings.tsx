@@ -254,7 +254,7 @@ export function AccountSettings() {
             <Button variant="ghost" size="sm" onClick={discardChanges}>
               Discard
             </Button>
-            <Button variant="solid" size="sm" onClick={saveAccount}>
+            <Button variant="default" size="sm" onClick={saveAccount}>
               Save changes
             </Button>
           </div>

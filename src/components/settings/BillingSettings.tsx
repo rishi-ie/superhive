@@ -75,7 +75,7 @@ export function BillingSettings() {
               </div>
             </div>
             {plan.canUpgrade && (
-              <Button variant="solid" size="md" onClick={() => setShowUpgradeModal(true)}>
+              <Button variant="default" size="md" onClick={() => setShowUpgradeModal(true)}>
                 Upgrade plan
               </Button>
             )}

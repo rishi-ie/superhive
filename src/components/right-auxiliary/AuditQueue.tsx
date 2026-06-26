@@ -88,7 +88,7 @@ export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueP
                     View Code Diff
                   </Button>
                   <Button
-                    variant="solid"
+                    variant="default"
                     size="sm"
                     className="flex-1"
                     onClick={() => onApprove?.(item.id)}
