@@ -101,7 +101,7 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
 
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border/40">
-      <div className="flex flex-col gap-4 px-4 pt-4 pb-3">
+      <div className="flex flex-col gap-4 px-4 pt-[calc(1rem+var(--titlebar-y,0px))] pb-3 [-webkit-app-region:drag] [&_button]:[-webkit-app-region:no-drag] [&_input]:[-webkit-app-region:no-drag] [&_a]:[-webkit-app-region:no-drag]">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors text-left w-fit -ml-0.5"

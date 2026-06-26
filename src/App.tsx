@@ -2,7 +2,7 @@
  * Root shell — toggles between main Dashboard and Settings screen.
  * Handles resizable panel width state for left nav and right auxiliary.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   DEFAULT_LEFT_WIDTH,
   DEFAULT_RIGHT_WIDTH,
@@ -37,6 +37,11 @@ function App() {
   const handleNavigate = (target: Page) => {
     setPage(target);
   };
+
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad/i.test(navigator.userAgent);
+    document.documentElement.style.setProperty('--titlebar-y', isMac ? '28px' : '0px');
+  }, []);
 
   return (
     <SettingsProvider>
