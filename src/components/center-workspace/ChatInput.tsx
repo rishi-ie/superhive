@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Textarea } from '@/components/ui/Textarea';
 import { Pill } from '@/components/ui/Pill';
+import { MODEL_LABELS } from '@/data/config/models';
 
 type ChatInputProps = {
   placeholder?: string;
@@ -15,8 +16,6 @@ type ChatInputProps = {
   onSubmit?: (text: string, model: string) => void;
   agentId?: string;
 };
-
-const MODELS = ['Auto', 'Opus 4.8', 'Sonnet 4', 'Codex', 'Copilot'];
 
 const CHAR_TOKEN_RATIO = 4; // rough estimate: 1 token ≈ 4 chars
 
@@ -135,7 +134,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
                 </Button>
                 {showModelPicker && (
                   <div className="absolute bottom-full left-0 mb-1 w-32 rounded-md border border-border bg-card shadow-lg z-10 overflow-hidden">
-                    {MODELS.filter(m => m !== 'Auto').map(m => (
+                    {MODEL_LABELS.filter(m => m !== 'Auto').map(m => (
                       <button
                         key={m}
                         type="button"

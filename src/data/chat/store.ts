@@ -1,6 +1,6 @@
 import { isMockEnabled } from '@/data/mock/feature-flags';
 import mockData from '../mock.json';
-import type { MockData } from '../mock/types';
+import type { MockData, ChatQuickStartItem } from '../mock/types';
 import type { ChatThread, Message } from './interface';
 
 const data = mockData as MockData;
@@ -136,5 +136,11 @@ export function createThreadForAgent(agentId: string, title: string): ChatThread
   return store.createThread(agentId, title);
 }
 
+export function listChatQuickStart(): ChatQuickStartItem[] {
+  if (!isMockEnabled('chat')) return [];
+  return data.chatQuickStart ?? [];
+}
+
 export type { ChatThread };
 export type { Message };
+export type { ChatQuickStartItem };

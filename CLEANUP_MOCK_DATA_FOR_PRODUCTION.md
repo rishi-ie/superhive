@@ -20,13 +20,22 @@ UI components (LeftNav, CenterWorkspace, RightAuxiliary, etc.) remain in place a
 
 **Mock types**: `src/data/mock/types.ts` — shared TypeScript types for mock data structures
 
-**Data stores** (6 domains, each checks `isMockEnabled`):
+**Data stores** (7 domains, each checks `isMockEnabled`):
 - `src/data/workspaces/store.ts`
 - `src/data/agents/store.ts`
 - `src/data/favorites/store.tsx`
 - `src/data/projects/store.ts`
 - `src/data/tickets/store.ts`
 - `src/data/chat/store.ts`
+
+**Static UI config vs. mock data** — important distinction:
+
+| Category | Where | Examples | Production? |
+|---|---|---|---|
+| **Mock data** | `src/data/mock.json` + `src/data/{domain}/store.ts` | workspaces, agents, tickets, chat threads, cost-usage history, quick-start suggestions | Deleted in Step 2 |
+| **Static UI config** | Inline arrays in component/TS files | `STATUS_OPTIONS`, `TIMEZONES`, `PLAN_TIERS`, `MODEL_LABELS`, icon name maps | Always kept — defines valid UI choices, not per-instance records |
+
+Static UI config arrays define the set of valid choices for a control (e.g., "which status values can a ticket have?"). They are NOT seeded records and do not belong in `mock.json`. They are intentionally kept inline regardless of the `VITE_USE_MOCK_DATA` setting.
 
 ---
 
@@ -106,6 +115,7 @@ export function listWorkspaces(): Workspace[] {
 | `listProjects` / `getProject` | `isMockEnabled('projects')` | `src/data/projects/store.ts` |
 | `listUniversalTickets` | `isMockEnabled('tickets')` | `src/data/tickets/store.ts` |
 | `listThreads` / `listMessages` | `isMockEnabled('chat')` | `src/data/chat/store.ts` |
+| `listCostUsage` | `isMockEnabled('costUsage')` | `src/data/cost-usage/store.ts` |
 
 ---
 

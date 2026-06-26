@@ -395,5 +395,34 @@
     { "id": "cmsg-44", "channelId": "mb-ch-3", "senderName": "Noah Chen", "content": "Use LAContext on iOS, BiometricPrompt on Android.", "timestamp": "09:40 AM", "isAI": true },
     { "id": "cmsg-45", "channelId": "mb-ch-3", "senderName": "Sonia Patel", "content": "Fallback to passcode when biometrics fail 3 times?", "timestamp": "09:35 AM", "isAI": true },
     { "id": "cmsg-46", "channelId": "mb-ch-3", "senderName": "Noah Chen", "content": "Yes — standard iOS/Android fallback behavior. We're not adding custom fallback logic.", "timestamp": "09:32 AM", "isAI": true }
+  ],
+  "costUsage": [
+    { "date": "Jun 1", "cost": 12.4 },
+    { "date": "Jun 2", "cost": 8.2 },
+    { "date": "Jun 3", "cost": 15.7 },
+    { "date": "Jun 4", "cost": 6.1 },
+    { "date": "Jun 5", "cost": 22.3 },
+    { "date": "Jun 8", "cost": 9.8 },
+    { "date": "Jun 9", "cost": 11.2 },
+    { "date": "Jun 10", "cost": 7.5 },
+    { "date": "Jun 11", "cost": 18.9 },
+    { "date": "Jun 12", "cost": 5.4 },
+    { "date": "Jun 15", "cost": 14.1 },
+    { "date": "Jun 16", "cost": 8.7 },
+    { "date": "Jun 17", "cost": 21.3 },
+    { "date": "Jun 18", "cost": 6.9 },
+    { "date": "Jun 19", "cost": 10.2 },
+    { "date": "Jun 22", "cost": 13.5 },
+    { "date": "Jun 23", "cost": 7.8 },
+    { "date": "Jun 24", "cost": 19.4 },
+    { "date": "Jun 25", "cost": 9.1 }
+  ],
+  "chatQuickStart": [
+    { "icon": "layers", "label": "Sprint planning", "description": "Break down a sprint goal into tickets", "category": "Planning" },
+    { "icon": "code", "label": "Review this PR", "description": "Analyze a pull request for issues", "category": "Code" },
+    { "icon": "search", "label": "Research competitors", "description": "Compare features and pricing", "category": "Research" },
+    { "icon": "file", "label": "Write documentation", "description": "Generate or update docs", "category": "Docs" },
+    { "icon": "chart", "label": "Analyze performance", "description": "Review metrics and suggest improvements", "category": "Analytics" },
+    { "icon": "bot", "label": "Configure an agent", "description": "Set up permissions and scope", "category": "Agents" }
   ]
 }

@@ -37,6 +37,18 @@ export type ChannelMessageSeed = {
   isAI: boolean;
 };
 
+export type CostUsageEntry = {
+  date: string;
+  cost: number;
+};
+
+export type ChatQuickStartItem = {
+  icon: string;
+  label: string;
+  description: string;
+  category: string;
+};
+
 export type MockData = {
   workspaces: Workspace[];
   currentWorkspaceId: string;
@@ -51,4 +63,6 @@ export type MockData = {
   chatThreads: ChatThreadSeed[];
   favorites: FavoriteSeed[];
   channelMessages: ChannelMessageSeed[];
+  costUsage: CostUsageEntry[];
+  chatQuickStart: ChatQuickStartItem[];
 };

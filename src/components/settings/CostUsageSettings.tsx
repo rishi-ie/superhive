@@ -10,31 +10,10 @@ import { TextInput } from '@/components/ui/TextInput';
 import { StatCard } from '@/components/ui/StatCard';
 import { useToast } from '@/lib/toast-context';
 import { Download, Lock } from 'lucide-react';
-
-const DEFAULT_DATA = [
-  { date: 'Jun 1', cost: 12.4 },
-  { date: 'Jun 2', cost: 8.2 },
-  { date: 'Jun 3', cost: 15.7 },
-  { date: 'Jun 4', cost: 6.1 },
-  { date: 'Jun 5', cost: 22.3 },
-  { date: 'Jun 8', cost: 9.8 },
-  { date: 'Jun 9', cost: 11.2 },
-  { date: 'Jun 10', cost: 7.5 },
-  { date: 'Jun 11', cost: 18.9 },
-  { date: 'Jun 12', cost: 5.4 },
-  { date: 'Jun 15', cost: 14.1 },
-  { date: 'Jun 16', cost: 8.7 },
-  { date: 'Jun 17', cost: 21.3 },
-  { date: 'Jun 18', cost: 6.9 },
-  { date: 'Jun 19', cost: 10.2 },
-  { date: 'Jun 22', cost: 13.5 },
-  { date: 'Jun 23', cost: 7.8 },
-  { date: 'Jun 24', cost: 19.4 },
-  { date: 'Jun 25', cost: 9.1 },
-];
+import { listCostUsage } from '@/data/cost-usage/store';
 
 
-function UsageChart({ data }: { data: typeof DEFAULT_DATA }) {
+function UsageChart({ data }: { data: { date: string; cost: number }[] }) {
   const max = Math.max(...data.map(d => d.cost), 1);
   return (
     <div className="space-y-2">
@@ -75,12 +54,13 @@ export function CostUsageSettings() {
   const [spendAlertEnabled, setSpendAlertEnabled] = useState(true);
   const [resetDay, setResetDay] = useState(1);
 
-  const totalCost = DEFAULT_DATA.reduce((s, d) => s + d.cost, 0);
-  const avgCost = totalCost / DEFAULT_DATA.length;
-  const peakCost = Math.max(...DEFAULT_DATA.map(d => d.cost));
+  const usageData = listCostUsage();
+  const totalCost = usageData.reduce((s, d) => s + d.cost, 0);
+  const avgCost = totalCost / usageData.length;
+  const peakCost = Math.max(...usageData.map(d => d.cost));
 
   const handleExportCsv = () => {
-    const rows = [['Date', 'Cost', 'Agent ID', 'Workspace ID'], ...DEFAULT_DATA.map(d => [d.date, d.cost.toFixed(2), '', ''])];
+    const rows = [['Date', 'Cost', 'Agent ID', 'Workspace ID'], ...usageData.map(d => [d.date, d.cost.toFixed(2), '', ''])];
     const csv = rows.map(r => r.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -105,11 +85,11 @@ export function CostUsageSettings() {
       >
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
-            <StatCard label="Total" value={`$${totalCost.toFixed(2)}`} sub={`${DEFAULT_DATA.length} active days`} />
+            <StatCard label="Total" value={`$${totalCost.toFixed(2)}`} sub={`${usageData.length} active days`} />
             <StatCard label="Average" value={`$${avgCost.toFixed(2)}`} sub="per active day" />
-            <StatCard label="Peak" value={`$${peakCost.toFixed(2)}`} sub={`on ${DEFAULT_DATA.find(d => d.cost === peakCost)?.date}`} />
+            <StatCard label="Peak" value={`$${peakCost.toFixed(2)}`} sub={`on ${usageData.find(d => d.cost === peakCost)?.date}`} />
           </div>
-          <UsageChart data={DEFAULT_DATA} />
+          <UsageChart data={usageData} />
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <div className="size-2 rounded-sm bg-chart-1" />

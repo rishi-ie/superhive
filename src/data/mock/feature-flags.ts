@@ -6,7 +6,8 @@ export type MockDomain =
   | 'agents'
   | 'chat'
   | 'projects'
-  | 'tickets';
+  | 'tickets'
+  | 'costUsage';
 
 export function isMockEnabled(domain: MockDomain): boolean {
   if (!USE_MOCK_DATA) return false;
