@@ -44,3 +44,6 @@ export const MAX_VISIBLE_PARTICIPANTS = 5;
 
 /** Toast auto-dismiss duration in ms. */
 export const TOAST_DURATION_MS = 3000;
+
+/** Default vertical offset for hidden titlebar on macOS. 0 on other platforms. */
+export const TITLEBAR_Y_MAC_PX = 28;

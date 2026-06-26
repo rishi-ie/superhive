@@ -1,5 +1,6 @@
 /**
- * Selectable card — a bordered tile that can be selected, used for theme/engine/integration pickers.
+ * Selectable card — bordered tile for picking a single option from a grid.
+ * Used in settings pages for theme, engine, and similar pickers.
  */
 import type { ReactNode } from 'react';
 

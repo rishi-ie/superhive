@@ -4,7 +4,7 @@
 import { SettingSection } from './shared/SettingSection';
 import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
-import { SelectableCard } from '@/components/ui/SelectableCard';
+import { SelectableCard } from './shared/SelectableCard';
 import { Badge } from '@/components/ui/Badge';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';

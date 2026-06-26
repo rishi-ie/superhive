@@ -10,6 +10,7 @@ import {
   MAX_LEFT_WIDTH,
   MIN_RIGHT_WIDTH,
   MAX_RIGHT_WIDTH,
+  TITLEBAR_Y_MAC_PX,
 } from '@/lib/constants';
 import { Dashboard } from './screens/Dashboard';
 import { Settings } from './screens/Settings';
@@ -40,7 +41,10 @@ function App() {
 
   useEffect(() => {
     const isMac = /Mac|iPhone|iPad/i.test(navigator.userAgent);
-    document.documentElement.style.setProperty('--titlebar-y', isMac ? '28px' : '0px');
+    document.documentElement.style.setProperty(
+      '--titlebar-y',
+      isMac ? `${TITLEBAR_Y_MAC_PX}px` : '0px'
+    );
   }, []);
 
   return (

@@ -16,61 +16,8 @@ import {
   type Settings,
   type SettingsStore,
 } from '@/data/settings/interface';
+import { DEFAULT_THEMES, ALL_THEME_VARS } from '@/data/config/themes';
 import { debounce } from '@/lib/debounce';
-
-const DEFAULT_THEMES = [
-  {
-    id: 'dark' as const,
-    name: 'Dark',
-    vars: {},
-  },
-  {
-    id: 'light' as const,
-    name: 'Light',
-    vars: {
-      '--background': '#f5f2ef',
-      '--foreground': '#1a1716',
-      '--card': '#ffffff',
-      '--card-foreground': '#1a1716',
-      '--popover': '#ffffff',
-      '--popover-foreground': '#1a1716',
-      '--primary': '#1a1716',
-      '--primary-foreground': '#f5f2ef',
-      '--secondary': '#e8e4e0',
-      '--secondary-foreground': '#1a1716',
-      '--muted': '#e8e4e0',
-      '--muted-foreground': '#6b6560',
-      '--accent': '#e07850',
-      '--accent-foreground': '#ffffff',
-      '--tertiary': '#ddd9d5',
-      '--tertiary-active': '#d0cbc6',
-      '--destructive': '#cc4444',
-      '--destructive-foreground': '#ffffff',
-      '--border': '#d0cbc6',
-      '--input': '#d0cbc6',
-      '--ring': '#b0a89e',
-      '--sidebar': '#f5f2ef',
-      '--sidebar-foreground': '#1a1716',
-      '--sidebar-primary': '#e07850',
-      '--sidebar-primary-foreground': '#ffffff',
-      '--sidebar-accent': '#e8e4e0',
-      '--sidebar-accent-foreground': '#1a1716',
-      '--sidebar-border': '#d0cbc6',
-      '--sidebar-ring': '#b0a89e',
-      '--highlight-match': 'rgba(224, 120, 80, 0.15)',
-      '--highlight-active': 'rgba(224, 120, 80, 0.4)',
-      '--highlight': '#e07850',
-      '--highlight-foreground': '#ffffff',
-    },
-  },
-  {
-    id: 'system' as const,
-    name: 'System',
-    vars: {},
-  },
-];
-
-const ALL_THEME_VARS = new Set(DEFAULT_THEMES.flatMap(t => Object.keys(t.vars)));
 
 export { DEFAULT_THEMES };
 export type { Theme } from '@/data/settings/interface';

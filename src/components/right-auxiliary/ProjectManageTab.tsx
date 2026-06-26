@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
-import { SaveCancelBar } from './shared/SaveCancelBar';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { ConfirmationModal } from './shared/ConfirmationModal';
 import { useToast } from '@/lib/toast-context';
 import type { Project } from '@/data/projects/store';
@@ -117,10 +117,11 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
 
       </div>
 
-      <SaveCancelBar
+      <SaveBar
         onSave={handleSave}
         onCancel={handleCancel}
         disabled={!isDirty}
+        variant="inline"
       />
 
       {showArchiveModal && (

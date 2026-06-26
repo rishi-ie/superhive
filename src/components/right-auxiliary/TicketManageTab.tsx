@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
-import { SaveCancelBar } from './shared/SaveCancelBar';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { ConfirmationModal } from './shared/ConfirmationModal';
 import { useToast } from '@/lib/toast-context';
 import type { UniversalTicket, UniversalTicketStatus, Priority, TicketType } from '@/data/tickets/store';
@@ -187,10 +187,11 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
         </div>
       </div>
 
-      <SaveCancelBar
+      <SaveBar
         onSave={handleSave}
         onCancel={handleCancel}
         disabled={!isDirty}
+        variant="inline"
       />
 
       {showCloseModal && (

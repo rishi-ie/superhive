@@ -7,11 +7,11 @@ import { TextInput } from '@/components/ui/TextInput';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Switch } from '@/components/ui/Switch';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
-import { SettingsSaveBar } from './shared/SettingsSaveBar';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { GitBranch, Globe, Apple } from 'lucide-react';
@@ -241,7 +241,12 @@ export function AccountSettings() {
       </SettingSection>
 
       {/* Sticky save bar */}
-      <SettingsSaveBar isDirty={anyDirty} onDiscard={discardChanges} onSave={saveAccount} />
+      <SaveBar
+        isDirty={anyDirty}
+        onCancel={discardChanges}
+        onSave={saveAccount}
+        variant="sticky"
+      />
 
       <div className="mt-6 flex justify-end">
         <ResetSection domain="account" />

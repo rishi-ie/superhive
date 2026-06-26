@@ -146,20 +146,20 @@ src/
 │   │   ├── Popover.tsx
 │   │   ├── Progress.tsx
 │   │   ├── RadioGroup.tsx
+│   │   ├── SaveBar.tsx        # Save/Cancel bar — variant: 'sticky' | 'inline'
 │   │   ├── ScrollArea.tsx
 │   │   ├── SearchBar.tsx
-│   │   ├── SectionLabel.tsx  # Section heading for stat panels
+│   │   ├── SectionLabel.tsx   # Section heading for stat panels
 │   │   ├── Select.tsx         # Radix Select — SelectTrigger/SelectContent/SelectItem
-│   │   ├── SelectableCard.tsx
 │   │   ├── Separator.tsx
 │   │   ├── SegmentedControl.tsx
 │   │   ├── Sheet.tsx          # Sheet/SheetContent/SheetHeader/SheetTitle etc.
 │   │   ├── Skeleton.tsx
 │   │   ├── Slider.tsx
-│   │   ├── StatCard.tsx      # Stat card for global stats views
-│   │   ├── StatusDot.tsx     # Agent status indicator — EXECUTING/COMPILING/IDLE/ERROR_LOOP/AWAITING_HUMAN
+│   │   ├── StatCard.tsx       # Stat card for global stats views
+│   │   ├── StatusDot.tsx      # Agent status indicator — EXECUTING/COMPILING/IDLE/ERROR_LOOP/AWAITING_HUMAN
 │   │   ├── StatusFilter.tsx
-│   │   ├── Switch.tsx         # Radix Switch — for form on/off toggles
+│   │   ├── Switch.tsx         # Canonical shadcn Switch — terracotta accent on-state
 │   │   ├── Tabs.tsx
 │   │   ├── TabsContent.tsx
 │   │   ├── TabsList.tsx
@@ -185,11 +185,11 @@ src/
 │       │   ├── ComingSoonBadge.tsx
 │       │   ├── ColorPicker.tsx
 │       │   ├── ResetSection.tsx
+│       │   ├── SelectableCard.tsx
 │       │   ├── SettingRow.tsx
 │       │   ├── SettingSection.tsx
 │       │   ├── SettingSearch.tsx
 │       │   ├── SettingsPageHeader.tsx
-│       │   ├── SettingsSaveBar.tsx
 │       │   └── index.ts
 │       ├── SettingsSidebar.tsx
 │       ├── AccountSettings.tsx
@@ -217,11 +217,12 @@ src/
 │   ├── workspaces/
 │   ├── tabs/              # Tab state: openTab(), closeTab(), selectTab(), setSelection()
 │   │
-│   ├── config/             # Static config — wizard definitions, nav items, right panel tabs
+│   ├── config/             # Static config — wizard definitions, nav items, right panel tabs, themes
 │   │   ├── wizard-configs.ts
 │   │   ├── left-nav.ts
 │   │   ├── right-panel-tabs.ts
 │   │   ├── models.ts
+│   │   ├── themes.ts        # Built-in theme definitions + ALL_THEME_VARS
 │   │   └── settings-registry.ts  # Settings nav registry — single source of truth for all settings pages
 │   │
 │   └── mock/               # Mock data config and types
@@ -261,13 +262,14 @@ Every `.tsx` file needs:
 
 ### Centralization rules
 | What | Where |
-|---|---|---|
+|---|---|
 | Magic numbers (panel sizes, token costs, animation durations, debounce ms) | `src/lib/constants.ts` |
 | Formatting helpers with no React deps (time, cost, text utils) | `src/lib/` or `src/components/chat/format.ts` |
 | Reusable UI primitives | `src/components/ui/` |
+| Settings-only primitives (page header, save bar, color picker) | `src/components/settings/shared/` |
 | Channel-specific shared | `src/components/channels/` |
 | Chat-specific shared helpers | `src/components/chat/` |
-| Static config (wizards, nav, tabs) | `src/data/config/` |
+| Static config (wizards, nav, tabs, themes) | `src/data/config/` |
 | Domain data | `src/data/{domain}/store.ts` |
 | User settings defaults | `src/data/settings/settings.json` |
 
@@ -278,6 +280,8 @@ Settings live in `src/data/settings/settings.json` (seeded defaults) + `localSto
 The `Settings` type in `src/data/settings/interface.ts` defines the shape. All settings pages live under `src/components/settings/` and update via `useSettings().update(domain, patch)`.
 
 **Settings navigation** is data-driven via `src/data/config/settings-registry.ts` — the single source of truth for all 14 settings page entries (id, label, icon, category, component). `Settings.tsx` and `SettingsSidebar.tsx` both derive from this registry rather than duplicating nav data.
+
+**Built-in themes** are defined in `src/data/config/themes.ts` as `DEFAULT_THEMES` (light, dark, system). Theme CSS variables are applied to `<html>` via `applySettingsToDOM()` in `src/lib/settings-context.tsx`.
 
 **Appearance settings** are applied directly to the DOM via `applySettingsToDOM()`:
 - `appearance.theme` → CSS vars + `data-theme` on `<html>`
@@ -316,7 +320,9 @@ This project uses shadcn/ui as the component foundation. Key conventions:
 - **Radix primitives**: shadcn is built on Radix UI primitives (`@radix-ui/react-*`); import them from the radix package directly, not from shadcn
 - **`verbatimModuleSyntax: true`**: TypeScript requires explicit named imports for all used identifiers — always write `import { forwardRef } from 'react'` not just `import React from 'react'` when using React types
 - **Theme tokens**: shadcn components read CSS variables from `src/index.css` — our custom `--chart-1..5`, `--highlight`, `--tertiary` etc. are available and used by custom components
-- **Domain components**: IconButton, StatusDot, StatusFilter, SegmentedControl, CodeBlock, SectionLabel, StatCard, SelectableCard, UniversalListCard, MaximizeOnDoubleClick, AccordionCore, FavoritesSection — these are custom domain primitives, not in shadcn; keep them as-is
+- **Domain components**: IconButton, StatusDot, StatusFilter, SegmentedControl, CodeBlock, SectionLabel, StatCard, UniversalListCard, MaximizeOnDoubleClick, AccordionCore, FavoritesSection — these are custom domain primitives, not in shadcn; keep them as-is
+- **Settings-only components**: `SettingsPageHeader`, `SettingsSaveBar` (now `SaveBar` in ui), `ColorPicker`, `ComingSoonBadge`, `SelectableCard` — these live in `src/components/settings/shared/` because they're only used in settings pages
+- **SaveBar**: `src/components/ui/SaveBar.tsx` consolidates the old `SettingsSaveBar` (settings) and `SaveCancelBar` (right-auxiliary) into one primitive with `variant: 'sticky' | 'inline'`
 
 ### TypeScript
 - `noUnusedLocals: true` and `noUnusedParameters: true` are enforced — fix all errors before committing
@@ -335,6 +341,8 @@ Use this table to decide where a new file belongs.
 | New thing | Put it in |
 |---|---|
 | Reusable across any panel (Button, Avatar, Badge, etc.) | `src/components/ui/` |
+| Only used in settings pages (ColorPicker, ComingSoonBadge, SelectableCard, SettingsPageHeader) | `src/components/settings/shared/` |
+| Only used in right-auxiliary (ControlMatrix helpers, ManageTab components) | `src/components/right-auxiliary/` or `src/components/right-auxiliary/shared/` |
 | Channel status display | `src/components/channels/` |
 | Chat formatting helpers (no React) | `src/components/chat/` |
 | Center panel content | `src/components/center-workspace/` or a subdirectory inside it |
@@ -342,7 +350,7 @@ Use this table to decide where a new file belongs.
 | Right sidebar content | `src/components/right-auxiliary/` |
 | A distinct group of related components inside a panel | `src/components/{panel}/{feature}/` with `index.ts` barrel |
 | Pure utility (no React) | `src/lib/` |
-| Static app config (wizard, nav, tabs) | `src/data/config/` |
+| Static app config (wizard, nav, tabs, themes) | `src/data/config/` |
 | A data domain | `src/data/{domain}/` with `interface.ts` + `store.ts` |
 
 ---

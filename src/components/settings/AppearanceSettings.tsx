@@ -6,14 +6,14 @@ import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ColorPicker } from './shared/ColorPicker';
+import { SelectableCard } from './shared/SelectableCard';
 import { Switch } from '@/components/ui/Switch';
 import { Select } from '@/components/ui/Select';
-import { SelectableCard } from '@/components/ui/SelectableCard';
 import { Badge } from '@/components/ui/Badge';
 import { Slider } from '@/components/ui/Slider';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import { DEFAULT_THEMES } from '@/lib/settings-context';
+import { DEFAULT_THEMES } from '@/data/config/themes';
 import type { ThemeId } from '@/data/settings/interface';
 
 const CODE_SYNTAX_THEMES = [

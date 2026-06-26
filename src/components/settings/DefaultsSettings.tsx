@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
-import { SettingsSaveBar } from './shared/SettingsSaveBar';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { Select } from '@/components/ui/Select';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Pill } from '@/components/ui/Pill';
@@ -201,7 +201,7 @@ export function DefaultsSettings() {
         />
       </SettingSection>
 
-      <SettingsSaveBar isDirty={isDirty} onDiscard={discardChanges} onSave={save} />
+      <SaveBar isDirty={isDirty} onCancel={discardChanges} onSave={save} variant="sticky" />
     </div>
   );
 }

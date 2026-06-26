@@ -46,7 +46,7 @@ A digital agent workspace — a command center for orchestrating autonomous AI a
 | `Tabs` | Tab strip. Radix-wrapped — Tabs.Root / List / Trigger / Content |
 | `Textarea` | Multi-line text input |
 | `TextInput` | Styled text input. Sizes: sm/md |
-| `Toggle` | Boolean switch. Sizes: sm/md |
+| `Switch` | Boolean toggle. Radix Switch — terracotta accent on-state |
 | `Tooltip` | Floating tooltip. Radix-wrapped |
 | `UniversalListCard` | List row with hover/selected states |
 

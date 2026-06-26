@@ -8,7 +8,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { IconButton } from '@/components/ui/IconButton';
 import { Select } from '@/components/ui/Select';
 import { TextInput } from '@/components/ui/TextInput';
-import { SaveCancelBar } from './shared/SaveCancelBar';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { useToast } from '@/lib/toast-context';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
@@ -137,10 +137,11 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
 
       </div>
 
-      <SaveCancelBar
+      <SaveBar
         onSave={handleSave}
         onCancel={handleCancel}
         disabled={!isDirty}
+        variant="inline"
       />
     </div>
   );

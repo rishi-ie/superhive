@@ -6,7 +6,7 @@ import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
-import { SettingsSaveBar } from './shared/SettingsSaveBar';
+import { SaveBar } from '@/components/ui/SaveBar';
 import { Switch } from '@/components/ui/Switch';
 import { TextInput } from '@/components/ui/TextInput';
 import { Label } from '@/components/ui/Label';
@@ -128,7 +128,7 @@ export function NotificationsSettings() {
         />
       </SettingSection>
 
-      <SettingsSaveBar isDirty={isDirty} onDiscard={discardChanges} onSave={save} />
+      <SaveBar isDirty={isDirty} onCancel={discardChanges} onSave={save} variant="sticky" />
       <div className="mt-6 flex justify-end">
         <ResetSection domain="notifications" />
       </div>
