@@ -5,6 +5,7 @@ type ToggleProps = {
   checked: boolean;
   onChange: (checked: boolean) => void;
   size?: 'sm' | 'md';
+  disabled?: boolean;
 };
 
 /**
@@ -12,8 +13,9 @@ type ToggleProps = {
  * @param checked - Current toggle state
  * @param onChange - Callback when toggle state changes
  * @param size - Toggle size: sm or md
+ * @param disabled - Prevents interaction when true
  */
-export function Toggle({ checked, onChange, size = 'md' }: ToggleProps) {
+export function Toggle({ checked, onChange, size = 'md', disabled = false }: ToggleProps) {
   const knobTranslate = checked
     ? size === 'sm' ? 'translate-x-4' : 'translate-x-5'
     : 'translate-x-0.5';
@@ -26,8 +28,9 @@ export function Toggle({ checked, onChange, size = 'md' }: ToggleProps) {
       type="button"
       role="switch"
       aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex ${trackH} ${trackW} shrink-0 rounded-full border border-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${checked ? 'bg-chart-1 border-chart-1' : 'bg-input'}`}
+      disabled={disabled}
+      onClick={() => { if (!disabled) onChange(!checked); }}
+      className={`relative inline-flex ${trackH} ${trackW} shrink-0 rounded-full border border-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'bg-chart-1 border-chart-1' : 'bg-input'}`}
     >
       <span
         className={`pointer-events-none inline-block ${knobSize} rounded-full bg-white shadow-sm transform transition-transform ${knobTranslate} mt-0.5`}

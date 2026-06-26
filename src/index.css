@@ -187,3 +187,27 @@ body {
 .animate-toast-in {
   animation: toast-in 200ms ease-out forwards;
 }
+
+/* Settings-driven theme overrides — applied via data-* on <html> */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  color-scheme: light;
+}
+[data-theme="system"] {
+  color-scheme: dark;
+}
+
+/* Font scale — controlled by data-font-scale on <html> */
+:root[data-font-scale] {
+  font-size: 1rem;
+}
+
+/* Reduce motion — kills all transitions and animations */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  transition: none !important;
+  animation: none !important;
+}

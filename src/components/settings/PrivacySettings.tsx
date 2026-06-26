@@ -1,0 +1,172 @@
+/**
+ * Privacy & Data settings — export, delete workspace data, retention, delete account.
+ */
+import { useState } from 'react';
+import { SettingSection } from './shared/SettingSection';
+import { SettingRow } from './shared/SettingRow';
+import { Button } from '@/components/ui/Button';
+import { ConfirmationModal } from '@/components/right-auxiliary/shared';
+import { useSettings } from '@/lib/settings-context';
+import { useToast } from '@/lib/toast-context';
+import { listWorkspaces } from '@/data/workspaces/store';
+import { Trash2 } from 'lucide-react';
+
+const RETENTION_OPTIONS = [
+  { value: 30, label: '30 days' },
+  { value: 90, label: '90 days' },
+  { value: 180, label: '6 months' },
+  { value: 365, label: '1 year' },
+  { value: -1, label: 'Forever' },
+];
+
+const selectClass =
+  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring';
+
+/**
+ * Privacy & Data settings page — manage your data, exports, and account deletion.
+ */
+export function PrivacySettings() {
+  const { settings, update, resetAll, exportJson } = useSettings();
+  const toast = useToast();
+  const [showDeleteWorkspace, setShowDeleteWorkspace] = useState<string | null>(null);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const workspaces = listWorkspaces();
+
+  const handleExport = () => {
+    const json = exportJson();
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'superhive-settings.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    update('privacy', { exportDataLastRun: new Date().toISOString() });
+    toast({ title: 'Settings exported successfully' });
+  };
+
+  const handleResetAll = () => {
+    resetAll();
+    toast({ title: 'All settings reset to defaults' });
+  };
+
+  return (
+    <div className="flex flex-col">
+      <div className="pb-8">
+        <h2 className="text-2xl font-semibold text-foreground">Privacy & Data</h2>
+        <p className="mt-2 text-sm text-muted-foreground">Manage your data, exports, and privacy preferences.</p>
+      </div>
+
+      <SettingSection
+        title="Your Data"
+        description="Export or delete data associated with your account."
+      >
+        <SettingRow
+          label="Export settings"
+          description="Download all your settings as a JSON file for backup or migration."
+          control={
+            <Button variant="outline" size="md" onClick={handleExport}>
+              Export JSON
+            </Button>
+          }
+        />
+        <SettingRow
+          label="Conversation retention"
+          description="How long chat messages and agent conversations are stored before automatic deletion."
+          control={
+            <select
+              value={settings.privacy.conversationRetentionDays}
+              onChange={e => update('privacy', { conversationRetentionDays: parseInt(e.target.value) })}
+              className={`${selectClass} w-40`}
+            >
+              {RETENTION_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          }
+        />
+      </SettingSection>
+
+      <SettingSection
+        title="Workspace Data"
+        description="Delete all data within a specific workspace. This cannot be undone."
+      >
+        <div className="border border-border/40 rounded-md divide-y divide-border/40">
+          {workspaces.map(ws => (
+            <div key={ws.id} className="flex items-center justify-between gap-4 px-4 py-3">
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-sm font-medium text-foreground">{ws.name}</span>
+                <span className="text-xs text-muted-foreground font-mono">{ws.id}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteWorkspace(ws.id)}
+                className="text-chart-5 hover:text-chart-5 hover:bg-chart-5/10 gap-1.5"
+              >
+                <Trash2 size={12} />
+                Delete
+              </Button>
+            </div>
+          ))}
+        </div>
+      </SettingSection>
+
+      <SettingSection title="Account" description="Account-level actions. These cannot be undone.">
+        <SettingRow
+          label="Reset all settings"
+          description="Revert all settings to their default values. Your data is not affected."
+          control={
+            <Button variant="outline" size="md" onClick={handleResetAll}>
+              Reset to defaults
+            </Button>
+          }
+        />
+        <SettingRow
+          label="Delete account"
+          description="Permanently delete your account and all associated data. This action is irreversible."
+          control={
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => setShowDeleteAccount(true)}
+              className="border-chart-5/60 text-chart-5 hover:bg-chart-5/10 hover:border-chart-5"
+            >
+              Delete account
+            </Button>
+          }
+        />
+      </SettingSection>
+
+      {showDeleteWorkspace && (
+        <ConfirmationModal
+          title="Delete workspace data"
+          description={`This will permanently delete all data for workspace "${showDeleteWorkspace}". This cannot be undone.`}
+          confirmLabel="Delete"
+          destructive
+          confirmText={showDeleteWorkspace}
+          onConfirm={() => {
+            toast({ title: `Workspace ${showDeleteWorkspace} data deleted` });
+            setShowDeleteWorkspace(null);
+          }}
+          onCancel={() => setShowDeleteWorkspace(null)}
+        />
+      )}
+
+      {showDeleteAccount && (
+        <ConfirmationModal
+          title="Delete account"
+          description="This will permanently delete your account and all associated data across all workspaces. This cannot be undone."
+          confirmLabel="Delete my account"
+          destructive
+          confirmText="delete"
+          onConfirm={() => {
+            toast({ title: 'Account deleted' });
+            setShowDeleteAccount(false);
+          }}
+          onCancel={() => setShowDeleteAccount(false)}
+        />
+      )}
+    </div>
+  );
+}

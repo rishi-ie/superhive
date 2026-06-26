@@ -1,30 +1,27 @@
 /**
- * Settings sidebar — searchable nav with categorized sections (Personal, Editor & Workflow, Organization).
+ * Settings sidebar — searchable nav with categorized sections (Personal, Workflow, Organization).
  */
+import { useState, useMemo } from 'react';
 import {
   User,
   Paintbrush,
   Bell,
-  Sparkles,
+  Shield,
+  Accessibility,
+  SlidersHorizontal,
   Keyboard,
-  GitBranch,
-  Bot,
-  Terminal,
-  Link,
   Globe,
-  Building2,
-  Users,
+  Workflow,
+  Coins,
+  Bot,
   Folder,
-  Monitor,
   Puzzle,
-  Search,
+  CreditCard,
   ArrowLeft,
-  ArrowRight,
-  History,
   ExternalLink,
 } from 'lucide-react';
-import { IconButton } from '@/components/ui/IconButton';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { SettingSearch } from './shared/SettingSearch';
 import type { LucideIcon } from 'lucide-react';
 
 type NavItem = {
@@ -46,20 +43,21 @@ const PERSONAL: Category = {
     { id: 'account', label: 'Account', icon: User },
     { id: 'appearance', label: 'Appearance', icon: Paintbrush },
     { id: 'notifications', label: 'Notifications', icon: Bell },
+    { id: 'privacy', label: 'Privacy & Data', icon: Shield },
+    { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
   ],
 };
 
-const EDITOR_WORKFLOW: Category = {
-  id: 'editor-workflow',
-  label: 'Editor & Workflow',
+const WORKFLOW: Category = {
+  id: 'workflow',
+  label: 'Workflow',
   items: [
-    { id: 'general', label: 'General', icon: Sparkles },
+    { id: 'defaults', label: 'Defaults', icon: SlidersHorizontal },
     { id: 'keyboard', label: 'Keyboard', icon: Keyboard },
-    { id: 'git', label: 'Git & Worktrees', icon: GitBranch },
-    { id: 'agents', label: 'Agents', icon: Bot },
-    { id: 'terminal', label: 'Terminal', icon: Terminal },
-    { id: 'links', label: 'Links', icon: Link },
     { id: 'models', label: 'Models', icon: Globe },
+    { id: 'workflows', label: 'Workflows & Triggers', icon: Workflow },
+    { id: 'cost-usage', label: 'Cost & Usage', icon: Coins },
+    { id: 'agents', label: 'Agents', icon: Bot },
   ],
 };
 
@@ -67,15 +65,13 @@ const ORGANIZATION: Category = {
   id: 'organization',
   label: 'Organization',
   items: [
-    { id: 'organization', label: 'Organization', icon: Building2 },
-    { id: 'teams', label: 'Teams', icon: Users },
-    { id: 'projects', label: 'Projects', icon: Folder },
-    { id: 'hosts', label: 'Hosts', icon: Monitor },
+    { id: 'workspaces', label: 'Workspaces', icon: Folder },
     { id: 'integrations', label: 'Integrations', icon: Puzzle },
+    { id: 'billing', label: 'Billing & Plans', icon: CreditCard },
   ],
 };
 
-const ALL_CATEGORIES = [PERSONAL, EDITOR_WORKFLOW, ORGANIZATION];
+const ALL_CATEGORIES = [PERSONAL, WORKFLOW, ORGANIZATION];
 
 type SettingsSidebarProps = {
   activeSection: string;
@@ -84,74 +80,73 @@ type SettingsSidebarProps = {
 };
 
 /**
- * Settings sidebar — searchable nav with categorized sections (Personal, Editor & Workflow, Organization).
+ * Settings sidebar — searchable nav with categorized sections (Personal, Workflow, Organization).
  * @param activeSection - Currently active section ID
  * @param onSectionChange - Callback when a new section is selected
  * @param onBack - Callback to return to the main Dashboard
  */
 export function SettingsSidebar({ activeSection, onSectionChange, onBack }: SettingsSidebarProps) {
+  const [query, setQuery] = useState('');
+
+  const filteredCategories = useMemo(() => {
+    if (!query.trim()) return ALL_CATEGORIES;
+    const q = query.toLowerCase();
+    return ALL_CATEGORIES
+      .map(cat => ({
+        ...cat,
+        items: cat.items.filter(item => item.label.toLowerCase().includes(q)),
+      }))
+      .filter(cat => cat.items.length > 0);
+  }, [query]);
+
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border/40">
-      <div className="drag flex h-10 shrink-0 items-center gap-1 pl-20 pr-3">
-        <IconButton aria-label="Back in history" disabled>
-          <ArrowLeft size={16} strokeWidth={STROKE_WIDTH} />
-        </IconButton>
-        <IconButton aria-label="Forward in history" disabled>
-          <ArrowRight size={16} strokeWidth={STROKE_WIDTH} />
-        </IconButton>
-        <IconButton aria-label="History" disabled>
-          <History size={16} strokeWidth={STROKE_WIDTH} />
-        </IconButton>
-        <div className="flex-1" />
-      </div>
-
-      <div className="flex flex-col gap-4 px-4 pt-1 pb-2">
+      <div className="flex flex-col gap-4 px-4 pt-4 pb-3">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors text-left"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors text-left w-fit -ml-0.5"
         >
           <ArrowLeft size={12} strokeWidth={STROKE_WIDTH} />
-          Back
+          Back to Superhive
         </button>
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
-        <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
-          <input
-            type="text"
-            placeholder="Search settings..."
-            className="w-full rounded-md border border-border bg-input py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
-        </div>
+        <SettingSearch onFilter={setQuery} />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 pb-4">
-        {ALL_CATEGORIES.map((category) => (
-          <div key={category.id} className="mt-4">
-            <span className="mb-2 block px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              {category.label}
-            </span>
-            <div className="flex flex-col gap-0.5">
-              {category.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onSectionChange(item.id)}
-                    className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors ${
-                      isActive
-                        ? 'bg-sidebar-accent text-foreground border-l-2 border-chart-1'
-                        : 'text-foreground hover:bg-sidebar-accent/50'
-                    }`}
-                  >
-                    <Icon size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+      <nav className="flex-1 overflow-y-auto px-2 pb-4" aria-label="Settings navigation">
+        {filteredCategories.length === 0 ? (
+          <p className="px-3 py-4 text-xs text-muted-foreground">No settings found.</p>
+        ) : (
+          filteredCategories.map((category) => (
+            <div key={category.id} className="mt-3 first:mt-0">
+              <span className="mb-1.5 block px-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                {category.label}
+              </span>
+              <div className="flex flex-col gap-0.5">
+                {category.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeSection === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => onSectionChange(item.id)}
+                      className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+                        isActive
+                          ? 'bg-sidebar-accent text-foreground font-medium'
+                          : 'text-foreground/80 hover:bg-sidebar-accent/50 hover:text-foreground'
+                      }`}
+                    >
+                      <Icon size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </nav>
 
       <div className="shrink-0 border-t border-sidebar-border px-4 py-3">
