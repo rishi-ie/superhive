@@ -19,7 +19,7 @@ export function NewButton({ label, onClick }: NewButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1.5 rounded-md bg-sidebar-accent px-3 py-2 text-xs font-semibold text-sidebar-accent-foreground hover:bg-sidebar-accent/90 transition-colors border border-sidebar-border shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+      className="flex items-center gap-1.5 rounded-md bg-chart-1 px-3 py-2 text-xs font-semibold text-highlight-foreground hover:bg-chart-1/90 transition-colors border border-sidebar-border shrink-0 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
     >
       <Plus size={12} strokeWidth={STROKE_WIDTH} />
       {label}

@@ -29,7 +29,7 @@ export function StatusFilter<T extends string>({ options, value, onChange }: Sta
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors border ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed ${
               isActive
                 ? 'bg-sidebar-accent border-sidebar-border text-sidebar-accent-foreground'
                 : 'bg-transparent border-transparent text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50'

@@ -4,7 +4,10 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Avatar } from '@/components/ui/Avatar';
+import { IconButton } from '@/components/ui/IconButton';
 import { Select } from '@/components/ui/Select';
+import { TextInput } from '@/components/ui/TextInput';
 import { SaveCancelBar } from './shared/SaveCancelBar';
 import { useToast } from '@/lib/toast-context';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
@@ -87,11 +90,9 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
 
         <div className="space-y-1.5">
           <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Topic</label>
-          <input
-            type="text"
+          <TextInput
             value={topic}
             onChange={e => markDirty(() => setTopic(e.target.value))}
-            className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
           />
         </div>
 
@@ -101,23 +102,26 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
           </label>
           <div className="space-y-1">
             {participants.map(name => {
-              const agent = availableAgents.find(a => a.name === name);
               return (
                 <div
                   key={name}
                   className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
                 >
-                  <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
-                    {agent?.initials ?? name.slice(0, 2).toUpperCase()}
-                  </div>
+                  <Avatar
+                    name={name}
+                    size="xs3"
+                    color="bg-chart-2"
+                    className="font-bold text-sidebar-primary-foreground"
+                  />
                   <span className="text-xs text-foreground flex-1 truncate">{name}</span>
-                  <button
+                  <IconButton
+                    variant="ghost"
+                    size="sm"
                     onClick={() => removeParticipant(name)}
-                    type="button"
-                    className="shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                    className="shrink-0 opacity-0 group-hover:opacity-100"
                   >
                     <X size={12} strokeWidth={STROKE_WIDTH} />
-                  </button>
+                  </IconButton>
                 </div>
               );
             })}

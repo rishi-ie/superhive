@@ -3,6 +3,8 @@
  */
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { LucideIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 
 export type WizardAction = {
   id: string;
@@ -63,9 +65,7 @@ export function OnboardingWizard({ config, onAction }: OnboardingWizardProps) {
                     <ActionIcon size={16} strokeWidth={STROKE_WIDTH} className="text-muted-foreground" />
                   </div>
                   {action.recommended && (
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-chart-1 bg-chart-1/15 px-1.5 py-0.5 rounded">
-                      REC
-                    </span>
+                    <Badge variant="recommended">REC</Badge>
                   )}
                 </div>
                 <div>
@@ -78,12 +78,13 @@ export function OnboardingWizard({ config, onAction }: OnboardingWizardProps) {
         </div>
 
         {skipLabel && (
-          <button
+          <Button
+            variant="ghost"
             onClick={() => onAction?.('skip')}
-            className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+            className="text-xs text-muted-foreground/60 hover:text-muted-foreground"
           >
             {skipLabel}
-          </button>
+          </Button>
         )}
       </div>
     </div>

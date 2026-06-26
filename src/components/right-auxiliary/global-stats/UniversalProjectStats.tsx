@@ -4,6 +4,7 @@
 import type { Project } from '@/data/projects/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 import { StatCard } from '@/components/ui/StatCard';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 
 type UniversalProjectStatsProps = {
   projects: Project[];
@@ -38,9 +39,7 @@ export function UniversalProjectStats({ projects, universalTickets, onProjectCli
 
       {onProjectClick && projects.length > 0 && (
         <div className="border-t border-border/40 pt-3 space-y-1">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Projects
-          </span>
+          <SectionLabel>Projects</SectionLabel>
           {projects.slice(0, 5).map(p => (
             <button
               key={p.id}

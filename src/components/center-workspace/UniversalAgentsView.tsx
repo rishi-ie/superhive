@@ -7,6 +7,7 @@ import { StatusDot } from '@/components/ui/StatusDot';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
+import { Select } from '@/components/ui/Select';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { OnboardingWizard } from './OnboardingWizard';
 import { AGENTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
@@ -117,15 +118,16 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }
           placeholder="Search agents..."
           className="flex-1"
         />
-        <select
+        <Select
           value={sort}
-          onChange={e => setSort(e.target.value as SortKey)}
-          className="rounded-md border border-border bg-input px-2 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
-        >
-          <option value="status">Sort: Status</option>
-          <option value="name">Sort: Name</option>
-          <option value="uptime">Sort: Uptime</option>
-        </select>
+          options={[
+            { value: 'status', label: 'Sort: Status' },
+            { value: 'name', label: 'Sort: Name' },
+            { value: 'uptime', label: 'Sort: Uptime' },
+          ]}
+          onChange={v => setSort(v as SortKey)}
+          className="w-32"
+        />
         <NewButton label="New Agent" onClick={() => onAction?.('configure-agent')} />
       </div>
 

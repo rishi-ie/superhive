@@ -3,6 +3,7 @@
  */
 import { Avatar } from '@/components/ui/Avatar';
 import { ChannelStatusPill } from '@/components/channels';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type CommunicationsProps = {
@@ -23,9 +24,7 @@ type CommunicationsProps = {
 export function Communications({ channels, agents, onChannelClick, onParticipantClick, onTicketClick }: CommunicationsProps) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">
-        Communications
-      </span>
+      <SectionLabel>Communications</SectionLabel>
       <div className="flex flex-col gap-1.5">
         {channels.map(ch => {
           const a = agents.find(x => x.name === ch.participants[0]);

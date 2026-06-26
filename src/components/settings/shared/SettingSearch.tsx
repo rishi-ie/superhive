@@ -40,7 +40,7 @@ export function SettingSearch({ onFilter }: SettingSearchProps) {
         value={value}
         onChange={handleChange}
         placeholder="Search settings..."
-        className="w-full rounded-md border border-border bg-input py-1.5 pl-9 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        className="w-full rounded-md border border-border bg-input py-1.5 pl-9 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       />
       {value && (
         <IconButton

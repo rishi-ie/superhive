@@ -84,13 +84,13 @@ export function AccordionCore({ currentView, onItemClick, onAgentClick, onProjec
       <AccordionHeader
         label="Meta Hive"
         icon={getIcon('meta-hive')}
-        badge={<span className="text-[9px] text-muted-foreground/60 italic pr-1">Coming soon</span>}
+        badge={<span className="text-[9px] text-muted-foreground/60 pr-1">Coming soon</span>}
       />
 
       <AccordionHeader
         label="Remote"
         icon={getIcon('remote')}
-        badge={<span className="text-[9px] text-muted-foreground/60 italic pr-1">Coming soon</span>}
+        badge={<span className="text-[9px] text-muted-foreground/60 pr-1">Coming soon</span>}
       />
     </div>
   );

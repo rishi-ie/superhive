@@ -7,6 +7,7 @@ import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter, type FilterOption } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
+import { Select } from '@/components/ui/Select';
 import { ChannelStatusPill } from '@/components/channels';
 import { OnboardingWizard } from './OnboardingWizard';
 import { UNIVERSAL_CHANNELS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
@@ -123,15 +124,16 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAc
           placeholder="Search channels..."
           className="flex-1"
         />
-        <select
+        <Select
           value={sort}
-          onChange={e => setSort(e.target.value as SortKey)}
-          className="rounded-md border border-border bg-input px-2 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
-        >
-          <option value="recent">Sort: Recent</option>
-          <option value="status">Sort: Status</option>
-          <option value="messages">Sort: Messages</option>
-        </select>
+          options={[
+            { value: 'recent', label: 'Sort: Recent' },
+            { value: 'status', label: 'Sort: Status' },
+            { value: 'messages', label: 'Sort: Messages' },
+          ]}
+          onChange={v => setSort(v as SortKey)}
+          className="w-32"
+        />
         <NewButton label="New Channel" onClick={() => onAction?.('create-universal-channel')} />
       </div>
 

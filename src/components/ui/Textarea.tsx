@@ -1,9 +1,9 @@
 /**
- * Styled text input with size and error state options.
+ * Styled textarea with size and error state options.
  */
-import { forwardRef, type InputHTMLAttributes } from 'react';
+import { forwardRef, type TextareaHTMLAttributes } from 'react';
 
-type TextInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
+type TextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
   size?: 'sm' | 'md';
   error?: boolean;
   className?: string;
@@ -15,18 +15,18 @@ const sizeClasses: Record<string, string> = {
 };
 
 /**
- * Styled text input with size and error state options.
- * @param size - Input size: sm or md
+ * Styled textarea matching TextInput visual style.
+ * @param size - Textarea size: sm or md (default)
  * @param error - Applies error styling (red border/ring)
  * @param className - Additional CSS classes
  */
-export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ size = 'md', error = false, className = '', ...rest }, ref) => {
     return (
-      <input
+      <textarea
         ref={ref}
         aria-invalid={error}
-        className={`w-full rounded-md border bg-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+        className={`flex w-full resize-none rounded-md border bg-input focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
           error
             ? 'border-destructive focus-visible:ring-destructive/40'
             : 'border-border'
@@ -37,4 +37,4 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
   }
 );
 
-TextInput.displayName = 'TextInput';
+Textarea.displayName = 'Textarea';

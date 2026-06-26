@@ -42,7 +42,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     return (
       <button
         ref={ref}
-        className={`no-drag flex items-center justify-center rounded-md transition-colors disabled:opacity-30 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar ${sizeMap[size]} ${variantMap[variant]} ${className}`}
+        className={`no-drag flex items-center justify-center rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${sizeMap[size]} ${variantMap[variant]} ${className}`}
         {...rest}
       >
         {children}

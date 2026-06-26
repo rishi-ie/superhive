@@ -4,6 +4,7 @@
  */
 import { CheckCircle, AlertTriangle, Layers, MessageCircle, Bot } from 'lucide-react';
 import { StatCard } from '@/components/ui/StatCard';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import { EmptyState } from '../shared/EmptyState';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listAgents } from '@/data/agents/store';
@@ -57,9 +58,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
 
       {/* Awaiting Your Input */}
       <div className="space-y-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Awaiting Your Input
-        </span>
+        <SectionLabel>Awaiting Your Input</SectionLabel>
         {awaitingReview.length === 0 ? (
           <EmptyState
             icon={<CheckCircle size={28} strokeWidth={1.5} />}
@@ -90,9 +89,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
       {/* Bottlenecks */}
       {bottlenecks.length > 0 && (
         <div className="space-y-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Bottlenecks
-          </span>
+          <SectionLabel>Bottlenecks</SectionLabel>
           <div className="space-y-1">
             {bottlenecks.slice(0, 3).map(ticket => (
               <div

@@ -2,8 +2,10 @@
  * Collapsible Active section — shows active agents and tasks with status indicators.
  */
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Circle, Zap } from 'lucide-react';
+import { ChevronDown, ChevronRight, Zap } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { StatusDot } from '@/components/ui/StatusDot';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 
 export type ActiveAgent = {
   id: string;
@@ -54,7 +56,7 @@ export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: Acti
           <ChevronRight size={12} strokeWidth={STROKE_WIDTH} className="shrink-0" />
         )}
         <Zap size={12} strokeWidth={STROKE_WIDTH} className="shrink-0 text-chart-2" />
-        <span className="flex-1 text-left">Active</span>
+        <span className="flex-1 text-left"><SectionLabel>Active</SectionLabel></span>
         <span className="text-[10px] text-muted-foreground font-fustat">
           {activeCount > 0 ? `${activeCount} active` : 'none'}
         </span>
@@ -67,16 +69,15 @@ export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: Acti
               onClick={() => onAgentClick?.(agent.id)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
             >
-              <Circle
-                size={6}
-                strokeWidth={STROKE_WIDTH}
-                className={`shrink-0 ${
+              <StatusDot
+                status={
                   agent.status === 'busy'
-                    ? 'text-chart-1 fill-chart-1'
+                    ? 'AWAITING_HUMAN'
                     : agent.status === 'active'
-                    ? 'text-chart-2 fill-chart-2'
-                    : 'text-muted-foreground fill-muted-foreground'
-                }`}
+                    ? 'EXECUTING'
+                    : 'IDLE'
+                }
+                size="xs"
               />
               <span className="flex-1 truncate text-left text-xs">{agent.name}</span>
               {agent.currentTask && (

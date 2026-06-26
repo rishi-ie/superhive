@@ -2,6 +2,8 @@
  * Ticket overview tab — displays ticket details, assignee, project, and activity preview.
  */
 import { Avatar } from '@/components/ui/Avatar';
+import { StatusDot } from '@/components/ui/StatusDot';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import { nameToAgentId } from '@/data/agents/store';
 import type { UniversalTicket } from '@/data/tickets/store';
 import type { SwarmActivity, ProjectAgent } from '@/data/projects/store';
@@ -51,13 +53,6 @@ export function TicketOverviewTab({
   onAgentClick,
   onProjectSelect,
 }: TicketOverviewTabProps) {
-  const initials = ticket.assignee.name
-    .split(' ')
-    .map((w: string) => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '?';
-
   const assigneeId = nameToAgentId(ticket.assignee.name);
 
   const relatedActivity = recentActivity
@@ -93,7 +88,7 @@ export function TicketOverviewTab({
             onClick={() => { if (assigneeId && onAgentClick) onAgentClick(assigneeId); }}
             className="shrink-0"
           >
-            <Avatar size="xs" fallback={initials} />
+            <Avatar size="xs" name={ticket.assignee.name} />
           </button>
           <button
             onClick={() => { if (assigneeId && onAgentClick) onAgentClick(assigneeId); }}
@@ -102,7 +97,7 @@ export function TicketOverviewTab({
             {ticket.assignee.name}
           </button>
           {ticket.assignee.isAI && (
-            <span className="size-1.5 rounded-full bg-chart-2 pulse-executing shrink-0" />
+            <StatusDot status="EXECUTING" size="xs" />
           )}
         </div>
 
@@ -121,7 +116,7 @@ export function TicketOverviewTab({
       {relatedActivity.length > 0 && (
         <div className="border-t border-border pt-2 space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Activity</span>
+            <SectionLabel>Activity</SectionLabel>
           </div>
           <div className="space-y-1">
             {relatedActivity.map((item, idx) => {

@@ -2,6 +2,7 @@
  * Single kanban column for a ticket status.
  */
 import { UniversalTicketCard } from './tickets/UniversalTicketCard';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import type { UniversalTicket, UniversalTicketStatus } from '@/data/tickets/store';
 
 type KanbanColumnProps = {
@@ -23,9 +24,7 @@ export function KanbanColumn({ label, tickets, selectedTicketId, onTicketSelect 
   return (
     <div className="flex flex-col gap-2 min-w-[240px] w-[260px] shrink-0 h-full">
       <div className="flex items-center gap-1.5 px-1 shrink-0">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {label}
-        </span>
+        <SectionLabel>{label}</SectionLabel>
         <span className="text-[9px] font-fustat text-muted-foreground/60 bg-secondary/80 rounded-full px-1.5 py-0.5">
           {tickets.length}
         </span>

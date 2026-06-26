@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
@@ -19,8 +20,6 @@ const RETENTION_OPTIONS = [
   { value: -1, label: 'Forever' },
 ];
 
-const selectClass =
-  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring';
 
 /**
  * Privacy & Data settings page — manage your data, exports, and account deletion.
@@ -74,15 +73,12 @@ export function PrivacySettings() {
           label="Conversation retention"
           description="How long chat messages and agent conversations are stored before automatic deletion."
           control={
-            <select
-              value={settings.privacy.conversationRetentionDays}
-              onChange={e => update('privacy', { conversationRetentionDays: parseInt(e.target.value) })}
-              className={`${selectClass} w-40`}
-            >
-              {RETENTION_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <Select
+              value={String(settings.privacy.conversationRetentionDays)}
+              options={RETENTION_OPTIONS}
+              onChange={val => update('privacy', { conversationRetentionDays: parseInt(val) })}
+              className="w-40"
+            />
           }
         />
       </SettingSection>

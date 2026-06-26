@@ -3,7 +3,7 @@
  */
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
+import { IconButton } from '@/components/ui/IconButton';
 
 type BulkActionBarProps = {
   count: number;
@@ -28,14 +28,14 @@ export function BulkActionBar({ count, onClear, actions }: BulkActionBarProps) {
         </span>
         {actions}
       </div>
-      <button
-        type="button"
+      <IconButton
+        variant="ghost"
+        size="sm"
         onClick={onClear}
-        className="text-muted-foreground hover:text-foreground transition-colors"
         aria-label="Clear selection"
       >
-        <X size={14} strokeWidth={STROKE_WIDTH} />
-      </button>
+        <X size={14} />
+      </IconButton>
     </div>
   );
 }

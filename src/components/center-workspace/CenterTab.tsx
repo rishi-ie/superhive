@@ -6,6 +6,7 @@ import {
   MessageCircle, Bot, Users, Settings, Lock, X,
 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { IconButton } from '@/components/ui/IconButton';
 import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/data/tabs/interface';
 
 const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
@@ -84,14 +85,15 @@ export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: Ce
         <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />
       )}
       {tab.pinned ? null : (
-        <span
-          role="button"
+        <IconButton
+          variant="ghost"
+          size="sm"
           aria-label="Close tab"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
           className="opacity-0 group-hover:opacity-100 hover:bg-accent rounded p-0.5 transition-opacity ml-auto shrink-0"
         >
           <X size={12} strokeWidth={STROKE_WIDTH} />
-        </span>
+        </IconButton>
       )}
     </button>
   );

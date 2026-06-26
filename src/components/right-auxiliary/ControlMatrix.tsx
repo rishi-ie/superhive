@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import { AlertTriangle, Check } from 'lucide-react';
 import { STROKE_WIDTH, COST_PER_TASK, MIN_TOKENS, MAX_TOKENS, TOKEN_STEP } from '@/lib/constants';
+import { Button } from '@/components/ui/Button';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Toggle } from '@/components/ui/Toggle';
 import { getPermissions, type Agent, type Permissions } from '@/data/agents/store';
 import type { CommitAuthority } from '@/data/agents/interface';
@@ -76,15 +78,12 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
           {ENGINES.map((engine) => {
             const selected = permissions.modelEngine === engine.label;
             return (
-              <button
+              <Button
                 key={engine.id}
-                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => set('modelEngine', engine.label)}
-                className={`flex flex-col items-start rounded-md border px-2.5 py-2 text-left transition-colors ${
-                  selected
-                    ? 'border-chart-1 bg-chart-1/10'
-                    : 'border-border hover:border-muted-foreground/50'
-                }`}
+                className="flex flex-col items-start h-auto py-2 text-left"
               >
                 <div className="flex w-full items-center justify-between">
                   <span className={`text-xs font-medium font-fustat ${selected ? 'text-foreground' : 'text-muted-foreground'}`}>
@@ -97,7 +96,7 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
                   <span className="text-[9px] text-muted-foreground/60">·</span>
                   <span className="text-[9px] text-chart-3">{engine.tag}</span>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -130,27 +129,12 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
       {/* Commit Authority */}
       <div className="space-y-1.5">
         <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Commit Authority</label>
-        <div className="flex rounded-md border border-border overflow-hidden">
-          {COMMIT_OPTIONS.map((opt) => {
-            const selected = permissions.commitAuthority === opt.value;
-            const danger = opt.value === 'DIRECT_MAIN';
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => set('commitAuthority', opt.value)}
-                className={[
-                  'flex-1 flex items-center justify-center py-2 text-[10px] font-medium transition-colors',
-                  selected && danger ? 'bg-chart-5/20 text-chart-5' :
-                  selected ? 'bg-chart-1/20 text-chart-1' :
-                  'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30',
-                ].filter(Boolean).join(' ')}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedControl
+          options={COMMIT_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+          value={permissions.commitAuthority}
+          onChange={(val) => set('commitAuthority', val as CommitAuthority)}
+          size="sm"
+        />
         <p className="text-[10px] text-muted-foreground leading-relaxed">{commitDesc}</p>
       </div>
 
@@ -193,13 +177,14 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
         <p className="text-[10px] text-muted-foreground leading-relaxed">
           Termination immediately stops all work, revokes all permissions, and discards unsaved progress.
         </p>
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-chart-5 px-3 py-2 text-sm font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full border-chart-5 text-chart-5 hover:bg-chart-5/10"
           onClick={() => onTerminate?.(agent.id)}
         >
           Terminate Agent Execution
-        </button>
+        </Button>
       </div>
 
     </div>

@@ -3,6 +3,9 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { Textarea } from '@/components/ui/Textarea';
 import { Send, Paperclip } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { ChannelStatusPill } from '@/components/channels';
@@ -40,13 +43,14 @@ function ChannelMessageItem({ msg, agentMap, onParticipantClick }: {
       </button>
       <div className="flex-1 min-w-0 space-y-0.5">
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => agentId && onParticipantClick?.(agentId)}
-            className="text-[11px] font-semibold text-foreground hover:text-chart-1 transition-colors"
-            type="button"
+            className="text-[11px] font-semibold text-foreground hover:text-chart-1 transition-colors p-0 h-auto"
           >
             {msg.senderName}
-          </button>
+          </Button>
           <span className="text-[9px] text-muted-foreground/60 font-fustat">{msg.timestamp}</span>
           {msg.isAI && (
             <span className="text-[8px] font-medium uppercase tracking-wider rounded border border-chart-2/40 bg-chart-2/10 text-chart-2 px-1 py-0.5">AI</span>
@@ -148,13 +152,14 @@ export function ChannelDetailView({
                 {channel.participants.join(' ↔ ')}
               </span>
               <span className="text-muted-foreground/40 shrink-0">·</span>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onTicketClick?.(channel.relatedTicketId)}
                 className="text-[9px] font-fustat text-muted-foreground bg-secondary/80 rounded px-1 py-0.5 hover:text-foreground transition-colors"
-                type="button"
               >
                 {channel.relatedTicketId}
-              </button>
+              </Button>
               <span className="text-muted-foreground/40 shrink-0">·</span>
               <span className="text-[10px] text-muted-foreground shrink-0">{wsName}</span>
               <span className="text-muted-foreground/40 shrink-0">·</span>
@@ -170,15 +175,16 @@ export function ChannelDetailView({
           {channel.participants.map(name => {
             const ag = Object.values(agentMap).find(a => a.initials === name.slice(0, 2).toUpperCase());
             return (
-              <button
+              <Button
                 key={name}
+                variant="ghost"
+                size="sm"
                 onClick={() => ag && onAgentSelect?.(ag.id)}
-                className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                type="button"
+                className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground transition-colors p-0 h-auto"
               >
                 <Avatar size="xs" fallback={name.slice(0, 2).toUpperCase()} />
                 {name}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -209,29 +215,30 @@ export function ChannelDetailView({
       {/* Input */}
       <div className="shrink-0 border-t border-border/40 p-3">
         <div className="flex items-end gap-2">
-          <button
-            type="button"
-            className="shrink-0 size-8 rounded-md border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card/80 transition-colors"
+          <IconButton
+            variant="ghost"
+            size="sm"
             title="Attach file"
           >
             <Paperclip size={14} strokeWidth={STROKE_WIDTH} />
-          </button>
-          <textarea
+          </IconButton>
+          <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Send a message…"
             rows={2}
-            className="flex-1 resize-none rounded-md border border-border bg-input px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring"
+            className="flex-1 resize-none"
           />
-          <button
+          <Button
+            variant="solid"
+            size="sm"
             onClick={handleSend}
-            type="button"
             disabled={!input.trim()}
             className="shrink-0 size-8 rounded-md bg-chart-1 flex items-center justify-center text-highlight-foreground hover:bg-chart-1/90 transition-colors disabled:opacity-40"
           >
             <Send size={14} strokeWidth={STROKE_WIDTH} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

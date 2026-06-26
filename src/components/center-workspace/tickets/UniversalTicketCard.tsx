@@ -2,6 +2,7 @@
  * Cross-workspace ticket card with priority, type, and assignee.
  */
 import { Avatar } from '@/components/ui/Avatar';
+import { StatusDot } from '@/components/ui/StatusDot';
 import type { UniversalTicket } from '@/data/tickets/store';
 import { PriorityTag } from './PriorityTag';
 import { TypeTag } from './TypeTag';
@@ -54,7 +55,7 @@ export function UniversalTicketCard({ ticket, selected, onClick }: UniversalTick
         <Avatar size="xs" fallback={initials} src={ticket.assignee.avatarUrl} />
         <span className="text-[10px] text-muted-foreground truncate flex-1">{ticket.assignee.name}</span>
         {ticket.assignee.isAI && (
-          <span className="size-1.5 rounded-full bg-chart-2 pulse-executing shrink-0" aria-label="AI processing" />
+          <StatusDot status="EXECUTING" size="xs" />
         )}
       </div>
     </button>

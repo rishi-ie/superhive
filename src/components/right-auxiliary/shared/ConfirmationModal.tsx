@@ -4,6 +4,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
 
 type ConfirmationModalProps = {
   title: string;
@@ -100,38 +102,35 @@ export function ConfirmationModal({
             <label className="text-[10px] text-muted-foreground uppercase tracking-wider" htmlFor="cm-input">
               Type &quot;{confirmText}&quot; to confirm
             </label>
-            <input
+            <TextInput
               id="cm-input"
               ref={firstFocusRef}
-              type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
               placeholder={confirmText}
-              className="mt-1 w-full rounded-md border border-border bg-input px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
+              className="mt-1"
             />
           </div>
         )}
 
         <div className="flex gap-2 px-4 pb-4">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
             onClick={onCancel}
-            className="flex-1 rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
+          </Button>
+          <Button
+            variant={destructive ? 'outline' : 'solid'}
+            size="sm"
+            className="flex-1"
             disabled={!canConfirm}
-            className={`flex-1 rounded-md px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-              destructive
-                ? 'border border-chart-5 text-chart-5 hover:bg-chart-5/10 disabled:opacity-40 disabled:cursor-not-allowed'
-                : 'bg-chart-1 text-highlight-foreground hover:bg-chart-1/90 disabled:opacity-40 disabled:cursor-not-allowed'
-            }`}
+            onClick={onConfirm}
           >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 /**
  * Reusable filter chip row.
  */
+import { Pill } from '@/components/ui/Pill';
+
 export type FilterChip = {
   id: string;
   label: string;
@@ -28,20 +30,16 @@ export function FilterChips({ chips, selected, onChange }: FilterChipsProps) {
       {chips.map(chip => {
         const isSelected = chip.id === selected;
         return (
-          <button
+          <Pill
             key={chip.id}
-            type="button"
+            active={isSelected}
+            size="sm"
             role="radio"
             aria-checked={isSelected}
             onClick={() => onChange(chip.id)}
-            className={`text-[10px] font-medium px-2 py-1 rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-              isSelected
-                ? 'bg-chart-1/15 border-chart-1/40 text-chart-1'
-                : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-            }`}
           >
             {chip.label}
-          </button>
+          </Pill>
         );
       })}
     </div>

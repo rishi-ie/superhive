@@ -4,6 +4,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, ChevronDown } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { Textarea } from '@/components/ui/Textarea';
+import { Pill } from '@/components/ui/Pill';
 
 type ChatInputProps = {
   placeholder?: string;
@@ -81,7 +85,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
     <div className="shrink-0 border-t border-border/40 bg-sidebar">
       <div className="px-4 py-2.5">
         <div className="flex items-start gap-2 bg-input rounded-lg px-3 py-2 border border-border/60 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/20 transition-all">
-          <textarea
+          <Textarea
             ref={textareaRef}
             rows={1}
             value={value}
@@ -96,43 +100,39 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
                 {tokens.toLocaleString()} tok
               </span>
             )}
-            <button
-              type="button"
+            <IconButton
+              variant="ghost"
+              size="sm"
               aria-label="Attach file"
-              className="flex items-center justify-center size-7 rounded text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
               onClick={() => {}}
             >
               <Paperclip size={15} strokeWidth={STROKE_WIDTH} />
-            </button>
+            </IconButton>
           </div>
         </div>
 
         <div className="flex items-center justify-between mt-1.5">
           <div className="flex items-center gap-1.5">
             <div className="relative">
-              <button
-                type="button"
+              <Pill
+                active={autoMode}
                 onClick={() => setAutoMode(a => !a)}
-                className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
-                  autoMode
-                    ? 'bg-chart-1/15 text-chart-1 border border-chart-1/30'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent'
-                }`}
               >
-                <span>Auto</span>
-              </button>
+                Auto
+              </Pill>
             </div>
 
             {!autoMode && (
               <div className="relative">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowModelPicker(p => !p)}
                   className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors border border-transparent"
                 >
                   <span>{model}</span>
                   <ChevronDown size={9} strokeWidth={STROKE_WIDTH} />
-                </button>
+                </Button>
                 {showModelPicker && (
                   <div className="absolute bottom-full left-0 mb-1 w-32 rounded-md border border-border bg-card shadow-lg z-10 overflow-hidden">
                     {MODELS.filter(m => m !== 'Auto').map(m => (
@@ -153,15 +153,16 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
             )}
           </div>
 
-          <button
-            type="button"
+          <Button
+            variant="solid"
+            size="sm"
             onClick={handleSubmit}
             disabled={!value.trim()}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-chart-1 text-highlight-foreground text-xs font-semibold hover:bg-chart-1/90 transition-colors disabled:opacity-40 disabled:pointer-events-none"
           >
             <span>Send</span>
             <Send size={12} strokeWidth={STROKE_WIDTH} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

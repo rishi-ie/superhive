@@ -6,12 +6,12 @@ import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
+import { Pill } from '@/components/ui/Pill';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const inputClass =
-  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed';
 
 /**
  * Notifications settings page — configure quiet hours for do-not-disturb periods.
@@ -79,21 +79,21 @@ export function NotificationsSettings() {
           description="Time range during which notifications are silenced. Can wrap past midnight."
           control={
             <div className="flex items-center gap-2">
-              <input
+              <TextInput
                 type="time"
                 value={start}
                 onChange={e => setStart(e.target.value)}
                 disabled={!enabled}
-                className={`${inputClass} w-32`}
+                className="w-32"
                 aria-label="Quiet hours start"
               />
               <span className="text-xs text-muted-foreground">to</span>
-              <input
+              <TextInput
                 type="time"
                 value={end}
                 onChange={e => setEnd(e.target.value)}
                 disabled={!enabled}
-                className={`${inputClass} w-32`}
+                className="w-32"
                 aria-label="Quiet hours end"
               />
             </div>
@@ -107,20 +107,16 @@ export function NotificationsSettings() {
               {DAYS.map((day, i) => {
                 const active = days.includes(i);
                 return (
-                  <button
+                  <Pill
                     key={day}
-                    type="button"
-                    onClick={() => toggleDay(i)}
+                    active={active}
                     disabled={!enabled}
-                    aria-pressed={active}
-                    className={`size-9 rounded-md text-[10px] font-medium border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-40 disabled:cursor-not-allowed ${
-                      active
-                        ? 'bg-chart-1/15 border-chart-1/40 text-chart-1'
-                        : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-                    }`}
+                    onClick={() => toggleDay(i)}
+                    size="sm"
+                    className="w-8 justify-center"
                   >
                     {day.slice(0, 2)}
-                  </button>
+                  </Pill>
                 );
               })}
             </div>

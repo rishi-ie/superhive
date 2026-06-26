@@ -30,7 +30,7 @@ export function Toggle({ checked, onChange, size = 'md', disabled = false }: Tog
       aria-checked={checked}
       disabled={disabled}
       onClick={() => { if (!disabled) onChange(!checked); }}
-      className={`relative inline-flex ${trackH} ${trackW} shrink-0 rounded-full border border-border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'bg-chart-1 border-chart-1' : 'bg-input'}`}
+      className={`relative inline-flex ${trackH} ${trackW} shrink-0 rounded-full border border-border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'bg-chart-1 border-chart-1' : 'bg-input'}`}
     >
       <span
         className={`pointer-events-none inline-block ${knobSize} rounded-full bg-white shadow-sm transform transition-transform ${knobTranslate} mt-0.5`}

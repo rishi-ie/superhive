@@ -2,6 +2,9 @@
  * Project management tab — title, members, and channels with save/cancel.
  */
 import { useState } from 'react';
+import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
 import { SaveCancelBar } from './shared/SaveCancelBar';
 import { ConfirmationModal } from './shared/ConfirmationModal';
 import { useToast } from '@/lib/toast-context';
@@ -51,11 +54,9 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
 
         <div className="space-y-2">
           <label className="text-[10px] tracking-wider font-medium text-muted-foreground">Title</label>
-          <input
-            type="text"
+          <TextInput
             value={title}
             onChange={e => markDirty(() => setTitle(e.target.value))}
-            className="w-full bg-transparent border-0 rounded-md px-2 py-1 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring hover:bg-white/5 transition-colors"
           />
         </div>
 
@@ -69,9 +70,12 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
                 key={agent.id}
                 className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
               >
-                <div className="size-5 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0">
-                  {agent.initials}
-                </div>
+                <Avatar
+                  name={agent.name}
+                  size="xs3"
+                  color="bg-chart-2"
+                  className="font-bold text-sidebar-primary-foreground"
+                />
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-foreground truncate">{agent.name}</div>
                   <div className="text-[9px] text-muted-foreground truncate">{agent.role}</div>
@@ -101,13 +105,14 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
         </div>
 
         <div className="border-t border-border/40 pt-3">
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
             onClick={() => setShowArchiveModal(true)}
-            className="w-full rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
           >
             Archive Project
-          </button>
+          </Button>
         </div>
 
       </div>

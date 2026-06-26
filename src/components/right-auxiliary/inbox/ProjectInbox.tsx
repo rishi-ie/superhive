@@ -6,6 +6,8 @@ import { FilterChips } from '../shared/FilterChips';
 import { BulkActionBar } from '../shared/BulkActionBar';
 import { EmptyState } from '../shared/EmptyState';
 import { CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Checkbox } from '@/components/ui/Checkbox';
 import type { Project } from '@/data/projects/store';
 import { useToast } from '@/lib/toast-context';
 
@@ -91,11 +93,9 @@ export function ProjectInbox({ project, onTicketClick }: ProjectInboxProps) {
                 key={item.id}
                 className="flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors group"
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={selected.has(item.id)}
-                  onChange={() => toggle(item.id)}
-                  className="size-3 rounded border-border accent-chart-1 shrink-0"
+                  onCheckedChange={() => toggle(item.id)}
                 />
                 <button
                   onClick={() => onTicketClick?.(item.refId)}
@@ -104,20 +104,20 @@ export function ProjectInbox({ project, onTicketClick }: ProjectInboxProps) {
                   <div className="text-xs text-foreground truncate">{item.title}</div>
                 </button>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => dismiss(item.id, 'Snoozed')}
-                    className="text-[9px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-border/40 hover:border-muted-foreground/40 transition-colors"
                   >
                     Snooze
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => dismiss(item.id, 'Done')}
-                    className="text-[9px] text-muted-foreground hover:text-foreground px-1.5 py-0.5 rounded border border-border/40 hover:border-muted-foreground/40 transition-colors"
                   >
                     Done
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -129,13 +129,13 @@ export function ProjectInbox({ project, onTicketClick }: ProjectInboxProps) {
         count={selected.size}
         onClear={() => setSelected(new Set())}
         actions={
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={markAllDone}
-            className="text-[10px] font-medium text-muted-foreground hover:text-foreground"
           >
             Mark all done
-          </button>
+          </Button>
         }
       />
     </div>

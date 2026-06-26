@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Pill } from '@/components/ui/Pill';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { StartupView, ViewMode, TimeFormat, KanbanColumn, RightPanelTab } from '@/data/settings/interface';
@@ -44,8 +47,6 @@ const RIGHT_PANEL_TABS: { value: RightPanelTab; label: string }[] = [
   { value: 'sessions', label: 'Sessions' },
 ];
 
-const selectClass =
-  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring';
 
 /**
  * Defaults settings page — configure app startup and display defaults.
@@ -113,31 +114,24 @@ export function DefaultsSettings() {
           label="Startup view"
           description="Which view or tab opens automatically when the app starts."
           control={
-            <select
+            <Select
               value={startupView}
-              onChange={e => setStartupView(e.target.value as StartupView)}
-              className={`${selectClass} w-56`}
-            >
-              {STARTUP_VIEWS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+              options={STARTUP_VIEWS}
+              onChange={val => setStartupView(val as StartupView)}
+              className="w-56"
+            />
           }
         />
         <SettingRow
           label="Default workspace"
           description="Which workspace is pre-selected when the app opens."
           control={
-            <select
+            <Select
               value={defaultWorkspaceId}
-              onChange={e => setDefaultWorkspaceId(e.target.value)}
-              className={`${selectClass} w-56`}
-            >
-              <option value="">Last opened</option>
-              {workspaces.map(ws => (
-                <option key={ws.id} value={ws.id}>{ws.name}</option>
-              ))}
-            </select>
+              options={[{ value: '', label: 'Last opened' }, ...workspaces.map(ws => ({ value: ws.id, label: ws.name }))]}
+              onChange={val => setDefaultWorkspaceId(val)}
+              className="w-56"
+            />
           }
         />
       </SettingSection>
@@ -147,55 +141,35 @@ export function DefaultsSettings() {
           label="View mode"
           description="Controls density of information in kanban and list views."
           control={
-            <div className="flex rounded-md border border-border overflow-hidden">
-              {VIEW_MODES.map((m, i) => (
-                <button
-                  key={m.value}
-                  type="button"
-                  onClick={() => setViewMode(m.value)}
-                  aria-pressed={viewMode === m.value}
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-                    i > 0 ? 'border-l border-border' : ''
-                  } ${
-                    viewMode === m.value
-                      ? 'bg-chart-1/20 text-chart-1'
-                      : 'bg-card text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/30'
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              options={VIEW_MODES}
+              value={viewMode}
+              onChange={val => setViewMode(val as ViewMode)}
+            />
           }
         />
         <SettingRow
           label="Time format"
           description="How timestamps are displayed throughout the app."
           control={
-            <select
+            <Select
               value={timeFormat}
-              onChange={e => setTimeFormat(e.target.value as TimeFormat)}
-              className={`${selectClass} w-56`}
-            >
-              {TIME_FORMATS.map(f => (
-                <option key={f.value} value={f.value}>{f.label}</option>
-              ))}
-            </select>
+              options={TIME_FORMATS}
+              onChange={val => setTimeFormat(val as TimeFormat)}
+              className="w-56"
+            />
           }
         />
         <SettingRow
           label="Right panel default tab"
           description="Which tab is shown in the right auxiliary panel when it opens."
           control={
-            <select
+            <Select
               value={rightPanelTab}
-              onChange={e => setRightPanelTab(e.target.value as RightPanelTab)}
-              className={`${selectClass} w-40`}
-            >
-              {RIGHT_PANEL_TABS.map(t => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </select>
+              options={RIGHT_PANEL_TABS}
+              onChange={val => setRightPanelTab(val as RightPanelTab)}
+              className="w-40"
+            />
           }
         />
       </SettingSection>
@@ -212,19 +186,13 @@ export function DefaultsSettings() {
               {KANBAN_COLUMNS.map(col => {
                 const active = kanbanColumns.includes(col.value);
                 return (
-                  <button
+                  <Pill
                     key={col.value}
-                    type="button"
+                    active={active}
                     onClick={() => toggleColumn(col.value)}
-                    aria-pressed={active}
-                    className={`text-xs font-medium px-3 py-1.5 rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-                      active
-                        ? 'bg-chart-1/15 border-chart-1/40 text-chart-1'
-                        : 'border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground/40'
-                    }`}
                   >
                     {col.label}
-                  </button>
+                  </Pill>
                 );
               })}
             </div>

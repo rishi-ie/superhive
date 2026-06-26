@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Copy, ThumbsUp, ThumbsDown, RotateCcw, Check } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@/components/ui/Button';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { parseMarkdown, type MarkdownBlock, type InlineElement } from '@/lib/markdown';
 import { formatTime, formatDuration } from '@/components/chat/format';
@@ -48,14 +49,15 @@ function renderBlock(block: MarkdownBlock, key: number) {
       <div key={key} className="my-2 rounded-md border border-border/40 bg-sidebar overflow-hidden">
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/40 bg-secondary/50">
           <span className="text-[9px] font-fustat uppercase tracking-wider text-muted-foreground/60">{lang}</span>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex items-center gap-1 text-[9px] text-muted-foreground/60 hover:text-muted-foreground transition-colors"
             onClick={() => navigator.clipboard.writeText(block.code)}
           >
             <Copy size={10} strokeWidth={STROKE_WIDTH} />
             copy
-          </button>
+          </Button>
         </div>
         <pre className="p-3 text-[11px] font-fustat text-foreground overflow-x-auto leading-relaxed whitespace-pre-wrap">
           <code>{block.code}</code>
@@ -143,16 +145,18 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
 
         {!isUser && (
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 px-1">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleCopy}
               className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
             >
               {copied ? <Check size={11} strokeWidth={STROKE_WIDTH} /> : <Copy size={11} strokeWidth={STROKE_WIDTH} />}
               {copied ? 'copied' : 'copy'}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleFeedback('up')}
               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors ${
                 message.feedback === 'up'
@@ -161,9 +165,10 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
               }`}
             >
               <ThumbsUp size={11} strokeWidth={STROKE_WIDTH} />
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleFeedback('down')}
               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors ${
                 message.feedback === 'down'
@@ -172,16 +177,17 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
               }`}
             >
               <ThumbsDown size={11} strokeWidth={STROKE_WIDTH} />
-            </button>
+            </Button>
             {onRegenerate && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => onRegenerate(message.id)}
                 className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
               >
                 <RotateCcw size={11} strokeWidth={STROKE_WIDTH} />
                 regenerate
-              </button>
+              </Button>
             )}
           </div>
         )}

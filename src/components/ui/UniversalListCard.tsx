@@ -16,7 +16,7 @@ type UniversalListCardProps = HTMLAttributes<HTMLDivElement> & {
  * @param children - Card content
  */
 export function UniversalListCard({ onClick, selected, children, className = '', ...rest }: UniversalListCardProps) {
-  const baseClasses = 'rounded-lg border bg-card transition-colors';
+  const baseClasses = 'rounded-md border bg-card transition-colors';
   const borderClasses = selected ? 'border-chart-1' : 'border-border hover:border-border/80';
 
   if (onClick) {
@@ -24,7 +24,7 @@ export function UniversalListCard({ onClick, selected, children, className = '',
       <button
         type="button"
         onClick={onClick}
-        className={`${baseClasses} ${borderClasses} p-3 w-full text-left ${className}`}
+        className={`${baseClasses} ${borderClasses} p-3 w-full text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${className}`}
       >
         {children}
       </button>
@@ -32,7 +32,7 @@ export function UniversalListCard({ onClick, selected, children, className = '',
   }
 
   return (
-    <div className={`${baseClasses} ${borderClasses} p-3 ${className}`} {...rest}>
+    <div className={`${baseClasses} ${borderClasses} p-3 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${className}`} {...rest}>
       {children}
     </div>
   );

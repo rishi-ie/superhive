@@ -2,6 +2,7 @@
  * Ticket management tab — status, priority, type, and assignee controls with save/cancel.
  */
 import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { SaveCancelBar } from './shared/SaveCancelBar';
 import { ConfirmationModal } from './shared/ConfirmationModal';
@@ -166,20 +167,22 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
 
         <div className="border-t border-border/40 pt-3 space-y-2">
           <div className="flex gap-2">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
               onClick={() => setShowCloseModal(true)}
-              className="flex-1 rounded-md border border-border/40 px-3 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
             >
               Close Ticket
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-chart-5 border-chart-5/40 hover:bg-chart-5/10"
               onClick={() => setShowArchiveModal(true)}
-              className="flex-1 rounded-md border border-chart-5/40 px-3 py-2 text-[10px] font-medium text-chart-5 hover:bg-chart-5/10 transition-colors"
             >
               Archive Ticket
-            </button>
+            </Button>
           </div>
         </div>
       </div>

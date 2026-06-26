@@ -6,6 +6,8 @@ import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
+import { IconButton } from '@/components/ui/IconButton';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { EngineId, ModelProvider, ModelProviderConfig } from '@/data/settings/interface';
@@ -26,8 +28,6 @@ const ENGINE_LABELS: Record<EngineId, string> = {
   codex: 'Codex',
 };
 
-const inputClass =
-  'w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring';
 
 /**
  * Models settings page — configure available engines and provider API keys.
@@ -127,12 +127,12 @@ export function ModelsSettings() {
                     label="API Key"
                     description="Your API key for this provider. Stored locally, never transmitted to our servers."
                     control={
-                      <input
+                      <TextInput
                         type="password"
                         value={provider.apiKey}
                         onChange={e => updateProvider(provider.id, { apiKey: e.target.value })}
                         placeholder="sk-..."
-                        className={`${inputClass} max-w-xs`}
+                        className="max-w-xs"
                       />
                     }
                   />
@@ -140,12 +140,12 @@ export function ModelsSettings() {
                     label="Custom endpoint URL"
                     description="Optional. Override the default API endpoint for this provider."
                     control={
-                      <input
+                      <TextInput
                         type="url"
                         value={provider.customEndpointUrl}
                         onChange={e => updateProvider(provider.id, { customEndpointUrl: e.target.value })}
                         placeholder="https://api.example.com/v1"
-                        className={`${inputClass} max-w-xs`}
+                        className="max-w-xs"
                       />
                     }
                   />
@@ -158,24 +158,24 @@ export function ModelsSettings() {
                           <span className="w-5 text-xs text-muted-foreground tabular-nums">{i + 1}.</span>
                           <span className="flex-1 text-xs text-foreground">{ENGINE_LABELS[engineId]}</span>
                           <div className="flex items-center gap-0.5">
-                            <button
-                              type="button"
+                            <IconButton
+                              size="sm"
+                              variant="ghost"
                               onClick={() => moveFallback(provider.id, engineId, -1)}
                               disabled={i === 0}
                               aria-label="Move up"
-                              className="size-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent disabled:opacity-30 disabled:cursor-not-allowed"
                             >
                               <ChevronUp size={14} />
-                            </button>
-                            <button
-                              type="button"
+                            </IconButton>
+                            <IconButton
+                              size="sm"
+                              variant="ghost"
                               onClick={() => moveFallback(provider.id, engineId, 1)}
                               disabled={i === provider.fallbackOrder.length - 1}
                               aria-label="Move down"
-                              className="size-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent disabled:opacity-30 disabled:cursor-not-allowed"
                             >
                               <ChevronDown size={14} />
-                            </button>
+                            </IconButton>
                           </div>
                         </div>
                       ))}

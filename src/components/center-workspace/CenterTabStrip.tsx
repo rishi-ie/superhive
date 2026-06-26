@@ -4,6 +4,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { CenterTab } from './CenterTab';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import type { CenterTab as CenterTabType } from '@/data/tabs/interface';
 import type { CenterTabType as NewTabType } from '@/data/tabs/interface';
 
@@ -72,19 +74,22 @@ export function CenterTabStrip({
 
       {onNewTab && (
         <div className="relative shrink-0" ref={menuRef}>
-          <button
+          <IconButton
+            variant="ghost"
+            size="sm"
             onClick={() => setShowMenu(v => !v)}
-            className="flex items-center justify-center size-7 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             aria-label="New tab"
           >
             <Plus size={14} />
-          </button>
+          </IconButton>
 
           {showMenu && (
             <div className="absolute top-full right-0 mt-1 w-40 rounded-lg border border-border bg-popover shadow-lg z-50 py-1">
               {NEW_TAB_OPTIONS.map(opt => (
-                <button
+                <Button
                   key={opt.type}
+                  variant="ghost"
+                  size="sm"
                   className="flex items-center gap-2 w-full px-3 py-2 text-sm text-popover-foreground hover:bg-accent transition-colors text-left"
                   onClick={() => {
                     onNewTab(opt.type, wsId);
@@ -93,7 +98,7 @@ export function CenterTabStrip({
                 >
                   <span className="text-base">{opt.icon}</span>
                   <span>{opt.label}</span>
-                </button>
+                </Button>
               ))}
             </div>
           )}

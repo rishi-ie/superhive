@@ -3,6 +3,7 @@
  */
 import { ShieldAlert, GitMerge } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Button } from '@/components/ui/Button';
 import { getAuditItems, type Agent } from '@/data/agents/store';
 
 type AuditQueueProps = {
@@ -59,37 +60,41 @@ export function AuditQueue({ agent, onApprove, onDeny, onViewDiff }: AuditQueueP
             <div className="flex gap-2">
               {isIntercept ? (
                 <>
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => onApprove?.(item.id)}
-                    className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
                   >
                     Grant One-Time Access
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => onDeny?.(item.id)}
-                    className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
                   >
                     Deny
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
-                  <button
-                    type="button"
-                    className="flex-1 rounded-md border border-border px-2 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 transition-colors"
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => onViewDiff?.(item.id)}
                   >
                     View Code Diff
-                  </button>
-                  <button
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="solid"
+                    size="sm"
+                    className="flex-1"
                     onClick={() => onApprove?.(item.id)}
-                    className="flex-1 rounded-md bg-chart-1 px-2 py-1 text-[10px] font-medium text-highlight-foreground hover:bg-chart-1/90 transition-colors"
                   >
                     Approve & Merge
-                  </button>
+                  </Button>
                 </>
               )}
             </div>

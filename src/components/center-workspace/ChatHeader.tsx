@@ -4,6 +4,8 @@
 import { MoreHorizontal, ChevronDown } from 'lucide-react';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { getPermissions } from '@/data/agents/store';
 import type { Agent } from '@/data/agents/store';
@@ -67,21 +69,22 @@ export function ChatHeader({ agent, tokenCount, sessionCost }: ChatHeaderProps) 
             )}
           </div>
 
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
           >
             <span>{modelEngine}</span>
             <ChevronDown size={10} strokeWidth={STROKE_WIDTH} />
-          </button>
+          </Button>
 
-          <button
-            type="button"
-            className="flex items-center justify-center size-6 rounded text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
+          <IconButton
+            variant="ghost"
+            size="sm"
             aria-label="Thread options"
           >
             <MoreHorizontal size={14} strokeWidth={STROKE_WIDTH} />
-          </button>
+          </IconButton>
         </div>
       </div>
     </div>

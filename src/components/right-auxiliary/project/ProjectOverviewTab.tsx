@@ -3,6 +3,8 @@
  */
 import type { Project } from '@/data/projects/store';
 import { StatCard } from '@/components/ui/StatCard';
+import { Avatar } from '@/components/ui/Avatar';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 
 type ProjectOverviewTabProps = {
   project: Project;
@@ -76,15 +78,15 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
       {/* Contributors */}
       {topAgents.length > 0 && (
         <div className="border-t border-border/40 pt-3 space-y-2">
-          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Contributors</span>
+          <SectionLabel>Contributors</SectionLabel>
           <div className="space-y-1">
             {topAgents.map(agent => (
               <div key={agent.id} className="flex items-center gap-2 group cursor-pointer">
                 <button
                   onClick={() => onAgentClick?.(agent.id)}
-                  className="size-4 rounded-full bg-chart-2 flex items-center justify-center text-[8px] font-bold text-sidebar-primary-foreground shrink-0"
+                  className="shrink-0"
                 >
-                  {agent.initials}
+                  <Avatar size="xs2" name={agent.name} color="bg-chart-2" />
                 </button>
                 <button
                   onClick={() => onAgentClick?.(agent.id)}
@@ -102,7 +104,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
       {/* Recent Activity */}
       {recentActivity.length > 0 && (
         <div className="border-t border-border/40 pt-3 space-y-2">
-          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Recent Activity</span>
+          <SectionLabel>Recent Activity</SectionLabel>
           <div className="space-y-1">
             {recentActivity.map(item => {
               const agent = project.agents.find(a => a.name === item.primaryAgent);
@@ -122,7 +124,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
       {/* Top Active Tickets */}
       {topTickets.length > 0 && (
         <div className="border-t border-border/40 pt-3 space-y-2">
-          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Active Tickets</span>
+          <SectionLabel>Active Tickets</SectionLabel>
           <div className="space-y-1">
             {topTickets.map(ticket => (
               <button
@@ -144,7 +146,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
       {/* Top Active Channels */}
       {topChannels.length > 0 && (
         <div className="border-t border-border/40 pt-3 space-y-2">
-          <span className="text-[10px] tracking-wider font-medium text-muted-foreground">Active Channels</span>
+          <SectionLabel>Active Channels</SectionLabel>
           <div className="space-y-1">
             {topChannels.map(channel => (
               <button

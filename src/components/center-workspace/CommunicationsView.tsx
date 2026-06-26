@@ -14,6 +14,7 @@ import { listChannels, listProjectAgents } from '@/data/projects/store';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { ChannelStatus } from '@/data/projects/interface';
 import type { OnboardingWizardProps } from './OnboardingWizard';
+import { Select } from '@/components/ui/Select';
 
 type SortKey = 'status' | 'recent' | 'messages';
 
@@ -117,15 +118,16 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
           placeholder="Search channels..."
           className="flex-1"
         />
-        <select
+        <Select
           value={sort}
-          onChange={e => setSort(e.target.value as SortKey)}
-          className="rounded-md border border-border bg-input px-2 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
-        >
-          <option value="status">Sort: Status</option>
-          <option value="recent">Sort: Recent</option>
-          <option value="messages">Sort: Messages</option>
-        </select>
+          options={[
+            { value: 'status', label: 'Sort: Status' },
+            { value: 'recent', label: 'Sort: Recent' },
+            { value: 'messages', label: 'Sort: Messages' },
+          ]}
+          onChange={v => setSort(v as SortKey)}
+          className="w-32"
+        />
         <NewButton label="New Channel" onClick={() => onAction?.('create-channel')} />
       </div>
 

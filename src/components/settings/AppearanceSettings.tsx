@@ -4,6 +4,9 @@
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Toggle } from '@/components/ui/Toggle';
+import { Select } from '@/components/ui/Select';
+import { SelectableCard } from '@/components/ui/SelectableCard';
+import { Badge } from '@/components/ui/Badge';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { DEFAULT_THEMES } from '@/lib/settings-context';
@@ -18,8 +21,6 @@ const CODE_SYNTAX_THEMES = [
   { id: 'solarized-dark', label: 'Solarized Dark' },
 ];
 
-const selectClass =
-  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring';
 
 function ThemeSwatch({ themeId }: { themeId: string }) {
   const isDark = themeId === 'dark';
@@ -65,22 +66,15 @@ export function AppearanceSettings() {
           {DEFAULT_THEMES.map(theme => {
             const isActive = appearance.theme === theme.id;
             return (
-              <button
+              <SelectableCard
                 key={theme.id}
+                title={theme.name}
+                selected={isActive}
                 onClick={() => { save('theme', theme.id as ThemeId); toast({ title: `Theme: ${theme.name}` }); }}
-                className={`flex flex-col items-center gap-2 rounded-lg border p-3 w-28 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-                  isActive
-                    ? 'border-chart-1 bg-chart-1/5'
-                    : 'border-border hover:border-muted-foreground/40'
-                }`}
-                aria-pressed={isActive}
               >
                 <ThemeSwatch themeId={theme.id} />
-                <span className="text-xs font-medium text-foreground">{theme.name}</span>
-                {isActive && (
-                  <span className="text-[9px] font-medium text-chart-1 uppercase tracking-wider">Active</span>
-                )}
-              </button>
+                {isActive && <Badge variant="active" className="ml-auto">Active</Badge>}
+              </SelectableCard>
             );
           })}
         </div>
@@ -136,15 +130,12 @@ export function AppearanceSettings() {
           label="Code syntax theme"
           description="Color theme used for code blocks in chat and commit messages."
           control={
-            <select
+            <Select
               value={appearance.codeSyntaxTheme}
-              onChange={e => save('codeSyntaxTheme', e.target.value)}
-              className={`${selectClass} w-48`}
-            >
-              {CODE_SYNTAX_THEMES.map(t => (
-                <option key={t.id} value={t.id}>{t.label}</option>
-              ))}
-            </select>
+              options={CODE_SYNTAX_THEMES.map(t => ({ value: t.id, label: t.label }))}
+              onChange={val => save('codeSyntaxTheme', val)}
+              className="w-48"
+            />
           }
         />
       </SettingSection>

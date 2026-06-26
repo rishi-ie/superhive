@@ -2,6 +2,7 @@
  * Three-column project ticket stream (To Do / Executing / Done).
  */
 import { TicketCard } from './tickets/TicketCard';
+import { SectionLabel } from '@/components/ui/SectionLabel';
 import type { Ticket, ProjectAgent } from '@/data/projects/store';
 
 type ExecutionStreamProps = {
@@ -40,9 +41,7 @@ export function ExecutionStream({ tickets, agents, onTicketSelect, onOpenTickets
         return (
           <div key={col.status} className="flex flex-col gap-2">
             <div className="flex items-center gap-1.5 px-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {col.label}
-              </span>
+              <SectionLabel>{col.label}</SectionLabel>
               <span className="text-[9px] font-fustat text-muted-foreground/60 bg-secondary/80 rounded-full px-1.5 py-0.5">
                 {colTickets.length}
               </span>

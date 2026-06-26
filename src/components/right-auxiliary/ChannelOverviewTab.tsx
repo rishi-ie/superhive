@@ -8,6 +8,10 @@ import { ChannelStatusPill } from '@/components/channels';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { CommunicationChannel, ProjectAgent, ChannelMessage } from '@/data/projects/store';
 import type { UniversalTicket } from '@/data/tickets/store';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { SectionLabel } from '@/components/ui/SectionLabel';
+import { Textarea } from '@/components/ui/Textarea';
 
 type ChannelOverviewTabProps = {
   channel: CommunicationChannel;
@@ -79,9 +83,7 @@ export function ChannelOverviewTab({
 
         {/* Participants */}
         <div className="border-t border-border pt-2 space-y-2">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Participants ({participants.length})
-          </span>
+          <SectionLabel>Participants ({participants.length})</SectionLabel>
           <div className="space-y-1 max-h-32 overflow-y-auto">
             {participants.map((p) => (
               <button
@@ -100,7 +102,7 @@ export function ChannelOverviewTab({
         {/* Related Ticket */}
         {relatedTicket && (
           <div className="border-t border-border pt-2 space-y-1">
-            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">Related Ticket</span>
+            <SectionLabel>Related Ticket</SectionLabel>
             <button
               onClick={() => onTicketClick?.(relatedTicket.id)}
               className="text-[10px] font-fustat text-muted-foreground bg-secondary/60 rounded px-1.5 py-0.5 hover:text-foreground transition-colors"
@@ -112,9 +114,7 @@ export function ChannelOverviewTab({
 
         {/* Message Thread */}
         <div className="border-t border-border pt-2 space-y-2">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Messages
-          </span>
+          <SectionLabel>Messages</SectionLabel>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {messages.length === 0 && (
               <p className="text-xs text-muted-foreground/60 italic text-center py-4">No messages yet.</p>
@@ -129,7 +129,7 @@ export function ChannelOverviewTab({
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-semibold text-foreground">{msg.senderName}</span>
                       {msg.isAI && (
-                        <span className="text-[8px] font-medium uppercase tracking-wider rounded border border-chart-2/40 bg-chart-2/10 text-chart-2 px-1 py-0.5">AI</span>
+                        <Badge variant="ai">AI</Badge>
                       )}
                       <span className="text-[9px] text-muted-foreground/60 font-fustat">{msg.timestamp}</span>
                     </div>
@@ -145,7 +145,7 @@ export function ChannelOverviewTab({
       {/* Compose */}
       <div className="shrink-0 border-t border-border p-2">
         <div className="flex items-end gap-2">
-          <textarea
+          <Textarea
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
@@ -156,15 +156,16 @@ export function ChannelOverviewTab({
             }}
             placeholder="Send a message..."
             rows={2}
-            className="flex-1 resize-none rounded-md border border-border bg-input px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring"
+            className="flex-1 resize-none"
           />
-          <button
+          <Button
             onClick={handleSend}
             disabled={!input.trim()}
-            className="shrink-0 size-8 rounded-md bg-chart-1 flex items-center justify-center text-highlight-foreground hover:bg-chart-1/90 transition-colors disabled:opacity-40"
+            className="shrink-0 size-8"
+            size="sm"
           >
             <Send size={14} strokeWidth={STROKE_WIDTH} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,8 +1,7 @@
 /**
  * Agent status pill — colored badge with icon for agent status (EXECUTING, COMPILING, etc.).
  */
-import { Loader2 } from 'lucide-react';
-import { STROKE_WIDTH } from '@/lib/constants';
+import { StatusDot } from '@/components/ui/StatusDot';
 import type { AgentStatus } from '@/data/agents/interface';
 
 /**
@@ -20,10 +19,7 @@ export function StatusPill({ status }: { status: AgentStatus }) {
   const { className } = config[status];
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-fustat font-medium uppercase tracking-wider ${className}`}>
-      {status === 'EXECUTING'     && <span className="size-1.5 rounded-full bg-chart-2 pulse-executing" />}
-      {status === 'COMPILING'     && <Loader2 size={8} className="animate-spin text-chart-3" strokeWidth={STROKE_WIDTH} />}
-      {status === 'ERROR_LOOP'    && <span className="size-1.5 rounded-full bg-chart-5 pulse-error" />}
-      {status === 'IDLE'          && <span className="size-1.5 rounded-full bg-muted-foreground/40" />}
+      <StatusDot status={status} size="xs" />
       {status}
     </span>
   );

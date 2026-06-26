@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { TextInput } from '@/components/ui/TextInput';
+import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Toggle } from '@/components/ui/Toggle';
 import { SettingSection } from './shared/SettingSection';
@@ -32,8 +33,6 @@ const TIMEZONES = [
   'UTC',
 ];
 
-const selectClass =
-  'rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring';
 
 /**
  * Account settings page — manage your identity, connected accounts, and preferences.
@@ -110,7 +109,7 @@ export function AccountSettings() {
               onMouseEnter={() => setAvatarHovered(true)}
               onMouseLeave={() => setAvatarHovered(false)}
             >
-              <Avatar size="xl" fallback={name.slice(0, 2).toUpperCase() || '?'} className="cursor-pointer" />
+              <Avatar size="xl" name={name} className="cursor-pointer" />
               {avatarHovered && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] text-foreground font-medium">
                   Change
@@ -164,15 +163,12 @@ export function AccountSettings() {
           label="Timezone"
           description="Used to display timestamps and schedule quiet hours correctly."
           control={
-            <select
+            <Select
               value={timezone}
-              onChange={e => { setTimezone(e.target.value); setTimezoneDirty(true); }}
-              className={`${selectClass} w-56`}
-            >
-              {TIMEZONES.map(tz => (
-                <option key={tz} value={tz}>{tz}</option>
-              ))}
-            </select>
+              options={TIMEZONES.map(tz => ({ value: tz, label: tz }))}
+              onChange={val => { setTimezone(val); setTimezoneDirty(true); }}
+              className="w-56"
+            />
           }
         />
       </SettingSection>

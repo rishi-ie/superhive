@@ -7,6 +7,7 @@ import { STROKE_WIDTH } from '@/lib/constants';
 
 type StatusDotProps = {
   status: AgentStatus;
+  size?: 'xs' | 'sm';
   className?: string;
 };
 
@@ -18,17 +19,22 @@ const colorMap: Record<AgentStatus, string> = {
   ERROR_LOOP:     'bg-chart-5',
 };
 
+const sizeClassMap: Record<'xs' | 'sm', string> = {
+  xs: 'size-1.5',
+  sm: 'size-2',
+};
+
 /**
  * Agent status indicator dot with pulse/spinner for active states.
- * Used by agent list items and swarm roster.
  * @param status - Agent status: EXECUTING, COMPILING, AWAITING_HUMAN, IDLE, ERROR_LOOP
+ * @param size - Dot size: xs (1.5) or sm (2, default)
  * @param className - Additional CSS classes
  */
-export function StatusDot({ status, className = '' }: StatusDotProps) {
+export function StatusDot({ status, size = 'sm', className = '' }: StatusDotProps) {
   if (status === 'COMPILING') {
     return (
       <Loader2
-        size={10}
+        size={8}
         strokeWidth={STROKE_WIDTH}
         className={`shrink-0 animate-spin text-chart-3 ${className}`}
       />
@@ -42,7 +48,7 @@ export function StatusDot({ status, className = '' }: StatusDotProps) {
 
   return (
     <span
-      className={`inline-block size-2 rounded-full shrink-0 ${colorMap[status]} ${pulse} ${className}`}
+      className={`inline-block rounded-full shrink-0 ${sizeClassMap[size]} ${colorMap[status]} ${pulse} ${className}`}
       aria-label={status}
     />
   );

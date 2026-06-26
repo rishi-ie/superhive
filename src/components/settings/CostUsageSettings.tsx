@@ -6,6 +6,8 @@ import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Toggle } from '@/components/ui/Toggle';
 import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
+import { StatCard } from '@/components/ui/StatCard';
 import { useToast } from '@/lib/toast-context';
 import { Download, Lock } from 'lucide-react';
 
@@ -31,8 +33,6 @@ const DEFAULT_DATA = [
   { date: 'Jun 25', cost: 9.1 },
 ];
 
-const disabledInputClass =
-  'w-24 rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed';
 
 function UsageChart({ data }: { data: typeof DEFAULT_DATA }) {
   const max = Math.max(...data.map(d => d.cost), 1);
@@ -63,15 +63,6 @@ function UsageChart({ data }: { data: typeof DEFAULT_DATA }) {
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="border border-border/40 rounded-md p-3 bg-card/30">
-      <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-foreground font-fustat tabular-nums">{value}</div>
-      {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
-    </div>
-  );
-}
 
 /**
  * Cost & Usage page — spending controls and usage breakdown.
@@ -148,13 +139,12 @@ export function CostUsageSettings() {
               control={
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">$</span>
-                  <input
+                  <TextInput
                     type="number"
-                    value={budgetCap}
+                    value={String(budgetCap)}
                     onChange={e => setBudgetCap(parseInt(e.target.value) || 0)}
-                    min={0}
                     disabled
-                    className={disabledInputClass}
+                    className="w-24"
                   />
                 </div>
               }
@@ -165,13 +155,12 @@ export function CostUsageSettings() {
               control={
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">$</span>
-                  <input
+                  <TextInput
                     type="number"
-                    value={perAgentLimit}
+                    value={String(perAgentLimit)}
                     onChange={e => setPerAgentLimit(parseInt(e.target.value) || 0)}
-                    min={0}
                     disabled
-                    className={disabledInputClass}
+                    className="w-24"
                   />
                 </div>
               }
@@ -179,20 +168,18 @@ export function CostUsageSettings() {
             <SettingRow
               label="Budget reset cycle"
               description="Day of month when the budget counter resets."
-              control={
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={resetDay}
-                    onChange={e => setResetDay(parseInt(e.target.value) || 1)}
-                    min={1}
-                    max={28}
-                    disabled
-                    className="w-16 rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                  <span className="text-xs text-muted-foreground">of each month</span>
-                </div>
-              }
+                  control={
+                    <div className="flex items-center gap-2">
+                      <TextInput
+                        type="number"
+                        value={String(resetDay)}
+                        onChange={e => setResetDay(parseInt(e.target.value) || 1)}
+                        disabled
+                        className="w-16"
+                      />
+                      <span className="text-xs text-muted-foreground">of each month</span>
+                    </div>
+                  }
             />
           </div>
         </div>
@@ -225,14 +212,12 @@ export function CostUsageSettings() {
               description="Percentage of monthly budget at which to trigger the alert."
               control={
                 <div className="flex items-center gap-2">
-                  <input
+                  <TextInput
                     type="number"
-                    value={spendAlertPercent}
+                    value={String(spendAlertPercent)}
                     onChange={e => setSpendAlertPercent(parseInt(e.target.value) || 80)}
-                    min={10}
-                    max={100}
                     disabled
-                    className="w-16 rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-16"
                   />
                   <span className="text-xs text-muted-foreground">%</span>
                 </div>

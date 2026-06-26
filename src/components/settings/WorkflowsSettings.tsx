@@ -5,14 +5,13 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { Button } from '@/components/ui/Button';
+import { TextInput } from '@/components/ui/TextInput';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { formatRelativeTime } from '@/lib/relative-time';
 
 const CRON_HELP = 'Cron expression: minute hour day month weekday. Example: "0 9 * * 1-5" = 9am Mon–Fri.';
 
-const inputClass =
-  'w-full rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring';
 
 /**
  * Workflows & Triggers page — manage scheduled and triggered workflows.
@@ -73,27 +72,25 @@ export function WorkflowsSettings() {
                     <SettingRow
                       label="Name"
                       description="A friendly name for this workflow."
-                      control={
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={e => setEditName(e.target.value)}
-                          className={`${inputClass} max-w-xs`}
-                        />
-                      }
+                    control={
+                          <TextInput
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            className="max-w-xs"
+                          />
+                        }
                     />
                     <SettingRow
                       label="Cron expression"
                       description={CRON_HELP}
                       control={
-                        <input
-                          type="text"
-                          value={editCron}
-                          onChange={e => setEditCron(e.target.value)}
-                          placeholder="0 9 * * 1-5"
-                          className="w-44 rounded-md border border-border bg-input px-3 py-1.5 text-sm text-foreground font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-ring"
-                        />
-                      }
+                          <TextInput
+                            value={editCron}
+                            onChange={e => setEditCron(e.target.value)}
+                            placeholder="0 9 * * 1-5"
+                            className="w-44 font-mono"
+                          />
+                        }
                     />
                     <div className="flex justify-end gap-2 pt-1">
                       <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
