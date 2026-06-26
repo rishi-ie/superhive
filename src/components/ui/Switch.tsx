@@ -1,6 +1,6 @@
 /**
  * Switch — on/off toggle using @radix-ui/react-switch.
- * Tuned for warm dark theme: terracotta accent on-state, visible off-state pill,
+ * Tuned for warm dark theme: blue accent on-state, visible off-state pill,
  * smaller thumb so track color shows on both sides, bright focus ring.
  */
 import React, { forwardRef } from 'react';

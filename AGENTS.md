@@ -308,11 +308,13 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 **Built-in themes** are defined in `src/data/config/themes.ts` as `DEFAULT_THEMES` (light, dark, system). Theme CSS variables are applied to `<html>` via `applySettingsToDOM()` in `src/lib/settings-context.tsx`.
 
 **Appearance settings** are applied directly to the DOM via `applySettingsToDOM()`:
-- `appearance.theme` → CSS vars + `data-theme` on `<html>`
-- `appearance.accentColor` → `--highlight`, `--accent`, `--chart-1`, `--sidebar-primary`
+- `appearance.theme` → CSS vars + `data-theme` on `<html>`. **Theme is authoritative for brand color** (`--chart-1`, `--sidebar-primary`, `--accent`, `--accent-foreground`, `--highlight-foreground`). Changing theme → buttons, badges, tabs, borders, sidebar accents all update.
+- `appearance.highlightColor` → user-controllable highlight subset only: `--highlight`, `--highlight-match`, `--highlight-active`, `--highlight-foreground`. Drives selection/match backgrounds, active link underlines, Switch on-state, Pill active state. **Does not** affect `--chart-1` / `--sidebar-primary` — those are theme-owned.
 - `appearance.fontScale` → `font-size` on `<html>` (rem-based text scales; pixel-arbitrary `text-[Npx]` classes do not)
 - `appearance.reduceMotion` → `data-reduce-motion` attr; CSS kills all transitions when `"true"`
 - `appearance.codeSyntaxTheme` → `CodeBlock` component uses this for `<pre>` background/foreground
+
+**Theme modularity rule**: changing a value in `:root` or any theme's `vars` MUST propagate to the whole app via the CSS variable cascade (`@theme inline` exposes them as Tailwind utilities like `bg-chart-1`). Do not write theme-defined vars from settings — settings only override the narrow user-tunable subset (`--highlight*` family).
 
 **Adaptive wiring rule**: every setting must drive visible UI. If a setting is stored but never consumed outside its settings page, it is a bug — fix it in the same PR that adds the setting.
 
@@ -320,7 +322,7 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 
 **Adding a new settings page**: create the page in `src/components/settings/`, add it to `settings-registry.ts` (nav entry with id/label/icon/category/component), and add it to `settingsCategories` in the same file.
 
-**`account.accentColor`** was removed — it was a duplicate of `appearance.accentColor`. Always use `appearance.accentColor`.
+**`appearance.accentColor`** was renamed to `appearance.highlightColor` with narrower scope — it no longer affects `--chart-1` / `--sidebar-primary` (theme-owned). To change the brand color, edit the theme.
 
 ### No new files at `src/components/` root
 Every new component goes in the correct subdirectory (see Component Placement below).

@@ -33,8 +33,8 @@ function loadSettings(): Settings {
   }
 }
 
-function computeAccentForeground(accent: string): string {
-  const hex = accent.replace('#', '');
+function computeHighlightForeground(highlight: string): string {
+  const hex = highlight.replace('#', '');
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
@@ -74,16 +74,13 @@ function applySettingsToDOM(settings: Settings) {
 
   root.setAttribute('data-reduce-motion', String(settings.appearance.reduceMotion || settings.accessibility.reduceMotion));
 
-  const accent = settings.appearance.accentColor;
-  const accentFg = computeAccentForeground(accent);
+  const highlight = settings.appearance.highlightColor;
+  const highlightFg = computeHighlightForeground(highlight);
 
-  root.style.setProperty('--highlight', accent);
-  root.style.setProperty('--accent', accent);
-  root.style.setProperty('--accent-foreground', accentFg);
-  root.style.setProperty('--sidebar-primary', accent);
-  root.style.setProperty('--chart-1', accent);
-  root.style.setProperty('--highlight-match', `${accent}33`);
-  root.style.setProperty('--highlight-active', `${accent}80`);
+  root.style.setProperty('--highlight', highlight);
+  root.style.setProperty('--highlight-foreground', highlightFg);
+  root.style.setProperty('--highlight-match', `${highlight}33`);
+  root.style.setProperty('--highlight-active', `${highlight}80`);
 }
 
 const SettingsContext = createContext<SettingsStore | null>(null);

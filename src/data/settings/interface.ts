@@ -16,7 +16,7 @@ export type Theme = {
 
 export type AppearanceSettings = {
   theme: ThemeId;
-  accentColor: string;
+  highlightColor: string;
   fontScale: number;
   reduceMotion: boolean;
   codeSyntaxTheme: string;
@@ -217,6 +217,6 @@ export type SettingsStore = {
   exportJson: () => string;
 };
 
-export const STORAGE_KEY = 'superhive-settings-v1';
+export const STORAGE_KEY = 'superhive-settings-v2';
 
 export const DEFAULT_SETTINGS: Settings = defaultSettings as Settings;

@@ -1,7 +1,7 @@
 {
   "appearance": {
     "theme": "dark",
-    "accentColor": "#e07850",
+    "highlightColor": "#0562EF",
     "fontScale": 1,
     "reduceMotion": false,
     "codeSyntaxTheme": "github-dark"

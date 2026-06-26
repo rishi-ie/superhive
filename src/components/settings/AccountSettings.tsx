@@ -180,13 +180,13 @@ export function AccountSettings() {
           }
         />
         <SettingRow
-          label="Profile accent color"
-          description="Your personal highlight color used across your avatar and activity indicators."
+          label="Profile highlight color"
+          description="Color for your selections, matches, and active link underlines. Theme controls the brand color for buttons and badges."
           control={
             <ColorPicker
-              value={settings.appearance.accentColor}
-              onChange={(v) => update('appearance', { accentColor: v })}
-              label="Profile accent color"
+              value={settings.appearance.highlightColor}
+              onChange={(v) => update('appearance', { highlightColor: v })}
+              label="Profile highlight color"
             />
           }
         />

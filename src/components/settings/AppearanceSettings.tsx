@@ -84,13 +84,13 @@ export function AppearanceSettings() {
 
       <SettingSection title="Color">
         <SettingRow
-          label="Accent color"
-          description="Your primary highlight color used across Superhive for emphasis and selection."
+          label="Highlight color"
+          description="Color for selections, matches, and active link underlines. Theme controls the brand color for buttons and badges."
           control={
             <ColorPicker
-              value={appearance.accentColor}
-              onChange={(v) => save('accentColor', v)}
-              label="Accent color"
+              value={appearance.highlightColor}
+              onChange={(v) => save('highlightColor', v)}
+              label="Highlight color"
             />
           }
         />
