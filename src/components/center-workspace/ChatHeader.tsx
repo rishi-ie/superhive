@@ -72,7 +72,7 @@ export function ChatHeader({ agent, tokenCount, sessionCost }: ChatHeaderProps) 
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
           >
             <span>{modelEngine}</span>
             <ChevronDown size={10} strokeWidth={STROKE_WIDTH} />

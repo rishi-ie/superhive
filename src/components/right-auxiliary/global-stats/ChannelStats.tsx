@@ -47,7 +47,7 @@ export function ChannelStats({ channels, onChannelClick }: ChannelStatsProps) {
               <button
                 key={ch.id}
                 onClick={() => onChannelClick?.(ch.id, ch.workspaceId ?? '')}
-                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors"
+                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors"
                 type="button"
               >
                 <div className="text-[10px] font-medium text-foreground truncate">{ch.topic}</div>

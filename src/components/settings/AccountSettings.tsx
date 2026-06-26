@@ -12,6 +12,7 @@ import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { ColorPicker } from './shared/ColorPicker';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { GitBranch, Globe, Apple } from 'lucide-react';
@@ -182,20 +183,11 @@ export function AccountSettings() {
           label="Profile accent color"
           description="Your personal highlight color used across your avatar and activity indicators."
           control={
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={settings.appearance.accentColor}
-                onChange={e => update('appearance', { accentColor: e.target.value })}
-                className="size-8 rounded-md cursor-pointer border border-border bg-transparent"
-                aria-label="Pick accent color"
-              />
-              <TextInput
-                value={settings.appearance.accentColor}
-                onChange={e => update('appearance', { accentColor: e.target.value })}
-                className="w-28"
-              />
-            </div>
+            <ColorPicker
+              value={settings.appearance.accentColor}
+              onChange={(v) => update('appearance', { accentColor: v })}
+              label="Profile accent color"
+            />
           }
         />
       </SettingSection>

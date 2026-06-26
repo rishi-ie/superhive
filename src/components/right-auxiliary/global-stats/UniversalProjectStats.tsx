@@ -45,7 +45,7 @@ export function UniversalProjectStats({ projects, universalTickets, onProjectCli
               key={p.id}
               type="button"
               onClick={() => onProjectClick(p.id, p.workspaceId)}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-border/40 hover:bg-white/5 transition-colors text-left"
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-border/40 hover:bg-hover-tint transition-colors text-left"
             >
               <span className="text-xs text-foreground truncate">{p.title}</span>
               <span className="text-[9px] text-muted-foreground shrink-0 ml-2">{p.workspaceId}</span>

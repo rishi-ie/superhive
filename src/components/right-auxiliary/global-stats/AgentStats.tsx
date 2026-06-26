@@ -48,7 +48,7 @@ export function AgentStats({ agents, onAgentClick }: AgentStatsProps) {
               <button
                 key={a.id}
                 onClick={() => onAgentClick?.(a.id)}
-                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors"
+                className="w-full text-left p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors"
                 type="button"
               >
                 <div className="text-[10px] font-medium text-foreground truncate">{a.name}</div>

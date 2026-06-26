@@ -127,7 +127,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowModelPicker(p => !p)}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors border border-transparent"
+                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors border border-transparent"
                 >
                   <span>{model}</span>
                   <ChevronDown size={9} strokeWidth={STROKE_WIDTH} />
@@ -140,7 +140,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
                         type="button"
                         onClick={() => { setModel(m); setShowModelPicker(false); }}
                         className={`w-full text-left px-2.5 py-1.5 text-[11px] transition-colors ${
-                          m === model ? 'bg-chart-1/10 text-chart-1' : 'text-foreground hover:bg-white/5'
+                          m === model ? 'bg-chart-1/10 text-chart-1' : 'text-foreground hover:bg-hover-tint'
                         }`}
                       >
                         {m}

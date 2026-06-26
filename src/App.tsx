@@ -16,6 +16,7 @@ import { Dashboard } from './screens/Dashboard';
 import { Settings } from './screens/Settings';
 import { ToastProvider } from './lib/toast-context';
 import { SettingsProvider } from './lib/settings-context';
+import { TooltipProvider } from './components/ui/TooltipProvider';
 
 export type Page = 'main' | 'settings';
 
@@ -49,19 +50,21 @@ function App() {
 
   return (
     <SettingsProvider>
-      <ToastProvider>
-        {page === 'settings' ? (
-          <Settings onBack={() => setPage('main')} />
-        ) : (
-          <Dashboard
-            leftWidth={leftWidth}
-            rightWidth={rightWidth}
-            onLeftWidthChange={handleLeftWidthChange}
-            onRightWidthChange={handleRightWidthChange}
-            onNavigate={handleNavigate}
-          />
-        )}
-      </ToastProvider>
+      <TooltipProvider>
+        <ToastProvider>
+          {page === 'settings' ? (
+            <Settings onBack={() => setPage('main')} />
+          ) : (
+            <Dashboard
+              leftWidth={leftWidth}
+              rightWidth={rightWidth}
+              onLeftWidthChange={handleLeftWidthChange}
+              onRightWidthChange={handleRightWidthChange}
+              onNavigate={handleNavigate}
+            />
+          )}
+        </ToastProvider>
+      </TooltipProvider>
     </SettingsProvider>
   );
 }

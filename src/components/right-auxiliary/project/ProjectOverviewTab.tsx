@@ -130,7 +130,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
               <button
                 key={ticket.id}
                 onClick={() => onTicketClick?.(ticket.id)}
-                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors text-left"
               >
                 <span className="text-[9px] font-fustat text-muted-foreground shrink-0">{ticket.id}</span>
                 <span className="text-[10px] text-foreground truncate flex-1">{ticket.title}</span>
@@ -152,7 +152,7 @@ export function ProjectOverviewTab({ project, onTicketClick, onAgentClick, onCha
               <button
                 key={channel.id}
                 onClick={() => onChannelClick?.(channel.id, project.workspaceId)}
-                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors text-left"
               >
                 <span className="text-[10px] text-foreground truncate flex-1">{channel.topic}</span>
                 <span className="text-[9px] text-muted-foreground shrink-0">{channel.messageCount} msgs</span>

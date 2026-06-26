@@ -16,10 +16,11 @@ import {
   type Settings,
   type SettingsStore,
 } from '@/data/settings/interface';
-import { DEFAULT_THEMES, ALL_THEME_VARS } from '@/data/config/themes';
+import { ALL_THEME_VARS } from '@/data/config/themes';
+import { themeStore } from '@/data/themes';
 import { debounce } from '@/lib/debounce';
 
-export { DEFAULT_THEMES };
+export { DEFAULT_THEMES } from '@/data/config/themes';
 export type { Theme } from '@/data/settings/interface';
 
 function loadSettings(): Settings {
@@ -32,19 +33,38 @@ function loadSettings(): Settings {
   }
 }
 
+function computeAccentForeground(accent: string): string {
+  const hex = accent.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 140 ? '#151110' : '#ffffff';
+}
+
 function applySettingsToDOM(settings: Settings) {
   const root = document.documentElement;
+  const { themes } = themeStore;
 
   ALL_THEME_VARS.forEach(k => root.style.removeProperty(k));
 
-  const theme = DEFAULT_THEMES.find(t => t.id === settings.appearance.theme) ?? DEFAULT_THEMES[0]!;
+  const selectedId = settings.appearance.theme;
+  const isSystemMode = selectedId === 'system';
+  const isDarkOS = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-  if (settings.appearance.theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const sysTheme = prefersDark ? DEFAULT_THEMES[0]! : DEFAULT_THEMES[1]!;
-    Object.entries(sysTheme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+  if (isSystemMode) {
+    const prefersDark = isDarkOS;
+    const sysTheme = themes.find(t => t.id === 'system') ?? themes[0]!;
+    if (prefersDark) {
+      Object.entries(sysTheme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    } else if (sysTheme.systemVars) {
+      Object.entries(sysTheme.systemVars).forEach(([k, v]) => root.style.setProperty(k, v));
+    } else {
+      Object.entries(sysTheme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+    }
     root.setAttribute('data-theme', 'system');
   } else {
+    const theme = themes.find(t => t.id === selectedId) ?? themes[0]!;
     Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
     root.setAttribute('data-theme', theme.id);
   }
@@ -54,11 +74,16 @@ function applySettingsToDOM(settings: Settings) {
 
   root.setAttribute('data-reduce-motion', String(settings.appearance.reduceMotion || settings.accessibility.reduceMotion));
 
-  root.style.setProperty('--highlight', settings.appearance.accentColor);
-  root.style.setProperty('--accent', settings.appearance.accentColor);
-  root.style.setProperty('--accent-foreground', '#ffffff');
-  root.style.setProperty('--sidebar-primary', settings.appearance.accentColor);
-  root.style.setProperty('--chart-1', settings.appearance.accentColor);
+  const accent = settings.appearance.accentColor;
+  const accentFg = computeAccentForeground(accent);
+
+  root.style.setProperty('--highlight', accent);
+  root.style.setProperty('--accent', accent);
+  root.style.setProperty('--accent-foreground', accentFg);
+  root.style.setProperty('--sidebar-primary', accent);
+  root.style.setProperty('--chart-1', accent);
+  root.style.setProperty('--highlight-match', `${accent}33`);
+  root.style.setProperty('--highlight-active', `${accent}80`);
 }
 
 const SettingsContext = createContext<SettingsStore | null>(null);

@@ -28,7 +28,7 @@ const Switch = forwardRef<
     <SwitchPrimitive.Thumb
       className={cn(
         'pointer-events-none block h-3.5 w-3.5 rounded-full bg-background',
-        'shadow-[0_1px_3px_rgb(0_0_0/0.4),inset_0_0_0_0.5px_rgb(255_255_255/0.1)]',
+        'shadow-[var(--switch-thumb-shadow)]',
         'ring-0 transition-transform duration-200',
         'translate-x-[3px] data-[state=checked]:translate-x-[19px]'
       )}

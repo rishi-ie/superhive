@@ -133,7 +133,7 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
               variant="ghost"
               size="sm"
               onClick={handleCopy}
-              className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-hover-tint transition-colors"
             >
               {copied ? <Check size={11} strokeWidth={STROKE_WIDTH} /> : <Copy size={11} strokeWidth={STROKE_WIDTH} />}
               {copied ? 'copied' : 'copy'}
@@ -145,7 +145,7 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors ${
                 message.feedback === 'up'
                   ? 'text-chart-2 bg-chart-2/10'
-                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-white/5'
+                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-hover-tint'
               }`}
             >
               <ThumbsUp size={11} strokeWidth={STROKE_WIDTH} />
@@ -157,7 +157,7 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
               className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] transition-colors ${
                 message.feedback === 'down'
                   ? 'text-chart-5 bg-chart-5/10'
-                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-white/5'
+                  : 'text-muted-foreground/60 hover:text-foreground hover:bg-hover-tint'
               }`}
             >
               <ThumbsDown size={11} strokeWidth={STROKE_WIDTH} />
@@ -167,7 +167,7 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
                 variant="ghost"
                 size="sm"
                 onClick={() => onRegenerate(message.id)}
-                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-white/5 transition-colors"
+                className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground/60 hover:text-foreground hover:bg-hover-tint transition-colors"
               >
                 <RotateCcw size={11} strokeWidth={STROKE_WIDTH} />
                 regenerate

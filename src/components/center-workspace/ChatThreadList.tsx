@@ -28,7 +28,7 @@ export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewT
       <button
         type="button"
         onClick={() => setExpanded(e => !e)}
-        className="w-full flex items-center gap-2 px-4 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+        className="w-full flex items-center gap-2 px-4 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
       >
         <ChevronDown
           size={11}
@@ -55,7 +55,7 @@ export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewT
               className={`w-full text-left px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-2 ${
                 thread.id === activeThreadId
                   ? 'bg-sidebar-accent/70 border border-chart-1/30'
-                  : 'hover:bg-white/5 border border-transparent'
+                  : 'hover:bg-hover-tint border border-transparent'
               }`}
             >
               <div className="flex-1 min-w-0">
@@ -72,7 +72,7 @@ export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewT
             <button
               type="button"
               onClick={onNewThread}
-              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
             >
               <Plus size={11} strokeWidth={STROKE_WIDTH} className="shrink-0" />
               <span>New thread</span>

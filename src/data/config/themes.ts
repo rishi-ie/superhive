@@ -1,8 +1,12 @@
 /**
  * Built-in theme definitions. Each theme is a map of CSS variable overrides
  * applied to :root when the user picks that theme (or system).
+ *
+ * Custom themes (from backend) are merged in at runtime via the themes/ store.
+ * The built-in list here serves as the seed/defaults.
  */
 import type { Theme } from '@/data/settings/interface';
+import { ALL_CSS_VARS } from '@/data/config/css-vars';
 
 export const DEFAULT_THEMES: Theme[] = [
   {
@@ -47,16 +51,22 @@ export const DEFAULT_THEMES: Theme[] = [
       '--highlight-active': 'rgba(224, 120, 80, 0.4)',
       '--highlight': '#e07850',
       '--highlight-foreground': '#ffffff',
+      '--overlay': 'rgb(0 0 0 / 0.5)',
+      '--hover-tint': 'rgb(0 0 0 / 0.04)',
+      '--switch-thumb-shadow': '0 1px 3px rgb(0 0 0 / 0.15), inset 0 0 0 0.5px rgb(0 0 0 / 0.05)',
     },
   },
   {
     id: 'system',
     name: 'System',
     vars: {},
+    systemVars: {},
   },
 ];
 
-/** Set of every CSS variable any theme touches — used to clear stale overrides. */
-export const ALL_THEME_VARS: Set<string> = new Set(
-  DEFAULT_THEMES.flatMap((t) => Object.keys(t.vars))
-);
+/**
+ * Set of every CSS variable that can be themed.
+ * Built from the canonical ALL_CSS_VARS list — ALL vars are cleared
+ * before applying a new theme so no stale values persist.
+ */
+export const ALL_THEME_VARS: Set<string> = new Set(ALL_CSS_VARS);

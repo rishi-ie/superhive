@@ -4,12 +4,14 @@
 
 import defaultSettings from './settings.json';
 
-export type ThemeId = 'light' | 'dark' | 'system';
+export type ThemeId = string;
 
 export type Theme = {
   id: ThemeId;
   name: string;
   vars: Record<string, string>;
+  /** Optional overrides for system-mode when OS is in light scheme. */
+  systemVars?: Record<string, string>;
 };
 
 export type AppearanceSettings = {

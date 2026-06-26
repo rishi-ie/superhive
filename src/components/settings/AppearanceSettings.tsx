@@ -7,14 +7,13 @@ import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ColorPicker } from './shared/ColorPicker';
 import { SelectableCard } from './shared/SelectableCard';
-import { Switch } from '@/components/ui/Switch';
 import { Select } from '@/components/ui/Select';
 import { Badge } from '@/components/ui/Badge';
 import { Slider } from '@/components/ui/Slider';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import { DEFAULT_THEMES } from '@/data/config/themes';
-import type { ThemeId } from '@/data/settings/interface';
+import { themeStore } from '@/data/themes';
+import type { Theme } from '@/data/settings/interface';
 
 const CODE_SYNTAX_THEMES = [
   { id: 'github-dark', label: 'GitHub Dark' },
@@ -25,20 +24,19 @@ const CODE_SYNTAX_THEMES = [
   { id: 'solarized-dark', label: 'Solarized Dark' },
 ];
 
+function swatchGradient(theme: Theme): string {
+  if (theme.id === 'dark') return 'linear-gradient(135deg, #151110 50%, #2a2827 50%)';
+  if (theme.id === 'light') return 'linear-gradient(135deg, #f5f2ef 50%, #d0cbc6 50%)';
+  const bg = theme.vars['--background'] ?? '#151110';
+  const card = theme.vars['--card'] ?? bg;
+  return `linear-gradient(135deg, ${bg} 50%, ${card} 50%)`;
+}
 
-function ThemeSwatch({ themeId }: { themeId: string }) {
-  const isDark = themeId === 'dark';
-  const isLight = themeId === 'light';
+function ThemeSwatch({ theme }: { theme: Theme }) {
   return (
     <div
-      className="size-12 rounded-md border border-border/60 shadow-sm"
-      style={{
-        background: isDark
-          ? 'linear-gradient(135deg, #151110 50%, #2a2827 50%)'
-          : isLight
-          ? 'linear-gradient(135deg, #f5f2ef 50%, #d0cbc6 50%)'
-          : 'linear-gradient(135deg, #151110 50%, #f5f2ef 50%)',
-      }}
+      className="size-12 rounded-md border border-border/60 shadow-sm shrink-0"
+      style={{ background: swatchGradient(theme) }}
     />
   );
 }
@@ -67,17 +65,17 @@ export function AppearanceSettings() {
         description="Choose a color theme for Superhive. System follows your OS preference."
       >
         <div className="flex flex-wrap gap-3 pt-1">
-          {DEFAULT_THEMES.map(theme => {
+          {themeStore.themes.map(theme => {
             const isActive = appearance.theme === theme.id;
             return (
               <SelectableCard
                 key={theme.id}
                 title={theme.name}
                 selected={isActive}
-                onClick={() => { save('theme', theme.id as ThemeId); toast({ title: `Theme: ${theme.name}` }); }}
+                onClick={() => { save('theme', theme.id); toast({ title: `Theme: ${theme.name}` }); }}
               >
-                <ThemeSwatch themeId={theme.id} />
-                {isActive && <Badge variant="active" className="ml-auto">Active</Badge>}
+                <ThemeSwatch theme={theme} />
+                {isActive && <Badge variant="active" className="ml-auto shrink-0">Active</Badge>}
               </SelectableCard>
             );
           })}
@@ -128,19 +126,6 @@ export function AppearanceSettings() {
               options={CODE_SYNTAX_THEMES.map(t => ({ value: t.id, label: t.label }))}
               onChange={val => save('codeSyntaxTheme', val)}
               className="w-48"
-            />
-          }
-        />
-      </SettingSection>
-
-      <SettingSection title="Motion">
-        <SettingRow
-          label="Reduce motion"
-          description="Disable animations and transitions throughout the interface. Improves accessibility and performance."
-          control={
-            <Switch
-              checked={appearance.reduceMotion}
-              onCheckedChange={(val) => save('reduceMotion', val)}
             />
           }
         />

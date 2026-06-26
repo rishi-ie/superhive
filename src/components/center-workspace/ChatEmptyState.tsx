@@ -56,7 +56,7 @@ export function ChatEmptyState({ agentName, onSuggestionClick }: ChatEmptyStateP
                 key={item.label}
                 type="button"
                 onClick={() => onSuggestionClick?.(item.label)}
-                className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg border border-border/40 bg-card hover:border-border/80 hover:bg-white/5 transition-colors text-left group"
+                className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg border border-border/40 bg-card hover:border-border/80 hover:bg-hover-tint transition-colors text-left group"
               >
                 <Icon
                   size={14}

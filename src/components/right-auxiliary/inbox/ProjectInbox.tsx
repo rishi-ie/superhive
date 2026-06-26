@@ -91,7 +91,7 @@ export function ProjectInbox({ project, onTicketClick }: ProjectInboxProps) {
             {filtered.map(item => (
               <div
                 key={item.id}
-                className="flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors group"
+                className="flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors group"
               >
                 <Checkbox
                   checked={selected.has(item.id)}

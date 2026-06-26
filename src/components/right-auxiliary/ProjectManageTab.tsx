@@ -68,7 +68,7 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
             {members.map(agent => (
               <div
                 key={agent.id}
-                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors cursor-default"
               >
                 <Avatar
                   name={agent.name}
@@ -93,7 +93,7 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
             {channels.slice(0, 5).map(channel => (
               <div
                 key={channel.id}
-                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+                className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors cursor-default"
               >
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-foreground truncate">{channel.topic}</div>

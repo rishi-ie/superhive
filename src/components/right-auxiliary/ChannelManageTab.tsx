@@ -79,7 +79,7 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
                 className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                   status === opt.value
                     ? STATUS_SELECTED[opt.value]
-                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    : 'bg-card text-muted-foreground hover:text-foreground hover:bg-hover-tint'
                 }`}
               >
                 {opt.label}
@@ -105,7 +105,7 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
               return (
                 <div
                   key={name}
-                  className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors cursor-default"
+                  className="group flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors cursor-default"
                 >
                   <Avatar
                     name={name}

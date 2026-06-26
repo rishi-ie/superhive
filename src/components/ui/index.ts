@@ -40,6 +40,7 @@ export { Textarea } from './Textarea';
 export { TextInput } from './TextInput';
 export { Tooltip } from './Tooltip';
 export { TooltipProvider } from './TooltipProvider';
+export { Toast } from './Toast';
 export { UniversalListCard } from './UniversalListCard';
 export { CodeBlock } from './CodeBlock';
 export { IconButton } from './IconButton';

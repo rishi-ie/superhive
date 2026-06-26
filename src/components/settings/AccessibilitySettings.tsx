@@ -20,7 +20,6 @@ export function AccessibilitySettings() {
 
   const toggle = (val: boolean) => {
     update('accessibility', { reduceMotion: val });
-    update('appearance', { reduceMotion: val });
     toast({ title: val ? 'Motion reduced' : 'Motion enabled' });
   };
 
@@ -37,7 +36,7 @@ export function AccessibilitySettings() {
       >
         <SettingRow
           label="Reduce motion"
-          description="Disable animations and transitions. Useful if you experience motion sensitivity or prefer a static interface. Synced with Appearance settings."
+          description="Disable animations and transitions. Useful if you experience motion sensitivity or prefer a static interface."
           control={
             <Switch
               checked={reduceMotion}

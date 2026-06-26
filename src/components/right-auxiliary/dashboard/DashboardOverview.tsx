@@ -70,7 +70,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
               <button
                 key={ticket.id}
                 onClick={() => onTicketClick?.(ticket.id)}
-                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-white/5 transition-colors text-left"
+                className="w-full flex items-center gap-2 p-2 rounded-md border border-border/40 hover:bg-hover-tint transition-colors text-left"
               >
                 <span className="text-[9px] font-fustat text-muted-foreground shrink-0">
                   {ticket.id}
@@ -112,7 +112,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
         <button
           type="button"
           onClick={() => onOpenTab?.('tickets')}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
         >
           <Layers size={12} />
           Create Ticket
@@ -120,7 +120,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
         <button
           type="button"
           onClick={() => onOpenTab?.('universal-channels')}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
         >
           <MessageCircle size={12} />
           Open Channels
@@ -128,7 +128,7 @@ export function DashboardOverview({ onTicketClick, onOpenTab }: DashboardOvervie
         <button
           type="button"
           onClick={() => onOpenTab?.('universal-agents')}
-          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-border/40 px-2 py-2 text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
         >
           <Bot size={12} />
           Browse Agents
