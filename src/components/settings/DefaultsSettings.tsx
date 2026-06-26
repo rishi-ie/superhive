@@ -4,7 +4,8 @@
 import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
-import { Button } from '@/components/ui/Button';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { SettingsSaveBar } from './shared/SettingsSaveBar';
 import { Select } from '@/components/ui/Select';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Pill } from '@/components/ui/Pill';
@@ -101,10 +102,10 @@ export function DefaultsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Defaults</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Configure what opens and how things display by default.</p>
-      </div>
+      <SettingsPageHeader
+        title="Defaults"
+        description="Configure what opens and how things display by default."
+      />
 
       <SettingSection
         title="Startup"
@@ -200,19 +201,7 @@ export function DefaultsSettings() {
         />
       </SettingSection>
 
-      {isDirty && (
-        <div className="sticky bottom-0 mt-8 -mx-4 px-4 py-3 bg-sidebar/95 backdrop-blur border-t border-border flex items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">Unsaved changes</span>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={discardChanges}>
-              Discard
-            </Button>
-            <Button variant="default" size="sm" onClick={save}>
-              Save changes
-            </Button>
-          </div>
-        </div>
-      )}
+      <SettingsSaveBar isDirty={isDirty} onDiscard={discardChanges} onSave={save} />
     </div>
   );
 }

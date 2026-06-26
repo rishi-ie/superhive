@@ -38,7 +38,6 @@ export { TabsList } from './TabsList';
 export { TabsTrigger } from './TabsTrigger';
 export { Textarea } from './Textarea';
 export { TextInput } from './TextInput';
-export { Toggle } from './Toggle';
 export { Tooltip } from './Tooltip';
 export { TooltipProvider } from './TooltipProvider';
 export { UniversalListCard } from './UniversalListCard';

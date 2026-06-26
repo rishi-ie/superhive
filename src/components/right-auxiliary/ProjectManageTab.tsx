@@ -125,6 +125,7 @@ export function ProjectManageTab({ project }: ProjectManageTabProps) {
 
       {showArchiveModal && (
         <ConfirmationModal
+          open={showArchiveModal}
           title="Archive Project"
           description="Archive this project? It will be hidden from default views."
           confirmLabel="Archive"

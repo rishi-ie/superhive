@@ -6,6 +6,7 @@ import { Plus, Archive, Pencil } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { IconButton } from '@/components/ui/IconButton';
@@ -87,16 +88,16 @@ export function WorkspacesSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-start justify-between gap-4 pb-8">
-        <div>
-          <h2 className="text-2xl font-semibold text-foreground">Workspaces</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Manage your organization's workspaces and data retention policies.</p>
-        </div>
-        <Button variant="default" size="md" onClick={handleCreate} className="gap-1.5 shrink-0">
-          <Plus size={14} />
-          New workspace
-        </Button>
-      </div>
+      <SettingsPageHeader
+        title="Workspaces"
+        description="Manage your organization's workspaces and data retention policies."
+        action={
+          <Button variant="default" size="md" onClick={handleCreate} className="gap-1.5 shrink-0">
+            <Plus size={14} />
+            New workspace
+          </Button>
+        }
+      />
 
       <SettingSection
         title="Workspaces"
@@ -173,17 +174,16 @@ export function WorkspacesSettings() {
         </div>
       </SettingSection>
 
-      {showArchive && (
-        <ConfirmationModal
-          title="Archive workspace"
-          description={`This will archive "${showArchive}". Archived workspaces are not deleted but are deactivated. This can be undone.`}
-          confirmLabel="Archive"
-          destructive
-          confirmText={showArchive}
-          onConfirm={() => archiveWorkspace(showArchive)}
-          onCancel={() => setShowArchive(null)}
-        />
-      )}
+      <ConfirmationModal
+        open={showArchive !== null}
+        title="Archive workspace"
+        description={`This will archive "${showArchive ?? ''}". Archived workspaces are not deleted but are deactivated. This can be undone.`}
+        confirmLabel="Archive"
+        destructive
+        confirmText={showArchive ?? undefined}
+        onConfirm={() => archiveWorkspace(showArchive ?? '')}
+        onCancel={() => setShowArchive(null)}
+      />
       <div className="mt-6 flex justify-end">
         <ResetSection domain="workspaces" />
       </div>

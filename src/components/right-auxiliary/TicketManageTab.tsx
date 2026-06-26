@@ -195,6 +195,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
 
       {showCloseModal && (
         <ConfirmationModal
+          open={showCloseModal}
           title="Close Ticket"
           description="Mark this ticket as closed? This will set its status to Merged."
           confirmLabel="Close Ticket"
@@ -205,6 +206,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
 
       {showArchiveModal && (
         <ConfirmationModal
+          open={showArchiveModal}
           title="Archive Ticket"
           description="Archive this ticket? It will be hidden from default views."
           confirmLabel="Archive"

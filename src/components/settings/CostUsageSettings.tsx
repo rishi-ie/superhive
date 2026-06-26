@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
-import { Toggle } from '@/components/ui/Toggle';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { ComingSoonBadge } from './shared/ComingSoonBadge';
+import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { StatCard } from '@/components/ui/StatCard';
 import { useToast } from '@/lib/toast-context';
-import { Download, Lock } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { listCostUsage } from '@/data/cost-usage/store';
 
 
@@ -75,10 +77,10 @@ export function CostUsageSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Cost & Usage</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Monitor agent spending and configure budget limits.</p>
-      </div>
+      <SettingsPageHeader
+        title="Cost & Usage"
+        description="Monitor agent spending and configure budget limits."
+      />
 
       <SettingSection
         title="Usage (Last 30 Days)"
@@ -109,9 +111,8 @@ export function CostUsageSettings() {
         description="Set spending caps to control costs across your workspace."
       >
         <div className="relative">
-          <div className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[9px] font-medium text-muted-foreground uppercase tracking-wider z-10">
-            <Lock size={9} />
-            Coming soon
+          <div className="absolute top-2 right-2 z-10">
+            <ComingSoonBadge />
           </div>
           <div className="space-y-3 opacity-50 pointer-events-none">
             <SettingRow
@@ -171,19 +172,17 @@ export function CostUsageSettings() {
         description="Get notified when spending approaches your budget threshold."
       >
         <div className="relative">
-          <div className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[9px] font-medium text-muted-foreground uppercase tracking-wider z-10">
-            <Lock size={9} />
-            Coming soon
+          <div className="absolute top-2 right-2 z-10">
+            <ComingSoonBadge />
           </div>
           <div className="space-y-3 opacity-50 pointer-events-none">
             <SettingRow
               label="Enable spend alerts"
               description="Receive an in-app notification when spending crosses the alert threshold."
               control={
-                <Toggle
+                <Switch
                   checked={spendAlertEnabled}
-                  onChange={setSpendAlertEnabled}
-                  size="sm"
+                  onCheckedChange={setSpendAlertEnabled}
                   disabled
                 />
               }

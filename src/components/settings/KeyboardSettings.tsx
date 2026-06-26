@@ -2,6 +2,7 @@
  * Keyboard shortcuts — static list grouped by category (Global / Tabs / Right Panel / Tickets & Channels).
  */
 import { SettingSection } from './shared/SettingSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { useSettings } from '@/lib/settings-context';
 
 /**
@@ -13,10 +14,10 @@ export function KeyboardSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Keyboard Shortcuts</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Quick reference for all keyboard shortcuts in Superhive.</p>
-      </div>
+      <SettingsPageHeader
+        title="Keyboard Shortcuts"
+        description="Quick reference for all keyboard shortcuts in Superhive."
+      />
 
       <div className="grid grid-cols-2 gap-x-8">
         {groups.map(group => (

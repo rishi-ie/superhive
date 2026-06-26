@@ -1,13 +1,17 @@
 /**
  * Confirmation modal — standard confirm or type-to-confirm for destructive actions.
+ * Backed by shadcn Dialog (Radix) for proper focus management and a11y.
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
+import { Label } from '@/components/ui/Label';
 
 type ConfirmationModalProps = {
+  open: boolean;
   title: string;
   description: string;
   confirmLabel?: string;
@@ -19,6 +23,7 @@ type ConfirmationModalProps = {
 
 /**
  * Confirmation modal with optional type-to-confirm for destructive actions.
+ * @param open - Whether the modal is visible
  * @param title - Modal title
  * @param description - Modal description
  * @param confirmLabel - Label on confirm button (default "Confirm")
@@ -28,6 +33,7 @@ type ConfirmationModalProps = {
  * @param onCancel - Called when cancelled
  */
 export function ConfirmationModal({
+  open,
   title,
   description,
   confirmLabel = 'Confirm',
@@ -37,102 +43,71 @@ export function ConfirmationModal({
   onCancel,
 }: ConfirmationModalProps) {
   const [input, setInput] = useState('');
-  const modalRef = useRef<HTMLDivElement>(null);
-  const firstFocusRef = useRef<HTMLInputElement>(null);
 
-  const canConfirm = destructive && confirmText
-    ? input === confirmText
-    : !destructive;
+  const canConfirm = destructive && confirmText ? input === confirmText : !destructive;
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { onCancel(); return; }
-      if (e.key !== 'Tab' || !modalRef.current) return;
-      const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
-      if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
-        e.preventDefault();
-        (e.shiftKey ? last : first).focus();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    document.body.style.overflow = 'hidden';
-    firstFocusRef.current?.focus();
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
-  }, [onCancel]);
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setInput('');
+      onCancel();
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onCancel}
-        aria-hidden="true"
-      />
-      <div
-        ref={modalRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="cm-title"
-        aria-describedby="cm-desc"
-        className="relative z-10 w-full max-w-sm mx-4 bg-sidebar border border-border rounded-lg shadow-xl overflow-hidden"
-      >
-        <div className="flex items-start gap-3 p-4">
-          {destructive && (
-            <AlertTriangle
-              size={18}
-              strokeWidth={STROKE_WIDTH}
-              className="text-chart-5 shrink-0 mt-0.5"
-              aria-hidden="true"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 id="cm-title" className="text-sm font-semibold text-foreground">{title}</h3>
-            <p id="cm-desc" className="text-xs text-muted-foreground mt-1">{description}</p>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <div className="flex items-start gap-3">
+            {destructive && (
+              <AlertTriangle
+                size={18}
+                strokeWidth={STROKE_WIDTH}
+                className="text-chart-5 shrink-0 mt-0.5"
+                aria-hidden="true"
+              />
+            )}
+            <div>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription>{description}</DialogDescription>
+            </div>
           </div>
-        </div>
+        </DialogHeader>
 
         {destructive && confirmText && (
-          <div className="px-4 pb-4">
-            <label className="text-[10px] text-muted-foreground uppercase tracking-wider" htmlFor="cm-input">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="cm-input"
+              className="text-[10px] text-muted-foreground uppercase tracking-wider font-normal"
+            >
               Type &quot;{confirmText}&quot; to confirm
-            </label>
+            </Label>
             <TextInput
               id="cm-input"
-              ref={firstFocusRef}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               placeholder={confirmText}
-              className="mt-1"
+              autoFocus
             />
           </div>
         )}
 
-        <div className="flex gap-2 px-4 pb-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={onCancel}
-          >
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={() => handleOpenChange(false)} className="flex-1">
             Cancel
           </Button>
           <Button
             variant={destructive ? 'outline' : 'default'}
-            size="sm"
-            className="flex-1"
             disabled={!canConfirm}
-            onClick={onConfirm}
+            onClick={() => {
+              setInput('');
+              onConfirm();
+            }}
+            className="flex-1"
           >
             {confirmLabel}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

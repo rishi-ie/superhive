@@ -6,10 +6,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { TextInput } from '@/components/ui/TextInput';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
-import { Toggle } from '@/components/ui/Toggle';
+import { Switch } from '@/components/ui/Switch';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { SettingsSaveBar } from './shared/SettingsSaveBar';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { GitBranch, Globe, Apple } from 'lucide-react';
@@ -41,7 +43,6 @@ const TIMEZONES = [
 export function AccountSettings() {
   const { settings, update } = useSettings();
   const toast = useToast();
-  const [avatarHovered, setAvatarHovered] = useState(false);
 
   const acc = settings.account;
 
@@ -89,10 +90,10 @@ export function AccountSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Account</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Manage your account settings and preferences.</p>
-      </div>
+      <SettingsPageHeader
+        title="Account"
+        description="Manage your account settings and preferences."
+      />
 
       {/* Profile — avatar row + identity rows */}
       <SettingSection title="Profile">
@@ -100,17 +101,11 @@ export function AccountSettings() {
           label="Avatar"
           description="Recommended size 256x256. JPG, PNG, or GIF."
           control={
-            <div
-              className="relative"
-              onMouseEnter={() => setAvatarHovered(true)}
-              onMouseLeave={() => setAvatarHovered(false)}
-            >
+            <div className="relative group">
               <Avatar size="xl" name={name} className="cursor-pointer" />
-              {avatarHovered && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] text-foreground font-medium">
-                  Change
-                </div>
-              )}
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] text-foreground font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Change
+              </div>
             </div>
           }
         />
@@ -226,9 +221,9 @@ export function AccountSettings() {
                     </span>
                   </div>
                 </div>
-                <Toggle
+                <Switch
                   checked={account.connected}
-                  onChange={() => {
+                  onCheckedChange={() => {
                     update('account', {
                       connectedAccounts: acc.connectedAccounts.map(a =>
                         a.provider === account.provider
@@ -238,7 +233,6 @@ export function AccountSettings() {
                     });
                     toast({ title: account.connected ? `${account.label} disconnected` : `${account.label} connected` });
                   }}
-                  size="sm"
                 />
               </div>
             );
@@ -247,19 +241,7 @@ export function AccountSettings() {
       </SettingSection>
 
       {/* Sticky save bar */}
-      {anyDirty && (
-        <div className="sticky bottom-0 mt-8 -mx-4 px-4 py-3 bg-sidebar/95 backdrop-blur border-t border-border flex items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">Unsaved changes</span>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={discardChanges}>
-              Discard
-            </Button>
-            <Button variant="default" size="sm" onClick={saveAccount}>
-              Save changes
-            </Button>
-          </div>
-        </div>
-      )}
+      <SettingsSaveBar isDirty={anyDirty} onDiscard={discardChanges} onSave={saveAccount} />
 
       <div className="mt-6 flex justify-end">
         <ResetSection domain="account" />

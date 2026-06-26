@@ -6,7 +6,8 @@ import { AlertTriangle, Check } from 'lucide-react';
 import { STROKE_WIDTH, COST_PER_TASK, MIN_TOKENS, MAX_TOKENS, TOKEN_STEP } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { Toggle } from '@/components/ui/Toggle';
+import { Slider } from '@/components/ui/Slider';
+import { Switch } from '@/components/ui/Switch';
 import { getPermissions, type Agent, type Permissions } from '@/data/agents/store';
 import type { CommitAuthority } from '@/data/agents/interface';
 
@@ -115,7 +116,7 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
                   <span className={`text-[10px] font-medium ${isOn ? 'text-chart-2' : 'text-muted-foreground/60'}`}>
                     {isOn ? 'ON' : 'OFF'}
                   </span>
-                  <Toggle checked={isOn} onChange={(val) => set(key, val)} size="sm" />
+                  <Switch checked={isOn} onCheckedChange={(val) => set(key, val)} />
                 </div>
               </div>
             );
@@ -139,22 +140,17 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
           <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Thinking Budget</label>
           <span className="text-[10px] font-fustat text-foreground">{sliderValue.toLocaleString()} tok</span>
         </div>
-        <input
-          type="range"
+        <Slider
+          value={[sliderValue]}
           min={MIN_TOKENS}
           max={MAX_TOKENS}
           step={TOKEN_STEP}
-          value={sliderValue}
-          aria-label="Thinking budget in tokens"
-          aria-valuemin={MIN_TOKENS}
-          aria-valuemax={MAX_TOKENS}
-          aria-valuenow={sliderValue}
-          onChange={(e) => {
-            const val = parseInt(e.target.value);
+          onValueChange={([val = sliderValue]) => {
             setSliderValue(val);
             set('maxTokens', val);
           }}
-          className="w-full accent-chart-1 h-1 rounded-full bg-input cursor-pointer"
+          aria-label="Thinking budget in tokens"
+          className="w-full"
         />
         <div className="flex items-center justify-between">
           <span className="text-[9px] text-muted-foreground/60 font-fustat">1K</span>

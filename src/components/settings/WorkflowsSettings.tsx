@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { useSettings } from '@/lib/settings-context';
@@ -51,10 +52,10 @@ export function WorkflowsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Workflows & Triggers</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Manage automated workflows and their schedules.</p>
-      </div>
+      <SettingsPageHeader
+        title="Workflows & Triggers"
+        description="Manage automated workflows and their schedules."
+      />
 
       <SettingSection
         title="Saved Workflows"

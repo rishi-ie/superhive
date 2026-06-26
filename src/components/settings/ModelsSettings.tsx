@@ -5,10 +5,12 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
-import { Toggle } from '@/components/ui/Toggle';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { IconButton } from '@/components/ui/IconButton';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/Collapsible';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { EngineId, ModelProvider, ModelProviderConfig } from '@/data/settings/interface';
@@ -73,10 +75,10 @@ export function ModelsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Models</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Configure which model engines are available and set up provider credentials.</p>
-      </div>
+      <SettingsPageHeader
+        title="Models"
+        description="Configure which model engines are available and set up provider credentials."
+      />
 
       <SettingSection
         title="Available Engines"
@@ -88,10 +90,9 @@ export function ModelsSettings() {
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-medium text-foreground">{engine.label}</span>
               </div>
-              <Toggle
+              <Switch
                 checked={engine.enabled}
-                onChange={() => toggleEngine(engine.id)}
-                size="sm"
+                onCheckedChange={() => toggleEngine(engine.id)}
               />
             </div>
           ))}
@@ -103,27 +104,32 @@ export function ModelsSettings() {
         description="Configure API keys and fallback chains for each model provider."
       >
         <div className="space-y-2">
-          {settings.models.providers.map(provider => (
-            <div key={provider.id} className="rounded-md border border-border/40 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setExpandedProvider(expandedProvider === provider.id ? null : provider.id)}
-                aria-expanded={expandedProvider === provider.id}
-                className="w-full flex items-center justify-between gap-4 px-4 py-3 bg-card hover:bg-card/80 transition-colors text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          {settings.models.providers.map(provider => {
+            const isOpen = expandedProvider === provider.id;
+            return (
+              <Collapsible
+                key={provider.id}
+                open={isOpen}
+                onOpenChange={(open) => setExpandedProvider(open ? provider.id : null)}
+                className="rounded-md border border-border/40 overflow-hidden"
               >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-sm font-medium text-foreground">{PROVIDER_LABELS[provider.id]}</span>
-                  <span className="text-xs text-muted-foreground truncate">
-                    {provider.apiKey ? '••••••••' + provider.apiKey.slice(-4) : 'No API key set'}
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {expandedProvider === provider.id ? 'Collapse' : 'Configure'}
-                </span>
-              </button>
-
-              {expandedProvider === provider.id && (
-                <div className="border-t border-border/40 bg-card/40 px-4 py-4 space-y-4">
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-between gap-4 px-4 py-3 bg-card hover:bg-card/80 transition-colors text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-medium text-foreground">{PROVIDER_LABELS[provider.id]}</span>
+                      <span className="text-xs text-muted-foreground truncate">
+                        {provider.apiKey ? '••••••••' + provider.apiKey.slice(-4) : 'No API key set'}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      {isOpen ? 'Collapse' : 'Configure'}
+                    </span>
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="border-t border-border/40 bg-card/40 px-4 py-4 space-y-4">
                   <SettingRow
                     label="API Key"
                     description="Your API key for this provider. Stored locally, never transmitted to our servers."
@@ -187,10 +193,10 @@ export function ModelsSettings() {
                       Save provider
                     </Button>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
         </div>
       </SettingSection>
       <div className="mt-6 flex justify-end">

@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { GitBranch, Hash, FileText, Ticket, Webhook, Unplug, Plug, CheckCircle2 } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
-import { Toggle } from '@/components/ui/Toggle';
+import { Switch } from '@/components/ui/Switch';
+import { Card, CardContent } from '@/components/ui/Card';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { IntegrationProvider } from '@/data/settings/interface';
@@ -100,10 +102,10 @@ export function IntegrationsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Integrations</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Connect external tools and services to Superhive.</p>
-      </div>
+      <SettingsPageHeader
+        title="Integrations"
+        description="Connect external tools and services to Superhive."
+      />
 
       <div className="flex gap-6 -mx-1">
         {/* List */}
@@ -147,28 +149,31 @@ export function IntegrationsSettings() {
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              <div className="flex items-start justify-between gap-4 pb-4 border-b border-border/40">
-                <div className="flex items-center gap-3">
-                  <div className={`size-11 rounded-lg flex items-center justify-center ${PROVIDER_BG[selected.provider]}`}>
-                    {(() => {
-                      const Icon = PROVIDER_ICONS[selected.provider];
-                      return <Icon size={20} className={PROVIDER_COLORS[selected.provider]} />;
-                    })()}
+              <Card className="border-b border-border/40 rounded-b-none">
+                <CardContent className="p-0 pt-4 pb-4">
+                  <div className="flex items-start justify-between gap-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`size-11 rounded-lg flex items-center justify-center ${PROVIDER_BG[selected.provider]}`}>
+                        {(() => {
+                          const Icon = PROVIDER_ICONS[selected.provider];
+                          return <Icon size={20} className={PROVIDER_COLORS[selected.provider]} />;
+                        })()}
+                      </div>
+                      <div>
+                        <h3 className="text-base font-semibold text-foreground">{selected.label}</h3>
+                        <span className={`text-xs flex items-center gap-1 ${selected.connected ? 'text-chart-2' : 'text-muted-foreground'}`}>
+                          {selected.connected && <CheckCircle2 size={10} />}
+                          {selected.connected ? 'Connected' : 'Not connected'}
+                        </span>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={selected.connected}
+                      onCheckedChange={() => toggleConnection(selected.id)}
+                    />
                   </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-foreground">{selected.label}</h3>
-                    <span className={`text-xs flex items-center gap-1 ${selected.connected ? 'text-chart-2' : 'text-muted-foreground'}`}>
-                      {selected.connected && <CheckCircle2 size={10} />}
-                      {selected.connected ? 'Connected' : 'Not connected'}
-                    </span>
-                  </div>
-                </div>
-                <Toggle
-                  checked={selected.connected}
-                  onChange={() => toggleConnection(selected.id)}
-                  size="sm"
-                />
-              </div>
+                </CardContent>
+              </Card>
 
               {selected.connected && selected.channels.length > 0 && (
                 <SettingSection

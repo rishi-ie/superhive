@@ -1,81 +1,16 @@
 /**
  * Settings sidebar — searchable nav with categorized sections (Personal, Workflow, Organization).
+ * Nav data derived from the settings registry — single source of truth.
  */
 import { useState, useMemo } from 'react';
-import {
-  User,
-  Paintbrush,
-  Bell,
-  Shield,
-  Accessibility,
-  SlidersHorizontal,
-  Keyboard,
-  Globe,
-  Workflow,
-  Coins,
-  Bot,
-  Folder,
-  Puzzle,
-  CreditCard,
-  ArrowLeft,
-  ExternalLink,
-} from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { SettingSearch } from './shared/SettingSearch';
-import type { LucideIcon } from 'lucide-react';
-
-type NavItem = {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-type Category = {
-  id: string;
-  label: string;
-  items: NavItem[];
-};
-
-const PERSONAL: Category = {
-  id: 'personal',
-  label: 'Personal',
-  items: [
-    { id: 'account', label: 'Account', icon: User },
-    { id: 'appearance', label: 'Appearance', icon: Paintbrush },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'privacy', label: 'Privacy & Data', icon: Shield },
-    { id: 'accessibility', label: 'Accessibility', icon: Accessibility },
-  ],
-};
-
-const WORKFLOW: Category = {
-  id: 'workflow',
-  label: 'Workflow',
-  items: [
-    { id: 'defaults', label: 'Defaults', icon: SlidersHorizontal },
-    { id: 'keyboard', label: 'Keyboard', icon: Keyboard },
-    { id: 'models', label: 'Models', icon: Globe },
-    { id: 'workflows', label: 'Workflows & Triggers', icon: Workflow },
-    { id: 'cost-usage', label: 'Cost & Usage', icon: Coins },
-    { id: 'agents', label: 'Agents', icon: Bot },
-  ],
-};
-
-const ORGANIZATION: Category = {
-  id: 'organization',
-  label: 'Organization',
-  items: [
-    { id: 'workspaces', label: 'Workspaces', icon: Folder },
-    { id: 'integrations', label: 'Integrations', icon: Puzzle },
-    { id: 'billing', label: 'Billing & Plans', icon: CreditCard },
-  ],
-};
-
-const ALL_CATEGORIES = [PERSONAL, WORKFLOW, ORGANIZATION];
+import { settingsCategories, settingsRegistry, type SettingsSectionId } from '@/data/config/settings-registry';
 
 type SettingsSidebarProps = {
   activeSection: string;
-  onSectionChange: (id: string) => void;
+  onSectionChange: (id: SettingsSectionId) => void;
   onBack: () => void;
 };
 
@@ -89,14 +24,17 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
   const [query, setQuery] = useState('');
 
   const filteredCategories = useMemo(() => {
-    if (!query.trim()) return ALL_CATEGORIES;
+    if (!query.trim()) return settingsCategories;
     const q = query.toLowerCase();
-    return ALL_CATEGORIES
+    return settingsCategories
       .map(cat => ({
         ...cat,
-        items: cat.items.filter(item => item.label.toLowerCase().includes(q)),
+        sections: cat.sections.filter(sectionId => {
+          const entry = settingsRegistry[sectionId];
+          return entry.label.toLowerCase().includes(q);
+        }),
       }))
-      .filter(cat => cat.items.length > 0);
+      .filter(cat => cat.sections.length > 0);
   }, [query]);
 
   return (
@@ -123,15 +61,17 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
                 {category.label}
               </span>
               <div className="flex flex-col gap-0.5">
-                {category.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeSection === item.id;
+                {category.sections.map((sectionId) => {
+                  const entry = settingsRegistry[sectionId];
+                  if (!entry) return null;
+                  const Icon = entry.icon;
+                  const isActive = activeSection === sectionId;
                   return (
                     <button
-                      key={item.id}
+                      key={sectionId}
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => onSectionChange(item.id)}
+                      onClick={() => onSectionChange(sectionId)}
                       className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
                         isActive
                           ? 'bg-sidebar-accent text-foreground font-medium'
@@ -139,7 +79,7 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
                       }`}
                     >
                       <Icon size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
-                      <span>{item.label}</span>
+                      <span>{entry.label}</span>
                     </button>
                   );
                 })}

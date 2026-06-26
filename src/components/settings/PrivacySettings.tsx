@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
@@ -52,10 +53,10 @@ export function PrivacySettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Privacy & Data</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Manage your data, exports, and privacy preferences.</p>
-      </div>
+      <SettingsPageHeader
+        title="Privacy & Data"
+        description="Manage your data, exports, and privacy preferences."
+      />
 
       <SettingSection
         title="Your Data"
@@ -135,35 +136,33 @@ export function PrivacySettings() {
         />
       </SettingSection>
 
-      {showDeleteWorkspace && (
-        <ConfirmationModal
-          title="Delete workspace data"
-          description={`This will permanently delete all data for workspace "${showDeleteWorkspace}". This cannot be undone.`}
-          confirmLabel="Delete"
-          destructive
-          confirmText={showDeleteWorkspace}
-          onConfirm={() => {
-            toast({ title: `Workspace ${showDeleteWorkspace} data deleted` });
-            setShowDeleteWorkspace(null);
-          }}
-          onCancel={() => setShowDeleteWorkspace(null)}
-        />
-      )}
+      <ConfirmationModal
+        open={showDeleteWorkspace !== null}
+        title="Delete workspace data"
+        description={`This will permanently delete all data for workspace "${showDeleteWorkspace ?? ''}". This cannot be undone.`}
+        confirmLabel="Delete"
+        destructive
+        confirmText={showDeleteWorkspace ?? undefined}
+        onConfirm={() => {
+          toast({ title: `Workspace ${showDeleteWorkspace} data deleted` });
+          setShowDeleteWorkspace(null);
+        }}
+        onCancel={() => setShowDeleteWorkspace(null)}
+      />
 
-      {showDeleteAccount && (
-        <ConfirmationModal
-          title="Delete account"
-          description="This will permanently delete your account and all associated data across all workspaces. This cannot be undone."
-          confirmLabel="Delete my account"
-          destructive
-          confirmText="delete"
-          onConfirm={() => {
-            toast({ title: 'Account deleted' });
-            setShowDeleteAccount(false);
-          }}
-          onCancel={() => setShowDeleteAccount(false)}
-        />
-      )}
+      <ConfirmationModal
+        open={showDeleteAccount}
+        title="Delete account"
+        description="This will permanently delete your account and all associated data across all workspaces. This cannot be undone."
+        confirmLabel="Delete my account"
+        destructive
+        confirmText="delete"
+        onConfirm={() => {
+          toast({ title: 'Account deleted' });
+          setShowDeleteAccount(false);
+        }}
+        onCancel={() => setShowDeleteAccount(false)}
+      />
       <div className="mt-6 flex justify-end">
         <ResetSection domain="privacy" />
       </div>

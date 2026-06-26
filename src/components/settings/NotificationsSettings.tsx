@@ -5,9 +5,11 @@ import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
-import { Toggle } from '@/components/ui/Toggle';
-import { Button } from '@/components/ui/Button';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { SettingsSaveBar } from './shared/SettingsSaveBar';
+import { Switch } from '@/components/ui/Switch';
 import { TextInput } from '@/components/ui/TextInput';
+import { Label } from '@/components/ui/Label';
 import { Pill } from '@/components/ui/Pill';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
@@ -55,10 +57,10 @@ export function NotificationsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Notifications</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Control when you receive notifications from Superhive.</p>
-      </div>
+      <SettingsPageHeader
+        title="Notifications"
+        description="Control when you receive notifications from Superhive."
+      />
 
       <SettingSection
         title="Quiet Hours"
@@ -68,10 +70,9 @@ export function NotificationsSettings() {
           label="Enable quiet hours"
           description="When active, notifications are silenced during the scheduled window."
           control={
-            <Toggle
+            <Switch
               checked={enabled}
-              onChange={setEnabled}
-              size="sm"
+              onCheckedChange={setEnabled}
             />
           }
         />
@@ -80,22 +81,24 @@ export function NotificationsSettings() {
           description="Time range during which notifications are silenced. Can wrap past midnight."
           control={
             <div className="flex items-center gap-2">
+              <Label htmlFor="qh-start" className="sr-only">Quiet hours start</Label>
               <TextInput
+                id="qh-start"
                 type="time"
                 value={start}
                 onChange={e => setStart(e.target.value)}
                 disabled={!enabled}
                 className="w-32"
-                aria-label="Quiet hours start"
               />
               <span className="text-xs text-muted-foreground">to</span>
+              <Label htmlFor="qh-end" className="sr-only">Quiet hours end</Label>
               <TextInput
+                id="qh-end"
                 type="time"
                 value={end}
                 onChange={e => setEnd(e.target.value)}
                 disabled={!enabled}
                 className="w-32"
-                aria-label="Quiet hours end"
               />
             </div>
           }
@@ -125,19 +128,7 @@ export function NotificationsSettings() {
         />
       </SettingSection>
 
-      {isDirty && (
-        <div className="sticky bottom-0 mt-8 -mx-4 px-4 py-3 bg-sidebar/95 backdrop-blur border-t border-border flex items-center justify-between gap-3">
-          <span className="text-xs text-muted-foreground">Unsaved changes</span>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={discardChanges}>
-              Discard
-            </Button>
-            <Button variant="default" size="sm" onClick={save}>
-              Save changes
-            </Button>
-          </div>
-        </div>
-        )}
+      <SettingsSaveBar isDirty={isDirty} onDiscard={discardChanges} onSave={save} />
       <div className="mt-6 flex justify-end">
         <ResetSection domain="notifications" />
       </div>

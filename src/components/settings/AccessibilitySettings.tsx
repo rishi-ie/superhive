@@ -4,7 +4,8 @@
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
-import { Toggle } from '@/components/ui/Toggle';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { Switch } from '@/components/ui/Switch';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 
@@ -25,10 +26,10 @@ export function AccessibilitySettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Accessibility</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Adjust settings to improve usability and comfort.</p>
-      </div>
+      <SettingsPageHeader
+        title="Accessibility"
+        description="Adjust settings to improve usability and comfort."
+      />
 
       <SettingSection
         title="Motion"
@@ -38,10 +39,9 @@ export function AccessibilitySettings() {
           label="Reduce motion"
           description="Disable animations and transitions. Useful if you experience motion sensitivity or prefer a static interface. Synced with Appearance settings."
           control={
-            <Toggle
+            <Switch
               checked={reduceMotion}
-              onChange={toggle}
-              size="sm"
+              onCheckedChange={toggle}
             />
           }
         />

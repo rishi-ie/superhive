@@ -166,7 +166,6 @@ src/
 │   │   ├── TabsTrigger.tsx
 │   │   ├── TextInput.tsx
 │   │   ├── Textarea.tsx
-│   │   ├── Toggle.tsx         # Radix Switch — for settings boolean toggles
 │   │   ├── Tooltip.tsx
 │   │   ├── TooltipProvider.tsx
 │   │   ├── UniversalListCard.tsx
@@ -182,8 +181,31 @@ src/
 │   │   └── format.ts        # formatTime(), formatDuration()
 │   │
 │   └── settings/           # Settings screen subcomponents
+│       ├── shared/          # Shared settings primitives
+│       │   ├── ComingSoonBadge.tsx
+│       │   ├── ColorPicker.tsx
+│       │   ├── ResetSection.tsx
+│       │   ├── SettingRow.tsx
+│       │   ├── SettingSection.tsx
+│       │   ├── SettingSearch.tsx
+│       │   ├── SettingsPageHeader.tsx
+│       │   ├── SettingsSaveBar.tsx
+│       │   └── index.ts
 │       ├── SettingsSidebar.tsx
-│       └── AccountSettings.tsx
+│       ├── AccountSettings.tsx
+│       ├── AppearanceSettings.tsx
+│       ├── NotificationsSettings.tsx
+│       ├── PrivacySettings.tsx
+│       ├── AccessibilitySettings.tsx
+│       ├── DefaultsSettings.tsx
+│       ├── KeyboardSettings.tsx
+│       ├── ModelsSettings.tsx
+│       ├── WorkflowsSettings.tsx
+│       ├── CostUsageSettings.tsx
+│       ├── AgentsSettings.tsx
+│       ├── WorkspacesSettings.tsx
+│       ├── IntegrationsSettings.tsx
+│       └── BillingSettings.tsx
 │
 ├── data/                    # Domain data layer — one subdirectory per domain
 │   ├── agents/             # listAgents(), getAgent(), getTelemetry(), getPermissions(), etc.
@@ -199,7 +221,8 @@ src/
 │   │   ├── wizard-configs.ts
 │   │   ├── left-nav.ts
 │   │   ├── right-panel-tabs.ts
-│   │   └── models.ts
+│   │   ├── models.ts
+│   │   └── settings-registry.ts  # Settings nav registry — single source of truth for all settings pages
 │   │
 │   └── mock/               # Mock data config and types
 │       ├── feature-flags.ts  # isMockEnabled(domain) — per-domain mock toggle
@@ -254,6 +277,8 @@ Settings live in `src/data/settings/settings.json` (seeded defaults) + `localSto
 
 The `Settings` type in `src/data/settings/interface.ts` defines the shape. All settings pages live under `src/components/settings/` and update via `useSettings().update(domain, patch)`.
 
+**Settings navigation** is data-driven via `src/data/config/settings-registry.ts` — the single source of truth for all 14 settings page entries (id, label, icon, category, component). `Settings.tsx` and `SettingsSidebar.tsx` both derive from this registry rather than duplicating nav data.
+
 **Appearance settings** are applied directly to the DOM via `applySettingsToDOM()`:
 - `appearance.theme` → CSS vars + `data-theme` on `<html>`
 - `appearance.accentColor` → `--highlight`, `--accent`, `--chart-1`, `--sidebar-primary`
@@ -264,6 +289,8 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 **Adaptive wiring rule**: every setting must drive visible UI. If a setting is stored but never consumed outside its settings page, it is a bug — fix it in the same PR that adds the setting.
 
 **Adding a new setting**: update `settings.json`, add the type in `interface.ts`, add the UI in the appropriate `*Settings.tsx` page, and consume it in the component that needs it. All four in the same PR.
+
+**Adding a new settings page**: create the page in `src/components/settings/`, add it to `settings-registry.ts` (nav entry with id/label/icon/category/component), and add it to `settingsCategories` in the same file.
 
 **`account.accentColor`** was removed — it was a duplicate of `appearance.accentColor`. Always use `appearance.accentColor`.
 

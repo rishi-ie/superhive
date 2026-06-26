@@ -21,8 +21,9 @@
   --destructive: #cc4444;
   --destructive-foreground: #ffcccc;
   --border: #2a2827;
-  --input: #2a2827;
-  --ring: #3a3837;
+  --input: #3a3837;
+  --ring: #8a8580;
+  --switch-track-off: #2a2827;
   --chart-1: #e07850;
   --chart-2: #50a878;
   --chart-3: #d4a84b;
@@ -104,6 +105,7 @@ body {
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-switch-track-off: var(--switch-track-off);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

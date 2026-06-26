@@ -4,10 +4,13 @@
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
-import { Toggle } from '@/components/ui/Toggle';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { ColorPicker } from './shared/ColorPicker';
+import { Switch } from '@/components/ui/Switch';
 import { Select } from '@/components/ui/Select';
 import { SelectableCard } from '@/components/ui/SelectableCard';
 import { Badge } from '@/components/ui/Badge';
+import { Slider } from '@/components/ui/Slider';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { DEFAULT_THEMES } from '@/lib/settings-context';
@@ -54,10 +57,10 @@ export function AppearanceSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Appearance</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Customize how Superhive looks and feels.</p>
-      </div>
+      <SettingsPageHeader
+        title="Appearance"
+        description="Customize how Superhive looks and feels."
+      />
 
       <SettingSection
         title="Theme"
@@ -86,18 +89,11 @@ export function AppearanceSettings() {
           label="Accent color"
           description="Your primary highlight color used across Superhive for emphasis and selection."
           control={
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={appearance.accentColor}
-                onChange={e => save('accentColor', e.target.value)}
-                className="size-8 rounded-md cursor-pointer border border-border bg-transparent"
-                aria-label="Pick accent color"
-              />
-              <span className="text-xs text-muted-foreground font-mono w-20 uppercase tracking-wider">
-                {appearance.accentColor}
-              </span>
-            </div>
+            <ColorPicker
+              value={appearance.accentColor}
+              onChange={(v) => save('accentColor', v)}
+              label="Accent color"
+            />
           }
         />
       </SettingSection>
@@ -108,18 +104,14 @@ export function AppearanceSettings() {
           description="Adjust the base font size. 1.0 = default, 1.1 = 10% larger, 0.9 = 10% smaller."
           control={
             <div className="flex items-center gap-3 w-72">
-              <input
-                type="range"
+              <Slider
+                value={[appearance.fontScale]}
                 min={0.8}
                 max={1.3}
                 step={0.05}
-                value={appearance.fontScale}
+                onValueChange={([v = appearance.fontScale]) => save('fontScale', v)}
                 aria-label="Font scale"
-                aria-valuemin={0.8}
-                aria-valuemax={1.3}
-                aria-valuenow={appearance.fontScale}
-                onChange={e => save('fontScale', parseFloat(e.target.value))}
-                className="flex-1 accent-chart-1 h-1"
+                className="flex-1"
               />
               <span className="text-xs font-fustat text-foreground w-12 text-right tabular-nums">
                 {appearance.fontScale.toFixed(2)}x
@@ -146,10 +138,9 @@ export function AppearanceSettings() {
           label="Reduce motion"
           description="Disable animations and transitions throughout the interface. Improves accessibility and performance."
           control={
-            <Toggle
+            <Switch
               checked={appearance.reduceMotion}
-              onChange={(val: boolean) => save('reduceMotion', val)}
-              size="sm"
+              onCheckedChange={(val) => save('reduceMotion', val)}
             />
           }
         />

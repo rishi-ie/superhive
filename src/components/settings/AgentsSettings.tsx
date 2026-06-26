@@ -1,13 +1,14 @@
 /**
  * Agents settings — global agent defaults (default engine for new agents).
  */
-import { Check } from 'lucide-react';
 import { SettingSection } from './shared/SettingSection';
 import { ResetSection } from './shared/ResetSection';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { SelectableCard } from '@/components/ui/SelectableCard';
+import { Badge } from '@/components/ui/Badge';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import type { EngineId } from '@/data/settings/interface';
-import { STROKE_WIDTH } from '@/lib/constants';
 
 const ENGINE_OPTIONS: { value: EngineId; label: string; description: string }[] = [
   { value: 'sonnet', label: 'Sonnet 4', description: 'Balanced speed and intelligence — good default for most tasks.' },
@@ -27,10 +28,10 @@ export function AgentsSettings() {
 
   return (
     <div className="flex flex-col">
-      <div className="pb-8">
-        <h2 className="text-2xl font-semibold text-foreground">Agents</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Configure global defaults applied to new agents when they are spawned.</p>
-      </div>
+      <SettingsPageHeader
+        title="Agents"
+        description="Configure global defaults applied to new agents when they are spawned."
+      />
 
       <SettingSection
         title="Default Engine"
@@ -40,33 +41,18 @@ export function AgentsSettings() {
           {ENGINE_OPTIONS.map(engine => {
             const isActive = currentEngine === engine.value;
             return (
-              <button
+              <SelectableCard
                 key={engine.value}
-                type="button"
+                title={engine.label}
+                description={engine.description}
+                selected={isActive}
                 onClick={() => {
                   update('agents', { defaultEngine: engine.value });
                   toast({ title: `Default engine set to ${engine.label}` });
                 }}
-                aria-pressed={isActive}
-                className={`relative flex items-start gap-3 rounded-md border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
-                  isActive
-                    ? 'border-chart-1 bg-chart-1/5'
-                    : 'border-border hover:border-muted-foreground/40'
-                }`}
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-foreground">{engine.label}</span>
-                    {isActive && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-chart-1/20 px-1.5 py-0.5 text-[9px] font-medium text-chart-1 uppercase tracking-wider">
-                        <Check size={9} strokeWidth={STROKE_WIDTH} />
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{engine.description}</p>
-                </div>
-              </button>
+                {isActive && <Badge variant="active">Active</Badge>}
+              </SelectableCard>
             );
           })}
         </div>
