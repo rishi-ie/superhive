@@ -1,36 +1,23 @@
-import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '@/data/mock.json';
-import type { MockData } from '@/data/mock/types';
+import { mockableData } from '@/data/mock/index';
 import type { Workspace } from './interface';
 
-const data = mockData as MockData;
+const workspaces: Workspace[] = mockableData.workspaces;
+const currentWorkspace: Workspace = workspaces.find(w => w.id === mockableData.currentWorkspaceId) ?? workspaces[0]!;
 
-const workspaces: Workspace[] = data.workspaces;
-const currentWorkspace: Workspace = workspaces.find(w => w.id === data.currentWorkspaceId) ?? workspaces[0]!;
-
-interface WorkspacesStore {
-  list(): Workspace[];
-  getCurrent(): Workspace | undefined;
+function list(): Workspace[] {
+  return workspaces;
 }
 
-const emptyStore: WorkspacesStore = {
-  list() { return []; },
-  getCurrent() { return undefined; },
-};
-
-const mockStore: WorkspacesStore = {
-  list() { return workspaces; },
-  getCurrent() { return currentWorkspace; },
-};
-
-const store: WorkspacesStore = isMockEnabled('workspaces') ? mockStore : emptyStore;
+function getCurrent(): Workspace | undefined {
+  return currentWorkspace;
+}
 
 export function listWorkspaces(): Workspace[] {
-  return store.list();
+  return list();
 }
 
 export function getCurrentWorkspace(): Workspace | undefined {
-  return store.getCurrent();
+  return getCurrent();
 }
 
 export type { Workspace };

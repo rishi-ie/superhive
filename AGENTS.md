@@ -246,9 +246,10 @@ src/
 │   │   ├── themes.ts        # Built-in theme definitions + ALL_THEME_VARS
 │   │   └── settings-registry.ts  # Settings nav registry — single source of truth for all settings pages
 │   │
-│   └── mock/               # Mock data config and types
-│       ├── feature-flags.ts  # isMockEnabled(domain) — per-domain mock toggle
-│       └── types.ts          # Shared mock seed types (FavoriteSeed, ChatThreadSeed, etc.)
+│   └── mock/               # Mock data — single source of truth
+│       ├── mock.json       # All seed data (workspaces, projects, agents, tickets, themes, etc.)
+│       ├── index.ts        # Central toggle + mockableData (the single place the env var is read)
+│       └── types.ts        # Shared mock seed types (FavoriteSeed, ChatThreadSeed, etc.)
 │
 └── lib/                     # Pure utilities — no React (except contexts below)
     ├── constants.ts          # Panel sizing, token costs, STROKE_WIDTH
@@ -395,9 +396,13 @@ src/data/{domain}/
 
 The store is the **only** public API for a domain. Components never import from sibling mock files — they always go through the store.
 
-Mock data is gated behind `isMockEnabled(domain)` in `src/data/mock/feature-flags.ts`. When disabled, stores return empty arrays — UI must handle empty states gracefully.
+**Mock toggle architecture**: there is exactly one place the `VITE_USE_MOCK_DATA` env var is checked — `src/data/mock/index.ts`. It exports `mockableData`, which is either the seed from `mock.json` or an empty `MockData` object. Every domain store imports `mockableData` from `@/data/mock/index` and reads/writes against the mutable arrays it returns.
 
-To add a new domain: create the `interface.ts` + `store.ts` pair, add mock data to `src/data/mock.json` if needed, wire into the appropriate dispatcher.
+When mocks are **on**: stores seed from `mock.json` and mutators (createProject, createThreadForAgent, etc.) work as expected.
+
+When mocks are **off**: stores start with empty arrays but mutators still work — the user can create projects, threads, audit items from zero. This is the "real fresh user" experience: empty app, full functionality.
+
+To add a new domain: create the `interface.ts` + `store.ts` pair, import `mockableData` from `@/data/mock/index`, add a corresponding key to `MockData` in `src/data/mock/types.ts` and seed data to `src/data/mock.json`. No per-store toggle logic — just import the central data source.
 
 ---
 

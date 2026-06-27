@@ -99,26 +99,16 @@ Runs `tsc --noEmit` with strict mode enabled (`noUnusedLocals`, `noUnusedParamet
 
 ## Mock Data
 
-Mock data is enabled by default. The app uses per-domain mock flags so each data area can be toggled independently.
+Mock data is enabled by default. The toggle is checked in exactly one place — `src/data/mock/index.ts`. Every domain store imports `mockableData` from there.
 
 **Enable/disable globally** — edit `.env.local`:
 
 ```sh
 VITE_USE_MOCK_DATA=true   # default — full mock data
-VITE_USE_MOCK_DATA=false   # empty states everywhere
+VITE_USE_MOCK_DATA=false  # empty app, but mutations (createProject, createThreadForAgent, etc.) still work
 ```
 
-**Toggle a specific domain** — set any of these in `.env.local` (each overrides the global flag):
-
-```sh
-VITE_MOCK_WORKSPACES=false
-VITE_MOCK_AGENTS=false
-VITE_MOCK_PROJECTS=false
-VITE_MOCK_TICKETS=false
-VITE_MOCK_CHAT=false
-VITE_MOCK_COSTUSAGE=false
-VITE_MOCK_FAVORITES=false
-```
+When mocks are off, the user gets a real fresh-user experience: no seed data, but they can create projects, agents, threads from zero.
 
 See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for full cleanup steps when going to production.
 
@@ -157,7 +147,7 @@ src/
 │   ├── universal-projects/
 │   ├── workspaces/
 │   ├── config/           # Wizard configs, nav items, right panel tabs, themes
-│   └── mock/             # feature-flags.ts, types.ts
+│   └── mock/             # mock.json (all seed), index.ts (toggle + mockableData), types.ts
 └── lib/
     ├── constants.ts      # Panel sizing, token costs, STROKE_WIDTH
     ├── debounce.ts

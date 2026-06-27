@@ -2,6 +2,7 @@ import type { Workspace } from '@/data/workspaces/interface';
 import type { Project } from '@/data/projects/interface';
 import type { UniversalTicket } from '@/data/tickets/interface';
 import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from '@/data/agents/interface';
+import type { Theme } from '@/data/settings/interface';
 
 export type IconKey = 'user' | 'folder';
 
@@ -65,4 +66,5 @@ export type MockData = {
   channelMessages: ChannelMessageSeed[];
   costUsage: CostUsageEntry[];
   chatQuickStart: ChatQuickStartItem[];
+  customThemes: Theme[];
 };

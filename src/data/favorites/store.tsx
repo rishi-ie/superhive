@@ -1,20 +1,17 @@
-import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '@/data/mock.json';
-import type { MockData, IconKey } from '@/data/mock/types';
+import { mockableData } from '@/data/mock/index';
 import type { FavoriteItem, FavoriteRef } from './interface';
-
-const data = mockData as MockData;
+import type { IconKey } from '@/data/mock/types';
 
 function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
   return refs.map(ref => {
     let label: string;
     let iconKey: IconKey;
     if (ref.type === 'project') {
-      const project = data.projects.find(p => p.id === ref.id);
+      const project = mockableData.projects.find(p => p.id === ref.id);
       label = project?.title ?? ref.id;
       iconKey = 'folder';
     } else {
-      const agent = data.agents.find(a => a.id === ref.id);
+      const agent = mockableData.agents.find(a => a.id === ref.id);
       label = agent?.name ?? ref.id;
       iconKey = 'user';
     }
@@ -22,25 +19,11 @@ function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
   });
 }
 
-const rawFavorites: FavoriteRef[] = data.favorites as FavoriteRef[];
+const rawFavorites: FavoriteRef[] = mockableData.favorites as FavoriteRef[];
 const resolvedFavorites = resolveFavorites(rawFavorites);
 
-interface FavoritesStore {
-  list(): FavoriteItem[];
-}
-
-const emptyStore: FavoritesStore = {
-  list() { return []; },
-};
-
-const mockStore: FavoritesStore = {
-  list() { return resolvedFavorites; },
-};
-
-const store: FavoritesStore = isMockEnabled('favorites') ? mockStore : emptyStore;
-
 export function listFavorites(): FavoriteItem[] {
-  return store.list();
+  return resolvedFavorites;
 }
 
 export type { FavoriteRef, FavoriteItem };

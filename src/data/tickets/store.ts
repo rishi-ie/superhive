@@ -1,6 +1,4 @@
-import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '@/data/mock.json';
-import type { MockData } from '@/data/mock/types';
+import { mockableData } from '@/data/mock/index';
 import type {
   UniversalTicket,
   UniversalTicketStatus,
@@ -9,28 +7,15 @@ import type {
   Assignee,
 } from './interface';
 
-const data = mockData as MockData;
-const universalTickets: UniversalTicket[] = data.universalTickets;
+const universalTickets: UniversalTicket[] = mockableData.universalTickets;
 
-interface TicketsStore {
-  list(workspaceId?: string): UniversalTicket[];
+function list(workspaceId?: string): UniversalTicket[] {
+  if (!workspaceId) return universalTickets;
+  return universalTickets.filter(t => t.workspaceId === workspaceId);
 }
 
-const emptyStore: TicketsStore = {
-  list() { return []; },
-};
-
-const mockStore: TicketsStore = {
-  list(workspaceId?: string) {
-    if (!workspaceId) return universalTickets;
-    return universalTickets.filter(t => t.workspaceId === workspaceId);
-  },
-};
-
-const store: TicketsStore = isMockEnabled('tickets') ? mockStore : emptyStore;
-
 export function listUniversalTickets(workspaceId?: string): UniversalTicket[] {
-  return store.list(workspaceId);
+  return list(workspaceId);
 }
 
 export type {

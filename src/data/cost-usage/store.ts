@@ -1,22 +1,10 @@
-import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '@/data/mock.json';
-import type { MockData } from '@/data/mock/types';
-import type { CostUsageEntry, CostUsageStore } from './interface';
+import { mockableData } from '@/data/mock/index';
+import type { CostUsageEntry } from './interface';
 
-const data = mockData as MockData;
-
-const emptyStore: CostUsageStore = {
-  list() { return []; },
-};
-
-const mockStore: CostUsageStore = {
-  list() { return data.costUsage; },
-};
-
-const store: CostUsageStore = isMockEnabled('costUsage') ? mockStore : emptyStore;
+const costUsage: CostUsageEntry[] = mockableData.costUsage;
 
 export function listCostUsage(): CostUsageEntry[] {
-  return store.list();
+  return costUsage;
 }
 
 export type { CostUsageEntry };

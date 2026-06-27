@@ -1,19 +1,15 @@
-import { isMockEnabled } from '@/data/mock/feature-flags';
-import mockData from '@/data/mock.json';
-import type { MockData } from '@/data/mock/types';
+import { mockableData } from '@/data/mock/index';
 import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
 import type { Project } from '@/data/projects/interface';
 
-const data = mockData as MockData;
+const projects: Project[] = mockableData.projects;
+const agents: Agent[] = mockableData.agents;
+const telemetryMap: Record<string, Telemetry> = mockableData.telemetry;
+const permissionsMap: Record<string, Permissions> = mockableData.permissions;
+const actionLogMap: Record<string, ActionLogEntry[]> = mockableData.actionLogs;
+const nextStepMap: Record<string, string> = mockableData.nextSteps;
 
-const agents: Agent[] = data.agents as Agent[];
-const projects: Project[] = data.projects;
-const telemetryMap: Record<string, Telemetry> = data.telemetry as Record<string, Telemetry>;
-const permissionsMap: Record<string, Permissions> = data.permissions as Record<string, Permissions>;
-const actionLogMap: Record<string, ActionLogEntry[]> = data.actionLogs as Record<string, ActionLogEntry[]>;
-const nextStepMap: Record<string, string> = data.nextSteps;
-
-let auditItemsMutable: AuditItem[] = structuredClone(data.auditItems);
+let auditItemsMutable: AuditItem[] = structuredClone(mockableData.auditItems);
 
 const DEFAULT_TELEMETRY: Telemetry = {
   contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5.00,
@@ -23,7 +19,7 @@ const DEFAULT_PERMISSIONS: Permissions = {
   modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false,
 };
 
-const mockAgentStore: AgentStore = {
+const store: AgentStore = {
   list() {
     return agents;
   },
@@ -58,26 +54,6 @@ const mockAgentStore: AgentStore = {
     auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
   },
 };
-
-const emptyStore: AgentStore = {
-  list() { return []; },
-  get(_id) { return undefined; },
-  getTelemetry() { return null; },
-  getPermissions() { return null; },
-  getAuditItems() { return []; },
-  getActionLog() { return []; },
-  getNextStep() { return ''; },
-  getDefaultTelemetry() {
-    return { contextSaturation: 0, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 0, sessionCost: 0, budget: 0 };
-  },
-  getDefaultPermissions() {
-    return { modelEngine: '—', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 0, writeMessages: false, installDeps: false };
-  },
-  approveAudit() {},
-  denyAudit() {},
-};
-
-const store: AgentStore = isMockEnabled('agents') ? mockAgentStore : emptyStore;
 
 export function listAgents(): Agent[] {
   return store.list();
