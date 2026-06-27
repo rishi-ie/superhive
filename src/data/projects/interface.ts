@@ -42,14 +42,29 @@ export type CommunicationChannel = {
   workspaceId?: string;
 };
 
+export type ProjectStatus = 'ACTIVE' | 'ARCHIVED';
+
 export type Project = {
   id: string;
   workspaceId: string;
   title: string;
+  description: string;
+  successCriteria: string;
+  color: string;
+  status: ProjectStatus;
   tickets: Ticket[];
   agents: ProjectAgent[];
   channels: CommunicationChannel[];
   activity: SwarmActivity[];
+};
+
+export type CreateProjectInput = {
+  title: string;
+  workspaceId: string;
+  description?: string;
+  successCriteria?: string;
+  color?: string;
+  agentIds?: string[];
 };
 
 export type ChannelMessage = {

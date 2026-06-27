@@ -6,11 +6,13 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { LeftNav } from '@/components/left-nav/LeftNav';
 import { CenterWorkspace } from '@/components/center-workspace/CenterWorkspace';
 import { RightAuxiliary } from '@/components/right-auxiliary/RightAuxiliary';
+import { CreateProjectDialog } from '@/components/center-workspace/CreateProjectDialog';
 import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from '@/lib/constants';
 import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
+import type { ArchivedProjectSummary } from '@/components/left-nav/ArchivedProjectsSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents, listTickets, getProject, getProjectByWorkspace } from '@/data/projects/store';
+import { listProjectAgents, listTickets, getProject, getProjectByWorkspace, listProjects } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, getAgentWorkspace } from '@/data/agents/store';
@@ -87,6 +89,8 @@ export function Dashboard({
   const [tabState, setTabState] = useState(() => makeInitialTabState('vela'));
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('vela');
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [projectsVersion, setProjectsVersion] = useState(0);
 
   const workspaces_data = listWorkspaces();
   const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' };
@@ -101,6 +105,21 @@ export function Dashboard({
     () => Object.fromEntries(listWorkspaces().map(w => [w.id, w.name])),
     [],
   );
+
+  const archivedProjects = useMemo<ArchivedProjectSummary[]>(
+    () =>
+      listProjects({ status: 'ARCHIVED' }).map(p => ({
+        id: p.id,
+        workspaceId: p.workspaceId,
+        title: p.title,
+        color: p.color,
+      })),
+    [projectsVersion],
+  );
+
+  const bumpProjectsVersion = useCallback(() => {
+    setProjectsVersion(v => v + 1);
+  }, []);
 
   const activeTasks = listTickets(activeWorkspaceId)
     .filter(t => t.status === 'EXECUTING')
@@ -220,7 +239,11 @@ export function Dashboard({
 
   const handleWizardAction = useCallback((actionId: string) => {
     const ws = activeWorkspaceId;
-    if (actionId === 'open-project' || actionId === 'create-project') {
+    if (actionId === 'create-project') {
+      setCreateProjectOpen(true);
+      return;
+    }
+    if (actionId === 'open-project') {
       openTab(buildTab('projects', ws, 'Projects'));
     } else if (actionId === 'view-agents' || actionId === 'open-agents' || actionId === 'configure-agent') {
       openTab(buildTab('agents', ws, 'Agents'));
@@ -236,6 +259,11 @@ export function Dashboard({
       openTab(buildTab('universal-channels', ws, 'Channels'));
     }
   }, [openTab, activeWorkspaceId]);
+
+  const handleProjectCreated = useCallback((project: import('@/data/projects/interface').Project) => {
+    bumpProjectsVersion();
+    openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: project.id }));
+  }, [openTab, bumpProjectsVersion]);
 
   const handleTerminateAgent = useCallback((agentId: string) => {
     console.warn('[TODO] Terminate agent:', agentId);
@@ -315,6 +343,7 @@ export function Dashboard({
         favorites={favorites_data}
         activeAgents={agents_data}
         activeTasks={activeTasks}
+        archivedProjects={archivedProjects}
         onWorkspaceSelect={handleWorkspaceSelect}
         onSettingsClick={() => onNavigate('settings')}
         onFavoritesItemClick={handleFavoriteSelect}
@@ -356,6 +385,13 @@ export function Dashboard({
         onTicketClick={handleTicketSelect}
         onThreadSelect={handleThreadSelect}
         onOpenTab={handleOpenTab}
+        onProjectsChanged={bumpProjectsVersion}
+      />
+      <CreateProjectDialog
+        open={createProjectOpen}
+        onOpenChange={setCreateProjectOpen}
+        onCreated={handleProjectCreated}
+        defaultWorkspaceId={activeWorkspaceId}
       />
     </div>
   );

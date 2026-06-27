@@ -54,6 +54,7 @@ type RightAuxiliaryProps = {
   onTicketClick?: (ticketId: string) => void;
   onThreadSelect?: (threadId: string) => void;
   onOpenTab?: (kind: string) => void;
+  onProjectsChanged?: () => void;
 };
 
 const MIN_WIDTH = 200;
@@ -89,6 +90,7 @@ export function RightAuxiliary({
   onTicketClick,
   onThreadSelect,
   onOpenTab,
+  onProjectsChanged,
 }: RightAuxiliaryProps) {
   const isResizingRef = useRef(false);
 
@@ -304,7 +306,7 @@ export function RightAuxiliary({
               />
             )}
             {context.kind === 'project' && projectData && (
-              <ProjectManageTab project={projectData} />
+              <ProjectManageTab project={projectData} onProjectsChanged={onProjectsChanged} />
             )}
             {context.kind === 'channel' && channelData && (
               <ChannelManageTab

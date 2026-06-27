@@ -52,7 +52,7 @@ export type ChatQuickStartItem = {
 export type MockData = {
   workspaces: Workspace[];
   currentWorkspaceId: string;
-  projects: Record<string, Project>;
+  projects: Project[];
   universalTickets: UniversalTicket[];
   agents: Agent[];
   telemetry: Record<string, Telemetry>;

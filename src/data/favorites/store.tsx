@@ -10,7 +10,7 @@ function resolveFavorites(refs: FavoriteRef[]): FavoriteItem[] {
     let label: string;
     let iconKey: IconKey;
     if (ref.type === 'project') {
-      const project = Object.values(data.projects).find(p => p.id === ref.id);
+      const project = data.projects.find(p => p.id === ref.id);
       label = project?.title ?? ref.id;
       iconKey = 'folder';
     } else {

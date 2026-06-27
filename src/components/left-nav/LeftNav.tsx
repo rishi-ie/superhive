@@ -6,6 +6,7 @@ import { LeftNavHeader } from './LeftNavHeader';
 import { TeamSelector, type Workspace } from './TeamSelector';
 import { ActiveSection, type ActiveAgent } from './ActiveSection';
 import { FavoritesSection, type FavoriteItem } from './FavoritesSection';
+import { ArchivedProjectsSection, type ArchivedProjectSummary } from './ArchivedProjectsSection';
 import { AccordionCore } from './AccordionCore';
 import { Utilities } from './Utilities';
 
@@ -17,6 +18,7 @@ type LeftNavProps = {
   favorites?: FavoriteItem[];
   activeAgents?: ActiveAgent[];
   activeTasks?: { id: string; title: string; assignedTo?: string }[];
+  archivedProjects?: ArchivedProjectSummary[];
   notificationCount?: number;
   onWorkspaceSelect?: (workspace: Workspace) => void;
   onSettingsClick?: () => void;
@@ -43,6 +45,7 @@ const MAX_WIDTH = 400;
  * @param favorites - Favorite items to display
  * @param activeAgents - Active agents to display
  * @param activeTasks - Active tasks to display
+ * @param archivedProjects - Archived projects displayed at the very bottom of the sidebar
  * @param onWorkspaceSelect - Called when workspace is selected
  * @param onSettingsClick - Called when settings is clicked
  * @param onFavoritesItemClick - Called when favorite item is clicked
@@ -63,6 +66,7 @@ export function LeftNav({
   favorites = [],
   activeAgents = [],
   activeTasks = [],
+  archivedProjects = [],
   onWorkspaceSelect,
   onSettingsClick,
   onFavoritesItemClick,
@@ -145,6 +149,11 @@ export function LeftNav({
         </div>
 
         <Utilities onSettingsClick={onSettingsClick} />
+
+        <ArchivedProjectsSection
+          projects={archivedProjects}
+          onProjectClick={onProjectClick}
+        />
       </div>
       <div
         className="w-px bg-sidebar-border/40 hover:bg-chart-1 cursor-ew-resize shrink-0 transition-colors"

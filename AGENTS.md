@@ -70,6 +70,7 @@ src/
 │   │   ├── ChatHeader.tsx
 │   │   ├── ChatEmptyState.tsx
 │   │   ├── OnboardingWizard.tsx
+│   │   ├── CreateProjectDialog.tsx  # Modal for capturing a new project's initial state
 │   │   ├── TicketCard.tsx     # Single workspace ticket card (used in ExecutionStream)
 │   │   └── tickets/           # Ticket-related shared components
 │   │       ├── UniversalTicketCard.tsx
@@ -84,6 +85,7 @@ src/
 │   │   ├── TeamSelector.tsx
 │   │   ├── ActiveSection.tsx
 │   │   ├── FavoritesSection.tsx
+│   │   ├── ArchivedProjectsSection.tsx  # Bottom-of-sidebar section listing archived projects
 │   │   ├── AccordionCore.tsx
 │   │   ├── ProjectListItem.tsx
 │   │   ├── AgentListItem.tsx
@@ -229,7 +231,7 @@ src/
 │   ├── cost-usage/         # listCostUsage() — cost and usage history
 │   ├── favorites/          # listFavorites(), etc.
 │   ├── left-nav/           # AccordionAgent type (interface only; data reshaped in AccordionCore)
-│   ├── projects/           # listProjects(), getProject(), listChannels(), etc.
+│   ├── projects/           # listProjects(opts), getProject(), createProject(), archiveProject(), unarchiveProject(), listChannels(), etc.
 │   ├── settings/           # Settings type + seeded defaults (settings.json) — canonical source
 │   ├── tickets/            # listUniversalTickets(), etc.
 │   ├── tabs/               # Tab state: openTab(), closeTab(), selectTab(), setSelection()
