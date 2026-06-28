@@ -116,7 +116,7 @@ export function RightAuxiliary({
     ? universalTickets.find(t => t.id === context.ticketId) ?? null
     : null;
 
-  const ticketWorkspaceId = ticketData?.workspaceId ?? workspacesData[0]?.id ?? 'vela';
+  const ticketWorkspaceId = ticketData?.workspaceId ?? workspacesData[0]?.id;
   const ticketProjectAgents = ticketWorkspaceId ? listProjectAgents(ticketWorkspaceId) : [];
   const ticketSwarmActivity = ticketWorkspaceId ? listSwarmActivity(ticketWorkspaceId) : [];
 

@@ -1,7 +1,6 @@
 /**
  * Cost & Usage — usage breakdown chart (working) + budget/spend controls (disabled coming soon).
  */
-import { useState } from 'react';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { StatCard } from '@/components/ui/StatCard';
 import { useToast } from '@/lib/toast-context';
+import { useSettings } from '@/lib/settings-context';
 import { Download } from 'lucide-react';
 import { listCostUsage } from '@/data/cost-usage/store';
 
@@ -51,11 +51,8 @@ function UsageChart({ data }: { data: { date: string; cost: number }[] }) {
  */
 export function CostUsageSettings() {
   const toast = useToast();
-  const [budgetCap, setBudgetCap] = useState(500);
-  const [perAgentLimit, setPerAgentLimit] = useState(100);
-  const [spendAlertPercent, setSpendAlertPercent] = useState(80);
-  const [spendAlertEnabled, setSpendAlertEnabled] = useState(true);
-  const [resetDay, setResetDay] = useState(1);
+  const { settings, update } = useSettings();
+  const { costUsage } = settings;
 
   const usageData = listCostUsage();
   const totalCost = usageData.reduce((s, d) => s + d.cost, 0);
@@ -123,8 +120,8 @@ export function CostUsageSettings() {
                   <span className="text-xs text-muted-foreground">$</span>
                   <TextInput
                     type="number"
-                    value={String(budgetCap)}
-                    onChange={e => setBudgetCap(parseInt(e.target.value) || 0)}
+                    value={String(costUsage.monthlyBudgetCap)}
+                    onChange={e => update('costUsage', { monthlyBudgetCap: parseInt(e.target.value) || 0 })}
                     disabled
                     className="w-24"
                   />
@@ -139,8 +136,8 @@ export function CostUsageSettings() {
                   <span className="text-xs text-muted-foreground">$</span>
                   <TextInput
                     type="number"
-                    value={String(perAgentLimit)}
-                    onChange={e => setPerAgentLimit(parseInt(e.target.value) || 0)}
+                    value={String(costUsage.perAgentSpendingLimit)}
+                    onChange={e => update('costUsage', { perAgentSpendingLimit: parseInt(e.target.value) || 0 })}
                     disabled
                     className="w-24"
                   />
@@ -154,8 +151,8 @@ export function CostUsageSettings() {
                     <div className="flex items-center gap-2">
                       <TextInput
                         type="number"
-                        value={String(resetDay)}
-                        onChange={e => setResetDay(parseInt(e.target.value) || 1)}
+                        value={String(costUsage.resetCycleDay)}
+                        onChange={e => update('costUsage', { resetCycleDay: parseInt(e.target.value) || 1 })}
                         disabled
                         className="w-16"
                       />
@@ -181,8 +178,8 @@ export function CostUsageSettings() {
               description="Receive an in-app notification when spending crosses the alert threshold."
               control={
                 <Switch
-                  checked={spendAlertEnabled}
-                  onCheckedChange={setSpendAlertEnabled}
+                  checked={costUsage.spendAlert.enabled}
+                  onCheckedChange={enabled => update('costUsage', { spendAlert: { ...costUsage.spendAlert, enabled } })}
                   disabled
                 />
               }
@@ -194,8 +191,8 @@ export function CostUsageSettings() {
                 <div className="flex items-center gap-2">
                   <TextInput
                     type="number"
-                    value={String(spendAlertPercent)}
-                    onChange={e => setSpendAlertPercent(parseInt(e.target.value) || 80)}
+                    value={String(costUsage.spendAlert.thresholdPercent)}
+                    onChange={e => update('costUsage', { spendAlert: { ...costUsage.spendAlert, thresholdPercent: parseInt(e.target.value) || 80 } })}
                     disabled
                     className="w-16"
                   />

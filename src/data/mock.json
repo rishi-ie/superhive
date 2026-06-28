@@ -1,2461 +1,1926 @@
 {
   "workspaces": [
     {
-      "id": "vela",
-      "name": "Vela",
-      "initials": "VL",
+      "id": "acme",
+      "name": "Acme Robotics",
+      "initials": "AR",
       "avatarColor": "bg-chart-1"
     },
     {
-      "id": "widget",
-      "name": "Widget Embed",
-      "initials": "WE",
+      "id": "quantum",
+      "name": "Quantum Labs",
+      "initials": "QL",
       "avatarColor": "bg-chart-2"
     },
     {
-      "id": "admin",
-      "name": "Admin Dashboard",
-      "initials": "AD",
+      "id": "field",
+      "name": "Field Operations",
+      "initials": "FO",
       "avatarColor": "bg-chart-3"
     },
     {
-      "id": "mobile",
-      "name": "Mobile SDK",
-      "initials": "MS",
-      "avatarColor": "bg-[#8b5cf6]"
+      "id": "cs",
+      "name": "Customer Success",
+      "initials": "CS",
+      "avatarColor": "bg-chart-4"
     }
   ],
-  "currentWorkspaceId": "vela",
+  "currentWorkspaceId": "acme",
   "projects": [
     {
-      "id": "proj-vela-platform",
-      "workspaceId": "vela",
-      "title": "Vela Platform",
-      "description": "Ship the first public release of the Vela developer platform — auth, runtime, embeddable widget, and a docs site.",
-      "successCriteria": "- Auth + billing live for 100 beta customers\n- p95 latency under 800ms at 10k rpm\n- Public docs site deployed\n- SDK bundle under 40kb gzipped",
+      "id": "proj-atlas",
+      "workspaceId": "acme",
+      "title": "Atlas Platform",
+      "description": "Ship the first public release of the Atlas humanoid platform — hardware, firmware, fleet coordination, and a customer-facing control plane.",
+      "successCriteria": "- 100 beta units shipped to pilot customers\n- p95 motion latency under 200ms\n- 99.5% uptime over rolling 30 days\n- OTA firmware updates verified end-to-end",
       "color": "#0562EF",
       "status": "ACTIVE",
       "tickets": [
         {
-          "id": "VL-101",
-          "title": "Fix ticket routing latency spike",
+          "id": "AT-101",
+          "title": "Calibrate ankle torque controller",
           "status": "EXECUTING",
           "assignedAgentId": "agent-elena"
         },
         {
-          "id": "VL-102",
-          "title": "Implement intent classification v2",
+          "id": "AT-102",
+          "title": "OTA firmware signing pipeline",
+          "status": "EXECUTING",
+          "assignedAgentId": "agent-priya"
+        },
+        {
+          "id": "AT-103",
+          "title": "Vision-language-action benchmark suite",
           "status": "EXECUTING",
           "assignedAgentId": "agent-david"
         },
         {
-          "id": "VL-103",
-          "title": "OAuth SSO for enterprise customers",
+          "id": "AT-104",
+          "title": "Battery thermal model v3",
           "status": "TODO",
-          "assignedAgentId": "agent-noah"
+          "assignedAgentId": "agent-marcus"
         },
         {
-          "id": "VL-104",
-          "title": "Add response SLA monitoring",
+          "id": "AT-105",
+          "title": "Gripper force feedback tuning",
           "status": "TODO",
-          "assignedAgentId": "agent-fatima"
+          "assignedAgentId": "agent-elena"
         },
         {
-          "id": "VL-105",
-          "title": "Optimize embedding pipeline throughput",
+          "id": "AT-106",
+          "title": "Slam localization under low light",
           "status": "REVIEW",
-          "assignedAgentId": "agent-marcus"
+          "assignedAgentId": "agent-david"
         },
         {
-          "id": "VL-106",
-          "title": "Migrate to Postgres 16",
+          "id": "AT-107",
+          "title": "Customer dashboard release notes",
           "status": "DONE",
           "assignedAgentId": "agent-marcus"
         },
         {
-          "id": "VL-107",
-          "title": "Implement bulk article import",
+          "id": "AT-108",
+          "title": "Onboarding wizard for first-time operators",
           "status": "DONE",
-          "assignedAgentId": "agent-fatima"
-        },
-        {
-          "id": "VL-108",
-          "title": "Add CSAT analytics dashboard",
-          "status": "DONE",
-          "assignedAgentId": "agent-james"
+          "assignedAgentId": "agent-elena"
         }
       ],
       "agents": [
         {
           "id": "agent-elena",
           "name": "Elena Rodriguez",
-          "role": "DevOps Engineer",
+          "role": "Robotics Engineer",
           "currentStatus": "WORKING",
-          "assignedTicketId": "VL-101",
+          "assignedTicketId": "AT-101",
           "initials": "ER"
         },
         {
           "id": "agent-marcus",
           "name": "Marcus Webb",
-          "role": "Backend Engineer",
-          "currentStatus": "COMPILING",
-          "assignedTicketId": "VL-105",
+          "role": "ML Engineer",
+          "currentStatus": "WORKING",
+          "assignedTicketId": "AT-104",
           "initials": "MW"
         },
         {
           "id": "agent-priya",
           "name": "Priya Sharma",
-          "role": "API Engineer",
-          "currentStatus": "WORKING",
-          "assignedTicketId": "VL-102",
+          "role": "DevOps Lead",
+          "currentStatus": "COMPILING",
+          "assignedTicketId": "AT-102",
           "initials": "PS"
         },
         {
           "id": "agent-david",
           "name": "David Kim",
-          "role": "ML Engineer",
+          "role": "Perception Engineer",
           "currentStatus": "WORKING",
-          "assignedTicketId": "VL-102",
+          "assignedTicketId": "AT-103",
           "initials": "DK"
-        },
-        {
-          "id": "agent-noah",
-          "name": "Noah Chen",
-          "role": "Security Engineer",
-          "currentStatus": "IDLE",
-          "assignedTicketId": null,
-          "initials": "NC"
         }
       ],
       "channels": [
         {
-          "id": "vl-ch-1",
-          "participants": [
-            "Elena Rodriguez",
-            "David Kim"
-          ],
-          "topic": "Intent classifier calibration",
-          "relatedTicketId": "VL-102",
+          "id": "chan-atlas-launch",
+          "participants": ["Elena Rodriguez", "Marcus Webb", "Priya Sharma"],
+          "topic": "Atlas launch readiness",
+          "relatedTicketId": "AT-107",
           "status": "OPEN",
-          "lastMessagePreview": "F1 dropped 3pts on 'billing' intents. Retraining now.",
-          "messageCount": 9,
-          "updatedAt": "11:42 AM",
+          "lastMessagePreview": "PR is up — Marcus, can you sanity-check the thermal thresholds?",
+          "messageCount": 24,
+          "updatedAt": "2026-06-28T09:14:00Z",
           "unread": true
         },
         {
-          "id": "vl-ch-2",
-          "participants": [
-            "Marcus Webb",
-            "Elena Rodriguez"
-          ],
-          "topic": "DB migration window",
-          "relatedTicketId": "VL-106",
-          "status": "RESOLVED",
-          "lastMessagePreview": "Migration complete. Rolling back to 15 for now.",
-          "messageCount": 6,
-          "updatedAt": "11:20 AM"
-        },
-        {
-          "id": "vl-ch-3",
-          "participants": [
-            "Noah Chen",
-            "Marcus Webb"
-          ],
-          "topic": "OAuth scope review",
-          "relatedTicketId": "VL-103",
+          "id": "chan-atlas-fw",
+          "participants": ["Priya Sharma", "Noah Chen", "Takeshi Yamamoto"],
+          "topic": "Firmware signing key rotation",
+          "relatedTicketId": "AT-102",
           "status": "AWAITING_REPLY",
-          "lastMessagePreview": "Need PKCE flow added before I can approve.",
-          "messageCount": 4,
-          "updatedAt": "10:55 AM"
+          "lastMessagePreview": "Waiting on security sign-off before we can rotate keys in prod.",
+          "messageCount": 11,
+          "updatedAt": "2026-06-28T08:02:00Z"
         },
         {
-          "id": "vl-ch-4",
-          "participants": [
-            "Priya Sharma",
-            "Elena Rodriguez"
-          ],
-          "topic": "Latency profiling session",
-          "relatedTicketId": "VL-101",
+          "id": "chan-atlas-perf",
+          "participants": ["David Kim", "Marcus Webb"],
+          "topic": "p95 motion latency regression",
+          "relatedTicketId": "AT-106",
           "status": "OPEN",
-          "lastMessagePreview": "p99 is 2.8s at 50k rpm. Blame is on the vector DB.",
-          "messageCount": 12,
-          "updatedAt": "10:30 AM",
-          "unread": true
+          "lastMessagePreview": "Shadow run looks clean — bumping to 10% rollout.",
+          "messageCount": 7,
+          "updatedAt": "2026-06-27T22:41:00Z"
         },
         {
-          "id": "vl-ch-5",
-          "participants": [
-            "Fatima Al-Hassan",
-            "Priya Sharma"
-          ],
-          "topic": "SLA metrics definition",
-          "relatedTicketId": "VL-104",
-          "status": "OPEN",
-          "lastMessagePreview": "First response SLA or resolution SLA? Need both.",
-          "messageCount": 3,
-          "updatedAt": "09:48 AM"
+          "id": "chan-atlas-battery",
+          "participants": ["Marcus Webb", "Rafael Santos"],
+          "topic": "Battery thermal model v3",
+          "relatedTicketId": "AT-104",
+          "status": "RESOLVED",
+          "lastMessagePreview": "Thermal model locked. Closing this out.",
+          "messageCount": 19,
+          "updatedAt": "2026-06-26T17:10:00Z"
         }
       ],
       "activity": [
         {
-          "id": "vl-act-1",
-          "timestamp": "11:42 AM",
-          "primaryAgent": "David Kim",
-          "action": "shared classifier drift findings with",
-          "targetAgent": "Elena Rodriguez",
-          "context": "for VL-102"
-        },
-        {
-          "id": "vl-act-2",
-          "timestamp": "11:20 AM",
-          "primaryAgent": "Marcus Webb",
-          "action": "rolled back database migration with",
-          "targetAgent": "Elena Rodriguez",
-          "context": "for VL-106"
-        },
-        {
-          "id": "vl-act-3",
-          "timestamp": "10:55 AM",
-          "primaryAgent": "Noah Chen",
-          "action": "requested PKCE additions from",
+          "id": "act-atlas-001",
+          "timestamp": "2026-06-28T09:14:00Z",
+          "primaryAgent": "Elena Rodriguez",
+          "action": "pushed branch",
           "targetAgent": "Marcus Webb",
-          "context": "for VL-103"
+          "context": "ankle-torque-v2 — needs thermal threshold sanity check"
         },
         {
-          "id": "vl-act-4",
-          "timestamp": "10:30 AM",
+          "id": "act-atlas-002",
+          "timestamp": "2026-06-28T08:55:00Z",
           "primaryAgent": "Priya Sharma",
-          "action": "escalated p99 regression to",
-          "targetAgent": "Elena Rodriguez",
-          "context": "for VL-101"
+          "action": "requested review from",
+          "targetAgent": "Takeshi Yamamoto",
+          "context": "OTA signing pipeline PR #482"
         },
         {
-          "id": "vl-act-5",
-          "timestamp": "09:48 AM",
-          "primaryAgent": "Fatima Al-Hassan",
-          "action": "aligned SLA definitions with",
+          "id": "act-atlas-003",
+          "timestamp": "2026-06-28T08:02:00Z",
+          "primaryAgent": "Noah Chen",
+          "action": "flagged blocker on",
           "targetAgent": "Priya Sharma",
-          "context": "for VL-104"
+          "context": "security sign-off needed for key rotation"
+        },
+        {
+          "id": "act-atlas-004",
+          "timestamp": "2026-06-27T22:41:00Z",
+          "primaryAgent": "David Kim",
+          "action": "rolled out to",
+          "targetAgent": "Marcus Webb",
+          "context": "10% shadow traffic for AT-106"
+        },
+        {
+          "id": "act-atlas-005",
+          "timestamp": "2026-06-27T18:12:00Z",
+          "primaryAgent": "Elena Rodriguez",
+          "action": "delegated subtask to",
+          "targetAgent": "Marcus Webb",
+          "context": "ankle torque thermal verification"
+        },
+        {
+          "id": "act-atlas-006",
+          "timestamp": "2026-06-27T15:30:00Z",
+          "primaryAgent": "Marcus Webb",
+          "action": "approved PR",
+          "targetAgent": "David Kim",
+          "context": "slam-lowlight #477"
+        },
+        {
+          "id": "act-atlas-007",
+          "timestamp": "2026-06-27T11:08:00Z",
+          "primaryAgent": "Priya Sharma",
+          "action": "marked blocked on",
+          "targetAgent": "Takeshi Yamamoto",
+          "context": "key rotation awaiting security approval"
+        },
+        {
+          "id": "act-atlas-008",
+          "timestamp": "2026-06-26T17:10:00Z",
+          "primaryAgent": "Marcus Webb",
+          "action": "closed ticket",
+          "targetAgent": "Rafael Santos",
+          "context": "AT-104 thermal model v3 merged"
+        },
+        {
+          "id": "act-atlas-009",
+          "timestamp": "2026-06-26T14:22:00Z",
+          "primaryAgent": "David Kim",
+          "action": "queued experiment for",
+          "targetAgent": "Elena Rodriguez",
+          "context": "vision-language-action sweep"
+        },
+        {
+          "id": "act-atlas-010",
+          "timestamp": "2026-06-26T10:45:00Z",
+          "primaryAgent": "Elena Rodriguez",
+          "action": "split ticket into",
+          "targetAgent": "Marcus Webb",
+          "context": "AT-101 ankle calibration sub-tasks"
+        },
+        {
+          "id": "act-atlas-011",
+          "timestamp": "2026-06-25T22:01:00Z",
+          "primaryAgent": "Priya Sharma",
+          "action": "deployed",
+          "targetAgent": "Elena Rodriguez",
+          "context": "AT-108 onboarding wizard to staging"
+        },
+        {
+          "id": "act-atlas-012",
+          "timestamp": "2026-06-25T16:30:00Z",
+          "primaryAgent": "Marcus Webb",
+          "action": "reviewed",
+          "targetAgent": "David Kim",
+          "context": "vision-language-action benchmark PR"
         }
       ]
     },
     {
-      "id": "proj-widget",
-      "workspaceId": "widget",
-      "title": "Widget Embed",
-      "description": "Embeddable conversational widget for third-party sites — drops in via a single script tag, persists sessions, supports Notion and Stripe surfaces.",
-      "successCriteria": "- WCAG AA compliant\n- Single-script-tag install under 5 lines\n- Session persistence across reloads\n- 3 first-party integrations live (Notion, Stripe, Linear)",
+      "id": "proj-beacon",
+      "workspaceId": "acme",
+      "title": "Beacon Fleet",
+      "description": "Fleet coordination software that lets Atlas robots share state, divide tasks, and recover from peer failures in real time.",
+      "successCriteria": "- 50-robot fleet demo in pilot warehouse\n- Sub-second state propagation\n- Zero data loss on leader failover",
       "color": "#50a878",
       "status": "ACTIVE",
       "tickets": [
         {
-          "id": "WE-201",
-          "title": "Add dark mode to widget SDK",
+          "id": "BC-101",
+          "title": "Leader election under flaky network",
           "status": "EXECUTING",
-          "assignedAgentId": "agent-ava"
+          "assignedAgentId": "agent-noah"
         },
         {
-          "id": "WE-202",
-          "title": "Reduce widget bundle size below 40kb",
-          "status": "TODO",
-          "assignedAgentId": "agent-ava"
+          "id": "BC-102",
+          "title": "Shared SLAM map synchronization",
+          "status": "EXECUTING",
+          "assignedAgentId": "agent-james"
         },
         {
-          "id": "WE-203",
-          "title": "Implement keyboard navigation",
-          "status": "DONE",
-          "assignedAgentId": "agent-ava"
-        },
-        {
-          "id": "WE-204",
-          "title": "Add widget to Notion integration",
+          "id": "BC-103",
+          "title": "Fleet dashboard rewrite in WebSocket",
           "status": "TODO",
           "assignedAgentId": "agent-james"
         },
         {
-          "id": "WE-205",
-          "title": "Fix z-index conflict with host page modals",
-          "status": "EXECUTING",
-          "assignedAgentId": "agent-sonia"
+          "id": "BC-104",
+          "title": "Security audit for fleet API",
+          "status": "TODO",
+          "assignedAgentId": "agent-takeshi"
         },
         {
-          "id": "WE-206",
-          "title": "Implement persistent session storage",
+          "id": "BC-105",
+          "title": "Failover stress test report",
           "status": "REVIEW",
-          "assignedAgentId": "agent-marcus"
+          "assignedAgentId": "agent-noah"
         },
         {
-          "id": "WE-207",
-          "title": "Add widget configuration API",
+          "id": "BC-106",
+          "title": "Operator handoff playbook",
           "status": "DONE",
-          "assignedAgentId": "agent-james"
-        },
-        {
-          "id": "WE-208",
-          "title": "Accessibility audit — WCAG AA",
-          "status": "DONE",
-          "assignedAgentId": "agent-ava"
+          "assignedAgentId": "agent-noah"
         }
       ],
       "agents": [
         {
-          "id": "agent-ava",
-          "name": "Ava Chen",
-          "role": "Frontend Engineer",
+          "id": "agent-noah",
+          "name": "Noah Chen",
+          "role": "Fleet Coordinator",
           "currentStatus": "WORKING",
-          "assignedTicketId": "WE-201",
-          "initials": "AC"
+          "assignedTicketId": "BC-101",
+          "initials": "NC"
         },
         {
           "id": "agent-james",
-          "name": "James Liu",
-          "role": "Frontend Engineer",
-          "currentStatus": "COMPILING",
-          "assignedTicketId": "WE-204",
-          "initials": "JL"
-        },
-        {
-          "id": "agent-sonia",
-          "name": "Sonia Patel",
-          "role": "Design Engineer",
-          "currentStatus": "COMPILING",
-          "assignedTicketId": "WE-205",
-          "initials": "SP"
-        },
-        {
-          "id": "agent-marcus",
-          "name": "Marcus Webb",
-          "role": "API Engineer",
+          "name": "James Okafor",
+          "role": "Field Engineer",
           "currentStatus": "WORKING",
-          "assignedTicketId": "WE-206",
-          "initials": "MW"
+          "assignedTicketId": "BC-102",
+          "initials": "JO"
+        },
+        {
+          "id": "agent-takeshi",
+          "name": "Takeshi Yamamoto",
+          "role": "Security Engineer",
+          "currentStatus": "IDLE",
+          "assignedTicketId": "BC-104",
+          "initials": "TY"
         }
       ],
       "channels": [
         {
-          "id": "we-ch-1",
-          "participants": [
-            "Ava Chen",
-            "Sonia Patel"
-          ],
-          "topic": "Dark mode design tokens",
-          "relatedTicketId": "WE-201",
+          "id": "chan-beacon-lead",
+          "participants": ["Noah Chen", "James Okafor"],
+          "topic": "Leader election under flaky network",
+          "relatedTicketId": "BC-101",
           "status": "OPEN",
-          "lastMessagePreview": "Token set uploaded to Figma. Reviewing now.",
-          "messageCount": 7,
-          "updatedAt": "11:15 AM",
-          "unread": true
+          "lastMessagePreview": "Switched to Raft with 200ms heartbeat — replays are clean now.",
+          "messageCount": 14,
+          "updatedAt": "2026-06-28T07:33:00Z"
         },
         {
-          "id": "we-ch-2",
-          "participants": [
-            "James Liu",
-            "Ava Chen"
-          ],
-          "topic": "Notion block renderer",
-          "relatedTicketId": "WE-204",
+          "id": "chan-beacon-slam",
+          "participants": ["James Okafor", "David Kim"],
+          "topic": "Shared SLAM map sync",
+          "relatedTicketId": "BC-102",
           "status": "AWAITING_REPLY",
-          "lastMessagePreview": "Notion API supports rich text — mapping to our schema.",
-          "messageCount": 3,
-          "updatedAt": "10:50 AM"
+          "lastMessagePreview": "Map diff bandwidth is 12% lower with delta encoding.",
+          "messageCount": 9,
+          "updatedAt": "2026-06-27T20:15:00Z"
         },
         {
-          "id": "we-ch-3",
-          "participants": [
-            "Sonia Patel",
-            "James Liu"
-          ],
-          "topic": "Modal z-index stacking",
-          "relatedTicketId": "WE-205",
-          "status": "OPEN",
-          "lastMessagePreview": "Portal approach is the cleanest. WDYT?",
-          "messageCount": 5,
-          "updatedAt": "10:20 AM"
-        },
-        {
-          "id": "we-ch-4",
-          "participants": [
-            "Marcus Webb",
-            "James Liu"
-          ],
-          "topic": "Session API contract",
-          "relatedTicketId": "WE-206",
+          "id": "chan-beacon-sec",
+          "participants": ["Takeshi Yamamoto", "Noah Chen"],
+          "topic": "Fleet API security review",
+          "relatedTicketId": "BC-104",
           "status": "RESOLVED",
-          "lastMessagePreview": "Contract approved. Merging.",
-          "messageCount": 4,
-          "updatedAt": "09:55 AM"
+          "lastMessagePreview": "Findings shipped, recommendations merged.",
+          "messageCount": 6,
+          "updatedAt": "2026-06-25T13:00:00Z"
         }
       ],
       "activity": [
         {
-          "id": "we-act-1",
-          "timestamp": "11:15 AM",
-          "primaryAgent": "Ava Chen",
-          "action": "shared dark mode tokens with",
-          "targetAgent": "Sonia Patel",
-          "context": "for WE-201"
+          "id": "act-beacon-001",
+          "timestamp": "2026-06-28T07:33:00Z",
+          "primaryAgent": "Noah Chen",
+          "action": "shipped patch",
+          "targetAgent": "James Okafor",
+          "context": "BC-101 raft heartbeat at 200ms"
         },
         {
-          "id": "we-act-2",
-          "timestamp": "10:50 AM",
-          "primaryAgent": "James Liu",
-          "action": "mapped Notion blocks to widget schema with",
-          "targetAgent": "Ava Chen",
-          "context": "for WE-204"
+          "id": "act-beacon-002",
+          "timestamp": "2026-06-28T06:18:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "queued experiment for",
+          "targetAgent": "Noah Chen",
+          "context": "delta-encoded SLAM maps"
         },
         {
-          "id": "we-act-3",
-          "timestamp": "10:20 AM",
-          "primaryAgent": "Sonia Patel",
-          "action": "proposed portal solution to",
-          "targetAgent": "James Liu",
-          "context": "for WE-205"
+          "id": "act-beacon-003",
+          "timestamp": "2026-06-27T20:15:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "shared findings with",
+          "targetAgent": "David Kim",
+          "context": "slam sync bandwidth reduction"
         },
         {
-          "id": "we-act-4",
-          "timestamp": "09:55 AM",
-          "primaryAgent": "Marcus Webb",
-          "action": "approved session API contract with",
-          "targetAgent": "James Liu",
-          "context": "for WE-206"
+          "id": "act-beacon-004",
+          "timestamp": "2026-06-27T15:42:00Z",
+          "primaryAgent": "Noah Chen",
+          "action": "approved",
+          "targetAgent": "James Okafor",
+          "context": "BC-105 failover stress test report"
+        },
+        {
+          "id": "act-beacon-005",
+          "timestamp": "2026-06-27T11:10:00Z",
+          "primaryAgent": "Takeshi Yamamoto",
+          "action": "flagged risk on",
+          "targetAgent": "Noah Chen",
+          "context": "unauthenticated WebSocket endpoint"
+        },
+        {
+          "id": "act-beacon-006",
+          "timestamp": "2026-06-26T22:30:00Z",
+          "primaryAgent": "Noah Chen",
+          "action": "split ticket",
+          "targetAgent": "James Okafor",
+          "context": "BC-102 slam sync into 3 sub-tasks"
+        },
+        {
+          "id": "act-beacon-007",
+          "timestamp": "2026-06-26T16:45:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "deployed",
+          "targetAgent": "Noah Chen",
+          "context": "BC-103 fleet dashboard preview"
+        },
+        {
+          "id": "act-beacon-008",
+          "timestamp": "2026-06-25T13:00:00Z",
+          "primaryAgent": "Takeshi Yamamoto",
+          "action": "closed review for",
+          "targetAgent": "Noah Chen",
+          "context": "BC-104 fleet API security review"
         }
       ]
     },
     {
-      "id": "proj-admin",
-      "workspaceId": "admin",
-      "title": "Admin Dashboard",
-      "description": "Internal admin surface for Superhive operators — agent performance, routing rules, billing, and access control.",
-      "successCriteria": "- RBAC enforced across all admin routes\n- Stripe billing portal integrated\n- Agent performance view redesigned per CX feedback\n- CSV export for analytics reports",
+      "id": "proj-cortex",
+      "workspaceId": "quantum",
+      "title": "Cortex Perception",
+      "description": "Vision-language-action research for unstructured environments — pick-and-place in cluttered, deformable, or low-light settings.",
+      "successCriteria": "- 90% success on unstructured pick benchmark\n- Latency under 800ms end-to-end\n- Reproducible eval pipeline",
       "color": "#d4a84b",
       "status": "ACTIVE",
       "tickets": [
         {
-          "id": "AD-301",
-          "title": "Redesign agent performance view",
+          "id": "CX-101",
+          "title": "Deformable object grasp policy",
           "status": "EXECUTING",
-          "assignedAgentId": "agent-sonia"
+          "assignedAgentId": "agent-zara"
         },
         {
-          "id": "AD-302",
-          "title": "Add CSV export to analytics reports",
-          "status": "TODO",
-          "assignedAgentId": "agent-james"
-        },
-        {
-          "id": "AD-303",
-          "title": "Build rule-based routing configuration UI",
-          "status": "TODO",
-          "assignedAgentId": "agent-priya"
-        },
-        {
-          "id": "AD-304",
-          "title": "Integrate Stripe billing portal",
+          "id": "CX-102",
+          "title": "Eval harness v2 with video replay",
           "status": "EXECUTING",
-          "assignedAgentId": "agent-marcus"
+          "assignedAgentId": "agent-fatima"
         },
         {
-          "id": "AD-305",
-          "title": "Fix timezone handling in report scheduler",
-          "status": "DONE",
-          "assignedAgentId": "agent-james"
+          "id": "CX-103",
+          "title": "Low-light perception fine-tune",
+          "status": "TODO",
+          "assignedAgentId": "agent-david"
         },
         {
-          "id": "AD-306",
-          "title": "Add role-based access control",
+          "id": "CX-104",
+          "title": "Action chunking ablation study",
           "status": "REVIEW",
-          "assignedAgentId": "agent-noah"
+          "assignedAgentId": "agent-zara"
+        },
+        {
+          "id": "CX-105",
+          "title": "Research paper outline draft",
+          "status": "DONE",
+          "assignedAgentId": "agent-zara"
         }
       ],
       "agents": [
         {
-          "id": "agent-sonia",
-          "name": "Sonia Patel",
-          "role": "Design Engineer",
+          "id": "agent-zara",
+          "name": "Zara Patel",
+          "role": "Research Scientist",
           "currentStatus": "WORKING",
-          "assignedTicketId": "AD-301",
-          "initials": "SP"
+          "assignedTicketId": "CX-101",
+          "initials": "ZP"
         },
         {
-          "id": "agent-james",
-          "name": "James Liu",
-          "role": "Frontend Engineer",
-          "currentStatus": "WORKING",
-          "assignedTicketId": "AD-302",
-          "initials": "JL"
+          "id": "agent-david",
+          "name": "David Kim",
+          "role": "Perception Engineer",
+          "currentStatus": "IDLE",
+          "assignedTicketId": "CX-103",
+          "initials": "DK"
         },
         {
-          "id": "agent-marcus",
-          "name": "Marcus Webb",
-          "role": "Backend Engineer",
+          "id": "agent-fatima",
+          "name": "Fatima Al-Rashid",
+          "role": "QA Engineer",
           "currentStatus": "COMPILING",
-          "assignedTicketId": "AD-304",
-          "initials": "MW"
-        },
-        {
-          "id": "agent-noah",
-          "name": "Noah Chen",
-          "role": "Security Engineer",
-          "currentStatus": "WORKING",
-          "assignedTicketId": "AD-306",
-          "initials": "NC"
+          "assignedTicketId": "CX-102",
+          "initials": "FA"
         }
       ],
       "channels": [
         {
-          "id": "ad-ch-1",
-          "participants": [
-            "Sonia Patel",
-            "James Liu"
-          ],
-          "topic": "Agent table redesign",
-          "relatedTicketId": "AD-301",
+          "id": "chan-cortex-deform",
+          "participants": ["Zara Patel", "David Kim"],
+          "topic": "Deformable object grasp policy",
+          "relatedTicketId": "CX-101",
           "status": "OPEN",
-          "lastMessagePreview": "Moved sentiment sparklines to the right column.",
+          "lastMessagePreview": "Diffusion policy is at 78% on the cloth set — pushing to 85% by Friday.",
+          "messageCount": 22,
+          "updatedAt": "2026-06-28T08:45:00Z"
+        },
+        {
+          "id": "chan-cortex-eval",
+          "participants": ["Fatima Al-Rashid", "Zara Patel"],
+          "topic": "Eval harness v2",
+          "relatedTicketId": "CX-102",
+          "status": "AWAITING_REPLY",
+          "lastMessagePreview": "Need a second pass on the video replay pipeline before this lands.",
           "messageCount": 8,
-          "updatedAt": "11:30 AM",
-          "unread": true
-        },
-        {
-          "id": "ad-ch-2",
-          "participants": [
-            "James Liu",
-            "Marcus Webb"
-          ],
-          "topic": "CSV streaming endpoint",
-          "relatedTicketId": "AD-302",
-          "status": "AWAITING_REPLY",
-          "lastMessagePreview": "Backend can stream rows. Front just needs to buffer.",
-          "messageCount": 3,
-          "updatedAt": "10:45 AM"
-        },
-        {
-          "id": "ad-ch-3",
-          "participants": [
-            "Marcus Webb",
-            "Noah Chen"
-          ],
-          "topic": "RBAC schema review",
-          "relatedTicketId": "AD-306",
-          "status": "OPEN",
-          "lastMessagePreview": "Need hierarchy: org → team → agent. Adding now.",
-          "messageCount": 5,
-          "updatedAt": "10:10 AM"
-        },
-        {
-          "id": "ad-ch-4",
-          "participants": [
-            "Marcus Webb",
-            "James Liu"
-          ],
-          "topic": "Stripe webhook handler",
-          "relatedTicketId": "AD-304",
-          "status": "AWAITING_REPLY",
-          "lastMessagePreview": "Webhook signed. Syncing subscription state to our DB.",
-          "messageCount": 4,
-          "updatedAt": "09:30 AM"
+          "updatedAt": "2026-06-27T19:20:00Z"
         }
       ],
       "activity": [
         {
-          "id": "ad-act-1",
-          "timestamp": "11:30 AM",
-          "primaryAgent": "Sonia Patel",
-          "action": "iterated on agent table layout with",
-          "targetAgent": "James Liu",
-          "context": "for AD-301"
+          "id": "act-cortex-001",
+          "timestamp": "2026-06-28T08:45:00Z",
+          "primaryAgent": "Zara Patel",
+          "action": "shared results with",
+          "targetAgent": "David Kim",
+          "context": "CX-101 cloth set at 78%"
         },
         {
-          "id": "ad-act-2",
-          "timestamp": "10:45 AM",
-          "primaryAgent": "James Liu",
-          "action": "confirmed streaming strategy with",
-          "targetAgent": "Marcus Webb",
-          "context": "for AD-302"
+          "id": "act-cortex-002",
+          "timestamp": "2026-06-28T07:10:00Z",
+          "primaryAgent": "Fatima Al-Rashid",
+          "action": "queued experiment for",
+          "targetAgent": "Zara Patel",
+          "context": "CX-102 video replay pipeline"
         },
         {
-          "id": "ad-act-3",
-          "timestamp": "10:10 AM",
-          "primaryAgent": "Marcus Webb",
-          "action": "requested RBAC schema addition from",
-          "targetAgent": "Noah Chen",
-          "context": "for AD-306"
+          "id": "act-cortex-003",
+          "timestamp": "2026-06-27T19:20:00Z",
+          "primaryAgent": "Fatima Al-Rashid",
+          "action": "requested review from",
+          "targetAgent": "Zara Patel",
+          "context": "CX-102 eval harness PR"
         },
         {
-          "id": "ad-act-4",
-          "timestamp": "09:30 AM",
-          "primaryAgent": "Marcus Webb",
-          "action": "verified Stripe signature with",
-          "targetAgent": "James Liu",
-          "context": "for AD-304"
+          "id": "act-cortex-004",
+          "timestamp": "2026-06-27T14:05:00Z",
+          "primaryAgent": "Zara Patel",
+          "action": "drafted",
+          "targetAgent": "David Kim",
+          "context": "CX-105 research paper outline"
+        },
+        {
+          "id": "act-cortex-005",
+          "timestamp": "2026-06-26T11:30:00Z",
+          "primaryAgent": "David Kim",
+          "action": "queued training run",
+          "targetAgent": "Zara Patel",
+          "context": "CX-103 low-light fine-tune v2"
+        },
+        {
+          "id": "act-cortex-006",
+          "timestamp": "2026-06-25T18:42:00Z",
+          "primaryAgent": "Zara Patel",
+          "action": "approved",
+          "targetAgent": "Fatima Al-Rashid",
+          "context": "CX-102 eval harness scaffolding"
         }
       ]
     },
     {
-      "id": "proj-mobile",
-      "workspaceId": "mobile",
-      "title": "Mobile SDK",
-      "description": "iOS and Android SDKs that wrap the Vela widget for native apps — push notifications, offline queue, biometric auth.",
-      "successCriteria": "- iOS + Android parity\n- Offline queue with exponential backoff\n- Biometric auth on both platforms\n- Init time under 200ms cold start",
+      "id": "proj-pulse",
+      "workspaceId": "quantum",
+      "title": "Pulse Battery",
+      "description": "Solid-state battery optimization for 24-hour runtime — chemistry exploration, thermal modeling, and lifetime prediction.",
+      "successCriteria": "- 24h continuous operation on prototype cells\n- Cycle life above 1000 cycles at 80% capacity\n- Thermal model within 2C of physical test",
       "color": "#7b68ee",
       "status": "ACTIVE",
       "tickets": [
         {
-          "id": "MB-401",
-          "title": "Implement push notification handling",
+          "id": "PL-101",
+          "title": "Cycle life prediction model",
           "status": "EXECUTING",
-          "assignedAgentId": "agent-sonia"
+          "assignedAgentId": "agent-rafael"
         },
         {
-          "id": "MB-402",
-          "title": "Add offline message queue",
+          "id": "PL-102",
+          "title": "Cell supplier qualification batch 3",
           "status": "TODO",
           "assignedAgentId": "agent-priya"
         },
         {
-          "id": "MB-403",
-          "title": "iOS safe area layout fixes",
+          "id": "PL-103",
+          "title": "Thermal runaway mitigation study",
+          "status": "REVIEW",
+          "assignedAgentId": "agent-rafael"
+        },
+        {
+          "id": "PL-104",
+          "title": "Charging curve simulator",
           "status": "DONE",
-          "assignedAgentId": "agent-sonia"
-        },
-        {
-          "id": "MB-404",
-          "title": "Add biometric authentication",
-          "status": "TODO",
-          "assignedAgentId": "agent-noah"
-        },
-        {
-          "id": "MB-405",
-          "title": "Reduce SDK initialization time",
-          "status": "EXECUTING",
-          "assignedAgentId": "agent-james"
+          "assignedAgentId": "agent-rafael"
         }
       ],
       "agents": [
         {
-          "id": "agent-sonia",
-          "name": "Sonia Patel",
-          "role": "Mobile Engineer",
-          "currentStatus": "WORKING",
-          "assignedTicketId": "MB-401",
-          "initials": "SP"
+          "id": "agent-rafael",
+          "name": "Rafael Santos",
+          "role": "Hardware Engineer",
+          "currentStatus": "COMPILING",
+          "assignedTicketId": "PL-101",
+          "initials": "RS"
         },
         {
           "id": "agent-priya",
           "name": "Priya Sharma",
-          "role": "Backend Engineer",
+          "role": "DevOps Lead",
           "currentStatus": "IDLE",
-          "assignedTicketId": null,
+          "assignedTicketId": "PL-102",
           "initials": "PS"
-        },
-        {
-          "id": "agent-james",
-          "name": "James Liu",
-          "role": "Mobile Engineer",
-          "currentStatus": "WORKING",
-          "assignedTicketId": "MB-405",
-          "initials": "JL"
-        },
-        {
-          "id": "agent-noah",
-          "name": "Noah Chen",
-          "role": "Security Engineer",
-          "currentStatus": "COMPILING",
-          "assignedTicketId": "MB-404",
-          "initials": "NC"
         }
       ],
       "channels": [
         {
-          "id": "mb-ch-1",
-          "participants": [
-            "Sonia Patel",
-            "James Liu"
-          ],
-          "topic": "Push notification architecture",
-          "relatedTicketId": "MB-401",
+          "id": "chan-pulse-thermal",
+          "participants": ["Rafael Santos", "Marcus Webb"],
+          "topic": "Thermal runaway mitigation",
+          "relatedTicketId": "PL-103",
           "status": "OPEN",
-          "lastMessagePreview": "APNS certificate provisioned. Testing now.",
-          "messageCount": 6,
-          "updatedAt": "11:00 AM",
-          "unread": true
+          "lastMessagePreview": "Solid-state cells hold the line — needs one more validation cycle.",
+          "messageCount": 12,
+          "updatedAt": "2026-06-27T16:08:00Z"
         },
         {
-          "id": "mb-ch-2",
-          "participants": [
-            "Priya Sharma",
-            "James Liu"
-          ],
-          "topic": "Offline queue schema",
-          "relatedTicketId": "MB-402",
+          "id": "chan-pulse-supplier",
+          "participants": ["Rafael Santos", "Priya Sharma"],
+          "topic": "Cell supplier qualification",
+          "relatedTicketId": "PL-102",
           "status": "AWAITING_REPLY",
-          "lastMessagePreview": "SQLite queue with exponential backoff on reconnect.",
-          "messageCount": 2,
-          "updatedAt": "10:15 AM"
-        },
-        {
-          "id": "mb-ch-3",
-          "participants": [
-            "Noah Chen",
-            "Sonia Patel"
-          ],
-          "topic": "Biometric auth scope",
-          "relatedTicketId": "MB-404",
-          "status": "OPEN",
-          "lastMessagePreview": "Use LAContext on iOS, BiometricPrompt on Android.",
-          "messageCount": 4,
-          "updatedAt": "09:40 AM"
+          "lastMessagePreview": "Batch 3 samples arriving Friday — need a LabVIEW calibration update.",
+          "messageCount": 5,
+          "updatedAt": "2026-06-26T14:33:00Z"
         }
       ],
       "activity": [
         {
-          "id": "mb-act-1",
-          "timestamp": "11:00 AM",
-          "primaryAgent": "Sonia Patel",
-          "action": "provisioned APNS certificate with",
-          "targetAgent": "James Liu",
-          "context": "for MB-401"
+          "id": "act-pulse-001",
+          "timestamp": "2026-06-28T06:50:00Z",
+          "primaryAgent": "Rafael Santos",
+          "action": "queued experiment",
+          "targetAgent": "Marcus Webb",
+          "context": "PL-101 cycle life model v4"
         },
         {
-          "id": "mb-act-2",
-          "timestamp": "10:15 AM",
+          "id": "act-pulse-002",
+          "timestamp": "2026-06-27T16:08:00Z",
+          "primaryAgent": "Rafael Santos",
+          "action": "shared findings with",
+          "targetAgent": "Marcus Webb",
+          "context": "PL-103 thermal runaway data"
+        },
+        {
+          "id": "act-pulse-003",
+          "timestamp": "2026-06-27T10:22:00Z",
           "primaryAgent": "Priya Sharma",
-          "action": "proposed SQLite queue design to",
-          "targetAgent": "James Liu",
-          "context": "for MB-402"
+          "action": "blocked on",
+          "targetAgent": "Rafael Santos",
+          "context": "PL-102 supplier batch lead time"
         },
         {
-          "id": "mb-act-3",
-          "timestamp": "09:40 AM",
-          "primaryAgent": "Noah Chen",
-          "action": "recommended native biometric APIs to",
-          "targetAgent": "Sonia Patel",
-          "context": "for MB-404"
+          "id": "act-pulse-004",
+          "timestamp": "2026-06-26T14:33:00Z",
+          "primaryAgent": "Rafael Santos",
+          "action": "requested calibration from",
+          "targetAgent": "Priya Sharma",
+          "context": "LabVIEW setup for batch 3"
+        },
+        {
+          "id": "act-pulse-005",
+          "timestamp": "2026-06-25T11:15:00Z",
+          "primaryAgent": "Rafael Santos",
+          "action": "shipped",
+          "targetAgent": "Marcus Webb",
+          "context": "PL-104 charging curve simulator"
+        }
+      ]
+    },
+    {
+      "id": "proj-vanguard",
+      "workspaceId": "field",
+      "title": "Vanguard Field",
+      "description": "Field-deployment tooling for Atlas rollout — site surveys, install kits, remote diagnostics, and on-site engineer dispatch.",
+      "successCriteria": "- 5 pilot sites live by end of Q3\n- Mean install time under 4 hours\n- Remote diagnostics covers 80% of field alerts",
+      "color": "#dc6b6b",
+      "status": "ACTIVE",
+      "tickets": [
+        {
+          "id": "VG-101",
+          "title": "Site survey mobile app",
+          "status": "EXECUTING",
+          "assignedAgentId": "agent-james"
+        },
+        {
+          "id": "VG-102",
+          "title": "Install kit checklist v2",
+          "status": "TODO",
+          "assignedAgentId": "agent-elena"
+        },
+        {
+          "id": "VG-103",
+          "title": "Remote diagnostics API",
+          "status": "EXECUTING",
+          "assignedAgentId": "agent-james"
+        },
+        {
+          "id": "VG-104",
+          "title": "On-call rotation playbook",
+          "status": "REVIEW",
+          "assignedAgentId": "agent-james"
+        },
+        {
+          "id": "VG-105",
+          "title": "Pilot site readiness report",
+          "status": "DONE",
+          "assignedAgentId": "agent-elena"
+        }
+      ],
+      "agents": [
+        {
+          "id": "agent-james",
+          "name": "James Okafor",
+          "role": "Field Engineer",
+          "currentStatus": "WORKING",
+          "assignedTicketId": "VG-101",
+          "initials": "JO"
+        },
+        {
+          "id": "agent-elena",
+          "name": "Elena Rodriguez",
+          "role": "Robotics Engineer",
+          "currentStatus": "IDLE",
+          "assignedTicketId": "VG-102",
+          "initials": "ER"
+        }
+      ],
+      "channels": [
+        {
+          "id": "chan-vanguard-survey",
+          "participants": ["James Okafor", "Elena Rodriguez"],
+          "topic": "Site survey mobile app",
+          "relatedTicketId": "VG-101",
+          "status": "OPEN",
+          "lastMessagePreview": "Offline-first sync landed — testing at the Memphis pilot tomorrow.",
+          "messageCount": 16,
+          "updatedAt": "2026-06-28T05:42:00Z"
+        },
+        {
+          "id": "chan-vanguard-diag",
+          "participants": ["James Okafor", "Priya Sharma"],
+          "topic": "Remote diagnostics API",
+          "relatedTicketId": "VG-103",
+          "status": "AWAITING_REPLY",
+          "lastMessagePreview": "Need a Prometheus exporter for the new telemetry stream.",
+          "messageCount": 7,
+          "updatedAt": "2026-06-27T18:55:00Z"
+        },
+        {
+          "id": "chan-vanguard-oncall",
+          "participants": ["James Okafor", "Luna Park"],
+          "topic": "On-call rotation",
+          "relatedTicketId": "VG-104",
+          "status": "OPEN",
+          "lastMessagePreview": "Memphis and Austin shifts confirmed for next week.",
+          "messageCount": 4,
+          "updatedAt": "2026-06-26T12:10:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "act-vanguard-001",
+          "timestamp": "2026-06-28T05:42:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "shipped patch",
+          "targetAgent": "Elena Rodriguez",
+          "context": "VG-101 offline-first sync"
+        },
+        {
+          "id": "act-vanguard-002",
+          "timestamp": "2026-06-27T18:55:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "requested help from",
+          "targetAgent": "Priya Sharma",
+          "context": "VG-103 Prometheus exporter"
+        },
+        {
+          "id": "act-vanguard-003",
+          "timestamp": "2026-06-27T13:18:00Z",
+          "primaryAgent": "Elena Rodriguez",
+          "action": "queued draft",
+          "targetAgent": "James Okafor",
+          "context": "VG-102 install kit checklist v2"
+        },
+        {
+          "id": "act-vanguard-004",
+          "timestamp": "2026-06-26T12:10:00Z",
+          "primaryAgent": "Luna Park",
+          "action": "confirmed shifts with",
+          "targetAgent": "James Okafor",
+          "context": "VG-104 Memphis + Austin coverage"
+        },
+        {
+          "id": "act-vanguard-005",
+          "timestamp": "2026-06-25T20:00:00Z",
+          "primaryAgent": "James Okafor",
+          "action": "closed ticket",
+          "targetAgent": "Elena Rodriguez",
+          "context": "VG-105 pilot site readiness report"
+        },
+        {
+          "id": "act-vanguard-006",
+          "timestamp": "2026-06-25T15:30:00Z",
+          "primaryAgent": "Elena Rodriguez",
+          "action": "shared doc with",
+          "targetAgent": "James Okafor",
+          "context": "VG-105 site readiness template"
+        }
+      ]
+    },
+    {
+      "id": "proj-helios",
+      "workspaceId": "cs",
+      "title": "Helios Onboarding",
+      "description": "Customer onboarding automation — tickets, training docs, proactive monitoring, and self-serve ramp for new pilots.",
+      "successCriteria": "- Time-to-first-task under 30 minutes\n- 90% customer activation rate\n- Auto-resolve 60% of common issues",
+      "color": "#0562EF",
+      "status": "ACTIVE",
+      "tickets": [
+        {
+          "id": "HL-101",
+          "title": "Self-serve onboarding wizard",
+          "status": "EXECUTING",
+          "assignedAgentId": "agent-luna"
+        },
+        {
+          "id": "HL-102",
+          "title": "Proactive alert playbook",
+          "status": "TODO",
+          "assignedAgentId": "agent-amelia"
+        },
+        {
+          "id": "HL-103",
+          "title": "Knowledge base article refresh",
+          "status": "REVIEW",
+          "assignedAgentId": "agent-fatima"
+        },
+        {
+          "id": "HL-104",
+          "title": "Customer activation dashboard",
+          "status": "DONE",
+          "assignedAgentId": "agent-luna"
+        }
+      ],
+      "agents": [
+        {
+          "id": "agent-luna",
+          "name": "Luna Park",
+          "role": "Customer Success Lead",
+          "currentStatus": "WORKING",
+          "assignedTicketId": "HL-101",
+          "initials": "LP"
+        },
+        {
+          "id": "agent-amelia",
+          "name": "Amelia Foster",
+          "role": "Product Manager",
+          "currentStatus": "IDLE",
+          "assignedTicketId": "HL-102",
+          "initials": "AF"
+        },
+        {
+          "id": "agent-fatima",
+          "name": "Fatima Al-Rashid",
+          "role": "QA Engineer",
+          "currentStatus": "COMPILING",
+          "assignedTicketId": "HL-103",
+          "initials": "FA"
+        }
+      ],
+      "channels": [
+        {
+          "id": "chan-helios-wizard",
+          "participants": ["Luna Park", "Amelia Foster"],
+          "topic": "Self-serve onboarding wizard",
+          "relatedTicketId": "HL-101",
+          "status": "OPEN",
+          "lastMessagePreview": "Conversion to first task is at 84% on the new flow.",
+          "messageCount": 13,
+          "updatedAt": "2026-06-28T07:50:00Z"
+        },
+        {
+          "id": "chan-helios-alerts",
+          "participants": ["Amelia Foster", "James Okafor"],
+          "topic": "Proactive alert playbook",
+          "relatedTicketId": "HL-102",
+          "status": "AWAITING_REPLY",
+          "lastMessagePreview": "Need input on which field alerts are noisy vs. useful.",
+          "messageCount": 9,
+          "updatedAt": "2026-06-27T15:00:00Z"
+        },
+        {
+          "id": "chan-helios-kb",
+          "participants": ["Fatima Al-Rashid", "Luna Park"],
+          "topic": "Knowledge base refresh",
+          "relatedTicketId": "HL-103",
+          "status": "RESOLVED",
+          "lastMessagePreview": "Top 20 articles updated and re-tagged.",
+          "messageCount": 11,
+          "updatedAt": "2026-06-25T09:20:00Z"
+        }
+      ],
+      "activity": [
+        {
+          "id": "act-helios-001",
+          "timestamp": "2026-06-28T07:50:00Z",
+          "primaryAgent": "Luna Park",
+          "action": "shared metric with",
+          "targetAgent": "Amelia Foster",
+          "context": "HL-101 wizard conversion at 84%"
+        },
+        {
+          "id": "act-helios-002",
+          "timestamp": "2026-06-27T22:05:00Z",
+          "primaryAgent": "Amelia Foster",
+          "action": "requested review from",
+          "targetAgent": "Luna Park",
+          "context": "HL-102 alert playbook draft"
+        },
+        {
+          "id": "act-helios-003",
+          "timestamp": "2026-06-27T15:00:00Z",
+          "primaryAgent": "Amelia Foster",
+          "action": "flagged question for",
+          "targetAgent": "James Okafor",
+          "context": "HL-102 field alert taxonomy"
+        },
+        {
+          "id": "act-helios-004",
+          "timestamp": "2026-06-26T11:42:00Z",
+          "primaryAgent": "Fatima Al-Rashid",
+          "action": "closed ticket",
+          "targetAgent": "Luna Park",
+          "context": "HL-103 KB article refresh"
+        },
+        {
+          "id": "act-helios-005",
+          "timestamp": "2026-06-25T18:30:00Z",
+          "primaryAgent": "Luna Park",
+          "action": "shipped",
+          "targetAgent": "Amelia Foster",
+          "context": "HL-104 activation dashboard"
+        },
+        {
+          "id": "act-helios-006",
+          "timestamp": "2026-06-25T09:20:00Z",
+          "primaryAgent": "Fatima Al-Rashid",
+          "action": "tagged",
+          "targetAgent": "Luna Park",
+          "context": "HL-103 KB top 20 articles"
         }
       ]
     }
   ],
   "universalTickets": [
     {
-      "id": "VL-101",
-      "title": "Fix ticket routing latency spike",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
-      "status": "EXECUTING",
-      "priority": "HIGH",
-      "type": "BUG",
-      "assignee": {
-        "name": "Elena Rodriguez",
-        "isAI": true
-      }
-    },
-    {
-      "id": "VL-102",
-      "title": "Implement intent classification v2",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
+      "id": "UT-001",
+      "title": "Ankle torque controller calibration",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": {
-        "name": "David Kim",
-        "isAI": true
-      }
+      "assignee": { "name": "Elena Rodriguez", "isAI": true }
     },
     {
-      "id": "VL-103",
-      "title": "OAuth SSO for enterprise customers",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
+      "id": "UT-002",
+      "title": "OTA firmware signing pipeline",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
+      "status": "EXECUTING",
+      "priority": "HIGH",
+      "type": "INFRA",
+      "assignee": { "name": "Priya Sharma", "isAI": true }
+    },
+    {
+      "id": "UT-003",
+      "title": "Vision-language-action benchmark suite",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
+      "status": "EXECUTING",
+      "priority": "MEDIUM",
+      "type": "FEATURE",
+      "assignee": { "name": "David Kim", "isAI": true }
+    },
+    {
+      "id": "UT-004",
+      "title": "Battery thermal model v3",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Noah Chen",
-        "isAI": false
-      }
+      "assignee": { "name": "Marcus Webb", "isAI": true }
     },
     {
-      "id": "VL-104",
-      "title": "Add response SLA monitoring",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
+      "id": "UT-005",
+      "title": "Gripper force feedback tuning",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
       "status": "BACKLOG",
       "priority": "LOW",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Fatima Al-Hassan",
-        "isAI": false
-      }
-    },
-    {
-      "id": "VL-105",
-      "title": "Optimize embedding pipeline throughput",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
-      "status": "REVIEW",
-      "priority": "MEDIUM",
       "type": "REFACTOR",
-      "assignee": {
-        "name": "Marcus Webb",
-        "isAI": true
-      }
+      "assignee": { "name": "Elena Rodriguez", "isAI": true }
     },
     {
-      "id": "VL-106",
-      "title": "Migrate to Postgres 16",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
+      "id": "UT-006",
+      "title": "SLAM under low light",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
+      "status": "REVIEW",
+      "priority": "HIGH",
+      "type": "BUG",
+      "assignee": { "name": "David Kim", "isAI": true }
+    },
+    {
+      "id": "UT-007",
+      "title": "Customer dashboard release notes",
+      "projectName": "Atlas Platform",
+      "workspaceId": "acme",
       "status": "MERGED",
       "priority": "LOW",
       "type": "INFRA",
-      "assignee": {
-        "name": "Marcus Webb",
-        "isAI": true
-      }
+      "assignee": { "name": "Marcus Webb", "isAI": true }
     },
     {
-      "id": "VL-107",
-      "title": "Implement bulk article import",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
-      "status": "MERGED",
-      "priority": "LOW",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Fatima Al-Hassan",
-        "isAI": false
-      }
+      "id": "UT-008",
+      "title": "Leader election under flaky network",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
+      "status": "EXECUTING",
+      "priority": "HIGH",
+      "type": "BUG",
+      "assignee": { "name": "Noah Chen", "isAI": true }
     },
     {
-      "id": "VL-108",
-      "title": "Add CSAT analytics dashboard",
-      "projectName": "Vela Platform",
-      "workspaceId": "vela",
-      "status": "MERGED",
-      "priority": "LOW",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
-    },
-    {
-      "id": "WE-201",
-      "title": "Add dark mode to widget SDK",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
+      "id": "UT-009",
+      "title": "Shared SLAM map sync",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
       "status": "EXECUTING",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Ava Chen",
-        "isAI": true
-      }
+      "assignee": { "name": "James Okafor", "isAI": true }
     },
     {
-      "id": "WE-202",
-      "title": "Reduce widget bundle size below 40kb",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
+      "id": "UT-010",
+      "title": "Fleet dashboard WebSocket rewrite",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "REFACTOR",
-      "assignee": {
-        "name": "Ava Chen",
-        "isAI": true
-      }
+      "assignee": { "name": "James Okafor", "isAI": true }
     },
     {
-      "id": "WE-203",
-      "title": "Implement keyboard navigation",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
-      "status": "MERGED",
-      "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Ava Chen",
-        "isAI": true
-      }
-    },
-    {
-      "id": "WE-204",
-      "title": "Add widget to Notion integration",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
+      "id": "UT-011",
+      "title": "Fleet API security audit",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
       "status": "BACKLOG",
-      "priority": "LOW",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
-    },
-    {
-      "id": "WE-205",
-      "title": "Fix z-index conflict with host page modals",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
-      "status": "EXECUTING",
       "priority": "HIGH",
-      "type": "BUG",
-      "assignee": {
-        "name": "Sonia Patel",
-        "isAI": true
-      }
+      "type": "INFRA",
+      "assignee": { "name": "Takeshi Yamamoto", "isAI": true }
     },
     {
-      "id": "WE-206",
-      "title": "Implement persistent session storage",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
+      "id": "UT-012",
+      "title": "Failover stress test report",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
       "status": "REVIEW",
       "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Marcus Webb",
-        "isAI": true
-      }
+      "type": "INFRA",
+      "assignee": { "name": "Noah Chen", "isAI": true }
     },
     {
-      "id": "WE-207",
-      "title": "Add widget configuration API",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
+      "id": "UT-013",
+      "title": "Operator handoff playbook",
+      "projectName": "Beacon Fleet",
+      "workspaceId": "acme",
       "status": "MERGED",
       "priority": "LOW",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
+      "type": "INFRA",
+      "assignee": { "name": "Noah Chen", "isAI": true }
     },
     {
-      "id": "WE-208",
-      "title": "Accessibility audit — WCAG AA",
-      "projectName": "Widget Embed",
-      "workspaceId": "widget",
-      "status": "MERGED",
-      "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Ava Chen",
-        "isAI": true
-      }
-    },
-    {
-      "id": "AD-301",
-      "title": "Redesign agent performance view",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
+      "id": "UT-014",
+      "title": "Deformable object grasp policy",
+      "projectName": "Cortex Perception",
+      "workspaceId": "quantum",
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Sonia Patel",
-        "isAI": true
-      }
+      "assignee": { "name": "Zara Patel", "isAI": true }
     },
     {
-      "id": "AD-302",
-      "title": "Add CSV export to analytics reports",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
+      "id": "UT-015",
+      "title": "Eval harness v2 with video replay",
+      "projectName": "Cortex Perception",
+      "workspaceId": "quantum",
+      "status": "EXECUTING",
+      "priority": "MEDIUM",
+      "type": "INFRA",
+      "assignee": { "name": "Fatima Al-Rashid", "isAI": true }
+    },
+    {
+      "id": "UT-016",
+      "title": "Low-light perception fine-tune",
+      "projectName": "Cortex Perception",
+      "workspaceId": "quantum",
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
+      "assignee": { "name": "David Kim", "isAI": true }
     },
     {
-      "id": "AD-303",
-      "title": "Build rule-based routing configuration UI",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
-      "status": "BACKLOG",
-      "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Priya Sharma",
-        "isAI": true
-      }
+      "id": "UT-017",
+      "title": "Action chunking ablation study",
+      "projectName": "Cortex Perception",
+      "workspaceId": "quantum",
+      "status": "REVIEW",
+      "priority": "LOW",
+      "type": "REFACTOR",
+      "assignee": { "name": "Zara Patel", "isAI": true }
     },
     {
-      "id": "AD-304",
-      "title": "Integrate Stripe billing portal",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
+      "id": "UT-018",
+      "title": "Research paper outline draft",
+      "projectName": "Cortex Perception",
+      "workspaceId": "quantum",
+      "status": "MERGED",
+      "priority": "LOW",
+      "type": "INFRA",
+      "assignee": { "name": "Zara Patel", "isAI": true }
+    },
+    {
+      "id": "UT-019",
+      "title": "Cycle life prediction model",
+      "projectName": "Pulse Battery",
+      "workspaceId": "quantum",
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Marcus Webb",
-        "isAI": true
-      }
+      "assignee": { "name": "Rafael Santos", "isAI": true }
     },
     {
-      "id": "AD-305",
-      "title": "Fix timezone handling in report scheduler",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
-      "status": "MERGED",
+      "id": "UT-020",
+      "title": "Cell supplier qualification batch 3",
+      "projectName": "Pulse Battery",
+      "workspaceId": "quantum",
+      "status": "BACKLOG",
       "priority": "MEDIUM",
-      "type": "BUG",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
+      "type": "INFRA",
+      "assignee": { "name": "Priya Sharma", "isAI": true }
     },
     {
-      "id": "AD-306",
-      "title": "Add role-based access control",
-      "projectName": "Admin Dashboard",
-      "workspaceId": "admin",
+      "id": "UT-021",
+      "title": "Thermal runaway mitigation study",
+      "projectName": "Pulse Battery",
+      "workspaceId": "quantum",
       "status": "REVIEW",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Noah Chen",
-        "isAI": false
-      }
+      "assignee": { "name": "Rafael Santos", "isAI": true }
     },
     {
-      "id": "MB-401",
-      "title": "Implement push notification handling",
-      "projectName": "Mobile SDK",
-      "workspaceId": "mobile",
+      "id": "UT-022",
+      "title": "Charging curve simulator",
+      "projectName": "Pulse Battery",
+      "workspaceId": "quantum",
+      "status": "MERGED",
+      "priority": "LOW",
+      "type": "FEATURE",
+      "assignee": { "name": "Rafael Santos", "isAI": true }
+    },
+    {
+      "id": "UT-023",
+      "title": "Site survey mobile app",
+      "projectName": "Vanguard Field",
+      "workspaceId": "field",
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": {
-        "name": "Sonia Patel",
-        "isAI": true
-      }
+      "assignee": { "name": "James Okafor", "isAI": true }
     },
     {
-      "id": "MB-402",
-      "title": "Add offline message queue",
-      "projectName": "Mobile SDK",
-      "workspaceId": "mobile",
+      "id": "UT-024",
+      "title": "Install kit checklist v2",
+      "projectName": "Vanguard Field",
+      "workspaceId": "field",
       "status": "BACKLOG",
-      "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Priya Sharma",
-        "isAI": true
-      }
-    },
-    {
-      "id": "MB-403",
-      "title": "iOS safe area layout fixes",
-      "projectName": "Mobile SDK",
-      "workspaceId": "mobile",
-      "status": "MERGED",
-      "priority": "MEDIUM",
-      "type": "BUG",
-      "assignee": {
-        "name": "Sonia Patel",
-        "isAI": true
-      }
-    },
-    {
-      "id": "MB-404",
-      "title": "Add biometric authentication",
-      "projectName": "Mobile SDK",
-      "workspaceId": "mobile",
-      "status": "TODO",
-      "priority": "MEDIUM",
-      "type": "FEATURE",
-      "assignee": {
-        "name": "Noah Chen",
-        "isAI": false
-      }
-    },
-    {
-      "id": "MB-405",
-      "title": "Reduce SDK initialization time",
-      "projectName": "Mobile SDK",
-      "workspaceId": "mobile",
-      "status": "EXECUTING",
       "priority": "MEDIUM",
       "type": "REFACTOR",
-      "assignee": {
-        "name": "James Liu",
-        "isAI": true
-      }
+      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+    },
+    {
+      "id": "UT-025",
+      "title": "Remote diagnostics API",
+      "projectName": "Vanguard Field",
+      "workspaceId": "field",
+      "status": "EXECUTING",
+      "priority": "HIGH",
+      "type": "INFRA",
+      "assignee": { "name": "James Okafor", "isAI": true }
+    },
+    {
+      "id": "UT-026",
+      "title": "On-call rotation playbook",
+      "projectName": "Vanguard Field",
+      "workspaceId": "field",
+      "status": "REVIEW",
+      "priority": "MEDIUM",
+      "type": "INFRA",
+      "assignee": { "name": "James Okafor", "isAI": true }
+    },
+    {
+      "id": "UT-027",
+      "title": "Pilot site readiness report",
+      "projectName": "Vanguard Field",
+      "workspaceId": "field",
+      "status": "MERGED",
+      "priority": "LOW",
+      "type": "INFRA",
+      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+    },
+    {
+      "id": "UT-028",
+      "title": "Self-serve onboarding wizard",
+      "projectName": "Helios Onboarding",
+      "workspaceId": "cs",
+      "status": "EXECUTING",
+      "priority": "HIGH",
+      "type": "FEATURE",
+      "assignee": { "name": "Luna Park", "isAI": true }
+    },
+    {
+      "id": "UT-029",
+      "title": "Proactive alert playbook",
+      "projectName": "Helios Onboarding",
+      "workspaceId": "cs",
+      "status": "BACKLOG",
+      "priority": "MEDIUM",
+      "type": "INFRA",
+      "assignee": { "name": "Amelia Foster", "isAI": true }
+    },
+    {
+      "id": "UT-030",
+      "title": "Knowledge base article refresh",
+      "projectName": "Helios Onboarding",
+      "workspaceId": "cs",
+      "status": "REVIEW",
+      "priority": "LOW",
+      "type": "REFACTOR",
+      "assignee": { "name": "Fatima Al-Rashid", "isAI": true }
+    },
+    {
+      "id": "UT-031",
+      "title": "Customer activation dashboard",
+      "projectName": "Helios Onboarding",
+      "workspaceId": "cs",
+      "status": "MERGED",
+      "priority": "LOW",
+      "type": "FEATURE",
+      "assignee": { "name": "Luna Park", "isAI": true }
     }
   ],
   "agents": [
     {
-      "id": "agent-ava",
-      "name": "Ava Chen",
-      "role": "Frontend Engineer",
+      "id": "agent-elena",
+      "name": "Elena Rodriguez",
+      "role": "Robotics Engineer",
       "status": "EXECUTING",
-      "activeTask": "Implementing dark mode tokens for widget SDK",
-      "uptime": "1h 48m"
+      "activeTask": "Calibrating ankle torque controller on Atlas pilot unit 17",
+      "uptime": "47h 12m"
     },
     {
       "id": "agent-marcus",
       "name": "Marcus Webb",
-      "role": "Backend Engineer",
-      "status": "COMPILING",
-      "activeTask": "Reviewing Stripe webhook handler",
-      "uptime": "3h 12m"
+      "role": "ML Engineer",
+      "status": "EXECUTING",
+      "activeTask": "Building cycle-life prediction model for Pulse Battery",
+      "uptime": "23h 04m"
     },
     {
       "id": "agent-priya",
       "name": "Priya Sharma",
-      "role": "API Engineer",
-      "status": "EXECUTING",
-      "activeTask": "Calibrating intent classifier thresholds",
-      "uptime": "2h 55m"
-    },
-    {
-      "id": "agent-james",
-      "name": "James Liu",
-      "role": "Frontend Engineer",
-      "status": "EXECUTING",
-      "activeTask": "Profiling SDK initialization bundle",
-      "uptime": "0h 42m"
-    },
-    {
-      "id": "agent-sonia",
-      "name": "Sonia Patel",
-      "role": "Design Engineer",
-      "status": "EXECUTING",
-      "activeTask": "Testing APNS certificate on staging",
-      "uptime": "4h 08m"
-    },
-    {
-      "id": "agent-elena",
-      "name": "Elena Rodriguez",
-      "role": "DevOps Engineer",
-      "status": "EXECUTING",
-      "activeTask": "Investigating p99 latency regression",
-      "uptime": "1h 22m"
+      "role": "DevOps Lead",
+      "status": "COMPILING",
+      "activeTask": "OTA firmware signing pipeline compilation",
+      "uptime": "12h 50m"
     },
     {
       "id": "agent-david",
       "name": "David Kim",
-      "role": "ML Engineer",
+      "role": "Perception Engineer",
       "status": "EXECUTING",
-      "activeTask": "Retraining classifier on billing intents",
-      "uptime": "3h 45m"
-    },
-    {
-      "id": "agent-fatima",
-      "name": "Fatima Al-Hassan",
-      "role": "Product Manager",
-      "status": "AWAITING_HUMAN",
-      "activeTask": "Reviewing SLA metric definitions with Priya",
-      "uptime": "0h 30m"
+      "activeTask": "Running vision-language-action benchmark sweep",
+      "uptime": "31h 18m"
     },
     {
       "id": "agent-noah",
       "name": "Noah Chen",
-      "role": "Security Engineer",
+      "role": "Fleet Coordinator",
+      "status": "AWAITING_HUMAN",
+      "activeTask": "Awaiting security sign-off on fleet API auth scheme",
+      "uptime": "8h 22m"
+    },
+    {
+      "id": "agent-fatima",
+      "name": "Fatima Al-Rashid",
+      "role": "QA Engineer",
+      "status": "IDLE",
+      "activeTask": "Idle — next: HL-103 KB review",
+      "uptime": "4h 11m"
+    },
+    {
+      "id": "agent-james",
+      "name": "James Okafor",
+      "role": "Field Engineer",
+      "status": "EXECUTING",
+      "activeTask": "Offline-first sync testing at Memphis pilot",
+      "uptime": "19h 45m"
+    },
+    {
+      "id": "agent-luna",
+      "name": "Luna Park",
+      "role": "Customer Success Lead",
+      "status": "EXECUTING",
+      "activeTask": "Tuning self-serve onboarding wizard flow",
+      "uptime": "27h 33m"
+    },
+    {
+      "id": "agent-rafael",
+      "name": "Rafael Santos",
+      "role": "Hardware Engineer",
       "status": "COMPILING",
-      "activeTask": "Designing RBAC schema for Admin Dashboard",
-      "uptime": "2h 17m"
+      "activeTask": "Cycle life prediction model v4 training job",
+      "uptime": "15h 02m"
+    },
+    {
+      "id": "agent-zara",
+      "name": "Zara Patel",
+      "role": "Research Scientist",
+      "status": "IDLE",
+      "activeTask": "Idle — next: CX-104 ablation review",
+      "uptime": "3h 47m"
+    },
+    {
+      "id": "agent-takeshi",
+      "name": "Takeshi Yamamoto",
+      "role": "Security Engineer",
+      "status": "ERROR_LOOP",
+      "activeTask": "Recovering from auth interceptor rate-limit spike",
+      "uptime": "1h 08m"
+    },
+    {
+      "id": "agent-amelia",
+      "name": "Amelia Foster",
+      "role": "Product Manager",
+      "status": "AWAITING_HUMAN",
+      "activeTask": "Awaiting stakeholder input on alert taxonomy",
+      "uptime": "6h 19m"
     }
   ],
   "telemetry": {
-    "agent-ava": {
-      "contextSaturation": 72,
-      "tokensPerSecond": 188,
-      "currentCost": 0.0312,
-      "evolutionLoop": "34/100",
-      "logicKernelIntegrity": 96,
-      "sessionCost": 1.87,
-      "budget": 5
+    "agent-elena": {
+      "contextSaturation": 0.62,
+      "tokensPerSecond": 142,
+      "currentCost": 4.21,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.987,
+      "sessionCost": 38.74,
+      "budget": 80
     },
     "agent-marcus": {
-      "contextSaturation": 58,
-      "tokensPerSecond": 94,
-      "currentCost": 0.0189,
-      "evolutionLoop": "21/100",
-      "logicKernelIntegrity": 88,
-      "sessionCost": 0.94,
-      "budget": 5
+      "contextSaturation": 0.78,
+      "tokensPerSecond": 198,
+      "currentCost": 7.89,
+      "evolutionLoop": "v3.4.0",
+      "logicKernelIntegrity": 0.972,
+      "sessionCost": 52.10,
+      "budget": 80
     },
     "agent-priya": {
-      "contextSaturation": 65,
-      "tokensPerSecond": 210,
-      "currentCost": 0.0441,
-      "evolutionLoop": "18/100",
-      "logicKernelIntegrity": 100,
-      "sessionCost": 2.31,
-      "budget": 8
-    },
-    "agent-james": {
-      "contextSaturation": 41,
-      "tokensPerSecond": 133,
-      "currentCost": 0.0098,
-      "evolutionLoop": "12/100",
-      "logicKernelIntegrity": 99,
-      "sessionCost": 0.44,
-      "budget": 5
-    },
-    "agent-sonia": {
-      "contextSaturation": 83,
-      "tokensPerSecond": 167,
-      "currentCost": 0.0276,
-      "evolutionLoop": "28/100",
-      "logicKernelIntegrity": 92,
-      "sessionCost": 1.63,
-      "budget": 6
-    },
-    "agent-elena": {
-      "contextSaturation": 54,
-      "tokensPerSecond": 78,
-      "currentCost": 0.0521,
-      "evolutionLoop": "9/100",
-      "logicKernelIntegrity": 87,
-      "sessionCost": 3.12,
-      "budget": 8
+      "contextSaturation": 0.41,
+      "tokensPerSecond": 88,
+      "currentCost": 2.34,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.994,
+      "sessionCost": 19.55,
+      "budget": 60
     },
     "agent-david": {
-      "contextSaturation": 91,
-      "tokensPerSecond": 44,
-      "currentCost": 0.0893,
-      "evolutionLoop": "15/100",
-      "logicKernelIntegrity": 94,
-      "sessionCost": 5.43,
-      "budget": 10
-    },
-    "agent-fatima": {
-      "contextSaturation": 18,
-      "tokensPerSecond": 12,
-      "currentCost": 0.0011,
-      "evolutionLoop": "3/100",
-      "logicKernelIntegrity": 100,
-      "sessionCost": 0.08,
-      "budget": 2
+      "contextSaturation": 0.83,
+      "tokensPerSecond": 211,
+      "currentCost": 8.62,
+      "evolutionLoop": "v3.4.1",
+      "logicKernelIntegrity": 0.968,
+      "sessionCost": 61.22,
+      "budget": 80
     },
     "agent-noah": {
-      "contextSaturation": 47,
+      "contextSaturation": 0.35,
+      "tokensPerSecond": 72,
+      "currentCost": 1.89,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.991,
+      "sessionCost": 14.40,
+      "budget": 60
+    },
+    "agent-fatima": {
+      "contextSaturation": 0.18,
+      "tokensPerSecond": 41,
+      "currentCost": 0.92,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.998,
+      "sessionCost": 7.20,
+      "budget": 60
+    },
+    "agent-james": {
+      "contextSaturation": 0.55,
+      "tokensPerSecond": 124,
+      "currentCost": 3.74,
+      "evolutionLoop": "v3.4.1",
+      "logicKernelIntegrity": 0.985,
+      "sessionCost": 32.18,
+      "budget": 80
+    },
+    "agent-luna": {
+      "contextSaturation": 0.48,
+      "tokensPerSecond": 109,
+      "currentCost": 2.95,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.989,
+      "sessionCost": 26.07,
+      "budget": 60
+    },
+    "agent-rafael": {
+      "contextSaturation": 0.71,
+      "tokensPerSecond": 167,
+      "currentCost": 6.04,
+      "evolutionLoop": "v3.4.0",
+      "logicKernelIntegrity": 0.974,
+      "sessionCost": 44.83,
+      "budget": 80
+    },
+    "agent-zara": {
+      "contextSaturation": 0.22,
+      "tokensPerSecond": 53,
+      "currentCost": 1.18,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.996,
+      "sessionCost": 9.62,
+      "budget": 60
+    },
+    "agent-takeshi": {
+      "contextSaturation": 0.91,
+      "tokensPerSecond": 247,
+      "currentCost": 11.32,
+      "evolutionLoop": "v3.4.0",
+      "logicKernelIntegrity": 0.821,
+      "sessionCost": 78.45,
+      "budget": 60
+    },
+    "agent-amelia": {
+      "contextSaturation": 0.29,
       "tokensPerSecond": 61,
-      "currentCost": 0.0144,
-      "evolutionLoop": "7/100",
-      "logicKernelIntegrity": 98,
-      "sessionCost": 0.77,
-      "budget": 6
+      "currentCost": 1.42,
+      "evolutionLoop": "v3.4.2",
+      "logicKernelIntegrity": 0.993,
+      "sessionCost": 11.78,
+      "budget": 60
     }
   },
   "permissions": {
-    "agent-ava": {
-      "modelEngine": "Opus 4.8",
+    "agent-elena": {
+      "modelEngine": "opus-4.1",
       "writeAccess": true,
       "commitAuthority": "REVIEW_ONLY",
-      "maxTokens": 8192,
+      "maxTokens": 16384,
       "writeMessages": true,
-      "installDeps": false
+      "installDeps": true
     },
     "agent-marcus": {
-      "modelEngine": "Opus 4.8",
+      "modelEngine": "opus-4.1",
       "writeAccess": true,
-      "commitAuthority": "AUTO_MERGE",
-      "maxTokens": 8192,
+      "commitAuthority": "REVIEW_ONLY",
+      "maxTokens": 16384,
       "writeMessages": true,
       "installDeps": true
     },
     "agent-priya": {
-      "modelEngine": "Sonnet",
-      "writeAccess": false,
-      "commitAuthority": "REVIEW_ONLY",
-      "maxTokens": 4096,
-      "writeMessages": false,
-      "installDeps": false
-    },
-    "agent-james": {
-      "modelEngine": "Claude",
-      "writeAccess": false,
-      "commitAuthority": "DIRECT_MAIN",
-      "maxTokens": 16384,
-      "writeMessages": false,
-      "installDeps": false
-    },
-    "agent-sonia": {
-      "modelEngine": "Codex",
-      "writeAccess": false,
-      "commitAuthority": "AUTO_MERGE",
-      "maxTokens": 8192,
-      "writeMessages": true,
-      "installDeps": true
-    },
-    "agent-elena": {
-      "modelEngine": "Sonnet",
+      "modelEngine": "sonnet-4.5",
       "writeAccess": true,
-      "commitAuthority": "DIRECT_MAIN",
+      "commitAuthority": "AUTO_MERGE",
       "maxTokens": 8192,
       "writeMessages": true,
       "installDeps": true
     },
     "agent-david": {
-      "modelEngine": "Opus 4.8",
-      "writeAccess": false,
+      "modelEngine": "opus-4.1",
+      "writeAccess": true,
       "commitAuthority": "REVIEW_ONLY",
       "maxTokens": 16384,
-      "writeMessages": false,
+      "writeMessages": true,
+      "installDeps": false
+    },
+    "agent-noah": {
+      "modelEngine": "sonnet-4.5",
+      "writeAccess": true,
+      "commitAuthority": "REVIEW_ONLY",
+      "maxTokens": 8192,
+      "writeMessages": true,
       "installDeps": false
     },
     "agent-fatima": {
-      "modelEngine": "Claude",
+      "modelEngine": "haiku-4.5",
       "writeAccess": false,
       "commitAuthority": "REVIEW_ONLY",
       "maxTokens": 4096,
       "writeMessages": true,
       "installDeps": false
     },
-    "agent-noah": {
-      "modelEngine": "Opus 4.8",
+    "agent-james": {
+      "modelEngine": "sonnet-4.5",
       "writeAccess": true,
       "commitAuthority": "REVIEW_ONLY",
       "maxTokens": 8192,
+      "writeMessages": true,
+      "installDeps": true
+    },
+    "agent-luna": {
+      "modelEngine": "sonnet-4.5",
+      "writeAccess": true,
+      "commitAuthority": "AUTO_MERGE",
+      "maxTokens": 8192,
+      "writeMessages": true,
+      "installDeps": true
+    },
+    "agent-rafael": {
+      "modelEngine": "opus-4.1",
+      "writeAccess": true,
+      "commitAuthority": "REVIEW_ONLY",
+      "maxTokens": 16384,
+      "writeMessages": true,
+      "installDeps": true
+    },
+    "agent-zara": {
+      "modelEngine": "opus-4.1",
+      "writeAccess": false,
+      "commitAuthority": "REVIEW_ONLY",
+      "maxTokens": 16384,
+      "writeMessages": true,
+      "installDeps": false
+    },
+    "agent-takeshi": {
+      "modelEngine": "sonnet-4.5",
+      "writeAccess": true,
+      "commitAuthority": "DIRECT_MAIN",
+      "maxTokens": 8192,
+      "writeMessages": true,
+      "installDeps": true
+    },
+    "agent-amelia": {
+      "modelEngine": "haiku-4.5",
+      "writeAccess": false,
+      "commitAuthority": "REVIEW_ONLY",
+      "maxTokens": 4096,
       "writeMessages": true,
       "installDeps": false
     }
   },
   "actionLogs": {
-    "agent-ava": [
-      {
-        "time": "12:34",
-        "action": "Built dark mode token map — 48 tokens across surface"
-      },
-      {
-        "time": "12:28",
-        "action": "Ran tree-shake analysis on widget bundle — saved 18kb"
-      },
-      {
-        "time": "12:10",
-        "action": "Fixed keyboard trap in modal — tab cycle now exits correctly"
-      }
+    "agent-elena": [
+      { "time": "09:14", "action": "Pushed branch ankle-torque-v2" },
+      { "time": "08:55", "action": "Reviewed PR #482 (firmware signing)" },
+      { "time": "08:02", "action": "Calibrated pilot unit 17" },
+      { "time": "07:33", "action": "Pulled main" }
     ],
     "agent-marcus": [
-      {
-        "time": "12:41",
-        "action": "Reviewing Stripe webhook signature verification"
-      },
-      {
-        "time": "12:30",
-        "action": "Merged PR #388 — Postgres 16 migration rollback"
-      },
-      {
-        "time": "12:15",
-        "action": "Spun up Stripe test webhook tunnel"
-      }
+      { "time": "08:45", "action": "Approved PR #477 (slam-lowlight)" },
+      { "time": "07:10", "action": "Queued PL-101 training run v4" },
+      { "time": "06:50", "action": "Closed ticket AT-104 thermal model v3" },
+      { "time": "06:22", "action": "Updated CX-104 ablation results table" }
     ],
     "agent-priya": [
-      {
-        "time": "12:38",
-        "action": "Adjusted confidence threshold for 'billing' intents — +7% precision"
-      },
-      {
-        "time": "12:20",
-        "action": "Indexed new knowledge base articles — 1,240 chunks embedded"
-      },
-      {
-        "time": "11:55",
-        "action": "Profiled vector DB query path — p99 340ms at full load"
-      }
-    ],
-    "agent-james": [
-      {
-        "time": "12:44",
-        "action": "Bundle splitting config added — lazy-loading non-critical modules"
-      },
-      {
-        "time": "12:15",
-        "action": "Notion rich text → widget schema mapping written"
-      },
-      {
-        "time": "11:50",
-        "action": "Fixed CSS `contain` property conflict with host page"
-      }
-    ],
-    "agent-sonia": [
-      {
-        "time": "12:40",
-        "action": "APNS sandbox cert uploaded — push payload testing in progress"
-      },
-      {
-        "time": "12:20",
-        "action": "Iterated on z-index portal approach — 3rd draft reviewed"
-      },
-      {
-        "time": "11:45",
-        "action": "Published agent performance table redesign to Figma"
-      }
-    ],
-    "agent-elena": [
-      {
-        "time": "12:35",
-        "action": "Correlated p99 spike with embedding queue backpressure"
-      },
-      {
-        "time": "12:10",
-        "action": "Deployed canary for VL-101 fix — monitoring p99 at 50k rpm"
-      },
-      {
-        "time": "11:40",
-        "action": "Wrote runbook for latency escalation — shared with Priya"
-      }
+      { "time": "08:02", "action": "Marked BC-104 blocked on security review" },
+      { "time": "07:55", "action": "Triggered OTA signing pipeline build" },
+      { "time": "07:30", "action": "Updated Prometheus exporter config" },
+      { "time": "07:00", "action": "Merged auto-merge: AT-108 staging deploy" }
     ],
     "agent-david": [
-      {
-        "time": "12:30",
-        "action": "Retraining on billing intent class — 8k new samples added"
-      },
-      {
-        "time": "12:00",
-        "action": "Evaluated classifier on holdout set — F1 0.94 (up from 0.89)"
-      },
-      {
-        "time": "11:30",
-        "action": "Benchmarked model quantization — 40% latency reduction achieved"
-      }
-    ],
-    "agent-fatima": [
-      {
-        "time": "12:00",
-        "action": "Compiled SLA definitions doc — 5 tier structure proposed"
-      },
-      {
-        "time": "11:30",
-        "action": "Reviewed sprint burn-down with engineering leads"
-      },
-      {
-        "time": "10:50",
-        "action": "Prioritized backlog — 12 items deprioritized for Q3"
-      }
+      { "time": "09:14", "action": "Rolled out AT-106 to 10% shadow" },
+      { "time": "08:50", "action": "Started CX-103 low-light fine-tune v2" },
+      { "time": "08:20", "action": "Reviewed vision-language-action sweep results" },
+      { "time": "07:45", "action": "Posted experiment summary to channel" }
     ],
     "agent-noah": [
-      {
-        "time": "12:18",
-        "action": "Drafted RBAC hierarchy: org → team → agent → viewer"
-      },
-      {
-        "time": "11:55",
-        "action": "Ran static analysis on OAuth PKCE implementation — no findings"
-      },
-      {
-        "time": "11:20",
-        "action": "Wrote threat model for widget embed CSP headers"
-      }
+      { "time": "07:33", "action": "Shipped BC-101 raft heartbeat patch" },
+      { "time": "06:18", "action": "Queued delta-encoded SLAM experiment" },
+      { "time": "05:55", "action": "Flagged auth blocker for BC-104" },
+      { "time": "05:30", "action": "Pulled main, rebased BC-102" }
+    ],
+    "agent-fatima": [
+      { "time": "08:00", "action": "Closed ticket HL-103 KB refresh" },
+      { "time": "07:30", "action": "Pushed CX-102 eval harness PR" },
+      { "time": "07:00", "action": "Updated HL-103 tag taxonomy" },
+      { "time": "06:30", "action": "Restarted eval harness sandbox" }
+    ],
+    "agent-james": [
+      { "time": "07:50", "action": "Shipped VG-101 offline-first sync" },
+      { "time": "07:00", "action": "Queued VG-103 Prometheus request" },
+      { "time": "06:30", "action": "Confirmed Memphis and Austin shifts" },
+      { "time": "06:00", "action": "Closed VG-105 pilot site readiness" }
+    ],
+    "agent-luna": [
+      { "time": "07:50", "action": "Posted HL-101 conversion metric (84%)" },
+      { "time": "06:42", "action": "Shipped HL-104 activation dashboard" },
+      { "time": "06:10", "action": "Updated HL-101 wizard copy" },
+      { "time": "05:30", "action": "Triaged support queue" }
+    ],
+    "agent-rafael": [
+      { "time": "06:50", "action": "Queued PL-101 cycle life model v4" },
+      { "time": "06:00", "action": "Shared PL-103 thermal data with Marcus" },
+      { "time": "05:30", "action": "Calibrated LabVIEW for batch 3" },
+      { "time": "05:00", "action": "Closed PL-104 charging curve simulator" }
+    ],
+    "agent-zara": [
+      { "time": "08:45", "action": "Posted CX-101 cloth set results (78%)" },
+      { "time": "07:30", "action": "Drafted CX-105 paper outline" },
+      { "time": "06:30", "action": "Reviewed CX-102 eval harness" },
+      { "time": "06:00", "action": "Started CX-104 ablation sweep" }
+    ],
+    "agent-takeshi": [
+      { "time": "07:55", "action": "Recovered from auth interceptor rate-limit spike" },
+      { "time": "07:00", "action": "Diagnosed BC-104 WebSocket endpoint issue" },
+      { "time": "06:15", "action": "Closed BC-104 fleet API security review" },
+      { "time": "05:45", "action": "Pulled main" }
+    ],
+    "agent-amelia": [
+      { "time": "07:00", "action": "Requested HL-102 alert taxonomy input" },
+      { "time": "06:15", "action": "Drafted HL-102 alert playbook" },
+      { "time": "05:45", "action": "Reviewed HL-101 wizard copy" },
+      { "time": "05:15", "action": "Pulled main" }
     ]
   },
   "nextSteps": {
-    "agent-ava": "Next — Apply dark mode tokens to widget iframe container",
-    "agent-marcus": "Next — Land Stripe webhook PR after Noah's sign-off",
-    "agent-priya": "Next — Validate VL-102 on staging with live traffic replay",
-    "agent-james": "Next — Measure SDK init delta after lazy-load split",
-    "agent-sonia": "Next — Test push payload on physical iPhone 15 device",
-    "agent-elena": "Next — Roll VL-101 fix to 10% if p99 holds below 800ms",
-    "agent-david": "Next — Run VL-102 classifier against production shadow traffic",
-    "agent-fatima": "Next — Circulate SLA doc for final sign-off by EOD",
-    "agent-noah": "Next — Present RBAC schema to Marcus and James by 14:00"
+    "agent-elena": "Next — Wait for Marcus's thermal threshold check on ankle-torque-v2",
+    "agent-marcus": "Next — Land AT-106 review once shadow data clears 24h window",
+    "agent-priya": "Next — Unblock BC-104 once Takeshi signs off on key rotation",
+    "agent-david": "Next — Promote CX-103 low-light fine-tune once v2 plateau lands",
+    "agent-noah": "Next — Sync with Priya on auth scheme once security signs off",
+    "agent-fatima": "Next — Rest then start CX-102 eval harness review",
+    "agent-james": "Next — Drive Memphis pilot through VG-101 install sequence",
+    "agent-luna": "Next — A/B test HL-101 wizard copy against control",
+    "agent-rafael": "Next — Compare PL-101 v4 against v3 once training completes",
+    "agent-zara": "Next — Wrap CX-104 ablation and update paper outline",
+    "agent-takeshi": "Next — Recover from error loop, then resume BC-104 audit",
+    "agent-amelia": "Next — Consolidate alert taxonomy feedback from James and Luna"
   },
   "auditItems": [
     {
-      "id": "audit-1",
+      "id": "audit-001",
       "type": "AUTH_INTERCEPT",
-      "title": "Agent requests elevated write scope",
-      "description": "Priya Sharma is requesting temporary write access to the intent classifier config. Needed to update threshold during VL-102 calibration.",
-      "timestamp": "3m ago"
+      "title": "Auth interceptor flagged elevated scope on agent-takeshi",
+      "description": "Takeshi's session requested elevated scope for fleet API key rotation. Awaiting human approval before proceeding.",
+      "timestamp": "2026-06-28T08:42:00Z"
     },
     {
-      "id": "audit-2",
+      "id": "audit-002",
       "type": "DIFF_REVIEW",
-      "title": "Embedding pipeline optimization",
-      "description": "+23% throughput improvement on vector embedding pipeline. Caching layer added. Ready for integration review.",
-      "timestamp": "7m ago"
+      "title": "PR #482 — OTA firmware signing pipeline",
+      "description": "Marcus needs to review the signing key rotation logic before merge. Touches prod security boundary.",
+      "timestamp": "2026-06-28T07:55:00Z"
     },
     {
-      "id": "audit-3",
-      "type": "DIFF_REVIEW",
-      "title": "Widget bundle size reduction — phase 1",
-      "description": "Tree-shaking and lazy-loading reduced widget from 62kb → 38kb gzipped. Phase 2 targeting 28kb.",
-      "timestamp": "15m ago"
-    },
-    {
-      "id": "audit-4",
+      "id": "audit-003",
       "type": "AUTH_INTERCEPT",
-      "title": "Production DB write — RBAC bypass",
-      "description": "Elena Rodriguez attempting direct writes to prod ticket_routing table. Suspected misconfiguration in RBAC enforcement.",
-      "timestamp": "1m ago"
+      "title": "Cross-workspace write attempt on agent-priya",
+      "description": "Priya tried to write to a Quantum Labs resource from Acme Robotics session. Confirm intent before continuing.",
+      "timestamp": "2026-06-28T07:11:00Z"
     },
     {
-      "id": "audit-5",
+      "id": "audit-004",
       "type": "DIFF_REVIEW",
-      "title": "Admin RBAC schema v1",
-      "description": "Org → Team → Agent hierarchy with 4 permission tiers. Security-reviewed. Ready for engineering sign-off.",
-      "timestamp": "22m ago"
+      "title": "PR #485 — Fleet dashboard WebSocket rewrite",
+      "description": "James's WebSocket rewrite changes the wire protocol. Needs review from Noah before merge.",
+      "timestamp": "2026-06-27T22:30:00Z"
+    },
+    {
+      "id": "audit-005",
+      "type": "AUTH_INTERCEPT",
+      "title": "Dependency install requested by agent-david",
+      "description": "David asked to install a new vision-language-action dependency. Approve or deny.",
+      "timestamp": "2026-06-27T18:08:00Z"
+    },
+    {
+      "id": "audit-006",
+      "type": "DIFF_REVIEW",
+      "title": "PR #477 — SLAM under low light",
+      "description": "David's SLAM low-light patch — already approved by Marcus, but needs final human sign-off before merge.",
+      "timestamp": "2026-06-27T15:42:00Z"
+    },
+    {
+      "id": "audit-007",
+      "type": "AUTH_INTERCEPT",
+      "title": "Direct main commit requested by agent-takeshi",
+      "description": "Takeshi is configured for DIRECT_MAIN. Confirm whether to allow this hotfix to skip review.",
+      "timestamp": "2026-06-27T11:00:00Z"
     }
   ],
   "chatThreads": [
     {
-      "id": "thread-ava-1",
-      "title": "Dark mode token audit",
-      "agentId": "agent-ava",
-      "messages": [
-        {
-          "id": "ava-msg-1",
-          "role": "user",
-          "content": "Can you audit our dark mode tokens for accessibility issues? I want to make sure we're covering contrast ratios for all interactive states.",
-          "minutesAgo": 2880
-        },
-        {
-          "id": "ava-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 412,
-          "durationMs": 2840,
-          "content": "I'll check the contrast ratios across all surface tokens.\n\n**Current state:**\n- `bg-background`: 4.2:1 (fails WCAG AA for body text)\n- `bg-card`: 4.8:1 (passes)\n\n**Interactive tokens:**\n- Primary button: 7.1:1 ✓\n- Ghost button text: 3.9:1 ✗ (fails AA)\n\n**Recommendation:**\n```css\n--bg-background: #1a1816;  /* → 4.5:1 for body text */\n```\n\nWant me to draft the PR?",
-          "minutesAgo": 2760
-        },
-        {
-          "id": "ava-msg-3",
-          "role": "user",
-          "content": "Yes, and also check the focus ring. The focus indicator on dark surfaces feels too subtle.",
-          "minutesAgo": 1440
-        },
-        {
-          "id": "ava-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 198,
-          "durationMs": 1200,
-          "content": "Focus ring is `--ring: #3a3837` — that's 2.8:1 on background. Too subtle.\n\nProposed update:\n```css\n--ring: #e07850;  /* chart-1 — 4.1:1 on dark bg */\n--ring-offset: #151110;\n```\n\nThis gives a clear terracotta focus ring that matches the brand. Width stays at 2px.",
-          "minutesAgo": 1420
-        },
-        {
-          "id": "ava-msg-5",
-          "role": "user",
-          "content": "Perfect. Ship both changes — background and focus ring. Also add a disabled state token.",
-          "minutesAgo": 120
-        },
-        {
-          "id": "ava-msg-6",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 156,
-          "durationMs": 890,
-          "content": "Done. Added:\n```css\n--disabled-opacity: 0.4;\n--disabled-text: #64748b;  /* 4.1:1 on card bg */\n```\n\nPR is up: `feat/design-tokens-002`",
-          "minutesAgo": 100
-        }
-      ],
-      "updatedAtMinutesAgo": 100
-    },
-    {
-      "id": "thread-noah-1",
-      "title": "SQLite offline queue investigation",
-      "agentId": "agent-noah",
-      "messages": [
-        {
-          "id": "noah-msg-1",
-          "role": "user",
-          "content": "We're seeing messages get dropped when the mobile app goes offline for more than 30 minutes. The queue doesn't seem to be persisting correctly.",
-          "minutesAgo": 4320
-        },
-        {
-          "id": "noah-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 340,
-          "durationMs": 2100,
-          "content": "Checked the SQLite WAL mode settings. The DB is in DELETE mode instead of WAL — this means writers block readers during checkpoint.\n\n```sql\nPRAGMA journal_mode=DELETE;  -- current\n-- should be:\nPRAGMA journal_mode=WAL;\n```\n\nWAL mode gives you reader-writer concurrency and better crash recovery. Try the migration and I'll re-run the offline durability test.",
-          "minutesAgo": 4300
-        },
-        {
-          "id": "noah-msg-3",
-          "role": "user",
-          "content": "Migration ran. What's the reconnection backoff strategy? Messages pile up on the client when offline.",
-          "minutesAgo": 180
-        },
-        {
-          "id": "noah-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 220,
-          "durationMs": 1550,
-          "content": "Current backoff is a flat 5s retry — not great. Proposed exponential backoff:\n\n```typescript\nconst baseDelay = 1000;    // 1s\nconst ceiling = 60000;     // 60s\nconst multiplier = 2;\nconst maxRetries = 8;\n```\n\nAfter 8 failures (ceiling reached), switch to dead-letter queue. Want me to implement this?",
-          "minutesAgo": 160
-        }
-      ],
-      "updatedAtMinutesAgo": 160
-    },
-    {
-      "id": "thread-elena-1",
-      "title": "Intent classifier drift report",
+      "id": "chat-elena-1",
+      "title": "Atlas launch readiness",
       "agentId": "agent-elena",
       "messages": [
-        {
-          "id": "elena-msg-1",
-          "role": "user",
-          "content": "Can you run the daily intent classifier eval? I want to check if 'billing' and 'subscription_cancelled' have drifted since last week's training data refresh.",
-          "minutesAgo": 1440
-        },
-        {
-          "id": "elena-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 388,
-          "durationMs": 3400,
-          "content": "Ran Evals batch on top 50 intent classes (12k samples).\n\n**Results:**\n| Class | F1 (prev) | F1 (now) | Delta |\n|-------|-----------|----------|-------|\n| billing | 0.91 | 0.88 | **-3pts** |\n| subscription_cancelled | 0.93 | 0.87 | **-6pts** |\n| plan_upgrade | 0.89 | 0.88 | -1pt |\n\nBoth billing classes share the 'cancel' stem — seems like a targeted data drift. I'd retrain on the last 7 days of support transcripts.",
-          "minutesAgo": 1420
-        },
-        {
-          "id": "elena-msg-3",
-          "role": "user",
-          "content": "Confirmed — billing recall fell from 0.91 to 0.88. What's causing it? Those two classes were rock solid at 0.95+ for months.",
-          "minutesAgo": 180
-        },
-        {
-          "id": "elena-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 264,
-          "durationMs": 1900,
-          "content": "Root cause: new Zendesk ticket format was introduced 10 days ago. The 'cancel' intent phrasing changed — users now say 'I want to stop being charged' instead of 'cancel subscription'. Both surface the same semantic intent but the lexical overlap is lower.\n\nFix: Add 2k labeled samples with the new phrasing to the training set. I'll curate from this week's support transcripts.",
-          "minutesAgo": 165
-        }
+        { "id": "m1", "role": "user", "content": "What's the status on the ankle torque controller?", "minutesAgo": 92 },
+        { "id": "m2", "role": "assistant", "content": "Pilot unit 17 calibrated yesterday at 78% confidence. Marcus is sanity-checking thermal thresholds before we roll the new curve to the full fleet. Should land by end of week.", "minutesAgo": 91, "model": "opus-4.1", "tokenCount": 1842, "durationMs": 4120 },
+        { "id": "m3", "role": "user", "content": "And the gripper force feedback?", "minutesAgo": 64 },
+        { "id": "m4", "role": "assistant", "content": "That's parked until ankle lands. Force feedback depends on the torque baseline. I'll pick it up Monday — likely 2-3 days of tuning.", "minutesAgo": 63, "model": "opus-4.1", "tokenCount": 962, "durationMs": 2210 }
       ],
-      "updatedAtMinutesAgo": 165
+      "updatedAtMinutesAgo": 63
     },
     {
-      "id": "thread-david-1",
-      "title": "Connection pool sizing",
-      "agentId": "agent-david",
-      "messages": [
-        {
-          "id": "david-msg-1",
-          "role": "user",
-          "content": "We're seeing p99 at 2.8s on ticket routing. Started Tuesday after the embedding pipeline change. Priya thinks it's the vector DB connection pool.",
-          "minutesAgo": 5760
-        },
-        {
-          "id": "david-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 310,
-          "durationMs": 2400,
-          "content": "That's consistent with pool exhaustion under concurrent embedding requests.\n\n**Math:**\n- Pool size: 20 connections\n- Embedding latency (cold): ~300ms\n- Peak QPS: ~340/s\n- Max concurrent: 20 × (1000/300) = 66 connections\n- Actual demand: 340 QPS\n\n**Pool is saturated.** Options:\n1. Increase pool size to 100\n2. Add PgBouncer sidecar\n3. Batch embedding requests (preferred — lowest blast radius)",
-          "minutesAgo": 5740
-        },
-        {
-          "id": "david-msg-3",
-          "role": "user",
-          "content": "Let's go with request batching. What's the batching strategy?",
-          "minutesAgo": 120
-        },
-        {
-          "id": "david-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 180,
-          "durationMs": 1300,
-          "content": "Group incoming embedding requests by customer tier:\n- Enterprise: batch of 1 (immediate)\n- Pro: batch up to 8, flush every 50ms\n- Starter: batch up to 32, flush every 200ms\n\nThis drops pool utilization by ~40% for non-enterprise tiers. Enterprise stays latency-optimized.",
-          "minutesAgo": 105
-        }
-      ],
-      "updatedAtMinutesAgo": 105
-    },
-    {
-      "id": "thread-marcus-1",
-      "title": "Admin RBAC schema review",
+      "id": "chat-marcus-1",
+      "title": "Cycle-life prediction model",
       "agentId": "agent-marcus",
       "messages": [
-        {
-          "id": "marcus-msg-1",
-          "role": "user",
-          "content": "James, can you review the Admin RBAC schema? I need sign-off before we can finalize the org → team → agent permission hierarchy.",
-          "minutesAgo": 4320
-        },
-        {
-          "id": "marcus-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 480,
-          "durationMs": 3100,
-          "content": "Reviewed. The hierarchy is sound — org owns teams, teams own agents. One issue:\n\n```sql\nALTER TABLE agent_permissions\nADD COLUMN resource_scope TEXT DEFAULT '*';\n```\n\nThis column is nullable but should be NOT NULL with DEFAULT '*' (wildcard = all resources). Right now a NULL scope could grant unintended access. Fix before merge.",
-          "minutesAgo": 4300
-        },
-        {
-          "id": "marcus-msg-3",
-          "role": "user",
-          "content": "Fixed the NOT NULL constraint. Also added a migration for existing rows. Ready for re-review.",
-          "minutesAgo": 2400
-        },
-        {
-          "id": "marcus-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 195,
-          "durationMs": 1400,
-          "content": "LGTM. Schema is clean.\n\nOne nit: add a UNIQUE constraint on (team_id, agent_id) in the team_agents join table — currently nothing prevents duplicate agent assignments.",
-          "minutesAgo": 2380
-        },
-        {
-          "id": "marcus-msg-5",
-          "role": "user",
-          "content": "Added. Migration is safe — it will reject duplicate inserts. Approved for merge?",
-          "minutesAgo": 180
-        },
-        {
-          "id": "marcus-msg-6",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 88,
-          "durationMs": 650,
-          "content": "Approved. Merge at will.",
-          "minutesAgo": 170
-        }
+        { "id": "m1", "role": "user", "content": "How's PL-101 looking?", "minutesAgo": 45 },
+        { "id": "m2", "role": "assistant", "content": "v4 is mid-training. We're seeing a 4% improvement on synthetic cycles vs v3. Real-world validation starts once the cell supplier batch 3 arrives — Priya's tracking that.", "minutesAgo": 44, "model": "opus-4.1", "tokenCount": 1512, "durationMs": 3680 },
+        { "id": "m3", "role": "user", "content": "Solid. Can you sync with Rafael on the thermal model assumptions?", "minutesAgo": 30 },
+        { "id": "m4", "role": "assistant", "content": "Already on it. He's queued the next round of thermal data for Tuesday — I'll fold it into v5.", "minutesAgo": 29, "model": "opus-4.1", "tokenCount": 712, "durationMs": 1820 }
       ],
-      "updatedAtMinutesAgo": 170
+      "updatedAtMinutesAgo": 29
     },
     {
-      "id": "thread-priya-1",
-      "title": "CSV export pipeline",
-      "agentId": "agent-priya",
+      "id": "chat-luna-1",
+      "title": "Onboarding wizard conversion",
+      "agentId": "agent-luna",
       "messages": [
-        {
-          "id": "priya-msg-1",
-          "role": "user",
-          "content": "The CSV export for analytics data is timing out for customers with > 500k rows. We need to make it streaming.",
-          "minutesAgo": 7200
-        },
-        {
-          "id": "priya-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 295,
-          "durationMs": 2200,
-          "content": "Switch to streaming writes to GCS:\n\n```python\nfrom google.cloud import storage\n\nclient = storage.Client()\nbucket = client.bucket('customer-exports')\nblob = bucket.blob(f'{customer_id}/{export_id}.csv')\n\nwith blob.open('wb', chunk_size=10 * 1024 * 1024) as f:  # 10MB chunks\n    for batch in chunked_query(rows, chunk_size=50000):\n        f.write(batch.to_csv(index=False))\n```\n\nThis avoids loading all rows into memory. Chunk size of 50k rows = ~10MB per write, well within GCS per-chunk limits.",
-          "minutesAgo": 7180
-        },
-        {
-          "id": "priya-msg-3",
-          "role": "user",
-          "content": "What's the GCS bucket retention policy? We need to make sure exports are available long enough for customers to download.",
-          "minutesAgo": 120
-        },
-        {
-          "id": "priya-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 120,
-          "durationMs": 950,
-          "content": "Current policy: 7-day rolling window, auto-deleted after. That's the compliance minimum. Happy to extend to 30 days if customers need it — just update the lifecycle rule:\n\n```bash\ngsutil lifecycle set lifecycle-config.json gs://customer-exports\n```\n\nConfig: `{ \"rule\": [{ \"action\": { \"type\": \"Delete\" }, \"condition\": { \"age\": 30 } }] }`",
-          "minutesAgo": 105
-        }
+        { "id": "m1", "role": "user", "content": "Conversion to first task?", "minutesAgo": 20 },
+        { "id": "m2", "role": "assistant", "content": "84% on the new flow, up from 67% on the legacy wizard. Main drop-off is at the workspace setup step — customers aren't sure what to pick. A/B testing simpler copy next week.", "minutesAgo": 19, "model": "sonnet-4.5", "tokenCount": 1284, "durationMs": 2940 }
       ],
-      "updatedAtMinutesAgo": 105
+      "updatedAtMinutesAgo": 19
     },
     {
-      "id": "thread-fatima-1",
-      "title": "SLA metric definitions",
-      "agentId": "agent-fatima",
+      "id": "chat-david-1",
+      "title": "Vision-language-action sweep",
+      "agentId": "agent-david",
       "messages": [
-        {
-          "id": "fatima-msg-1",
-          "role": "user",
-          "content": "We need to define SLA metrics for the enterprise tier. First response and resolution time. What are good baseline targets?",
-          "minutesAgo": 8640
-        },
-        {
-          "id": "fatima-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 380,
-          "durationMs": 2600,
-          "content": "Looking at our current p50/p95 data across enterprise customers:\n\n**First Response SLA:**\n- Pro: 4h p50, 8h p95 → propose: 4h first response, 95th percentile\n- Starter: 24h first response\n\n**Resolution SLA:**\n- Pro: 72h p50, 5d p95 → propose: 72h resolution, business days\n- Starter: 7d resolution\n\nBoth measured in business hours. Non-business-hour tickets clock starts at 9am next business day.",
-          "minutesAgo": 8620
-        },
-        {
-          "id": "fatima-msg-3",
-          "role": "user",
-          "content": "Add breach notifications. When a ticket is 1h from breaching first response SLA, send a Slack alert to the on-call rotation.",
-          "minutesAgo": 120
-        },
-        {
-          "id": "fatima-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 140,
-          "durationMs": 980,
-          "content": "Added SLA breach webhook:\n```json\n{\n  \"event\": \"sla.first_response.approaching\",\n  \"ticket_id\": \"...\",\n  \"breach_at\": \"2024-01-15T14:00:00Z\",\n  \"minutes_remaining\": 60\n}\n```\n\nAlert routing rule: route to `#eng-oncall` Slack channel when `minutes_remaining <= 60`.",
-          "minutesAgo": 100
-        }
+        { "id": "m1", "role": "user", "content": "Latest sweep numbers?", "minutesAgo": 14 },
+        { "id": "m2", "role": "assistant", "content": "Cloth set at 78%, deformable at 64%. Action chunking helps cloth more than rigid. Marcus is going to review the ablation tomorrow.", "minutesAgo": 13, "model": "opus-4.1", "tokenCount": 1042, "durationMs": 2510 },
+        { "id": "m3", "role": "user", "content": "Let's target 85% on cloth by Friday.", "minutesAgo": 10 },
+        { "id": "m4", "role": "assistant", "content": "Plan: tighter grasp priors + 2 extra fine-tune epochs. Zara will own it.", "minutesAgo": 9, "model": "opus-4.1", "tokenCount": 612, "durationMs": 1480 }
       ],
-      "updatedAtMinutesAgo": 100
+      "updatedAtMinutesAgo": 9
     },
     {
-      "id": "thread-sonia-1",
-      "title": "OAuth PKCE review",
-      "agentId": "agent-sonia",
+      "id": "chat-noah-1",
+      "title": "Leader election under flaky network",
+      "agentId": "agent-noah",
       "messages": [
-        {
-          "id": "sonia-msg-1",
-          "role": "user",
-          "content": "Noah, we need PKCE flow added to the OAuth implementation before the enterprise SSO feature ships. What's the current status?",
-          "minutesAgo": 11520
-        },
-        {
-          "id": "sonia-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 260,
-          "durationMs": 1950,
-          "content": "PKCE is on the OAuth scope list. Adding S256 challenge method now.\n\nRFC 7636 requires:\n- `code_challenge = BASE64URL(SHA256(code_verifier))`\n- `code_challenge_method = S256`\n\nThe auth server stores the hash and compares on token exchange. No code_verifier in the URL — it's sent only to the token endpoint over TLS.",
-          "minutesAgo": 11500
-        },
-        {
-          "id": "sonia-msg-3",
-          "role": "user",
-          "content": "What's the fallback when PKCE isn't supported by the client?",
-          "minutesAgo": 2400
-        },
-        {
-          "id": "sonia-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 190,
-          "durationMs": 1400,
-          "content": "Per RFC 8628, PKCE is optional for public clients but RECOMMENDED. If client doesn't send `code_challenge`, we allow it with a `security_notes` flag on the client record — it can't be used for sensitive scopes.\n\nEnterprise SSO clients must use PKCE. Regular OAuth clients (native apps, SPAs) get the fallback.",
-          "minutesAgo": 2380
-        }
+        { "id": "m1", "role": "user", "content": "Status on BC-101?", "minutesAgo": 38 },
+        { "id": "m2", "role": "assistant", "content": "Raft heartbeat dropped to 200ms. Replay tests are clean through 3 simulated leader crashes. One more sweep tomorrow, then I want James's eyes on the failover matrix.", "minutesAgo": 37, "model": "sonnet-4.5", "tokenCount": 1192, "durationMs": 2710 }
       ],
-      "updatedAtMinutesAgo": 2380
-    },
-    {
-      "id": "thread-james-1",
-      "title": "Widget bundle regression",
-      "agentId": "agent-james",
-      "messages": [
-        {
-          "id": "james-msg-1",
-          "role": "user",
-          "content": "Bundle size on the widget iframe is up 38kb since last Thursday. Can you investigate?",
-          "minutesAgo": 5040
-        },
-        {
-          "id": "james-msg-2",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 445,
-          "durationMs": 3200,
-          "content": "Found it. The rich text renderer is pulling in the entire Notion SDK:\n\n```javascript\n// Before\nimport { Client } from '@notionhq/client';\n\n// Problem: full SDK is 340kb minified\n// We only use: blocks.getBlockChildren()\n```\n\nReplaced with a targeted fetch:\n```javascript\n// After\nconst response = await fetch(\n  `https://api.notion.com/v1/blocks/${blockId}/children`,\n  { headers: { Authorization: `Bearer ${token}` } }\n);\n// ~2kb for just the endpoint we need\n```\n\nBundle impact: -34kb. CI bundle budget updated to 45kb max.",
-          "minutesAgo": 5000
-        },
-        {
-          "id": "james-msg-3",
-          "role": "user",
-          "content": "Can you also add a pre-flight bundle audit step to CI? I don't want this to regress again.",
-          "minutesAgo": 240
-        },
-        {
-          "id": "james-msg-4",
-          "role": "assistant",
-          "model": "Opus 4.8",
-          "tokenCount": 170,
-          "durationMs": 1100,
-          "content": "Done. Added to the build pipeline:\n\n```yaml\n- name: Check bundle size\n  run: |\n    BUNDLE_SIZE=$(stat -f%z dist/widget.js)\n    if [ \"$BUNDLE_SIZE\" -gt 46000 ]; then\n      echo \"Bundle exceeds budget: ${BUNDLE_SIZE}b > 45kb\"\n      exit 1\n    fi\n```\n\nFails CI with a clear error. Should I add bundle visualization to the PR comment too?",
-          "minutesAgo": 220
-        }
-      ],
-      "updatedAtMinutesAgo": 220
+      "updatedAtMinutesAgo": 37
     }
   ],
   "favorites": [
-    {
-      "id": "agent-elena",
-      "type": "agent"
-    },
-    {
-      "id": "agent-david",
-      "type": "agent"
-    },
-    {
-      "id": "proj-vela-platform",
-      "type": "project"
-    },
-    {
-      "id": "proj-widget",
-      "type": "project"
-    },
-    {
-      "id": "proj-admin",
-      "type": "project"
-    }
+    { "id": "proj-atlas", "type": "project" },
+    { "id": "proj-beacon", "type": "project" },
+    { "id": "proj-cortex", "type": "project" },
+    { "id": "agent-elena", "type": "agent" },
+    { "id": "agent-luna", "type": "agent" },
+    { "id": "agent-marcus", "type": "agent" }
   ],
   "channelMessages": [
-    {
-      "id": "cmsg-1",
-      "channelId": "vl-ch-1",
-      "senderName": "Elena Rodriguez",
-      "content": "F1 dropped 3pts on 'billing' intents. Retraining now.",
-      "timestamp": "11:42 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-2",
-      "channelId": "vl-ch-1",
-      "senderName": "David Kim",
-      "content": "Confirmed — billing class recall fell from 0.91 to 0.88. Added 2k labeled samples from this week's support tickets.",
-      "timestamp": "11:40 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-3",
-      "channelId": "vl-ch-1",
-      "senderName": "Elena Rodriguez",
-      "content": "What's the recall on 'subscription_cancelled'? That's the other drop.",
-      "timestamp": "11:38 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-4",
-      "channelId": "vl-ch-1",
-      "senderName": "David Kim",
-      "content": "0.87, down from 0.93. Both classes share 'cancel' stem. I'll run a targeted fine-tune on the pair.",
-      "timestamp": "11:36 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-5",
-      "channelId": "vl-ch-1",
-      "senderName": "Elena Rodriguez",
-      "content": "Good call. I'll set up evaluation pipeline for both classes post-finetune.",
-      "timestamp": "11:35 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-6",
-      "channelId": "vl-ch-2",
-      "senderName": "Marcus Webb",
-      "content": "Migration complete. Rolled back to Postgres 15.",
-      "timestamp": "11:20 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-7",
-      "channelId": "vl-ch-2",
-      "senderName": "Elena Rodriguez",
-      "content": "What caused the corruption?",
-      "timestamp": "11:18 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-8",
-      "channelId": "vl-ch-2",
-      "senderName": "Marcus Webb",
-      "content": "Incompatible index type on a generated column in PG16. Fixed the schema — forward migration is clean now.",
-      "timestamp": "11:15 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-9",
-      "channelId": "vl-ch-3",
-      "senderName": "Noah Chen",
-      "content": "Need PKCE flow added before I can approve the OAuth changes.",
-      "timestamp": "10:55 AM",
-      "isAI": false
-    },
-    {
-      "id": "cmsg-10",
-      "channelId": "vl-ch-3",
-      "senderName": "Marcus Webb",
-      "content": "PKCE is on the OAuth scope list. Adding S256 challenge method now.",
-      "timestamp": "10:50 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-11",
-      "channelId": "vl-ch-4",
-      "senderName": "Priya Sharma",
-      "content": "p99 is 2.8s at 50k rpm. Blame is on the vector DB.",
-      "timestamp": "10:30 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-12",
-      "channelId": "vl-ch-4",
-      "senderName": "Elena Rodriguez",
-      "content": "Connection pool saturation. Pool size is 20 — we need 100+ at that QPS. Batching embedding requests would cut pool usage by 40%.",
-      "timestamp": "10:25 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-13",
-      "channelId": "vl-ch-4",
-      "senderName": "Priya Sharma",
-      "content": "Batching in progress. Grouping by customer tier — enterprise gets priority.",
-      "timestamp": "10:20 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-14",
-      "channelId": "vl-ch-4",
-      "senderName": "Elena Rodriguez",
-      "content": "I'll deploy the batched embeds to canary. Monitor p99 for 30min.",
-      "timestamp": "10:15 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-15",
-      "channelId": "vl-ch-5",
-      "senderName": "Fatima Al-Hassan",
-      "content": "First response SLA or resolution SLA? Need both.",
-      "timestamp": "09:48 AM",
-      "isAI": false
-    },
-    {
-      "id": "cmsg-16",
-      "channelId": "vl-ch-5",
-      "senderName": "Priya Sharma",
-      "content": "Agree with both. First response: 4h for Pro, 24h for Starter. Resolution: 72h / 7d respectively.",
-      "timestamp": "09:45 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-17",
-      "channelId": "vl-ch-5",
-      "senderName": "Fatima Al-Hassan",
-      "content": "Perfect. I'll add these to the metrics dashboard as two separate SLAs.",
-      "timestamp": "09:40 AM",
-      "isAI": false
-    },
-    {
-      "id": "cmsg-18",
-      "channelId": "we-ch-1",
-      "senderName": "Ava Chen",
-      "content": "Token set uploaded to Figma. Reviewing now.",
-      "timestamp": "11:15 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-19",
-      "channelId": "we-ch-1",
-      "senderName": "Sonia Patel",
-      "content": "Ghost secondary text is failing AA on dark surfaces. #64748b on #0f172a is 3.9:1.",
-      "timestamp": "11:12 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-20",
-      "channelId": "we-ch-1",
-      "senderName": "Ava Chen",
-      "content": "Updated to #94a3b8 — that's 4.6:1. Also added ghost-tertiary at #475569 for disabled states (5.9:1).",
-      "timestamp": "11:10 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-21",
-      "channelId": "we-ch-1",
-      "senderName": "Sonia Patel",
-      "content": "Approved. Ship it.",
-      "timestamp": "11:08 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-22",
-      "channelId": "we-ch-2",
-      "senderName": "James Liu",
-      "content": "Notion API supports rich text — mapping to our schema.",
-      "timestamp": "10:50 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-23",
-      "channelId": "we-ch-2",
-      "senderName": "Ava Chen",
-      "content": "Which Notion block types are you handling first?",
-      "timestamp": "10:45 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-24",
-      "channelId": "we-ch-2",
-      "senderName": "James Liu",
-      "content": "Paragraph, heading_1-3, bulleted_list_item, numbered_list_item, code, and callout. Image and table are v2.",
-      "timestamp": "10:42 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-25",
-      "channelId": "we-ch-3",
-      "senderName": "Sonia Patel",
-      "content": "Portal approach is the cleanest. WDYT?",
-      "timestamp": "10:20 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-26",
-      "channelId": "we-ch-3",
-      "senderName": "James Liu",
-      "content": "Love it. React portal with FocusTrap and aria-modal. I've used this pattern before — very robust.",
-      "timestamp": "10:15 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-27",
-      "channelId": "we-ch-3",
-      "senderName": "Sonia Patel",
-      "content": "One concern: focus restoration when modal closes. The previous focus target might be gone by then.",
-      "timestamp": "10:12 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-28",
-      "channelId": "we-ch-3",
-      "senderName": "James Liu",
-      "content": "Store a ref to the trigger element before opening. restore focus on close if it's still in the DOM.",
-      "timestamp": "10:10 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-29",
-      "channelId": "ad-ch-1",
-      "senderName": "James Liu",
-      "content": "Streaming is working in staging. 40ms TTFT on small payloads.",
-      "timestamp": "11:45 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-30",
-      "channelId": "ad-ch-1",
-      "senderName": "Marcus Webb",
-      "content": "That's competitive with the incumbents. What's the delta at 95th percentile?",
-      "timestamp": "11:42 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-31",
-      "channelId": "ad-ch-1",
-      "senderName": "James Liu",
-      "content": "p95 is 120ms — well within SLA. Tested at 500 concurrent connections, no degradation.",
-      "timestamp": "11:40 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-32",
-      "channelId": "ad-ch-2",
-      "senderName": "Priya Sharma",
-      "content": "CSV export pipeline is streaming-ready. Writing to GCS in 10MB chunks.",
-      "timestamp": "11:30 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-33",
-      "channelId": "ad-ch-2",
-      "senderName": "James Liu",
-      "content": "What's the GCS bucket retention policy?",
-      "timestamp": "11:25 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-34",
-      "channelId": "ad-ch-2",
-      "senderName": "Priya Sharma",
-      "content": "7-day rolling window. Files are auto-deleted after. Happy to extend if compliance needs it.",
-      "timestamp": "11:22 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-35",
-      "channelId": "ad-ch-3",
-      "senderName": "Marcus Webb",
-      "content": "Need hierarchy: org → team → agent. Adding now.",
-      "timestamp": "10:10 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-36",
-      "channelId": "ad-ch-4",
-      "senderName": "Marcus Webb",
-      "content": "Webhook signed. Syncing subscription state to our DB.",
-      "timestamp": "09:30 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-37",
-      "channelId": "mb-ch-1",
-      "senderName": "Sonia Patel",
-      "content": "APNS certificate provisioned. Testing now.",
-      "timestamp": "11:00 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-38",
-      "channelId": "mb-ch-1",
-      "senderName": "James Liu",
-      "content": "I'll run the integration test suite against sandbox. Last run was clean on the widget side.",
-      "timestamp": "10:55 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-39",
-      "channelId": "mb-ch-1",
-      "senderName": "Sonia Patel",
-      "content": "Push payload format question: should we use the mutable-content flag for content-available?",
-      "timestamp": "10:50 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-40",
-      "channelId": "mb-ch-1",
-      "senderName": "James Liu",
-      "content": "Yes — mutable-content is required for background refresh. Also set content-available:1 on the alert dictionary.",
-      "timestamp": "10:48 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-41",
-      "channelId": "mb-ch-2",
-      "senderName": "Priya Sharma",
-      "content": "SQLite queue with exponential backoff on reconnect.",
-      "timestamp": "10:15 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-42",
-      "channelId": "mb-ch-2",
-      "senderName": "James Liu",
-      "content": "What's the base delay and ceiling?",
-      "timestamp": "10:10 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-43",
-      "channelId": "mb-ch-2",
-      "senderName": "Priya Sharma",
-      "content": "1s base, 60s ceiling, 2x multiplier. After 5 failures, switch to dead-letter queue.",
-      "timestamp": "10:08 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-44",
-      "channelId": "mb-ch-3",
-      "senderName": "Noah Chen",
-      "content": "Use LAContext on iOS, BiometricPrompt on Android.",
-      "timestamp": "09:40 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-45",
-      "channelId": "mb-ch-3",
-      "senderName": "Sonia Patel",
-      "content": "Fallback to passcode when biometrics fail 3 times?",
-      "timestamp": "09:35 AM",
-      "isAI": true
-    },
-    {
-      "id": "cmsg-46",
-      "channelId": "mb-ch-3",
-      "senderName": "Noah Chen",
-      "content": "Yes — standard iOS/Android fallback behavior. We're not adding custom fallback logic.",
-      "timestamp": "09:32 AM",
-      "isAI": true
-    }
+    { "id": "cm-001", "channelId": "chan-atlas-launch", "senderName": "Elena Rodriguez", "content": "PR is up — Marcus, can you sanity-check the thermal thresholds?", "timestamp": "2026-06-28T09:14:00Z", "isAI": false },
+    { "id": "cm-002", "channelId": "chan-atlas-launch", "senderName": "Marcus Webb", "content": "Looking now. The 200ms window might bite us at high torque — let me run a quick sim.", "timestamp": "2026-06-28T09:12:00Z", "isAI": false },
+    { "id": "cm-003", "channelId": "chan-atlas-launch", "senderName": "Priya Sharma", "content": "Just merged AT-108 to staging. Wizard is live for the next cohort.", "timestamp": "2026-06-27T18:30:00Z", "isAI": false },
+    { "id": "cm-004", "channelId": "chan-atlas-fw", "senderName": "Priya Sharma", "content": "Waiting on security sign-off before we can rotate keys in prod.", "timestamp": "2026-06-28T08:02:00Z", "isAI": false },
+    { "id": "cm-005", "channelId": "chan-atlas-fw", "senderName": "Takeshi Yamamoto", "content": "Reviewing the key rotation proposal now. Should have an answer within the hour.", "timestamp": "2026-06-28T07:55:00Z", "isAI": false },
+    { "id": "cm-006", "channelId": "chan-atlas-perf", "senderName": "David Kim", "content": "Shadow run looks clean — bumping to 10% rollout.", "timestamp": "2026-06-27T22:41:00Z", "isAI": false },
+    { "id": "cm-007", "channelId": "chan-atlas-perf", "senderName": "Marcus Webb", "content": "Watch the p99 closely. If we see >800ms I'll roll back.", "timestamp": "2026-06-27T22:38:00Z", "isAI": false },
+    { "id": "cm-008", "channelId": "chan-atlas-battery", "senderName": "Marcus Webb", "content": "Thermal model locked. Closing this out.", "timestamp": "2026-06-26T17:10:00Z", "isAI": false },
+    { "id": "cm-009", "channelId": "chan-atlas-battery", "senderName": "Rafael Santos", "content": "Confirmed — solid-state cells hold the line under our test profile.", "timestamp": "2026-06-26T16:55:00Z", "isAI": false },
+    { "id": "cm-010", "channelId": "chan-beacon-lead", "senderName": "Noah Chen", "content": "Switched to Raft with 200ms heartbeat — replays are clean now.", "timestamp": "2026-06-28T07:33:00Z", "isAI": false },
+    { "id": "cm-011", "channelId": "chan-beacon-lead", "senderName": "James Okafor", "content": "Field test scheduled for tomorrow — I'll bring back the failover matrix.", "timestamp": "2026-06-28T07:00:00Z", "isAI": false },
+    { "id": "cm-012", "channelId": "chan-beacon-slam", "senderName": "James Okafor", "content": "Map diff bandwidth is 12% lower with delta encoding.", "timestamp": "2026-06-27T20:15:00Z", "isAI": false },
+    { "id": "cm-013", "channelId": "chan-beacon-slam", "senderName": "David Kim", "content": "Nice. That should fit comfortably in the per-robot cache budget.", "timestamp": "2026-06-27T20:00:00Z", "isAI": false },
+    { "id": "cm-014", "channelId": "chan-beacon-sec", "senderName": "Takeshi Yamamoto", "content": "Findings shipped, recommendations merged.", "timestamp": "2026-06-25T13:00:00Z", "isAI": false },
+    { "id": "cm-015", "channelId": "chan-cortex-deform", "senderName": "Zara Patel", "content": "Diffusion policy is at 78% on the cloth set — pushing to 85% by Friday.", "timestamp": "2026-06-28T08:45:00Z", "isAI": false },
+    { "id": "cm-016", "channelId": "chan-cortex-deform", "senderName": "David Kim", "content": "Want me to queue a fine-tune tonight?", "timestamp": "2026-06-28T08:30:00Z", "isAI": false },
+    { "id": "cm-017", "channelId": "chan-cortex-eval", "senderName": "Fatima Al-Rashid", "content": "Need a second pass on the video replay pipeline before this lands.", "timestamp": "2026-06-27T19:20:00Z", "isAI": false },
+    { "id": "cm-018", "channelId": "chan-pulse-thermal", "senderName": "Rafael Santos", "content": "Solid-state cells hold the line — needs one more validation cycle.", "timestamp": "2026-06-27T16:08:00Z", "isAI": false },
+    { "id": "cm-019", "channelId": "chan-pulse-thermal", "senderName": "Marcus Webb", "content": "I'll fold the data into PL-101 v5 once you ship the validation.", "timestamp": "2026-06-27T16:00:00Z", "isAI": false },
+    { "id": "cm-020", "channelId": "chan-pulse-supplier", "senderName": "Rafael Santos", "content": "Batch 3 samples arriving Friday — need a LabVIEW calibration update.", "timestamp": "2026-06-26T14:33:00Z", "isAI": false },
+    { "id": "cm-021", "channelId": "chan-vanguard-survey", "senderName": "James Okafor", "content": "Offline-first sync landed — testing at the Memphis pilot tomorrow.", "timestamp": "2026-06-28T05:42:00Z", "isAI": false },
+    { "id": "cm-022", "channelId": "chan-vanguard-survey", "senderName": "Elena Rodriguez", "content": "Sweet. I'll ride along and capture install time metrics.", "timestamp": "2026-06-28T05:30:00Z", "isAI": false },
+    { "id": "cm-023", "channelId": "chan-vanguard-diag", "senderName": "James Okafor", "content": "Need a Prometheus exporter for the new telemetry stream.", "timestamp": "2026-06-27T18:55:00Z", "isAI": false },
+    { "id": "cm-024", "channelId": "chan-vanguard-diag", "senderName": "Priya Sharma", "content": "On it. Will have a draft exporter up by EOD.", "timestamp": "2026-06-27T18:40:00Z", "isAI": false },
+    { "id": "cm-025", "channelId": "chan-vanguard-oncall", "senderName": "Luna Park", "content": "Memphis and Austin shifts confirmed for next week.", "timestamp": "2026-06-26T12:10:00Z", "isAI": false },
+    { "id": "cm-026", "channelId": "chan-helios-wizard", "senderName": "Luna Park", "content": "Conversion to first task is at 84% on the new flow.", "timestamp": "2026-06-28T07:50:00Z", "isAI": false },
+    { "id": "cm-027", "channelId": "chan-helios-wizard", "senderName": "Amelia Foster", "content": "Workspace setup step is still the drop-off point. Looping in James on copy.", "timestamp": "2026-06-28T07:40:00Z", "isAI": false },
+    { "id": "cm-028", "channelId": "chan-helios-alerts", "senderName": "Amelia Foster", "content": "Need input on which field alerts are noisy vs. useful.", "timestamp": "2026-06-27T15:00:00Z", "isAI": false },
+    { "id": "cm-029", "channelId": "chan-helios-kb", "senderName": "Fatima Al-Rashid", "content": "Top 20 articles updated and re-tagged.", "timestamp": "2026-06-25T09:20:00Z", "isAI": false },
+    { "id": "cm-030", "channelId": "chan-helios-kb", "senderName": "Luna Park", "content": "Published. Will monitor search-to-resolution time over the next week.", "timestamp": "2026-06-25T09:15:00Z", "isAI": false }
   ],
   "costUsage": [
-    {
-      "date": "Jun 1",
-      "cost": 12.4
-    },
-    {
-      "date": "Jun 2",
-      "cost": 8.2
-    },
-    {
-      "date": "Jun 3",
-      "cost": 15.7
-    },
-    {
-      "date": "Jun 4",
-      "cost": 6.1
-    },
-    {
-      "date": "Jun 5",
-      "cost": 22.3
-    },
-    {
-      "date": "Jun 8",
-      "cost": 9.8
-    },
-    {
-      "date": "Jun 9",
-      "cost": 11.2
-    },
-    {
-      "date": "Jun 10",
-      "cost": 7.5
-    },
-    {
-      "date": "Jun 11",
-      "cost": 18.9
-    },
-    {
-      "date": "Jun 12",
-      "cost": 5.4
-    },
-    {
-      "date": "Jun 15",
-      "cost": 14.1
-    },
-    {
-      "date": "Jun 16",
-      "cost": 8.7
-    },
-    {
-      "date": "Jun 17",
-      "cost": 21.3
-    },
-    {
-      "date": "Jun 18",
-      "cost": 6.9
-    },
-    {
-      "date": "Jun 19",
-      "cost": 10.2
-    },
-    {
-      "date": "Jun 22",
-      "cost": 13.5
-    },
-    {
-      "date": "Jun 23",
-      "cost": 7.8
-    },
-    {
-      "date": "Jun 24",
-      "cost": 19.4
-    },
-    {
-      "date": "Jun 25",
-      "cost": 9.1
-    }
+    { "date": "May 30", "cost": 142.18 },
+    { "date": "May 31", "cost": 158.42 },
+    { "date": "Jun 1", "cost": 134.71 },
+    { "date": "Jun 2", "cost": 121.05 },
+    { "date": "Jun 3", "cost": 168.94 },
+    { "date": "Jun 4", "cost": 175.32 },
+    { "date": "Jun 5", "cost": 149.18 },
+    { "date": "Jun 6", "cost": 142.66 },
+    { "date": "Jun 7", "cost": 128.40 },
+    { "date": "Jun 8", "cost": 156.83 },
+    { "date": "Jun 9", "cost": 171.22 },
+    { "date": "Jun 10", "cost": 188.04 },
+    { "date": "Jun 11", "cost": 162.95 },
+    { "date": "Jun 12", "cost": 145.71 },
+    { "date": "Jun 13", "cost": 138.59 },
+    { "date": "Jun 14", "cost": 152.18 },
+    { "date": "Jun 15", "cost": 169.45 },
+    { "date": "Jun 16", "cost": 184.62 },
+    { "date": "Jun 17", "cost": 178.31 },
+    { "date": "Jun 18", "cost": 165.08 },
+    { "date": "Jun 19", "cost": 158.94 },
+    { "date": "Jun 20", "cost": 172.16 },
+    { "date": "Jun 21", "cost": 189.72 },
+    { "date": "Jun 22", "cost": 194.05 },
+    { "date": "Jun 23", "cost": 181.40 },
+    { "date": "Jun 24", "cost": 167.83 },
+    { "date": "Jun 25", "cost": 159.27 },
+    { "date": "Jun 26", "cost": 175.91 },
+    { "date": "Jun 27", "cost": 198.34 },
+    { "date": "Jun 28", "cost": 211.50 }
   ],
   "chatQuickStart": [
-    {
-      "icon": "layers",
-      "label": "Sprint planning",
-      "description": "Break down a sprint goal into tickets",
-      "category": "Planning"
-    },
-    {
-      "icon": "code",
-      "label": "Review this PR",
-      "description": "Analyze a pull request for issues",
-      "category": "Code"
-    },
-    {
-      "icon": "search",
-      "label": "Research competitors",
-      "description": "Compare features and pricing",
-      "category": "Research"
-    },
-    {
-      "icon": "file",
-      "label": "Write documentation",
-      "description": "Generate or update docs",
-      "category": "Docs"
-    },
-    {
-      "icon": "chart",
-      "label": "Analyze performance",
-      "description": "Review metrics and suggest improvements",
-      "category": "Analytics"
-    },
-    {
-      "icon": "bot",
-      "label": "Configure an agent",
-      "description": "Set up permissions and scope",
-      "category": "Agents"
-    }
+    { "icon": "Sparkles", "label": "Sprint planning", "description": "Pull open tickets, group by epic, propose a 2-week plan.", "category": "Project" },
+    { "icon": "GitPullRequest", "label": "Review a PR", "description": "Summarize diff, surface risks, draft review comments.", "category": "Engineering" },
+    { "icon": "Bug", "label": "Triage a bug report", "description": "Reproduce, prioritize, assign, draft a fix plan.", "category": "Engineering" },
+    { "icon": "FileText", "label": "Draft release notes", "description": "Compile merged work since the last release into customer-facing notes.", "category": "Communication" },
+    { "icon": "BarChart3", "label": "Cost review", "description": "Break down last week's agent spend by project and flag outliers.", "category": "Operations" },
+    { "icon": "Users", "label": "Onboard a new pilot", "description": "Spin up workspace, install kit checklist, schedule first sync.", "category": "Customer Success" }
   ],
   "customThemes": [
     {
-      "id": "custom:midnight",
+      "id": "midnight",
       "name": "Midnight",
       "vars": {
-        "--background": "#0f1117",
-        "--foreground": "#c9d1d9",
-        "--card": "#161b22",
-        "--card-foreground": "#c9d1d9",
-        "--popover": "#161b22",
-        "--popover-foreground": "#c9d1d9",
-        "--primary": "#c9d1d9",
-        "--primary-foreground": "#0f1117",
-        "--secondary": "#21262d",
-        "--secondary-foreground": "#c9d1d9",
-        "--muted": "#21262d",
-        "--muted-foreground": "#8b949e",
-        "--accent": "#58a6ff",
-        "--accent-foreground": "#ffffff",
-        "--tertiary": "#1c2128",
-        "--tertiary-active": "#252b33",
-        "--destructive": "#f85149",
-        "--destructive-foreground": "#ffffff",
-        "--border": "#30363d",
-        "--input": "#30363d",
-        "--ring": "#58a6ff",
-        "--sidebar": "#0d1117",
-        "--sidebar-foreground": "#c9d1d9",
-        "--sidebar-primary": "#58a6ff",
-        "--sidebar-primary-foreground": "#0f1117",
-        "--sidebar-accent": "#21262d",
-        "--sidebar-accent-foreground": "#c9d1d9",
-        "--sidebar-border": "#30363d",
-        "--sidebar-ring": "#58a6ff",
-        "--highlight-match": "rgba(88, 166, 255, 0.2)",
-        "--highlight-active": "rgba(88, 166, 255, 0.5)",
-        "--highlight": "#58a6ff",
-        "--highlight-foreground": "#0f1117",
-        "--overlay": "rgb(0 0 0 / 0.8)",
-        "--hover-tint": "rgb(255 255 255 / 0.05)",
-        "--switch-thumb-shadow": "0 1px 3px rgb(0 0 0 / 0.4), inset 0 0 0 0.5px rgb(255 255 255 / 0.1)"
-      },
-      "systemVars": {
-        "--background": "#ffffff",
-        "--foreground": "#1a1716",
-        "--card": "#ffffff",
-        "--card-foreground": "#1a1716",
-        "--popover": "#ffffff",
-        "--popover-foreground": "#1a1716",
-        "--primary": "#1a1716",
-        "--primary-foreground": "#ffffff",
-        "--secondary": "#f0ede8",
-        "--secondary-foreground": "#1a1716",
-        "--muted": "#f0ede8",
-        "--muted-foreground": "#6b6560",
-        "--accent": "#58a6ff",
-        "--accent-foreground": "#ffffff",
-        "--tertiary": "#e8e4e0",
-        "--tertiary-active": "#ddd9d5",
-        "--destructive": "#f85149",
-        "--destructive-foreground": "#ffffff",
-        "--border": "#d0cbc6",
-        "--input": "#d0cbc6",
-        "--ring": "#58a6ff",
-        "--sidebar": "#f5f2ef",
-        "--sidebar-foreground": "#1a1716",
-        "--sidebar-primary": "#58a6ff",
-        "--sidebar-primary-foreground": "#ffffff",
-        "--sidebar-accent": "#e8e4e0",
-        "--sidebar-accent-foreground": "#1a1716",
-        "--sidebar-border": "#d0cbc6",
-        "--sidebar-ring": "#58a6ff",
-        "--highlight-match": "rgba(88, 166, 255, 0.15)",
-        "--highlight-active": "rgba(88, 166, 255, 0.4)",
-        "--highlight": "#58a6ff",
-        "--highlight-foreground": "#ffffff",
-        "--overlay": "rgb(0 0 0 / 0.5)",
-        "--hover-tint": "rgb(0 0 0 / 0.04)",
-        "--switch-thumb-shadow": "0 1px 3px rgb(0 0 0 / 0.15), inset 0 0 0 0.5px rgb(0 0 0 / 0.05)"
+        "--background": "#0a0a14",
+        "--foreground": "#e6e8f0",
+        "--card": "#11121d",
+        "--card-foreground": "#e6e8f0",
+        "--popover": "#11121d",
+        "--popover-foreground": "#e6e8f0",
+        "--primary": "#7b8cff",
+        "--primary-foreground": "#0a0a14",
+        "--secondary": "#1a1c2c",
+        "--secondary-foreground": "#e6e8f0",
+        "--muted": "#1a1c2c",
+        "--muted-foreground": "#8b91a8",
+        "--accent": "#1a1c2c",
+        "--accent-foreground": "#e6e8f0",
+        "--tertiary": "#0d0e18",
+        "--tertiary-active": "#14151f",
+        "--destructive": "#ff6b7e",
+        "--destructive-foreground": "#0a0a14",
+        "--border": "#1f2235",
+        "--input": "#1f2235",
+        "--ring": "#7b8cff",
+        "--chart-1": "#7b8cff",
+        "--chart-2": "#5fcfa3",
+        "--chart-3": "#e0b76b",
+        "--chart-4": "#c89bff",
+        "--chart-5": "#ff8a99",
+        "--sidebar": "#0d0e18",
+        "--sidebar-foreground": "#e6e8f0",
+        "--sidebar-primary": "#7b8cff",
+        "--sidebar-primary-foreground": "#0a0a14",
+        "--sidebar-accent": "#14151f",
+        "--sidebar-accent-foreground": "#e6e8f0",
+        "--sidebar-border": "#1f2235",
+        "--sidebar-ring": "#7b8cff",
+        "--highlight": "#7b8cff",
+        "--highlight-foreground": "#0a0a14",
+        "--highlight-match": "rgba(123, 140, 255, 0.2)",
+        "--highlight-active": "rgba(123, 140, 255, 0.5)",
+        "--paper": "#0d0e18",
+        "--bg-alt": "#11121d",
+        "--blue-tint": "rgba(123, 140, 255, 0.12)",
+        "--blue-hover": "#94a1ff",
+        "--blue-light": "#7b8cff",
+        "--card-blue": "rgba(123, 140, 255, 0.08)",
+        "--border-light": "rgba(123, 140, 255, 0.1)",
+        "--border-strong": "#2a2d44",
+        "--text-dim": "#6b7088",
+        "--radius": "0.625rem"
       }
     }
   ]

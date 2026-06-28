@@ -86,8 +86,11 @@ export function Dashboard({
   onRightWidthChange,
   onNavigate,
 }: DashboardProps) {
-  const [tabState, setTabState] = useState(() => makeInitialTabState('vela'));
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>('vela');
+  const [tabState, setTabState] = useState(() => {
+    const firstWs = listWorkspaces()[0];
+    return makeInitialTabState(firstWs?.id ?? 'acme');
+  });
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => listWorkspaces()[0]?.id ?? 'acme');
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [projectsVersion, setProjectsVersion] = useState(0);

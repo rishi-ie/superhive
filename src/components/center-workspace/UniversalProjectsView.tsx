@@ -18,14 +18,6 @@ import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'name' | 'activity' | 'tickets';
 
-const STATUS_OPTIONS = [
-  { value: 'ALL' as const, label: 'All' },
-  { value: 'vela' as const, label: 'Vela' },
-  { value: 'widget' as const, label: 'Widget' },
-  { value: 'admin' as const, label: 'Admin' },
-  { value: 'mobile' as const, label: 'Mobile' },
-] as const;
-
 type WorkspaceFilter = 'ALL' | string;
 
 type UniversalProjectsViewProps = {
@@ -61,12 +53,17 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAc
     return counts;
   }, [projects]);
 
+  const workspaceFilterOptions = useMemo<{ value: WorkspaceFilter; label: string }[]>(() => [
+    { value: 'ALL' as const, label: 'All' },
+    ...workspaces.map(w => ({ value: w.id as WorkspaceFilter, label: w.name })),
+  ], [workspaces]);
+
   const filterOptions = useMemo<readonly FilterOption<WorkspaceFilter>[]>(() =>
-    STATUS_OPTIONS.map(o => ({
+    workspaceFilterOptions.map(o => ({
       ...o,
       count: statusCounts[o.value === 'ALL' ? 'ALL' : o.value] ?? 0,
     })),
-    [statusCounts]
+    [workspaceFilterOptions, statusCounts]
   );
 
   const filtered = useMemo(() => {
