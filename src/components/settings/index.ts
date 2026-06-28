@@ -8,7 +8,6 @@ export { AppearanceSettings } from './AppearanceSettings';
 export { BillingSettings } from './BillingSettings';
 export { CostUsageSettings } from './CostUsageSettings';
 export { DefaultsSettings } from './DefaultsSettings';
-export { IntegrationsSettings } from './IntegrationsSettings';
 export { KeyboardSettings } from './KeyboardSettings';
 export { ModelsSettings } from './ModelsSettings';
 export { NotificationsSettings } from './NotificationsSettings';

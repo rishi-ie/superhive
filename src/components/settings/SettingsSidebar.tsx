@@ -3,9 +3,10 @@
  * Nav data derived from the settings registry — single source of truth.
  */
 import { useState, useMemo } from 'react';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Puzzle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { SettingSearch } from './shared/SettingSearch';
+import { ComingSoonBadge } from './shared/ComingSoonBadge';
 import { settingsCategories, settingsRegistry, type SettingsSectionId } from '@/data/config/settings-registry';
 
 type SettingsSidebarProps = {
@@ -84,6 +85,13 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
                   );
                 })}
               </div>
+              {category.id === 'organization' && (
+                <div className="mt-1 flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-foreground/50 cursor-default">
+                  <Puzzle size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
+                  <span>Integrations</span>
+                  <ComingSoonBadge className="ml-auto" />
+                </div>
+              )}
             </div>
           ))
         )}

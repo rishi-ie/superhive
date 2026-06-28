@@ -16,7 +16,6 @@ import {
   Coins,
   Bot,
   Folder,
-  Puzzle,
   CreditCard,
 } from 'lucide-react';
 
@@ -32,7 +31,6 @@ import { WorkflowsSettings } from '@/components/settings/WorkflowsSettings';
 import { CostUsageSettings } from '@/components/settings/CostUsageSettings';
 import { AgentsSettings } from '@/components/settings/AgentsSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
-import { IntegrationsSettings } from '@/components/settings/IntegrationsSettings';
 import { BillingSettings } from '@/components/settings/BillingSettings';
 
 export type SettingsCategoryId = 'personal' | 'workflow' | 'organization';
@@ -49,7 +47,6 @@ export type SettingsSectionId =
   | 'cost-usage'
   | 'agents'
   | 'workspaces'
-  | 'integrations'
   | 'billing';
 
 export type SettingsPageEntry = {
@@ -151,13 +148,6 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
     component: WorkspacesSettings,
     category: 'organization',
   },
-  integrations: {
-    id: 'integrations',
-    label: 'Integrations',
-    icon: Puzzle,
-    component: IntegrationsSettings,
-    category: 'organization',
-  },
   billing: {
     id: 'billing',
     label: 'Billing & Plans',
@@ -181,7 +171,7 @@ export const settingsCategories: SettingsCategoryMeta[] = [
   {
     id: 'organization',
     label: 'Organization',
-    sections: ['workspaces', 'integrations', 'billing'],
+    sections: ['workspaces', 'billing'],
   },
 ];
 
