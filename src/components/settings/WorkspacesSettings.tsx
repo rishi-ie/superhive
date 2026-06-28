@@ -1,19 +1,24 @@
 /**
- * Workspaces settings — list, create, rename, archive workspaces + per-workspace data retention.
+ * Workspaces settings — manage workspaces with a card-based layout.
+ * Each workspace shows identity, data retention, and actions.
  */
 import { useState } from 'react';
-import { Plus, Archive, Pencil } from 'lucide-react';
+import { Plus, Pencil, Archive, Folder } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
+import { getInitials } from '@/lib/initials';
 import { SettingSection } from './shared/SettingSection';
-import { SettingRow } from './shared/SettingRow';
-import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { ResetSection } from './shared/ResetSection';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
-import { IconButton } from '@/components/ui/IconButton';
 import { TextInput } from '@/components/ui/TextInput';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
+import type { WorkspaceItem } from '@/data/settings/interface';
 
 const RETENTION_OPTIONS = [
   { value: 30, label: '30 days' },
@@ -23,66 +28,218 @@ const RETENTION_OPTIONS = [
   { value: -1, label: 'Forever' },
 ];
 
+const CHART_COLORS = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
 
-/**
- * Workspaces settings page — manage your organization's workspaces and data retention.
- */
-export function WorkspacesSettings() {
-  const { settings, update } = useSettings();
-  const toast = useToast();
-  const [showArchive, setShowArchive] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState('');
+function avatarColor(id: string): string {
+  const idx = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % CHART_COLORS.length;
+  return CHART_COLORS[idx] ?? 'chart-1';
+}
 
-  const workspaces = settings.workspaces.workspaces;
+/* ─── Workspace Card (horizontal list row) ──────────────────────────────── */
 
-  const startEdit = (ws: typeof workspaces[0]) => {
-    setEditingId(ws.id);
-    setEditName(ws.name);
+type WorkspaceCardProps = {
+  workspace: WorkspaceItem;
+  isDefault: boolean;
+  onRetentionChange: (id: string, days: number) => void;
+  onRename: (id: string, name: string) => void;
+  onArchive: (id: string) => void;
+};
+
+function WorkspaceCard({ workspace, isDefault, onRetentionChange, onRename, onArchive }: WorkspaceCardProps) {
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(workspace.name);
+  const [showArchive, setShowArchive] = useState(false);
+
+  const color = avatarColor(workspace.id);
+  const initials = getInitials(workspace.name);
+
+  const startEdit = () => {
+    setEditName(workspace.name);
+    setEditing(true);
   };
 
   const saveEdit = () => {
-    if (!editingId) return;
-    update('workspaces', {
-      workspaces: workspaces.map(w =>
-        w.id === editingId ? { ...w, name: editName } : w
-      ),
-    });
-    setEditingId(null);
-    toast({ title: 'Workspace renamed' });
+    const trimmed = editName.trim();
+    if (trimmed && trimmed !== workspace.name) {
+      onRename(workspace.id, trimmed);
+    }
+    setEditing(false);
   };
 
   const cancelEdit = () => {
-    setEditingId(null);
-    setEditName('');
+    setEditing(false);
+    setEditName(workspace.name);
   };
 
-  const updateRetention = (workspaceId: string, days: number) => {
+  return (
+    <>
+      <Card className="bg-card">
+        <CardContent className="p-0">
+          <div className="flex items-center gap-4 px-4 py-3">
+            {/* Avatar */}
+            <div
+              className={`size-9 shrink-0 rounded-md bg-${color} flex items-center justify-center text-[11px] font-bold text-sidebar-primary-foreground uppercase select-none`}
+            >
+              {initials}
+            </div>
+
+            {/* Name + id */}
+            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+              {editing ? (
+                <div className="flex items-center gap-1.5">
+                  <TextInput
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    autoFocus
+                    size="sm"
+                    className="max-w-[200px]"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') saveEdit();
+                      if (e.key === 'Escape') cancelEdit();
+                    }}
+                  />
+                  <Button variant="default" size="sm" onClick={saveEdit} className="h-7 px-2 text-[11px]">
+                    Save
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={cancelEdit} className="h-7 px-2 text-[11px]">
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold text-foreground truncate">{workspace.name}</span>
+                  {isDefault && (
+                    <Badge variant="active" className="text-[9px] shrink-0">
+                      Default
+                    </Badge>
+                  )}
+                </div>
+              )}
+              <span className="text-[10px] text-muted-foreground font-mono">{workspace.id}</span>
+            </div>
+
+            {/* Retention */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs text-muted-foreground hidden sm:block">Data retention</span>
+              <Select
+                value={String(workspace.dataRetentionDays)}
+                options={RETENTION_OPTIONS}
+                onChange={val => onRetentionChange(workspace.id, parseInt(val))}
+                className="w-32"
+              />
+            </div>
+
+            {/* Actions */}
+            {!editing && (
+              <div className="flex items-center gap-1 shrink-0">
+                <Button variant="ghost" size="sm" onClick={startEdit} className="h-7 w-7 p-0">
+                  <Pencil size={13} strokeWidth={STROKE_WIDTH} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowArchive(true)}
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-chart-5"
+                >
+                  <Archive size={13} strokeWidth={STROKE_WIDTH} />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Footer row */}
+          <div className="px-4 pb-3 flex items-center gap-1.5 border-t border-border/30 pt-2">
+            <span className="text-[10px] text-muted-foreground">
+              Created {new Date(workspace.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <ConfirmationModal
+        open={showArchive}
+        title="Archive workspace"
+        description={`"${workspace.name}" will be archived. Archived workspaces are not deleted but are deactivated. This can be undone.`}
+        confirmLabel="Archive"
+        destructive
+        confirmText={workspace.name}
+        onConfirm={() => {
+          onArchive(workspace.id);
+          setShowArchive(false);
+        }}
+        onCancel={() => setShowArchive(false)}
+      />
+    </>
+  );
+}
+
+/* ─── Empty State ───────────────────────────────────────────────────────── */
+
+function EmptyState({ onCreate }: { onCreate: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+      <div className="size-12 rounded-full bg-muted flex items-center justify-center">
+        <Folder size={20} strokeWidth={STROKE_WIDTH} className="text-muted-foreground" />
+      </div>
+      <div className="flex flex-col gap-1">
+        <p className="text-sm font-medium text-foreground">No workspaces yet</p>
+        <p className="text-xs text-muted-foreground max-w-48">
+          Create your first workspace to start organizing agents, projects, and channels.
+        </p>
+      </div>
+      <Button variant="default" size="sm" onClick={onCreate} className="gap-1.5 mt-1">
+        <Plus size={13} strokeWidth={STROKE_WIDTH} />
+        Create workspace
+      </Button>
+    </div>
+  );
+}
+
+/* ─── Main Component ─────────────────────────────────────────────────────── */
+
+export function WorkspacesSettings() {
+  const { settings, update } = useSettings();
+  const toast = useToast();
+  const [showCreate, setShowCreate] = useState(false);
+  const [createName, setCreateName] = useState('');
+
+  const workspaces = settings.workspaces.workspaces;
+  const defaultId = settings.account.defaultWorkspaceId;
+
+  const handleRetentionChange = (id: string, days: number) => {
     update('workspaces', {
-      workspaces: workspaces.map(w =>
-        w.id === workspaceId ? { ...w, dataRetentionDays: days } : w
-      ),
+      workspaces: workspaces.map(w => (w.id === id ? { ...w, dataRetentionDays: days } : w)),
     });
   };
 
-  const archiveWorkspace = (_id: string) => {
+  const handleRename = (id: string, name: string) => {
+    update('workspaces', {
+      workspaces: workspaces.map(w => (w.id === id ? { ...w, name } : w)),
+    });
+    toast({ title: 'Workspace renamed' });
+  };
+
+  const handleArchive = (_id: string) => {
     toast({ title: `Workspace archived` });
-    setShowArchive(null);
   };
 
   const handleCreate = () => {
+    const trimmed = createName.trim();
+    if (!trimmed) return;
     const id = `ws-${Date.now()}`;
-    update('workspaces', {
-      workspaces: [
-        ...workspaces,
-        {
-          id,
-          name: 'New Workspace',
-          dataRetentionDays: 90,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    });
+    const isFirst = workspaces.length === 0;
+    const newWorkspace: WorkspaceItem = {
+      id,
+      name: trimmed,
+      dataRetentionDays: 90,
+      createdAt: new Date().toISOString(),
+    };
+    update('workspaces', { workspaces: [...workspaces, newWorkspace] });
+    if (isFirst || !defaultId) {
+      update('account', { defaultWorkspaceId: id });
+    }
+    setShowCreate(false);
+    setCreateName('');
     toast({ title: 'Workspace created' });
   };
 
@@ -92,98 +249,75 @@ export function WorkspacesSettings() {
         title="Workspaces"
         description="Manage your organization's workspaces and data retention policies."
         action={
-          <Button variant="default" size="md" onClick={handleCreate} className="gap-1.5 shrink-0">
-            <Plus size={14} />
+          <Button variant="default" size="md" onClick={() => setShowCreate(true)} className="gap-1.5 shrink-0">
+            <Plus size={14} strokeWidth={STROKE_WIDTH} />
             New workspace
           </Button>
         }
       />
 
       <SettingSection
-        title="Workspaces"
+        title="Your workspaces"
         description="Each workspace is an isolated environment with its own agents, channels, and tickets."
       >
-        <div className="border border-border/40 rounded-md divide-y divide-border/40">
-          {workspaces.map(ws => (
-            <div key={ws.id} className="px-4 py-3">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-col gap-1 flex-1 min-w-0">
-                  {editingId === ws.id ? (
-                    <div className="flex items-center gap-2">
-                      <TextInput
-                        value={editName}
-                        onChange={e => setEditName(e.target.value)}
-                        autoFocus
-                        className="max-w-xs"
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') saveEdit();
-                          if (e.key === 'Escape') cancelEdit();
-                        }}
-                      />
-                      <Button variant="default" size="sm" onClick={saveEdit}>Save</Button>
-                      <Button variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground">{ws.name}</span>
-                      <span className="text-xs text-muted-foreground font-mono">{ws.id}</span>
-                    </div>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    Created {new Date(ws.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                {editingId !== ws.id && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <IconButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => startEdit(ws)}
-                      aria-label={`Rename ${ws.name}`}
-                    >
-                      <Pencil size={13} />
-                    </IconButton>
-                    <IconButton
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setShowArchive(ws.id)}
-                      aria-label={`Archive ${ws.name}`}
-                      className="text-muted-foreground hover:text-chart-5"
-                    >
-                      <Archive size={13} />
-                    </IconButton>
-                  </div>
-                )}
-              </div>
-              <div className="mt-3 pt-3 border-t border-border/30">
-                <SettingRow
-                  label="Data retention"
-                  description="How long conversation and activity data is kept before automatic deletion."
-                  control={
-                    <Select
-                      value={String(ws.dataRetentionDays)}
-                      options={RETENTION_OPTIONS}
-                      onChange={val => updateRetention(ws.id, parseInt(val))}
-                      className="w-36"
-                    />
-                  }
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+        {workspaces.length === 0 ? (
+          <Card>
+            <CardContent className="p-0">
+              <EmptyState onCreate={() => setShowCreate(true)} />
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {workspaces.map(ws => (
+              <WorkspaceCard
+                key={ws.id}
+                workspace={ws}
+                isDefault={ws.id === defaultId}
+                onRetentionChange={handleRetentionChange}
+                onRename={handleRename}
+                onArchive={handleArchive}
+              />
+            ))}
+          </div>
+        )}
       </SettingSection>
 
-      <ConfirmationModal
-        open={showArchive !== null}
-        title="Archive workspace"
-        description={`This will archive "${showArchive ?? ''}". Archived workspaces are not deleted but are deactivated. This can be undone.`}
-        confirmLabel="Archive"
-        destructive
-        confirmText={showArchive ?? undefined}
-        onConfirm={() => archiveWorkspace(showArchive ?? '')}
-        onCancel={() => setShowArchive(null)}
-      />
+      {/* Create Dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create workspace</DialogTitle>
+            <DialogDescription>
+              Give your workspace a name. You can rename it anytime.
+            </DialogDescription>
+          </DialogHeader>
+          <TextInput
+            value={createName}
+            onChange={e => setCreateName(e.target.value)}
+            placeholder="Workspace name"
+            autoFocus
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleCreate();
+            }}
+          />
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowCreate(false);
+                setCreateName('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button variant="default" size="sm" onClick={handleCreate} disabled={!createName.trim()}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="mt-6 flex justify-end">
         <ResetSection domain="workspaces" />
       </div>
