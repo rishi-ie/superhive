@@ -96,7 +96,6 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           channelId={tab.selectedChannelId ?? ''}
           workspaceId={tab.workspaceId}
           onTicketClick={onTicketSelect}
-          onAgentSelect={onAgentSelect}
         />
       );
 

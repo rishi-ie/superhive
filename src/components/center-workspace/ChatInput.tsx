@@ -17,7 +17,7 @@ type ChatInputProps = {
   agentId?: string;
 };
 
-const CHAR_TOKEN_RATIO = 4; // rough estimate: 1 token ≈ 4 chars
+const CHAR_TOKEN_RATIO = 4;
 
 function countTokens(text: string): number {
   return Math.ceil(text.length / CHAR_TOKEN_RATIO);
@@ -81,87 +81,85 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
   const tokens = countTokens(value);
 
   return (
-    <div className="shrink-0 border-t border-border/40 bg-sidebar">
-      <div className="px-4 py-2.5">
-        <div className="flex items-start gap-2 bg-input rounded-lg px-3 py-2 border border-border/60 focus-within:border-ring focus-within:ring-1 focus-within:ring-ring/20 transition-all">
-          <Textarea
-            ref={textareaRef}
-            rows={1}
-            value={value}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed"
-          />
-          <div className="flex items-center gap-1 shrink-0 pt-0.5">
-            {tokens > 0 && (
-              <span className="text-[9px] font-fustat text-muted-foreground/50 mr-1">
-                {tokens.toLocaleString()} tok
-              </span>
-            )}
-            <IconButton
-              variant="ghost"
-              size="sm"
-              aria-label="Attach file"
-              onClick={() => {}}
-            >
-              <Paperclip size={15} strokeWidth={STROKE_WIDTH} />
-            </IconButton>
-          </div>
-        </div>
+    <div className="shrink-0 border-t border-border/40 px-3 py-3">
+      {/* Input card — textarea + attach + send */}
+      <div className="flex items-start gap-2 bg-card rounded-lg px-3 py-2 border border-border shadow-sm focus-within:border-chart-1 focus-within:ring-1 focus-within:ring-chart-1/20 transition-all">
+        <IconButton
+          variant="ghost"
+          size="sm"
+          aria-label="Attach file"
+          onClick={() => {}}
+        >
+          <Paperclip size={15} strokeWidth={STROKE_WIDTH} />
+        </IconButton>
 
-        <div className="flex items-center justify-between mt-1.5">
-          <div className="flex items-center gap-1.5">
-            <div className="relative">
-              <Pill
-                active={autoMode}
-                onClick={() => setAutoMode(a => !a)}
-              >
-                Auto
-              </Pill>
-            </div>
+        <Textarea
+          ref={textareaRef}
+          rows={1}
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed py-0.5"
+        />
 
-            {!autoMode && (
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowModelPicker(p => !p)}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors border border-transparent"
-                >
-                  <span>{model}</span>
-                  <ChevronDown size={9} strokeWidth={STROKE_WIDTH} />
-                </Button>
-                {showModelPicker && (
-                  <div className="absolute bottom-full left-0 mb-1 w-32 rounded-md border border-border bg-card shadow-lg z-10 overflow-hidden">
-                    {MODEL_LABELS.filter(m => m !== 'Auto').map(m => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => { setModel(m); setShowModelPicker(false); }}
-                        className={`w-full text-left px-2.5 py-1.5 text-[11px] transition-colors ${
-                          m === model ? 'bg-chart-1/10 text-chart-1' : 'text-foreground hover:bg-hover-tint'
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        <Button
+          variant="default"
+          size="icon"
+          onClick={handleSubmit}
+          disabled={!value.trim()}
+          className="shrink-0 mt-0.5 size-7"
+        >
+          <Send size={14} strokeWidth={STROKE_WIDTH} />
+        </Button>
+      </div>
 
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSubmit}
-            disabled={!value.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-chart-1 text-highlight-foreground text-xs font-semibold hover:bg-chart-1/90 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+      {/* Meta row */}
+      <div className="flex items-center justify-between mt-1.5 pl-1">
+        <div className="flex items-center gap-1.5">
+          <Pill
+            active={autoMode}
+            onClick={() => setAutoMode(a => !a)}
+            className={autoMode ? 'bg-chart-1/15 text-chart-1 border border-chart-1/30' : ''}
           >
-            <span>Send</span>
-            <Send size={12} strokeWidth={STROKE_WIDTH} />
-          </Button>
+            Auto
+          </Pill>
+
+          {!autoMode && (
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowModelPicker(p => !p)}
+                className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium text-muted-foreground hover:text-foreground border border-transparent hover:border-border transition-colors"
+              >
+                <span>{model}</span>
+                <ChevronDown size={9} strokeWidth={STROKE_WIDTH} />
+              </Button>
+              {showModelPicker && (
+                <div className="absolute bottom-full left-0 mb-1 w-32 rounded-md border border-border bg-card shadow-lg z-10 overflow-hidden">
+                  {MODEL_LABELS.filter(m => m !== 'Auto').map(m => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => { setModel(m); setShowModelPicker(false); }}
+                      className={`w-full text-left px-2.5 py-1.5 text-[11px] transition-colors ${
+                        m === model ? 'bg-chart-1/10 text-chart-1' : 'text-foreground hover:bg-sidebar-accent'
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tokens > 0 && (
+            <span className="text-[9px] font-fustat text-muted-foreground/50 ml-1">
+              {tokens.toLocaleString()} tok
+            </span>
+          )}
         </div>
       </div>
     </div>
