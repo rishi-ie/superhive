@@ -25,6 +25,20 @@ export type AuditItem = {
   title: string;
   description: string;
   timestamp: string;
+  agentId: string;
+  scope?: string;
+  prId?: string;
+  touchedFiles?: number;
+};
+
+export type PendingQuestion = {
+  id: string;
+  agentId: string;
+  threadId?: string;
+  messageId?: string;
+  question: string;
+  options?: string[];
+  timestamp: string;
 };
 
 export type CommitAuthority = 'REVIEW_ONLY' | 'AUTO_MERGE' | 'DIRECT_MAIN';
@@ -49,10 +63,12 @@ export interface AgentStore {
   getTelemetry(agentId: string): Telemetry | null;
   getPermissions(agentId: string): Permissions | null;
   getAuditItems(agentId?: string): AuditItem[];
+  getPendingQuestions(agentId: string): PendingQuestion[];
   getActionLog(agentId: string): ActionLogEntry[];
   getNextStep(agentId: string): string;
   getDefaultTelemetry(): Telemetry;
   getDefaultPermissions(): Permissions;
   approveAudit(id: string): void;
   denyAudit(id: string): void;
+  answerQuestion(id: string, answer: string, agentId: string): void;
 }

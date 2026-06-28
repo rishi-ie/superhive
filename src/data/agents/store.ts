@@ -1,5 +1,5 @@
 import { mockableData } from '@/data/mock/index';
-import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from './interface';
+import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion } from './interface';
 import type { Project } from '@/data/projects/interface';
 
 const projects: Project[] = mockableData.projects;
@@ -10,6 +10,7 @@ const actionLogMap: Record<string, ActionLogEntry[]> = mockableData.actionLogs;
 const nextStepMap: Record<string, string> = mockableData.nextSteps;
 
 let auditItemsMutable: AuditItem[] = structuredClone(mockableData.auditItems);
+let pendingQuestionsMutable: PendingQuestion[] = structuredClone(mockableData.pendingQuestions);
 
 const DEFAULT_TELEMETRY: Telemetry = {
   contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5.00,
@@ -32,8 +33,12 @@ const store: AgentStore = {
   getPermissions(agentId: string) {
     return permissionsMap[agentId] ?? null;
   },
-  getAuditItems(_agentId?: string) {
-    return auditItemsMutable;
+  getAuditItems(agentId?: string) {
+    if (!agentId) return auditItemsMutable;
+    return auditItemsMutable.filter(item => item.agentId === agentId);
+  },
+  getPendingQuestions(agentId: string) {
+    return pendingQuestionsMutable.filter(q => q.agentId === agentId);
   },
   getActionLog(agentId: string) {
     return actionLogMap[agentId] ?? [];
@@ -52,6 +57,9 @@ const store: AgentStore = {
   },
   denyAudit(id: string) {
     auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
+  },
+  answerQuestion(id: string, _answer: string, _agentId: string) {
+    pendingQuestionsMutable = pendingQuestionsMutable.filter(q => q.id !== id);
   },
 };
 
@@ -118,4 +126,12 @@ export function denyAudit(id: string): void {
   store.denyAudit(id);
 }
 
-export { type Agent, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry };
+export function getPendingQuestions(agentId: string): PendingQuestion[] {
+  return store.getPendingQuestions(agentId);
+}
+
+export function answerQuestion(id: string, answer: string, agentId: string): void {
+  store.answerQuestion(id, answer, agentId);
+}
+
+export { type Agent, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry, type PendingQuestion };

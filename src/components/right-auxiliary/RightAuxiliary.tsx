@@ -320,8 +320,9 @@ export function RightAuxiliary({
       case 'inbox':
         return (
           <>
-            {context.kind === 'agent' && (
+            {context.kind === 'agent' && agentData && (
               <AgentInbox
+                agent={agentData}
                 onTicketClick={onTicketClick}
               />
             )}

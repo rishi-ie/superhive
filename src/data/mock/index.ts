@@ -27,6 +27,7 @@ const EMPTY_DATA: MockData = {
   actionLogs: {},
   nextSteps: {},
   auditItems: [],
+  pendingQuestions: [],
   chatThreads: [],
   favorites: [],
   channelMessages: [],

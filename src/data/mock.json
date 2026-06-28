@@ -1683,51 +1683,98 @@
     {
       "id": "audit-001",
       "type": "AUTH_INTERCEPT",
-      "title": "Auth interceptor flagged elevated scope on agent-takeshi",
+      "title": "Elevated scope request — fleet API key rotation",
       "description": "Takeshi's session requested elevated scope for fleet API key rotation. Awaiting human approval before proceeding.",
-      "timestamp": "2026-06-28T08:42:00Z"
+      "timestamp": "2026-06-28T08:42:00Z",
+      "agentId": "agent-takeshi",
+      "scope": "Fleet API Key Rotation"
     },
     {
       "id": "audit-002",
       "type": "DIFF_REVIEW",
       "title": "PR #482 — OTA firmware signing pipeline",
       "description": "Marcus needs to review the signing key rotation logic before merge. Touches prod security boundary.",
-      "timestamp": "2026-06-28T07:55:00Z"
+      "timestamp": "2026-06-28T07:55:00Z",
+      "agentId": "agent-marcus",
+      "prId": "PR #482",
+      "touchedFiles": 14
     },
     {
       "id": "audit-003",
       "type": "AUTH_INTERCEPT",
-      "title": "Cross-workspace write attempt on agent-priya",
+      "title": "Cross-workspace write attempt on Quantum Labs",
       "description": "Priya tried to write to a Quantum Labs resource from Acme Robotics session. Confirm intent before continuing.",
-      "timestamp": "2026-06-28T07:11:00Z"
+      "timestamp": "2026-06-28T07:11:00Z",
+      "agentId": "agent-priya",
+      "scope": "Cross-Workspace Write"
     },
     {
       "id": "audit-004",
       "type": "DIFF_REVIEW",
       "title": "PR #485 — Fleet dashboard WebSocket rewrite",
       "description": "James's WebSocket rewrite changes the wire protocol. Needs review from Noah before merge.",
-      "timestamp": "2026-06-27T22:30:00Z"
+      "timestamp": "2026-06-27T22:30:00Z",
+      "agentId": "agent-james",
+      "prId": "PR #485",
+      "touchedFiles": 9
     },
     {
       "id": "audit-005",
       "type": "AUTH_INTERCEPT",
-      "title": "Dependency install requested by agent-david",
+      "title": "Dependency install — vision-language-action package",
       "description": "David asked to install a new vision-language-action dependency. Approve or deny.",
-      "timestamp": "2026-06-27T18:08:00Z"
+      "timestamp": "2026-06-27T18:08:00Z",
+      "agentId": "agent-david",
+      "scope": "Install Dependencies"
     },
     {
       "id": "audit-006",
       "type": "DIFF_REVIEW",
       "title": "PR #477 — SLAM under low light",
       "description": "David's SLAM low-light patch — already approved by Marcus, but needs final human sign-off before merge.",
-      "timestamp": "2026-06-27T15:42:00Z"
+      "timestamp": "2026-06-27T15:42:00Z",
+      "agentId": "agent-david",
+      "prId": "PR #477",
+      "touchedFiles": 3
     },
     {
       "id": "audit-007",
       "type": "AUTH_INTERCEPT",
-      "title": "Direct main commit requested by agent-takeshi",
+      "title": "Direct main commit — hotfix skip review",
       "description": "Takeshi is configured for DIRECT_MAIN. Confirm whether to allow this hotfix to skip review.",
-      "timestamp": "2026-06-27T11:00:00Z"
+      "timestamp": "2026-06-27T11:00:00Z",
+      "agentId": "agent-takeshi",
+      "scope": "Direct Main Commit"
+    }
+  ],
+  "pendingQuestions": [
+    {
+      "id": "pq-001",
+      "agentId": "agent-elena",
+      "question": "Atlas launch clearance — confirm scope of V&V coverage for the new shoulder assembly?",
+      "options": ["Full assembly", "Subsystems only", "Defer to launch"],
+      "timestamp": "2026-06-28T09:10:00Z"
+    },
+    {
+      "id": "pq-002",
+      "agentId": "agent-marcus",
+      "question": "PR #482 — should the signing key rotation happen in this PR or a follow-up?",
+      "options": ["This PR", "Follow-up PR", "Split into 2 PRs"],
+      "timestamp": "2026-06-28T08:55:00Z"
+    },
+    {
+      "id": "pq-003",
+      "agentId": "agent-noah",
+      "question": "Beacon fleet alert taxonomy — rename 'Stale Heartbeat' to 'Heartbeat Timeout'?",
+      "options": ["Yes rename", "Keep current", "Survey team first"],
+      "timestamp": "2026-06-28T08:30:00Z"
+    },
+    {
+      "id": "pq-004",
+      "agentId": "agent-james",
+      "question": "WebSocket protocol version — bump to v2 in this rewrite or keep v1 compat?",
+      "options": ["v2 only", "Dual-stack v1+v2", "Maintain v1 compat"],
+      "timestamp": "2026-06-28T08:00:00Z"
     }
   ],
   "chatThreads": [

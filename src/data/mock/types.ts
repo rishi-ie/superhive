@@ -1,7 +1,7 @@
 import type { Workspace } from '@/data/workspaces/interface';
 import type { Project } from '@/data/projects/interface';
 import type { UniversalTicket } from '@/data/tickets/interface';
-import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry } from '@/data/agents/interface';
+import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion } from '@/data/agents/interface';
 import type { Theme } from '@/data/settings/interface';
 
 export type IconKey = 'user' | 'folder';
@@ -61,6 +61,7 @@ export type MockData = {
   actionLogs: Record<string, ActionLogEntry[]>;
   nextSteps: Record<string, string>;
   auditItems: AuditItem[];
+  pendingQuestions: PendingQuestion[];
   chatThreads: ChatThreadSeed[];
   favorites: FavoriteSeed[];
   channelMessages: ChannelMessageSeed[];
