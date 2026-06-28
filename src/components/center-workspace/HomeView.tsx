@@ -167,32 +167,28 @@ export function HomeView({
 
         {/* Two empty states side by side — Projects + Agents */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-md border border-border/40 bg-card/30">
-            <EmptyState
-              icon={<FolderOpen size={28} strokeWidth={1.5} />}
-              title="No projects yet"
-              description="Create your first project to get started."
-              action={
-                <NewButton
-                  label="New Project"
-                  onClick={() => onCreateProject?.()}
-                />
-              }
-            />
-          </div>
-          <div className="rounded-md border border-border/40 bg-card/30">
-            <EmptyState
-              icon={<Bot size={28} strokeWidth={1.5} />}
-              title="No agents yet"
-              description="Add agents to your workspace to get started."
-              action={
-                <NewButton
-                  label="New Agent"
-                  onClick={() => onCreateAgent?.()}
-                />
-              }
-            />
-          </div>
+          <EmptyState
+            icon={<FolderOpen size={28} strokeWidth={1.5} />}
+            title="No projects yet"
+            description="Create your first project to get started."
+            action={
+              <NewButton
+                label="New Project"
+                onClick={() => onCreateProject?.()}
+              />
+            }
+          />
+          <EmptyState
+            icon={<Bot size={28} strokeWidth={1.5} />}
+            title="No agents yet"
+            description="Add agents to your workspace to get started."
+            action={
+              <NewButton
+                label="New Agent"
+                onClick={() => onCreateAgent?.()}
+              />
+            }
+          />
         </div>
 
       </div>
