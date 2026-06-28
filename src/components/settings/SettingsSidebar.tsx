@@ -67,7 +67,16 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
                   if (!entry) return null;
                   const Icon = entry.icon;
                   const isActive = activeSection === sectionId;
-                  return (
+                  return entry.comingSoon ? (
+                    <div
+                      key={sectionId}
+                      className="flex items-center gap-2.5 rounded-md px-3 py-2 text-sm text-foreground/50 cursor-default"
+                    >
+                      <Icon size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
+                      <span>{entry.label}</span>
+                      <ComingSoonBadge className="ml-auto" />
+                    </div>
+                  ) : (
                     <button
                       key={sectionId}
                       role="tab"

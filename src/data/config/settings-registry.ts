@@ -55,6 +55,7 @@ export type SettingsPageEntry = {
   icon: LucideIcon;
   component: ComponentType;
   category: SettingsCategoryId;
+  comingSoon?: boolean;
 };
 
 export type SettingsCategoryMeta = {
@@ -122,10 +123,11 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
   },
   workflows: {
     id: 'workflows',
-    label: 'Workflows & Triggers',
+    label: 'Workflows',
     icon: Workflow,
     component: WorkflowsSettings,
     category: 'workflow',
+    comingSoon: true,
   },
   'cost-usage': {
     id: 'cost-usage',
