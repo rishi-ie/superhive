@@ -12,7 +12,7 @@ import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import type { ArchivedProjectSummary } from '@/components/left-nav/ArchivedProjectsSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents, listTickets, getProject, getProjectByWorkspace, listProjects } from '@/data/projects/store';
+import { listProjectAgents, getProject, getProjectByWorkspace, listProjects } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, getAgentWorkspace } from '@/data/agents/store';
@@ -123,10 +123,6 @@ export function Dashboard({
   const bumpProjectsVersion = useCallback(() => {
     setProjectsVersion(v => v + 1);
   }, []);
-
-  const activeTasks = listTickets(activeWorkspaceId)
-    .filter(t => t.status === 'EXECUTING')
-    .map(t => ({ id: t.id, title: t.title, assignedTo: t.assignedAgentId }));
 
   const activeTab = getActiveTab(tabState);
 
@@ -339,13 +335,11 @@ export function Dashboard({
         currentWorkspace={currentWorkspace}
         favorites={favorites_data}
         activeAgents={agents_data}
-        activeTasks={activeTasks}
         archivedProjects={archivedProjects}
         onWorkspaceSelect={handleWorkspaceSelect}
         onSettingsClick={() => onNavigate('settings')}
         onFavoritesItemClick={handleFavoriteSelect}
         onActiveAgentClick={handleAgentSelect}
-        onActiveTaskClick={(id) => handleTicketSelect(id)}
         onNavItemClick={handleNavItemClick}
         currentView={activeTab?.type ?? 'projects'}
         onAgentSelect={handleAgentSelect}

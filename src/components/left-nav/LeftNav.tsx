@@ -17,7 +17,6 @@ type LeftNavProps = {
   currentWorkspace?: Workspace;
   favorites?: FavoriteItem[];
   activeAgents?: ActiveAgent[];
-  activeTasks?: { id: string; title: string; assignedTo?: string }[];
   archivedProjects?: ArchivedProjectSummary[];
   notificationCount?: number;
   onWorkspaceSelect?: (workspace: Workspace) => void;
@@ -25,7 +24,6 @@ type LeftNavProps = {
   onFavoritesItemClick?: (item: FavoriteItem) => void;
   onActiveAgentClick?: (id: string) => void;
   onAgentSelect?: (id: string) => void;
-  onActiveTaskClick?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
   onProjectClick?: (projectId: string, workspaceId: string) => void;
   currentView?: string;
@@ -44,14 +42,12 @@ const MAX_WIDTH = 400;
  * @param currentWorkspace - Currently selected workspace
  * @param favorites - Favorite items to display
  * @param activeAgents - Active agents to display
- * @param activeTasks - Active tasks to display
  * @param archivedProjects - Archived projects displayed at the very bottom of the sidebar
  * @param onWorkspaceSelect - Called when workspace is selected
  * @param onSettingsClick - Called when settings is clicked
  * @param onFavoritesItemClick - Called when favorite item is clicked
  * @param onActiveAgentClick - Called when active agent is clicked
  * @param onAgentSelect - Called when agent is selected from accordion
- * @param onActiveTaskClick - Called when active task is clicked
  * @param onNavItemClick - Called when nav item is clicked
  * @param onProjectClick - Called when project is clicked
  * @param currentView - Current view identifier
@@ -65,13 +61,11 @@ export function LeftNav({
   currentWorkspace = { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' },
   favorites = [],
   activeAgents = [],
-  activeTasks = [],
   archivedProjects = [],
   onWorkspaceSelect,
   onSettingsClick,
   onFavoritesItemClick,
   onActiveAgentClick,
-  onActiveTaskClick,
   onNavItemClick,
   onProjectClick,
   currentView,
@@ -133,9 +127,7 @@ export function LeftNav({
 
         <ActiveSection
           agents={activeAgents}
-          tasks={activeTasks}
           onAgentClick={onActiveAgentClick}
-          onTaskClick={onActiveTaskClick}
         />
         <FavoritesSection
           items={favorites}

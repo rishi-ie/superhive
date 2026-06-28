@@ -2,13 +2,13 @@
  * Collapsible Favorites section with star icon and item list.
  */
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Star, Users, Layers } from 'lucide-react';
+import { ChevronDown, ChevronRight, Star, Bot, Layers } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { IconKey } from '@/data/mock/types';
 import type { FavoriteItem } from '@/data/favorites/interface';
 
 const ITEM_ICONS: Record<IconKey, React.ReactElement> = {
-  user: <Users size={12} strokeWidth={STROKE_WIDTH} />,
+  user: <Bot size={12} strokeWidth={STROKE_WIDTH} />,
   folder: <Layers size={12} strokeWidth={STROKE_WIDTH} />,
 };
 

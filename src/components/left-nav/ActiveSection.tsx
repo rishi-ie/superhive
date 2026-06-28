@@ -1,5 +1,5 @@
 /**
- * Collapsible Active section — shows active agents and tasks with status indicators.
+ * Collapsible Active section — shows active agents with status indicators.
  */
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Zap } from 'lucide-react';
@@ -15,32 +15,26 @@ export type ActiveAgent = {
   currentTask?: string;
 };
 
-export type ActiveTask = {
-  id: string;
-  title: string;
-  assignedTo?: string;
-};
-
 type ActiveSectionProps = {
   agents: ActiveAgent[];
-  tasks: { id: string; title: string; assignedTo?: string }[];
   onAgentClick?: (id: string) => void;
-  onTaskClick?: (id: string) => void;
 };
 
+const MAX_VISIBLE = 5;
+
 /**
- * Collapsible Active section — shows active agents and tasks with status indicators.
+ * Collapsible Active section — shows active agents with status indicators.
  * @param agents - Active agents to display
- * @param tasks - Active tasks to display
- * @param onAgentClick - Called when agent is clicked
- * @param onTaskClick - Called when task is clicked
+ * @param onAgentClick - Called when an agent is clicked
  */
-export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: ActiveSectionProps) {
+export function ActiveSection({ agents, onAgentClick }: ActiveSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const activeCount = agents.filter((a) => a.status === 'active' || a.status === 'busy').length;
+  const visible = agents.slice(0, MAX_VISIBLE);
+  const overflow = agents.length - MAX_VISIBLE;
 
-  if (agents.length === 0 && tasks.length === 0) {
+  if (agents.length === 0) {
     return null;
   }
 
@@ -63,7 +57,7 @@ export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: Acti
       </button>
       {isExpanded && (
         <div className="mt-0.5 ml-2 space-y-0.5">
-          {agents.slice(0, 5).map((agent) => (
+          {visible.map((agent) => (
             <button
               key={agent.id}
               onClick={() => onAgentClick?.(agent.id)}
@@ -87,16 +81,11 @@ export function ActiveSection({ agents, tasks, onAgentClick, onTaskClick }: Acti
               )}
             </button>
           ))}
-          {tasks.slice(0, 3).map((task) => (
-            <button
-              key={task.id}
-              onClick={() => onTaskClick?.(task.id)}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
-            >
-              <div className="size-1.5 rounded-full bg-chart-1 shrink-0" />
-              <span className="flex-1 truncate text-left text-xs">{task.title}</span>
-            </button>
-          ))}
+          {overflow > 0 && (
+            <span className="ml-2 text-[10px] text-muted-foreground/60">
+              +{overflow} more
+            </span>
+          )}
         </div>
       )}
     </div>
