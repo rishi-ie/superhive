@@ -9,13 +9,13 @@ import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { Select } from '@/components/ui/Select';
 import { ChannelStatusPill } from '@/components/channels';
-import { OnboardingWizard } from './OnboardingWizard';
-import { UNIVERSAL_CHANNELS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { MessageSquare } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import { listChannels, listProjectAgents } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { ChannelStatus } from '@/data/projects/interface';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'recent' | 'messages';
 
@@ -29,15 +29,15 @@ const STATUS_OPTIONS = [
 type UniversalChannelsViewProps = {
   onChannelSelect?: (id: string, workspaceId: string) => void;
   selectedChannelId?: string | null;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateChannel?: () => void;
 };
 
 /**
  * @param onChannelSelect - Called when a channel is selected
  * @param selectedChannelId - Currently selected channel ID
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateChannel - Called when "New Channel" is clicked
  */
-export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAction }: UniversalChannelsViewProps) {
+export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onCreateChannel }: UniversalChannelsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ChannelStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('recent');
@@ -104,7 +104,11 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAc
 
   if (channels.length === 0) {
     return (
-      <OnboardingWizard config={UNIVERSAL_CHANNELS_WIZARD_CONFIG} onAction={onAction} />
+      <EmptyState
+        icon={<MessageSquare size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No channels yet"
+        description="Channels are where agents and humans coordinate work"
+      />
     );
   }
 
@@ -134,7 +138,7 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onAc
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Channel" onClick={() => onAction?.('create-universal-channel')} />
+        <NewButton label="New Channel" onClick={onCreateChannel} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

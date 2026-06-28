@@ -3,11 +3,11 @@
  */
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
-import { OnboardingWizard } from './OnboardingWizard';
-import { AGENTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { Bot } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import { listAgents } from '@/data/agents/store';
 import { listProjectAgents } from '@/data/projects/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type AgentCardProps = {
   agent: ReturnType<typeof listAgents>[number];
@@ -43,16 +43,14 @@ type AgentsViewProps = {
   workspaceId?: string;
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
-  onAction?: OnboardingWizardProps['onAction'];
 };
 
 /**
  * @param workspaceId - Optional workspace to filter agents
  * @param onAgentSelect - Called when an agent is selected
  * @param selectedAgentId - Currently selected agent ID
- * @param onAction - Called when an onboarding action is taken
  */
-export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId, onAction }: AgentsViewProps) {
+export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId }: AgentsViewProps) {
   const allAgents = listAgents();
   const workspaceAgentIds = workspaceId
     ? new Set(listProjectAgents(workspaceId).map(a => a.id))
@@ -63,9 +61,10 @@ export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId, onActi
 
   if (agents.length === 0) {
     return (
-      <OnboardingWizard
-        config={AGENTS_WIZARD_CONFIG}
-        onAction={onAction}
+      <EmptyState
+        icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No agents yet"
+        description="AI agents execute work, monitor systems, and coordinate with the swarm"
       />
     );
   }

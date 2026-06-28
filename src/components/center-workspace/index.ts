@@ -19,7 +19,6 @@ export { CommunicationsView } from './CommunicationsView';
 export { ExecutionStream } from './ExecutionStream';
 export { KanbanBoard } from './KanbanBoard';
 export { KanbanColumn } from './KanbanColumn';
-export { OnboardingWizard } from './OnboardingWizard';
 export { ProjectDetailView } from './ProjectDetailView';
 export { ProjectsView } from './ProjectsView';
 export { SwarmRoster } from './SwarmRoster';

@@ -9,11 +9,11 @@ import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { Select } from '@/components/ui/Select';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
-import { OnboardingWizard } from './OnboardingWizard';
-import { AGENTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { Bot } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import { listAgents, getTelemetry, getPermissions, getAuditItems, getActionLog, getNextStep } from '@/data/agents/store';
 import type { AgentStatus } from '@/data/agents/interface';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'name' | 'uptime';
 
@@ -47,15 +47,15 @@ function ContextBar({ value }: { value: number }) {
 type UniversalAgentsViewProps = {
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateAgent?: () => void;
 };
 
 /**
  * @param onAgentSelect - Called when an agent is selected
  * @param selectedAgentId - Currently selected agent ID
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateAgent - Called when "New Agent" is clicked
  */
-export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }: UniversalAgentsViewProps) {
+export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onCreateAgent }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -98,7 +98,11 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }
 
   if (agents.length === 0) {
     return (
-      <OnboardingWizard config={AGENTS_WIZARD_CONFIG} onAction={onAction} />
+      <EmptyState
+        icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No agents yet"
+        description="AI agents execute work, monitor systems, and coordinate with the swarm"
+      />
     );
   }
 
@@ -128,7 +132,7 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onAction }
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Agent" onClick={() => onAction?.('configure-agent')} />
+        <NewButton label="New Agent" onClick={onCreateAgent} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

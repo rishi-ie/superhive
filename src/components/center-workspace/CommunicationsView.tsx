@@ -8,12 +8,12 @@ import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { ChannelStatusPill } from '@/components/channels';
-import { OnboardingWizard } from './OnboardingWizard';
-import { COMMUNICATIONS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { MessageCircle } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import { listChannels, listProjectAgents } from '@/data/projects/store';
 import { formatRelativeTime } from '@/lib/relative-time';
 import type { ChannelStatus } from '@/data/projects/interface';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 import { Select } from '@/components/ui/Select';
 
 type SortKey = 'status' | 'recent' | 'messages';
@@ -29,16 +29,16 @@ type CommunicationsViewProps = {
   workspaceId: string;
   selectedChannelId?: string | null;
   onChannelSelect?: (id: string, workspaceId: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateChannel?: () => void;
 };
 
 /**
  * @param workspaceId - Current workspace ID
  * @param selectedChannelId - Currently selected channel ID
  * @param onChannelSelect - Called when a channel is selected
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateChannel - Called when "New Channel" is clicked
  */
-export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSelect, onAction }: CommunicationsViewProps) {
+export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSelect, onCreateChannel }: CommunicationsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | ChannelStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -95,9 +95,10 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
 
   if (channels.length === 0) {
     return (
-      <OnboardingWizard
-        config={COMMUNICATIONS_WIZARD_CONFIG}
-        onAction={onAction}
+      <EmptyState
+        icon={<MessageCircle size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No channels yet"
+        description="Channels are where agents and humans coordinate work"
       />
     );
   }
@@ -128,7 +129,7 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Channel" onClick={() => onAction?.('create-channel')} />
+        <NewButton label="New Channel" onClick={onCreateChannel} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

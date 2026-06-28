@@ -12,7 +12,6 @@ import { ChannelStatusPill } from '@/components/channels';
 import { listChannelMessages, addChannelMessage, listProjectAgents, getChannel } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import type { ChannelMessage } from '@/data/projects/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type ChannelDetailViewProps = {
   channelId: string;
@@ -20,7 +19,6 @@ type ChannelDetailViewProps = {
   onParticipantClick?: (agentId: string) => void;
   onTicketClick?: (ticketId: string) => void;
   onAgentSelect?: (agentId: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
 };
 
 function ChannelMessageItem({ msg, agentMap, onParticipantClick }: {

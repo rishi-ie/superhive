@@ -4,11 +4,8 @@
  */
 import { CenterBreadcrumb } from './CenterBreadcrumb';
 import { CenterTabStrip } from './CenterTabStrip';
-import { OnboardingWizard } from './OnboardingWizard';
-import { CENTER_EMPTY_STATE_CONFIG } from '@/data/config/wizard-configs';
 import { TabBody } from './TabBody';
 import type { CenterTab } from '@/data/tabs/interface';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type CenterWorkspaceProps = {
   tabs: CenterTab[];
@@ -22,9 +19,12 @@ type CenterWorkspaceProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onNavItemClick?: (id: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
   onSend?: (message: string) => void;
   onOpenTickets?: () => void;
+  onCreateProject?: () => void;
+  onCreateTicket?: () => void;
+  onCreateChannel?: () => void;
+  onCreateAgent?: () => void;
 };
 
 /**
@@ -39,9 +39,12 @@ type CenterWorkspaceProps = {
  * @param onProjectSelect - Called when a project is selected
  * @param onChannelSelect - Called when a channel is selected
  * @param onNavItemClick - Called when a nav item is clicked (e.g. section see-more)
- * @param onAction - Called when an onboarding action is taken
  * @param onSend - Called when a chat message is sent
  * @param onOpenTickets - Called when "open tickets" is clicked
+ * @param onCreateProject - Called when "New Project" is clicked
+ * @param onCreateTicket - Called when "New Ticket" is clicked
+ * @param onCreateChannel - Called when "New Channel" is clicked
+ * @param onCreateAgent - Called when "New Agent" is clicked
  */
 export function CenterWorkspace({
   tabs,
@@ -55,25 +58,14 @@ export function CenterWorkspace({
   onProjectSelect,
   onChannelSelect,
   onNavItemClick,
-  onAction,
   onSend,
   onOpenTickets,
+  onCreateProject,
+  onCreateTicket,
+  onCreateChannel,
+  onCreateAgent,
 }: CenterWorkspaceProps) {
-  const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
-
-  if (!activeTab) {
-    return (
-      <div className="flex h-full flex-1 flex-col min-w-0 bg-background">
-        <div className="h-2 shrink-0" />
-        <div className="flex-1 flex items-center justify-center">
-          <OnboardingWizard
-            config={CENTER_EMPTY_STATE_CONFIG}
-            onAction={onAction}
-          />
-        </div>
-      </div>
-    );
-  }
+  const activeTab = tabs.find(t => t.id === activeTabId)!;
 
   const wsId = activeTab.workspaceId;
   const workspaceName = workspaceMap[wsId] ?? wsId;
@@ -102,9 +94,12 @@ export function CenterWorkspace({
           onProjectSelect={onProjectSelect}
           onChannelSelect={onChannelSelect}
           onNavItemClick={onNavItemClick}
-          onAction={onAction}
           onSend={onSend}
           onOpenTickets={onOpenTickets}
+          onCreateProject={onCreateProject}
+          onCreateTicket={onCreateTicket}
+          onCreateChannel={onCreateChannel}
+          onCreateAgent={onCreateAgent}
         />
       </div>
     </div>

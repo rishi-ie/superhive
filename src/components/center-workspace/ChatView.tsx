@@ -16,14 +16,12 @@ type ChatViewProps = {
   workspaceId: string;
   agentId?: string | null;
   onSend?: (message: string) => void;
-  onAction?: (actionId: string) => void;
 };
 
 /**
  * @param workspaceId - Current workspace ID
  * @param agentId - Agent to chat with (null for no agent)
  * @param onSend - Called when a message is sent
- * @param onAction - Called when an action button is clicked
  */
 export function ChatView({ agentId, onSend }: ChatViewProps) {
   const agent = agentId ? getAgent(agentId) ?? null : null;

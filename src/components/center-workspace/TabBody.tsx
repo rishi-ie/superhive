@@ -15,7 +15,6 @@ import { HomeView } from './HomeView';
 import { getProject } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import type { CenterTab } from '@/data/tabs/interface';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type TabBodyProps = {
   tab: CenterTab;
@@ -24,9 +23,12 @@ type TabBodyProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onNavItemClick?: (id: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
   onSend?: (message: string) => void;
   onOpenTickets?: () => void;
+  onCreateProject?: () => void;
+  onCreateTicket?: () => void;
+  onCreateChannel?: () => void;
+  onCreateAgent?: () => void;
 };
 
 /**
@@ -36,11 +38,14 @@ type TabBodyProps = {
  * @param onProjectSelect - Called when a project is selected
  * @param onChannelSelect - Called when a channel is selected
  * @param onNavItemClick - Called when a nav item is clicked (e.g. section see-more)
- * @param onAction - Called when an onboarding action is taken
  * @param onSend - Called when a chat message is sent
  * @param onOpenTickets - Called when "open tickets" is clicked
+ * @param onCreateProject - Called when "New Project" is clicked
+ * @param onCreateTicket - Called when "New Ticket" is clicked
+ * @param onCreateChannel - Called when "New Channel" is clicked
+ * @param onCreateAgent - Called when "New Agent" is clicked
  */
-export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChannelSelect, onNavItemClick, onAction, onSend, onOpenTickets }: TabBodyProps) {
+export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, onChannelSelect, onNavItemClick, onSend, onOpenTickets, onCreateProject, onCreateTicket, onCreateChannel, onCreateAgent }: TabBodyProps) {
   switch (tab.type) {
     case 'projects':
       return (
@@ -50,7 +55,6 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           onAgentClick={onAgentSelect}
           onChannelClick={onChannelSelect}
           onOpenTickets={onOpenTickets}
-          onAction={onAction}
         />
       );
 
@@ -63,7 +67,6 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           onAgentClick={onAgentSelect}
           onChannelClick={onChannelSelect}
           onOpenTickets={onOpenTickets}
-          onAction={onAction}
         />
       );
     }
@@ -74,6 +77,7 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           workspaceId={tab.workspaceId}
           selectedTicketId={tab.selectedTicketId ?? undefined}
           onTicketSelect={onTicketSelect}
+          onCreateTicket={onCreateTicket}
         />
       );
 
@@ -82,6 +86,7 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
         <CommunicationsView
           workspaceId={tab.workspaceId}
           onChannelSelect={onChannelSelect ? (id) => onChannelSelect(id, tab.workspaceId) : undefined}
+          onCreateChannel={onCreateChannel}
         />
       );
 
@@ -107,7 +112,8 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           onChannelSelect={onChannelSelect}
           onTicketSelect={onTicketSelect}
           onNavItemClick={onNavItemClick}
-          onAction={onAction}
+          onCreateProject={onCreateProject}
+          onCreateAgent={onCreateAgent}
         />
       );
     }
@@ -126,7 +132,6 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
         <ChatView
           workspaceId={tab.workspaceId}
           agentId={tab.selectedAgentId ?? undefined}
-          onAction={onAction}
           onSend={onSend}
         />
       );
@@ -136,7 +141,7 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
         <UniversalAgentsView
           onAgentSelect={onAgentSelect}
           selectedAgentId={tab.selectedAgentId ?? undefined}
-          onAction={onAction}
+          onCreateAgent={onCreateAgent}
         />
       );
 
@@ -145,7 +150,7 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
         <UniversalProjectsView
           onProjectSelect={onProjectSelect}
           selectedProjectId={tab.selectedProjectId ?? undefined}
-          onAction={onAction}
+          onCreateProject={onCreateProject}
         />
       );
 
@@ -154,7 +159,7 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
         <UniversalChannelsView
           onChannelSelect={onChannelSelect}
           selectedChannelId={tab.selectedChannelId ?? undefined}
-          onAction={onAction}
+          onCreateChannel={onCreateChannel}
         />
       );
 

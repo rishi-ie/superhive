@@ -4,10 +4,10 @@
 import { ExecutionStream } from './ExecutionStream';
 import { SwarmRoster } from './SwarmRoster';
 import { Communications } from './Communications';
-import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { Layers } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import type { Project } from '@/data/projects/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 import { StatCard } from '@/components/ui/StatCard';
 
 type ProjectDetailViewProps = {
@@ -16,16 +16,14 @@ type ProjectDetailViewProps = {
   onAgentClick?: (id: string) => void;
   onChannelClick?: (id: string, workspaceId: string) => void;
   onOpenTickets?: () => void;
-  onAction?: OnboardingWizardProps['onAction'];
 };
 
 /**
- * @param project - Project to display (null shows onboarding)
+ * @param project - Project to display (null shows empty state)
  * @param onTicketSelect - Called when a ticket is selected
  * @param onAgentClick - Called when an agent is clicked
  * @param onChannelClick - Called when a channel is clicked
  * @param onOpenTickets - Called when "open tickets" is clicked
- * @param onAction - Called when an onboarding action is taken
  */
 export function ProjectDetailView({
   project,
@@ -33,13 +31,13 @@ export function ProjectDetailView({
   onAgentClick,
   onChannelClick,
   onOpenTickets,
-  onAction,
 }: ProjectDetailViewProps) {
   if (!project) {
     return (
-      <OnboardingWizard
-        config={PROJECTS_WIZARD_CONFIG}
-        onAction={onAction}
+      <EmptyState
+        icon={<Layers size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No project selected"
+        description="Select a project from the sidebar to view its details"
       />
     );
   }

@@ -4,15 +4,15 @@
 import { ExecutionStream } from './ExecutionStream';
 import { SwarmRoster } from './SwarmRoster';
 import { Communications } from './Communications';
-import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { Layers } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import {
   getProjectTitle,
   listTickets,
   listProjectAgents,
   listChannels,
 } from '@/data/projects/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type ProjectsViewProps = {
   workspaceId: string;
@@ -21,7 +21,6 @@ type ProjectsViewProps = {
   onAgentClick?: (id: string) => void;
   onChannelClick?: (id: string, workspaceId: string) => void;
   onOpenTickets?: () => void;
-  onAction?: OnboardingWizardProps['onAction'];
 };
 
 /**
@@ -31,16 +30,16 @@ type ProjectsViewProps = {
  * @param onAgentClick - Called when an agent is clicked
  * @param onChannelClick - Called when a channel is clicked
  * @param onOpenTickets - Called when "open tickets" is clicked
- * @param onAction - Called when an onboarding action is taken
  */
-export function ProjectsView({ workspaceId, projectId, onTicketSelect, onAgentClick, onChannelClick, onOpenTickets, onAction }: ProjectsViewProps) {
+export function ProjectsView({ workspaceId, projectId, onTicketSelect, onAgentClick, onChannelClick, onOpenTickets }: ProjectsViewProps) {
   const title = projectId ? getProjectTitle(workspaceId) : getProjectTitle(workspaceId);
 
   if (!title) {
     return (
-      <OnboardingWizard
-        config={PROJECTS_WIZARD_CONFIG}
-        onAction={onAction}
+      <EmptyState
+        icon={<Layers size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No projects yet"
+        description="Projects are containers for tickets, agents, and communications"
       />
     );
   }

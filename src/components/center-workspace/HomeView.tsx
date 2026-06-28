@@ -25,7 +25,7 @@ import {
   listAgents,
   getNextStep,
 } from '@/data/agents/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
+
 
 const TICKET_COLUMNS = ['BACKLOG', 'EXECUTING', 'REVIEW'] as const;
 const TICKETS_PER_COLUMN = 2;
@@ -38,7 +38,8 @@ type HomeViewProps = {
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onTicketSelect?: (id: string) => void;
   onNavItemClick?: (id: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateProject?: () => void;
+  onCreateAgent?: () => void;
 };
 
 const MAX_ITEMS = 3;
@@ -72,7 +73,8 @@ function SeeMoreCard({ onClick, heightClass }: { onClick: () => void; heightClas
  * @param onChannelSelect - Called when a channel is selected
  * @param onTicketSelect - Called when a ticket is selected
  * @param onNavItemClick - Called when a nav item is clicked (e.g. section see-more)
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateProject - Called when "New Project" is clicked
+ * @param onCreateAgent - Called when "New Agent" is clicked
  */
 export function HomeView({
   workspaceId,
@@ -82,7 +84,8 @@ export function HomeView({
   onChannelSelect,
   onTicketSelect,
   onNavItemClick,
-  onAction,
+  onCreateProject,
+  onCreateAgent,
 }: HomeViewProps) {
   const workspaceProjects = useMemo(
     () => listProjects({ status: 'ACTIVE' }).filter(p => p.workspaceId === workspaceId),
@@ -130,6 +133,72 @@ export function HomeView({
 
   const navigate = (id: string) => () => onNavItemClick?.(id);
 
+  const hasNoData =
+    workspaceProjects.length === 0 &&
+    workspaceAgents.length === 0 &&
+    workspaceChannels.length === 0 &&
+    workspaceTickets.length === 0;
+
+  if (hasNoData) {
+    return (
+      <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
+
+        {/* Header — workspace name only */}
+        <h1 className="text-xl font-bold text-foreground">{workspaceName}</h1>
+
+        {/* Stat strip — 4 cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard label="Projects" value={workspaceProjects.length} />
+          <StatCard
+            label="Open Tickets"
+            value={workspaceTickets.filter(t => t.status !== 'MERGED').length}
+          />
+          <StatCard
+            label="Active Agents"
+            value={workspaceAgents.filter(a => a.status === 'EXECUTING' || a.status === 'COMPILING').length}
+            color="text-chart-2"
+          />
+          <StatCard
+            label="Awaiting Reply"
+            value={awaitingChannels}
+            color="text-chart-3"
+          />
+        </div>
+
+        {/* Two empty states side by side — Projects + Agents */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="rounded-md border border-border/40 bg-card/30">
+            <EmptyState
+              icon={<FolderOpen size={28} strokeWidth={1.5} />}
+              title="No projects yet"
+              description="Create your first project to get started."
+              action={
+                <NewButton
+                  label="New Project"
+                  onClick={() => onCreateProject?.()}
+                />
+              }
+            />
+          </div>
+          <div className="rounded-md border border-border/40 bg-card/30">
+            <EmptyState
+              icon={<Bot size={28} strokeWidth={1.5} />}
+              title="No agents yet"
+              description="Add agents to your workspace to get started."
+              action={
+                <NewButton
+                  label="New Agent"
+                  onClick={() => onCreateAgent?.()}
+                />
+              }
+            />
+          </div>
+        </div>
+
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
 
@@ -138,7 +207,7 @@ export function HomeView({
         <h1 className="text-xl font-bold text-foreground">{workspaceName}</h1>
         <NewButton
           label="New Project"
-          onClick={() => onAction?.('create-project')}
+          onClick={() => onCreateProject?.()}
         />
       </div>
 
@@ -172,7 +241,7 @@ export function HomeView({
             action={
               <NewButton
                 label="New Project"
-                onClick={() => onAction?.('create-project')}
+                onClick={() => onCreateProject?.()}
               />
             }
           />

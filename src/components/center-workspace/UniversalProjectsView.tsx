@@ -9,12 +9,11 @@ import { StatusFilter, type FilterOption } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { Select } from '@/components/ui/Select';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
-import { OnboardingWizard } from './OnboardingWizard';
-import { PROJECTS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { Layers } from 'lucide-react';
 import { listProjects } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { formatRelativeTime } from '@/lib/relative-time';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'name' | 'activity' | 'tickets';
 
@@ -23,15 +22,15 @@ type WorkspaceFilter = 'ALL' | string;
 type UniversalProjectsViewProps = {
   onProjectSelect?: (id: string, workspaceId: string) => void;
   selectedProjectId?: string | null;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateProject?: () => void;
 };
 
 /**
  * @param onProjectSelect - Called when a project is selected
  * @param selectedProjectId - Currently selected project ID
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateProject - Called when "New Project" is clicked
  */
-export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAction }: UniversalProjectsViewProps) {
+export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onCreateProject }: UniversalProjectsViewProps) {
   const [query, setQuery] = useState('');
   const [workspaceFilter, setWorkspaceFilter] = useState<WorkspaceFilter>('ALL');
   const [sort, setSort] = useState<SortKey>('activity');
@@ -92,7 +91,11 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAc
 
   if (projects.length === 0) {
     return (
-      <OnboardingWizard config={PROJECTS_WIZARD_CONFIG} onAction={onAction} />
+      <EmptyState
+        icon={<Layers size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No projects yet"
+        description="Projects are containers for tickets, agents, and communications"
+      />
     );
   }
 
@@ -122,7 +125,7 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onAc
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Project" onClick={() => onAction?.('create-project')} />
+        <NewButton label="New Project" onClick={onCreateProject} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

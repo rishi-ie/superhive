@@ -3,14 +3,14 @@
  */
 import { useMemo, useState } from 'react';
 import { KanbanBoard } from './KanbanBoard';
-import { OnboardingWizard } from './OnboardingWizard';
+import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
+import { ClipboardCheck } from 'lucide-react';
+import { STROKE_WIDTH } from '@/lib/constants';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { NewButton } from '@/components/ui/NewButton';
 import { Select } from '@/components/ui/Select';
-import { TICKETS_WIZARD_CONFIG } from '@/data/config/wizard-configs';
 import { listUniversalTickets } from '@/data/tickets/store';
 import type { UniversalTicketStatus, Priority } from '@/data/tickets/store';
-import type { OnboardingWizardProps } from './OnboardingWizard';
 
 type SortKey = 'status' | 'priority' | 'recent';
 
@@ -31,16 +31,16 @@ type TicketsViewProps = {
   workspaceId: string;
   selectedTicketId?: string | null;
   onTicketSelect?: (id: string) => void;
-  onAction?: OnboardingWizardProps['onAction'];
+  onCreateTicket?: () => void;
 };
 
 /**
  * @param workspaceId - Current workspace ID
  * @param selectedTicketId - Currently selected ticket ID
  * @param onTicketSelect - Called when a ticket is selected
- * @param onAction - Called when an onboarding action is taken
+ * @param onCreateTicket - Called when "New Ticket" is clicked
  */
-export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onAction }: TicketsViewProps) {
+export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onCreateTicket }: TicketsViewProps) {
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('status');
 
@@ -69,9 +69,10 @@ export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onA
 
   if (tickets.length === 0) {
     return (
-      <OnboardingWizard
-        config={TICKETS_WIZARD_CONFIG}
-        onAction={onAction}
+      <EmptyState
+        icon={<ClipboardCheck size={32} strokeWidth={STROKE_WIDTH} />}
+        title="No tickets yet"
+        description="Tickets break work into trackable units for the swarm"
       />
     );
   }
@@ -102,7 +103,7 @@ export function TicketsView({ workspaceId, selectedTicketId, onTicketSelect, onA
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Ticket" onClick={() => onAction?.('create-ticket')} />
+        <NewButton label="New Ticket" onClick={onCreateTicket} />
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">

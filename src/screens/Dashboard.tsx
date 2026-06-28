@@ -241,27 +241,20 @@ export function Dashboard({
     }
   }, [openTab]);
 
-  const handleWizardAction = useCallback((actionId: string) => {
-    const ws = activeWorkspaceId;
-    if (actionId === 'create-project') {
-      setCreateProjectOpen(true);
-      return;
-    }
-    if (actionId === 'open-project') {
-      openTab(buildTab('projects', ws, 'Projects'));
-    } else if (actionId === 'view-agents' || actionId === 'open-agents' || actionId === 'configure-agent') {
-      openTab(buildTab('agents', ws, 'Agents'));
-    } else if (actionId === 'browse-agents' || actionId === 'open-agents') {
-      openTab(buildTab('universal-agents', ws, 'Agents'));
-    } else if (actionId === 'browse-projects' || actionId === 'open-projects') {
-      openTab(buildTab('universal-projects', ws, 'Projects'));
-    } else if (actionId === 'open-tickets' || actionId === 'create-ticket') {
-      openTab(buildTab('tickets', ws, 'Tickets'));
-    } else if (actionId === 'open-comms' || actionId === 'create-channel') {
-      openTab(buildTab('channels', ws, 'Comms'));
-    } else if (actionId === 'browse-channels' || actionId === 'create-universal-channel') {
-      openTab(buildTab('universal-channels', ws, 'Channels'));
-    }
+  const handleCreateProject = useCallback(() => {
+    setCreateProjectOpen(true);
+  }, []);
+
+  const handleCreateTicket = useCallback(() => {
+    openTab(buildTab('tickets', activeWorkspaceId, 'Tickets'));
+  }, [openTab, activeWorkspaceId]);
+
+  const handleCreateChannel = useCallback(() => {
+    openTab(buildTab('channels', activeWorkspaceId, 'Comms'));
+  }, [openTab, activeWorkspaceId]);
+
+  const handleCreateAgent = useCallback(() => {
+    openTab(buildTab('agents', activeWorkspaceId, 'Agents'));
   }, [openTab, activeWorkspaceId]);
 
   const handleProjectCreated = useCallback((project: import('@/data/projects/interface').Project) => {
@@ -372,9 +365,12 @@ export function Dashboard({
         onProjectSelect={handleProjectSelect}
         onChannelSelect={handleChannelSelect}
         onNavItemClick={handleNavItemClick}
-        onAction={handleWizardAction}
         onSend={handleSendMessage}
         onOpenTickets={handleOpenTickets}
+        onCreateProject={handleCreateProject}
+        onCreateTicket={handleCreateTicket}
+        onCreateChannel={handleCreateChannel}
+        onCreateAgent={handleCreateAgent}
       />
       <RightAuxiliary
         width={rightWidth}
