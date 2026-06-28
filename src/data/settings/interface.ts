@@ -154,7 +154,7 @@ export type IntegrationsSettings = {
   integrations: Integration[];
 };
 
-export type PlanTier = 'free' | 'pro' | 'enterprise';
+export type PlanTier = 'free' | 'pro' | 'meta-hive' | 'enterprise';
 
 export type Plan = {
   tier: PlanTier;
@@ -162,7 +162,7 @@ export type Plan = {
   priceMonthly: number;
   includedQuota: string;
   seats: number;
-  canUpgrade: boolean;
+  metaHiveAgents?: number;
 };
 
 export type PaymentMethod = {
