@@ -371,6 +371,7 @@ export function Dashboard({
         onAgentSelect={handleAgentSelect}
         onProjectSelect={handleProjectSelect}
         onChannelSelect={handleChannelSelect}
+        onNavItemClick={handleNavItemClick}
         onAction={handleWizardAction}
         onSend={handleSendMessage}
         onOpenTickets={handleOpenTickets}

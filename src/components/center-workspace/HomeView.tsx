@@ -1,15 +1,16 @@
 /**
  * Home dashboard tab — workspace overview with stats, projects, agents, channels, and tickets.
+ * Each section shows up to 3 cards + a see-more arrow card that links to the full section.
  */
 import { useMemo } from 'react';
-import { FolderOpen, Bot, MessageCircle, ClipboardCheck } from 'lucide-react';
+import { FolderOpen, Bot, MessageCircle, ClipboardCheck, ArrowUpRight } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionLabel } from '@/components/ui/SectionLabel';
 import { NewButton } from '@/components/ui/NewButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
-import { KanbanColumn } from './KanbanColumn';
+import { UniversalTicketCard } from './tickets/UniversalTicketCard';
 import { ChannelStatusPill } from '@/components/channels/ChannelStatusPill';
 import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import {
@@ -26,6 +27,9 @@ import {
 } from '@/data/agents/store';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
+const TICKET_COLUMNS = ['BACKLOG', 'EXECUTING', 'REVIEW'] as const;
+const TICKETS_PER_COLUMN = 2;
+
 type HomeViewProps = {
   workspaceId: string;
   workspaceName: string;
@@ -33,8 +37,32 @@ type HomeViewProps = {
   onAgentSelect?: (id: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
   onTicketSelect?: (id: string) => void;
+  onNavItemClick?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
 };
+
+const MAX_ITEMS = 3;
+
+/**
+ * Dashed-border card with an arrow icon — slots into a section's grid as the 4th cell
+ * to deep-link the user to the full section view.
+ */
+function SeeMoreCard({ onClick, heightClass }: { onClick: () => void; heightClass: string }) {
+  return (
+    <button
+      onClick={onClick}
+      type="button"
+      aria-label="See more"
+      className={`w-full flex items-center justify-center rounded-md border border-dashed border-border/60 hover:border-chart-1/60 hover:bg-hover-tint transition-colors group ${heightClass}`}
+    >
+      <ArrowUpRight
+        size={16}
+        strokeWidth={STROKE_WIDTH}
+        className="text-muted-foreground group-hover:text-chart-1 transition-colors"
+      />
+    </button>
+  );
+}
 
 /**
  * @param workspaceId - Current workspace ID
@@ -43,6 +71,7 @@ type HomeViewProps = {
  * @param onAgentSelect - Called when an agent is selected
  * @param onChannelSelect - Called when a channel is selected
  * @param onTicketSelect - Called when a ticket is selected
+ * @param onNavItemClick - Called when a nav item is clicked (e.g. section see-more)
  * @param onAction - Called when an onboarding action is taken
  */
 export function HomeView({
@@ -52,6 +81,7 @@ export function HomeView({
   onAgentSelect,
   onChannelSelect,
   onTicketSelect,
+  onNavItemClick,
   onAction,
 }: HomeViewProps) {
   const workspaceProjects = useMemo(
@@ -94,6 +124,12 @@ export function HomeView({
     [workspaceChannels],
   );
 
+  const topProjects = workspaceProjects.slice(0, MAX_ITEMS);
+  const topAgents = workspaceAgents.slice(0, MAX_ITEMS);
+  const topChannels = workspaceChannels.slice(0, MAX_ITEMS);
+
+  const navigate = (id: string) => () => onNavItemClick?.(id);
+
   return (
     <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
 
@@ -125,7 +161,7 @@ export function HomeView({
         />
       </div>
 
-      {/* Projects — compact card grid */}
+      {/* Projects — full-width 3-col grid with optional 4th see-more */}
       <div className="space-y-2">
         <SectionLabel>Projects</SectionLabel>
         {workspaceProjects.length === 0 ? (
@@ -141,12 +177,12 @@ export function HomeView({
             }
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-            {workspaceProjects.slice(0, 9).map(p => (
+          <div className="grid grid-cols-3 gap-2">
+            {topProjects.map(p => (
               <button
                 key={p.id}
                 onClick={() => onProjectSelect?.(p.id, workspaceId)}
-                className="flex flex-col gap-1.5 p-3 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group"
+                className="flex flex-col gap-1.5 p-3 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group min-h-[56px]"
               >
                 <div className="flex items-center gap-2">
                   <span
@@ -163,6 +199,12 @@ export function HomeView({
                 </div>
               </button>
             ))}
+            {workspaceProjects.length > MAX_ITEMS && (
+              <SeeMoreCard
+                onClick={navigate('universal-projects')}
+                heightClass="min-h-[56px]"
+              />
+            )}
           </div>
         )}
       </div>
@@ -170,7 +212,7 @@ export function HomeView({
       {/* Agents + Channels — side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        {/* Agents — compact card grid */}
+        {/* Agents — 2-col card grid */}
         <div className="space-y-2">
           <SectionLabel>Agents</SectionLabel>
           {workspaceAgents.length === 0 ? (
@@ -181,13 +223,13 @@ export function HomeView({
             />
           ) : (
             <div className="grid grid-cols-2 gap-2">
-              {workspaceAgents.slice(0, 8).map(agent => {
+              {topAgents.map(agent => {
                 const nextStep = getNextStep(agent.id);
                 return (
                   <button
                     key={agent.id}
                     onClick={() => onAgentSelect?.(agent.id)}
-                    className="flex items-start gap-2.5 p-2.5 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group"
+                    className="flex items-start gap-2.5 p-2.5 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group min-h-[62px]"
                   >
                     <Avatar
                       size="xs"
@@ -215,6 +257,12 @@ export function HomeView({
                   </button>
                 );
               })}
+              {workspaceAgents.length > MAX_ITEMS && (
+                <SeeMoreCard
+                  onClick={navigate('universal-agents')}
+                  heightClass="min-h-[62px]"
+                />
+              )}
             </div>
           )}
         </div>
@@ -230,11 +278,11 @@ export function HomeView({
             />
           ) : (
             <div className="flex flex-col gap-1">
-              {workspaceChannels.slice(0, 8).map(ch => (
+              {topChannels.map(ch => (
                 <button
                   key={ch.id}
                   onClick={() => onChannelSelect?.(ch.id, workspaceId)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-md border border-border/40 bg-card hover:bg-hover-tint hover:border-border/80 transition-colors text-left group min-h-[32px]"
                 >
                   <MessageCircle
                     size={13}
@@ -252,12 +300,18 @@ export function HomeView({
                   )}
                 </button>
               ))}
+              {workspaceChannels.length > MAX_ITEMS && (
+                <SeeMoreCard
+                  onClick={navigate('channels')}
+                  heightClass="min-h-[32px]"
+                />
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Ticket board — horizontal scroll of kanban columns */}
+      {/* Ticket Board — 3 kanban columns, max 2 tickets per column, single see-more card */}
       <div className="space-y-2">
         <SectionLabel>Ticket Board</SectionLabel>
         {workspaceTickets.length === 0 ? (
@@ -267,21 +321,42 @@ export function HomeView({
             description="Tickets assigned to this workspace will appear here."
           />
         ) : (
-          <div className="flex gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pb-1">
-            {(['BACKLOG', 'EXECUTING', 'REVIEW', 'MERGED'] as const).map(status => {
-              const col = ticketsByStatus[status] ?? [];
-              return (
-                <KanbanColumn
-                  key={status}
-                  label={status}
-                  status={status}
-                  tickets={col.slice(0, 6)}
-                  selectedTicketId={null}
-                  onTicketSelect={onTicketSelect}
-                />
-              );
-            })}
-          </div>
+          <>
+            <div className="flex gap-3 pb-1">
+              {TICKET_COLUMNS.map(status => {
+                const col = ticketsByStatus[status] ?? [];
+                const visible = col.slice(0, TICKETS_PER_COLUMN);
+                return (
+                  <div key={status} className="flex flex-col gap-1.5 min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 px-1">
+                      <span className="font-medium text-muted-foreground uppercase tracking-wider text-[11px]">
+                        {status}
+                      </span>
+                      <span className="text-[9px] font-fustat text-muted-foreground/60 bg-secondary/80 rounded-full px-1.5 py-0.5">
+                        {col.length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      {visible.map(ticket => (
+                        <UniversalTicketCard
+                          key={ticket.id}
+                          ticket={ticket}
+                          selected={false}
+                          onClick={() => onTicketSelect?.(ticket.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {workspaceTickets.length > TICKET_COLUMNS.length * TICKETS_PER_COLUMN && (
+              <SeeMoreCard
+                onClick={navigate('tickets')}
+                heightClass="min-h-[40px]"
+              />
+            )}
+          </>
         )}
       </div>
 

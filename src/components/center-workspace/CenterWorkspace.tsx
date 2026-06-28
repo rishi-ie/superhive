@@ -21,6 +21,7 @@ type CenterWorkspaceProps = {
   onAgentSelect?: (id: string) => void;
   onProjectSelect?: (id: string, workspaceId: string) => void;
   onChannelSelect?: (id: string, workspaceId: string) => void;
+  onNavItemClick?: (id: string) => void;
   onAction?: OnboardingWizardProps['onAction'];
   onSend?: (message: string) => void;
   onOpenTickets?: () => void;
@@ -37,6 +38,7 @@ type CenterWorkspaceProps = {
  * @param onAgentSelect - Called when an agent is selected
  * @param onProjectSelect - Called when a project is selected
  * @param onChannelSelect - Called when a channel is selected
+ * @param onNavItemClick - Called when a nav item is clicked (e.g. section see-more)
  * @param onAction - Called when an onboarding action is taken
  * @param onSend - Called when a chat message is sent
  * @param onOpenTickets - Called when "open tickets" is clicked
@@ -52,6 +54,7 @@ export function CenterWorkspace({
   onAgentSelect,
   onProjectSelect,
   onChannelSelect,
+  onNavItemClick,
   onAction,
   onSend,
   onOpenTickets,
@@ -98,6 +101,7 @@ export function CenterWorkspace({
           onAgentSelect={onAgentSelect}
           onProjectSelect={onProjectSelect}
           onChannelSelect={onChannelSelect}
+          onNavItemClick={onNavItemClick}
           onAction={onAction}
           onSend={onSend}
           onOpenTickets={onOpenTickets}
