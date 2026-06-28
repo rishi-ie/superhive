@@ -3,7 +3,6 @@
  */
 export { AccountSettings } from './AccountSettings';
 export { AccessibilitySettings } from './AccessibilitySettings';
-export { AgentsSettings } from './AgentsSettings';
 export { AppearanceSettings } from './AppearanceSettings';
 export { BillingSettings } from './BillingSettings';
 export { CostUsageSettings } from './CostUsageSettings';

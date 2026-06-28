@@ -14,7 +14,6 @@ import {
   Globe,
   Workflow,
   Coins,
-  Bot,
   Folder,
   CreditCard,
 } from 'lucide-react';
@@ -29,7 +28,6 @@ import { KeyboardSettings } from '@/components/settings/KeyboardSettings';
 import { ModelsSettings } from '@/components/settings/ModelsSettings';
 import { WorkflowsSettings } from '@/components/settings/WorkflowsSettings';
 import { CostUsageSettings } from '@/components/settings/CostUsageSettings';
-import { AgentsSettings } from '@/components/settings/AgentsSettings';
 import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 import { BillingSettings } from '@/components/settings/BillingSettings';
 
@@ -45,7 +43,6 @@ export type SettingsSectionId =
   | 'models'
   | 'workflows'
   | 'cost-usage'
-  | 'agents'
   | 'workspaces'
   | 'billing';
 
@@ -135,13 +132,7 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
     icon: Coins,
     component: CostUsageSettings,
     category: 'workflow',
-  },
-  agents: {
-    id: 'agents',
-    label: 'Agents',
-    icon: Bot,
-    component: AgentsSettings,
-    category: 'workflow',
+    comingSoon: true,
   },
   workspaces: {
     id: 'workspaces',
@@ -168,7 +159,7 @@ export const settingsCategories: SettingsCategoryMeta[] = [
   {
     id: 'workflow',
     label: 'Workflow',
-    sections: ['defaults', 'keyboard', 'models', 'workflows', 'cost-usage', 'agents'],
+    sections: ['defaults', 'keyboard', 'models', 'workflows', 'cost-usage'],
   },
   {
     id: 'organization',
