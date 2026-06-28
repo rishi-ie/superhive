@@ -2,12 +2,11 @@
  * Workspace channel list with search, filter, and sort.
  */
 import { useMemo, useState } from 'react';
-import { Avatar } from '@/components/ui/Avatar';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
-import { ChannelStatusPill } from '@/components/channels';
+import { ChannelStatusPill, ParticipantStack } from '@/components/channels';
 import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { MessageCircle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -154,35 +153,19 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {filtered.map(channel => {
-              const p0 = channel.participants[0] ?? '';
-              const p1 = channel.participants[1] ?? '';
-              const a = agentMap[p0];
-              const b = agentMap[p1];
-              const initialsA = a?.initials ?? p0.slice(0, 2).toUpperCase() ?? '?';
-              const initialsB = b?.initials ?? p1.slice(0, 2).toUpperCase() ?? '?';
-
-              return (
-                <UniversalListCard
-                  key={channel.id}
-                  className="flex flex-col gap-1"
-                  selected={selectedChannelId === channel.id}
-                  onClick={onChannelSelect ? () => onChannelSelect(channel.id, workspaceId) : undefined}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="relative shrink-0 size-7">
-                      <Avatar
-                        size="xs"
-                        fallback={initialsA}
-                        className="absolute top-0 left-0 ring-1 ring-card z-10"
-                      />
-                      <Avatar
-                        size="xs"
-                        fallback={initialsB}
-                        className="absolute bottom-0 right-0 ring-1 ring-card"
-                      />
-                    </div>
-                    <span className="text-xs font-semibold text-foreground truncate flex-1">
+            {filtered.map(channel => (
+              <UniversalListCard
+                key={channel.id}
+                className="flex flex-col gap-1"
+                selected={selectedChannelId === channel.id}
+                onClick={onChannelSelect ? () => onChannelSelect(channel.id, workspaceId) : undefined}
+              >
+                  <div className="flex items-center gap-3">
+                    <ParticipantStack
+                      participants={channel.participants}
+                      agentMap={agentMap}
+                    />
+                    <span className="text-xs font-semibold text-foreground truncate flex-1 leading-tight">
                       {channel.topic}
                     </span>
                     {channel.unread && (
@@ -193,28 +176,23 @@ export function CommunicationsView({ workspaceId, selectedChannelId, onChannelSe
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-muted-foreground truncate pl-px leading-4">
+                  <p className="text-[11px] text-muted-foreground truncate pl-px leading-relaxed">
                     {channel.lastMessagePreview}
                   </p>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-muted-foreground">
-                      {channel.participants.join(' ↔ ')}
-                    </span>
-                    <span className="text-muted-foreground/40 shrink-0">·</span>
-                    <span className="text-[9px] font-fustat text-muted-foreground bg-secondary/80 rounded px-1 py-0.5 shrink-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-fustat text-muted-foreground bg-secondary/80 rounded px-1.5 py-0.5 shrink-0">
                       {channel.relatedTicketId}
                     </span>
                     <span className="text-muted-foreground/40 shrink-0">·</span>
-                    <span className="text-[10px] text-muted-foreground shrink-0">
+                    <span className="text-[11px] text-muted-foreground shrink-0">
                       {channel.messageCount} msg{channel.messageCount !== 1 ? 's' : ''}
                     </span>
                     <span className="text-muted-foreground/40 shrink-0">·</span>
                     <ChannelStatusPill status={channel.status} />
                   </div>
-                </UniversalListCard>
-              );
-            })}
+              </UniversalListCard>
+            ))}
           </div>
         )}
       </div>
