@@ -11,7 +11,9 @@ import { UniversalProjectsView } from './UniversalProjectsView';
 import { UniversalAgentsView } from './UniversalAgentsView';
 import { UniversalChannelsView } from './UniversalChannelsView';
 import { ChannelDetailView } from './ChannelDetailView';
+import { HomeView } from './HomeView';
 import { getProject } from '@/data/projects/store';
+import { listWorkspaces } from '@/data/workspaces/store';
 import type { CenterTab } from '@/data/tabs/interface';
 import type { OnboardingWizardProps } from './OnboardingWizard';
 
@@ -90,6 +92,22 @@ export function TabBody({ tab, onTicketSelect, onAgentSelect, onProjectSelect, o
           onAgentSelect={onAgentSelect}
         />
       );
+
+    case 'home': {
+      const workspaces = listWorkspaces();
+      const workspaceName = workspaces.find(w => w.id === tab.workspaceId)?.name ?? tab.workspaceId;
+      return (
+        <HomeView
+          workspaceId={tab.workspaceId}
+          workspaceName={workspaceName}
+          onProjectSelect={onProjectSelect}
+          onAgentSelect={onAgentSelect}
+          onChannelSelect={onChannelSelect}
+          onTicketSelect={onTicketSelect}
+          onAction={onAction}
+        />
+      );
+    }
 
     case 'agents':
       return (

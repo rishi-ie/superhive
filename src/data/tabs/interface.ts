@@ -1,4 +1,5 @@
 export type CenterTabType =
+  | 'home'
   | 'projects'
   | 'project'
   | 'tickets'

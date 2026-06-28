@@ -15,10 +15,10 @@ export function makeInitialTabState(workspaceId: string): TabState {
     tabs: [
       {
         id,
-        type: 'projects',
+        type: 'home',
         workspaceId,
-        title: 'Projects',
-        pinned: true,
+        title: 'Home',
+        pinned: false,
         selectedAgentId: null,
         selectedProjectId: null,
         selectedTicketId: null,

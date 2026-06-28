@@ -7,6 +7,7 @@ export type RightPanelTabId =
   | 'sessions';
 
 export type RightPanelContext =
+  | { kind: 'home'; workspaceId: string }
   | { kind: 'agent'; agentId: string }
   | { kind: 'ticket'; ticketId: string }
   | { kind: 'project'; projectId: string; workspaceId: string }
@@ -33,6 +34,7 @@ const ALL_TABS: RightPanelTab[] = [
 ];
 
 const CONTEXT_VISIBLE_TABS: Record<string, RightPanelTabId[]> = {
+  home:              ['overview', 'inbox'],
   agent:             ['overview', 'manage', 'inbox', 'sessions'],
   ticket:            ['overview', 'manage', 'inbox'],
   project:           ['overview', 'manage', 'inbox'],

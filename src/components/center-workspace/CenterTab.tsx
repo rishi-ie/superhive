@@ -3,13 +3,14 @@
  */
 import {
   MessageSquare, Layers, ClipboardCheck, FolderOpen,
-  MessageCircle, Bot, Users, Settings, Lock, X,
+  MessageCircle, Bot, Users, Settings, Lock, X, Home,
 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { IconButton } from '@/components/ui/IconButton';
 import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/data/tabs/interface';
 
 const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
+  home: Home,
   projects: Layers,
   tickets: ClipboardCheck,
   project: FolderOpen,
@@ -24,6 +25,7 @@ const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
 };
 
 const TYPE_LABELS: Record<TabType, string> = {
+  home: 'Home',
   projects: 'Projects',
   tickets: 'Tickets',
   project: 'Project',
@@ -61,9 +63,7 @@ export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: Ce
     ? tab.subtitle
       ? `${tab.title} · ${tab.subtitle}`
       : tab.title
-    : isUniversal
-    ? typeLabel
-    : `${typeLabel} · ${workspaceName}`;
+    : (isUniversal || tab.type === 'home') ? typeLabel : `${typeLabel} · ${workspaceName}`;
 
   return (
     <button

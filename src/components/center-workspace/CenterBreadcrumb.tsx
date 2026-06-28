@@ -21,6 +21,7 @@ function getBreadcrumbSegments(
   onJump?: (workspaceId: string, section?: string) => void,
 ): TabSegment[] {
   const sections: Record<CenterTab['type'], string | null> = {
+    home: null,
     projects: 'Projects',
     project: 'Project',
     tickets: 'Tickets',

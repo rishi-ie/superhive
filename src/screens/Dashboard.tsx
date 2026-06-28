@@ -141,6 +141,7 @@ export function Dashboard({
     if (activeTab.type === 'universal-agents') return { kind: 'universal-agents' };
     if (activeTab.type === 'universal-projects') return { kind: 'universal-projects' };
     if (activeTab.type === 'universal-channels') return { kind: 'universal-channels' };
+    if (activeTab.type === 'home') return { kind: 'home', workspaceId: activeTab.workspaceId };
     return null;
   }, [activeTab]);
 

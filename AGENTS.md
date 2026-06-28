@@ -48,6 +48,7 @@ src/
 │   │   ├── CenterTab.tsx
 │   │   ├── CenterBreadcrumb.tsx
 │   │   ├── TabBody.tsx       # Tab dispatcher — switch(activeTab.type) renders correct view
+│   │   ├── HomeView.tsx       # Workspace home: stats, projects, agents, channels, ticket board
 │   │   ├── ProjectsView.tsx   # Kanban: To Do / Executing / Done
 │   │   ├── ProjectDetailView.tsx
 │   │   ├── TicketsView.tsx     # Kanban: Backlog / Executing / Review / Merged
