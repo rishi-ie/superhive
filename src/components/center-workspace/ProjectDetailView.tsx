@@ -50,11 +50,11 @@ export function ProjectDetailView({
     <div className="flex flex-col gap-4 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
       <h1 className="text-lg font-bold text-foreground">{project.title}</h1>
 
-      <div className="grid grid-cols-2 gap-2">
-        <StatCard label="Total Tickets" value={project.tickets.length} />
-        <StatCard label="Executing" value={executing} color="text-chart-2" />
-        <StatCard label="Active Agents" value={activeAgents} color="text-chart-2" />
-        <StatCard label="Open Channels" value={openChannels} />
+      <div className="flex gap-2">
+        <div className="flex-1"><StatCard label="Total Tickets" value={project.tickets.length} /></div>
+        <div className="flex-1"><StatCard label="Executing" value={executing} color="text-chart-2" /></div>
+        <div className="flex-1"><StatCard label="Active Agents" value={activeAgents} color="text-chart-2" /></div>
+        <div className="flex-1"><StatCard label="Open Channels" value={openChannels} /></div>
       </div>
 
       <ExecutionStream
