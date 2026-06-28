@@ -51,6 +51,9 @@ export function CenterTabStrip({
   const menuRef = useRef<HTMLDivElement>(null);
   const wsId = activeWorkspaceId ?? tabs.find(t => t.id === activeTabId)?.workspaceId ?? listWorkspaces()[0]?.id ?? 'acme';
 
+  const homeTab = tabs.find(t => t.type === 'home');
+  const otherTabs = tabs.filter(t => t.type !== 'home');
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -63,7 +66,16 @@ export function CenterTabStrip({
 
   return (
     <div className="flex items-center h-10 border-b border-border px-2 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {tabs.map(tab => (
+      {homeTab && (
+        <CenterTab
+          key={homeTab.id}
+          tab={homeTab}
+          workspaceName={workspaceMap[homeTab.workspaceId] ?? homeTab.workspaceId}
+          isActive={homeTab.id === activeTabId}
+          onClick={() => onTabClick(homeTab.id)}
+        />
+      )}
+      {otherTabs.map(tab => (
         <CenterTab
           key={tab.id}
           tab={tab}

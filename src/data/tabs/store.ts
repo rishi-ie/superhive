@@ -18,7 +18,7 @@ export function makeInitialTabState(workspaceId: string): TabState {
         type: 'home',
         workspaceId,
         title: 'Home',
-        pinned: false,
+        pinned: true,
         selectedAgentId: null,
         selectedProjectId: null,
         selectedTicketId: null,

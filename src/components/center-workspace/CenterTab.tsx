@@ -44,7 +44,7 @@ type CenterTabProps = {
   workspaceName: string;
   isActive: boolean;
   onClick: () => void;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 /**
@@ -89,7 +89,7 @@ export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: Ce
           variant="ghost"
           size="sm"
           aria-label="Close tab"
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onClick={(e) => { e.stopPropagation(); onClose?.(); }}
           className="opacity-0 group-hover:opacity-100 hover:bg-accent rounded p-0.5 transition-opacity ml-auto shrink-0"
         >
           <X size={12} strokeWidth={STROKE_WIDTH} />
