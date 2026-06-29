@@ -25,6 +25,12 @@ type CenterWorkspaceProps = {
   onCreateTicket?: () => void;
   onCreateChannel?: () => void;
   onCreateAgent?: () => void;
+  setupDismissed: boolean;
+  readyDismissed: boolean;
+  onWorkspaceCreated: (id: string) => void;
+  onDismissSetup: () => void;
+  onDismissReady: () => void;
+  onOpenSettings: () => void;
 };
 
 /**
@@ -45,6 +51,12 @@ type CenterWorkspaceProps = {
  * @param onCreateTicket - Called when "New Ticket" is clicked
  * @param onCreateChannel - Called when "New Channel" is clicked
  * @param onCreateAgent - Called when "New Agent" is clicked
+ * @param setupDismissed - Whether the no-workspace setup wizard has been dismissed this session
+ * @param readyDismissed - Whether the per-workspace ready wizard has been dismissed for the active workspace
+ * @param onWorkspaceCreated - Called after a new workspace is created via the setup wizard
+ * @param onDismissSetup - Called when the user dismisses the setup wizard
+ * @param onDismissReady - Called when the user dismisses the ready wizard
+ * @param onOpenSettings - Called when the user wants to open settings
  */
 export function CenterWorkspace({
   tabs,
@@ -64,6 +76,12 @@ export function CenterWorkspace({
   onCreateTicket,
   onCreateChannel,
   onCreateAgent,
+  setupDismissed,
+  readyDismissed,
+  onWorkspaceCreated,
+  onDismissSetup,
+  onDismissReady,
+  onOpenSettings,
 }: CenterWorkspaceProps) {
   const activeTab = tabs.find(t => t.id === activeTabId)!;
 
@@ -100,6 +118,12 @@ export function CenterWorkspace({
           onCreateTicket={onCreateTicket}
           onCreateChannel={onCreateChannel}
           onCreateAgent={onCreateAgent}
+          setupDismissed={setupDismissed}
+          readyDismissed={readyDismissed}
+          onWorkspaceCreated={onWorkspaceCreated}
+          onDismissSetup={onDismissSetup}
+          onDismissReady={onDismissReady}
+          onOpenSettings={onOpenSettings}
         />
       </div>
     </div>

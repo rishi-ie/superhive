@@ -133,67 +133,7 @@ export function HomeView({
 
   const navigate = (id: string) => () => onNavItemClick?.(id);
 
-  const hasNoData =
-    workspaceProjects.length === 0 &&
-    workspaceAgents.length === 0 &&
-    workspaceChannels.length === 0 &&
-    workspaceTickets.length === 0;
-
-  if (hasNoData) {
-    return (
-      <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
-
-        {/* Header — workspace name only */}
-        <h1 className="text-xl font-bold text-foreground">{workspaceName}</h1>
-
-        {/* Stat strip — 4 cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Projects" value={workspaceProjects.length} />
-          <StatCard
-            label="Open Tickets"
-            value={workspaceTickets.filter(t => t.status !== 'MERGED').length}
-          />
-          <StatCard
-            label="Active Agents"
-            value={workspaceAgents.filter(a => a.status === 'EXECUTING' || a.status === 'COMPILING').length}
-            color="text-chart-2"
-          />
-          <StatCard
-            label="Awaiting Reply"
-            value={awaitingChannels}
-            color="text-chart-3"
-          />
-        </div>
-
-        {/* Two empty states side by side — Projects + Agents */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <EmptyState
-            icon={<FolderOpen size={28} strokeWidth={1.5} />}
-            title="No projects yet"
-            description="Create your first project to get started."
-            action={
-              <NewButton
-                label="New Project"
-                onClick={() => onCreateProject?.()}
-              />
-            }
-          />
-          <EmptyState
-            icon={<Bot size={28} strokeWidth={1.5} />}
-            title="No agents yet"
-            description="Add agents to your workspace to get started."
-            action={
-              <NewButton
-                label="New Agent"
-                onClick={() => onCreateAgent?.()}
-              />
-            }
-          />
-        </div>
-
-      </div>
-    );
-  }
+  void onCreateAgent;
 
   return (
     <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">

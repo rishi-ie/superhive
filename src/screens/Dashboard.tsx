@@ -20,7 +20,7 @@ import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
 import type { ArchivedProjectSummary } from '@/components/left-nav/ArchivedProjectsSection';
 import { listWorkspaces } from '@/data/workspaces/store';
-import { listProjectAgents, getProject, getProjectByWorkspace, listProjects } from '@/data/projects/store';
+import { getProject, getProjectByWorkspace, listProjectAgents, listProjects } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, getAgentWorkspace } from '@/data/agents/store';
@@ -485,6 +485,38 @@ export function Dashboard({
   // ─── Global keyboard shortcut manager ────────────────────────────────
   useGlobalShortcuts(shortcutApi);
 
+  // ─── Setup wizard dismissal state (session-persisted) ─────────────────
+  const [setupDismissed, setSetupDismissed] = useState<boolean>(() =>
+    sessionStorage.getItem('wizard:setup:dismissed') === '1',
+  );
+  const [readyDismissedByWs, setReadyDismissedByWs] = useState<Record<string, boolean>>(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('wizard:ready:dismissed') ?? '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const readyDismissed = !!readyDismissedByWs[activeWorkspaceId];
+
+  const dismissSetup = useCallback(() => {
+    setSetupDismissed(true);
+    sessionStorage.setItem('wizard:setup:dismissed', '1');
+  }, []);
+
+  const dismissReady = useCallback(() => {
+    setReadyDismissedByWs(prev => {
+      const next = { ...prev, [activeWorkspaceId]: true };
+      sessionStorage.setItem('wizard:ready:dismissed', JSON.stringify(next));
+      return next;
+    });
+  }, [activeWorkspaceId]);
+
+  const handleWorkspaceCreated = useCallback((id: string) => {
+    setActiveWorkspaceId(id);
+    dismissSetup();
+  }, [dismissSetup]);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <LeftNav
@@ -524,6 +556,12 @@ export function Dashboard({
         onCreateTicket={handleCreateTicket}
         onCreateChannel={handleCreateChannel}
         onCreateAgent={handleCreateAgent}
+        setupDismissed={setupDismissed}
+        readyDismissed={readyDismissed}
+        onWorkspaceCreated={handleWorkspaceCreated}
+        onDismissSetup={dismissSetup}
+        onDismissReady={dismissReady}
+        onOpenSettings={() => onNavigate('settings')}
       />
       <RightAuxiliary
         width={rightWidth}
