@@ -1,207 +1,349 @@
 /**
- * Defaults settings — startup view, default workspace, view mode, time format, kanban columns, right panel tab.
+ * Defaults settings — startup view, default workspace, view mode, time format,
+ * kanban columns, and right-panel default tab.
+ * Auto-saves each change with a toast confirmation. No Save bar.
  */
-import { useState } from 'react';
-import { SettingSection } from './shared/SettingSection';
-import { SettingRow } from './shared/SettingRow';
-import { SettingsPageHeader } from './shared/SettingsPageHeader';
-import { SaveBar } from '@/components/ui/SaveBar';
-import { Select } from '@/components/ui/Select';
-import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { Pill } from '@/components/ui/Pill';
+import { useCallback } from 'react';
+import {
+  History, Bot, MessageSquare, Layers, Ticket, Hexagon,
+  Eye, Settings, Inbox, Clock, ArrowUp, ArrowDown,
+} from 'lucide-react';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import type { StartupView, ViewMode, TimeFormat, KanbanColumn, RightPanelTab } from '@/data/settings/interface';
+import { Card, CardContent } from '@/components/ui/Card';
+import { SelectableCard } from './shared/SelectableCard';
+import { SettingsPageHeader } from './shared/SettingsPageHeader';
+import { ResetSection } from './shared/ResetSection';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Pill } from '@/components/ui/Pill';
+import { IconButton } from '@/components/ui/IconButton';
+import { getInitials } from '@/lib/initials';
 import { listWorkspaces } from '@/data/workspaces/store';
+import { STROKE_WIDTH } from '@/lib/constants';
+import type {
+  StartupView,
+  ViewMode,
+  TimeFormat,
+  KanbanColumn,
+  RightPanelTab,
+} from '@/data/settings/interface';
 
-const STARTUP_VIEWS: { value: StartupView; label: string }[] = [
-  { value: 'last', label: 'Last-opened view' },
-  { value: 'universal-agents', label: 'Universal Agents' },
-  { value: 'universal-channels', label: 'Universal Channels' },
-  { value: 'universal-projects', label: 'Universal Projects' },
-  { value: 'tickets', label: 'Tickets' },
-  { value: 'swarm-roster', label: 'Swarm Roster' },
+const CHART_COLORS = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
+type ChartColor = typeof CHART_COLORS[number];
+function avatarColor(id: string): string {
+  const idx = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % CHART_COLORS.length;
+  return (CHART_COLORS[idx] as ChartColor) ?? 'chart-1';
+}
+
+const STARTUP_OPTIONS: {
+  value: StartupView;
+  label: string;
+  description: string;
+  icon: typeof History;
+}[] = [
+  { value: 'last',               label: 'Last opened',         description: 'Resume the view you last had open.', icon: History },
+  { value: 'universal-agents',   label: 'Universal Agents',    description: 'All agents across every workspace.', icon: Bot },
+  { value: 'universal-channels', label: 'Universal Channels',  description: 'All channels across the workspace.', icon: MessageSquare },
+  { value: 'universal-projects', label: 'Universal Projects',  description: 'All projects across the workspace.', icon: Layers },
+  { value: 'tickets',            label: 'Tickets',             description: 'Jump straight into the tickets board.', icon: Ticket },
+  { value: 'swarm-roster',       label: 'Swarm Roster',        description: 'Open the agent swarm overview (within Projects).', icon: Hexagon },
 ];
 
-const VIEW_MODES: { value: ViewMode; label: string }[] = [
-  { value: 'comfortable', label: 'Comfortable' },
-  { value: 'compact', label: 'Compact' },
+const VIEW_MODE_OPTIONS = [
+  { value: 'comfortable' as ViewMode, label: 'Comfortable' },
+  { value: 'compact'      as ViewMode, label: 'Compact' },
 ];
 
-const TIME_FORMATS: { value: TimeFormat; label: string }[] = [
-  { value: 'relative', label: 'Relative (2 hours ago)' },
-  { value: '12h', label: '12-hour (2:30 PM)' },
-  { value: '24h', label: '24-hour (14:30)' },
+const TIME_FORMAT_OPTIONS: {
+  value: TimeFormat;
+  label: string;
+  sample: string;
+}[] = [
+  { value: 'relative', label: 'Relative',  sample: '2h ago'  },
+  { value: '12h',      label: '12-hour',   sample: '2:30 PM' },
+  { value: '24h',      label: '24-hour',   sample: '14:30'   },
 ];
 
 const KANBAN_COLUMNS: { value: KanbanColumn; label: string }[] = [
-  { value: 'todo', label: 'To Do' },
+  { value: 'todo',      label: 'To Do'     },
   { value: 'executing', label: 'Executing' },
-  { value: 'review', label: 'Review' },
-  { value: 'merged', label: 'Merged' },
+  { value: 'review',    label: 'Review'    },
+  { value: 'merged',    label: 'Merged'    },
 ];
 
-const RIGHT_PANEL_TABS: { value: RightPanelTab; label: string }[] = [
-  { value: 'overview', label: 'Overview' },
-  { value: 'manage', label: 'Manage' },
-  { value: 'inbox', label: 'Inbox' },
-  { value: 'sessions', label: 'Sessions' },
+const RIGHT_PANEL_TABS: {
+  value: RightPanelTab;
+  label: string;
+  icon: typeof Eye;
+}[] = [
+  { value: 'overview', label: 'Overview', icon: Eye     },
+  { value: 'manage',   label: 'Manage',   icon: Settings },
+  { value: 'inbox',    label: 'Inbox',    icon: Inbox  },
+  { value: 'sessions', label: 'Sessions', icon: Clock  },
 ];
-
 
 /**
- * Defaults settings page — configure app startup and display defaults.
+ * Defaults settings — configure app startup and display defaults.
+ * All changes auto-save immediately with a toast confirmation.
  */
 export function DefaultsSettings() {
   const { settings, update } = useSettings();
   const toast = useToast();
-  const workspaces = listWorkspaces();
   const d = settings.defaults;
+  const workspaces = listWorkspaces();
 
-  const [startupView, setStartupView] = useState(d.startupView);
-  const [defaultWorkspaceId, setDefaultWorkspaceId] = useState(d.defaultWorkspaceId ?? '');
-  const [viewMode, setViewMode] = useState(d.viewMode);
-  const [timeFormat, setTimeFormat] = useState(d.timeFormat);
-  const [kanbanColumns, setKanbanColumns] = useState<KanbanColumn[]>(d.defaultKanbanColumns);
-  const [rightPanelTab, setRightPanelTab] = useState(d.rightPanelDefaultTab);
+  type DefaultsPatch = Partial<{
+  startupView: StartupView;
+  defaultWorkspaceId: string | null;
+  viewMode: ViewMode;
+  timeFormat: TimeFormat;
+  defaultKanbanColumns: KanbanColumn[];
+  rightPanelDefaultTab: RightPanelTab;
+}>;
+
+const apply = useCallback((patch: DefaultsPatch) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (update as (domain: 'defaults', patch: DefaultsPatch) => void)('defaults', patch);
+    toast({ title: 'Defaults updated', type: 'success' });
+  }, [update, toast]);
+
+  const setStartupView = (v: StartupView) => apply({ startupView: v });
+  const setWorkspace = (id: string | null) => apply({ defaultWorkspaceId: id });
+  const setViewMode = (v: ViewMode) => apply({ viewMode: v });
+  const setTimeFormat = (v: TimeFormat) => apply({ timeFormat: v });
+  const setRightPanelTab = (v: RightPanelTab) => apply({ rightPanelDefaultTab: v });
 
   const toggleColumn = (col: KanbanColumn) => {
-    setKanbanColumns(prev =>
-      prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]
-    );
+    const next = d.defaultKanbanColumns.includes(col)
+      ? d.defaultKanbanColumns.filter(c => c !== col)
+      : [...d.defaultKanbanColumns, col];
+    apply({ defaultKanbanColumns: next });
   };
 
-  const save = () => {
-    update('defaults', {
-      startupView,
-      defaultWorkspaceId: defaultWorkspaceId || null,
-      viewMode,
-      timeFormat,
-      defaultKanbanColumns: kanbanColumns,
-      rightPanelDefaultTab: rightPanelTab,
-    });
-    toast({ title: 'Defaults saved' });
+  const moveColumn = (idx: number, dir: -1 | 1) => {
+    const cols = [...d.defaultKanbanColumns];
+    const target = idx + dir;
+    if (target < 0 || target >= cols.length) return;
+    const a = cols[idx] as KanbanColumn;
+    const b = cols[target] as KanbanColumn;
+    cols[idx] = b;
+    cols[target] = a;
+    apply({ defaultKanbanColumns: cols });
   };
-
-  const discardChanges = () => {
-    setStartupView(d.startupView);
-    setDefaultWorkspaceId(d.defaultWorkspaceId ?? '');
-    setViewMode(d.viewMode);
-    setTimeFormat(d.timeFormat);
-    setKanbanColumns(d.defaultKanbanColumns);
-    setRightPanelTab(d.rightPanelDefaultTab);
-  };
-
-  const isDirty =
-    startupView !== d.startupView ||
-    defaultWorkspaceId !== (d.defaultWorkspaceId ?? '') ||
-    viewMode !== d.viewMode ||
-    timeFormat !== d.timeFormat ||
-    JSON.stringify([...kanbanColumns].sort()) !== JSON.stringify([...d.defaultKanbanColumns].sort()) ||
-    rightPanelTab !== d.rightPanelDefaultTab;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-6">
       <SettingsPageHeader
         title="Defaults"
-        description="Configure what opens and how things display by default."
+        description="Choose what opens when Superhive launches and how your workspace looks."
       />
 
-      <SettingSection
-        title="Startup"
-        description="Controls what you see when Superhive launches."
-      >
-        <SettingRow
-          label="Startup view"
-          description="Which view or tab opens automatically when the app starts."
-          control={
-            <Select
-              value={startupView}
-              options={STARTUP_VIEWS}
-              onChange={val => setStartupView(val as StartupView)}
-              className="w-56"
-            />
-          }
-        />
-        <SettingRow
-          label="Default workspace"
-          description="Which workspace is pre-selected when the app opens."
-          control={
-            <Select
-              value={defaultWorkspaceId}
-              options={[{ value: '', label: 'Last opened' }, ...workspaces.map(ws => ({ value: ws.id, label: ws.name }))]}
-              onChange={val => setDefaultWorkspaceId(val)}
-              className="w-56"
-            />
-          }
-        />
-      </SettingSection>
+      {/* ─── Startup View ───────────────────────────────────────────── */}
+      <Card className="bg-card border border-border/40">
+        <CardContent className="p-5 flex flex-col gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Startup view</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              The view or tab that opens automatically when Superhive launches.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            {STARTUP_OPTIONS.map(opt => {
+              const Icon = opt.icon;
+              return (
+                <SelectableCard
+                  key={opt.value}
+                  title={opt.label}
+                  description={opt.description}
+                  icon={<Icon size={16} strokeWidth={STROKE_WIDTH} />}
+                  selected={d.startupView === opt.value}
+                  onClick={() => setStartupView(opt.value)}
+                />
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
-      <SettingSection title="Display">
-        <SettingRow
-          label="View mode"
-          description="Controls density of information in kanban and list views."
-          control={
-            <SegmentedControl
-              options={VIEW_MODES}
-              value={viewMode}
-              onChange={val => setViewMode(val as ViewMode)}
-            />
-          }
-        />
-        <SettingRow
-          label="Time format"
-          description="How timestamps are displayed throughout the app."
-          control={
-            <Select
-              value={timeFormat}
-              options={TIME_FORMATS}
-              onChange={val => setTimeFormat(val as TimeFormat)}
-              className="w-56"
-            />
-          }
-        />
-        <SettingRow
-          label="Right panel default tab"
-          description="Which tab is shown in the right auxiliary panel when it opens."
-          control={
-            <Select
-              value={rightPanelTab}
-              options={RIGHT_PANEL_TABS}
-              onChange={val => setRightPanelTab(val as RightPanelTab)}
-              className="w-40"
-            />
-          }
-        />
-      </SettingSection>
-
-      <SettingSection
-        title="Kanban Columns"
-        description="Which columns are visible in tickets and project kanban boards."
-      >
-        <SettingRow
-          label="Visible columns"
-          description="Toggle to show or hide columns in kanban boards. At least one column must be visible."
-          control={
-            <div className="flex flex-wrap gap-1.5">
-              {KANBAN_COLUMNS.map(col => {
-                const active = kanbanColumns.includes(col.value);
+      {/* ─── Default Workspace ───────────────────────────────────────── */}
+      <Card className="bg-card border border-border/40">
+        <CardContent className="p-5 flex flex-col gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Default workspace</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Which workspace is pre-selected when the app opens.
+            </p>
+          </div>
+          {workspaces.length === 0 ? (
+            <div className="rounded-md border border-dashed border-border/60 px-4 py-6 text-center text-xs text-muted-foreground">
+              No workspaces — create one in the Workspaces settings page first.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5">
+              <SelectableCard
+                title="Last opened"
+                description="Resume the workspace you last had active."
+                icon={<History size={16} strokeWidth={STROKE_WIDTH} />}
+                selected={d.defaultWorkspaceId === null}
+                onClick={() => setWorkspace(null)}
+              />
+              {workspaces.map(ws => {
+                const color = avatarColor(ws.id);
                 return (
-                  <Pill
-                    key={col.value}
-                    active={active}
-                    onClick={() => toggleColumn(col.value)}
-                  >
-                    {col.label}
-                  </Pill>
+                  <SelectableCard
+                    key={ws.id}
+                    title={ws.name}
+                    description={ws.id}
+                    icon={
+                      <div
+                        className={`flex size-7 items-center justify-center rounded-md bg-${color} text-[11px] font-semibold text-highlight-foreground`}
+                      >
+                        {getInitials(ws.name)}
+                      </div>
+                    }
+                    selected={d.defaultWorkspaceId === ws.id}
+                    onClick={() => setWorkspace(ws.id)}
+                  />
                 );
               })}
             </div>
-          }
-        />
-      </SettingSection>
+          )}
+        </CardContent>
+      </Card>
 
-      <SaveBar isDirty={isDirty} onCancel={discardChanges} onSave={save} variant="sticky" />
+      {/* ─── Display ────────────────────────────────────────────────── */}
+      <Card className="bg-card border border-border/40">
+        <CardContent className="p-5 flex flex-col gap-6">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Display</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Controls density and how timestamps and panels look throughout the app.
+            </p>
+          </div>
+
+          {/* View Mode */}
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-foreground">View mode</span>
+              <span className="text-[11px] text-muted-foreground">
+                Adjusts spacing across kanban and list views.
+              </span>
+            </div>
+            <SegmentedControl
+              options={VIEW_MODE_OPTIONS}
+              value={d.viewMode}
+              onChange={v => setViewMode(v as ViewMode)}
+            />
+          </div>
+
+          {/* Time Format */}
+          <div>
+            <div className="mb-2 flex flex-col gap-1">
+              <span className="text-xs font-medium text-foreground">Time format</span>
+              <span className="text-[11px] text-muted-foreground">
+                How timestamps appear throughout the app.
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2.5">
+              {TIME_FORMAT_OPTIONS.map(opt => (
+                <SelectableCard
+                  key={opt.value}
+                  title={opt.label}
+                  description={opt.sample}
+                  icon={<Clock size={16} strokeWidth={STROKE_WIDTH} />}
+                  selected={d.timeFormat === opt.value}
+                  onClick={() => setTimeFormat(opt.value)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Right Panel Default Tab */}
+          <div>
+            <div className="mb-2 flex flex-col gap-1">
+              <span className="text-xs font-medium text-foreground">Right panel default tab</span>
+              <span className="text-[11px] text-muted-foreground">
+                Which tab is shown in the Avionics panel when it opens.
+              </span>
+            </div>
+            <div className="grid grid-cols-4 gap-2.5">
+              {RIGHT_PANEL_TABS.map(opt => {
+                const Icon = opt.icon;
+                return (
+                  <SelectableCard
+                    key={opt.value}
+                    title={opt.label}
+                    icon={<Icon size={16} strokeWidth={STROKE_WIDTH} />}
+                    selected={d.rightPanelDefaultTab === opt.value}
+                    onClick={() => setRightPanelTab(opt.value)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ─── Kanban Columns ─────────────────────────────────────────── */}
+      <Card className="bg-card border border-border/40">
+        <CardContent className="p-5 flex flex-col gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Kanban columns</h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Which columns appear in tickets and project kanban boards, and in what order.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {KANBAN_COLUMNS.map(col => {
+                const idx = d.defaultKanbanColumns.indexOf(col.value);
+                const active = idx >= 0;
+                return (
+                  <div key={col.value} className="flex items-center gap-0.5">
+                    <Pill active={active} onClick={() => toggleColumn(col.value)}>
+                      {col.label}
+                    </Pill>
+                    {active && (
+                      <>
+                        <IconButton
+                          aria-label={`Move ${col.label} up`}
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => moveColumn(idx, -1)}
+                          disabled={idx === 0}
+                          className="size-5"
+                        >
+                          <ArrowUp size={10} strokeWidth={STROKE_WIDTH} />
+                        </IconButton>
+                        <IconButton
+                          aria-label={`Move ${col.label} down`}
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => moveColumn(idx, 1)}
+                          disabled={idx === d.defaultKanbanColumns.length - 1}
+                          className="size-5"
+                        >
+                          <ArrowDown size={10} strokeWidth={STROKE_WIDTH} />
+                        </IconButton>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[10.5px] text-muted-foreground tabular-nums">
+              Active order: {d.defaultKanbanColumns.length
+                ? d.defaultKanbanColumns.join(' → ')
+                : 'none — select at least one column'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end">
+        <ResetSection domain="defaults" />
+      </div>
     </div>
   );
 }
