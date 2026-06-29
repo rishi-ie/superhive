@@ -72,7 +72,7 @@ function applySettingsToDOM(settings: Settings) {
   root.setAttribute('data-font-scale', String(settings.appearance.fontScale));
   root.style.fontSize = `${settings.appearance.fontScale}rem`;
 
-  root.setAttribute('data-reduce-motion', String(settings.appearance.reduceMotion || settings.accessibility.reduceMotion));
+  root.setAttribute('data-reduce-motion', String(settings.appearance.reduceMotion));
 
   const highlight = settings.appearance.highlightColor;
   const highlightFg = computeHighlightForeground(highlight);

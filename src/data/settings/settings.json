@@ -6,20 +6,9 @@
     "reduceMotion": false,
     "codeSyntaxTheme": "github-dark"
   },
-  "notifications": {
-    "quietHours": {
-      "enabled": false,
-      "start": "22:00",
-      "end": "08:00",
-      "days": [0, 1, 2, 3, 4]
-    }
-  },
   "privacy": {
     "exportDataLastRun": null,
     "conversationRetentionDays": 90
-  },
-  "accessibility": {
-    "reduceMotion": false
   },
   "defaults": {
     "startupView": "last",

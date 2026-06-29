@@ -6,9 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   User,
   Paintbrush,
-  Bell,
   Shield,
-  Accessibility,
   SlidersHorizontal,
   Keyboard,
   Globe,
@@ -20,9 +18,7 @@ import {
 
 import { AccountSettings } from '@/components/settings/AccountSettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
-import { NotificationsSettings } from '@/components/settings/NotificationsSettings';
 import { PrivacySettings } from '@/components/settings/PrivacySettings';
-import { AccessibilitySettings } from '@/components/settings/AccessibilitySettings';
 import { DefaultsSettings } from '@/components/settings/DefaultsSettings';
 import { KeyboardSettings } from '@/components/settings/KeyboardSettings';
 import { ModelsSettings } from '@/components/settings/ModelsSettings';
@@ -35,9 +31,7 @@ export type SettingsCategoryId = 'personal' | 'workflow' | 'organization';
 export type SettingsSectionId =
   | 'account'
   | 'appearance'
-  | 'notifications'
   | 'privacy'
-  | 'accessibility'
   | 'defaults'
   | 'keyboard'
   | 'models'
@@ -76,25 +70,11 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
     component: AppearanceSettings,
     category: 'personal',
   },
-  notifications: {
-    id: 'notifications',
-    label: 'Notifications',
-    icon: Bell,
-    component: NotificationsSettings,
-    category: 'personal',
-  },
   privacy: {
     id: 'privacy',
     label: 'Privacy & Data',
     icon: Shield,
     component: PrivacySettings,
-    category: 'personal',
-  },
-  accessibility: {
-    id: 'accessibility',
-    label: 'Accessibility',
-    icon: Accessibility,
-    component: AccessibilitySettings,
     category: 'personal',
   },
   defaults: {
@@ -154,7 +134,7 @@ export const settingsCategories: SettingsCategoryMeta[] = [
   {
     id: 'personal',
     label: 'Personal',
-    sections: ['account', 'appearance', 'notifications', 'privacy', 'accessibility'],
+    sections: ['account', 'appearance', 'privacy'],
   },
   {
     id: 'workflow',

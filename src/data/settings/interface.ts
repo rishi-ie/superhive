@@ -22,24 +22,9 @@ export type AppearanceSettings = {
   codeSyntaxTheme: string;
 };
 
-export type QuietHours = {
-  enabled: boolean;
-  start: string;
-  end: string;
-  days: number[];
-};
-
-export type NotificationsSettings = {
-  quietHours: QuietHours;
-};
-
 export type PrivacySettings = {
   exportDataLastRun: string | null;
   conversationRetentionDays: number;
-};
-
-export type AccessibilitySettings = {
-  reduceMotion: boolean;
 };
 
 export type StartupView = 'last' | 'universal-agents' | 'universal-channels' | 'universal-projects' | 'tickets' | 'swarm-roster';
@@ -184,9 +169,7 @@ export type AccountSettings = {
 
 export type Settings = {
   appearance: AppearanceSettings;
-  notifications: NotificationsSettings;
   privacy: PrivacySettings;
-  accessibility: AccessibilitySettings;
   defaults: DefaultsSettings;
   models: ModelsSettings;
   workflows: WorkflowsSettings;
