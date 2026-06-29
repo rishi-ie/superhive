@@ -68,6 +68,7 @@ export interface AgentStore {
   getNextStep(agentId: string): string;
   getDefaultTelemetry(): Telemetry;
   getDefaultPermissions(): Permissions;
+  setPermissions(agentId: string, permissions: Permissions): void;
   approveAudit(id: string): void;
   denyAudit(id: string): void;
   answerQuestion(id: string, answer: string, agentId: string): void;

@@ -5,7 +5,7 @@ import type { Project } from '@/data/projects/interface';
 const projects: Project[] = mockableData.projects;
 const agents: Agent[] = mockableData.agents;
 const telemetryMap: Record<string, Telemetry> = mockableData.telemetry;
-const permissionsMap: Record<string, Permissions> = mockableData.permissions;
+let permissionsMap: Record<string, Permissions> = structuredClone(mockableData.permissions);
 const actionLogMap: Record<string, ActionLogEntry[]> = mockableData.actionLogs;
 const nextStepMap: Record<string, string> = mockableData.nextSteps;
 
@@ -52,6 +52,9 @@ const store: AgentStore = {
   getDefaultPermissions() {
     return DEFAULT_PERMISSIONS;
   },
+  setPermissions(agentId: string, permissions: Permissions) {
+    permissionsMap[agentId] = permissions;
+  },
   approveAudit(id: string) {
     auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
   },
@@ -90,6 +93,10 @@ export function getTelemetry(agentId: string): Telemetry {
 
 export function getPermissions(agentId: string): Permissions {
   return store.getPermissions(agentId) ?? store.getDefaultPermissions();
+}
+
+export function setPermissions(agentId: string, permissions: Permissions): void {
+  store.setPermissions(agentId, permissions);
 }
 
 export function getAuditItems(agentId?: string): AuditItem[] {
