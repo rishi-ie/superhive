@@ -1,13 +1,10 @@
 /**
- * Account settings — name, email, username, avatar, connected accounts, workspace, timezone, sign out.
+ * Account settings — name, username, default workspace, highlight color, sign out.
+ * Auto-saves each change with a toast confirmation. No save bar.
  */
-import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { TextInput } from '@/components/ui/TextInput';
-import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
-import { Switch } from '@/components/ui/Switch';
-import { SaveBar } from '@/components/ui/SaveBar';
 import { SettingSection } from './shared/SettingSection';
 import { SettingRow } from './shared/SettingRow';
 import { ResetSection } from './shared/ResetSection';
@@ -15,74 +12,22 @@ import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ColorPicker } from './shared/ColorPicker';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import { GitBranch, Globe, Apple } from 'lucide-react';
-
-const PROVIDER_ICONS = {
-  github: GitBranch,
-  google: Globe,
-  apple: Apple,
-};
-
-const TIMEZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Singapore',
-  'Australia/Sydney',
-  'UTC',
-];
-
 
 /**
- * Account settings page — manage your identity, connected accounts, and preferences.
+ * Account settings page — manage your identity, default workspace, and session.
  */
 export function AccountSettings() {
   const { settings, update } = useSettings();
   const toast = useToast();
-
   const acc = settings.account;
 
-  const [name, setName] = useState(acc.name);
-  const [email, setEmail] = useState(acc.email);
-  const [username, setUsername] = useState(acc.username);
-  const [timezone, setTimezone] = useState(acc.timezone);
-  const [defaultWorkspaceId, setDefaultWorkspaceId] = useState(acc.defaultWorkspaceId ?? '');
-
-  const [nameDirty, setNameDirty] = useState(false);
-  const [emailDirty, setEmailDirty] = useState(false);
-  const [usernameDirty, setUsernameDirty] = useState(false);
-  const [timezoneDirty, setTimezoneDirty] = useState(false);
-  const [workspaceDirty, setWorkspaceDirty] = useState(false);
-
-  const anyDirty = nameDirty || emailDirty || usernameDirty || timezoneDirty || workspaceDirty;
-
-  const saveAccount = () => {
-    update('account', {
-      name: name.trim() || 'Your Name',
-      email: email.trim() || 'you@example.com',
-      username: username.trim() || 'you',
-      timezone,
-      defaultWorkspaceId: defaultWorkspaceId || null,
-    });
-    setNameDirty(false);
-    setEmailDirty(false);
-    setUsernameDirty(false);
-    setTimezoneDirty(false);
-    setWorkspaceDirty(false);
-    toast({ title: 'Account settings saved' });
-  };
-
-  const discardChanges = () => {
-    setName(acc.name); setNameDirty(false);
-    setEmail(acc.email); setEmailDirty(false);
-    setUsername(acc.username); setUsernameDirty(false);
-    setTimezone(acc.timezone); setTimezoneDirty(false);
-    setDefaultWorkspaceId(acc.defaultWorkspaceId ?? ''); setWorkspaceDirty(false);
+  const saveField = <K extends keyof typeof acc>(
+    key: K,
+    value: typeof acc[K],
+    label: string,
+  ) => {
+    update('account', { [key]: value });
+    toast({ title: `${label} updated` });
   };
 
   const handleSignOut = () => {
@@ -96,14 +41,14 @@ export function AccountSettings() {
         description="Manage your account settings and preferences."
       />
 
-      {/* Profile — avatar row + identity rows */}
+      {/* Profile */}
       <SettingSection title="Profile">
         <SettingRow
           label="Avatar"
           description="Recommended size 256x256. JPG, PNG, or GIF."
           control={
             <div className="relative group">
-              <Avatar size="xl" name={name} className="cursor-pointer" />
+              <Avatar size="xl" name={acc.name} className="cursor-pointer" />
               <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/60 text-[10px] text-foreground font-medium opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                 Change
               </div>
@@ -115,8 +60,8 @@ export function AccountSettings() {
           description="How you appear across Superhive — in mentions, activity feed, and notifications."
           control={
             <TextInput
-              value={name}
-              onChange={e => { setName(e.target.value); setNameDirty(true); }}
+              value={acc.name}
+              onChange={e => saveField('name', e.target.value, 'Display name')}
               className="w-64"
             />
           }
@@ -128,39 +73,11 @@ export function AccountSettings() {
             <div className="flex items-center gap-1.5">
               <span className="text-sm text-muted-foreground">@</span>
               <TextInput
-                value={username}
-                onChange={e => { setUsername(e.target.value); setUsernameDirty(true); }}
+                value={acc.username}
+                onChange={e => saveField('username', e.target.value, 'Username')}
                 className="w-48"
               />
             </div>
-          }
-        />
-      </SettingSection>
-
-      {/* Contact */}
-      <SettingSection title="Contact">
-        <SettingRow
-          label="Email address"
-          description="Used for sign-in, notifications, and billing receipts."
-          control={
-            <TextInput
-              type="email"
-              value={email}
-              onChange={e => { setEmail(e.target.value); setEmailDirty(true); }}
-              className="w-80"
-            />
-          }
-        />
-        <SettingRow
-          label="Timezone"
-          description="Used to display timestamps and schedule quiet hours correctly."
-          control={
-            <Select
-              value={timezone}
-              options={TIMEZONES.map(tz => ({ value: tz, label: tz }))}
-              onChange={val => { setTimezone(val); setTimezoneDirty(true); }}
-              className="w-56"
-            />
           }
         />
       </SettingSection>
@@ -172,9 +89,15 @@ export function AccountSettings() {
           description="Which workspace opens automatically when you launch Superhive. Leave blank for last-opened."
           control={
             <TextInput
-              value={defaultWorkspaceId}
-              onChange={e => { setDefaultWorkspaceId(e.target.value); setWorkspaceDirty(true); }}
+              value={acc.defaultWorkspaceId ?? ''}
               placeholder="Last opened"
+              onChange={e =>
+                saveField(
+                  'defaultWorkspaceId',
+                  e.target.value || null,
+                  'Default workspace',
+                )
+              }
               className="w-56"
             />
           }
@@ -185,66 +108,14 @@ export function AccountSettings() {
           control={
             <ColorPicker
               value={settings.appearance.highlightColor}
-              onChange={(v) => update('appearance', { highlightColor: v })}
+              onChange={v => update('appearance', { highlightColor: v })}
               label="Profile highlight color"
             />
           }
         />
       </SettingSection>
 
-      {/* Connected accounts */}
-      <SettingSection
-        title="Connected accounts"
-        description="Link your external accounts for easier sign-in."
-      >
-        <div className="border border-border/40 rounded-md divide-y divide-border/40">
-          {acc.connectedAccounts.map(account => {
-            const Icon = PROVIDER_ICONS[account.provider];
-            return (
-              <div key={account.provider} className="flex items-center justify-between gap-6 px-4 py-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="size-8 rounded-md bg-card border border-border/60 flex items-center justify-center shrink-0">
-                    <Icon size={15} className="text-muted-foreground" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-sm font-medium text-foreground">{account.label}</span>
-                    <span className="text-xs text-muted-foreground truncate">
-                      {account.connected ? account.email ?? 'Connected' : 'Not connected'}
-                    </span>
-                  </div>
-                </div>
-                <Switch
-                  checked={account.connected}
-                  onCheckedChange={() => {
-                    update('account', {
-                      connectedAccounts: acc.connectedAccounts.map(a =>
-                        a.provider === account.provider
-                          ? { ...a, connected: !a.connected }
-                          : a
-                      ),
-                    });
-                    toast({ title: account.connected ? `${account.label} disconnected` : `${account.label} connected` });
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </SettingSection>
-
-      {/* Sticky save bar */}
-      <SaveBar
-        isDirty={anyDirty}
-        onCancel={discardChanges}
-        onSave={saveAccount}
-        variant="sticky"
-      />
-
-      <div className="mt-6 flex justify-end">
-        <ResetSection domain="account" />
-      </div>
-
-      {/* Session / sign out */}
+      {/* Session */}
       <SettingSection title="Session">
         <SettingRow
           label="Sign out of this device"
@@ -256,6 +127,10 @@ export function AccountSettings() {
           }
         />
       </SettingSection>
+
+      <div className="mt-6 flex justify-end">
+        <ResetSection domain="account" />
+      </div>
     </div>
   );
 }
