@@ -81,11 +81,14 @@ export type Engine = {
 };
 
 export type ModelProviderConfig = {
-  id: ModelProvider;
+  id: string;
   label: string;
   apiKey: string;
-  fallbackOrder: EngineId[];
-  customEndpointUrl: string;
+  baseUrl: string;
+  models: string[];
+  isCustom: boolean;
+  catalogId?: string;
+  createdAt?: string;
 };
 
 export type ModelsSettings = {

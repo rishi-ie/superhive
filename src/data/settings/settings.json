@@ -80,22 +80,28 @@
         "id": "openai",
         "label": "OpenAI",
         "apiKey": "",
-        "fallbackOrder": ["sonnet", "claude"],
-        "customEndpointUrl": ""
+        "baseUrl": "",
+        "models": [],
+        "isCustom": false,
+        "catalogId": "openai"
       },
       {
         "id": "anthropic",
         "label": "Anthropic",
         "apiKey": "",
-        "fallbackOrder": ["opus", "sonnet"],
-        "customEndpointUrl": ""
+        "baseUrl": "",
+        "models": [],
+        "isCustom": false,
+        "catalogId": "anthropic"
       },
       {
         "id": "google",
         "label": "Google AI",
         "apiKey": "",
-        "fallbackOrder": ["claude", "sonnet"],
-        "customEndpointUrl": ""
+        "baseUrl": "",
+        "models": [],
+        "isCustom": false,
+        "catalogId": "google"
       }
     ]
   },
