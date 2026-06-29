@@ -57,20 +57,6 @@ export type DefaultsSettings = {
   rightPanelDefaultTab: RightPanelTab;
 };
 
-export type ShortcutGroup = {
-  label: string;
-  shortcuts: Shortcut[];
-};
-
-export type Shortcut = {
-  keys: string;
-  description: string;
-};
-
-export type KeyboardSettings = {
-  groups: ShortcutGroup[];
-};
-
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'custom';
 export type EngineId = 'opus' | 'sonnet' | 'claude' | 'codex';
 
@@ -202,7 +188,6 @@ export type Settings = {
   privacy: PrivacySettings;
   accessibility: AccessibilitySettings;
   defaults: DefaultsSettings;
-  keyboard: KeyboardSettings;
   models: ModelsSettings;
   workflows: WorkflowsSettings;
   costUsage: CostUsageSettings;

@@ -19,6 +19,7 @@ import { SettingsProvider } from './lib/settings-context';
 import { TooltipProvider } from './components/ui/TooltipProvider';
 
 export type Page = 'main' | 'settings';
+export type SettingsSectionId = string;
 
 /**
  * Root shell component — renders Dashboard or Settings based on page state.
@@ -40,6 +41,8 @@ function App() {
     setPage(target);
   };
 
+  const handleBack = () => setPage('main');
+
   useEffect(() => {
     const isMac = /Mac|iPhone|iPad/i.test(navigator.userAgent);
     document.documentElement.style.setProperty(
@@ -48,14 +51,20 @@ function App() {
     );
   }, []);
 
+  // ─── Translate Cmd+. and the "open keyboard shortcuts" shortcut into navigation ───
+  // The shortcut manager in Dashboard handles the actual key detection. When
+  // those shortcuts fire, `pendingSettingsSection` is set on the Dashboard and
+  // it dispatches a CustomEvent on window. Settings listens (see Settings.tsx).
+  // App just renders one or the other.
   return (
     <SettingsProvider>
       <TooltipProvider>
         <ToastProvider>
           {page === 'settings' ? (
-            <Settings onBack={() => setPage('main')} />
+            <Settings onBack={handleBack} />
           ) : (
             <Dashboard
+              page={page}
               leftWidth={leftWidth}
               rightWidth={rightWidth}
               onLeftWidthChange={handleLeftWidthChange}

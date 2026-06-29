@@ -93,6 +93,8 @@ export function CenterTabStrip({
             size="sm"
             onClick={() => setShowMenu(v => !v)}
             aria-label="New tab"
+            title="New tab"
+            data-new-tab-button
           >
             <Plus size={14} />
           </IconButton>

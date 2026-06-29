@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink, Puzzle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { SettingSearch } from './shared/SettingSearch';
 import { ComingSoonBadge } from './shared/ComingSoonBadge';
+import { ShortcutHint } from '@/components/shortcuts';
 import { settingsCategories, settingsRegistry, type SettingsSectionId } from '@/data/config/settings-registry';
 
 type SettingsSidebarProps = {
@@ -90,6 +91,9 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
                     >
                       <Icon size={15} strokeWidth={STROKE_WIDTH} className="shrink-0" />
                       <span>{entry.label}</span>
+                      {sectionId === 'keyboard' && (
+                        <ShortcutHint shortcutId="shortcuts.open" compact className="ml-auto text-[10px]" />
+                      )}
                     </button>
                   );
                 })}

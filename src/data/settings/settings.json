@@ -29,45 +29,6 @@
     "defaultKanbanColumns": ["todo", "executing", "review", "merged"],
     "rightPanelDefaultTab": "overview"
   },
-  "keyboard": {
-    "groups": [
-      {
-        "label": "Global",
-        "shortcuts": [
-          { "keys": "⌘K", "description": "Open command palette" },
-          { "keys": "⌘.", "description": "Open settings" },
-          { "keys": "⌘1–9", "description": "Switch workspace" }
-        ]
-      },
-      {
-        "label": "Tabs",
-        "shortcuts": [
-          { "keys": "⌘T", "description": "New tab" },
-          { "keys": "⌘W", "description": "Close tab" },
-          { "keys": "⌘⇧[", "description": "Previous tab" },
-          { "keys": "⌘⇧]", "description": "Next tab" }
-        ]
-      },
-      {
-        "label": "Right Panel",
-        "shortcuts": [
-          { "keys": "⌘⇧O", "description": "Overview tab" },
-          { "keys": "⌘⇧M", "description": "Manage tab" },
-          { "keys": "⌘⇧I", "description": "Inbox tab" },
-          { "keys": "⌘⇧S", "description": "Sessions tab" },
-          { "keys": "Esc", "description": "Dismiss panel" }
-        ]
-      },
-      {
-        "label": "Tickets & Channels",
-        "shortcuts": [
-          { "keys": "N", "description": "New ticket" },
-          { "keys": "M", "description": "Send message (in channel)" },
-          { "keys": "@", "description": "Open mention picker" }
-        ]
-      }
-    ]
-  },
   "models": {
     "engines": [
       { "id": "opus", "label": "Opus 4.8", "enabled": true },

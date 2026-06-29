@@ -45,3 +45,4 @@ export { UniversalListCard } from './UniversalListCard';
 export { CodeBlock } from './CodeBlock';
 export { IconButton } from './IconButton';
 export { NewButton } from './NewButton';
+export { Kbd } from './Kbd';

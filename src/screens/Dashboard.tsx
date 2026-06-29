@@ -1,12 +1,20 @@
 /**
  * Three-panel workspace shell — LeftNav + CenterWorkspace + RightAuxiliary.
  * Orchestrates tab state, workspace selection, and cross-panel event routing.
+ *
+ * Owns the global keyboard shortcut listener (mounted via `useGlobalShortcuts`).
+ * Single source of action callbacks — shortcut handlers read these via ShortcutAPI.
  */
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { LeftNav } from '@/components/left-nav/LeftNav';
 import { CenterWorkspace } from '@/components/center-workspace/CenterWorkspace';
 import { RightAuxiliary } from '@/components/right-auxiliary/RightAuxiliary';
 import { CreateProjectDialog } from '@/components/center-workspace/CreateProjectDialog';
+import { CommandPalette, buildDefaultPaletteItems } from '@/components/shortcuts';
+import {
+  useGlobalShortcuts,
+  type ShortcutAPI,
+} from '@/lib/shortcuts';
 import { DEFAULT_LEFT_WIDTH, DEFAULT_RIGHT_WIDTH } from '@/lib/constants';
 import type { Page } from '@/App';
 import type { ActiveAgent } from '@/components/left-nav/ActiveSection';
@@ -25,6 +33,7 @@ import {
   getActiveTab,
   findTab,
   setSelection,
+  pinTab as pinTabOp,
 } from '@/data/tabs/store';
 import type { CenterTabType, CenterTab } from '@/data/tabs/interface';
 import type { Workspace } from '@/data/workspaces/interface';
@@ -35,8 +44,11 @@ import {
   type RightPanelContext,
   type RightPanelTabId,
 } from '@/data/config/right-panel-tabs';
+import { useSettings } from '@/lib/settings-context';
+import { useToast } from '@/lib/toast-context';
 
 type DashboardProps = {
+  page: Page;
   leftWidth: number;
   rightWidth: number;
   onLeftWidthChange: (width: number) => void;
@@ -73,6 +85,7 @@ function buildTab(
 
 /**
  * Three-panel workspace shell — LeftNav + CenterWorkspace + RightAuxiliary.
+ * @param page - The current top-level page (used to gate shortcut scoping)
  * @param leftWidth - Current width of the left navigation panel
  * @param rightWidth - Current width of the right auxiliary panel
  * @param onLeftWidthChange - Callback when left panel width changes
@@ -80,6 +93,7 @@ function buildTab(
  * @param onNavigate - Callback when user navigates to a different page (e.g. settings)
  */
 export function Dashboard({
+  page,
   leftWidth,
   rightWidth,
   onLeftWidthChange,
@@ -94,6 +108,12 @@ export function Dashboard({
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [projectsVersion, setProjectsVersion] = useState(0);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [pendingSettingsSection, setPendingSettingsSection] = useState<string | null>(null);
+  const [newTabMenuIndex, setNewTabMenuIndex] = useState(0);
+  const newTabMenuTrigger = useRef<(() => void) | null>(null);
+  const { update: updateSettings } = useSettings();
+  const toast = useToast();
 
   const workspaces_data = listWorkspaces();
   const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' };
@@ -125,6 +145,8 @@ export function Dashboard({
   }, []);
 
   const activeTab = getActiveTab(tabState);
+  const activeWorkspaceIdRef = useRef(activeWorkspaceId);
+  activeWorkspaceIdRef.current = activeWorkspaceId;
 
   const rightPanelContext = useMemo<RightPanelContext>(() => {
     if (!activeTab) return null;
@@ -215,11 +237,35 @@ export function Dashboard({
     setTabState(prev => selectTabOp(prev, tabId));
   }, []);
 
-  const handleTabClose = useCallback((tabId: string) => {
+  const handleTabClickByIndex = useCallback((n: number) => {
     setTabState(prev => {
-      const next = closeTabOp(prev, tabId);
+      const tab = prev.tabs[n - 1];
+      if (tab) return selectTabOp(prev, tab.id);
+      return prev;
+    });
+  }, []);
+
+  const handleTabClose = useCallback((tabId: string) => {
+    setTabState(prev => closeTabOp(prev, tabId));
+  }, []);
+
+  const closeOtherTabs = useCallback(() => {
+    setTabState(prev => {
+      const activeId = prev.activeTabId;
+      let next = prev;
+      // Close every tab except active and pinned
+      const idsToClose = next.tabs
+        .filter(t => t.id !== activeId && !t.pinned)
+        .map(t => t.id);
+      for (const id of idsToClose) {
+        next = closeTabOp(next, id);
+      }
       return next;
     });
+  }, []);
+
+  const openOrFocusTab = useCallback((tab: Omit<CenterTab, 'id' | 'createdAt'>) => {
+    setTabState(prev => openTabOp(prev, tab));
   }, []);
 
   const handleBreadcrumbJump = useCallback((workspaceId: string, section?: string) => {
@@ -303,28 +349,141 @@ export function Dashboard({
     openTab(buildTab('tickets', activeWorkspaceId, 'Tickets'));
   }, [openTab, activeWorkspaceId]);
 
-  // ─── Keyboard shortcuts ───────────────────────────────────────────
+  // ─── Pinned-tab shortcut ─────────────────────────────────────────
+  const handleTogglePin = useCallback(() => {
+    setTabState(prev => {
+      if (!prev.activeTabId) return prev;
+      const t = prev.tabs.find(x => x.id === prev.activeTabId);
+      if (!t) return prev;
+      return pinTabOp(prev, t.id, !t.pinned);
+    });
+  }, []);
+
+  // ─── Theme toggle ────────────────────────────────────────────────
+  const handleToggleTheme = useCallback(() => {
+    const next = currentTheme === 'dark' ? 'light' : 'dark';
+    updateSettings('appearance', { theme: next });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ─── Search focus ────────────────────────────────────────────────
+  const focusSearch = useCallback(() => {
+    // Trigger any [data-search-input] element to focus
+    const el = document.querySelector<HTMLElement>('[data-search-input]');
+    if (el) (el as HTMLInputElement).focus();
+    else toast({ title: 'No active search', type: 'info' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ─── Send active chat msg / focus chat input (best-effort) ────────
+  const sendActiveChatMessage = useCallback(() => {
+    const editable = document.querySelector<HTMLElement>('[data-chat-input] textarea');
+    if (!editable) {
+      // Fallback: dispatch Enter on textarea
+      const ta = document.querySelector<HTMLTextAreaElement>('textarea[data-chat-input-textarea], textarea[data-chat-send-target]');
+      if (ta) {
+        ta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, shiftKey: false }));
+      }
+      return;
+    }
+    (editable as HTMLTextAreaElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true, shiftKey: false }));
+  }, []);
+
+  const focusChatInput = useCallback(() => {
+    const el = document.querySelector<HTMLElement>('[data-chat-input] textarea');
+    if (el) (el as HTMLTextAreaElement).focus();
+  }, []);
+
+  // ─── Confirm active modal (best-effort: clicks a [data-modal-default-action]) ────
+  const confirmActiveModal = useCallback(() => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-modal-default-action], dialog[open] button[type="submit"]');
+    if (btn) btn.click();
+  }, []);
+
+  // ─── Open new-tab menu: trigger the + IconButton in CenterTabStrip ────
+  const openNewTabMenu = useCallback(() => {
+    // Fall back to opening the home tab if we can't find the + button
+    const plusBtn = document.querySelector<HTMLButtonElement>('[data-new-tab-button]');
+    if (plusBtn) plusBtn.click();
+    else openTab(buildTab('home', activeWorkspaceId, 'Home'));
+  }, [openTab, activeWorkspaceId]);
+
+  // ─── Pending settings section handling ────────────────────────────────
+  const requestOpenSection = useCallback((id: string) => {
+    setPendingSettingsSection(id);
+  }, []);
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      const mod = e.metaKey || e.ctrlKey;
-      if (!mod) return;
-      if (e.key === 'w') {
-        e.preventDefault();
-        if (activeTab && !activeTab.pinned) {
-          handleTabClose(activeTab.id);
-        }
-      }
-      if (e.key >= '1' && e.key <= '9') {
-        e.preventDefault();
-        const idx = parseInt(e.key) - 1;
-        const tab = tabState.tabs[idx];
-        if (tab) handleTabClick(tab.id);
-      }
+    if (page === 'settings' && pendingSettingsSection) {
+      // Dispatch a custom event that Settings.tsx can listen to
+      window.dispatchEvent(new CustomEvent('settings:open-section', { detail: { id: pendingSettingsSection } }));
+      setPendingSettingsSection(null);
     }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, tabState.tabs, handleTabClose, handleTabClick]);
+  }, [page, pendingSettingsSection]);
+
+  // ─── Listen for help-popover shortcut item → open palette ─────────────
+  useEffect(() => {
+    function onHelpShortcut() {
+      setPaletteOpen(true);
+    }
+    window.addEventListener('app:open-command-palette', onHelpShortcut);
+    return () => window.removeEventListener('app:open-command-palette', onHelpShortcut);
+  }, []);
+
+  // ─── Theme observation for toggleTheme callback closure ─────────────
+  const { settings } = useSettings();
+  const currentTheme = settings.appearance.theme;
+
+  // ─── Build the ShortcutAPI for useGlobalShortcuts ────────────────────
+  const shortcutApi = useMemo<ShortcutAPI>(() => ({
+    navigate: onNavigate,
+    isOnSettingsPage: page === 'settings',
+    toggleLeftPanel: handleToggleLeftPanel,
+    toggleRightPanel: handleToggleRightPanel,
+    focusSearch,
+    openPalette: () => setPaletteOpen(true),
+    closePalette: () => setPaletteOpen(false),
+    isPaletteOpen: paletteOpen,
+    requestOpenSection,
+    toggleTheme: handleToggleTheme,
+
+    activeWorkspaceId,
+    tabs: tabState.tabs,
+    activeTab,
+    activeTabId: tabState.activeTabId,
+    handleTabClick,
+    handleTabClickByIndex,
+    handleTabClose,
+    closeOtherTabs,
+    openOrFocusTab,
+    openNewTabMenu,
+
+    setRightPanelTab,
+
+    openProjectDialog: () => setCreateProjectOpen(true),
+
+    sendActiveChatMessage,
+    focusChatInput,
+
+    confirmActiveModal,
+  }), [
+    page, onNavigate, handleToggleLeftPanel, handleToggleRightPanel, focusSearch,
+    paletteOpen, requestOpenSection, handleToggleTheme,
+    activeWorkspaceId, tabState.tabs, activeTab, tabState.activeTabId,
+    handleTabClick, handleTabClickByIndex, handleTabClose, closeOtherTabs,
+    openOrFocusTab, openNewTabMenu, setRightPanelTab,
+    sendActiveChatMessage, focusChatInput, confirmActiveModal,
+  ]);
+
+  // Suppress unused warning — captured for potential future use
+  void newTabMenuIndex;
+  void setNewTabMenuIndex;
+  void newTabMenuTrigger;
+  void handleTogglePin;
+  void updateSettings;
+
+  // ─── Global keyboard shortcut manager ────────────────────────────────
+  useGlobalShortcuts(shortcutApi);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -387,6 +546,23 @@ export function Dashboard({
         onOpenChange={setCreateProjectOpen}
         onCreated={handleProjectCreated}
         defaultWorkspaceId={activeWorkspaceId}
+      />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        items={buildDefaultPaletteItems({
+          openSettings: () => onNavigate('settings'),
+          openShortcuts: () => { onNavigate('settings'); requestOpenSection('keyboard'); },
+          newProject: () => setCreateProjectOpen(true),
+          newTicket: handleCreateTicket,
+          openProjectsAll: () => openTab(buildTab('universal-projects', activeWorkspaceId, 'Projects')),
+          openTicketsAll: handleCreateTicket,
+          openChannelsAll: () => openTab(buildTab('universal-channels', activeWorkspaceId, 'Channels')),
+          openAgentsAll: () => openTab(buildTab('universal-agents', activeWorkspaceId, 'Agents')),
+          toggleTheme: handleToggleTheme,
+          toggleLeftPanel: handleToggleLeftPanel,
+          toggleRightPanel: handleToggleRightPanel,
+        })}
       />
     </div>
   );

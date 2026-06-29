@@ -1,5 +1,7 @@
 /**
  * Help popover anchored to the help button — docs, changelog, shortcuts.
+ * "Shortcuts" item dispatches a window event that the Dashboard listens for
+ * to open the command palette.
  */
 import { useEffect, useRef } from 'react';
 import { Book, Sparkles, Command } from 'lucide-react';
@@ -12,10 +14,20 @@ type HelpPopoverProps = {
 };
 
 const items = [
-  { id: 'docs',      label: 'Documentation', Icon: Book },
-  { id: 'changelog', label: 'Changelog',     Icon: Sparkles },
-  { id: 'shortcuts', label: 'Shortcuts',     Icon: Command },
+  { id: 'docs',        label: 'Documentation',  Icon: Book },
+  { id: 'changelog',   label: 'Changelog',      Icon: Sparkles },
+  { id: 'shortcuts',   label: 'Shortcuts',      Icon: Command, shortcutHint: 'palette.open' },
 ];
+
+function dispatchItem(id: string) {
+  if (id === 'shortcuts') {
+    window.dispatchEvent(new CustomEvent('app:open-command-palette'));
+    return;
+  }
+  if (id === 'docs' || id === 'changelog') {
+    window.dispatchEvent(new CustomEvent('app:open-help', { detail: { id } }));
+  }
+}
 
 /**
  * Help popover anchored to the help button — docs, changelog, shortcuts.
@@ -47,11 +59,14 @@ export function HelpPopover({ anchorRef, open, onClose }: HelpPopoverProps) {
       {items.map(({ id, label, Icon }) => (
         <button
           key={id}
-          onClick={onClose}
+          onClick={() => { dispatchItem(id); onClose(); }}
           className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-popover-foreground hover:bg-accent transition-colors"
         >
           <Icon size={14} strokeWidth={STROKE_WIDTH} className="shrink-0" />
           <span className="flex-1 text-left">{label}</span>
+          {id === 'shortcuts' && (
+            <kbd className="font-mono text-[10px] text-muted-foreground">⌘K</kbd>
+          )}
         </button>
       ))}
     </div>

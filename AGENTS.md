@@ -328,6 +328,48 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 
 **`appearance.accentColor`** was renamed to `appearance.highlightColor` with narrower scope — it no longer affects `--chart-1` / `--sidebar-primary` (theme-owned). To change the brand color, edit the theme.
 
+---
+
+### Keyboard shortcuts architecture
+
+Keyboard shortcuts are **developer-controlled**, not user-rebindable. The system lives in `src/lib/shortcuts/`. One file is the single source of truth: **`src/lib/shortcuts/registry.ts`**.
+
+**Adding a new shortcut** (3 steps):
+1. Add one entry to `DEFAULT_SHORTCUTS` in `registry.ts` (id, label, description, category, chord, scope)
+2. Add one handler in `src/lib/shortcuts/actions.ts` and register it in the `ACTIONS` map (keyed by shortcut id)
+3. Done — Dashboard automatically dispatches it, the settings page lists it, and any `<ShortcutHint shortcutId="…" />` you add renders the platform-appropriate chord.
+
+**Files**:
+| File | Purpose |
+|---|---|
+| `src/lib/shortcuts/registry.ts` | `DEFAULT_SHORTCUTS` — the single source of truth |
+| `src/lib/shortcuts/actions.ts` | One handler per shortcut, exported in `ACTIONS` map |
+| `src/lib/shortcuts/useGlobalShortcuts.ts` | Window keydown listener + dispatcher (mounted once in `Dashboard.tsx`) |
+| `src/lib/shortcuts/chord.ts` | Chord normalization, event matching, input/dialog detection |
+| `src/lib/shortcuts/format.ts` | Platform-aware chord formatter (`⌘K` on Mac, `Ctrl K` on Win/Linux) |
+| `src/lib/shortcuts/platform.ts` | `usePlatform()` hook + `detectPlatform()` |
+| `src/components/ui/Kbd.tsx` | Single key cap primitive |
+| `src/components/shortcuts/` | `KbdGroup`, `ShortcutHint`, `ShortcutRow`, `CategoryGroup`, `CommandPalette` |
+
+**Chord conventions**:
+- `{ mac: 'Mod+k', default: 'Mod+k' }` — single string for both platforms (Mod = Cmd on Mac, Ctrl elsewhere)
+- `{ mac: 'Mod+Option+Right', default: 'Ctrl+Alt+Right' }` — explicit divergence when needed
+- `Escape`, `Enter`, `ArrowUp`, `Space` — unnamed keys are unescaped
+- `Mod+1`–`Mod+9` are the tab cycle bindings
+
+**Scope values**:
+- `'global'` (default) — fires when not in any input or dialog
+- `'always'` — fires even inside inputs / open modals (use sparingly, e.g. `Mod+Enter` send)
+- `'in-canvas'` — fires only when a center tab is active (skip on the settings page)
+
+**Surfacing hints in UI**: `<ShortcutHint shortcutId="palette.open" />` for chip-style, or `<ShortcutHint shortcutId="palette.open" compact />` for inline text. Drop into `Button`s, dropdown items, table rows, or anywhere a hint should appear.
+
+**Help→CommandPalette bridge**: `HelpPopover`'s "Shortcuts" item dispatches a `app:open-command-palette` event that Dashboard listens for. Pattern is reusable for other menu→action wirings.
+
+**Validation**: `runRegistryValidation()` runs in dev on Dashboard mount and logs conflicts (duplicate ids, chord collisions per platform).
+
+**No localStorage sync, no user rebinding UI** — the keyboard settings page is documentation only.
+
 ### No new files at `src/components/` root
 Every new component goes in the correct subdirectory (see Component Placement below).
 
@@ -382,6 +424,8 @@ Use this table to decide where a new file belongs.
 | Pure utility (no React) | `src/lib/` |
 | Static app config (wizard, nav, tabs, themes) | `src/data/config/` |
 | A data domain | `src/data/{domain}/` with `interface.ts` + `store.ts` |
+| Keyboard shortcut UI primitives (hint chip, row, palette) | `src/components/shortcuts/` with `index.ts` barrel |
+| Keyboard shortcut runtime (registry, matcher, dispatcher) | `src/lib/shortcuts/` with `index.ts` barrel |
 
 ---
 
