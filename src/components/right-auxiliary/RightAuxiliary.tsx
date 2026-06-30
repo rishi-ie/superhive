@@ -39,6 +39,7 @@ import { ProjectInbox } from './inbox/ProjectInbox';
 import { ChannelInbox } from './inbox/ChannelInbox';
 import { ProjectOverviewTab } from './project/ProjectOverviewTab';
 import { ProjectManageTab } from './ProjectManageTab';
+import { HomeActivityFeed } from './home';
 
 type RightAuxiliaryProps = {
   width: number;
@@ -354,6 +355,24 @@ export function RightAuxiliary({
           <EmptyState
             title="No sessions"
             description="Sessions are available for agents only"
+          />
+        );
+
+      case 'activity':
+        if (context.kind === 'home') {
+          return (
+            <HomeActivityFeed
+              workspaceId={context.workspaceId}
+              onAgentClick={onAgentClick}
+              onTicketClick={onTicketClick}
+              onChannelClick={onChannelClick}
+            />
+          );
+        }
+        return (
+          <EmptyState
+            title="No activity"
+            description="Activity feed is available on the home dashboard"
           />
         );
 

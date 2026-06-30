@@ -34,6 +34,7 @@ const EMPTY_DATA: MockData = {
   costUsage: [],
   chatQuickStart: [],
   customThemes: [],
+  homeActivityEvents: [],
 };
 
 export const mockableData: MockData = MOCKS_ENABLED ? (mockData as MockData) : EMPTY_DATA;

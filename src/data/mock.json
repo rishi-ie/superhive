@@ -122,7 +122,11 @@
       "channels": [
         {
           "id": "chan-atlas-launch",
-          "participants": ["Elena Rodriguez", "Marcus Webb", "Priya Sharma"],
+          "participants": [
+            "Elena Rodriguez",
+            "Marcus Webb",
+            "Priya Sharma"
+          ],
           "topic": "Atlas launch readiness",
           "relatedTicketId": "AT-107",
           "status": "OPEN",
@@ -133,7 +137,11 @@
         },
         {
           "id": "chan-atlas-fw",
-          "participants": ["Priya Sharma", "Noah Chen", "Takeshi Yamamoto"],
+          "participants": [
+            "Priya Sharma",
+            "Noah Chen",
+            "Takeshi Yamamoto"
+          ],
           "topic": "Firmware signing key rotation",
           "relatedTicketId": "AT-102",
           "status": "AWAITING_REPLY",
@@ -143,7 +151,10 @@
         },
         {
           "id": "chan-atlas-perf",
-          "participants": ["David Kim", "Marcus Webb"],
+          "participants": [
+            "David Kim",
+            "Marcus Webb"
+          ],
           "topic": "p95 motion latency regression",
           "relatedTicketId": "AT-106",
           "status": "OPEN",
@@ -153,7 +164,10 @@
         },
         {
           "id": "chan-atlas-battery",
-          "participants": ["Marcus Webb", "Rafael Santos"],
+          "participants": [
+            "Marcus Webb",
+            "Rafael Santos"
+          ],
           "topic": "Battery thermal model v3",
           "relatedTicketId": "AT-104",
           "status": "RESOLVED",
@@ -336,7 +350,10 @@
       "channels": [
         {
           "id": "chan-beacon-lead",
-          "participants": ["Noah Chen", "James Okafor"],
+          "participants": [
+            "Noah Chen",
+            "James Okafor"
+          ],
           "topic": "Leader election under flaky network",
           "relatedTicketId": "BC-101",
           "status": "OPEN",
@@ -346,7 +363,10 @@
         },
         {
           "id": "chan-beacon-slam",
-          "participants": ["James Okafor", "David Kim"],
+          "participants": [
+            "James Okafor",
+            "David Kim"
+          ],
           "topic": "Shared SLAM map sync",
           "relatedTicketId": "BC-102",
           "status": "AWAITING_REPLY",
@@ -356,7 +376,10 @@
         },
         {
           "id": "chan-beacon-sec",
-          "participants": ["Takeshi Yamamoto", "Noah Chen"],
+          "participants": [
+            "Takeshi Yamamoto",
+            "Noah Chen"
+          ],
           "topic": "Fleet API security review",
           "relatedTicketId": "BC-104",
           "status": "RESOLVED",
@@ -501,7 +524,10 @@
       "channels": [
         {
           "id": "chan-cortex-deform",
-          "participants": ["Zara Patel", "David Kim"],
+          "participants": [
+            "Zara Patel",
+            "David Kim"
+          ],
           "topic": "Deformable object grasp policy",
           "relatedTicketId": "CX-101",
           "status": "OPEN",
@@ -511,7 +537,10 @@
         },
         {
           "id": "chan-cortex-eval",
-          "participants": ["Fatima Al-Rashid", "Zara Patel"],
+          "participants": [
+            "Fatima Al-Rashid",
+            "Zara Patel"
+          ],
           "topic": "Eval harness v2",
           "relatedTicketId": "CX-102",
           "status": "AWAITING_REPLY",
@@ -626,7 +655,10 @@
       "channels": [
         {
           "id": "chan-pulse-thermal",
-          "participants": ["Rafael Santos", "Marcus Webb"],
+          "participants": [
+            "Rafael Santos",
+            "Marcus Webb"
+          ],
           "topic": "Thermal runaway mitigation",
           "relatedTicketId": "PL-103",
           "status": "OPEN",
@@ -636,7 +668,10 @@
         },
         {
           "id": "chan-pulse-supplier",
-          "participants": ["Rafael Santos", "Priya Sharma"],
+          "participants": [
+            "Rafael Santos",
+            "Priya Sharma"
+          ],
           "topic": "Cell supplier qualification",
           "relatedTicketId": "PL-102",
           "status": "AWAITING_REPLY",
@@ -749,7 +784,10 @@
       "channels": [
         {
           "id": "chan-vanguard-survey",
-          "participants": ["James Okafor", "Elena Rodriguez"],
+          "participants": [
+            "James Okafor",
+            "Elena Rodriguez"
+          ],
           "topic": "Site survey mobile app",
           "relatedTicketId": "VG-101",
           "status": "OPEN",
@@ -759,7 +797,10 @@
         },
         {
           "id": "chan-vanguard-diag",
-          "participants": ["James Okafor", "Priya Sharma"],
+          "participants": [
+            "James Okafor",
+            "Priya Sharma"
+          ],
           "topic": "Remote diagnostics API",
           "relatedTicketId": "VG-103",
           "status": "AWAITING_REPLY",
@@ -769,7 +810,10 @@
         },
         {
           "id": "chan-vanguard-oncall",
-          "participants": ["James Okafor", "Luna Park"],
+          "participants": [
+            "James Okafor",
+            "Luna Park"
+          ],
           "topic": "On-call rotation",
           "relatedTicketId": "VG-104",
           "status": "OPEN",
@@ -892,7 +936,10 @@
       "channels": [
         {
           "id": "chan-helios-wizard",
-          "participants": ["Luna Park", "Amelia Foster"],
+          "participants": [
+            "Luna Park",
+            "Amelia Foster"
+          ],
           "topic": "Self-serve onboarding wizard",
           "relatedTicketId": "HL-101",
           "status": "OPEN",
@@ -902,7 +949,10 @@
         },
         {
           "id": "chan-helios-alerts",
-          "participants": ["Amelia Foster", "James Okafor"],
+          "participants": [
+            "Amelia Foster",
+            "James Okafor"
+          ],
           "topic": "Proactive alert playbook",
           "relatedTicketId": "HL-102",
           "status": "AWAITING_REPLY",
@@ -912,7 +962,10 @@
         },
         {
           "id": "chan-helios-kb",
-          "participants": ["Fatima Al-Rashid", "Luna Park"],
+          "participants": [
+            "Fatima Al-Rashid",
+            "Luna Park"
+          ],
           "topic": "Knowledge base refresh",
           "relatedTicketId": "HL-103",
           "status": "RESOLVED",
@@ -982,7 +1035,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+      "assignee": {
+        "name": "Elena Rodriguez",
+        "isAI": true
+      }
     },
     {
       "id": "UT-002",
@@ -992,7 +1048,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "INFRA",
-      "assignee": { "name": "Priya Sharma", "isAI": true }
+      "assignee": {
+        "name": "Priya Sharma",
+        "isAI": true
+      }
     },
     {
       "id": "UT-003",
@@ -1002,7 +1061,10 @@
       "status": "EXECUTING",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": { "name": "David Kim", "isAI": true }
+      "assignee": {
+        "name": "David Kim",
+        "isAI": true
+      }
     },
     {
       "id": "UT-004",
@@ -1012,7 +1074,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": { "name": "Marcus Webb", "isAI": true }
+      "assignee": {
+        "name": "Marcus Webb",
+        "isAI": true
+      }
     },
     {
       "id": "UT-005",
@@ -1022,7 +1087,10 @@
       "status": "BACKLOG",
       "priority": "LOW",
       "type": "REFACTOR",
-      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+      "assignee": {
+        "name": "Elena Rodriguez",
+        "isAI": true
+      }
     },
     {
       "id": "UT-006",
@@ -1032,7 +1100,10 @@
       "status": "REVIEW",
       "priority": "HIGH",
       "type": "BUG",
-      "assignee": { "name": "David Kim", "isAI": true }
+      "assignee": {
+        "name": "David Kim",
+        "isAI": true
+      }
     },
     {
       "id": "UT-007",
@@ -1042,7 +1113,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "INFRA",
-      "assignee": { "name": "Marcus Webb", "isAI": true }
+      "assignee": {
+        "name": "Marcus Webb",
+        "isAI": true
+      }
     },
     {
       "id": "UT-008",
@@ -1052,7 +1126,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "BUG",
-      "assignee": { "name": "Noah Chen", "isAI": true }
+      "assignee": {
+        "name": "Noah Chen",
+        "isAI": true
+      }
     },
     {
       "id": "UT-009",
@@ -1062,7 +1139,10 @@
       "status": "EXECUTING",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": { "name": "James Okafor", "isAI": true }
+      "assignee": {
+        "name": "James Okafor",
+        "isAI": true
+      }
     },
     {
       "id": "UT-010",
@@ -1072,7 +1152,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "REFACTOR",
-      "assignee": { "name": "James Okafor", "isAI": true }
+      "assignee": {
+        "name": "James Okafor",
+        "isAI": true
+      }
     },
     {
       "id": "UT-011",
@@ -1082,7 +1165,10 @@
       "status": "BACKLOG",
       "priority": "HIGH",
       "type": "INFRA",
-      "assignee": { "name": "Takeshi Yamamoto", "isAI": true }
+      "assignee": {
+        "name": "Takeshi Yamamoto",
+        "isAI": true
+      }
     },
     {
       "id": "UT-012",
@@ -1092,7 +1178,10 @@
       "status": "REVIEW",
       "priority": "MEDIUM",
       "type": "INFRA",
-      "assignee": { "name": "Noah Chen", "isAI": true }
+      "assignee": {
+        "name": "Noah Chen",
+        "isAI": true
+      }
     },
     {
       "id": "UT-013",
@@ -1102,7 +1191,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "INFRA",
-      "assignee": { "name": "Noah Chen", "isAI": true }
+      "assignee": {
+        "name": "Noah Chen",
+        "isAI": true
+      }
     },
     {
       "id": "UT-014",
@@ -1112,7 +1204,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "Zara Patel", "isAI": true }
+      "assignee": {
+        "name": "Zara Patel",
+        "isAI": true
+      }
     },
     {
       "id": "UT-015",
@@ -1122,7 +1217,10 @@
       "status": "EXECUTING",
       "priority": "MEDIUM",
       "type": "INFRA",
-      "assignee": { "name": "Fatima Al-Rashid", "isAI": true }
+      "assignee": {
+        "name": "Fatima Al-Rashid",
+        "isAI": true
+      }
     },
     {
       "id": "UT-016",
@@ -1132,7 +1230,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "FEATURE",
-      "assignee": { "name": "David Kim", "isAI": true }
+      "assignee": {
+        "name": "David Kim",
+        "isAI": true
+      }
     },
     {
       "id": "UT-017",
@@ -1142,7 +1243,10 @@
       "status": "REVIEW",
       "priority": "LOW",
       "type": "REFACTOR",
-      "assignee": { "name": "Zara Patel", "isAI": true }
+      "assignee": {
+        "name": "Zara Patel",
+        "isAI": true
+      }
     },
     {
       "id": "UT-018",
@@ -1152,7 +1256,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "INFRA",
-      "assignee": { "name": "Zara Patel", "isAI": true }
+      "assignee": {
+        "name": "Zara Patel",
+        "isAI": true
+      }
     },
     {
       "id": "UT-019",
@@ -1162,7 +1269,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "Rafael Santos", "isAI": true }
+      "assignee": {
+        "name": "Rafael Santos",
+        "isAI": true
+      }
     },
     {
       "id": "UT-020",
@@ -1172,7 +1282,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "INFRA",
-      "assignee": { "name": "Priya Sharma", "isAI": true }
+      "assignee": {
+        "name": "Priya Sharma",
+        "isAI": true
+      }
     },
     {
       "id": "UT-021",
@@ -1182,7 +1295,10 @@
       "status": "REVIEW",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "Rafael Santos", "isAI": true }
+      "assignee": {
+        "name": "Rafael Santos",
+        "isAI": true
+      }
     },
     {
       "id": "UT-022",
@@ -1192,7 +1308,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "FEATURE",
-      "assignee": { "name": "Rafael Santos", "isAI": true }
+      "assignee": {
+        "name": "Rafael Santos",
+        "isAI": true
+      }
     },
     {
       "id": "UT-023",
@@ -1202,7 +1321,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "James Okafor", "isAI": true }
+      "assignee": {
+        "name": "James Okafor",
+        "isAI": true
+      }
     },
     {
       "id": "UT-024",
@@ -1212,7 +1334,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "REFACTOR",
-      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+      "assignee": {
+        "name": "Elena Rodriguez",
+        "isAI": true
+      }
     },
     {
       "id": "UT-025",
@@ -1222,7 +1347,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "INFRA",
-      "assignee": { "name": "James Okafor", "isAI": true }
+      "assignee": {
+        "name": "James Okafor",
+        "isAI": true
+      }
     },
     {
       "id": "UT-026",
@@ -1232,7 +1360,10 @@
       "status": "REVIEW",
       "priority": "MEDIUM",
       "type": "INFRA",
-      "assignee": { "name": "James Okafor", "isAI": true }
+      "assignee": {
+        "name": "James Okafor",
+        "isAI": true
+      }
     },
     {
       "id": "UT-027",
@@ -1242,7 +1373,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "INFRA",
-      "assignee": { "name": "Elena Rodriguez", "isAI": true }
+      "assignee": {
+        "name": "Elena Rodriguez",
+        "isAI": true
+      }
     },
     {
       "id": "UT-028",
@@ -1252,7 +1386,10 @@
       "status": "EXECUTING",
       "priority": "HIGH",
       "type": "FEATURE",
-      "assignee": { "name": "Luna Park", "isAI": true }
+      "assignee": {
+        "name": "Luna Park",
+        "isAI": true
+      }
     },
     {
       "id": "UT-029",
@@ -1262,7 +1399,10 @@
       "status": "BACKLOG",
       "priority": "MEDIUM",
       "type": "INFRA",
-      "assignee": { "name": "Amelia Foster", "isAI": true }
+      "assignee": {
+        "name": "Amelia Foster",
+        "isAI": true
+      }
     },
     {
       "id": "UT-030",
@@ -1272,7 +1412,10 @@
       "status": "REVIEW",
       "priority": "LOW",
       "type": "REFACTOR",
-      "assignee": { "name": "Fatima Al-Rashid", "isAI": true }
+      "assignee": {
+        "name": "Fatima Al-Rashid",
+        "isAI": true
+      }
     },
     {
       "id": "UT-031",
@@ -1282,7 +1425,10 @@
       "status": "MERGED",
       "priority": "LOW",
       "type": "FEATURE",
-      "assignee": { "name": "Luna Park", "isAI": true }
+      "assignee": {
+        "name": "Luna Park",
+        "isAI": true
+      }
     }
   ],
   "agents": [
@@ -1399,7 +1545,7 @@
       "currentCost": 7.89,
       "evolutionLoop": "v3.4.0",
       "logicKernelIntegrity": 0.972,
-      "sessionCost": 52.10,
+      "sessionCost": 52.1,
       "budget": 80
     },
     "agent-priya": {
@@ -1426,7 +1572,7 @@
       "currentCost": 1.89,
       "evolutionLoop": "v3.4.2",
       "logicKernelIntegrity": 0.991,
-      "sessionCost": 14.40,
+      "sessionCost": 14.4,
       "budget": 60
     },
     "agent-fatima": {
@@ -1435,7 +1581,7 @@
       "currentCost": 0.92,
       "evolutionLoop": "v3.4.2",
       "logicKernelIntegrity": 0.998,
-      "sessionCost": 7.20,
+      "sessionCost": 7.2,
       "budget": 60
     },
     "agent-james": {
@@ -1593,76 +1739,220 @@
   },
   "actionLogs": {
     "agent-elena": [
-      { "time": "09:14", "action": "Pushed branch ankle-torque-v2" },
-      { "time": "08:55", "action": "Reviewed PR #482 (firmware signing)" },
-      { "time": "08:02", "action": "Calibrated pilot unit 17" },
-      { "time": "07:33", "action": "Pulled main" }
+      {
+        "time": "09:14",
+        "action": "Pushed branch ankle-torque-v2"
+      },
+      {
+        "time": "08:55",
+        "action": "Reviewed PR #482 (firmware signing)"
+      },
+      {
+        "time": "08:02",
+        "action": "Calibrated pilot unit 17"
+      },
+      {
+        "time": "07:33",
+        "action": "Pulled main"
+      }
     ],
     "agent-marcus": [
-      { "time": "08:45", "action": "Approved PR #477 (slam-lowlight)" },
-      { "time": "07:10", "action": "Queued PL-101 training run v4" },
-      { "time": "06:50", "action": "Closed ticket AT-104 thermal model v3" },
-      { "time": "06:22", "action": "Updated CX-104 ablation results table" }
+      {
+        "time": "08:45",
+        "action": "Approved PR #477 (slam-lowlight)"
+      },
+      {
+        "time": "07:10",
+        "action": "Queued PL-101 training run v4"
+      },
+      {
+        "time": "06:50",
+        "action": "Closed ticket AT-104 thermal model v3"
+      },
+      {
+        "time": "06:22",
+        "action": "Updated CX-104 ablation results table"
+      }
     ],
     "agent-priya": [
-      { "time": "08:02", "action": "Marked BC-104 blocked on security review" },
-      { "time": "07:55", "action": "Triggered OTA signing pipeline build" },
-      { "time": "07:30", "action": "Updated Prometheus exporter config" },
-      { "time": "07:00", "action": "Merged auto-merge: AT-108 staging deploy" }
+      {
+        "time": "08:02",
+        "action": "Marked BC-104 blocked on security review"
+      },
+      {
+        "time": "07:55",
+        "action": "Triggered OTA signing pipeline build"
+      },
+      {
+        "time": "07:30",
+        "action": "Updated Prometheus exporter config"
+      },
+      {
+        "time": "07:00",
+        "action": "Merged auto-merge: AT-108 staging deploy"
+      }
     ],
     "agent-david": [
-      { "time": "09:14", "action": "Rolled out AT-106 to 10% shadow" },
-      { "time": "08:50", "action": "Started CX-103 low-light fine-tune v2" },
-      { "time": "08:20", "action": "Reviewed vision-language-action sweep results" },
-      { "time": "07:45", "action": "Posted experiment summary to channel" }
+      {
+        "time": "09:14",
+        "action": "Rolled out AT-106 to 10% shadow"
+      },
+      {
+        "time": "08:50",
+        "action": "Started CX-103 low-light fine-tune v2"
+      },
+      {
+        "time": "08:20",
+        "action": "Reviewed vision-language-action sweep results"
+      },
+      {
+        "time": "07:45",
+        "action": "Posted experiment summary to channel"
+      }
     ],
     "agent-noah": [
-      { "time": "07:33", "action": "Shipped BC-101 raft heartbeat patch" },
-      { "time": "06:18", "action": "Queued delta-encoded SLAM experiment" },
-      { "time": "05:55", "action": "Flagged auth blocker for BC-104" },
-      { "time": "05:30", "action": "Pulled main, rebased BC-102" }
+      {
+        "time": "07:33",
+        "action": "Shipped BC-101 raft heartbeat patch"
+      },
+      {
+        "time": "06:18",
+        "action": "Queued delta-encoded SLAM experiment"
+      },
+      {
+        "time": "05:55",
+        "action": "Flagged auth blocker for BC-104"
+      },
+      {
+        "time": "05:30",
+        "action": "Pulled main, rebased BC-102"
+      }
     ],
     "agent-fatima": [
-      { "time": "08:00", "action": "Closed ticket HL-103 KB refresh" },
-      { "time": "07:30", "action": "Pushed CX-102 eval harness PR" },
-      { "time": "07:00", "action": "Updated HL-103 tag taxonomy" },
-      { "time": "06:30", "action": "Restarted eval harness sandbox" }
+      {
+        "time": "08:00",
+        "action": "Closed ticket HL-103 KB refresh"
+      },
+      {
+        "time": "07:30",
+        "action": "Pushed CX-102 eval harness PR"
+      },
+      {
+        "time": "07:00",
+        "action": "Updated HL-103 tag taxonomy"
+      },
+      {
+        "time": "06:30",
+        "action": "Restarted eval harness sandbox"
+      }
     ],
     "agent-james": [
-      { "time": "07:50", "action": "Shipped VG-101 offline-first sync" },
-      { "time": "07:00", "action": "Queued VG-103 Prometheus request" },
-      { "time": "06:30", "action": "Confirmed Memphis and Austin shifts" },
-      { "time": "06:00", "action": "Closed VG-105 pilot site readiness" }
+      {
+        "time": "07:50",
+        "action": "Shipped VG-101 offline-first sync"
+      },
+      {
+        "time": "07:00",
+        "action": "Queued VG-103 Prometheus request"
+      },
+      {
+        "time": "06:30",
+        "action": "Confirmed Memphis and Austin shifts"
+      },
+      {
+        "time": "06:00",
+        "action": "Closed VG-105 pilot site readiness"
+      }
     ],
     "agent-luna": [
-      { "time": "07:50", "action": "Posted HL-101 conversion metric (84%)" },
-      { "time": "06:42", "action": "Shipped HL-104 activation dashboard" },
-      { "time": "06:10", "action": "Updated HL-101 wizard copy" },
-      { "time": "05:30", "action": "Triaged support queue" }
+      {
+        "time": "07:50",
+        "action": "Posted HL-101 conversion metric (84%)"
+      },
+      {
+        "time": "06:42",
+        "action": "Shipped HL-104 activation dashboard"
+      },
+      {
+        "time": "06:10",
+        "action": "Updated HL-101 wizard copy"
+      },
+      {
+        "time": "05:30",
+        "action": "Triaged support queue"
+      }
     ],
     "agent-rafael": [
-      { "time": "06:50", "action": "Queued PL-101 cycle life model v4" },
-      { "time": "06:00", "action": "Shared PL-103 thermal data with Marcus" },
-      { "time": "05:30", "action": "Calibrated LabVIEW for batch 3" },
-      { "time": "05:00", "action": "Closed PL-104 charging curve simulator" }
+      {
+        "time": "06:50",
+        "action": "Queued PL-101 cycle life model v4"
+      },
+      {
+        "time": "06:00",
+        "action": "Shared PL-103 thermal data with Marcus"
+      },
+      {
+        "time": "05:30",
+        "action": "Calibrated LabVIEW for batch 3"
+      },
+      {
+        "time": "05:00",
+        "action": "Closed PL-104 charging curve simulator"
+      }
     ],
     "agent-zara": [
-      { "time": "08:45", "action": "Posted CX-101 cloth set results (78%)" },
-      { "time": "07:30", "action": "Drafted CX-105 paper outline" },
-      { "time": "06:30", "action": "Reviewed CX-102 eval harness" },
-      { "time": "06:00", "action": "Started CX-104 ablation sweep" }
+      {
+        "time": "08:45",
+        "action": "Posted CX-101 cloth set results (78%)"
+      },
+      {
+        "time": "07:30",
+        "action": "Drafted CX-105 paper outline"
+      },
+      {
+        "time": "06:30",
+        "action": "Reviewed CX-102 eval harness"
+      },
+      {
+        "time": "06:00",
+        "action": "Started CX-104 ablation sweep"
+      }
     ],
     "agent-takeshi": [
-      { "time": "07:55", "action": "Recovered from auth interceptor rate-limit spike" },
-      { "time": "07:00", "action": "Diagnosed BC-104 WebSocket endpoint issue" },
-      { "time": "06:15", "action": "Closed BC-104 fleet API security review" },
-      { "time": "05:45", "action": "Pulled main" }
+      {
+        "time": "07:55",
+        "action": "Recovered from auth interceptor rate-limit spike"
+      },
+      {
+        "time": "07:00",
+        "action": "Diagnosed BC-104 WebSocket endpoint issue"
+      },
+      {
+        "time": "06:15",
+        "action": "Closed BC-104 fleet API security review"
+      },
+      {
+        "time": "05:45",
+        "action": "Pulled main"
+      }
     ],
     "agent-amelia": [
-      { "time": "07:00", "action": "Requested HL-102 alert taxonomy input" },
-      { "time": "06:15", "action": "Drafted HL-102 alert playbook" },
-      { "time": "05:45", "action": "Reviewed HL-101 wizard copy" },
-      { "time": "05:15", "action": "Pulled main" }
+      {
+        "time": "07:00",
+        "action": "Requested HL-102 alert taxonomy input"
+      },
+      {
+        "time": "06:15",
+        "action": "Drafted HL-102 alert playbook"
+      },
+      {
+        "time": "05:45",
+        "action": "Reviewed HL-101 wizard copy"
+      },
+      {
+        "time": "05:15",
+        "action": "Pulled main"
+      }
     ]
   },
   "nextSteps": {
@@ -1752,28 +2042,44 @@
       "id": "pq-001",
       "agentId": "agent-elena",
       "question": "Atlas launch clearance — confirm scope of V&V coverage for the new shoulder assembly?",
-      "options": ["Full assembly", "Subsystems only", "Defer to launch"],
+      "options": [
+        "Full assembly",
+        "Subsystems only",
+        "Defer to launch"
+      ],
       "timestamp": "2026-06-28T09:10:00Z"
     },
     {
       "id": "pq-002",
       "agentId": "agent-marcus",
       "question": "PR #482 — should the signing key rotation happen in this PR or a follow-up?",
-      "options": ["This PR", "Follow-up PR", "Split into 2 PRs"],
+      "options": [
+        "This PR",
+        "Follow-up PR",
+        "Split into 2 PRs"
+      ],
       "timestamp": "2026-06-28T08:55:00Z"
     },
     {
       "id": "pq-003",
       "agentId": "agent-noah",
       "question": "Beacon fleet alert taxonomy — rename 'Stale Heartbeat' to 'Heartbeat Timeout'?",
-      "options": ["Yes rename", "Keep current", "Survey team first"],
+      "options": [
+        "Yes rename",
+        "Keep current",
+        "Survey team first"
+      ],
       "timestamp": "2026-06-28T08:30:00Z"
     },
     {
       "id": "pq-004",
       "agentId": "agent-james",
       "question": "WebSocket protocol version — bump to v2 in this rewrite or keep v1 compat?",
-      "options": ["v2 only", "Dual-stack v1+v2", "Maintain v1 compat"],
+      "options": [
+        "v2 only",
+        "Dual-stack v1+v2",
+        "Maintain v1 compat"
+      ],
       "timestamp": "2026-06-28T08:00:00Z"
     }
   ],
@@ -1783,10 +2089,36 @@
       "title": "Atlas launch readiness",
       "agentId": "agent-elena",
       "messages": [
-        { "id": "m1", "role": "user", "content": "What's the status on the ankle torque controller?", "minutesAgo": 92 },
-        { "id": "m2", "role": "assistant", "content": "Pilot unit 17 calibrated yesterday at 78% confidence. Marcus is sanity-checking thermal thresholds before we roll the new curve to the full fleet. Should land by end of week.", "minutesAgo": 91, "model": "opus-4.1", "tokenCount": 1842, "durationMs": 4120 },
-        { "id": "m3", "role": "user", "content": "And the gripper force feedback?", "minutesAgo": 64 },
-        { "id": "m4", "role": "assistant", "content": "That's parked until ankle lands. Force feedback depends on the torque baseline. I'll pick it up Monday — likely 2-3 days of tuning.", "minutesAgo": 63, "model": "opus-4.1", "tokenCount": 962, "durationMs": 2210 }
+        {
+          "id": "m1",
+          "role": "user",
+          "content": "What's the status on the ankle torque controller?",
+          "minutesAgo": 92
+        },
+        {
+          "id": "m2",
+          "role": "assistant",
+          "content": "Pilot unit 17 calibrated yesterday at 78% confidence. Marcus is sanity-checking thermal thresholds before we roll the new curve to the full fleet. Should land by end of week.",
+          "minutesAgo": 91,
+          "model": "opus-4.1",
+          "tokenCount": 1842,
+          "durationMs": 4120
+        },
+        {
+          "id": "m3",
+          "role": "user",
+          "content": "And the gripper force feedback?",
+          "minutesAgo": 64
+        },
+        {
+          "id": "m4",
+          "role": "assistant",
+          "content": "That's parked until ankle lands. Force feedback depends on the torque baseline. I'll pick it up Monday — likely 2-3 days of tuning.",
+          "minutesAgo": 63,
+          "model": "opus-4.1",
+          "tokenCount": 962,
+          "durationMs": 2210
+        }
       ],
       "updatedAtMinutesAgo": 63
     },
@@ -1795,10 +2127,36 @@
       "title": "Cycle-life prediction model",
       "agentId": "agent-marcus",
       "messages": [
-        { "id": "m1", "role": "user", "content": "How's PL-101 looking?", "minutesAgo": 45 },
-        { "id": "m2", "role": "assistant", "content": "v4 is mid-training. We're seeing a 4% improvement on synthetic cycles vs v3. Real-world validation starts once the cell supplier batch 3 arrives — Priya's tracking that.", "minutesAgo": 44, "model": "opus-4.1", "tokenCount": 1512, "durationMs": 3680 },
-        { "id": "m3", "role": "user", "content": "Solid. Can you sync with Rafael on the thermal model assumptions?", "minutesAgo": 30 },
-        { "id": "m4", "role": "assistant", "content": "Already on it. He's queued the next round of thermal data for Tuesday — I'll fold it into v5.", "minutesAgo": 29, "model": "opus-4.1", "tokenCount": 712, "durationMs": 1820 }
+        {
+          "id": "m1",
+          "role": "user",
+          "content": "How's PL-101 looking?",
+          "minutesAgo": 45
+        },
+        {
+          "id": "m2",
+          "role": "assistant",
+          "content": "v4 is mid-training. We're seeing a 4% improvement on synthetic cycles vs v3. Real-world validation starts once the cell supplier batch 3 arrives — Priya's tracking that.",
+          "minutesAgo": 44,
+          "model": "opus-4.1",
+          "tokenCount": 1512,
+          "durationMs": 3680
+        },
+        {
+          "id": "m3",
+          "role": "user",
+          "content": "Solid. Can you sync with Rafael on the thermal model assumptions?",
+          "minutesAgo": 30
+        },
+        {
+          "id": "m4",
+          "role": "assistant",
+          "content": "Already on it. He's queued the next round of thermal data for Tuesday — I'll fold it into v5.",
+          "minutesAgo": 29,
+          "model": "opus-4.1",
+          "tokenCount": 712,
+          "durationMs": 1820
+        }
       ],
       "updatedAtMinutesAgo": 29
     },
@@ -1807,8 +2165,21 @@
       "title": "Onboarding wizard conversion",
       "agentId": "agent-luna",
       "messages": [
-        { "id": "m1", "role": "user", "content": "Conversion to first task?", "minutesAgo": 20 },
-        { "id": "m2", "role": "assistant", "content": "84% on the new flow, up from 67% on the legacy wizard. Main drop-off is at the workspace setup step — customers aren't sure what to pick. A/B testing simpler copy next week.", "minutesAgo": 19, "model": "sonnet-4.5", "tokenCount": 1284, "durationMs": 2940 }
+        {
+          "id": "m1",
+          "role": "user",
+          "content": "Conversion to first task?",
+          "minutesAgo": 20
+        },
+        {
+          "id": "m2",
+          "role": "assistant",
+          "content": "84% on the new flow, up from 67% on the legacy wizard. Main drop-off is at the workspace setup step — customers aren't sure what to pick. A/B testing simpler copy next week.",
+          "minutesAgo": 19,
+          "model": "sonnet-4.5",
+          "tokenCount": 1284,
+          "durationMs": 2940
+        }
       ],
       "updatedAtMinutesAgo": 19
     },
@@ -1817,10 +2188,36 @@
       "title": "Vision-language-action sweep",
       "agentId": "agent-david",
       "messages": [
-        { "id": "m1", "role": "user", "content": "Latest sweep numbers?", "minutesAgo": 14 },
-        { "id": "m2", "role": "assistant", "content": "Cloth set at 78%, deformable at 64%. Action chunking helps cloth more than rigid. Marcus is going to review the ablation tomorrow.", "minutesAgo": 13, "model": "opus-4.1", "tokenCount": 1042, "durationMs": 2510 },
-        { "id": "m3", "role": "user", "content": "Let's target 85% on cloth by Friday.", "minutesAgo": 10 },
-        { "id": "m4", "role": "assistant", "content": "Plan: tighter grasp priors + 2 extra fine-tune epochs. Zara will own it.", "minutesAgo": 9, "model": "opus-4.1", "tokenCount": 612, "durationMs": 1480 }
+        {
+          "id": "m1",
+          "role": "user",
+          "content": "Latest sweep numbers?",
+          "minutesAgo": 14
+        },
+        {
+          "id": "m2",
+          "role": "assistant",
+          "content": "Cloth set at 78%, deformable at 64%. Action chunking helps cloth more than rigid. Marcus is going to review the ablation tomorrow.",
+          "minutesAgo": 13,
+          "model": "opus-4.1",
+          "tokenCount": 1042,
+          "durationMs": 2510
+        },
+        {
+          "id": "m3",
+          "role": "user",
+          "content": "Let's target 85% on cloth by Friday.",
+          "minutesAgo": 10
+        },
+        {
+          "id": "m4",
+          "role": "assistant",
+          "content": "Plan: tighter grasp priors + 2 extra fine-tune epochs. Zara will own it.",
+          "minutesAgo": 9,
+          "model": "opus-4.1",
+          "tokenCount": 612,
+          "durationMs": 1480
+        }
       ],
       "updatedAtMinutesAgo": 9
     },
@@ -1829,91 +2226,452 @@
       "title": "Leader election under flaky network",
       "agentId": "agent-noah",
       "messages": [
-        { "id": "m1", "role": "user", "content": "Status on BC-101?", "minutesAgo": 38 },
-        { "id": "m2", "role": "assistant", "content": "Raft heartbeat dropped to 200ms. Replay tests are clean through 3 simulated leader crashes. One more sweep tomorrow, then I want James's eyes on the failover matrix.", "minutesAgo": 37, "model": "sonnet-4.5", "tokenCount": 1192, "durationMs": 2710 }
+        {
+          "id": "m1",
+          "role": "user",
+          "content": "Status on BC-101?",
+          "minutesAgo": 38
+        },
+        {
+          "id": "m2",
+          "role": "assistant",
+          "content": "Raft heartbeat dropped to 200ms. Replay tests are clean through 3 simulated leader crashes. One more sweep tomorrow, then I want James's eyes on the failover matrix.",
+          "minutesAgo": 37,
+          "model": "sonnet-4.5",
+          "tokenCount": 1192,
+          "durationMs": 2710
+        }
       ],
       "updatedAtMinutesAgo": 37
     }
   ],
   "favorites": [
-    { "id": "proj-atlas", "type": "project" },
-    { "id": "proj-beacon", "type": "project" },
-    { "id": "proj-cortex", "type": "project" },
-    { "id": "agent-elena", "type": "agent" },
-    { "id": "agent-luna", "type": "agent" },
-    { "id": "agent-marcus", "type": "agent" }
+    {
+      "id": "proj-atlas",
+      "type": "project"
+    },
+    {
+      "id": "proj-beacon",
+      "type": "project"
+    },
+    {
+      "id": "proj-cortex",
+      "type": "project"
+    },
+    {
+      "id": "agent-elena",
+      "type": "agent"
+    },
+    {
+      "id": "agent-luna",
+      "type": "agent"
+    },
+    {
+      "id": "agent-marcus",
+      "type": "agent"
+    }
   ],
   "channelMessages": [
-    { "id": "cm-001", "channelId": "chan-atlas-launch", "senderName": "Elena Rodriguez", "content": "PR is up — Marcus, can you sanity-check the thermal thresholds?", "timestamp": "2026-06-28T09:14:00Z", "isAI": false },
-    { "id": "cm-002", "channelId": "chan-atlas-launch", "senderName": "Marcus Webb", "content": "Looking now. The 200ms window might bite us at high torque — let me run a quick sim.", "timestamp": "2026-06-28T09:12:00Z", "isAI": false },
-    { "id": "cm-003", "channelId": "chan-atlas-launch", "senderName": "Priya Sharma", "content": "Just merged AT-108 to staging. Wizard is live for the next cohort.", "timestamp": "2026-06-27T18:30:00Z", "isAI": false },
-    { "id": "cm-004", "channelId": "chan-atlas-fw", "senderName": "Priya Sharma", "content": "Waiting on security sign-off before we can rotate keys in prod.", "timestamp": "2026-06-28T08:02:00Z", "isAI": false },
-    { "id": "cm-005", "channelId": "chan-atlas-fw", "senderName": "Takeshi Yamamoto", "content": "Reviewing the key rotation proposal now. Should have an answer within the hour.", "timestamp": "2026-06-28T07:55:00Z", "isAI": false },
-    { "id": "cm-006", "channelId": "chan-atlas-perf", "senderName": "David Kim", "content": "Shadow run looks clean — bumping to 10% rollout.", "timestamp": "2026-06-27T22:41:00Z", "isAI": false },
-    { "id": "cm-007", "channelId": "chan-atlas-perf", "senderName": "Marcus Webb", "content": "Watch the p99 closely. If we see >800ms I'll roll back.", "timestamp": "2026-06-27T22:38:00Z", "isAI": false },
-    { "id": "cm-008", "channelId": "chan-atlas-battery", "senderName": "Marcus Webb", "content": "Thermal model locked. Closing this out.", "timestamp": "2026-06-26T17:10:00Z", "isAI": false },
-    { "id": "cm-009", "channelId": "chan-atlas-battery", "senderName": "Rafael Santos", "content": "Confirmed — solid-state cells hold the line under our test profile.", "timestamp": "2026-06-26T16:55:00Z", "isAI": false },
-    { "id": "cm-010", "channelId": "chan-beacon-lead", "senderName": "Noah Chen", "content": "Switched to Raft with 200ms heartbeat — replays are clean now.", "timestamp": "2026-06-28T07:33:00Z", "isAI": false },
-    { "id": "cm-011", "channelId": "chan-beacon-lead", "senderName": "James Okafor", "content": "Field test scheduled for tomorrow — I'll bring back the failover matrix.", "timestamp": "2026-06-28T07:00:00Z", "isAI": false },
-    { "id": "cm-012", "channelId": "chan-beacon-slam", "senderName": "James Okafor", "content": "Map diff bandwidth is 12% lower with delta encoding.", "timestamp": "2026-06-27T20:15:00Z", "isAI": false },
-    { "id": "cm-013", "channelId": "chan-beacon-slam", "senderName": "David Kim", "content": "Nice. That should fit comfortably in the per-robot cache budget.", "timestamp": "2026-06-27T20:00:00Z", "isAI": false },
-    { "id": "cm-014", "channelId": "chan-beacon-sec", "senderName": "Takeshi Yamamoto", "content": "Findings shipped, recommendations merged.", "timestamp": "2026-06-25T13:00:00Z", "isAI": false },
-    { "id": "cm-015", "channelId": "chan-cortex-deform", "senderName": "Zara Patel", "content": "Diffusion policy is at 78% on the cloth set — pushing to 85% by Friday.", "timestamp": "2026-06-28T08:45:00Z", "isAI": false },
-    { "id": "cm-016", "channelId": "chan-cortex-deform", "senderName": "David Kim", "content": "Want me to queue a fine-tune tonight?", "timestamp": "2026-06-28T08:30:00Z", "isAI": false },
-    { "id": "cm-017", "channelId": "chan-cortex-eval", "senderName": "Fatima Al-Rashid", "content": "Need a second pass on the video replay pipeline before this lands.", "timestamp": "2026-06-27T19:20:00Z", "isAI": false },
-    { "id": "cm-018", "channelId": "chan-pulse-thermal", "senderName": "Rafael Santos", "content": "Solid-state cells hold the line — needs one more validation cycle.", "timestamp": "2026-06-27T16:08:00Z", "isAI": false },
-    { "id": "cm-019", "channelId": "chan-pulse-thermal", "senderName": "Marcus Webb", "content": "I'll fold the data into PL-101 v5 once you ship the validation.", "timestamp": "2026-06-27T16:00:00Z", "isAI": false },
-    { "id": "cm-020", "channelId": "chan-pulse-supplier", "senderName": "Rafael Santos", "content": "Batch 3 samples arriving Friday — need a LabVIEW calibration update.", "timestamp": "2026-06-26T14:33:00Z", "isAI": false },
-    { "id": "cm-021", "channelId": "chan-vanguard-survey", "senderName": "James Okafor", "content": "Offline-first sync landed — testing at the Memphis pilot tomorrow.", "timestamp": "2026-06-28T05:42:00Z", "isAI": false },
-    { "id": "cm-022", "channelId": "chan-vanguard-survey", "senderName": "Elena Rodriguez", "content": "Sweet. I'll ride along and capture install time metrics.", "timestamp": "2026-06-28T05:30:00Z", "isAI": false },
-    { "id": "cm-023", "channelId": "chan-vanguard-diag", "senderName": "James Okafor", "content": "Need a Prometheus exporter for the new telemetry stream.", "timestamp": "2026-06-27T18:55:00Z", "isAI": false },
-    { "id": "cm-024", "channelId": "chan-vanguard-diag", "senderName": "Priya Sharma", "content": "On it. Will have a draft exporter up by EOD.", "timestamp": "2026-06-27T18:40:00Z", "isAI": false },
-    { "id": "cm-025", "channelId": "chan-vanguard-oncall", "senderName": "Luna Park", "content": "Memphis and Austin shifts confirmed for next week.", "timestamp": "2026-06-26T12:10:00Z", "isAI": false },
-    { "id": "cm-026", "channelId": "chan-helios-wizard", "senderName": "Luna Park", "content": "Conversion to first task is at 84% on the new flow.", "timestamp": "2026-06-28T07:50:00Z", "isAI": false },
-    { "id": "cm-027", "channelId": "chan-helios-wizard", "senderName": "Amelia Foster", "content": "Workspace setup step is still the drop-off point. Looping in James on copy.", "timestamp": "2026-06-28T07:40:00Z", "isAI": false },
-    { "id": "cm-028", "channelId": "chan-helios-alerts", "senderName": "Amelia Foster", "content": "Need input on which field alerts are noisy vs. useful.", "timestamp": "2026-06-27T15:00:00Z", "isAI": false },
-    { "id": "cm-029", "channelId": "chan-helios-kb", "senderName": "Fatima Al-Rashid", "content": "Top 20 articles updated and re-tagged.", "timestamp": "2026-06-25T09:20:00Z", "isAI": false },
-    { "id": "cm-030", "channelId": "chan-helios-kb", "senderName": "Luna Park", "content": "Published. Will monitor search-to-resolution time over the next week.", "timestamp": "2026-06-25T09:15:00Z", "isAI": false }
+    {
+      "id": "cm-001",
+      "channelId": "chan-atlas-launch",
+      "senderName": "Elena Rodriguez",
+      "content": "PR is up — Marcus, can you sanity-check the thermal thresholds?",
+      "timestamp": "2026-06-28T09:14:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-002",
+      "channelId": "chan-atlas-launch",
+      "senderName": "Marcus Webb",
+      "content": "Looking now. The 200ms window might bite us at high torque — let me run a quick sim.",
+      "timestamp": "2026-06-28T09:12:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-003",
+      "channelId": "chan-atlas-launch",
+      "senderName": "Priya Sharma",
+      "content": "Just merged AT-108 to staging. Wizard is live for the next cohort.",
+      "timestamp": "2026-06-27T18:30:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-004",
+      "channelId": "chan-atlas-fw",
+      "senderName": "Priya Sharma",
+      "content": "Waiting on security sign-off before we can rotate keys in prod.",
+      "timestamp": "2026-06-28T08:02:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-005",
+      "channelId": "chan-atlas-fw",
+      "senderName": "Takeshi Yamamoto",
+      "content": "Reviewing the key rotation proposal now. Should have an answer within the hour.",
+      "timestamp": "2026-06-28T07:55:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-006",
+      "channelId": "chan-atlas-perf",
+      "senderName": "David Kim",
+      "content": "Shadow run looks clean — bumping to 10% rollout.",
+      "timestamp": "2026-06-27T22:41:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-007",
+      "channelId": "chan-atlas-perf",
+      "senderName": "Marcus Webb",
+      "content": "Watch the p99 closely. If we see >800ms I'll roll back.",
+      "timestamp": "2026-06-27T22:38:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-008",
+      "channelId": "chan-atlas-battery",
+      "senderName": "Marcus Webb",
+      "content": "Thermal model locked. Closing this out.",
+      "timestamp": "2026-06-26T17:10:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-009",
+      "channelId": "chan-atlas-battery",
+      "senderName": "Rafael Santos",
+      "content": "Confirmed — solid-state cells hold the line under our test profile.",
+      "timestamp": "2026-06-26T16:55:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-010",
+      "channelId": "chan-beacon-lead",
+      "senderName": "Noah Chen",
+      "content": "Switched to Raft with 200ms heartbeat — replays are clean now.",
+      "timestamp": "2026-06-28T07:33:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-011",
+      "channelId": "chan-beacon-lead",
+      "senderName": "James Okafor",
+      "content": "Field test scheduled for tomorrow — I'll bring back the failover matrix.",
+      "timestamp": "2026-06-28T07:00:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-012",
+      "channelId": "chan-beacon-slam",
+      "senderName": "James Okafor",
+      "content": "Map diff bandwidth is 12% lower with delta encoding.",
+      "timestamp": "2026-06-27T20:15:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-013",
+      "channelId": "chan-beacon-slam",
+      "senderName": "David Kim",
+      "content": "Nice. That should fit comfortably in the per-robot cache budget.",
+      "timestamp": "2026-06-27T20:00:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-014",
+      "channelId": "chan-beacon-sec",
+      "senderName": "Takeshi Yamamoto",
+      "content": "Findings shipped, recommendations merged.",
+      "timestamp": "2026-06-25T13:00:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-015",
+      "channelId": "chan-cortex-deform",
+      "senderName": "Zara Patel",
+      "content": "Diffusion policy is at 78% on the cloth set — pushing to 85% by Friday.",
+      "timestamp": "2026-06-28T08:45:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-016",
+      "channelId": "chan-cortex-deform",
+      "senderName": "David Kim",
+      "content": "Want me to queue a fine-tune tonight?",
+      "timestamp": "2026-06-28T08:30:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-017",
+      "channelId": "chan-cortex-eval",
+      "senderName": "Fatima Al-Rashid",
+      "content": "Need a second pass on the video replay pipeline before this lands.",
+      "timestamp": "2026-06-27T19:20:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-018",
+      "channelId": "chan-pulse-thermal",
+      "senderName": "Rafael Santos",
+      "content": "Solid-state cells hold the line — needs one more validation cycle.",
+      "timestamp": "2026-06-27T16:08:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-019",
+      "channelId": "chan-pulse-thermal",
+      "senderName": "Marcus Webb",
+      "content": "I'll fold the data into PL-101 v5 once you ship the validation.",
+      "timestamp": "2026-06-27T16:00:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-020",
+      "channelId": "chan-pulse-supplier",
+      "senderName": "Rafael Santos",
+      "content": "Batch 3 samples arriving Friday — need a LabVIEW calibration update.",
+      "timestamp": "2026-06-26T14:33:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-021",
+      "channelId": "chan-vanguard-survey",
+      "senderName": "James Okafor",
+      "content": "Offline-first sync landed — testing at the Memphis pilot tomorrow.",
+      "timestamp": "2026-06-28T05:42:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-022",
+      "channelId": "chan-vanguard-survey",
+      "senderName": "Elena Rodriguez",
+      "content": "Sweet. I'll ride along and capture install time metrics.",
+      "timestamp": "2026-06-28T05:30:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-023",
+      "channelId": "chan-vanguard-diag",
+      "senderName": "James Okafor",
+      "content": "Need a Prometheus exporter for the new telemetry stream.",
+      "timestamp": "2026-06-27T18:55:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-024",
+      "channelId": "chan-vanguard-diag",
+      "senderName": "Priya Sharma",
+      "content": "On it. Will have a draft exporter up by EOD.",
+      "timestamp": "2026-06-27T18:40:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-025",
+      "channelId": "chan-vanguard-oncall",
+      "senderName": "Luna Park",
+      "content": "Memphis and Austin shifts confirmed for next week.",
+      "timestamp": "2026-06-26T12:10:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-026",
+      "channelId": "chan-helios-wizard",
+      "senderName": "Luna Park",
+      "content": "Conversion to first task is at 84% on the new flow.",
+      "timestamp": "2026-06-28T07:50:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-027",
+      "channelId": "chan-helios-wizard",
+      "senderName": "Amelia Foster",
+      "content": "Workspace setup step is still the drop-off point. Looping in James on copy.",
+      "timestamp": "2026-06-28T07:40:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-028",
+      "channelId": "chan-helios-alerts",
+      "senderName": "Amelia Foster",
+      "content": "Need input on which field alerts are noisy vs. useful.",
+      "timestamp": "2026-06-27T15:00:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-029",
+      "channelId": "chan-helios-kb",
+      "senderName": "Fatima Al-Rashid",
+      "content": "Top 20 articles updated and re-tagged.",
+      "timestamp": "2026-06-25T09:20:00Z",
+      "isAI": false
+    },
+    {
+      "id": "cm-030",
+      "channelId": "chan-helios-kb",
+      "senderName": "Luna Park",
+      "content": "Published. Will monitor search-to-resolution time over the next week.",
+      "timestamp": "2026-06-25T09:15:00Z",
+      "isAI": false
+    }
   ],
   "costUsage": [
-    { "date": "May 30", "cost": 142.18 },
-    { "date": "May 31", "cost": 158.42 },
-    { "date": "Jun 1", "cost": 134.71 },
-    { "date": "Jun 2", "cost": 121.05 },
-    { "date": "Jun 3", "cost": 168.94 },
-    { "date": "Jun 4", "cost": 175.32 },
-    { "date": "Jun 5", "cost": 149.18 },
-    { "date": "Jun 6", "cost": 142.66 },
-    { "date": "Jun 7", "cost": 128.40 },
-    { "date": "Jun 8", "cost": 156.83 },
-    { "date": "Jun 9", "cost": 171.22 },
-    { "date": "Jun 10", "cost": 188.04 },
-    { "date": "Jun 11", "cost": 162.95 },
-    { "date": "Jun 12", "cost": 145.71 },
-    { "date": "Jun 13", "cost": 138.59 },
-    { "date": "Jun 14", "cost": 152.18 },
-    { "date": "Jun 15", "cost": 169.45 },
-    { "date": "Jun 16", "cost": 184.62 },
-    { "date": "Jun 17", "cost": 178.31 },
-    { "date": "Jun 18", "cost": 165.08 },
-    { "date": "Jun 19", "cost": 158.94 },
-    { "date": "Jun 20", "cost": 172.16 },
-    { "date": "Jun 21", "cost": 189.72 },
-    { "date": "Jun 22", "cost": 194.05 },
-    { "date": "Jun 23", "cost": 181.40 },
-    { "date": "Jun 24", "cost": 167.83 },
-    { "date": "Jun 25", "cost": 159.27 },
-    { "date": "Jun 26", "cost": 175.91 },
-    { "date": "Jun 27", "cost": 198.34 },
-    { "date": "Jun 28", "cost": 211.50 }
+    {
+      "date": "May 30",
+      "cost": 142.18
+    },
+    {
+      "date": "May 31",
+      "cost": 158.42
+    },
+    {
+      "date": "Jun 1",
+      "cost": 134.71
+    },
+    {
+      "date": "Jun 2",
+      "cost": 121.05
+    },
+    {
+      "date": "Jun 3",
+      "cost": 168.94
+    },
+    {
+      "date": "Jun 4",
+      "cost": 175.32
+    },
+    {
+      "date": "Jun 5",
+      "cost": 149.18
+    },
+    {
+      "date": "Jun 6",
+      "cost": 142.66
+    },
+    {
+      "date": "Jun 7",
+      "cost": 128.4
+    },
+    {
+      "date": "Jun 8",
+      "cost": 156.83
+    },
+    {
+      "date": "Jun 9",
+      "cost": 171.22
+    },
+    {
+      "date": "Jun 10",
+      "cost": 188.04
+    },
+    {
+      "date": "Jun 11",
+      "cost": 162.95
+    },
+    {
+      "date": "Jun 12",
+      "cost": 145.71
+    },
+    {
+      "date": "Jun 13",
+      "cost": 138.59
+    },
+    {
+      "date": "Jun 14",
+      "cost": 152.18
+    },
+    {
+      "date": "Jun 15",
+      "cost": 169.45
+    },
+    {
+      "date": "Jun 16",
+      "cost": 184.62
+    },
+    {
+      "date": "Jun 17",
+      "cost": 178.31
+    },
+    {
+      "date": "Jun 18",
+      "cost": 165.08
+    },
+    {
+      "date": "Jun 19",
+      "cost": 158.94
+    },
+    {
+      "date": "Jun 20",
+      "cost": 172.16
+    },
+    {
+      "date": "Jun 21",
+      "cost": 189.72
+    },
+    {
+      "date": "Jun 22",
+      "cost": 194.05
+    },
+    {
+      "date": "Jun 23",
+      "cost": 181.4
+    },
+    {
+      "date": "Jun 24",
+      "cost": 167.83
+    },
+    {
+      "date": "Jun 25",
+      "cost": 159.27
+    },
+    {
+      "date": "Jun 26",
+      "cost": 175.91
+    },
+    {
+      "date": "Jun 27",
+      "cost": 198.34
+    },
+    {
+      "date": "Jun 28",
+      "cost": 211.5
+    }
   ],
   "chatQuickStart": [
-    { "icon": "Sparkles", "label": "Sprint planning", "description": "Pull open tickets, group by epic, propose a 2-week plan.", "category": "Project" },
-    { "icon": "GitPullRequest", "label": "Review a PR", "description": "Summarize diff, surface risks, draft review comments.", "category": "Engineering" },
-    { "icon": "Bug", "label": "Triage a bug report", "description": "Reproduce, prioritize, assign, draft a fix plan.", "category": "Engineering" },
-    { "icon": "FileText", "label": "Draft release notes", "description": "Compile merged work since the last release into customer-facing notes.", "category": "Communication" },
-    { "icon": "BarChart3", "label": "Cost review", "description": "Break down last week's agent spend by project and flag outliers.", "category": "Operations" },
-    { "icon": "Users", "label": "Onboard a new pilot", "description": "Spin up workspace, install kit checklist, schedule first sync.", "category": "Customer Success" }
+    {
+      "icon": "Sparkles",
+      "label": "Sprint planning",
+      "description": "Pull open tickets, group by epic, propose a 2-week plan.",
+      "category": "Project"
+    },
+    {
+      "icon": "GitPullRequest",
+      "label": "Review a PR",
+      "description": "Summarize diff, surface risks, draft review comments.",
+      "category": "Engineering"
+    },
+    {
+      "icon": "Bug",
+      "label": "Triage a bug report",
+      "description": "Reproduce, prioritize, assign, draft a fix plan.",
+      "category": "Engineering"
+    },
+    {
+      "icon": "FileText",
+      "label": "Draft release notes",
+      "description": "Compile merged work since the last release into customer-facing notes.",
+      "category": "Communication"
+    },
+    {
+      "icon": "BarChart3",
+      "label": "Cost review",
+      "description": "Break down last week's agent spend by project and flag outliers.",
+      "category": "Operations"
+    },
+    {
+      "icon": "Users",
+      "label": "Onboard a new pilot",
+      "description": "Spin up workspace, install kit checklist, schedule first sync.",
+      "category": "Customer Success"
+    }
   ],
   "customThemes": [
     {
@@ -1968,6 +2726,708 @@
         "--border-strong": "#2a2d44",
         "--text-dim": "#6b7088",
         "--radius": "0.625rem"
+      }
+    }
+  ],
+  "homeActivityEvents": [
+    {
+      "id": "hae-001",
+      "kind": "agent_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:04:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "message": "Working on ankle torque controller calibration — v2 balancing loop",
+      "target": "AT-101",
+      "ref": {
+        "type": "agent",
+        "id": "agent-elena",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hae-002",
+      "kind": "agent_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:59:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "message": "Running cycle-life prediction sweep for Pulse Battery batch 4",
+      "target": "PL-104",
+      "ref": {
+        "type": "agent",
+        "id": "agent-marcus",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hae-003",
+      "kind": "agent_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:53:00Z",
+      "actor": "David Kim",
+      "actorId": "agent-david",
+      "message": "Executing vision-language-action benchmark suite — 78% complete",
+      "target": "UT-003",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-003",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hae-004",
+      "kind": "agent_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:36:00Z",
+      "actor": "Noah Chen",
+      "actorId": "agent-noah",
+      "message": "Running leader election under flaky network test",
+      "target": "UT-008",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-008",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hae-005",
+      "kind": "agent_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:12:00Z",
+      "actor": "James Okafor",
+      "actorId": "agent-james",
+      "message": "Syncing shared SLAM map delta with Atlas fleet nodes",
+      "target": "UT-009",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-009",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hac-001",
+      "kind": "agent_compiling",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:05:00Z",
+      "actor": "Priya Sharma",
+      "actorId": "agent-priya",
+      "message": "Compiling OTA signing pipeline — linking cert rotation module",
+      "target": "UT-002",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-002",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hac-002",
+      "kind": "agent_compiling",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:25:00Z",
+      "actor": "Priya Sharma",
+      "actorId": "agent-priya",
+      "message": "Compiling firmware for Atlas v2.1 — security module",
+      "target": "UT-002",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-002",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "haa-001",
+      "kind": "agent_awaiting_human",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:01:00Z",
+      "actor": "Noah Chen",
+      "actorId": "agent-noah",
+      "message": "Beacon fleet alert taxonomy — needs human confirmation",
+      "target": "HL-102",
+      "ref": {
+        "type": "agent",
+        "id": "agent-noah",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hai-001",
+      "kind": "agent_idle",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T05:07:00Z",
+      "actor": "Takeshi Yamamoto",
+      "actorId": "agent-takeshi",
+      "message": "Standing by after key rotation approval",
+      "target": "UT-011",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-011",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "htc-001",
+      "kind": "ticket_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:03:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "message": "Ankle torque controller calibration moved to EXECUTING",
+      "target": "UT-001",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-001",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "htc-002",
+      "kind": "ticket_executing",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:58:00Z",
+      "actor": "Priya Sharma",
+      "actorId": "agent-priya",
+      "message": "OTA firmware signing pipeline moved to EXECUTING",
+      "target": "UT-002",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-002",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "htr-001",
+      "kind": "ticket_review",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:49:00Z",
+      "actor": "David Kim",
+      "actorId": "agent-david",
+      "message": "SLAM under low light moved to REVIEW",
+      "target": "UT-006",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-006",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "htm-001",
+      "kind": "ticket_merged",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T05:37:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "message": "Customer dashboard release notes MERGED",
+      "target": "UT-007",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-007",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "htc-003",
+      "kind": "ticket_created",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T04:52:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "message": "Battery thermal model v3 filed to BACKLOG",
+      "target": "UT-004",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-004",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hsh-001",
+      "kind": "swarm_handoff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:02:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "target": "Marcus Webb",
+      "message": "pushed branch — ankle-torque-v2 · thermal check needed",
+      "ref": {
+        "type": "agent",
+        "id": "agent-marcus",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hsh-002",
+      "kind": "swarm_handoff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:45:00Z",
+      "actor": "Priya Sharma",
+      "actorId": "agent-priya",
+      "target": "Takeshi Yamamoto",
+      "message": "requested review · OTA signing pipeline PR #482",
+      "ref": {
+        "type": "agent",
+        "id": "agent-takeshi",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hsh-003",
+      "kind": "swarm_handoff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:29:00Z",
+      "actor": "David Kim",
+      "actorId": "agent-david",
+      "target": "Elena Rodriguez",
+      "message": "rolled out to · 10% shadow traffic for AT-106",
+      "ref": {
+        "type": "agent",
+        "id": "agent-elena",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hsh-004",
+      "kind": "swarm_handoff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T05:55:00Z",
+      "actor": "Noah Chen",
+      "actorId": "agent-noah",
+      "target": "James Okafor",
+      "message": "shipped patch · BC-101 raft heartbeat at 200ms",
+      "ref": {
+        "type": "agent",
+        "id": "agent-james",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hsh-005",
+      "kind": "swarm_handoff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T05:12:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "target": "David Kim",
+      "message": "approved PR · slam-lowlight #477",
+      "ref": {
+        "type": "agent",
+        "id": "agent-david",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hau-001",
+      "kind": "audit_auth",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:00:00Z",
+      "actor": "Takeshi Yamamoto",
+      "actorId": "agent-takeshi",
+      "message": "Elevated scope request — fleet API key rotation",
+      "ref": {
+        "type": "audit",
+        "id": "audit-001",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hau-002",
+      "kind": "audit_diff",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:52:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "message": "PR #482 — OTA firmware signing pipeline · 14 files",
+      "ref": {
+        "type": "audit",
+        "id": "audit-002",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hpq-001",
+      "kind": "question_pending",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:56:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "message": "Atlas launch clearance — confirm scope of V&V coverage for new shoulder assembly?",
+      "ref": {
+        "type": "agent",
+        "id": "agent-elena",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hpq-002",
+      "kind": "question_pending",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T06:48:00Z",
+      "actor": "Marcus Webb",
+      "actorId": "agent-marcus",
+      "message": "PR #482 — signing key rotation in this PR or follow-up?",
+      "ref": {
+        "type": "agent",
+        "id": "agent-marcus",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hcm-001",
+      "kind": "channel_message",
+      "workspaceId": "acme",
+      "timestamp": "2026-06-30T07:06:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "message": "Atlas launch readiness — PR is up, Marcus check thermal thresholds",
+      "target": "#atlas-launch",
+      "ref": {
+        "type": "channel",
+        "id": "chan-atlas-launch",
+        "workspaceId": "acme"
+      }
+    },
+    {
+      "id": "hae-010",
+      "kind": "agent_executing",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:57:00Z",
+      "actor": "Zara Patel",
+      "actorId": "agent-zara",
+      "message": "Running deformable object grasp policy training",
+      "target": "UT-014",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-014",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hae-011",
+      "kind": "agent_executing",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:41:00Z",
+      "actor": "Fatima Al-Rashid",
+      "actorId": "agent-fatima",
+      "message": "Building eval harness v2 with video replay pipeline",
+      "target": "UT-015",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-015",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hae-012",
+      "kind": "agent_executing",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:20:00Z",
+      "actor": "Rafael Santos",
+      "actorId": "agent-rafael",
+      "message": "Running cycle-life model v4 training for Pulse batch 4",
+      "target": "UT-017",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-017",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hac-010",
+      "kind": "agent_compiling",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T07:04:00Z",
+      "actor": "Rafael Santos",
+      "actorId": "agent-rafael",
+      "message": "Compiling PL-104 charging curve simulator binary",
+      "target": "UT-018",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-018",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hai-010",
+      "kind": "agent_idle",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T04:07:00Z",
+      "actor": "David Kim",
+      "actorId": "agent-david",
+      "message": "Standing by after benchmark suite run",
+      "target": "UT-003",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-003",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "htc-010",
+      "kind": "ticket_executing",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:55:00Z",
+      "actor": "Zara Patel",
+      "actorId": "agent-zara",
+      "message": "Deformable object grasp policy moved to EXECUTING",
+      "target": "UT-014",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-014",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "htr-010",
+      "kind": "ticket_review",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T05:59:00Z",
+      "actor": "Fatima Al-Rashid",
+      "actorId": "agent-fatima",
+      "message": "Eval harness v2 moved to REVIEW",
+      "target": "UT-015",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-015",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hsh-010",
+      "kind": "swarm_handoff",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:50:00Z",
+      "actor": "Zara Patel",
+      "actorId": "agent-zara",
+      "target": "David Kim",
+      "message": "shared results · CX-101 cloth set at 78%",
+      "ref": {
+        "type": "agent",
+        "id": "agent-david",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hsh-011",
+      "kind": "swarm_handoff",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:32:00Z",
+      "actor": "Fatima Al-Rashid",
+      "actorId": "agent-fatima",
+      "target": "Zara Patel",
+      "message": "queued experiment · CX-102 video replay pipeline",
+      "ref": {
+        "type": "agent",
+        "id": "agent-zara",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hsh-012",
+      "kind": "swarm_handoff",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T05:39:00Z",
+      "actor": "Rafael Santos",
+      "actorId": "agent-rafael",
+      "target": "Marcus Webb",
+      "message": "queued experiment · PL-101 cycle life model v4",
+      "ref": {
+        "type": "agent",
+        "id": "agent-marcus",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hpq-010",
+      "kind": "question_pending",
+      "workspaceId": "quantum",
+      "timestamp": "2026-06-30T06:42:00Z",
+      "actor": "Rafael Santos",
+      "actorId": "agent-rafael",
+      "message": "PL-102 supplier batch lead time — unblocked or keep blocked?",
+      "ref": {
+        "type": "agent",
+        "id": "agent-rafael",
+        "workspaceId": "quantum"
+      }
+    },
+    {
+      "id": "hae-020",
+      "kind": "agent_executing",
+      "workspaceId": "field",
+      "timestamp": "2026-06-30T07:00:00Z",
+      "actor": "James Okafor",
+      "actorId": "agent-james",
+      "message": "Syncing VG-101 offline-first delta with Vanguard field nodes",
+      "target": "UT-020",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-020",
+        "workspaceId": "field"
+      }
+    },
+    {
+      "id": "hae-021",
+      "kind": "agent_executing",
+      "workspaceId": "field",
+      "timestamp": "2026-06-30T06:46:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "message": "Building install kit checklist v2 for Vanguard pilot sites",
+      "target": "UT-022",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-022",
+        "workspaceId": "field"
+      }
+    },
+    {
+      "id": "hsh-020",
+      "kind": "swarm_handoff",
+      "workspaceId": "field",
+      "timestamp": "2026-06-30T07:05:00Z",
+      "actor": "James Okafor",
+      "actorId": "agent-james",
+      "target": "Elena Rodriguez",
+      "message": "shipped patch · VG-101 offline-first sync",
+      "ref": {
+        "type": "agent",
+        "id": "agent-elena",
+        "workspaceId": "field"
+      }
+    },
+    {
+      "id": "hsh-021",
+      "kind": "swarm_handoff",
+      "workspaceId": "field",
+      "timestamp": "2026-06-30T06:23:00Z",
+      "actor": "Elena Rodriguez",
+      "actorId": "agent-elena",
+      "target": "James Okafor",
+      "message": "closed ticket · VG-105 pilot site readiness report",
+      "ref": {
+        "type": "agent",
+        "id": "agent-james",
+        "workspaceId": "field"
+      }
+    },
+    {
+      "id": "htm-020",
+      "kind": "ticket_merged",
+      "workspaceId": "field",
+      "timestamp": "2026-06-30T04:27:00Z",
+      "actor": "James Okafor",
+      "actorId": "agent-james",
+      "message": "VG-105 pilot site readiness report MERGED",
+      "target": "UT-025",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-025",
+        "workspaceId": "field"
+      }
+    },
+    {
+      "id": "hae-030",
+      "kind": "agent_executing",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T07:01:00Z",
+      "actor": "Luna Park",
+      "actorId": "agent-luna",
+      "message": "Monitoring HL-104 activation dashboard conversion at 84%",
+      "target": "UT-030",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-030",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "hae-031",
+      "kind": "agent_executing",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T06:48:00Z",
+      "actor": "Amelia Foster",
+      "actorId": "agent-amelia",
+      "message": "Reviewing HL-102 alert playbook for field team",
+      "target": "UT-031",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-031",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "haa-030",
+      "kind": "agent_awaiting_human",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T06:54:00Z",
+      "actor": "Amelia Foster",
+      "actorId": "agent-amelia",
+      "message": "HL-102 field alert taxonomy — awaiting team decision",
+      "target": "HL-102",
+      "ref": {
+        "type": "agent",
+        "id": "agent-amelia",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "hsh-030",
+      "kind": "swarm_handoff",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T07:03:00Z",
+      "actor": "Luna Park",
+      "actorId": "agent-luna",
+      "target": "Amelia Foster",
+      "message": "shared metric · HL-101 wizard conversion at 84%",
+      "ref": {
+        "type": "agent",
+        "id": "agent-amelia",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "hsh-031",
+      "kind": "swarm_handoff",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T06:15:00Z",
+      "actor": "Amelia Foster",
+      "actorId": "agent-amelia",
+      "target": "Luna Park",
+      "message": "requested review · HL-102 alert playbook draft",
+      "ref": {
+        "type": "agent",
+        "id": "agent-luna",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "htm-030",
+      "kind": "ticket_merged",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T03:47:00Z",
+      "actor": "Fatima Al-Rashid",
+      "actorId": "agent-fatima",
+      "message": "HL-103 KB article refresh MERGED",
+      "target": "UT-033",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-033",
+        "workspaceId": "cs"
+      }
+    },
+    {
+      "id": "htr-030",
+      "kind": "ticket_review",
+      "workspaceId": "cs",
+      "timestamp": "2026-06-30T05:47:00Z",
+      "actor": "Luna Park",
+      "actorId": "agent-luna",
+      "message": "HL-104 activation dashboard moved to REVIEW",
+      "target": "UT-034",
+      "ref": {
+        "type": "ticket",
+        "id": "UT-034",
+        "workspaceId": "cs"
       }
     }
   ]

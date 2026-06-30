@@ -1,10 +1,11 @@
-import { Eye, Settings, Inbox, Clock } from 'lucide-react';
+import { Eye, Settings, Inbox, Clock, Activity } from 'lucide-react';
 
 export type RightPanelTabId =
   | 'overview'
   | 'manage'
   | 'inbox'
-  | 'sessions';
+  | 'sessions'
+  | 'activity';
 
 export type RightPanelContext =
   | { kind: 'home'; workspaceId: string }
@@ -28,13 +29,14 @@ export type RightPanelTab = {
 
 const ALL_TABS: RightPanelTab[] = [
   { id: 'overview',  label: 'Overview',  icon: Eye },
-  { id: 'manage',    label: 'Manage',    icon: Settings },
-  { id: 'inbox',     label: 'Inbox',     icon: Inbox },
-  { id: 'sessions',  label: 'Sessions',  icon: Clock },
+  { id: 'manage',   label: 'Manage',    icon: Settings },
+  { id: 'inbox',    label: 'Inbox',     icon: Inbox },
+  { id: 'sessions', label: 'Sessions',  icon: Clock },
+  { id: 'activity', label: 'Activity',   icon: Activity },
 ];
 
 const CONTEXT_VISIBLE_TABS: Record<string, RightPanelTabId[]> = {
-  home:              ['overview', 'inbox'],
+  home:              ['activity'],
   agent:             ['overview', 'manage', 'inbox', 'sessions'],
   ticket:            ['overview', 'manage', 'inbox'],
   project:           ['overview', 'manage', 'inbox'],
