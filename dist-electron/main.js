@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { BrowserWindow, app, ipcMain } from "electron";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import * as fs from "fs";
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -28,7 +29,7 @@ var __require = /* @__PURE__ */ createRequire(import.meta.url);
 //#endregion
 //#region node_modules/electron-log/src/node/packageJson.js
 var require_packageJson = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs$4 = __require("fs");
+	var fs$5 = __require("fs");
 	var path$5 = __require("path");
 	module.exports = {
 		findAndReadPackageJson,
@@ -52,7 +53,7 @@ var require_packageJson = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		try {
 			const fileName = findUp("package.json", path$5.join(...searchPaths));
 			if (!fileName) return;
-			const json = JSON.parse(fs$4.readFileSync(fileName, "utf8"));
+			const json = JSON.parse(fs$5.readFileSync(fileName, "utf8"));
 			const name = json?.productName || json?.name;
 			if (!name || name.toLowerCase() === "electron") return;
 			if (name) return {
@@ -75,7 +76,7 @@ var require_packageJson = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			const parsedPath = path$5.parse(currentPath);
 			const root = parsedPath.root;
 			const dir = parsedPath.dir;
-			if (fs$4.existsSync(path$5.join(currentPath, fileName))) return path$5.resolve(path$5.join(currentPath, fileName));
+			if (fs$5.existsSync(path$5.join(currentPath, fileName))) return path$5.resolve(path$5.join(currentPath, fileName));
 			if (currentPath === root) return null;
 			currentPath = dir;
 		}
@@ -453,7 +454,7 @@ var require_electron_log_preload = /* @__PURE__ */ __commonJSMin(((exports, modu
 //#endregion
 //#region node_modules/electron-log/src/main/initialize.js
 var require_initialize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs$3 = __require("fs");
+	var fs$4 = __require("fs");
 	var os$2 = __require("os");
 	var path$2 = __require("path");
 	var preloadInitializeFn = require_electron_log_preload();
@@ -488,7 +489,7 @@ var require_initialize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		try {
 			preloadPath = path$2.resolve(__dirname, "../renderer/electron-log-preload.js");
 		} catch {}
-		if (!preloadPath || !fs$3.existsSync(preloadPath)) {
+		if (!preloadPath || !fs$4.existsSync(preloadPath)) {
 			preloadPath = path$2.join(externalApi.getAppUserDataPath() || os$2.tmpdir(), "electron-log-preload.js");
 			const preloadCode = `
       try {
@@ -497,7 +498,7 @@ var require_initialize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
         console.error(e);
       }
     `;
-			fs$3.writeFileSync(preloadPath, preloadCode, "utf8");
+			fs$4.writeFileSync(preloadPath, preloadCode, "utf8");
 		}
 		externalApi.setPreloadFileForSessions({
 			filePath: preloadPath,
@@ -1346,7 +1347,7 @@ var require_console = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#region node_modules/electron-log/src/node/transports/file/File.js
 var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var EventEmitter$1 = __require("events");
-	var fs$2 = __require("fs");
+	var fs$3 = __require("fs");
 	var os$1 = __require("os");
 	var File = class extends EventEmitter$1 {
 		asyncWriteQueue = [];
@@ -1371,7 +1372,7 @@ var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		clear() {
 			try {
-				fs$2.writeFileSync(this.path, "", {
+				fs$3.writeFileSync(this.path, "", {
 					mode: this.writeOptions.mode,
 					flag: "w"
 				});
@@ -1394,7 +1395,7 @@ var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		}
 		getSize() {
 			if (this.initialSize === void 0) try {
-				const stats = fs$2.statSync(this.path);
+				const stats = fs$3.statSync(this.path);
 				this.initialSize = stats.size;
 			} catch (e) {
 				this.initialSize = 0;
@@ -1413,7 +1414,7 @@ var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 			const text = this.asyncWriteQueue.join("");
 			this.asyncWriteQueue = [];
 			this.hasActiveAsyncWriting = true;
-			fs$2.writeFile(this.path, text, this.writeOptions, (e) => {
+			fs$3.writeFile(this.path, text, this.writeOptions, (e) => {
 				file.hasActiveAsyncWriting = false;
 				if (e) file.emit("error", /* @__PURE__ */ new Error(`Couldn't write to ${file.path}. ${e.message}`), this);
 				else file.increaseBytesWrittenCounter(text);
@@ -1435,7 +1436,7 @@ var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				return;
 			}
 			try {
-				fs$2.writeFileSync(this.path, text, this.writeOptions);
+				fs$3.writeFileSync(this.path, text, this.writeOptions);
 				this.increaseBytesWrittenCounter(text);
 			} catch (e) {
 				this.emit("error", /* @__PURE__ */ new Error(`Couldn't write to ${this.path}. ${e.message}`), this);
@@ -1445,12 +1446,12 @@ var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = File;
 	function readFileSyncFromEnd(filePath, bytesCount) {
 		const buffer = Buffer.alloc(bytesCount);
-		const stats = fs$2.statSync(filePath);
+		const stats = fs$3.statSync(filePath);
 		const readLength = Math.min(stats.size, bytesCount);
 		const offset = Math.max(0, stats.size - bytesCount);
-		const fd = fs$2.openSync(filePath, "r");
-		const totalBytes = fs$2.readSync(fd, buffer, 0, readLength, offset);
-		fs$2.closeSync(fd);
+		const fd = fs$3.openSync(filePath, "r");
+		const totalBytes = fs$3.readSync(fd, buffer, 0, readLength, offset);
+		fs$3.closeSync(fd);
 		return buffer.toString("utf8", 0, totalBytes);
 	}
 }));
@@ -1475,7 +1476,7 @@ var require_NullFile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#region node_modules/electron-log/src/node/transports/file/FileRegistry.js
 var require_FileRegistry = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var EventEmitter = __require("events");
-	var fs$1 = __require("fs");
+	var fs$2 = __require("fs");
 	var path$1 = __require("path");
 	var File = require_File();
 	var NullFile = require_NullFile();
@@ -1542,8 +1543,8 @@ var require_FileRegistry = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		* @private
 		*/
 		testFileWriting({ filePath, writeOptions }) {
-			fs$1.mkdirSync(path$1.dirname(filePath), { recursive: true });
-			fs$1.writeFileSync(filePath, "", {
+			fs$2.mkdirSync(path$1.dirname(filePath), { recursive: true });
+			fs$2.writeFileSync(filePath, "", {
 				flag: "a",
 				mode: writeOptions.mode
 			});
@@ -1554,7 +1555,7 @@ var require_FileRegistry = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#endregion
 //#region node_modules/electron-log/src/node/transports/file/index.js
 var require_file = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs = __require("fs");
+	var fs$1 = __require("fs");
 	var os = __require("os");
 	var path = __require("path");
 	var FileRegistry = require_FileRegistry();
@@ -1594,7 +1595,7 @@ var require_file = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				const oldPath = file.toString();
 				const inf = path.parse(oldPath);
 				try {
-					fs.renameSync(oldPath, path.join(inf.dir, `${inf.name}.old${inf.ext}`));
+					fs$1.renameSync(oldPath, path.join(inf.dir, `${inf.name}.old${inf.ext}`));
 				} catch (e) {
 					logConsole("Could not rotate log", e);
 					const quarterOfMaxSize = Math.round(transport.maxSize / 4);
@@ -1662,12 +1663,12 @@ var require_file = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		function readAllLogs({ fileFilter = (f) => f.endsWith(".log") } = {}) {
 			initializeOnFirstAccess();
 			const logsPath = path.dirname(transport.resolvePathFn(pathVariables));
-			if (!fs.existsSync(logsPath)) return [];
-			return fs.readdirSync(logsPath).map((fileName) => path.join(logsPath, fileName)).filter(fileFilter).map((logPath) => {
+			if (!fs$1.existsSync(logsPath)) return [];
+			return fs$1.readdirSync(logsPath).map((fileName) => path.join(logsPath, fileName)).filter(fileFilter).map((logPath) => {
 				try {
 					return {
 						path: logPath,
-						lines: fs.readFileSync(logPath, "utf8").split(os.EOL)
+						lines: fs$1.readFileSync(logPath, "utf8").split(os.EOL)
 					};
 				} catch {
 					return null;
@@ -1927,6 +1928,41 @@ function createWindow() {
 }
 ipcMain.handle("window:toggle-maximize", () => {
 	toggleMaximize();
+});
+/**
+* Returns the path to the app's user data directory.
+* Used by the renderer to resolve .superhive/ paths.
+*/
+ipcMain.handle("app:get-data-dir", () => {
+	return app.getPath("userData");
+});
+/**
+* Reads settings from .superhive/settings.json in the user data directory.
+* Falls back to empty object if file doesn't exist.
+*/
+ipcMain.handle("settings:read", () => {
+	const settingsPath = join(app.getPath("userData"), ".superhive", "settings.json");
+	try {
+		if (fs.existsSync(settingsPath)) return fs.readFileSync(settingsPath, "utf-8");
+	} catch (err) {
+		import_main.default.error("Failed to read settings:", err);
+	}
+	return null;
+});
+/**
+* Writes settings to .superhive/settings.json in the user data directory.
+*/
+ipcMain.handle("settings:write", (_event, content) => {
+	const baseDir = join(app.getPath("userData"), ".superhive");
+	const settingsPath = join(baseDir, "settings.json");
+	try {
+		if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+		fs.writeFileSync(settingsPath, content, "utf-8");
+		return true;
+	} catch (err) {
+		import_main.default.error("Failed to write settings:", err);
+		return false;
+	}
 });
 app.whenReady().then(() => {
 	import_main.default.info("App ready");

@@ -1,83 +1,26 @@
-import { mockableData } from '@/data/mock/index';
-import type { AgentStore, Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion } from './interface';
-import type { Project } from '@/data/projects/interface';
+/**
+ * Agents store — owns agent data + telemetry/permissions/audit state.
+ *
+ * Delegates to AgentsRepository, which wraps DataSource collections.
+ */
+import { getDataSource } from '@/data/datasource/index';
+import { AgentsRepository } from './repository';
+import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion } from './interface';
 
-const projects: Project[] = mockableData.projects;
-const agents: Agent[] = mockableData.agents;
-const telemetryMap: Record<string, Telemetry> = mockableData.telemetry;
-let permissionsMap: Record<string, Permissions> = structuredClone(mockableData.permissions);
-const actionLogMap: Record<string, ActionLogEntry[]> = mockableData.actionLogs;
-const nextStepMap: Record<string, string> = mockableData.nextSteps;
-
-let auditItemsMutable: AuditItem[] = structuredClone(mockableData.auditItems);
-let pendingQuestionsMutable: PendingQuestion[] = structuredClone(mockableData.pendingQuestions);
-
-const DEFAULT_TELEMETRY: Telemetry = mockableData.agentDefaults?.telemetry ?? {
-  contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5,
-};
-
-const DEFAULT_PERMISSIONS: Permissions = mockableData.agentDefaults?.permissions ?? {
-  modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false,
-};
-
-const store: AgentStore = {
-  list() {
-    return agents;
-  },
-  get(id: string) {
-    return agents.find((a) => a.id === id);
-  },
-  getTelemetry(agentId: string) {
-    return telemetryMap[agentId] ?? null;
-  },
-  getPermissions(agentId: string) {
-    return permissionsMap[agentId] ?? null;
-  },
-  getAuditItems(agentId?: string) {
-    if (!agentId) return auditItemsMutable;
-    return auditItemsMutable.filter(item => item.agentId === agentId);
-  },
-  getPendingQuestions(agentId: string) {
-    return pendingQuestionsMutable.filter(q => q.agentId === agentId);
-  },
-  getActionLog(agentId: string) {
-    return actionLogMap[agentId] ?? [];
-  },
-  getNextStep(agentId: string) {
-    return nextStepMap[agentId] ?? 'Next — Standing by';
-  },
-  getDefaultTelemetry() {
-    return DEFAULT_TELEMETRY;
-  },
-  getDefaultPermissions() {
-    return DEFAULT_PERMISSIONS;
-  },
-  setPermissions(agentId: string, permissions: Permissions) {
-    permissionsMap[agentId] = permissions;
-  },
-  approveAudit(id: string) {
-    auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
-  },
-  denyAudit(id: string) {
-    auditItemsMutable = auditItemsMutable.filter(item => item.id !== id);
-  },
-  answerQuestion(id: string, _answer: string, _agentId: string) {
-    pendingQuestionsMutable = pendingQuestionsMutable.filter(q => q.id !== id);
-  },
-};
+const repo = new AgentsRepository(getDataSource());
 
 export function listAgents(): Agent[] {
-  return store.list();
+  return repo.list();
 }
 
 export function getAgent(id: string): Agent | undefined {
-  return store.get(id);
+  return repo.byId(id);
 }
 
 export function getActiveAgent(preferredId?: string | null): Agent | null {
-  const agents = store.list();
+  const agents = repo.list();
   if (preferredId) {
-    return agents.find(a => a.id === preferredId) ?? agents[0] ?? null;
+    return agents.find((a) => a.id === preferredId) ?? agents[0] ?? null;
   }
   return (
     agents.find((a) => a.status === 'EXECUTING') ??
@@ -88,57 +31,94 @@ export function getActiveAgent(preferredId?: string | null): Agent | null {
 }
 
 export function getTelemetry(agentId: string): Telemetry {
-  return store.getTelemetry(agentId) ?? store.getDefaultTelemetry();
+  return repo.getTelemetry(agentId) ?? getDefaultTelemetry();
 }
 
 export function getPermissions(agentId: string): Permissions {
-  return store.getPermissions(agentId) ?? store.getDefaultPermissions();
+  return repo.getPermissions(agentId) ?? getDefaultPermissions();
 }
 
 export function setPermissions(agentId: string, permissions: Permissions): void {
-  store.setPermissions(agentId, permissions);
+  const ds = getDataSource();
+  ds.permissions.upsert(agentId, permissions as unknown as Permissions);
+  void agentId;
 }
 
 export function getAuditItems(agentId?: string): AuditItem[] {
-  return store.getAuditItems(agentId);
+  return repo.getAuditItems(agentId);
+}
+
+export function approveAudit(id: string): void {
+  repo.approveAudit(id);
+}
+
+export function denyAudit(id: string): void {
+  repo.denyAudit(id);
 }
 
 export function getActionLog(agentId: string): ActionLogEntry[] {
-  return store.getActionLog(agentId);
+  return repo.getActionLog(agentId);
 }
 
 export function getNextStep(agentId: string): string {
-  return store.getNextStep(agentId);
+  return repo.getNextStep(agentId);
+}
+
+export function getPendingQuestions(agentId: string): PendingQuestion[] {
+  return repo.getPendingQuestions(agentId);
+}
+
+export function answerQuestion(id: string, _answer: string, agentId: string): void {
+  repo.answerQuestion(id);
+  void _answer;
+  void agentId;
+}
+
+export function nameToAgentId(name: string): string | null {
+  return repo.list().find((a) => a.name.toLowerCase() === name.toLowerCase())?.id ?? null;
 }
 
 export function getAgentWorkspace(agentId: string): string | null {
-  for (const project of projects) {
-    if (project.agents.some(a => a.id === agentId)) {
+  const ds = getDataSource();
+  for (const project of ds.projects.findAll()) {
+    if (project.agents.some((a) => a.id === agentId)) {
       return project.workspaceId;
     }
   }
   return null;
 }
 
-export function nameToAgentId(name: string): string | null {
-  const lower = name.toLowerCase();
-  return agents.find(a => a.name.toLowerCase() === lower)?.id ?? null;
+export function getDefaultTelemetry(): Telemetry {
+  const ds = getDataSource();
+  const defaults = ds.telemetry.findAll()[0];
+  if (defaults) {
+    return {
+      contextSaturation: defaults.contextSaturation,
+      tokensPerSecond: defaults.tokensPerSecond,
+      currentCost: defaults.currentCost,
+      evolutionLoop: defaults.evolutionLoop,
+      logicKernelIntegrity: defaults.logicKernelIntegrity,
+      sessionCost: defaults.sessionCost,
+      budget: defaults.budget,
+    };
+  }
+  return { contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5 };
 }
 
-export function approveAudit(id: string): void {
-  store.approveAudit(id);
-}
-
-export function denyAudit(id: string): void {
-  store.denyAudit(id);
-}
-
-export function getPendingQuestions(agentId: string): PendingQuestion[] {
-  return store.getPendingQuestions(agentId);
-}
-
-export function answerQuestion(id: string, answer: string, agentId: string): void {
-  store.answerQuestion(id, answer, agentId);
+export function getDefaultPermissions(): Permissions {
+  const ds = getDataSource();
+  const defaults = ds.permissions.findAll()[0];
+  if (defaults) {
+    return {
+      modelEngine: defaults.modelEngine,
+      writeAccess: defaults.writeAccess,
+      commitAuthority: defaults.commitAuthority as Permissions['commitAuthority'],
+      maxTokens: defaults.maxTokens,
+      writeMessages: defaults.writeMessages,
+      installDeps: defaults.installDeps,
+    };
+  }
+  return { modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false };
 }
 
 export { type Agent, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry, type PendingQuestion };

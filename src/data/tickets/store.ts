@@ -1,27 +1,14 @@
-import { mockableData } from '@/data/mock/index';
-import type {
-  UniversalTicket,
-  UniversalTicketStatus,
-  Priority,
-  TicketType,
-  Assignee,
-} from './interface';
+/**
+ * Tickets store — thin wrapper over DataSource.tickets (UniversalTicket).
+ */
+import { getDataSource } from '@/data/datasource/index';
+import { TicketsRepository } from './repository';
+import type { UniversalTicket, UniversalTicketStatus, Priority, TicketType } from './interface';
 
-const universalTickets: UniversalTicket[] = mockableData.universalTickets;
-
-function list(workspaceId?: string): UniversalTicket[] {
-  if (!workspaceId) return universalTickets;
-  return universalTickets.filter(t => t.workspaceId === workspaceId);
-}
+const repo = new TicketsRepository(getDataSource());
 
 export function listUniversalTickets(workspaceId?: string): UniversalTicket[] {
-  return list(workspaceId);
+  return repo.list(workspaceId);
 }
 
-export type {
-  UniversalTicket,
-  UniversalTicketStatus,
-  Priority,
-  TicketType,
-  Assignee,
-};
+export type { UniversalTicket, UniversalTicketStatus, Priority, TicketType };

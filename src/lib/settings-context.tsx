@@ -1,5 +1,9 @@
 /**
- * Settings context and hook — wraps settings store with React context and localStorage persistence.
+ * Settings context and hook — wraps settings store with React context.
+ *
+ * Persistence backend is handled by settings/storage.ts:
+ *   - Electron: writes to .superhive/settings.json via IPC
+ *   - Browser/dev: falls back to localStorage
  */
 import {
   createContext,
@@ -12,26 +16,16 @@ import {
 } from 'react';
 import {
   DEFAULT_SETTINGS,
-  STORAGE_KEY,
   type Settings,
   type SettingsStore,
 } from '@/data/settings/interface';
 import { ALL_THEME_VARS } from '@/data/config/themes';
 import { themeStore } from '@/data/themes';
 import { debounce } from '@/lib/debounce';
+import { readSettings, writeSettings } from '@/data/settings/storage';
 
 export { DEFAULT_THEMES } from '@/data/config/themes';
 export type { Theme } from '@/data/settings/interface';
-
-function loadSettings(): Settings {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_SETTINGS };
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-}
 
 function computeHighlightForeground(highlight: string): string {
   const hex = highlight.replace('#', '');
@@ -46,7 +40,7 @@ function applySettingsToDOM(settings: Settings) {
   const root = document.documentElement;
   const { themes } = themeStore;
 
-  ALL_THEME_VARS.forEach(k => root.style.removeProperty(k));
+  ALL_THEME_VARS.forEach((k) => root.style.removeProperty(k));
 
   const selectedId = settings.appearance.theme;
   const isSystemMode = selectedId === 'system';
@@ -54,7 +48,7 @@ function applySettingsToDOM(settings: Settings) {
 
   if (isSystemMode) {
     const prefersDark = isDarkOS;
-    const sysTheme = themes.find(t => t.id === 'system') ?? themes[0]!;
+    const sysTheme = themes.find((t) => t.id === 'system') ?? themes[0]!;
     if (prefersDark) {
       Object.entries(sysTheme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
     } else if (sysTheme.systemVars) {
@@ -64,7 +58,7 @@ function applySettingsToDOM(settings: Settings) {
     }
     root.setAttribute('data-theme', 'system');
   } else {
-    const theme = themes.find(t => t.id === selectedId) ?? themes[0]!;
+    const theme = themes.find((t) => t.id === selectedId) ?? themes[0]!;
     Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
     root.setAttribute('data-theme', theme.id);
   }
@@ -89,8 +83,16 @@ const SettingsContext = createContext<SettingsStore | null>(null);
  * @param children - App content wrapped by the settings context
  */
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(loadSettings);
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const isFirstRender = useRef(true);
+
+  // Load settings async on mount (persisted via IPC in Electron, localStorage in dev)
+  useEffect(() => {
+    readSettings().then((loaded) => {
+      setSettings(loaded);
+      applySettingsToDOM(loaded);
+    });
+  }, []);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -101,23 +103,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const persist = useCallback(
     debounce((s: Settings) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      } catch {
-        // storage full or unavailable
-      }
+      writeSettings(s);
     }, 300),
-    []
+    [],
   );
 
-  const update = useCallback(<K extends keyof Settings>(domain: K, patch: Partial<Settings[K]>) => {
-    setSettings(prev => {
-      const next = { ...prev, [domain]: { ...prev[domain], ...patch } };
-      persist(next);
-      applySettingsToDOM(next);
-      return next;
-    });
-  }, [persist]);
+  const update = useCallback(
+    <K extends keyof Settings>(domain: K, patch: Partial<Settings[K]>) => {
+      setSettings((prev) => {
+        const next = { ...prev, [domain]: { ...prev[domain], ...patch } };
+        persist(next);
+        applySettingsToDOM(next);
+        return next;
+      });
+    },
+    [persist],
+  );
 
   const resetAll = useCallback(() => {
     const next = { ...DEFAULT_SETTINGS };

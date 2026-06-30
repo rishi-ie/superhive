@@ -1,16 +1,19 @@
-import { listProjects } from '@/data/projects/store';
+/**
+ * Universal projects store — simplified cross-workspace project list.
+ *
+ * Delegates to UniversalProjectsRepository, which wraps DataSource.projects
+ * into a flat universal view.
+ */
+import { getDataSource } from '@/data/datasource/index';
+import { UniversalProjectsRepository } from './repository';
 import type { UniversalProject } from './interface';
 
-const universalProjects: UniversalProject[] = listProjects().map(p => ({
-  id: p.id,
-  title: p.title,
-  workspaceId: p.workspaceId,
-}));
+const repo = new UniversalProjectsRepository(getDataSource());
 
 export function listUniversalProjects(): UniversalProject[] {
-  return universalProjects;
+  return repo.list();
 }
 
 export function getUniversalProject(id: string): UniversalProject | undefined {
-  return universalProjects.find(p => p.id === id);
+  return repo.byId(id);
 }

@@ -1,4 +1,10 @@
-import { mockableData } from '@/data/mock/index';
+/**
+ * Projects store — owns project data + channels + messages.
+ *
+ * Delegates to ProjectsRepository, which wraps DataSource.projects + DataSource.channelMessages.
+ */
+import { getDataSource } from '@/data/datasource/index';
+import { ProjectsRepository } from './repository';
 import { getInitials } from '@/lib/initials';
 import { listAgents } from '@/data/agents/store';
 import type {
@@ -12,158 +18,93 @@ import type {
   ProjectStatus,
 } from './interface';
 
-const projectsMutable: Project[] = (mockableData.projects ?? []).map(p => ({ ...p }));
-const projectsById: Record<string, Project> = Object.fromEntries(
-  projectsMutable.map(p => [p.id, p]),
-);
+const repo = new ProjectsRepository(getDataSource());
 
-let channelMessagesMutable: ChannelMessage[] = (mockableData.channelMessages ?? []).map(m => ({ ...m }));
-
-interface ListProjectsOpts {
-  status?: ProjectStatus;
+export function listProjects(opts?: { status?: ProjectStatus }): Project[] {
+  return repo.list(opts?.status);
 }
 
-function slugifyTitle(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 32) || 'project';
+export function getProject(id: string): Project | undefined {
+  return repo.byId(id);
 }
 
-function listProjects(opts?: ListProjectsOpts): Project[] {
-  if (opts?.status) {
-    return projectsMutable.filter(p => p.status === opts.status);
-  }
-  return [...projectsMutable];
+export function getProjectByWorkspace(workspaceId: string): Project | undefined {
+  return repo.byWorkspace(workspaceId);
 }
 
-function getProject(id: string): Project | undefined {
-  return projectsById[id];
+export function getProjectTitle(workspaceId?: string): string {
+  return repo.title(workspaceId);
 }
 
-function getProjectByWorkspace(workspaceId: string): Project | undefined {
-  return projectsMutable.find(p => p.workspaceId === workspaceId);
+export function listTickets(workspaceId?: string): Ticket[] {
+  return repo.listTickets(workspaceId);
 }
 
-function getTitle(workspaceId?: string): string {
-  const project = workspaceId
-    ? projectsMutable.find(p => p.workspaceId === workspaceId)
-    : projectsMutable[0];
-  return project?.title ?? '';
+export function listProjectAgents(workspaceId?: string): ProjectAgent[] {
+  return repo.listProjectAgents(workspaceId);
 }
 
-function listTickets(workspaceId?: string): Ticket[] {
-  if (!workspaceId) {
-    return projectsMutable.flatMap(p => p.tickets);
-  }
-  return projectsMutable.find(p => p.workspaceId === workspaceId)?.tickets ?? [];
+export function listSwarmActivity(workspaceId?: string): SwarmActivity[] {
+  return repo.listSwarmActivity(workspaceId);
 }
 
-function listProjectAgents(workspaceId?: string): ProjectAgent[] {
-  if (!workspaceId) {
-    return projectsMutable.flatMap(p => p.agents);
-  }
-  return projectsMutable.find(p => p.workspaceId === workspaceId)?.agents ?? [];
+export function listChannels(workspaceId?: string): CommunicationChannel[] {
+  return repo.listChannels(workspaceId);
 }
 
-function listSwarmActivity(workspaceId?: string): SwarmActivity[] {
-  if (!workspaceId) {
-    return projectsMutable.flatMap(p => p.activity);
-  }
-  return projectsMutable.find(p => p.workspaceId === workspaceId)?.activity ?? [];
+export function getChannel(id: string): CommunicationChannel | undefined {
+  return repo.getChannel(id);
 }
 
-function listChannels(workspaceId?: string): CommunicationChannel[] {
-  if (!workspaceId) {
-    return projectsMutable.flatMap(p =>
-      p.channels.map(ch => ({ ...ch, workspaceId: p.workspaceId })),
-    );
-  }
-  const project = projectsMutable.find(p => p.workspaceId === workspaceId);
-  return (project?.channels ?? []).map(ch => ({ ...ch, workspaceId }));
+export function listChannelMessages(channelId: string): ChannelMessage[] {
+  return repo.listChannelMessages(channelId);
 }
 
-function listChannelMessages(channelId: string): ChannelMessage[] {
-  return channelMessagesMutable.filter(m => m.channelId === channelId);
-}
-
-function getChannel(id: string): CommunicationChannel | undefined {
-  for (const project of projectsMutable) {
-    const ch = project.channels.find(c => c.id === id);
-    if (ch) return { ...ch, workspaceId: project.workspaceId };
-  }
-  return undefined;
-}
-
-function createProject(input: CreateProjectInput): Project | null {
+export function createProject(input: CreateProjectInput): Project | null {
   const title = input.title.trim();
   if (!title || !input.workspaceId) return null;
-  const id = `proj-${slugifyTitle(title)}-${Date.now().toString(36)}`;
+
   const globalAgents = listAgents();
   const projectAgents: ProjectAgent[] = (input.agentIds ?? [])
-    .map(agentId => globalAgents.find(a => a.id === agentId))
+    .map((agentId) => globalAgents.find((a) => a.id === agentId))
     .filter((a): a is NonNullable<typeof a> => a !== undefined)
-    .map(a => ({
+    .map((a) => ({
       id: a.id,
       name: a.name,
       role: a.role,
-      currentStatus: 'IDLE',
+      currentStatus: 'IDLE' as const,
       assignedTicketId: null,
       initials: getInitials(a.name),
     }));
-  const project: Project = {
-    id,
-    workspaceId: input.workspaceId,
+
+  const created = repo.create({
+    ...input,
     title,
-    description: input.description?.trim() ?? '',
-    successCriteria: input.successCriteria?.trim() ?? '',
-    color: input.color ?? '#0562EF',
-    status: 'ACTIVE',
-    tickets: [],
-    agents: projectAgents,
-    channels: [],
-    activity: [],
-  };
-  projectsMutable.unshift(project);
-  projectsById[id] = project;
-  return project;
+  });
+
+  if (projectAgents.length > 0) {
+    repo.patchAgents(created.id, projectAgents);
+  }
+
+  return repo.byId(created.id) ?? created;
 }
 
-function archiveProject(id: string): Project | null {
-  const project = projectsById[id];
-  if (!project) return null;
-  project.status = 'ARCHIVED';
-  return project;
+export function archiveProject(id: string): Project | null {
+  repo.archive(id);
+  return repo.byId(id) ?? null;
 }
 
-function unarchiveProject(id: string): Project | null {
-  const project = projectsById[id];
-  if (!project) return null;
-  project.status = 'ACTIVE';
-  return project;
+export function unarchiveProject(id: string): Project | null {
+  repo.unarchive(id);
+  return repo.byId(id) ?? null;
 }
-
-export { listProjects, getProject, getProjectByWorkspace, getTitle as getProjectTitle, listTickets, listProjectAgents, listSwarmActivity, listChannels, listChannelMessages, getChannel, createProject, archiveProject, unarchiveProject };
 
 export function addChannelMessage(channelId: string, senderName: string, content: string, isAI: boolean = true): void {
-  channelMessagesMutable.push({
-    id: `cmsg-${crypto.randomUUID().slice(0, 8)}`,
-    channelId,
-    senderName,
-    content,
-    timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-    isAI,
-  });
+  repo.addChannelMessage(channelId, senderName, content, isAI);
 }
 
 export function getProjectIdByTicketId(ticketId: string): string | null {
-  for (const project of projectsMutable) {
-    if (project.tickets.some(t => t.id === ticketId)) {
-      return project.id;
-    }
-  }
-  return null;
+  return repo.getProjectIdByTicketId(ticketId);
 }
 
 export type { Ticket, ProjectAgent, SwarmActivity, CommunicationChannel, Project, ChannelMessage, CreateProjectInput, ProjectStatus };

@@ -1,10 +1,14 @@
-import { mockableData } from '@/data/mock/index';
+/**
+ * Cost usage store — thin wrapper over DataSource.costUsage.
+ */
+import { getDataSource } from '@/data/datasource/index';
+import { CostUsageRepository } from './repository';
 import type { CostUsageEntry } from './interface';
 
-const costUsage: CostUsageEntry[] = mockableData.costUsage;
+const repo = new CostUsageRepository(getDataSource());
 
 export function listCostUsage(): CostUsageEntry[] {
-  return costUsage;
+  return repo.list();
 }
 
 export type { CostUsageEntry };

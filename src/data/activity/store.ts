@@ -2,14 +2,14 @@
  * Activity store — unified, timestamped activity feed derived from all domain stores.
  *
  * Sources aggregated (see mock.json `homeActivityEvents` for the rich hand-seeded set):
- *   1. mockableData.homeActivityEvents   — primary seed (~47 events)
- *   2. SwarmActivity from all projects   — swarm_handoff flavor
- *   3. AuditItem / PendingQuestion      — audit_*, question_pending
+ *   1. DataSource.activity              — primary seed (~47 events)
+ *   2. SwarmActivity from all projects  — swarm_handoff flavor
+ *   3. AuditItem / PendingQuestion     — audit_*, question_pending
  *
  * Auto-refresh simulation: simulateNewEvent() cycles through a cursor per workspace
  * to produce the "alive" feeling without permanently mutating state.
  */
-import { mockableData } from '@/data/mock/index';
+import { getDataSource } from '@/data/datasource/index';
 import { listSwarmActivity } from '@/data/projects/store';
 import { listAgents } from '@/data/agents/store';
 import { getAuditItems, getPendingQuestions } from '@/data/agents/store';
@@ -77,22 +77,22 @@ function buildFeed(opts: ListActivityOpts = {}): ActivityEvent[] {
   const events: ActivityEvent[] = [];
 
   const workspaces = workspaceId
-    ? listWorkspaces().filter(w => w.id === workspaceId)
+    ? listWorkspaces().filter((w) => w.id === workspaceId)
     : listWorkspaces();
 
-  const wsIds = new Set(workspaces.map(w => w.id));
+  const wsIds = new Set(workspaces.map((w) => w.id));
 
-  // 1. HomeActivityEvents seed from mock
-  for (const ev of mockableData.homeActivityEvents ?? []) {
+  // 1. Activity seed from DataSource
+  for (const ev of getDataSource().activity.findAll()) {
     if (!wsIds.has(ev.workspaceId)) continue;
-    events.push(ev as ActivityEvent);
+    events.push(ev);
   }
 
   // 2. SwarmActivity from all projects
   for (const ws of workspaces) {
     const swarm = listSwarmActivity(ws.id);
     for (const sa of swarm) {
-      if (!events.some(e => e.id === sa.id)) {
+      if (!events.some((e) => e.id === sa.id)) {
         events.push(swarmToEvent(sa, ws.id));
       }
     }
@@ -104,7 +104,7 @@ function buildFeed(opts: ListActivityOpts = {}): ActivityEvent[] {
     for (const agent of agents) {
       const audits = getAuditItems(agent.id);
       for (const a of audits) {
-        if (!events.some(e => e.id === a.id)) {
+        if (!events.some((e) => e.id === a.id)) {
           events.push(auditToEvent(a, ws.id));
         }
       }
@@ -117,7 +117,7 @@ function buildFeed(opts: ListActivityOpts = {}): ActivityEvent[] {
     for (const agent of agents) {
       const questions = getPendingQuestions(agent.id);
       for (const q of questions) {
-        if (!events.some(e => e.id === q.id)) {
+        if (!events.some((e) => e.id === q.id)) {
           events.push(questionToEvent(q, ws.id));
         }
       }
@@ -132,9 +132,6 @@ function buildFeed(opts: ListActivityOpts = {}): ActivityEvent[] {
 
 /* ─── Public API ──────────────────────────────────────────────────── */
 
-/**
- * List activity events with optional workspace filter and kind filter.
- */
 export function listActivity(opts: ListActivityOpts = {}): ActivityEvent[] {
   return buildFeed(opts);
 }
@@ -146,7 +143,7 @@ const simulationPoolCache: Record<string, ActivityEvent[]> = {};
 
 function buildSimulationPool(workspaceId: string): ActivityEvent[] {
   const agents = listAgents();
-  return agents.map(agent => ({
+  return agents.map((agent) => ({
     id: `sim-${agent.id}-executing`,
     kind: 'agent_executing' as ActivityKind,
     workspaceId,
@@ -170,7 +167,6 @@ export function simulateNewEvent(workspaceId: string): ActivityEvent {
   const cursor = simulationCursors[workspaceId] ?? 0;
   const base = pool[cursor % pool.length]!;
   simulationCursors[workspaceId] = cursor + 1;
-  // Fresh timestamp + unique id each time
   return {
     ...base,
     id: `${base.id}-${Date.now()}`,

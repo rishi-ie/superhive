@@ -1,17 +1,16 @@
 /**
  * Themes store — provides the full active theme list (built-in + custom).
  *
- * Built-in themes live in `data/config/themes.ts` (app structure, always loaded).
- * Custom themes come from `mockableData.customThemes`, which is the Midnight
- * theme from `mock.json` when mocks are on, or an empty array when off.
+ * Delegates to ThemesRepository, which merges DEFAULT_THEMES (always loaded)
+ * with custom themes from DataSource.themes.
  */
 import { DEFAULT_THEMES } from '@/data/config/themes';
-import { mockableData } from '@/data/mock/index';
-import type { Theme } from '@/data/settings/interface';
+import { getDataSource } from '@/data/datasource/index';
+import { ThemesRepository } from './repository';
 import type { ThemeStore } from './interface';
 
-const customThemes: Theme[] = mockableData.customThemes ?? [];
+const repo = new ThemesRepository(getDataSource());
 
 export const themeStore: ThemeStore = {
-  themes: [...DEFAULT_THEMES, ...customThemes],
+  themes: [...DEFAULT_THEMES, ...repo.getCustom()],
 };
