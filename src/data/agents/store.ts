@@ -12,11 +12,11 @@ const nextStepMap: Record<string, string> = mockableData.nextSteps;
 let auditItemsMutable: AuditItem[] = structuredClone(mockableData.auditItems);
 let pendingQuestionsMutable: PendingQuestion[] = structuredClone(mockableData.pendingQuestions);
 
-const DEFAULT_TELEMETRY: Telemetry = {
-  contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5.00,
+const DEFAULT_TELEMETRY: Telemetry = mockableData.agentDefaults?.telemetry ?? {
+  contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5,
 };
 
-const DEFAULT_PERMISSIONS: Permissions = {
+const DEFAULT_PERMISSIONS: Permissions = mockableData.agentDefaults?.permissions ?? {
   modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false,
 };
 

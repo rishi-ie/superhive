@@ -35,6 +35,14 @@ const EMPTY_DATA: MockData = {
   chatQuickStart: [],
   customThemes: [],
   homeActivityEvents: [],
+  agentDefaults: {
+    telemetry: {
+      contextSaturation: 50, tokensPerSecond: 0, currentCost: 0, evolutionLoop: '0/100', logicKernelIntegrity: 100, sessionCost: 0, budget: 5,
+    },
+    permissions: {
+      modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false,
+    },
+  },
 };
 
 export const mockableData: MockData = MOCKS_ENABLED ? (mockData as MockData) : EMPTY_DATA;

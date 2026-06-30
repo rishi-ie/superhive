@@ -51,6 +51,11 @@ export type ChatQuickStartItem = {
   category: string;
 };
 
+export type AgentDefaults = {
+  telemetry: Telemetry;
+  permissions: Permissions;
+};
+
 export type MockData = {
   workspaces: Workspace[];
   currentWorkspaceId: string;
@@ -70,4 +75,5 @@ export type MockData = {
   chatQuickStart: ChatQuickStartItem[];
   customThemes: Theme[];
   homeActivityEvents: ActivityEvent[];
+  agentDefaults: AgentDefaults;
 };
