@@ -8,7 +8,7 @@ Electron + React + Vite + TypeScript + Tailwind v4.
 
 ---
 
-## Quick Commands
+## Quick Commands ok
 
 ```sh
 bun install              # Install dependencies
@@ -272,34 +272,40 @@ src/
 These rules are enforced by TypeScript (`noUnusedLocals: true`, `noUnusedParameters: true`) and review. Every contributor — human or agent — follows them.
 
 ### One component per file
+
 File name matches the exported name. Every `.tsx` file exports exactly one component (named export). No multi-component files except:
+
 - `index.ts` barrels that re-export sibling components
 - Co-located type-only exports (e.g. `type FooProps` in `Foo.tsx` beside `Foo`)
 
 The codebase uses named exports throughout (`export function Foo()`) — `export default` is not used.
 
 ### JSDoc required
+
 Every `.tsx` file needs:
+
 1. A top-of-file `/** ... */` block describing what the file provides
 2. A `/** ... */` on the main exported component/function with `@param` for each prop
 
 ### Imports
+
 - Always use `@/` alias — never `../../` or other relative paths crossing directory boundaries
 - Sibling imports within the same directory: `./SiblingName`
 - Never import sibling files via parent: no `./ParentDir/Child` from within `ParentDir/`
 
 ### Centralization rules
-| What | Where |
-|---|---|
-| Magic numbers (panel sizes, token costs, animation durations, debounce ms) | `src/lib/constants.ts` |
-| Formatting helpers with no React deps (time, cost, text utils) | `src/lib/` or `src/components/chat/format.ts` |
-| Reusable UI primitives | `src/components/ui/` |
-| Settings-only primitives (page header, save bar, color picker) | `src/components/settings/shared/` |
-| Channel-specific shared | `src/components/channels/` |
-| Chat-specific shared helpers | `src/components/chat/` |
-| Static config (wizards, nav, tabs, themes) | `src/data/config/` |
-| Domain data | `src/data/{domain}/store.ts` |
-| User settings defaults | `src/data/settings/settings.json` |
+
+| What                                                                       | Where                                         |
+| -------------------------------------------------------------------------- | --------------------------------------------- |
+| Magic numbers (panel sizes, token costs, animation durations, debounce ms) | `src/lib/constants.ts`                        |
+| Formatting helpers with no React deps (time, cost, text utils)             | `src/lib/` or `src/components/chat/format.ts` |
+| Reusable UI primitives                                                     | `src/components/ui/`                          |
+| Settings-only primitives (page header, save bar, color picker)             | `src/components/settings/shared/`             |
+| Channel-specific shared                                                    | `src/components/channels/`                    |
+| Chat-specific shared helpers                                               | `src/components/chat/`                        |
+| Static config (wizards, nav, tabs, themes)                                 | `src/data/config/`                            |
+| Domain data                                                                | `src/data/{domain}/store.ts`                  |
+| User settings defaults                                                     | `src/data/settings/settings.json`             |
 
 ### Settings architecture
 
@@ -312,6 +318,7 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 **Built-in themes** are defined in `src/data/config/themes.ts` as `DEFAULT_THEMES` (light, dark, system). Theme CSS variables are applied to `<html>` via `applySettingsToDOM()` in `src/lib/settings-context.tsx`.
 
 **Appearance settings** are applied directly to the DOM via `applySettingsToDOM()`:
+
 - `appearance.theme` → CSS vars + `data-theme` on `<html>`. **Theme is authoritative for brand color** (`--chart-1`, `--sidebar-primary`, `--accent`, `--accent-foreground`, `--highlight-foreground`). Changing theme → buttons, badges, tabs, borders, sidebar accents all update.
 - `appearance.highlightColor` → user-controllable highlight subset only: `--highlight`, `--highlight-match`, `--highlight-active`, `--highlight-foreground`. Drives selection/match backgrounds, active link underlines, Switch on-state, Pill active state. **Does not** affect `--chart-1` / `--sidebar-primary` — those are theme-owned.
 - `appearance.fontScale` → `font-size` on `<html>` (rem-based text scales; pixel-arbitrary `text-[Npx]` classes do not)
@@ -335,6 +342,7 @@ The `Settings` type in `src/data/settings/interface.ts` defines the shape. All s
 Keyboard shortcuts are **developer-controlled**, not user-rebindable. The system lives in `src/lib/shortcuts/`. One file is the single source of truth: **`src/lib/shortcuts/registry.ts`**.
 
 **Adding a new shortcut** (3 steps):
+
 1. Add one entry to `DEFAULT_SHORTCUTS` in `registry.ts` (id, label, description, category, chord, scope)
 2. Add one handler in `src/lib/shortcuts/actions.ts` and register it in the `ACTIONS` map (keyed by shortcut id)
 3. Done — Dashboard automatically dispatches it, the settings page lists it, and any `<ShortcutHint shortcutId="…" />` you add renders the platform-appropriate chord.
@@ -352,12 +360,14 @@ Keyboard shortcuts are **developer-controlled**, not user-rebindable. The system
 | `src/components/shortcuts/` | `KbdGroup`, `ShortcutHint`, `ShortcutRow`, `CategoryGroup`, `CommandPalette` |
 
 **Chord conventions**:
+
 - `{ mac: 'Mod+k', default: 'Mod+k' }` — single string for both platforms (Mod = Cmd on Mac, Ctrl elsewhere)
 - `{ mac: 'Mod+Option+Right', default: 'Ctrl+Alt+Right' }` — explicit divergence when needed
 - `Escape`, `Enter`, `ArrowUp`, `Space` — unnamed keys are unescaped
 - `Mod+1`–`Mod+9` are the tab cycle bindings
 
 **Scope values**:
+
 - `'global'` (default) — fires when not in any input or dialog
 - `'always'` — fires even inside inputs / open modals (use sparingly, e.g. `Mod+Enter` send)
 - `'in-canvas'` — fires only when a center tab is active (skip on the settings page)
@@ -371,19 +381,24 @@ Keyboard shortcuts are **developer-controlled**, not user-rebindable. The system
 **No localStorage sync, no user rebinding UI** — the keyboard settings page is documentation only.
 
 ### No new files at `src/components/` root
+
 Every new component goes in the correct subdirectory (see Component Placement below).
 
 ### Barrel files
+
 Create `index.ts` in any new subdirectory with 2+ sibling files. Keep barrels focused — don't re-export from parent directories.
 
 ### Tailwind / CSS
+
 - No inline magic hex colors — use CSS variables (`--chart-1`, `--accent`, etc.) defined in `src/index.css`
 - No invented arbitrary values — use existing design tokens
 - Animation utilities (`animate-in`, `fade-in-0`, `zoom-in-95`, etc.) are provided by `tw-animate-css` — import via `src/index.css`
 - shadcn components use `@theme inline` CSS variables (see `src/index.css`) for theming — use them instead of hardcoded values
 
 ### shadcn/ui conventions
+
 This project uses shadcn/ui as the component foundation. Key conventions:
+
 - **Add new shadcn components**: run `bunx shadcn@latest add <component-name>` (CLI adds to `src/components/ui/`)
 - **Filename convention**: PascalCase (`Button.tsx`, not `button.tsx`) — preserves existing import paths
 - **Variant naming**: `Button` uses `variant="default"` (not `"solid"`) and `variant="outline"` — existing `variant="solid"` call sites were migrated to `variant="default"` in the initial shadcn overhaul
@@ -397,10 +412,12 @@ This project uses shadcn/ui as the component foundation. Key conventions:
 - **SaveBar**: `src/components/ui/SaveBar.tsx` consolidates the old `SettingsSaveBar` (settings) and `SaveCancelBar` (right-auxiliary) into one primitive with `variant: 'sticky' | 'inline'`
 
 ### TypeScript
+
 - `noUnusedLocals: true` and `noUnusedParameters: true` are enforced — fix all errors before committing
 - Run `bun run typecheck` before every commit
 
 ### Style
+
 - Single quotes for imports and strings
 - `.editorconfig` at root enforces: 2-space indent, UTF-8, LF, trim-trailing-whitespace
 
@@ -410,22 +427,22 @@ This project uses shadcn/ui as the component foundation. Key conventions:
 
 Use this table to decide where a new file belongs.
 
-| New thing | Put it in |
-|---|---|
-| Reusable across any panel (Button, Avatar, Badge, etc.) | `src/components/ui/` |
-| Only used in settings pages (ColorPicker, ComingSoonBadge, SelectableCard, SettingsPageHeader) | `src/components/settings/shared/` |
-| Only used in right-auxiliary (ControlMatrix helpers, ManageTab components) | `src/components/right-auxiliary/` or `src/components/right-auxiliary/shared/` |
-| Channel status display | `src/components/channels/` |
-| Chat formatting helpers (no React) | `src/components/chat/` |
-| Center panel content | `src/components/center-workspace/` or a subdirectory inside it |
-| Left sidebar content | `src/components/left-nav/` |
-| Right sidebar content | `src/components/right-auxiliary/` |
-| A distinct group of related components inside a panel | `src/components/{panel}/{feature}/` with `index.ts` barrel |
-| Pure utility (no React) | `src/lib/` |
-| Static app config (wizard, nav, tabs, themes) | `src/data/config/` |
-| A data domain | `src/data/{domain}/` with `interface.ts` + `store.ts` |
-| Keyboard shortcut UI primitives (hint chip, row, palette) | `src/components/shortcuts/` with `index.ts` barrel |
-| Keyboard shortcut runtime (registry, matcher, dispatcher) | `src/lib/shortcuts/` with `index.ts` barrel |
+| New thing                                                                                      | Put it in                                                                     |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Reusable across any panel (Button, Avatar, Badge, etc.)                                        | `src/components/ui/`                                                          |
+| Only used in settings pages (ColorPicker, ComingSoonBadge, SelectableCard, SettingsPageHeader) | `src/components/settings/shared/`                                             |
+| Only used in right-auxiliary (ControlMatrix helpers, ManageTab components)                     | `src/components/right-auxiliary/` or `src/components/right-auxiliary/shared/` |
+| Channel status display                                                                         | `src/components/channels/`                                                    |
+| Chat formatting helpers (no React)                                                             | `src/components/chat/`                                                        |
+| Center panel content                                                                           | `src/components/center-workspace/` or a subdirectory inside it                |
+| Left sidebar content                                                                           | `src/components/left-nav/`                                                    |
+| Right sidebar content                                                                          | `src/components/right-auxiliary/`                                             |
+| A distinct group of related components inside a panel                                          | `src/components/{panel}/{feature}/` with `index.ts` barrel                    |
+| Pure utility (no React)                                                                        | `src/lib/`                                                                    |
+| Static app config (wizard, nav, tabs, themes)                                                  | `src/data/config/`                                                            |
+| A data domain                                                                                  | `src/data/{domain}/` with `interface.ts` + `store.ts`                         |
+| Keyboard shortcut UI primitives (hint chip, row, palette)                                      | `src/components/shortcuts/` with `index.ts` barrel                            |
+| Keyboard shortcut runtime (registry, matcher, dispatcher)                                      | `src/lib/shortcuts/` with `index.ts` barrel                                   |
 
 ---
 
