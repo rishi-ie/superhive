@@ -39,6 +39,12 @@ export interface DataSource {
   get workspaceAgents(): WorkspaceAgentsCollection;
   get projectAgents(): ProjectAgentsCollection;
   get okfBundles(): OkfBundlesCollection;
+  get agentProcesses(): AgentProcessesCollection;
+  get integrations(): IntegrationsCollection;
+  get integrationChannels(): IntegrationChannelsCollection;
+  get permissionRequests(): PermissionRequestsCollection;
+  get subAgents(): SubAgentsCollection;
+  get channelParticipants(): ChannelParticipantsCollection;
   get projects(): Collection<import('../projects/interface').Project>;
   get agents(): Collection<import('../agents/interface').Agent>;
   get tickets(): Collection<import('../tickets/interface').UniversalTicket>;
@@ -168,4 +174,112 @@ export interface OkfBundlesCollection {
   upsert(projectId: string, rootPath: string): OkfBundleRecord;
   setLastSynced(projectId: string, at: string): void;
   incrementEntryCount(projectId: string): void;
+}
+
+export type AgentProcessRecord = {
+  ulid: string;
+  pid: number | null;
+  status: string;
+  lastHeartbeatAt: string | null;
+  startedAt: string;
+  port: number | null;
+  workspaceId: string | null;
+  projectId: string | null;
+};
+
+export interface AgentProcessesCollection {
+  findAll(): AgentProcessRecord[];
+  findByUlid(ulid: string): AgentProcessRecord | undefined;
+  upsert(record: Partial<AgentProcessRecord> & { ulid: string }): AgentProcessRecord;
+  setStatus(ulid: string, status: string): void;
+  recordHeartbeat(ulid: string): void;
+  remove(ulid: string): boolean;
+}
+
+export interface IntegrationRecord extends Entity {
+  id: string;
+  provider: string;
+  label: string;
+  connected: boolean;
+  apiKey: string | null;
+  baseUrl: string | null;
+  configJson: string | null;
+  updatedAt: string;
+}
+
+export interface IntegrationsCollection {
+  findAll(): IntegrationRecord[];
+  findById(id: string): IntegrationRecord | undefined;
+  upsert(id: string, patch: Partial<Omit<IntegrationRecord, 'id'>>): IntegrationRecord;
+}
+
+export interface IntegrationChannelRecord extends Entity {
+  id: string;
+  integrationId: string;
+  name: string;
+  eventsJson: string;
+}
+
+export interface IntegrationChannelsCollection {
+  findAll(): IntegrationChannelRecord[];
+  findByIntegrationId(integrationId: string): IntegrationChannelRecord[];
+  create(record: Omit<IntegrationChannelRecord, 'id'>): IntegrationChannelRecord;
+  remove(id: string): boolean;
+}
+
+export type PermissionRequestRecord = {
+  id: string;
+  agentUlid: string;
+  action: string;
+  toolName: string | null;
+  argsJson: string | null;
+  status: string;
+  requestedAt: string;
+  resolvedAt: string | null;
+  resolverNote: string | null;
+};
+
+export interface PermissionRequestsCollection {
+  findAll(): PermissionRequestRecord[];
+  findById(id: string): PermissionRequestRecord | undefined;
+  create(record: Omit<PermissionRequestRecord, 'id'>): PermissionRequestRecord;
+  resolve(id: string, status: string, note?: string): void;
+  listByAgent(agentUlid: string): PermissionRequestRecord[];
+}
+
+export type SubAgentRecord = {
+  id: string;
+  parentUlid: string;
+  name: string;
+  kind: string;
+  status: string;
+  startedAt: string;
+  finishedAt: string | null;
+  task: string | null;
+};
+
+export interface SubAgentsCollection {
+  findAll(): SubAgentRecord[];
+  findById(id: string): SubAgentRecord | undefined;
+  create(record: Omit<SubAgentRecord, 'id'>): SubAgentRecord;
+  setStatus(id: string, status: string): void;
+  finish(id: string): void;
+  listByParent(parentUlid: string): SubAgentRecord[];
+}
+
+export type ChannelParticipantRecord = {
+  channelId: string;
+  agentId: string;
+  participantType: string;
+  canRead: boolean;
+  canWrite: boolean;
+  joinedAt: string;
+};
+
+export interface ChannelParticipantsCollection {
+  findAll(): ChannelParticipantRecord[];
+  findByChannelId(channelId: string): ChannelParticipantRecord[];
+  create(record: Omit<ChannelParticipantRecord, 'channelId' | 'agentId' | 'participantType'> & { channelId: string; agentId: string; participantType: string }): ChannelParticipantRecord;
+  remove(channelId: string, agentId: string, participantType: string): boolean;
+  updatePermissions(channelId: string, agentId: string, participantType: string, patch: { canRead?: boolean; canWrite?: boolean }): void;
 }

@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 10;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -63,6 +63,17 @@ CREATE TABLE IF NOT EXISTS okf_bundles (
   entry_count INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS agent_processes (
+  ulid TEXT PRIMARY KEY,
+  pid INTEGER,
+  status TEXT NOT NULL DEFAULT 'STARTING',
+  last_heartbeat_at TEXT,
+  started_at TEXT NOT NULL,
+  port INTEGER,
+  workspace_id TEXT,
+  project_id TEXT
+);
+
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
   workspaceId TEXT NOT NULL,
@@ -98,8 +109,13 @@ CREATE TABLE IF NOT EXISTS chat_threads (
   title TEXT NOT NULL,
   agentId TEXT,
   updatedAt TEXT NOT NULL,
-  messages TEXT NOT NULL DEFAULT '[]'
+  messages TEXT NOT NULL DEFAULT '[]',
+  thread_kind TEXT NOT NULL DEFAULT 'agent',
+  project_id TEXT,
+  workspace_id TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_chat_threads_workspace ON chat_threads(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_chat_threads_project ON chat_threads(project_id);
 
 CREATE TABLE IF NOT EXISTS favorites (
   id TEXT PRIMARY KEY,
@@ -209,4 +225,56 @@ CREATE TABLE IF NOT EXISTS chat_quick_start (
   description TEXT NOT NULL,
   category TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS integrations (
+  id TEXT PRIMARY KEY,
+  provider TEXT NOT NULL,
+  label TEXT NOT NULL,
+  connected INTEGER NOT NULL DEFAULT 0,
+  api_key TEXT,
+  base_url TEXT,
+  config_json TEXT,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS integration_channels (
+  id TEXT PRIMARY KEY,
+  integration_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  events_json TEXT NOT NULL DEFAULT '[]'
+);
+
+CREATE TABLE IF NOT EXISTS permission_requests (
+  id TEXT PRIMARY KEY,
+  agent_ulid TEXT NOT NULL,
+  action TEXT NOT NULL,
+  tool_name TEXT,
+  args_json TEXT,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  requested_at TEXT NOT NULL,
+  resolved_at TEXT,
+  resolver_note TEXT
+);
+
+CREATE TABLE IF NOT EXISTS sub_agents (
+  id TEXT PRIMARY KEY,
+  parent_ulid TEXT NOT NULL,
+  name TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'STARTING',
+  started_at TEXT NOT NULL,
+  finished_at TEXT,
+  task TEXT
+);
+
+CREATE TABLE IF NOT EXISTS channel_participants (
+  channel_id TEXT NOT NULL,
+  agent_id TEXT NOT NULL,
+  participant_type TEXT NOT NULL DEFAULT 'agent',
+  can_read INTEGER NOT NULL DEFAULT 1,
+  can_write INTEGER NOT NULL DEFAULT 1,
+  joined_at TEXT NOT NULL,
+  PRIMARY KEY (channel_id, agent_id, participant_type)
+);
+CREATE INDEX IF NOT EXISTS idx_channel_participants_channel ON channel_participants(channel_id);
 `;

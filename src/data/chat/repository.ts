@@ -12,8 +12,25 @@ export class ChatRepository {
     return this.ds.chat.findAll();
   }
 
+  listThreadsByScope(opts: { projectId?: string; workspaceId?: string; kind?: string }): ChatThread[] {
+    return this.listThreads().filter((t) => {
+      if (opts.kind && t.threadKind !== opts.kind) return false;
+      if (opts.projectId && t.projectId !== opts.projectId) return false;
+      if (opts.workspaceId && t.workspaceId !== opts.workspaceId) return false;
+      return true;
+    });
+  }
+
   getByAgent(agentId: string): ChatThread | undefined {
     return this.listThreads().find((t) => t.agentId === agentId);
+  }
+
+  getByProject(projectId: string): ChatThread | undefined {
+    return this.listThreads().find((t) => t.projectId === projectId && t.threadKind === 'project-agent');
+  }
+
+  getByWorkspace(workspaceId: string): ChatThread | undefined {
+    return this.listThreads().find((t) => t.workspaceId === workspaceId && t.threadKind === 'workspace-agent');
   }
 
   getCurrent(agentId?: string): ChatThread | undefined {
@@ -39,7 +56,6 @@ export class ChatRepository {
       timestamp: new Date(),
       status: 'sent',
     };
-    // Patch thread.messages via update — clone + push
     const updated = { ...thread, messages: [...thread.messages, msg] };
     this.ds.chat.update(threadId, updated as Partial<ChatThread>);
     return msg;
@@ -62,7 +78,15 @@ export class ChatRepository {
   }
 
   createThread(agentId: string, title: string): ChatThread {
-    return this.ds.chat.create({ id: `thread-${agentId}-${Date.now()}`, title, agentId, messages: [], updatedAt: new Date() });
+    return this.ds.chat.create({ id: `thread-${agentId}-${Date.now()}`, title, agentId, messages: [], updatedAt: new Date(), threadKind: 'agent' });
+  }
+
+  createThreadForProject(projectId: string, title: string): ChatThread {
+    return this.ds.chat.create({ id: `thread-project-${projectId}-${Date.now()}`, title, projectId, workspaceId: null, messages: [], updatedAt: new Date(), threadKind: 'project-agent' });
+  }
+
+  createThreadForWorkspace(workspaceId: string, title: string): ChatThread {
+    return this.ds.chat.create({ id: `thread-workspace-${workspaceId}-${Date.now()}`, title, workspaceId, messages: [], updatedAt: new Date(), threadKind: 'workspace-agent' });
   }
 
   listQuickStart(): ChatQuickStartItem[] {

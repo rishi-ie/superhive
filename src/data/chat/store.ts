@@ -13,6 +13,10 @@ export function listThreads(): ChatThread[] {
   return repo.listThreads();
 }
 
+export function listThreadsByScope(opts: { projectId?: string; workspaceId?: string; kind?: string }): ChatThread[] {
+  return repo.listThreadsByScope(opts);
+}
+
 export function getThreadByAgent(agentId: string): ChatThread | undefined {
   return repo.getByAgent(agentId);
 }
@@ -41,6 +45,22 @@ export function setMessageFeedback(messageId: string, feedback: Message['feedbac
 
 export function createThreadForAgent(agentId: string, title: string): ChatThread {
   return repo.createThread(agentId, title);
+}
+
+export function getThreadByProject(projectId: string): ChatThread | undefined {
+  return repo.getByProject(projectId);
+}
+
+export function getThreadByWorkspace(workspaceId: string): ChatThread | undefined {
+  return repo.getByWorkspace(workspaceId);
+}
+
+export function createThreadForProject(projectId: string, title: string): ChatThread {
+  return repo.createThreadForProject(projectId, title);
+}
+
+export function createThreadForWorkspace(workspaceId: string, title: string): ChatThread {
+  return repo.createThreadForWorkspace(workspaceId, title);
 }
 
 export function listChatQuickStart(): ChatQuickStartItem[] {

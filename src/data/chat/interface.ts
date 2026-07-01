@@ -21,6 +21,9 @@ export type ChatThread = {
   messages: Message[];
   updatedAt: Date;
   agentId?: string;
+  threadKind?: 'agent' | 'project-agent' | 'workspace-agent';
+  projectId?: string | null;
+  workspaceId?: string | null;
 };
 
 export type ChatQuickStartItem = {

@@ -52,6 +52,12 @@ export class DbDataSource implements DataSource {
   private _workspaceAgents: Array<{ workspaceId: string; agentId: string; role: string | null; joinedAt: string }> = [];
   private _projectAgents: Array<{ projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null }> = [];
   private _okfBundles: Array<{ projectId: string; rootPath: string; lastSyncedAt: string | null; entryCount: number }> = [];
+  private _agentProcesses: Array<{ ulid: string; pid: number | null; status: string; lastHeartbeatAt: string | null; startedAt: string; port: number | null; workspaceId: string | null; projectId: string | null }> = [];
+  private _integrations: Array<{ id: string; provider: string; label: string; connected: boolean; apiKey: string | null; baseUrl: string | null; configJson: string | null; updatedAt: string }> = [];
+  private _integrationChannels: Array<{ id: string; integrationId: string; name: string; eventsJson: string }> = [];
+  private _permissionRequests: Array<{ id: string; agentUlid: string; action: string; toolName: string | null; argsJson: string | null; status: string; requestedAt: string; resolvedAt: string | null; resolverNote: string | null }> = [];
+  private _subAgents: Array<{ id: string; parentUlid: string; name: string; kind: string; status: string; startedAt: string; finishedAt: string | null; task: string | null }> = [];
+  private _channelParticipants: Array<{ channelId: string; agentId: string; participantType: string; canRead: boolean; canWrite: boolean; joinedAt: string }> = [];
   private _projects: Project[] = [];
   private _agents: Agent[] = [];
   private _tickets: UniversalTicket[] = [];
@@ -106,7 +112,7 @@ export class DbDataSource implements DataSource {
         //     agent_permissions, etc. — no harm dropping tables that don't exist)
         const tablesToDrop = [
           'schema_meta', 'meta', 'kv',
-          'workspaces', 'workspace_agents', 'projects', 'project_agents', 'okf_bundles', 'agents', 'universal_tickets',
+          'workspaces', 'workspace_agents', 'projects', 'project_agents', 'okf_bundles', 'agent_processes', 'integrations', 'integration_channels', 'permission_requests', 'sub_agents', 'channel_participants', 'agents', 'universal_tickets',
           'chat_threads', 'favorites', 'custom_themes', 'home_activity_events',
           'telemetry', 'permissions', 'action_logs', 'next_steps',
           'cost_usage', 'audit_items', 'pending_questions',
@@ -198,6 +204,85 @@ export class DbDataSource implements DataSource {
       entryCount: Number(r.entry_count),
     }));
 
+    // agent_processes
+    this._agentProcesses = asArray<Row>(
+      (await window.electron.dbQuery('SELECT ulid, pid, status, last_heartbeat_at, started_at, port, workspace_id, project_id FROM agent_processes')).rows,
+    ).map((r) => ({
+      ulid: String(r.ulid),
+      pid: r.pid != null ? Number(r.pid) : null,
+      status: String(r.status),
+      lastHeartbeatAt: (r.last_heartbeat_at as string | null) ?? null,
+      startedAt: String(r.started_at),
+      port: r.port != null ? Number(r.port) : null,
+      workspaceId: (r.workspace_id as string | null) ?? null,
+      projectId: (r.project_id as string | null) ?? null,
+    }));
+
+    // integrations
+    this._integrations = asArray<Row>(
+      (await window.electron.dbQuery('SELECT id, provider, label, connected, api_key, base_url, config_json, updated_at FROM integrations')).rows,
+    ).map((r) => ({
+      id: String(r.id),
+      provider: String(r.provider),
+      label: String(r.label),
+      connected: Boolean(r.connected),
+      apiKey: (r.api_key as string | null) ?? null,
+      baseUrl: (r.base_url as string | null) ?? null,
+      configJson: (r.config_json as string | null) ?? null,
+      updatedAt: String(r.updated_at),
+    }));
+
+    // integration_channels
+    this._integrationChannels = asArray<Row>(
+      (await window.electron.dbQuery('SELECT id, integration_id, name, events_json FROM integration_channels')).rows,
+    ).map((r) => ({
+      id: String(r.id),
+      integrationId: String(r.integration_id),
+      name: String(r.name),
+      eventsJson: String(r.events_json),
+    }));
+
+    // permission_requests
+    this._permissionRequests = asArray<Row>(
+      (await window.electron.dbQuery('SELECT id, agent_ulid, action, tool_name, args_json, status, requested_at, resolved_at, resolver_note FROM permission_requests')).rows,
+    ).map((r) => ({
+      id: String(r.id),
+      agentUlid: String(r.agent_ulid),
+      action: String(r.action),
+      toolName: (r.tool_name as string | null) ?? null,
+      argsJson: (r.args_json as string | null) ?? null,
+      status: String(r.status),
+      requestedAt: String(r.requested_at),
+      resolvedAt: (r.resolved_at as string | null) ?? null,
+      resolverNote: (r.resolver_note as string | null) ?? null,
+    }));
+
+    // sub_agents
+    this._subAgents = asArray<Row>(
+      (await window.electron.dbQuery('SELECT id, parent_ulid, name, kind, status, started_at, finished_at, task FROM sub_agents')).rows,
+    ).map((r) => ({
+      id: String(r.id),
+      parentUlid: String(r.parent_ulid),
+      name: String(r.name),
+      kind: String(r.kind),
+      status: String(r.status),
+      startedAt: String(r.started_at),
+      finishedAt: (r.finished_at as string | null) ?? null,
+      task: (r.task as string | null) ?? null,
+    }));
+
+    // channel_participants
+    this._channelParticipants = asArray<Row>(
+      (await window.electron.dbQuery('SELECT channel_id, agent_id, participant_type, can_read, can_write, joined_at FROM channel_participants')).rows,
+    ).map((r) => ({
+      channelId: String(r.channel_id),
+      agentId: String(r.agent_id),
+      participantType: String(r.participant_type),
+      canRead: Boolean(r.can_read),
+      canWrite: Boolean(r.can_write),
+      joinedAt: String(r.joined_at),
+    }));
+
     // projects
     const projectRows = asArray<Row>(
       (await window.electron.dbQuery('SELECT data FROM projects')).rows,
@@ -231,7 +316,7 @@ export class DbDataSource implements DataSource {
 
     // chat_threads — JSON-blob messages
     this._chatThreads = asArray<Row>(
-      (await window.electron.dbQuery('SELECT id, title, agentId, updatedAt, messages FROM chat_threads')).rows,
+      (await window.electron.dbQuery('SELECT id, title, agentId, updatedAt, messages, thread_kind, project_id, workspace_id FROM chat_threads')).rows,
     ).map((r) => ({
       id: String(r.id), title: String(r.title),
       agentId: (r.agentId as string | null) ?? undefined,
@@ -240,6 +325,9 @@ export class DbDataSource implements DataSource {
         ...m,
         timestamp: typeof m.timestamp === 'string' ? new Date(m.timestamp) : m.timestamp,
       })),
+      threadKind: (r.thread_kind as string | null) as ChatThread['threadKind'] ?? undefined,
+      projectId: (r.project_id as string | null) ?? null,
+      workspaceId: (r.workspace_id as string | null) ?? null,
     }));
 
     // favorites
@@ -524,6 +612,245 @@ export class DbDataSource implements DataSource {
     };
   }
 
+  get agentProcesses() {
+    type AP = { ulid: string; pid: number | null; status: string; lastHeartbeatAt: string | null; startedAt: string; port: number | null; workspaceId: string | null; projectId: string | null };
+    return {
+      findAll: (): AP[] => [...this._agentProcesses],
+      findByUlid: (ulid: string): AP | undefined =>
+        this._agentProcesses.find((p) => p.ulid === ulid),
+      upsert: (record: Partial<AP> & { ulid: string }): AP => {
+        const existing = this._agentProcesses.find((p) => p.ulid === record.ulid);
+        if (existing) {
+          Object.assign(existing, record);
+          this._persist(
+            'UPDATE agent_processes SET pid = ?, status = ?, last_heartbeat_at = ?, port = ?, workspace_id = ?, project_id = ? WHERE ulid = ?',
+            [existing.pid, existing.status, existing.lastHeartbeatAt, existing.port, existing.workspaceId, existing.projectId, existing.ulid],
+          );
+          this._notify();
+          return existing;
+        }
+        const item: AP = {
+          ulid: record.ulid,
+          pid: record.pid ?? null,
+          status: record.status ?? 'STARTING',
+          lastHeartbeatAt: record.lastHeartbeatAt ?? null,
+          startedAt: record.startedAt ?? new Date().toISOString(),
+          port: record.port ?? null,
+          workspaceId: record.workspaceId ?? null,
+          projectId: record.projectId ?? null,
+        };
+        this._agentProcesses.push(item);
+        this._persist(
+          'INSERT INTO agent_processes (ulid, pid, status, last_heartbeat_at, started_at, port, workspace_id, project_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.ulid, item.pid, item.status, item.lastHeartbeatAt, item.startedAt, item.port, item.workspaceId, item.projectId],
+        );
+        this._notify();
+        return item;
+      },
+      setStatus: (ulid: string, status: string): void => {
+        const p = this._agentProcesses.find((x) => x.ulid === ulid);
+        if (!p) return;
+        p.status = status;
+        this._persist('UPDATE agent_processes SET status = ? WHERE ulid = ?', [status, ulid]);
+        this._notify();
+      },
+      recordHeartbeat: (ulid: string): void => {
+        const p = this._agentProcesses.find((x) => x.ulid === ulid);
+        if (!p) return;
+        p.lastHeartbeatAt = new Date().toISOString();
+        this._persist('UPDATE agent_processes SET last_heartbeat_at = ? WHERE ulid = ?', [p.lastHeartbeatAt, ulid]);
+        this._notify();
+      },
+      remove: (ulid: string): boolean => {
+        const before = this._agentProcesses.length;
+        this._agentProcesses = this._agentProcesses.filter((p) => p.ulid !== ulid);
+        if (this._agentProcesses.length < before) {
+          this._persist('DELETE FROM agent_processes WHERE ulid = ?', [ulid]);
+          this._notify();
+          return true;
+        }
+        return false;
+      },
+    };
+  }
+
+  get integrations() {
+    type I = { id: string; provider: string; label: string; connected: boolean; apiKey: string | null; baseUrl: string | null; configJson: string | null; updatedAt: string };
+    return {
+      findAll: (): I[] => [...this._integrations],
+      findById: (id: string): I | undefined => this._integrations.find((i) => i.id === id),
+      upsert: (id: string, patch: Partial<Omit<I, 'id'>>): I => {
+        const existing = this._integrations.find((i) => i.id === id);
+        if (existing) {
+          Object.assign(existing, patch);
+          this._persist(
+            'UPDATE integrations SET provider = ?, label = ?, connected = ?, api_key = ?, base_url = ?, config_json = ?, updated_at = ? WHERE id = ?',
+            [existing.provider, existing.label, existing.connected ? 1 : 0, existing.apiKey, existing.baseUrl, existing.configJson, existing.updatedAt, id],
+          );
+          this._notify();
+          return existing;
+        }
+        const item: I = {
+          id,
+          provider: patch.provider ?? '',
+          label: patch.label ?? '',
+          connected: patch.connected ?? false,
+          apiKey: patch.apiKey ?? null,
+          baseUrl: patch.baseUrl ?? null,
+          configJson: patch.configJson ?? null,
+          updatedAt: patch.updatedAt ?? new Date().toISOString(),
+        };
+        this._integrations.push(item);
+        this._persist(
+          'INSERT INTO integrations (id, provider, label, connected, api_key, base_url, config_json, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.provider, item.label, item.connected ? 1 : 0, item.apiKey, item.baseUrl, item.configJson, item.updatedAt],
+        );
+        this._notify();
+        return item;
+      },
+    };
+  }
+
+  get integrationChannels() {
+    type IC = { id: string; integrationId: string; name: string; eventsJson: string };
+    return {
+      findAll: (): IC[] => [...this._integrationChannels],
+      findByIntegrationId: (integrationId: string): IC[] =>
+        this._integrationChannels.filter((c) => c.integrationId === integrationId),
+      create: (record: Omit<IC, 'id'>): IC => {
+        const item: IC = { id: crypto.randomUUID(), ...record };
+        this._integrationChannels.push(item);
+        this._persist(
+          'INSERT INTO integration_channels (id, integration_id, name, events_json) VALUES (?, ?, ?, ?)',
+          [item.id, item.integrationId, item.name, item.eventsJson],
+        );
+        this._notify();
+        return item;
+      },
+      remove: (id: string): boolean => {
+        const before = this._integrationChannels.length;
+        this._integrationChannels = this._integrationChannels.filter((c) => c.id !== id);
+        if (this._integrationChannels.length < before) {
+          this._persist('DELETE FROM integration_channels WHERE id = ?', [id]);
+          this._notify();
+          return true;
+        }
+        return false;
+      },
+    };
+  }
+
+  get permissionRequests() {
+    type PR = { id: string; agentUlid: string; action: string; toolName: string | null; argsJson: string | null; status: string; requestedAt: string; resolvedAt: string | null; resolverNote: string | null };
+    return {
+      findAll: (): PR[] => [...this._permissionRequests],
+      findById: (id: string): PR | undefined => this._permissionRequests.find((p) => p.id === id),
+      create: (record: Omit<PR, 'id'>): PR => {
+        const item: PR = { id: crypto.randomUUID(), ...record };
+        this._permissionRequests.push(item);
+        this._persist(
+          'INSERT INTO permission_requests (id, agent_ulid, action, tool_name, args_json, status, requested_at, resolved_at, resolver_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.agentUlid, item.action, item.toolName, item.argsJson, item.status, item.requestedAt, item.resolvedAt, item.resolverNote],
+        );
+        this._notify();
+        return item;
+      },
+      resolve: (id: string, status: string, note?: string): void => {
+        const p = this._permissionRequests.find((x) => x.id === id);
+        if (!p) return;
+        p.status = status;
+        p.resolvedAt = new Date().toISOString();
+        if (note !== undefined) p.resolverNote = note;
+        this._persist(
+          'UPDATE permission_requests SET status = ?, resolved_at = ?, resolver_note = ? WHERE id = ?',
+          [p.status, p.resolvedAt, p.resolverNote, id],
+        );
+        this._notify();
+      },
+      listByAgent: (agentUlid: string): PR[] =>
+        this._permissionRequests.filter((p) => p.agentUlid === agentUlid),
+    };
+  }
+
+  get subAgents() {
+    type SA = { id: string; parentUlid: string; name: string; kind: string; status: string; startedAt: string; finishedAt: string | null; task: string | null };
+    return {
+      findAll: (): SA[] => [...this._subAgents],
+      findById: (id: string): SA | undefined => this._subAgents.find((s) => s.id === id),
+      create: (record: Omit<SA, 'id'>): SA => {
+        const item: SA = { id: crypto.randomUUID(), ...record };
+        this._subAgents.push(item);
+        this._persist(
+          'INSERT INTO sub_agents (id, parent_ulid, name, kind, status, started_at, finished_at, task) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.parentUlid, item.name, item.kind, item.status, item.startedAt, item.finishedAt, item.task],
+        );
+        this._notify();
+        return item;
+      },
+      setStatus: (id: string, status: string): void => {
+        const s = this._subAgents.find((x) => x.id === id);
+        if (!s) return;
+        s.status = status;
+        this._persist('UPDATE sub_agents SET status = ? WHERE id = ?', [status, id]);
+        this._notify();
+      },
+      finish: (id: string): void => {
+        const s = this._subAgents.find((x) => x.id === id);
+        if (!s) return;
+        s.status = 'FINISHED';
+        s.finishedAt = new Date().toISOString();
+        this._persist('UPDATE sub_agents SET status = ?, finished_at = ? WHERE id = ?', [s.status, s.finishedAt, id]);
+        this._notify();
+      },
+      listByParent: (parentUlid: string): SA[] =>
+        this._subAgents.filter((s) => s.parentUlid === parentUlid),
+    };
+  }
+
+  get channelParticipants() {
+    type CP = { channelId: string; agentId: string; participantType: string; canRead: boolean; canWrite: boolean; joinedAt: string };
+    return {
+      findAll: (): CP[] => [...this._channelParticipants],
+      findByChannelId: (channelId: string): CP[] =>
+        this._channelParticipants.filter((p) => p.channelId === channelId),
+      create: (record: Omit<CP, 'channelId' | 'agentId' | 'participantType'> & { channelId: string; agentId: string; participantType: string }): CP => {
+        const item: CP = { ...record };
+        this._channelParticipants.push(item);
+        this._persist(
+          'INSERT INTO channel_participants (channel_id, agent_id, participant_type, can_read, can_write, joined_at) VALUES (?, ?, ?, ?, ?, ?)',
+          [item.channelId, item.agentId, item.participantType, item.canRead ? 1 : 0, item.canWrite ? 1 : 0, item.joinedAt],
+        );
+        this._notify();
+        return item;
+      },
+      remove: (channelId: string, agentId: string, participantType: string): boolean => {
+        const before = this._channelParticipants.length;
+        this._channelParticipants = this._channelParticipants.filter(
+          (p) => !(p.channelId === channelId && p.agentId === agentId && p.participantType === participantType),
+        );
+        if (this._channelParticipants.length < before) {
+          this._persist('DELETE FROM channel_participants WHERE channel_id = ? AND agent_id = ? AND participant_type = ?', [channelId, agentId, participantType]);
+          this._notify();
+          return true;
+        }
+        return false;
+      },
+      updatePermissions: (channelId: string, agentId: string, participantType: string, patch: { canRead?: boolean; canWrite?: boolean }): void => {
+        const p = this._channelParticipants.find(
+          (x) => x.channelId === channelId && x.agentId === agentId && x.participantType === participantType,
+        );
+        if (!p) return;
+        if (patch.canRead !== undefined) p.canRead = patch.canRead;
+        if (patch.canWrite !== undefined) p.canWrite = patch.canWrite;
+        this._persist(
+          'UPDATE channel_participants SET can_read = ?, can_write = ? WHERE channel_id = ? AND agent_id = ? AND participant_type = ?',
+          [p.canRead ? 1 : 0, p.canWrite ? 1 : 0, channelId, agentId, participantType],
+        );
+        this._notify();
+      },
+    };
+  }
+
   get projects(): Collection<Project> {
     return {
       findAll: () => [...this._projects],
@@ -652,11 +979,14 @@ export class DbDataSource implements DataSource {
           ...(r as ChatThread),
           messages: r.messages ?? [],
           updatedAt: r.updatedAt ?? new Date(),
+          threadKind: r.threadKind ?? 'agent',
+          projectId: r.projectId ?? null,
+          workspaceId: r.workspaceId ?? null,
         };
         this._chatThreads.push(item);
         this._persist(
-          'INSERT INTO chat_threads (id, title, agentId, updatedAt, messages) VALUES (?, ?, ?, ?, ?)',
-          [item.id, item.title, item.agentId ?? null, item.updatedAt.toISOString(), JSON.stringify(item.messages)],
+          'INSERT INTO chat_threads (id, title, agentId, updatedAt, messages, thread_kind, project_id, workspace_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.title, item.agentId ?? null, item.updatedAt.toISOString(), JSON.stringify(item.messages), item.threadKind ?? 'agent', item.projectId ?? null, item.workspaceId ?? null],
         );
         this._notify();
         return item;
@@ -667,8 +997,8 @@ export class DbDataSource implements DataSource {
         this._chatThreads[idx] = { ...this._chatThreads[idx], ...patch } as ChatThread;
         const updated: ChatThread = this._chatThreads[idx]!;
         this._persist(
-          'UPDATE chat_threads SET title = ?, agentId = ?, updatedAt = ?, messages = ? WHERE id = ?',
-          [updated.title, updated.agentId ?? null, updated.updatedAt.toISOString(), JSON.stringify(updated.messages), id],
+          'UPDATE chat_threads SET title = ?, agentId = ?, updatedAt = ?, messages = ?, thread_kind = ?, project_id = ?, workspace_id = ? WHERE id = ?',
+          [updated.title, updated.agentId ?? null, updated.updatedAt.toISOString(), JSON.stringify(updated.messages), updated.threadKind ?? 'agent', updated.projectId ?? null, updated.workspaceId ?? null, id],
         );
         this._notify();
         return updated;
