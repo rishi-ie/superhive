@@ -36,6 +36,7 @@ export interface DataSource {
   load(): Promise<void>;
 
   get workspaces(): Collection<import('../workspaces/interface').Workspace>;
+  get workspaceAgents(): WorkspaceAgentsCollection;
   get projects(): Collection<import('../projects/interface').Project>;
   get agents(): Collection<import('../agents/interface').Agent>;
   get tickets(): Collection<import('../tickets/interface').UniversalTicket>;
@@ -138,4 +139,10 @@ export interface ChannelMessagesCollection {
 
 export interface ChatQuickStartCollection {
   findAll(): import('../chat/interface').ChatQuickStartItem[];
+}
+
+export interface WorkspaceAgentsCollection {
+  findAll(): { workspaceId: string; agentId: string; role: string | null; joinedAt: string }[];
+  create(record: { workspaceId: string; agentId: string; role: string | null; joinedAt: string }): { workspaceId: string; agentId: string; role: string | null; joinedAt: string };
+  delete(id: string): boolean;
 }

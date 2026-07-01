@@ -49,6 +49,7 @@ function asArray<T>(rows: unknown): T[] {
 export class DbDataSource implements DataSource {
   // ── Hydrated cache ────────────────────────────────────────────────────────
   private _workspaces: Workspace[] = [];
+  private _workspaceAgents: Array<{ workspaceId: string; agentId: string; role: string | null; joinedAt: string }> = [];
   private _projects: Project[] = [];
   private _agents: Agent[] = [];
   private _tickets: UniversalTicket[] = [];
@@ -103,7 +104,7 @@ export class DbDataSource implements DataSource {
         //     agent_permissions, etc. — no harm dropping tables that don't exist)
         const tablesToDrop = [
           'schema_meta', 'meta', 'kv',
-          'workspaces', 'projects', 'agents', 'universal_tickets',
+          'workspaces', 'workspace_agents', 'projects', 'agents', 'universal_tickets',
           'chat_threads', 'favorites', 'custom_themes', 'home_activity_events',
           'telemetry', 'permissions', 'action_logs', 'next_steps',
           'cost_usage', 'audit_items', 'pending_questions',
@@ -150,9 +151,27 @@ export class DbDataSource implements DataSource {
     this._currentWorkspaceId = (metaRows[0]?.value as string | undefined) ?? '';
 
     // workspaces
-    this._workspaces = asArray<Workspace>(
-      (await window.electron.dbQuery('SELECT id, name, initials, avatarColor FROM workspaces')).rows,
-    );
+    this._workspaces = asArray<Row>(
+      (await window.electron.dbQuery('SELECT id, name, initials, avatarColor, created_at, retention_days, archived_at FROM workspaces')).rows,
+    ).map((r) => ({
+      id: String(r.id),
+      name: String(r.name),
+      initials: String(r.initials),
+      avatarColor: (r.avatarColor as string | null) ?? undefined,
+      createdAt: String(r.created_at),
+      retentionDays: Number(r.retention_days),
+      archivedAt: (r.archived_at as string | null) ?? null,
+    }));
+
+    // workspace_agents
+    this._workspaceAgents = asArray<Row>(
+      (await window.electron.dbQuery('SELECT workspace_id, agent_id, role, joined_at FROM workspace_agents')).rows,
+    ).map((r) => ({
+      workspaceId: String(r.workspace_id),
+      agentId: String(r.agent_id),
+      role: (r.role as string | null) ?? null,
+      joinedAt: String(r.joined_at),
+    }));
 
     // projects
     const projectRows = asArray<Row>(
@@ -344,8 +363,8 @@ export class DbDataSource implements DataSource {
         const item = { id: crypto.randomUUID(), ...r } as Workspace;
         this._workspaces.push(item);
         this._persist(
-          'INSERT INTO workspaces (id, name, initials, avatarColor) VALUES (?, ?, ?, ?)',
-          [item.id, item.name, item.initials, item.avatarColor ?? null],
+          'INSERT INTO workspaces (id, name, initials, avatarColor, created_at, retention_days, archived_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.name, item.initials, item.avatarColor ?? null, item.createdAt ?? new Date().toISOString(), item.retentionDays ?? 90, item.archivedAt ?? null],
         );
         this._notify();
         return item;
@@ -356,8 +375,8 @@ export class DbDataSource implements DataSource {
         this._workspaces[idx] = { ...this._workspaces[idx], ...patch } as Workspace;
         const updated: Workspace = this._workspaces[idx]!;
         this._persist(
-          'UPDATE workspaces SET name = ?, initials = ?, avatarColor = ? WHERE id = ?',
-          [updated.name, updated.initials, updated.avatarColor ?? null, id],
+          'UPDATE workspaces SET name = ?, initials = ?, avatarColor = ?, retention_days = ?, archived_at = ? WHERE id = ?',
+          [updated.name, updated.initials, updated.avatarColor ?? null, updated.retentionDays ?? 90, updated.archivedAt ?? null, id],
         );
         this._notify();
         return updated;
@@ -370,6 +389,27 @@ export class DbDataSource implements DataSource {
           this._notify();
           return true;
         }
+        return false;
+      },
+    };
+  }
+
+  get workspaceAgents() {
+    type WA = { workspaceId: string; agentId: string; role: string | null; joinedAt: string };
+    return {
+      findAll: (): WA[] => [...this._workspaceAgents],
+      create: (r: Partial<WA>): WA => {
+        const item: WA = { workspaceId: r.workspaceId!, agentId: r.agentId!, role: r.role ?? null, joinedAt: r.joinedAt! };
+        this._workspaceAgents.push(item);
+        this._persist(
+          'INSERT INTO workspace_agents (workspace_id, agent_id, role, joined_at) VALUES (?, ?, ?, ?)',
+          [item.workspaceId, item.agentId, item.role, item.joinedAt],
+        );
+        this._notify();
+        return item;
+      },
+      delete: (_id: string): boolean => {
+        void _id;
         return false;
       },
     };

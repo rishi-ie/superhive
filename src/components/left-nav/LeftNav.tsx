@@ -58,7 +58,7 @@ export function LeftNav({
   width,
   onWidthChange,
   workspaces = [],
-  currentWorkspace = { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1' },
+  currentWorkspace = { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: new Date().toISOString(), retentionDays: 90, archivedAt: null },
   favorites = [],
   activeAgents = [],
   archivedProjects = [],

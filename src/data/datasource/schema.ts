@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -31,7 +31,18 @@ CREATE TABLE IF NOT EXISTS workspaces (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   initials TEXT NOT NULL,
-  avatarColor TEXT
+  avatarColor TEXT,
+  created_at TEXT NOT NULL,
+  retention_days INTEGER NOT NULL DEFAULT 90,
+  archived_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS workspace_agents (
+  workspace_id TEXT NOT NULL,
+  agent_id TEXT NOT NULL,
+  role TEXT,
+  joined_at TEXT NOT NULL,
+  PRIMARY KEY (workspace_id, agent_id)
 );
 
 CREATE TABLE IF NOT EXISTS projects (

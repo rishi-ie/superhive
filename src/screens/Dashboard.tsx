@@ -117,7 +117,7 @@ export function Dashboard({
   const toast = useToast();
 
   const workspaces_data = listWorkspaces();
-  const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: undefined, retentionDays: undefined, archivedAt: undefined };
+  const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: new Date().toISOString(), retentionDays: 90, archivedAt: null };
   const favorites_data = listFavorites();
   const workspaceAgents = listProjectAgents(activeWorkspaceId);
   const workspaceAgentNames = new Set(workspaceAgents.map(a => a.name));
