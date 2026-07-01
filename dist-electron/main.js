@@ -10975,6 +10975,66 @@ ipcMain.handle("db:exec-multi", async (_event, sql) => {
 		throw err;
 	}
 });
+ipcMain.handle("okf:get-data-dir", () => {
+	return join(app.getPath("userData"), ".superhive", "okf");
+});
+ipcMain.handle("okf:bundle-exists", (_event, projectId) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	return fs.existsSync(bundleDir);
+});
+ipcMain.handle("okf:create-bundle", (_event, projectId) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (!fs.existsSync(bundleDir)) fs.mkdirSync(bundleDir, { recursive: true });
+	return true;
+});
+ipcMain.handle("okf:read-bundle", async (_event, projectId) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (!fs.existsSync(bundleDir)) return {};
+	const result = {};
+	const entries = fs.readdirSync(bundleDir, { withFileTypes: true });
+	for (const entry of entries) if (entry.isFile() && entry.name.endsWith(".md")) {
+		const filePath = join(bundleDir, entry.name);
+		const { frontmatter, body } = parseOkfFile(fs.readFileSync(filePath, "utf-8"));
+		result[entry.name] = {
+			frontmatter,
+			body
+		};
+	}
+	return result;
+});
+ipcMain.handle("okf:write-concept", (_event, projectId, path, frontmatter, body) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (!fs.existsSync(bundleDir)) fs.mkdirSync(bundleDir, { recursive: true });
+	const filePath = join(bundleDir, path);
+	const yaml = Object.entries(frontmatter).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join("\n");
+	fs.writeFileSync(filePath, `---\n${yaml}\n---\n${body}`, "utf-8");
+	return true;
+});
+function parseOkfFile(raw) {
+	const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+	if (!match) return {
+		frontmatter: {},
+		body: raw
+	};
+	const yamlStr = match[1];
+	const body = match[2];
+	const frontmatter = {};
+	for (const line of yamlStr.split("\n")) {
+		const colonIdx = line.indexOf(":");
+		if (colonIdx === -1) continue;
+		const key = line.slice(0, colonIdx).trim();
+		const val = line.slice(colonIdx + 1).trim();
+		try {
+			frontmatter[key] = JSON.parse(val);
+		} catch {
+			frontmatter[key] = val;
+		}
+	}
+	return {
+		frontmatter,
+		body
+	};
+}
 app.whenReady().then(() => {
 	import_main.default.info("App ready");
 	createWindow();

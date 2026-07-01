@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -54,6 +54,13 @@ CREATE TABLE IF NOT EXISTS project_agents (
   joined_at TEXT NOT NULL,
   context_snapshot_path TEXT,
   PRIMARY KEY (project_id, agent_id)
+);
+
+CREATE TABLE IF NOT EXISTS okf_bundles (
+  project_id TEXT PRIMARY KEY,
+  root_path TEXT NOT NULL,
+  last_synced_at TEXT,
+  entry_count INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS projects (

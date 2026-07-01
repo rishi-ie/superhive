@@ -20,6 +20,13 @@ export interface ElectronAPI {
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => Promise<void>;
   /** Executes a multi-statement SQL string (e.g. seed.sql) in one call. */
   dbExecMulti: (sql: string) => Promise<void>;
+  okf: {
+    getDataDir: () => Promise<string>;
+    bundleExists: (projectId: string) => Promise<boolean>;
+    createBundle: (projectId: string) => Promise<void>;
+    readBundle: (projectId: string) => Promise<Record<string, { frontmatter: Record<string, unknown>; body: string }>>;
+    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) => Promise<void>;
+  };
 }
 
 contextBridge.exposeInMainWorld('electron', {
@@ -38,6 +45,14 @@ contextBridge.exposeInMainWorld('electron', {
   dbExecute: (sql: string, args?: unknown[]) => ipcRenderer.invoke('db:execute', sql, args),
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => ipcRenderer.invoke('db:batch', stmts),
   dbExecMulti: (sql: string) => ipcRenderer.invoke('db:exec-multi', sql),
+  okf: {
+    getDataDir: () => ipcRenderer.invoke('okf:get-data-dir'),
+    bundleExists: (projectId: string) => ipcRenderer.invoke('okf:bundle-exists', projectId),
+    createBundle: (projectId: string) => ipcRenderer.invoke('okf:create-bundle', projectId),
+    readBundle: (projectId: string) => ipcRenderer.invoke('okf:read-bundle', projectId),
+    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) =>
+      ipcRenderer.invoke('okf:write-concept', projectId, path, frontmatter, body),
+  },
 });
 
 console.log('Preload script loaded');

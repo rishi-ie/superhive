@@ -23,6 +23,13 @@ type ElectronAPI = {
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => Promise<void>;
   /** Executes a multi-statement SQL string (e.g. seed.sql) in one call. */
   dbExecMulti: (sql: string) => Promise<void>;
+  okf: {
+    getDataDir: () => Promise<string>;
+    bundleExists: (projectId: string) => Promise<boolean>;
+    createBundle: (projectId: string) => Promise<void>;
+    readBundle: (projectId: string) => Promise<Record<string, { frontmatter: Record<string, unknown>; body: string }>>;
+    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) => Promise<void>;
+  };
 };
 
 interface Window {

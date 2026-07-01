@@ -15,7 +15,14 @@ contextBridge.exposeInMainWorld("electron", {
 	dbQuery: (sql, args) => ipcRenderer.invoke("db:query", sql, args),
 	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
 	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts),
-	dbExecMulti: (sql) => ipcRenderer.invoke("db:exec-multi", sql)
+	dbExecMulti: (sql) => ipcRenderer.invoke("db:exec-multi", sql),
+	okf: {
+		getDataDir: () => ipcRenderer.invoke("okf:get-data-dir"),
+		bundleExists: (projectId) => ipcRenderer.invoke("okf:bundle-exists", projectId),
+		createBundle: (projectId) => ipcRenderer.invoke("okf:create-bundle", projectId),
+		readBundle: (projectId) => ipcRenderer.invoke("okf:read-bundle", projectId),
+		writeConcept: (projectId, path, frontmatter, body) => ipcRenderer.invoke("okf:write-concept", projectId, path, frontmatter, body)
+	}
 });
 console.log("Preload script loaded");
 //#endregion

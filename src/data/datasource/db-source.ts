@@ -51,6 +51,7 @@ export class DbDataSource implements DataSource {
   private _workspaces: Workspace[] = [];
   private _workspaceAgents: Array<{ workspaceId: string; agentId: string; role: string | null; joinedAt: string }> = [];
   private _projectAgents: Array<{ projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null }> = [];
+  private _okfBundles: Array<{ projectId: string; rootPath: string; lastSyncedAt: string | null; entryCount: number }> = [];
   private _projects: Project[] = [];
   private _agents: Agent[] = [];
   private _tickets: UniversalTicket[] = [];
@@ -105,7 +106,7 @@ export class DbDataSource implements DataSource {
         //     agent_permissions, etc. — no harm dropping tables that don't exist)
         const tablesToDrop = [
           'schema_meta', 'meta', 'kv',
-          'workspaces', 'workspace_agents', 'projects', 'project_agents', 'agents', 'universal_tickets',
+          'workspaces', 'workspace_agents', 'projects', 'project_agents', 'okf_bundles', 'agents', 'universal_tickets',
           'chat_threads', 'favorites', 'custom_themes', 'home_activity_events',
           'telemetry', 'permissions', 'action_logs', 'next_steps',
           'cost_usage', 'audit_items', 'pending_questions',
@@ -185,6 +186,16 @@ export class DbDataSource implements DataSource {
       assignedTicketId: (r.assigned_ticket_id as string | null) ?? null,
       joinedAt: String(r.joined_at),
       contextSnapshotPath: (r.context_snapshot_path as string | null) ?? null,
+    }));
+
+    // okf_bundles
+    this._okfBundles = asArray<Row>(
+      (await window.electron.dbQuery('SELECT project_id, root_path, last_synced_at, entry_count FROM okf_bundles')).rows,
+    ).map((r) => ({
+      projectId: String(r.project_id),
+      rootPath: String(r.root_path),
+      lastSyncedAt: (r.last_synced_at as string | null) ?? null,
+      entryCount: Number(r.entry_count),
     }));
 
     // projects
@@ -460,6 +471,55 @@ export class DbDataSource implements DataSource {
           return true;
         }
         return false;
+      },
+    };
+  }
+
+  get okfBundles() {
+    type OB = { projectId: string; rootPath: string; lastSyncedAt: string | null; entryCount: number };
+    return {
+      findAll: (): OB[] => [...this._okfBundles],
+      findByProjectId: (projectId: string): OB | undefined =>
+        this._okfBundles.find((b) => b.projectId === projectId),
+      upsert: (projectId: string, rootPath: string): OB => {
+        const existing = this._okfBundles.find((b) => b.projectId === projectId);
+        if (existing) {
+          existing.rootPath = rootPath;
+          this._persist(
+            'UPDATE okf_bundles SET root_path = ? WHERE project_id = ?',
+            [rootPath, projectId],
+          );
+          this._notify();
+          return existing;
+        }
+        const record: OB = { projectId, rootPath, lastSyncedAt: null, entryCount: 0 };
+        this._okfBundles.push(record);
+        this._persist(
+          'INSERT INTO okf_bundles (project_id, root_path, last_synced_at, entry_count) VALUES (?, ?, ?, ?)',
+          [projectId, rootPath, null, 0],
+        );
+        this._notify();
+        return record;
+      },
+      setLastSynced: (projectId: string, at: string): void => {
+        const bundle = this._okfBundles.find((b) => b.projectId === projectId);
+        if (!bundle) return;
+        bundle.lastSyncedAt = at;
+        this._persist(
+          'UPDATE okf_bundles SET last_synced_at = ? WHERE project_id = ?',
+          [at, projectId],
+        );
+        this._notify();
+      },
+      incrementEntryCount: (projectId: string): void => {
+        const bundle = this._okfBundles.find((b) => b.projectId === projectId);
+        if (!bundle) return;
+        bundle.entryCount += 1;
+        this._persist(
+          'UPDATE okf_bundles SET entry_count = ? WHERE project_id = ?',
+          [bundle.entryCount, projectId],
+        );
+        this._notify();
       },
     };
   }
