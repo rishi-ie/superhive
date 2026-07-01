@@ -1,8 +1,9 @@
 /**
- * schema.ts — libSQL DDL for all 19 tables backing the DataSource collections.
+ * schema.ts — libSQL DDL for all tables backing the DataSource collections.
  *
- * Run once on first boot (CREATE TABLE IF NOT EXISTS is idempotent). One-to-one
- * mapping with src/data/datasource/types.ts `DataSource` interface.
+ * Schema versioning: bump SCHEMA_VERSION whenever columns or tables change
+ * incompatibly. The boot path in db-source.ts drops all tables on version
+ * mismatch and re-applies SCHEMA from scratch, then re-seeds.
  *
  * Conventions:
  *   - `id` is the synthetic primary key, TEXT.
@@ -11,8 +12,16 @@
  *     Theme.vars/systemVars, PendingQuestion.options, ActivityEvent.ref) live in JSON TEXT
  *     columns — keeps the schema flat, no JOIN overhead.
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
+ *   - `schema_meta` tracks the schema version only — independent of user data.
  */
+export const SCHEMA_VERSION = 2;
+
 export const SCHEMA = `
+CREATE TABLE IF NOT EXISTS schema_meta (
+  k TEXT PRIMARY KEY,
+  v TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

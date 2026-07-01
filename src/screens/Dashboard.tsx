@@ -9,6 +9,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { LeftNav } from '@/components/left-nav/LeftNav';
 import { CenterWorkspace } from '@/components/center-workspace/CenterWorkspace';
 import { RightAuxiliary } from '@/components/right-auxiliary/RightAuxiliary';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { CreateProjectDialog } from '@/components/center-workspace/CreateProjectDialog';
 import { CommandPalette, buildDefaultPaletteItems } from '@/components/shortcuts';
 import {
@@ -563,22 +564,24 @@ export function Dashboard({
         onDismissReady={dismissReady}
         onOpenSettings={() => onNavigate('settings')}
       />
-      <RightAuxiliary
-        width={rightWidth}
-        onWidthChange={onRightWidthChange}
-        context={rightPanelContext}
-        tab={currentRightPanelTab}
-        onTabChange={setRightPanelTab}
-        onRefresh={handleRefresh}
-        onTerminate={handleTerminateAgent}
-        onAgentClick={handleAgentSelect}
-        onProjectSelect={handleProjectSelectByWorkspace}
-        onChannelClick={handleChannelClick}
-        onTicketClick={handleTicketSelect}
-        onThreadSelect={handleThreadSelect}
-        onOpenTab={handleOpenTab}
-        onProjectsChanged={bumpProjectsVersion}
-      />
+      <ErrorBoundary>
+        <RightAuxiliary
+          width={rightWidth}
+          onWidthChange={onRightWidthChange}
+          context={rightPanelContext}
+          tab={currentRightPanelTab}
+          onTabChange={setRightPanelTab}
+          onRefresh={handleRefresh}
+          onTerminate={handleTerminateAgent}
+          onAgentClick={handleAgentSelect}
+          onProjectSelect={handleProjectSelectByWorkspace}
+          onChannelClick={handleChannelClick}
+          onTicketClick={handleTicketSelect}
+          onThreadSelect={handleThreadSelect}
+          onOpenTab={handleOpenTab}
+          onProjectsChanged={bumpProjectsVersion}
+        />
+      </ErrorBoundary>
       <CreateProjectDialog
         open={createProjectOpen}
         onOpenChange={setCreateProjectOpen}

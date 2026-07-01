@@ -5,6 +5,7 @@
 import { CenterBreadcrumb } from './CenterBreadcrumb';
 import { CenterTabStrip } from './CenterTabStrip';
 import { TabBody } from './TabBody';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import type { CenterTab } from '@/data/tabs/interface';
 
 type CenterWorkspaceProps = {
@@ -105,26 +106,28 @@ export function CenterWorkspace({
       />
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <TabBody
-          tab={activeTab}
-          onTicketSelect={onTicketSelect}
-          onAgentSelect={onAgentSelect}
-          onProjectSelect={onProjectSelect}
-          onChannelSelect={onChannelSelect}
-          onNavItemClick={onNavItemClick}
-          onSend={onSend}
-          onOpenTickets={onOpenTickets}
-          onCreateProject={onCreateProject}
-          onCreateTicket={onCreateTicket}
-          onCreateChannel={onCreateChannel}
-          onCreateAgent={onCreateAgent}
-          setupDismissed={setupDismissed}
-          readyDismissed={readyDismissed}
-          onWorkspaceCreated={onWorkspaceCreated}
-          onDismissSetup={onDismissSetup}
-          onDismissReady={onDismissReady}
-          onOpenSettings={onOpenSettings}
-        />
+        <ErrorBoundary>
+          <TabBody
+            tab={activeTab}
+            onTicketSelect={onTicketSelect}
+            onAgentSelect={onAgentSelect}
+            onProjectSelect={onProjectSelect}
+            onChannelSelect={onChannelSelect}
+            onNavItemClick={onNavItemClick}
+            onSend={onSend}
+            onOpenTickets={onOpenTickets}
+            onCreateProject={onCreateProject}
+            onCreateTicket={onCreateTicket}
+            onCreateChannel={onCreateChannel}
+            onCreateAgent={onCreateAgent}
+            setupDismissed={setupDismissed}
+            readyDismissed={readyDismissed}
+            onWorkspaceCreated={onWorkspaceCreated}
+            onDismissSetup={onDismissSetup}
+            onDismissReady={onDismissReady}
+            onOpenSettings={onOpenSettings}
+          />
+        </ErrorBoundary>
       </div>
     </div>
   );

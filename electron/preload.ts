@@ -1,5 +1,6 @@
-import { contextBridge, ipcRenderer } from 'electron';
+const { contextBridge, ipcRenderer } = require('electron');
 
+/** @deprecated Types only — ElectronAPI is used by renderer for window.electron typing. */
 export interface ElectronAPI {
   platform: NodeJS.Platform;
   version: string;
@@ -37,6 +38,6 @@ contextBridge.exposeInMainWorld('electron', {
   dbExecute: (sql: string, args?: unknown[]) => ipcRenderer.invoke('db:execute', sql, args),
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => ipcRenderer.invoke('db:batch', stmts),
   dbExecMulti: (sql: string) => ipcRenderer.invoke('db:exec-multi', sql),
-} satisfies ElectronAPI);
+});
 
 console.log('Preload script loaded');

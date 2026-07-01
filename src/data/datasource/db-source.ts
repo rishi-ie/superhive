@@ -13,8 +13,8 @@
  *   - If db is unavailable (load() failed), cache stays empty, IPC skipped,
  *     app still runs with no data
  *
- * One-shot seed: first boot checks meta.seeded. If not '1', executes seed.sql
- * via client.executeMultiple() and sets the flag. Never re-seeded after that.
+ * One-shot seed: checked via schema_meta version stamp. On version mismatch the
+ * old schema is dropped entirely, fresh SCHEMA applied, and seed.sql executed.
  */
 import type { DataSource, Collection } from './types';
 import type { Workspace } from '@/data/workspaces/interface';
@@ -26,7 +26,7 @@ import type { ActivityEvent } from '@/data/activity/interface';
 import type { ChatThread, Message, ChatQuickStartItem } from '@/data/chat/interface';
 import type { FavoriteRef } from '@/data/favorites/interface';
 import type { CostUsageEntry } from '@/data/cost-usage/interface';
-import { SCHEMA } from './schema';
+import { SCHEMA, SCHEMA_VERSION } from './schema';
 import seedSql from '../seed/seed.sql?raw';
 import type {
   TelemetryCollection,
@@ -85,16 +85,47 @@ export class DbDataSource implements DataSource {
   async load(): Promise<void> {
     if (this._ready) return;
     try {
-      // 1. Apply schema (CREATE TABLE IF NOT EXISTS — split on ; to send as batch)
-      const stmts = SCHEMA.split(';').map((s) => s.trim()).filter(Boolean);
-      await window.electron.dbBatch(stmts.map((sql) => ({ sql })));
+      // 1. Version check — determine if we need a fresh schema + seed
+      let needsFullMigration = false;
+      try {
+        const verRows = await window.electron.dbQuery(
+          "SELECT v FROM schema_meta WHERE k = 'version'",
+        );
+        const currentVer = asArray<Row>(verRows.rows)[0]?.v as string | undefined;
+        needsFullMigration = currentVer !== String(SCHEMA_VERSION);
+      } catch {
+        // schema_meta table doesn't exist yet — old DB, needs migration
+        needsFullMigration = true;
+      }
 
-      // 2. One-shot seed migration if meta.seeded !== '1'
-      const seededRows = await window.electron.dbQuery(
-        "SELECT value FROM meta WHERE key = 'seeded'",
-      );
-      const seeded = (asArray<Row>(seededRows.rows)[0]?.value as string | undefined) === '1';
-      if (!seeded) {
+      if (needsFullMigration) {
+        // 2a. Drop everything we own (covers legacy schemas: kv, agent_telemetry,
+        //     agent_permissions, etc. — no harm dropping tables that don't exist)
+        const tablesToDrop = [
+          'schema_meta', 'meta', 'kv',
+          'workspaces', 'projects', 'agents', 'universal_tickets',
+          'chat_threads', 'favorites', 'custom_themes', 'home_activity_events',
+          'telemetry', 'permissions', 'action_logs', 'next_steps',
+          'cost_usage', 'audit_items', 'pending_questions',
+          'channel_messages', 'chat_quick_start',
+          'agent_telemetry', 'agent_permissions', 'agent_action_log',
+          'agent_next_step', 'current_workspace', 'agent_defaults',
+        ];
+        await window.electron.dbBatch(
+          tablesToDrop.map((t) => ({ sql: `DROP TABLE IF EXISTS ${t}` })),
+        );
+
+        // 2b. Apply full schema
+        const stmts = SCHEMA.split(';').map((s) => s.trim()).filter(Boolean);
+        await window.electron.dbBatch(stmts.map((sql) => ({ sql })));
+
+        // 2c. Stamp version
+        await window.electron.dbExecute(
+          "INSERT OR REPLACE INTO schema_meta (k, v) VALUES ('version', ?)",
+          [String(SCHEMA_VERSION)],
+        );
+
+        // 2d. Seed
         await window.electron.dbExecMulti(seedSql);
       }
 
@@ -161,7 +192,10 @@ export class DbDataSource implements DataSource {
       id: String(r.id), title: String(r.title),
       agentId: (r.agentId as string | null) ?? undefined,
       updatedAt: new Date(String(r.updatedAt)),
-      messages: JSON.parse(String(r.messages)) as Message[],
+      messages: (JSON.parse(String(r.messages)) as Message[]).map((m) => ({
+        ...m,
+        timestamp: typeof m.timestamp === 'string' ? new Date(m.timestamp) : m.timestamp,
+      })),
     }));
 
     // favorites

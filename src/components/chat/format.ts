@@ -2,9 +2,10 @@
  * Format a timestamp as a human-readable relative time string for chat.
  * e.g. "just now", "3m ago", "2h ago", "yesterday", "3d ago"
  */
-export function formatTime(date: Date): string {
+export function formatTime(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
   const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
+  const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60000);
   if (diffMins < 1) return 'just now';
   if (diffMins < 60) return `${diffMins}m ago`;
@@ -13,7 +14,7 @@ export function formatTime(date: Date): string {
   const diffDays = Math.floor(diffHours / 24);
   if (diffDays === 1) return 'yesterday';
   if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  return d.toLocaleDateString();
 }
 
 /**
