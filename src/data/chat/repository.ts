@@ -3,8 +3,7 @@
  * Owns thread + message CRUD and quick-start data.
  */
 import type { DataSource } from '@/data/datasource/types';
-import type { ChatThread, Message } from './interface';
-import type { ChatQuickStartItem } from '@/data/mock/types';
+import type { ChatThread, Message, ChatQuickStartItem } from './interface';
 
 export class ChatRepository {
   constructor(private ds: DataSource) {}

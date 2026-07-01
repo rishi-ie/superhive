@@ -1,18 +1,14 @@
 /**
  * Activity store — unified, timestamped activity feed derived from all domain stores.
  *
- * Sources aggregated (see mock.json `homeActivityEvents` for the rich hand-seeded set):
- *   1. DataSource.activity              — primary seed (~47 events)
+ * Sources aggregated:
+ *   1. DataSource.activity              — primary seed
  *   2. SwarmActivity from all projects  — swarm_handoff flavor
  *   3. AuditItem / PendingQuestion     — audit_*, question_pending
- *
- * Auto-refresh simulation: simulateNewEvent() cycles through a cursor per workspace
- * to produce the "alive" feeling without permanently mutating state.
  */
 import { getDataSource } from '@/data/datasource/index';
 import { listSwarmActivity } from '@/data/projects/store';
-import { listAgents } from '@/data/agents/store';
-import { getAuditItems, getPendingQuestions } from '@/data/agents/store';
+import { listAgents, getAuditItems, getPendingQuestions } from '@/data/agents/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import type { ActivityEvent, ActivityKind, ListActivityOpts } from './interface';
 
@@ -134,44 +130,6 @@ function buildFeed(opts: ListActivityOpts = {}): ActivityEvent[] {
 
 export function listActivity(opts: ListActivityOpts = {}): ActivityEvent[] {
   return buildFeed(opts);
-}
-
-/* ─── Auto-refresh simulation ──────────────────────────────────────── */
-
-const simulationCursors: Record<string, number> = {};
-const simulationPoolCache: Record<string, ActivityEvent[]> = {};
-
-function buildSimulationPool(workspaceId: string): ActivityEvent[] {
-  const agents = listAgents();
-  return agents.map((agent) => ({
-    id: `sim-${agent.id}-executing`,
-    kind: 'agent_executing' as ActivityKind,
-    workspaceId,
-    timestamp: new Date(Date.now() - Math.floor(Math.random() * 60_000)).toISOString(),
-    actor: agent.name,
-    actorId: agent.id,
-    message: agent.activeTask || 'Working on current task',
-    ref: { type: 'agent' as const, id: agent.id, workspaceId },
-  }));
-}
-
-/**
- * Returns the next simulated "new" event for auto-refresh.
- * Cycles through the pool per workspace so each call is distinct.
- */
-export function simulateNewEvent(workspaceId: string): ActivityEvent {
-  if (!simulationPoolCache[workspaceId]) {
-    simulationPoolCache[workspaceId] = buildSimulationPool(workspaceId);
-  }
-  const pool = simulationPoolCache[workspaceId];
-  const cursor = simulationCursors[workspaceId] ?? 0;
-  const base = pool[cursor % pool.length]!;
-  simulationCursors[workspaceId] = cursor + 1;
-  return {
-    ...base,
-    id: `${base.id}-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-  };
 }
 
 export type { ActivityEvent, ActivityKind, ListActivityOpts };

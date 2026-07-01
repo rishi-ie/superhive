@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight, Star, Bot, Layers } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
-import type { IconKey } from '@/data/mock/types';
+import type { IconKey } from '@/data/favorites/interface';
 import type { FavoriteItem } from '@/data/favorites/interface';
 
 const ITEM_ICONS: Record<IconKey, React.ReactElement> = {

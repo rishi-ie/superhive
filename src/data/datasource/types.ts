@@ -1,12 +1,8 @@
 /**
  * DataSource abstraction — the single seam between domain stores and data backends.
  *
- * Two implementations exist:
- *   MockDataSource — in-memory, seeded from mock.json (now)
- *   DbDataSource   — IPC → SQLite in Electron main (future; ships as stub)
- *
- * Both satisfy this interface. The factory in index.ts selects which to use
- * based on VITE_DATA_SOURCE env var (default: mock).
+ * The implementation is DbDataSource (SQLite via Electron main). Both satisfy
+ * this interface — swapping the implementation swaps the backend, zero store changes.
  */
 
 /**
@@ -35,8 +31,7 @@ export interface Collection<T extends Entity> {
 export interface DataSource {
   /**
    * Boot the data source. Call once before any collection access.
-   * MockDataSource: resolves immediately (data is already in memory).
-   * DbDataSource: opens the SQLite connection (future work).
+   * DbDataSource: runs schema DDL then seeds from seed.sql.
    */
   load(): Promise<void>;
 
@@ -142,5 +137,5 @@ export interface ChannelMessagesCollection {
 }
 
 export interface ChatQuickStartCollection {
-  findAll(): import('../mock/types').ChatQuickStartItem[];
+  findAll(): import('../chat/interface').ChatQuickStartItem[];
 }

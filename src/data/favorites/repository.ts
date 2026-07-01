@@ -4,8 +4,7 @@
  * This is the fix for the old favorites/store.tsx cross-domain bypass wart.
  */
 import type { DataSource } from '@/data/datasource/types';
-import type { FavoriteRef, FavoriteItem } from './interface';
-import type { IconKey } from '@/data/mock/types';
+import type { FavoriteRef, FavoriteItem, IconKey } from './interface';
 import type { Project } from '@/data/projects/interface';
 import type { Agent } from '@/data/agents/interface';
 

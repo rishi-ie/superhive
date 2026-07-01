@@ -5,8 +5,7 @@
  */
 import { getDataSource } from '@/data/datasource/index';
 import { ChatRepository } from './repository';
-import type { ChatThread, Message } from './interface';
-import type { ChatQuickStartItem } from '@/data/mock/types';
+import type { ChatThread, Message, ChatQuickStartItem } from './interface';
 
 const repo = new ChatRepository(getDataSource());
 

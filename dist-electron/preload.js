@@ -11,7 +11,11 @@ contextBridge.exposeInMainWorld("electron", {
 	},
 	getDataDir: () => ipcRenderer.invoke("app:get-data-dir"),
 	readSettings: () => ipcRenderer.invoke("settings:read"),
-	writeSettings: (content) => ipcRenderer.invoke("settings:write", content)
+	writeSettings: (content) => ipcRenderer.invoke("settings:write", content),
+	dbQuery: (sql, args) => ipcRenderer.invoke("db:query", sql, args),
+	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
+	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts),
+	dbExecMulti: (sql) => ipcRenderer.invoke("db:exec-multi", sql)
 });
 console.log("Preload script loaded");
 //#endregion

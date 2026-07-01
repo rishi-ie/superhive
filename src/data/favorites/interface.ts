@@ -1,4 +1,4 @@
-import type { IconKey } from '@/data/mock/types';
+export type IconKey = 'user' | 'folder';
 
 export type FavoriteRef = {
   id: string;

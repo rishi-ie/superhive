@@ -22,3 +22,10 @@ export type ChatThread = {
   updatedAt: Date;
   agentId?: string;
 };
+
+export type ChatQuickStartItem = {
+  icon: string;
+  label: string;
+  description: string;
+  category: string;
+};

@@ -3,6 +3,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import log from 'electron-log/main';
+import { createClient, type Client, type InValue } from '@libsql/client';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -104,6 +105,65 @@ ipcMain.handle('settings:write', (_event, content: string) => {
   } catch (err) {
     log.error('Failed to write settings:', err);
     return false;
+  }
+});
+
+/* ─── libSQL data backend ─────────────────────────────────────────────────── */
+
+let dbClient: Client | null = null;
+
+async function getDbClient(): Promise<Client> {
+  if (dbClient) return dbClient;
+  const dataDir = app.getPath('userData');
+  const baseDir = join(dataDir, '.superhive');
+  if (!fs.existsSync(baseDir)) {
+    fs.mkdirSync(baseDir, { recursive: true });
+  }
+  const url = process.env.LIBSQL_URL ?? `file:${join(baseDir, 'data.db')}`;
+  dbClient = createClient({ url });
+  log.info('libSQL DB opened:', url.startsWith('file:') ? url.replace('file:', '') : url);
+  return dbClient;
+}
+
+ipcMain.handle('db:query', async (_event, sql: string, args?: unknown[]) => {
+  try {
+    const client = await getDbClient();
+    const result = await client.execute({ sql, args: (args ?? []) as InValue[] });
+    return { rows: result.rows ?? [] };
+  } catch (err) {
+    log.error('db:query error:', err);
+    throw err;
+  }
+});
+
+ipcMain.handle('db:execute', async (_event, sql: string, args?: unknown[]) => {
+  try {
+    const client = await getDbClient();
+    const result = await client.execute({ sql, args: (args ?? []) as InValue[] });
+    return { rowsAffected: result.rowsAffected, lastInsertRowid: result.lastInsertRowid };
+  } catch (err) {
+    log.error('db:execute error:', err);
+    throw err;
+  }
+});
+
+ipcMain.handle('db:batch', async (_event, stmts: Array<{ sql: string; args?: unknown[] }>) => {
+  try {
+    const client = await getDbClient();
+    await client.batch(stmts.map((s) => ({ sql: s.sql, args: (s.args ?? []) as InValue[] })));
+  } catch (err) {
+    log.error('db:batch error:', err);
+    throw err;
+  }
+});
+
+ipcMain.handle('db:exec-multi', async (_event, sql: string) => {
+  try {
+    const client = await getDbClient();
+    await client.executeMultiple(sql);
+  } catch (err) {
+    log.error('db:exec-multi error:', err);
+    throw err;
   }
 });
 
