@@ -26,18 +26,43 @@ export class WorkspacesRepository {
       .join('')
       .toUpperCase()
       .slice(0, 3);
-    return this.ds.workspaces.create({ id, name: input.name.trim(), initials });
+    const now = new Date().toISOString();
+    return this.ds.workspaces.create({
+      id,
+      name: input.name.trim(),
+      initials,
+      createdAt: now,
+      retentionDays: 90,
+      archivedAt: null,
+    });
   }
 
-  setCurrent(id: string): void {
-    // Workspace "current" is stored as a separate field — we re-use
-    // a dedicated writable field on a lightweight object to avoid
-    // mutating the Snapshot directly.
-    // The actual "currentWorkspaceId" lives on DataSource.currentWorkspaceId
-    // which is read-only in this abstraction. Mutation is handled via
-    // the store's setCurrentWorkspace path.
-    // This repository exposes read-only for now; mutation is in store.
-    void id;
+  rename(id: string, name: string): Workspace | undefined {
+    const existing = this.ds.workspaces.findById(id);
+    if (!existing) return undefined;
+    const initials = name
+      .split(' ')
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 3);
+    return this.ds.workspaces.update(id, { name: name.trim(), initials });
+  }
+
+  setRetention(id: string, days: number): Workspace | undefined {
+    const existing = this.ds.workspaces.findById(id);
+    if (!existing) return undefined;
+    return this.ds.workspaces.update(id, { retentionDays: days });
+  }
+
+  archive(id: string): Workspace | undefined {
+    const existing = this.ds.workspaces.findById(id);
+    if (!existing) return undefined;
+    return this.ds.workspaces.update(id, { archivedAt: new Date().toISOString() });
+  }
+
+  setCurrent(_id: string): void {
+    void _id;
   }
 }
 

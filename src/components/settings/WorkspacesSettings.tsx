@@ -16,9 +16,9 @@ import { Select } from '@/components/ui/Select';
 import { TextInput } from '@/components/ui/TextInput';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
-import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import type { WorkspaceItem } from '@/data/settings/interface';
+import { listWorkspaces, createWorkspace, renameWorkspace, setRetention, archiveWorkspace } from '@/data/workspaces/store';
+import type { Workspace } from '@/data/workspaces/store';
 
 const RETENTION_OPTIONS = [
   { value: 30, label: '30 days' },
@@ -46,7 +46,7 @@ const BG: Record<string, string> = {
 /* ─── Workspace Card (horizontal list row) ──────────────────────────────── */
 
 type WorkspaceCardProps = {
-  workspace: WorkspaceItem;
+  workspace: Workspace;
   isDefault: boolean;
   onRetentionChange: (id: string, days: number) => void;
   onRename: (id: string, name: string) => void;
@@ -130,7 +130,7 @@ function WorkspaceCard({ workspace, isDefault, onRetentionChange, onRename, onAr
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-xs text-muted-foreground hidden sm:block">Data retention</span>
               <Select
-                value={String(workspace.dataRetentionDays)}
+                value={String(workspace.retentionDays)}
                 options={RETENTION_OPTIONS}
                 onChange={val => onRetentionChange(workspace.id, parseInt(val))}
                 className="w-32"
@@ -158,7 +158,7 @@ function WorkspaceCard({ workspace, isDefault, onRetentionChange, onRename, onAr
           {/* Footer row */}
           <div className="px-4 pb-3 flex items-center gap-1.5 border-t border-border/30 pt-2">
             <span className="text-[10px] text-muted-foreground">
-              Created {new Date(workspace.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              Created {workspace.createdAt ? new Date(workspace.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
             </span>
           </div>
         </CardContent>
@@ -206,46 +206,37 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
 /* ─── Main Component ─────────────────────────────────────────────────────── */
 
 export function WorkspacesSettings() {
-  const { settings, update } = useSettings();
   const toast = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [createName, setCreateName] = useState('');
+  const [, setTrigger] = useState(0);
 
-  const workspaces = settings.workspaces.workspaces;
-  const defaultId = settings.account.defaultWorkspaceId;
+  const workspaces = listWorkspaces().filter(w => !w.archivedAt);
+  const defaultId = listWorkspaces()[0]?.id;
 
   const handleRetentionChange = (id: string, days: number) => {
-    update('workspaces', {
-      workspaces: workspaces.map(w => (w.id === id ? { ...w, dataRetentionDays: days } : w)),
-    });
+    setRetention(id, days);
+    setTrigger(t => t + 1);
+    toast({ title: 'Retention updated' });
   };
 
   const handleRename = (id: string, name: string) => {
-    update('workspaces', {
-      workspaces: workspaces.map(w => (w.id === id ? { ...w, name } : w)),
-    });
+    renameWorkspace(id, name);
+    setTrigger(t => t + 1);
     toast({ title: 'Workspace renamed' });
   };
 
-  const handleArchive = (_id: string) => {
-    toast({ title: `Workspace archived` });
+  const handleArchive = (id: string) => {
+    archiveWorkspace(id);
+    setTrigger(t => t + 1);
+    toast({ title: 'Workspace archived' });
   };
 
   const handleCreate = () => {
     const trimmed = createName.trim();
     if (!trimmed) return;
-    const id = `ws-${Date.now()}`;
-    const isFirst = workspaces.length === 0;
-    const newWorkspace: WorkspaceItem = {
-      id,
-      name: trimmed,
-      dataRetentionDays: 90,
-      createdAt: new Date().toISOString(),
-    };
-    update('workspaces', { workspaces: [...workspaces, newWorkspace] });
-    if (isFirst || !defaultId) {
-      update('account', { defaultWorkspaceId: id });
-    }
+    createWorkspace({ name: trimmed });
+    setTrigger(t => t + 1);
     setShowCreate(false);
     setCreateName('');
     toast({ title: 'Workspace created' });

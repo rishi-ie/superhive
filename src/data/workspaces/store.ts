@@ -29,6 +29,18 @@ export function createWorkspace(input: { name: string; description?: string }): 
   return ws;
 }
 
+export function renameWorkspace(id: string, name: string): Workspace | undefined {
+  return repo.rename(id, name);
+}
+
+export function setRetention(id: string, days: number): Workspace | undefined {
+  return repo.setRetention(id, days);
+}
+
+export function archiveWorkspace(id: string): Workspace | undefined {
+  return repo.archive(id);
+}
+
 export function setCurrentWorkspace(id: string): void {
   currentWorkspaceId = id;
 }
