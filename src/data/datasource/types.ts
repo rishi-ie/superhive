@@ -37,6 +37,7 @@ export interface DataSource {
 
   get workspaces(): Collection<import('../workspaces/interface').Workspace>;
   get workspaceAgents(): WorkspaceAgentsCollection;
+  get projectAgents(): ProjectAgentsCollection;
   get projects(): Collection<import('../projects/interface').Project>;
   get agents(): Collection<import('../agents/interface').Agent>;
   get tickets(): Collection<import('../tickets/interface').UniversalTicket>;
@@ -145,4 +146,10 @@ export interface WorkspaceAgentsCollection {
   findAll(): { workspaceId: string; agentId: string; role: string | null; joinedAt: string }[];
   create(record: { workspaceId: string; agentId: string; role: string | null; joinedAt: string }): { workspaceId: string; agentId: string; role: string | null; joinedAt: string };
   delete(id: string): boolean;
+}
+
+export interface ProjectAgentsCollection {
+  findAll(): { projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null }[];
+  create(record: { projectId: string; agentId: string; role?: string; currentStatus?: string; assignedTicketId?: string; joinedAt?: string; contextSnapshotPath?: string }): { projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null };
+  delete(projectId: string, agentId: string): boolean;
 }

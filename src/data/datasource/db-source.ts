@@ -50,6 +50,7 @@ export class DbDataSource implements DataSource {
   // ── Hydrated cache ────────────────────────────────────────────────────────
   private _workspaces: Workspace[] = [];
   private _workspaceAgents: Array<{ workspaceId: string; agentId: string; role: string | null; joinedAt: string }> = [];
+  private _projectAgents: Array<{ projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null }> = [];
   private _projects: Project[] = [];
   private _agents: Agent[] = [];
   private _tickets: UniversalTicket[] = [];
@@ -104,7 +105,7 @@ export class DbDataSource implements DataSource {
         //     agent_permissions, etc. — no harm dropping tables that don't exist)
         const tablesToDrop = [
           'schema_meta', 'meta', 'kv',
-          'workspaces', 'workspace_agents', 'projects', 'agents', 'universal_tickets',
+          'workspaces', 'workspace_agents', 'projects', 'project_agents', 'agents', 'universal_tickets',
           'chat_threads', 'favorites', 'custom_themes', 'home_activity_events',
           'telemetry', 'permissions', 'action_logs', 'next_steps',
           'cost_usage', 'audit_items', 'pending_questions',
@@ -171,6 +172,19 @@ export class DbDataSource implements DataSource {
       agentId: String(r.agent_id),
       role: (r.role as string | null) ?? null,
       joinedAt: String(r.joined_at),
+    }));
+
+    // project_agents
+    this._projectAgents = asArray<Row>(
+      (await window.electron.dbQuery('SELECT project_id, agent_id, role, current_status, assigned_ticket_id, joined_at, context_snapshot_path FROM project_agents')).rows,
+    ).map((r) => ({
+      projectId: String(r.project_id),
+      agentId: String(r.agent_id),
+      role: (r.role as string | null) ?? null,
+      currentStatus: String(r.current_status),
+      assignedTicketId: (r.assigned_ticket_id as string | null) ?? null,
+      joinedAt: String(r.joined_at),
+      contextSnapshotPath: (r.context_snapshot_path as string | null) ?? null,
     }));
 
     // projects
@@ -410,6 +424,41 @@ export class DbDataSource implements DataSource {
       },
       delete: (_id: string): boolean => {
         void _id;
+        return false;
+      },
+    };
+  }
+
+  get projectAgents() {
+    type PA = { projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null };
+    return {
+      findAll: (): PA[] => [...this._projectAgents],
+      create: (r: Partial<PA>): PA => {
+        const item: PA = {
+          projectId: r.projectId!,
+          agentId: r.agentId!,
+          role: r.role ?? null,
+          currentStatus: r.currentStatus ?? 'IDLE',
+          assignedTicketId: r.assignedTicketId ?? null,
+          joinedAt: r.joinedAt ?? new Date().toISOString(),
+          contextSnapshotPath: r.contextSnapshotPath ?? null,
+        };
+        this._projectAgents.push(item);
+        this._persist(
+          'INSERT INTO project_agents (project_id, agent_id, role, current_status, assigned_ticket_id, joined_at, context_snapshot_path) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [item.projectId, item.agentId, item.role, item.currentStatus, item.assignedTicketId, item.joinedAt, item.contextSnapshotPath],
+        );
+        this._notify();
+        return item;
+      },
+      delete: (projectId: string, agentId: string): boolean => {
+        const before = this._projectAgents.length;
+        this._projectAgents = this._projectAgents.filter((pa) => !(pa.projectId === projectId && pa.agentId === agentId));
+        if (this._projectAgents.length < before) {
+          this._persist('DELETE FROM project_agents WHERE project_id = ? AND agent_id = ?', [projectId, agentId]);
+          this._notify();
+          return true;
+        }
         return false;
       },
     };

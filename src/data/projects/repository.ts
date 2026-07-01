@@ -81,9 +81,28 @@ export class ProjectsRepository {
   }
 
   listProjectAgents(workspaceId?: string): ProjectAgent[] {
-    const all = this.ds.projects.findAll();
-    if (!workspaceId) return all.flatMap((p) => p.agents);
-    return all.find((p) => p.workspaceId === workspaceId)?.agents ?? [];
+    const joinRows = this.ds.projectAgents.findAll();
+    const allProjects = this.ds.projects.findAll();
+    const projectsInWs = workspaceId
+      ? allProjects.filter((p) => p.workspaceId === workspaceId)
+      : allProjects;
+    const projectIds = new Set(projectsInWs.map((p) => p.id));
+
+    return joinRows
+      .filter((pa) => projectIds.has(pa.projectId))
+      .map((pa) => {
+        const agent = this.ds.agents.findById(pa.agentId);
+        return {
+          id: pa.agentId,
+          name: agent?.name ?? pa.agentId,
+          role: pa.role ?? agent?.role ?? '',
+          currentStatus: pa.currentStatus as ProjectAgent['currentStatus'],
+          assignedTicketId: pa.assignedTicketId,
+          initials: agent ? (agent.name.split(' ').map((w) => w[0]).join('').toUpperCase().slice(0, 3)) : pa.agentId.slice(0, 2).toUpperCase(),
+          projectId: pa.projectId,
+          contextSnapshotPath: pa.contextSnapshotPath,
+        } as ProjectAgent;
+      });
   }
 
   listSwarmActivity(workspaceId?: string): SwarmActivity[] {

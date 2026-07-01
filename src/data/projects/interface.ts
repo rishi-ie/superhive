@@ -16,6 +16,8 @@ export type ProjectAgent = {
   currentStatus: AgentCurrentStatus;
   assignedTicketId: string | null;
   initials: string;
+  projectId?: string;
+  contextSnapshotPath?: string | null;
 };
 
 export type SwarmActivity = {
