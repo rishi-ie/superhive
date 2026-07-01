@@ -27,7 +27,8 @@ bun run electron:preview   # vite build + electron .
 
 ## Key env vars
 
-- `VITE_DATA_SOURCE` — set in `.env.local`, defaults to `mock`. The single switch that picks the data backend. `mock` → `MockDataSource` (in-memory, seeded from `mock.json`). `db` → `DbDataSource` (better-sqlite3, not yet wired — see `src/data/datasource/index.ts`). Controlled in exactly one place: `src/data/datasource/index.ts`.
+- `LIBSQL_URL` — path to the SQLite database file (e.g. `file:./data.db`). Defaults for dev are set in `.env.example`.
+- `LIBSQL_AUTH_TOKEN` — auth token for remote SQLite (e.g. Turso). Defaults for dev are set in `.env.example`.
 
 ---
 
@@ -47,7 +48,7 @@ src/
 │   ├── shortcuts/                         # KbdGroup, ShortcutHint, CommandPalette
 │   ├── channels/  chat/                   # tiny shared helpers
 ├── data/
-│   ├── mock/                              # single source of mock truth
+│   ├── seed/                              # static SQL seed — 18 tables, bundled via Vite ?raw
 │   ├── settings/                          # Settings type + settings.json (seed defaults)
 │   ├── config/                            # static config: settings-registry, themes, nav, right-panel-tabs, wizard configs
 │   └── {domain}/                          # one folder per data domain; interface.ts + store.ts
@@ -63,7 +64,7 @@ electron/main.ts · preload.ts              # Electron main + contextBridge (use
 
 | Concern | File |
 |---|---|
-| Data layer (seam + factory) | `src/data/datasource/index.ts` + `src/data/datasource/types.ts` + `src/data/datasource/mock-source.ts` |
+| Data layer (seam + factory) | `src/data/datasource/index.ts` + `src/data/datasource/types.ts` + `src/data/datasource/db-source.ts` |
 | Settings nav (10 pages, 3 categories) | `src/data/config/settings-registry.ts` |
 | Theme palette + tokens | `src/data/config/themes.ts` |
 | Keyboard shortcuts (declarative data) | `src/lib/shortcuts/registry.ts` (`DEFAULT_SHORTCUTS`) |
@@ -118,21 +119,21 @@ Domain primitives (custom, not in shadcn) — keep them as-is: `IconButton`, `St
 
 ## Data layer
 
-**Single seam:** `src/data/datasource/`. The `DataSource` interface (`types.ts`) is the contract every backend satisfies. Every other file in the codebase reads through this interface — only `src/data/datasource/mock-source.ts` imports `mock.json` directly.
+**Single seam:** `src/data/datasource/`. The `DataSource` interface (`types.ts`) is the contract every backend satisfies. Every other file in the codebase reads through this interface — only `src/data/datasource/db-source.ts` imports `src/data/seed/seed.sql` directly.
 
-**Single switch point:** `src/data/datasource/index.ts`. The factory is the only line that decides which `DataSource` implementation is active. Today: `MockDataSource`. Tomorrow (when swapping to a real DB): add a branch here pointing to the new class. Zero callers change.
+**Single switch point:** `src/data/datasource/index.ts`. The factory re-exports from `db-source.ts`. Zero callers import from a specific implementation.
 
-**Today, the only implementation is `MockDataSource`** (`src/data/datasource/mock-source.ts`). It loads `src/data/mock.json` once at construction via `normalizeSeedData()` and exposes 17 collections. **To swap to a real database:** rewrite `mock-source.ts` (or add a sibling + one factory branch). Repositories, stores, and components do not change.
+**Today, the only implementation is `DbDataSource`** (`src/data/datasource/db-source.ts`). On first boot it loads `src/data/seed/seed.sql` (bundled via Vite `?raw`) and executes all statements against libSQL. Schema versioning is tracked in `schema_meta`; mismatches trigger a drop-and-recreate.
 
-**Adding a new domain:** create `src/data/{domain}/{interface,repository,store}.ts`, extend `Snapshot` in `snapshot.ts`, seed rows in `mock.json`. No factory changes.
+**Adding a new domain:** create `src/data/{domain}/interface.ts` + `src/data/{domain}/store.ts`. Add seed INSERTs to `src/data/seed/seed.sql`. No factory changes.
 
 **Verify the seam holds:**
 ```sh
-rg "from '@/data/mock.json'|from '\\./mock\\.json'" src electron scripts
+rg "from '@/data/seed/seed.sql'|from '\\./seed\\.sql'" src electron scripts
 ```
-Expected single hit: `src/data/datasource/mock-source.ts`. Anything else is a leak.
+Expected single hit: `src/data/datasource/db-source.ts`. Anything else is a leak.
 
-**`src/data/settings/settings.json` is NOT mock data** and is always kept regardless of the data source. See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for the full prod cleanup steps.
+**`src/data/settings/settings.json` is NOT mock data** and is always kept regardless of the data source.
 
 ---
 
@@ -195,7 +196,7 @@ Stores delegate to a `Repository` that wraps a `DataSource` collection. The `Dat
 
 ## Adding a feature (short)
 
-1. **Domain data** — types in `interface.ts`, impl in `store.ts`; if new domain, also add a key to `MockData` + seed `mock.json`.
+1. **Domain data** — types in `interface.ts`, impl in `store.ts`; if new domain, also add seed INSERTs to `src/data/seed/seed.sql`.
 2. **Component** — create in the correct subdirectory (see table above). Top-of-file JSDoc + `@param` JSDoc on the component. Prefer existing shadcn primitives; add new ones via `bunx shadcn add`. Use CVA + `cn()` for variants.
 3. **Wire it** — `TabBody.tsx` (center tabs), `RightAuxiliary.tsx`, or `AccordionCore.tsx` depending on which panel needs it.
 4. **Verify** — `bun run typecheck` must pass. `bun run build` must pass. Update this guide if you added a new convention or shared utility location.

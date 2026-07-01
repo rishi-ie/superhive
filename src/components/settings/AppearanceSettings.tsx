@@ -213,7 +213,6 @@ export function AppearanceSettings() {
                   size="sm"
                   className="h-9 px-3 text-xs gap-1.5 opacity-70"
                   onClick={() => {
-                    console.warn('[TODO] download starter theme');
                     toast({ title: 'Starter download coming soon', type: 'info' });
                   }}
                 >
@@ -225,7 +224,6 @@ export function AppearanceSettings() {
                   size="sm"
                   className="h-9 px-3 text-xs gap-1.5 opacity-70"
                   onClick={() => {
-                    console.warn('[TODO] import theme');
                     toast({ title: 'Theme import coming soon', type: 'info' });
                   }}
                 >

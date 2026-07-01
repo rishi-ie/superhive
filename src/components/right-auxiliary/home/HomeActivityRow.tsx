@@ -59,6 +59,24 @@ const KIND_PIP_COLOR: Record<ActivityKind, string> = {
   swarm_handoff:       'bg-chart-2',
 };
 
+const TONE_BG: Record<string, string> = {
+  'chart-1':            'bg-chart-1/10',
+  'chart-2':            'bg-chart-2/10',
+  'chart-3':            'bg-chart-3/10',
+  'chart-4':            'bg-chart-4/10',
+  'chart-5':            'bg-chart-5/10',
+  'muted-foreground':   'bg-muted-foreground/10',
+};
+
+const TONE_TEXT: Record<string, string> = {
+  'chart-1':            'text-chart-1',
+  'chart-2':            'text-chart-2',
+  'chart-3':            'text-chart-3',
+  'chart-4':            'text-chart-4',
+  'chart-5':            'text-chart-5',
+  'muted-foreground':   'text-muted-foreground',
+};
+
 function kindToAgentStatus(kind: ActivityKind): import('@/data/agents/interface').AgentStatus | null {
   if (kind === 'agent_executing') return 'EXECUTING';
   if (kind === 'agent_compiling') return 'COMPILING';
@@ -128,8 +146,8 @@ export function HomeActivityRow({ event, onAgentClick, onTicketClick, onChannelC
             </div>
           </div>
         ) : (
-          <div className={`size-4 rounded-full flex items-center justify-center bg-${meta.tone}/10`}>
-            <Icon size={10} strokeWidth={STROKE_WIDTH} className={`text-${meta.tone}`} />
+          <div className={`size-4 rounded-full flex items-center justify-center ${TONE_BG[meta.tone] ?? 'bg-chart-1/10'}`}>
+            <Icon size={10} strokeWidth={STROKE_WIDTH} className={TONE_TEXT[meta.tone] ?? 'text-chart-1'} />
           </div>
         )}
       </span>

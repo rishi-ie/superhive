@@ -305,13 +305,13 @@ export function Dashboard({
     openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: project.id }));
   }, [openTab, bumpProjectsVersion]);
 
-  const handleTerminateAgent = useCallback((agentId: string) => {
-    console.warn('[TODO] Terminate agent:', agentId);
-  }, []);
+  const handleTerminateAgent = useCallback((_agentId: string) => {
+    toast({ title: 'Terminate agent coming soon', type: 'info' });
+  }, [toast]);
 
   const handleRefresh = useCallback(() => {
-    console.warn('[TODO] Refresh right panel');
-  }, []);
+    toast({ title: 'Refresh coming soon', type: 'info' });
+  }, [toast]);
 
   const handleProjectSelectByWorkspace = useCallback((workspaceId: string) => {
     const project = getProjectByWorkspace(workspaceId);
@@ -330,9 +330,9 @@ export function Dashboard({
 
   const handleChannelClick = handleChannelSelect;
 
-  const handleThreadSelect = useCallback((threadId: string) => {
-    console.warn('[TODO] Reopen thread:', threadId);
-  }, []);
+  const handleThreadSelect = useCallback((_threadId: string) => {
+    toast({ title: 'Reopen thread coming soon', type: 'info' });
+  }, [toast]);
 
   const handleSendMessage = useCallback((message: string) => {
     addMessageToActiveThread(message);

@@ -34,6 +34,13 @@ function avatarColor(id: string): string {
   const idx = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % CHART_COLORS.length;
   return (CHART_COLORS[idx] as ChartColor) ?? 'chart-1';
 }
+const BG: Record<string, string> = {
+  'chart-1': 'bg-chart-1',
+  'chart-2': 'bg-chart-2',
+  'chart-3': 'bg-chart-3',
+  'chart-4': 'bg-chart-4',
+  'chart-5': 'bg-chart-5',
+};
 
 const STARTUP_OPTIONS: {
   value: StartupView;
@@ -196,7 +203,7 @@ const apply = useCallback((patch: DefaultsPatch) => {
                     description={ws.id}
                     icon={
                       <div
-                        className={`flex size-7 items-center justify-center rounded-md bg-${color} text-[11px] font-semibold text-highlight-foreground`}
+                        className={`flex size-7 items-center justify-center rounded-md ${BG[color] ?? 'bg-chart-1'} text-[11px] font-semibold text-highlight-foreground`}
                       >
                         {getInitials(ws.name)}
                       </div>
