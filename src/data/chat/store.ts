@@ -45,7 +45,7 @@ export function createThreadForAgent(agentId: string, title: string): ChatThread
 }
 
 export function listChatQuickStart(): ChatQuickStartItem[] {
-  return getDataSource().chatQuickStart.findAll();
+  return repo.listQuickStart();
 }
 
 export { type ChatThread, type Message };

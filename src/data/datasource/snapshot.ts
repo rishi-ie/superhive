@@ -23,7 +23,6 @@ import type { Theme } from '@/data/settings/interface';
 import type { ActivityEvent } from '@/data/activity/interface';
 import type { ChatThread } from '@/data/chat/interface';
 import type { ChatThreadSeed, ChatQuickStartItem, CostUsageEntry, FavoriteSeed, ChannelMessageSeed } from '@/data/mock/types';
-import type { AgentDefaults } from '@/data/mock/types';
 
 /**
  * The full persisted data snapshot. Maps 1:1 to mock.json keys.
@@ -52,7 +51,6 @@ export type Snapshot = {
   chatQuickStart: ChatQuickStartItem[];
   customThemes: Theme[];
   homeActivityEvents: ActivityEvent[];
-  agentDefaults: AgentDefaults;
 };
 
 /**

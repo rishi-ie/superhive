@@ -4,6 +4,7 @@
  */
 import type { DataSource } from '@/data/datasource/types';
 import type { ChatThread, Message } from './interface';
+import type { ChatQuickStartItem } from '@/data/mock/types';
 
 export class ChatRepository {
   constructor(private ds: DataSource) {}
@@ -65,8 +66,8 @@ export class ChatRepository {
     return this.ds.chat.create({ id: `thread-${agentId}-${Date.now()}`, title, agentId, messages: [], updatedAt: new Date() });
   }
 
-  listQuickStart() {
-    return this.ds.chat.findAll()[0] ? [] : [];
+  listQuickStart(): ChatQuickStartItem[] {
+    return this.ds.chatQuickStart.findAll();
   }
 }
 

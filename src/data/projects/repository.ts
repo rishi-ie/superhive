@@ -113,7 +113,7 @@ export class ProjectsRepository {
     isAI: boolean = true,
   ): ChannelMessage {
     return this.ds.channelMessages.create({
-      id: `cmsg-${crypto.randomUUID().slice(0, 8)}`,
+      id: `cmsg-${crypto.randomUUID()}` as const,
       channelId,
       senderName,
       content,
