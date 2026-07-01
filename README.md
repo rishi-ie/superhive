@@ -99,16 +99,12 @@ Runs `tsc --noEmit` with strict mode enabled (`noUnusedLocals`, `noUnusedParamet
 
 ## Mock Data
 
-Mock data is enabled by default. The toggle is checked in exactly one place — `src/data/mock/index.ts`. Every domain store imports `mockableData` from there.
-
-**Enable/disable globally** — edit `.env.local`:
+Mock data is enabled by default. The single switch is `VITE_DATA_SOURCE` in `.env.local`. It is checked in exactly one place — `src/data/datasource/index.ts`. Set to `db` to use a real database backend (not yet wired).
 
 ```sh
-VITE_USE_MOCK_DATA=true   # default — full mock data
-VITE_USE_MOCK_DATA=false  # empty app, but mutations (createProject, createThreadForAgent, etc.) still work
+VITE_DATA_SOURCE=mock   # default — in-memory seeded from mock.json
+VITE_DATA_SOURCE=db     # not yet wired — coming soon
 ```
-
-When mocks are off, the user gets a real fresh-user experience: no seed data, but they can create projects, agents, threads from zero.
 
 See `CLEANUP_MOCK_DATA_FOR_PRODUCTION.md` for full cleanup steps when going to production.
 

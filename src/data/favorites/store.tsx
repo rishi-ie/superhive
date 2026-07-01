@@ -1,10 +1,8 @@
 /**
  * Favorites store — owns the favorites list.
  *
- * This is the FIX for the old cross-domain bypass wart:
- * previously read mockableData.projects.find() / mockableData.agents.find()
- * directly. Now delegates through FavoritesRepository which uses
- * DataSource.projects / DataSource.agents properly.
+ * Delegates through FavoritesRepository which uses DataSource.projects
+ * and DataSource.agents via the DataSource interface.
  */
 import { getDataSource } from '@/data/datasource/index';
 import { FavoritesRepository } from './repository';
