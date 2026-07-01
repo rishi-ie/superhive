@@ -134,7 +134,7 @@ function createActionLogCollection(
   seed: Record<string, ActionLogEntry[]>,
 ): ActionLogCollection {
   let items: ActionLogRecord[] = Object.entries(seed).flatMap(([agentId, entries]) =>
-    entries.map((e) => ({ id: crypto.randomUUID(), agentId, time: e.time, action: e.action })),
+    entries.map((e) => ({ id: `${agentId}:${e.time}`, agentId, time: e.time, action: e.action })),
   );
 
   return {
@@ -142,7 +142,7 @@ function createActionLogCollection(
     findByAgentId: (agentId) => items.filter((r) => r.agentId === agentId),
     push: (agentId, entry) => {
       const rec: ActionLogRecord = {
-        id: crypto.randomUUID(),
+        id: `${agentId}:${entry.time}`,
         agentId,
         time: entry.time,
         action: entry.action,
