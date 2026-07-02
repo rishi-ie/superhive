@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+type Unsubscribe = () => void;
+
 /** @deprecated Types only — ElectronAPI is used by renderer for window.electron typing. */
 export interface ElectronAPI {
   platform: NodeJS.Platform;
@@ -37,6 +39,15 @@ export interface ElectronAPI {
   agents: {
     terminateAll: () => Promise<void>;
     terminate: (ulid: string) => Promise<void>;
+  },
+  pty: {
+    spawn: (id: string, agentPath: string, cols?: number, rows?: number) => Promise<{ ok: true } | { ok: false; error: string }>;
+    write: (id: string, data: string) => Promise<boolean>;
+    resize: (id: string, cols: number, rows: number) => Promise<boolean>;
+    kill: (id: string) => Promise<boolean>;
+    list: () => Promise<string[]>;
+    onData: (id: string, callback: (data: string) => void) => Unsubscribe;
+    onExit: (id: string, callback: (payload: { exitCode: number }) => void) => Unsubscribe;
   },
 }
 
@@ -84,6 +95,24 @@ contextBridge.exposeInMainWorld('electron', {
   agents: {
     terminateAll: () => ipcRenderer.invoke('agents:terminate-all'),
     terminate: (ulid: string) => ipcRenderer.invoke('agents:terminate', ulid),
+  },
+  pty: {
+    spawn: (id: string, agentPath: string, cols = 80, rows = 24) =>
+      ipcRenderer.invoke('pty:spawn', id, agentPath, cols, rows),
+    write: (id: string, data: string) => ipcRenderer.invoke('pty:write', id, data),
+    resize: (id: string, cols: number, rows: number) => ipcRenderer.invoke('pty:resize', id, cols, rows),
+    kill: (id: string) => ipcRenderer.invoke('pty:kill', id),
+    list: () => ipcRenderer.invoke('pty:list'),
+    onData: (id: string, callback: (data: string) => void) => {
+      const listener = (_: unknown, payload: { data: string }) => callback(payload.data);
+      ipcRenderer.on(`pty:data:${id}`, listener);
+      return () => ipcRenderer.removeListener(`pty:data:${id}`, listener);
+    },
+    onExit: (id: string, callback: (payload: { exitCode: number }) => void) => {
+      const listener = (_: unknown, payload: { exitCode: number }) => callback(payload);
+      ipcRenderer.on(`pty:exit:${id}`, listener);
+      return () => ipcRenderer.removeListener(`pty:exit:${id}`, listener);
+    },
   },
 });
 

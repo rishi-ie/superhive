@@ -41,7 +41,7 @@ src/
 │   ├── ui/                                # shadcn + custom primitives — reuse, don't reinvent
 │   ├── settings/                          # SettingsSidebar + 10 settings pages + shared/
 │   ├── shortcuts/                         # KbdGroup, ShortcutHint, CommandPalette
-│   ├── channels/  chat/                   # tiny shared helpers
+│   ├── channels/                          # tiny shared helpers
 ├── pages/
 │   ├── Dashboard.tsx · Settings.tsx       # top-level page shells
 │   ├── LeftNav/                           # Fleet Command sidebar
@@ -58,10 +58,11 @@ src/
 │   └── {domain}/                          # one folder per data domain (singular: agent, project, …)
 ├── lib/
 │   ├── shortcuts/                         # single source of shortcut truth
+│   ├── terminal.ts                         # PTY control registry for AgentTerminal
 │   ├── settings-context.tsx               # applies appearance → DOM
 │   ├── constants.ts · utils.ts (cn) · markdown · debounce · …
 ├── hooks/ · types/                        # small helpers
-electron/main.ts · preload.ts              # Electron main + contextBridge (use electron-log, not console.log)
+electron/main.ts · preload.ts · agent-host.ts  # Electron main + contextBridge + PTY host (use electron-log, not console.log)
 ```
 
 ### Sources of truth — find these first
@@ -152,6 +153,8 @@ Domain primitives (custom, not in shadcn) — keep them as-is: `IconButton`, `St
 
 **Today, the only implementation is `DbDataSource`** (`src/data/datasource/db-source.ts`). On first boot it loads `src/data/seed/seed.sql` (bundled via Vite `?raw`) and executes all statements against libSQL. Schema versioning is tracked in `schema_meta`; mismatches trigger a drop-and-recreate.
 
+**Chat tables removed:** `chat_threads` and `chat_quick_start` were dropped in schema v13. `AgentTerminal` replaces `ChatView` for the `agent` tab type.
+
 **Adding a new domain:** create `src/data/{domain}/interface.ts` + `src/data/{domain}/repository.ts` + `src/data/{domain}/store.ts`. Add seed INSERTs to `src/data/seed/seed.sql`. No factory changes. Domain folders are singular (`agent`, `project`, `ticket`, …).
 
 **Verify the seam holds:**
@@ -197,6 +200,8 @@ Scopes:
 - `'always'` — fires even inside inputs/dialogs (e.g. `Mod+Enter` send)
 - `'in-canvas'` — only when a center tab is active (skip on the settings page)
 
+Terminal shortcuts: `Mod+K` clears the terminal buffer; `Mod+Shift+R` restarts the PTY subprocess. Both are `in-canvas` scope.
+
 `runRegistryValidation()` runs on Dashboard mount in dev and logs id/chord collisions. The keyboard settings page is documentation only — there is no `localStorage` sync and no rebinding UI.
 
 ---
@@ -214,6 +219,7 @@ Stores delegate to a `Repository` that wraps a `DataSource` collection. The `Dat
 - **Wrong dev command** — `bun run index.ts` does not work. This is Electron + Vite, not a Bun server. Use `bun run dev`.
 - **Main-process logging** — use `electron-log`. `console.log` in `electron/main.ts` won't appear in devtools.
 - **Bun-native libs** — `better-sqlite3`, `ioredis`, `express`, `ws` need native rebuilds for Electron. Do not add them to the main process.
+- **Native Node modules in Electron** — `node-pty` is a native module. It is rebuilt for Electron via `@electron/rebuild`. If adding other native modules, add them to `postinstall` and re-run `bun install && bun run postinstall`.
 - **No `src/components/archived/`.** It doesn't exist; don't create it.
 - **No `api.ts` placeholder files.** If a domain needs a real backend, wire it directly into `store.ts`.
 - **Settings seed is not mock.** `src/data/settings/settings.json` is never deleted by the mock cleanup.

@@ -19,7 +19,7 @@ export function getAgent(id: string): Agent | undefined {
 
 export function patchAgent(
   id: string,
-  patch: { name?: string; role?: string; principles?: string; boundaries?: string; skills?: string[] },
+  patch: { name?: string; role?: string; principles?: string; boundaries?: string; skills?: string[]; piPath?: string },
 ): Agent | undefined {
   return repo.patch(id, patch);
 }

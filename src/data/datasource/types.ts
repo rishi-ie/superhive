@@ -48,7 +48,6 @@ export interface DataSource {
   get projects(): Collection<import('../project/interface').Project>;
   get agents(): Collection<import('../agent/interface').Agent>;
   get tickets(): Collection<import('../ticket/interface').UniversalTicket>;
-  get chat(): Collection<import('../chat/interface').ChatThread>;
   get favorites(): Collection<import('../favorite/interface').FavoriteRef>;
   get themes(): Collection<import('../settings/interface').Theme>;
   get activity(): Collection<import('../activity/interface').ActivityEvent>;
@@ -61,8 +60,6 @@ export interface DataSource {
   get auditItems(): AuditItemsCollection;
   get pendingQuestions(): PendingQuestionsCollection;
   get channelMessages(): ChannelMessagesCollection;
-  get chatQuickStart(): ChatQuickStartCollection;
-
   get currentWorkspaceId(): string;
 }
 
@@ -143,10 +140,6 @@ export interface ChannelMessagesCollection {
   findAll(): import('../project/interface').ChannelMessage[];
   findByChannelId(channelId: string): import('../project/interface').ChannelMessage[];
   create(msg: import('../project/interface').ChannelMessage): import('../project/interface').ChannelMessage;
-}
-
-export interface ChatQuickStartCollection {
-  findAll(): import('../chat/interface').ChatQuickStartItem[];
 }
 
 export interface WorkspaceAgentsCollection {

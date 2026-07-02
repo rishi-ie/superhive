@@ -36,6 +36,23 @@ contextBridge.exposeInMainWorld("electron", {
 	agents: {
 		terminateAll: () => ipcRenderer.invoke("agents:terminate-all"),
 		terminate: (ulid) => ipcRenderer.invoke("agents:terminate", ulid)
+	},
+	pty: {
+		spawn: (id, agentPath, cols = 80, rows = 24) => ipcRenderer.invoke("pty:spawn", id, agentPath, cols, rows),
+		write: (id, data) => ipcRenderer.invoke("pty:write", id, data),
+		resize: (id, cols, rows) => ipcRenderer.invoke("pty:resize", id, cols, rows),
+		kill: (id) => ipcRenderer.invoke("pty:kill", id),
+		list: () => ipcRenderer.invoke("pty:list"),
+		onData: (id, callback) => {
+			const listener = (_, payload) => callback(payload.data);
+			ipcRenderer.on(`pty:data:${id}`, listener);
+			return () => ipcRenderer.removeListener(`pty:data:${id}`, listener);
+		},
+		onExit: (id, callback) => {
+			const listener = (_, payload) => callback(payload);
+			ipcRenderer.on(`pty:exit:${id}`, listener);
+			return () => ipcRenderer.removeListener(`pty:exit:${id}`, listener);
+		}
 	}
 });
 console.log("Preload script loaded");

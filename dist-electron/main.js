@@ -4,6 +4,7 @@ import { dirname, join, relative } from "path";
 import { fileURLToPath } from "url";
 import * as fs from "fs";
 import { Buffer as Buffer$1 } from "node:buffer";
+import * as pty from "node-pty";
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -2440,7 +2441,7 @@ var require_dist = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.load = load;
 }));
 //#endregion
-//#region node_modules/detect-libc/lib/process.js
+//#region node_modules/libsql/node_modules/detect-libc/lib/process.js
 var require_process = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var isLinux = () => process.platform === "linux";
 	var report = null;
@@ -2456,7 +2457,7 @@ var require_process = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	};
 }));
 //#endregion
-//#region node_modules/detect-libc/lib/filesystem.js
+//#region node_modules/libsql/node_modules/detect-libc/lib/filesystem.js
 var require_filesystem = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var fs$1 = __require("fs");
 	/**
@@ -2489,7 +2490,7 @@ var require_filesystem = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	};
 }));
 //#endregion
-//#region node_modules/detect-libc/lib/detect-libc.js
+//#region node_modules/libsql/node_modules/detect-libc/lib/detect-libc.js
 var require_detect_libc = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var childProcess = __require("child_process");
 	var { isLinux, getReport } = require_process();
@@ -10833,6 +10834,111 @@ function _createClient(config) {
 	else return _createClient$3(config);
 }
 //#endregion
+//#region electron/agent-host.ts
+/**
+* Agent PTY host — runs in Electron main process.
+*
+* Manages a Map of ulid → node-pty IPty instances.
+* Bridges PTY output/input over IPC so the renderer can drive a xterm.js instance
+* for each active agent terminal.
+*
+* Architecture:
+*   electron/main.ts imports this module and forwards IPC messages to it.
+*   Preload script exposes a typed window.electron.pty API to the renderer.
+*   Renderer sends user keystrokes → preload → main → node-pty.
+*   PTY output → main → renderer (via window.electron.pty.onData callback).
+*/
+var processes = /* @__PURE__ */ new Map();
+function broadcastToRenderer$1(channel, payload) {
+	for (const win of BrowserWindow.getAllWindows()) {
+		if (win.isDestroyed()) continue;
+		try {
+			win.webContents.send(channel, payload);
+		} catch (err) {
+			import_main.default.warn(`agent-host: failed to send to renderer: ${err}`);
+		}
+	}
+}
+function spawnPty(id, agentPath, cols = 80, rows = 24) {
+	if (processes.has(id)) return {
+		ok: false,
+		error: `PTY already running for ${id}`
+	};
+	const shell = process.platform === "win32" ? "powershell.exe" : "bash";
+	const shellArgs = process.platform === "win32" ? [] : ["-c", `cd "${agentPath}" && ./agent.sh`];
+	import_main.default.info(`agent-host: spawning PTY for ${id} with agent path: ${agentPath}`);
+	let ptyProcess;
+	try {
+		ptyProcess = pty.spawn(shell, shellArgs, {
+			name: "xterm-color",
+			cols,
+			rows,
+			cwd: agentPath,
+			env: {
+				...process.env,
+				AGENT_ID: id,
+				TERM: "xterm-256color"
+			}
+		});
+	} catch (err) {
+		import_main.default.error(`agent-host: failed to spawn PTY for ${id}:`, err);
+		return {
+			ok: false,
+			error: String(err)
+		};
+	}
+	ptyProcess.onData((data) => {
+		broadcastToRenderer$1(`pty:data:${id}`, { data });
+	});
+	ptyProcess.onExit(({ exitCode }) => {
+		import_main.default.info(`agent-host: PTY for ${id} exited with code ${exitCode}`);
+		processes.delete(id);
+		broadcastToRenderer$1(`pty:exit:${id}`, { exitCode });
+	});
+	processes.set(id, {
+		pty: ptyProcess,
+		onDataCallbacks: /* @__PURE__ */ new Set()
+	});
+	return { ok: true };
+}
+function writePty(id, data) {
+	const entry = processes.get(id);
+	if (!entry) return false;
+	try {
+		entry.pty.write(data);
+		return true;
+	} catch (err) {
+		import_main.default.warn(`agent-host: writePty failed for ${id}:`, err);
+		return false;
+	}
+}
+function resizePty(id, cols, rows) {
+	const entry = processes.get(id);
+	if (!entry) return false;
+	try {
+		entry.pty.resize(Math.max(1, cols), Math.max(1, rows));
+		return true;
+	} catch (err) {
+		import_main.default.warn(`agent-host: resizePty failed for ${id}:`, err);
+		return false;
+	}
+}
+function killPty(id) {
+	const entry = processes.get(id);
+	if (!entry) return false;
+	try {
+		entry.pty.kill();
+		processes.delete(id);
+		return true;
+	} catch (err) {
+		import_main.default.warn(`agent-host: killPty failed for ${id}:`, err);
+		return false;
+	}
+}
+function listPtyIds() {
+	return Array.from(processes.keys());
+}
+//#endregion
 //#region electron/agent-handler.ts
 /**
 * Agent message handlers — invoked by the WS server for each incoming message.
@@ -11298,6 +11404,21 @@ function parseOkfFile(raw) {
 		body
 	};
 }
+ipcMain.handle("pty:spawn", (_event, id, agentPath, cols = 80, rows = 24) => {
+	return spawnPty(id, agentPath, cols, rows);
+});
+ipcMain.handle("pty:write", (_event, id, data) => {
+	return writePty(id, data);
+});
+ipcMain.handle("pty:resize", (_event, id, cols, rows) => {
+	return resizePty(id, cols, rows);
+});
+ipcMain.handle("pty:kill", (_event, id) => {
+	return killPty(id);
+});
+ipcMain.handle("pty:list", () => {
+	return listPtyIds();
+});
 app.whenReady().then(() => {
 	import_main.default.info("App ready");
 	startWsServer();

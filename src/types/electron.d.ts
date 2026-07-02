@@ -48,6 +48,15 @@ type ElectronAPI = {
     terminateAll: () => Promise<void>;
     terminate: (ulid: string) => Promise<void>;
   };
+  pty: {
+    spawn: (id: string, agentPath: string, cols?: number, rows?: number) => Promise<{ ok: true } | { ok: false; error: string }>;
+    write: (id: string, data: string) => Promise<boolean>;
+    resize: (id: string, cols: number, rows: number) => Promise<boolean>;
+    kill: (id: string) => Promise<boolean>;
+    list: () => Promise<string[]>;
+    onData: (id: string, callback: (data: string) => void) => () => void;
+    onExit: (id: string, callback: (payload: { exitCode: number }) => void) => () => void;
+  };
 };
 
 interface Window {

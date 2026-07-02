@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import log from 'electron-log/main';
 import { createClient, type Client, type InValue } from '@libsql/client';
+import { spawnPty, writePty, resizePty, killPty, listPtyIds } from './agent-host';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -325,6 +326,28 @@ function parseOkfFile(raw: string): { frontmatter: Record<string, unknown>; body
 }
 
 import { startWsServer, stopWsServer } from './ws-server';
+
+/* ─── PTY agent host ─────────────────────────────────────────────────────── */
+
+ipcMain.handle('pty:spawn', (_event, id: string, agentPath: string, cols = 80, rows = 24) => {
+  return spawnPty(id, agentPath, cols, rows);
+});
+
+ipcMain.handle('pty:write', (_event, id: string, data: string) => {
+  return writePty(id, data);
+});
+
+ipcMain.handle('pty:resize', (_event, id: string, cols: number, rows: number) => {
+  return resizePty(id, cols, rows);
+});
+
+ipcMain.handle('pty:kill', (_event, id: string) => {
+  return killPty(id);
+});
+
+ipcMain.handle('pty:list', () => {
+  return listPtyIds();
+});
 
 app.whenReady().then(() => {
   log.info('App ready');

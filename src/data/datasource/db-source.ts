@@ -23,7 +23,7 @@ import type { UniversalTicket } from '@/data/ticket/interface';
 import type { Agent, Telemetry, Permissions, AuditItem, PendingQuestion } from '@/data/agent/interface';
 import type { Theme } from '@/data/settings/interface';
 import type { ActivityEvent } from '@/data/activity/interface';
-import type { ChatThread, Message, ChatQuickStartItem } from '@/data/chat/interface';
+
 import type { FavoriteRef } from '@/data/favorite/interface';
 import type { CostUsageEntry } from '@/data/cost_usage/interface';
 import { SCHEMA, SCHEMA_VERSION } from './schema';
@@ -37,7 +37,6 @@ import type {
   AuditItemsCollection,
   PendingQuestionsCollection,
   ChannelMessagesCollection,
-  ChatQuickStartCollection,
 } from './types';
 
 type Row = Record<string, unknown>;
@@ -61,7 +60,6 @@ export class DbDataSource implements DataSource {
   private _projects: Project[] = [];
   private _agents: Agent[] = [];
   private _tickets: UniversalTicket[] = [];
-  private _chatThreads: ChatThread[] = [];
   private _favorites: FavoriteRef[] = [];
   private _themes: Theme[] = [];
   private _activity: ActivityEvent[] = [];
@@ -73,7 +71,6 @@ export class DbDataSource implements DataSource {
   private _auditItems: AuditItem[] = [];
   private _pendingQuestions: PendingQuestion[] = [];
   private _channelMessages: ChannelMessage[] = [];
-  private _chatQuickStart: ChatQuickStartItem[] = [];
   private _currentWorkspaceId = '';
 
   private _ready = false;
@@ -318,22 +315,6 @@ export class DbDataSource implements DataSource {
       archivedAt: (r.archived_at as string | null) ?? null,
     }));
 
-    // chat_threads — JSON-blob messages
-    this._chatThreads = asArray<Row>(
-      (await window.electron.dbQuery('SELECT id, title, agentId, updatedAt, messages, thread_kind, project_id, workspace_id FROM chat_threads')).rows,
-    ).map((r) => ({
-      id: String(r.id), title: String(r.title),
-      agentId: (r.agentId as string | null) ?? undefined,
-      updatedAt: new Date(String(r.updatedAt)),
-      messages: (JSON.parse(String(r.messages)) as Message[]).map((m) => ({
-        ...m,
-        timestamp: typeof m.timestamp === 'string' ? new Date(m.timestamp) : m.timestamp,
-      })),
-      threadKind: (r.thread_kind as string | null) as ChatThread['threadKind'] ?? undefined,
-      projectId: (r.project_id as string | null) ?? null,
-      workspaceId: (r.workspace_id as string | null) ?? null,
-    }));
-
     // favorites
     this._favorites = asArray<Row>(
       (await window.electron.dbQuery('SELECT id, type FROM favorites')).rows,
@@ -450,13 +431,6 @@ export class DbDataSource implements DataSource {
       timestamp: String(r.timestamp), isAI: Number(r.isAI) === 1,
     }));
 
-    // chat_quick_start
-    this._chatQuickStart = asArray<Row>(
-      (await window.electron.dbQuery('SELECT icon, label, description, category FROM chat_quick_start')).rows,
-    ).map((r) => ({
-      icon: String(r.icon), label: String(r.label),
-      description: String(r.description), category: String(r.category),
-    }));
   }
 
   // ── Fire-and-forget persist ───────────────────────────────────────────────
@@ -982,52 +956,6 @@ export class DbDataSource implements DataSource {
     };
   }
 
-  get chat(): Collection<ChatThread> {
-    return {
-      findAll: () => [...this._chatThreads],
-      findById: (id) => this._chatThreads.find((t) => t.id === id),
-      create: (r) => {
-        const item: ChatThread = {
-          ...(r as ChatThread),
-          messages: r.messages ?? [],
-          updatedAt: r.updatedAt ?? new Date(),
-          threadKind: r.threadKind ?? 'agent',
-          projectId: r.projectId ?? null,
-          workspaceId: r.workspaceId ?? null,
-        };
-        this._chatThreads.push(item);
-        this._persist(
-          'INSERT INTO chat_threads (id, title, agentId, updatedAt, messages, thread_kind, project_id, workspace_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [item.id, item.title, item.agentId ?? null, item.updatedAt.toISOString(), JSON.stringify(item.messages), item.threadKind ?? 'agent', item.projectId ?? null, item.workspaceId ?? null],
-        );
-        this._notify();
-        return item;
-      },
-      update: (id, patch) => {
-        const idx = this._chatThreads.findIndex((t) => t.id === id);
-        if (idx === -1) return undefined;
-        this._chatThreads[idx] = { ...this._chatThreads[idx], ...patch } as ChatThread;
-        const updated: ChatThread = this._chatThreads[idx]!;
-        this._persist(
-          'UPDATE chat_threads SET title = ?, agentId = ?, updatedAt = ?, messages = ?, thread_kind = ?, project_id = ?, workspace_id = ? WHERE id = ?',
-          [updated.title, updated.agentId ?? null, updated.updatedAt.toISOString(), JSON.stringify(updated.messages), updated.threadKind ?? 'agent', updated.projectId ?? null, updated.workspaceId ?? null, id],
-        );
-        this._notify();
-        return updated;
-      },
-      delete: (id) => {
-        const before = this._chatThreads.length;
-        this._chatThreads = this._chatThreads.filter((t) => t.id !== id);
-        if (this._chatThreads.length < before) {
-          this._persist('DELETE FROM chat_threads WHERE id = ?', [id]);
-          this._notify();
-          return true;
-        }
-        return false;
-      },
-    };
-  }
-
   get favorites(): Collection<FavoriteRef> {
     return {
       findAll: () => [...this._favorites],
@@ -1283,10 +1211,6 @@ export class DbDataSource implements DataSource {
         return item;
       },
     };
-  }
-
-  get chatQuickStart(): ChatQuickStartCollection {
-    return { findAll: () => [...this._chatQuickStart] };
   }
 
   get currentWorkspaceId(): string {

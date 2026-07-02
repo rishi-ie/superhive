@@ -76,6 +76,8 @@ export const openChannelsAll = (api: ShortcutAPI) => api.openOrFocusTab(buildTab
 
 // ─── Agents ───────────────────────────────────────────────────────────
 export const openAgentsAll   = (api: ShortcutAPI) => api.openOrFocusTab(buildTab(api, 'universal-agents', 'Agents'));
+export const clearTerminal   = () => { import('@/lib/terminal').then(m => m.clearActiveTerminal()); };
+export const restartTerminal  = () => { import('@/lib/terminal').then(m => m.restartActiveTerminal()); };
 
 // ─── Chat ─────────────────────────────────────────────────────────────
 export const sendChat        = (api: ShortcutAPI) => api.sendActiveChatMessage();
@@ -113,5 +115,7 @@ export const ACTIONS: Record<string, (api: ShortcutAPI) => void> = {
   sendChat,
   focusChat,
   confirmModal,
+  clearTerminal,
+  restartTerminal,
 };
 

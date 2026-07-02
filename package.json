@@ -12,11 +12,15 @@
     "preview": "vite preview",
     "electron:dev": "vite",
     "electron:build": "bun run build && electron-builder",
-    "electron:preview": "vite build && electron ."
+    "electron:preview": "vite build && electron .",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "postinstall": "electron-rebuild -f -w node-pty 2>/dev/null || true"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.1",
     "@tailwindcss/postcss": "^4.3.1",
     "@types/bun": "latest",
+    "@types/node": "^22.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
@@ -55,6 +59,9 @@
     "electron": "^42.4.1",
     "electron-log": "^5.4.4",
     "lucide-react": "^1.21.0",
+    "node-pty": "^1.0.0",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "sonner": "^2.0.7",

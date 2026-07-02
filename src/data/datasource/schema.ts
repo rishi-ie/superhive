@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS agents (
   uptime TEXT NOT NULL DEFAULT '',
   principles TEXT NOT NULL DEFAULT '',
   boundaries TEXT NOT NULL DEFAULT '',
-  skills TEXT NOT NULL DEFAULT '[]'
+  skills TEXT NOT NULL DEFAULT '[]',
+  piPath TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS universal_tickets (
@@ -107,19 +108,6 @@ CREATE TABLE IF NOT EXISTS universal_tickets (
   archived_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_universal_tickets_workspace ON universal_tickets(workspaceId);
-
-CREATE TABLE IF NOT EXISTS chat_threads (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  agentId TEXT,
-  updatedAt TEXT NOT NULL,
-  messages TEXT NOT NULL DEFAULT '[]',
-  thread_kind TEXT NOT NULL DEFAULT 'agent',
-  project_id TEXT,
-  workspace_id TEXT
-);
-CREATE INDEX IF NOT EXISTS idx_chat_threads_workspace ON chat_threads(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_chat_threads_project ON chat_threads(project_id);
 
 CREATE TABLE IF NOT EXISTS favorites (
   id TEXT PRIMARY KEY,
@@ -221,14 +209,6 @@ CREATE TABLE IF NOT EXISTS channel_messages (
   isAI INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_channel_messages_channel ON channel_messages(channelId);
-
-CREATE TABLE IF NOT EXISTS chat_quick_start (
-  id TEXT PRIMARY KEY,
-  icon TEXT NOT NULL,
-  label TEXT NOT NULL,
-  description TEXT NOT NULL,
-  category TEXT NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS integrations (
   id TEXT PRIMARY KEY,

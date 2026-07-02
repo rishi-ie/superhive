@@ -10,6 +10,7 @@ export type Agent = {
   principles?: string;
   boundaries?: string;
   skills?: string[];
+  piPath?: string;
 };
 
 export type Telemetry = {

@@ -11,7 +11,7 @@ import { BulkActionBar } from '@/pages/RightAuxiliary/shared/BulkActionBar';
 import { EmptyState } from '@/pages/RightAuxiliary/shared/EmptyState';
 import { FilterChips } from '@/pages/RightAuxiliary/shared/FilterChips';
 import { getAuditItems, getPendingQuestions, approveAudit, denyAudit, answerQuestion } from '@/data/agent/store';
-import { addMessageToActiveThread } from '@/data/chat/store';
+
 import { formatRelativeTime } from '@/lib/relative-time';
 import { useToast } from '@/toasts/context';
 import type { Agent } from '@/data/agent/store';
@@ -300,9 +300,8 @@ export function AgentInbox({ agent, onTicketClick: _onTicketClick }: AgentInboxP
 
   const handleAnswer = (questionId: string, text: string) => {
     answerQuestion(questionId, text, agent.id);
-    addMessageToActiveThread(text, agent.id);
     setQuestions(prev => prev.filter(q => q.id !== questionId));
-    toast({ title: 'Answer sent to chat' });
+    toast({ title: 'Answer sent to agent' });
   };
 
   const handleClearSelection = () => setSelectedAuditIds(new Set());

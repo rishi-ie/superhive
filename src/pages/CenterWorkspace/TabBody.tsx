@@ -1,7 +1,7 @@
 /**
  * Dispatches to the correct view based on tab type.
  */
-import { ChatView } from './ChatView';
+import { AgentTerminal } from './AgentTerminal';
 import { ProjectDetailView } from './ProjectDetailView';
 import { TicketsView } from './TicketsView';
 import { AgentsView } from './AgentsView';
@@ -173,10 +173,8 @@ export function TabBody({
 
     case 'agent':
       return (
-        <ChatView
-          workspaceId={tab.workspaceId}
-          agentId={tab.selectedAgentId ?? undefined}
-          onSend={onSend}
+        <AgentTerminal
+          agentId={tab.selectedAgentId ?? ''}
         />
       );
 

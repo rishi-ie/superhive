@@ -30,7 +30,7 @@ import { listUniversalTickets } from '@/data/ticket/store';
 import { listFavorites } from '@/data/favorite/store';
 import { listAgents, getAgentWorkspace } from '@/data/agent/store';
 import { terminateAgentProcess } from '@/data/agent_process/store';
-import { addMessageToActiveThread, getThread } from '@/data/chat/store';
+
 import {
   makeInitialTabState,
   openOrFocusTab as openTabOp,
@@ -349,18 +349,8 @@ export function Dashboard({
 
   const handleChannelClick = handleChannelSelect;
 
-  const handleThreadSelect = useCallback((threadId: string) => {
-    const thread = getThread(threadId);
-    if (!thread) return;
-    const ws = thread.workspaceId ?? activeWorkspaceId;
-    const agentId = thread.agentId;
-    if (agentId) {
-      openTab(buildTab('agent', ws, thread.title || 'Agent', { selectedAgentId: agentId }));
-    }
-  }, [openTab, activeWorkspaceId]);
-
-  const handleSendMessage = useCallback((message: string) => {
-    addMessageToActiveThread(message);
+  const handleThreadSelect = useCallback((_threadId: string) => {
+    // Sessions tab is removed; thread navigation no longer applies
   }, []);
 
   const handleToggleLeftPanel = useCallback(() => {
@@ -586,7 +576,6 @@ export function Dashboard({
         onProjectSelect={handleProjectSelect}
         onChannelSelect={handleChannelSelect}
         onNavItemClick={handleNavItemClick}
-        onSend={handleSendMessage}
         onOpenTickets={handleOpenTickets}
         onCreateProject={handleCreateProject}
         onCreateTicket={handleCreateTicket}

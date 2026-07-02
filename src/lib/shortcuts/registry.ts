@@ -329,6 +329,22 @@ export const DEFAULT_SHORTCUTS: ShortcutDef[] = [
     chord: chord('Mod+Shift+a'),
     scope: 'global',
   },
+  {
+    id: 'terminal.clear',
+    category: 'agents',
+    label: 'Clear terminal',
+    description: 'Clear the terminal scrollback and display.',
+    chord: chord('Mod+k'),
+    scope: 'in-canvas',
+  },
+  {
+    id: 'terminal.restart',
+    category: 'agents',
+    label: 'Restart agent',
+    description: 'Kill and respawn the PTY subprocess for the active agent.',
+    chord: chord('Mod+Shift+r'),
+    scope: 'in-canvas',
+  },
 
   // ─── Chat ──────────────────────────────────────────────────────────
   {
