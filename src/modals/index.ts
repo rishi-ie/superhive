@@ -5,6 +5,7 @@
 export { CreateProjectDialog } from './CreateProjectModal';
 export { CreateTicketDialog } from './CreateTicketModal';
 export { CreateChannelDialog } from './CreateChannelModal';
+export { CreateAgentDialog } from './CreateAgentModal';
 export { AgentEditDialog } from './AgentEditModal';
 export { HelpModal } from './HelpModal';
 export { ConfirmationModal } from './ConfirmationModal';

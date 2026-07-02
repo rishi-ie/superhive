@@ -1,6 +1,6 @@
 /**
  * All agents across workspaces with search, status filter, and sort.
- * Note: no "New Agent" button — that lives in AgentsView (the canonical entry point).
+ * Includes a "New Agent" button in the page header.
  */
 import { useMemo, useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
@@ -8,6 +8,7 @@ import { StatusDot } from '@/components/ui/StatusDot';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
 import { Select } from '@/components/ui/Select';
+import { NewButton } from '@/components/ui/NewButton';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { EmptyState } from '@/pages/RightAuxiliary/shared/EmptyState';
 import { Bot } from 'lucide-react';
@@ -47,13 +48,15 @@ function ContextBar({ value }: { value: number }) {
 type UniversalAgentsViewProps = {
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
+  onCreateAgent?: () => void;
 };
 
 /**
  * @param onAgentSelect - Called when an agent is selected
  * @param selectedAgentId - Currently selected agent ID
+ * @param onCreateAgent - Called when "New Agent" button is clicked
  */
-export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: UniversalAgentsViewProps) {
+export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onCreateAgent }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -96,21 +99,42 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: Universa
 
   if (agents.length === 0) {
     return (
-      <EmptyState
-        icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
-        title="No agents yet"
-        description="AI agents execute work, monitor systems, and coordinate with the swarm"
-      />
+      <div className="flex flex-col h-full">
+        <div className="px-6 pt-5 pb-3 shrink-0 flex items-center justify-between">
+          <div>
+            <h1 className="text-base font-bold text-foreground">All Agents</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Universal agents · 0 agents
+            </p>
+          </div>
+          {onCreateAgent && <NewButton label="New Agent" onClick={onCreateAgent} />}
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <EmptyState
+            icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
+            title="No agents yet"
+            description="AI agents execute work, monitor systems, and coordinate with the swarm"
+            action={
+              onCreateAgent ? (
+                <NewButton label="New Agent" onClick={onCreateAgent} />
+              ) : undefined
+            }
+          />
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-6 pt-5 pb-3 shrink-0">
-        <h1 className="text-base font-bold text-foreground">All Agents</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Universal agents · {agents.length} agent{agents.length !== 1 ? 's' : ''}
-        </p>
+      <div className="px-6 pt-5 pb-3 shrink-0 flex items-center justify-between">
+        <div>
+          <h1 className="text-base font-bold text-foreground">All Agents</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Universal agents · {agents.length} agent{agents.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+        {onCreateAgent && <NewButton label="New Agent" onClick={onCreateAgent} />}
       </div>
 
       <div className="px-6 pb-3 flex items-center gap-3 shrink-0">

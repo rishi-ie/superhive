@@ -1,7 +1,8 @@
 /**
- * AgentEditDialog — modal for editing an agent's name, role, principles,
- * boundaries, and skills. Sends update to local store (running-agent WS
- * sync is handled in Phase 52).
+ * CreateAgentDialog — modal for capturing a new agent's identity and Pi path.
+ *
+ * Required: name, role, piPath (must exist on disk).
+ * Optional: principles, boundaries, skills (chip multi-select).
  */
 import { useEffect, useState } from 'react';
 import { Bot } from 'lucide-react';
@@ -18,7 +19,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Label } from '@/components/ui/Label';
 import { useToast } from '@/toasts/context';
-import { patchAgent } from '@/data/agent/store';
+import { createAgent } from '@/data/agent/store';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { Agent } from '@/data/agent/store';
 
@@ -33,51 +34,53 @@ const MAX_ROLE = 80;
 const MAX_PATH = 500;
 const MAX_TEXT = 500;
 
-export type AgentEditDialogProps = {
+export type CreateAgentDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  agent: Agent;
-  onSaved?: (agent: Agent) => void;
+  onCreated?: (agent: Agent) => void;
 };
 
 /**
- * Modal for editing an existing agent.
+ * Modal for creating a new agent. Submit is disabled until name + role are set.
+ * Pi path is validated against the filesystem before submit.
+ *
  * @param open - Whether the dialog is visible
  * @param onOpenChange - Called when the dialog requests open/close
- * @param agent - Agent to edit
- * @param onSaved - Called with the patched agent after a successful save
+ * @param onCreated - Called with the newly created agent after a successful submit
  */
-export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEditDialogProps) {
+export function CreateAgentDialog({ open, onOpenChange, onCreated }: CreateAgentDialogProps) {
   const toast = useToast();
-  const [name, setName] = useState(agent.name);
-  const [role, setRole] = useState(agent.role);
-  const [principles, setPrinciples] = useState(agent.principles ?? '');
-  const [boundaries, setBoundaries] = useState(agent.boundaries ?? '');
-  const [skills, setSkills] = useState<Set<string>>(new Set(agent.skills ?? []));
-  const [piPath, setPiPath] = useState(agent.piPath ?? '');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [piPath, setPiPath] = useState('');
+  const [principles, setPrinciples] = useState('');
+  const [boundaries, setBoundaries] = useState('');
+  const [skills, setSkills] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [pathError, setPathError] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
-      setName(agent.name);
-      setRole(agent.role);
-      setPrinciples(agent.principles ?? '');
-      setBoundaries(agent.boundaries ?? '');
-      setSkills(new Set(agent.skills ?? []));
-      setPiPath(agent.piPath ?? '');
+      setName('');
+      setRole('');
+      setPiPath('');
+      setPrinciples('');
+      setBoundaries('');
+      setSkills(new Set());
       setSubmitting(false);
       setPathError(null);
-      // If the agent has no piPath set, pre-fill with the default agents dir.
-      if (!agent.piPath) {
-        void window.electron.app.agentsDir().then((dir) => {
-          setPiPath((current) => (current ? current : dir));
-        });
-      }
+      // Pre-fill piPath with the default agents dir (auto-created on first call).
+      void window.electron.app.agentsDir().then((dir) => {
+        setPiPath((current) => (current ? current : dir));
+      });
     }
-  }, [open, agent]);
+  }, [open]);
 
-  const canSubmit = name.trim().length > 0 && role.trim().length > 0 && piPath.trim().length > 0 && !submitting;
+  const canSubmit =
+    name.trim().length > 0 &&
+    role.trim().length > 0 &&
+    piPath.trim().length > 0 &&
+    !submitting;
 
   const toggleSkill = (s: string) => {
     setSkills(prev => {
@@ -88,7 +91,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
     });
   };
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
     setPathError(null);
@@ -101,7 +104,7 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
       return;
     }
 
-    const updated = patchAgent(agent.id, {
+    const agent = createAgent({
       name: name.trim(),
       role: role.trim(),
       piPath: trimmedPath,
@@ -109,13 +112,13 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
       boundaries: boundaries.slice(0, MAX_TEXT),
       skills: Array.from(skills),
     });
-    if (!updated) {
-      toast({ title: 'Could not save agent', type: 'error' });
+    if (!agent) {
+      toast({ title: 'Could not create agent', type: 'error' });
       setSubmitting(false);
       return;
     }
-    toast({ title: 'Agent updated', description: updated.name });
-    onSaved?.(updated);
+    toast({ title: 'Agent created', description: agent.name });
+    onCreated?.(agent);
     onOpenChange(false);
   };
 
@@ -128,9 +131,9 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
               <Bot size={16} strokeWidth={STROKE_WIDTH} />
             </div>
             <div>
-              <DialogTitle>Edit agent</DialogTitle>
+              <DialogTitle>New agent</DialogTitle>
               <DialogDescription>
-                Tune this agent's identity, principles, and capabilities.
+                Give this agent a name, role, and the path to its Pi agent script.
               </DialogDescription>
             </div>
           </div>
@@ -139,36 +142,38 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="ae-name" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
+              <Label htmlFor="ca-name" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
                 Name
               </Label>
               <TextInput
-                id="ae-name"
+                id="ca-name"
                 value={name}
                 onChange={(e) => setName(e.target.value.slice(0, MAX_NAME))}
+                placeholder="e.g. Atlas"
                 autoFocus
                 maxLength={MAX_NAME}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ae-role" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
+              <Label htmlFor="ca-role" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
                 Role
               </Label>
               <TextInput
-                id="ae-role"
+                id="ca-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value.slice(0, MAX_ROLE))}
+                placeholder="e.g. Code reviewer"
                 maxLength={MAX_ROLE}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="ae-piPath" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
+            <Label htmlFor="ca-piPath" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
               Pi agent path
             </Label>
             <TextInput
-              id="ae-piPath"
+              id="ca-piPath"
               value={piPath}
               onChange={(e) => {
                 setPiPath(e.target.value.slice(0, MAX_PATH));
@@ -188,11 +193,11 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="ae-principles" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
+            <Label htmlFor="ca-principles" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
               Principles
             </Label>
             <Textarea
-              id="ae-principles"
+              id="ca-principles"
               value={principles}
               onChange={(e) => setPrinciples(e.target.value.slice(0, MAX_TEXT))}
               placeholder="What this agent should always do."
@@ -202,11 +207,11 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="ae-boundaries" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
+            <Label htmlFor="ca-boundaries" className="text-[10px] uppercase tracking-wider font-normal text-muted-foreground">
               Boundaries
             </Label>
             <Textarea
-              id="ae-boundaries"
+              id="ca-boundaries"
               value={boundaries}
               onChange={(e) => setBoundaries(e.target.value.slice(0, MAX_TEXT))}
               placeholder="What this agent should never do."
@@ -241,9 +246,19 @@ export function AgentEditDialog({ open, onOpenChange, agent, onSaved }: AgentEdi
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={handleSave} disabled={!canSubmit}>Save</Button>
+        <DialogFooter className="gap-2 sm:gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            Cancel
+          </Button>
+          <Button
+            variant="default"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            loading={submitting}
+            className="flex-1"
+          >
+            Create agent
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

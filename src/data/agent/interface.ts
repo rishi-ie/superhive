@@ -13,6 +13,15 @@ export type Agent = {
   piPath?: string;
 };
 
+export type CreateAgentInput = {
+  name: string;
+  role: string;
+  piPath: string;
+  principles?: string;
+  boundaries?: string;
+  skills?: string[];
+};
+
 export type Telemetry = {
   contextSaturation: number;
   tokensPerSecond: number;

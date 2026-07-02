@@ -7,6 +7,7 @@
  * subprocess spawning lands when general-v1 ships.
  */
 import { registerAgentProcess, setAgentProcessStatus } from '@/data/agent_process/store';
+import { generateAgentId } from '@/functions/agents';
 
 const STUB_STATUS = 'STUB';
 
@@ -17,7 +18,7 @@ export type AgentKind = 'workspace' | 'project';
  * Returns the generated ULID — useful for tracking/display.
  */
 export function spawnAgentStub(opts: { kind: AgentKind; entityId: string; name: string }): string {
-  const ulid = generateUlid();
+  const ulid = generateAgentId();
   registerAgentProcess(
     ulid,
     0,
@@ -26,14 +27,4 @@ export function spawnAgentStub(opts: { kind: AgentKind; entityId: string; name: 
   );
   setAgentProcessStatus(ulid, STUB_STATUS);
   return ulid;
-}
-
-function generateUlid(): string {
-  // ULID-like: 26 chars, time-based prefix + random.
-  const ts = Date.now().toString(36).padStart(10, '0').toUpperCase();
-  let random = '';
-  while (random.length < 16) {
-    random += Math.random().toString(36).slice(2).toUpperCase();
-  }
-  return (ts + random).slice(0, 26);
 }

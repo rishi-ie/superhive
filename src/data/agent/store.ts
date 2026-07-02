@@ -5,7 +5,8 @@
  */
 import { getDataSource } from '@/data/datasource/index';
 import { AgentsRepository } from './repository';
-import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion } from './interface';
+import type { Agent, Telemetry, Permissions, AuditItem, ActionLogEntry, PendingQuestion, CreateAgentInput } from './interface';
+import { validateAgentInput, generateAgentId } from '@/functions/agents';
 
 const repo = new AgentsRepository(getDataSource());
 
@@ -15,6 +16,24 @@ export function listAgents(): Agent[] {
 
 export function getAgent(id: string): Agent | undefined {
   return repo.byId(id);
+}
+
+export function createAgent(input: CreateAgentInput): Agent | null {
+  const validated = validateAgentInput(input);
+  if (!validated) return null;
+  const agent: Agent = {
+    id: generateAgentId(),
+    name: validated.name,
+    role: validated.role,
+    piPath: validated.piPath,
+    status: 'IDLE',
+    activeTask: '',
+    uptime: '',
+    principles: input.principles ?? '',
+    boundaries: input.boundaries ?? '',
+    skills: input.skills ?? [],
+  };
+  return repo.create(agent);
 }
 
 export function patchAgent(
@@ -127,4 +146,4 @@ export function getDefaultPermissions(): Permissions {
   return { modelEngine: 'Opus 4.8', writeAccess: false, commitAuthority: 'REVIEW_ONLY', maxTokens: 8192, writeMessages: false, installDeps: false };
 }
 
-export { type Agent, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry, type PendingQuestion };
+export { type Agent, type Telemetry, type Permissions, type AuditItem, type ActionLogEntry, type PendingQuestion, type CreateAgentInput };

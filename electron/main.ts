@@ -309,6 +309,84 @@ ipcMain.handle('agents:terminate', (_event, ulid: string) => {
   return true;
 });
 
+/* ─── FS helpers ──────────────────────────────────────────────────────────── */
+
+ipcMain.handle('fs:path-exists', (_event, p: string) => {
+  try {
+    return fs.existsSync(p);
+  } catch (err) {
+    log.warn('fs:path-exists error:', err);
+    return false;
+  }
+});
+
+/**
+ * Returns the default agents directory inside the app's userData.
+ * The directory is created lazily (with a stub README + agent.sh) the first
+ * time it is requested via this handler.
+ */
+ipcMain.handle('app:agents-dir', () => {
+  const dir = join(app.getPath('userData'), '.superhive', 'agents', 'default');
+  try {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(
+        join(dir, 'README.md'),
+        [
+          '# Pi agent — default',
+          '',
+          'This is the default working directory for Pi agents in Superhive.',
+          '',
+          'Add an `agent.sh` script here to bootstrap your agent when its terminal opens.',
+          'Make it executable with: `chmod +x ./agent.sh`',
+          '',
+          'When the terminal starts, Superhive will:',
+          '  1. Drop you into a bash shell at this directory',
+          '  2. Auto-run `./agent.sh` if it exists and is executable',
+          '  3. Otherwise print a hint explaining what to do',
+          '',
+        ].join('\n'),
+        'utf-8',
+      );
+      fs.writeFileSync(
+        join(dir, 'agent.sh'),
+        [
+          '#!/usr/bin/env bash',
+          '# Sample Pi agent entry point. Replace with your real implementation.',
+          'set -euo pipefail',
+          'echo "Hello from $(basename "$(pwd)") — replace this script to start your agent."',
+          'echo "Edit this file, then run: chmod +x ./agent.sh && ./agent.sh"',
+          '# Drop into an interactive shell so the user can poke around.',
+          'exec bash',
+          '',
+        ].join('\n'),
+        'utf-8',
+      );
+      try {
+        fs.chmodSync(join(dir, 'agent.sh'), 0o755);
+      } catch {
+        // chmod may fail on some FS; not fatal — the user can chmod manually.
+      }
+      log.info(`Created default agents dir at ${dir}`);
+    }
+  } catch (err) {
+    log.error('app:agents-dir error:', err);
+  }
+  return dir;
+});
+
+ipcMain.handle('fs:ensure-dir', (_event, p: string) => {
+  try {
+    if (!fs.existsSync(p)) {
+      fs.mkdirSync(p, { recursive: true });
+    }
+    return true;
+  } catch (err) {
+    log.warn('fs:ensure-dir error:', err);
+    return false;
+  }
+});
+
 function parseOkfFile(raw: string): { frontmatter: Record<string, unknown>; body: string } {
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: raw };

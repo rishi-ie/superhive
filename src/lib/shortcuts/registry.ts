@@ -330,6 +330,14 @@ export const DEFAULT_SHORTCUTS: ShortcutDef[] = [
     scope: 'global',
   },
   {
+    id: 'agent.new',
+    category: 'agents',
+    label: 'New agent',
+    description: 'Open the new agent dialog.',
+    chord: chord('Mod+n'),
+    scope: 'global',
+  },
+  {
     id: 'terminal.clear',
     category: 'agents',
     label: 'Clear terminal',

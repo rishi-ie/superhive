@@ -10865,7 +10865,7 @@ function spawnPty(id, agentPath, cols = 80, rows = 24) {
 		error: `PTY already running for ${id}`
 	};
 	const shell = process.platform === "win32" ? "powershell.exe" : "bash";
-	const shellArgs = process.platform === "win32" ? [] : ["-c", `cd "${agentPath}" && ./agent.sh`];
+	const shellArgs = [];
 	import_main.default.info(`agent-host: spawning PTY for ${id} with agent path: ${agentPath}`);
 	let ptyProcess;
 	try {
@@ -10899,6 +10899,14 @@ function spawnPty(id, agentPath, cols = 80, rows = 24) {
 		pty: ptyProcess,
 		onDataCallbacks: /* @__PURE__ */ new Set()
 	});
+	const banner = process.platform === "win32" ? `Write-Host "Pi agent shell - $PWD"\r\n` : "printf '\\033[1;36mPi agent shell\\033[0m — %s\\n' \"$(pwd)\"; if [ -x ./agent.sh ]; then printf '\\033[1;32m→ Found agent.sh, starting…\\033[0m\\n'; ./agent.sh; elif [ -f ./agent.sh ]; then printf '\\033[1;33m→ Found agent.sh but not executable — run: chmod +x ./agent.sh\\033[0m\\n'; else printf '\\033[1;33m→ No agent.sh in %s. Add one and run ./agent.sh.\\033[0m\\n' \"$(pwd)\"; fi\r";
+	setTimeout(() => {
+		try {
+			ptyProcess.write(banner);
+		} catch (err) {
+			import_main.default.warn(`agent-host: failed to write banner for ${id}:`, err);
+		}
+	}, 80);
 	return { ok: true };
 }
 function writePty(id, data) {
@@ -11378,6 +11386,67 @@ ipcMain.handle("agents:terminate-all", () => {
 ipcMain.handle("agents:terminate", (_event, ulid) => {
 	import_main.default.info(`Terminating agent process: ${ulid}`);
 	return true;
+});
+ipcMain.handle("fs:path-exists", (_event, p) => {
+	try {
+		return fs.existsSync(p);
+	} catch (err) {
+		import_main.default.warn("fs:path-exists error:", err);
+		return false;
+	}
+});
+/**
+* Returns the default agents directory inside the app's userData.
+* The directory is created lazily (with a stub README + agent.sh) the first
+* time it is requested via this handler.
+*/
+ipcMain.handle("app:agents-dir", () => {
+	const dir = join(app.getPath("userData"), ".superhive", "agents", "default");
+	try {
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir, { recursive: true });
+			fs.writeFileSync(join(dir, "README.md"), [
+				"# Pi agent — default",
+				"",
+				"This is the default working directory for Pi agents in Superhive.",
+				"",
+				"Add an `agent.sh` script here to bootstrap your agent when its terminal opens.",
+				"Make it executable with: `chmod +x ./agent.sh`",
+				"",
+				"When the terminal starts, Superhive will:",
+				"  1. Drop you into a bash shell at this directory",
+				"  2. Auto-run `./agent.sh` if it exists and is executable",
+				"  3. Otherwise print a hint explaining what to do",
+				""
+			].join("\n"), "utf-8");
+			fs.writeFileSync(join(dir, "agent.sh"), [
+				"#!/usr/bin/env bash",
+				"# Sample Pi agent entry point. Replace with your real implementation.",
+				"set -euo pipefail",
+				"echo \"Hello from $(basename \"$(pwd)\") — replace this script to start your agent.\"",
+				"echo \"Edit this file, then run: chmod +x ./agent.sh && ./agent.sh\"",
+				"# Drop into an interactive shell so the user can poke around.",
+				"exec bash",
+				""
+			].join("\n"), "utf-8");
+			try {
+				fs.chmodSync(join(dir, "agent.sh"), 493);
+			} catch {}
+			import_main.default.info(`Created default agents dir at ${dir}`);
+		}
+	} catch (err) {
+		import_main.default.error("app:agents-dir error:", err);
+	}
+	return dir;
+});
+ipcMain.handle("fs:ensure-dir", (_event, p) => {
+	try {
+		if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+		return true;
+	} catch (err) {
+		import_main.default.warn("fs:ensure-dir error:", err);
+		return false;
+	}
 });
 function parseOkfFile(raw) {
 	const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);

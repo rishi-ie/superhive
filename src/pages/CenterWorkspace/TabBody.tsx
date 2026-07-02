@@ -183,6 +183,7 @@ export function TabBody({
         <UniversalAgentsView
           onAgentSelect={onAgentSelect}
           selectedAgentId={tab.selectedAgentId ?? undefined}
+          onCreateAgent={onCreateAgent}
         />
       );
 

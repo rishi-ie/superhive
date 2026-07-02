@@ -23,6 +23,10 @@ export class AgentsRepository {
     return this.ds.agents.findById(id);
   }
 
+  create(agent: Agent): Agent {
+    return this.ds.agents.create(agent);
+  }
+
   patch(id: string, partial: { name?: string; role?: string; principles?: string; boundaries?: string; skills?: string[]; piPath?: string }): Agent | undefined {
     return this.ds.agents.update(id, partial as Partial<Agent>);
   }

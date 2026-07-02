@@ -13,6 +13,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { CreateProjectDialog } from '@/modals/CreateProjectModal';
 import { CreateTicketDialog } from '@/modals/CreateTicketModal';
 import { CreateChannelDialog } from '@/modals/CreateChannelModal';
+import { CreateAgentDialog } from '@/modals/CreateAgentModal';
 import { CommandPalette, buildDefaultPaletteItems } from '@/components/shortcuts';
 import { PermissionToastContainer } from '@/toasts/PermissionToastContainer';
 import { SubAgentSpawnToastContainer } from '@/toasts/SubAgentSpawnToast';
@@ -114,6 +115,7 @@ export function Dashboard({
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const [createChannelOpen, setCreateChannelOpen] = useState(false);
+  const [createAgentOpen, setCreateAgentOpen] = useState(false);
   const [projectsVersion, setProjectsVersion] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [pendingSettingsSection, setPendingSettingsSection] = useState<string | null>(null);
@@ -319,8 +321,8 @@ export function Dashboard({
   }, []);
 
   const handleCreateAgent = useCallback(() => {
-    toast({ title: 'Agent creation wizard', description: 'Coming soon (Phases 32-37 are manual).', type: 'info' });
-  }, [toast]);
+    setCreateAgentOpen(true);
+  }, []);
 
   const handleTerminateAgent = useCallback((agentId: string) => {
     terminateAgentProcess(agentId);
@@ -627,6 +629,13 @@ export function Dashboard({
         }}
         defaultWorkspaceId={activeWorkspaceId}
       />
+      <CreateAgentDialog
+        open={createAgentOpen}
+        onOpenChange={setCreateAgentOpen}
+        onCreated={(agent) => {
+          handleAgentSelect(agent.id);
+        }}
+      />
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
@@ -635,6 +644,7 @@ export function Dashboard({
           openShortcuts: () => { onNavigate('settings'); requestOpenSection('keyboard'); },
           newProject: () => setCreateProjectOpen(true),
           newTicket: handleCreateTicket,
+          newAgent: handleCreateAgent,
           openProjectsAll: () => openTab(buildTab('universal-projects', activeWorkspaceId, 'Projects')),
           openTicketsAll: handleCreateTicket,
           openChannelsAll: () => openTab(buildTab('universal-channels', activeWorkspaceId, 'Channels')),

@@ -133,8 +133,6 @@ export function HomeView({
 
   const navigate = (id: string) => () => onNavItemClick?.(id);
 
-  void onCreateAgent;
-
   return (
     <div className="flex flex-col gap-5 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
 
@@ -219,12 +217,20 @@ export function HomeView({
 
         {/* Agents — 2-col card grid */}
         <div className="space-y-2">
-          <SectionLabel>Agents</SectionLabel>
+          <div className="flex items-center justify-between">
+            <SectionLabel>Agents</SectionLabel>
+            {onCreateAgent && <NewButton label="New Agent" onClick={onCreateAgent} />}
+          </div>
           {workspaceAgents.length === 0 ? (
             <EmptyState
               icon={<Bot size={28} strokeWidth={1.5} />}
               title="No agents assigned"
               description="Add agents to your workspace to get started."
+              action={
+                onCreateAgent ? (
+                  <NewButton label="New Agent" onClick={onCreateAgent} />
+                ) : undefined
+              }
             />
           ) : (
             <div className="grid grid-cols-2 gap-2">

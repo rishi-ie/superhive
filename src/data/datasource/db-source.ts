@@ -288,7 +288,7 @@ export class DbDataSource implements DataSource {
 
     // agents
     this._agents = asArray<Row>(
-      (await window.electron.dbQuery('SELECT id, name, role, status, activeTask, uptime, principles, boundaries, skills FROM agents')).rows,
+      (await window.electron.dbQuery('SELECT id, name, role, status, activeTask, uptime, principles, boundaries, skills, piPath FROM agents')).rows,
     ).map((r) => ({
       id: String(r.id), name: String(r.name), role: String(r.role),
       status: r.status as Agent['status'],
@@ -296,6 +296,7 @@ export class DbDataSource implements DataSource {
       principles: String(r.principles ?? ''),
       boundaries: String(r.boundaries ?? ''),
       skills: (() => { try { return JSON.parse(String(r.skills ?? '[]')) as string[]; } catch { return []; } })(),
+      piPath: String(r.piPath ?? ''),
     }));
 
     // universal_tickets
@@ -884,8 +885,8 @@ export class DbDataSource implements DataSource {
         const item = r as Agent;
         this._agents.push(item);
         this._persist(
-          'INSERT INTO agents (id, name, role, status, activeTask, uptime, principles, boundaries, skills) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          [item.id, item.name, item.role, item.status, item.activeTask, item.uptime, item.principles ?? '', item.boundaries ?? '', JSON.stringify(item.skills ?? [])],
+          'INSERT INTO agents (id, name, role, status, activeTask, uptime, principles, boundaries, skills, piPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.name, item.role, item.status, item.activeTask, item.uptime, item.principles ?? '', item.boundaries ?? '', JSON.stringify(item.skills ?? []), item.piPath ?? ''],
         );
         this._notify();
         return item;
@@ -896,8 +897,8 @@ export class DbDataSource implements DataSource {
         this._agents[idx] = { ...this._agents[idx], ...patch } as Agent;
         const updated: Agent = this._agents[idx]!;
         this._persist(
-          'UPDATE agents SET name = ?, role = ?, status = ?, activeTask = ?, uptime = ?, principles = ?, boundaries = ?, skills = ? WHERE id = ?',
-          [updated.name, updated.role, updated.status, updated.activeTask, updated.uptime, updated.principles ?? '', updated.boundaries ?? '', JSON.stringify(updated.skills ?? []), id],
+          'UPDATE agents SET name = ?, role = ?, status = ?, activeTask = ?, uptime = ?, principles = ?, boundaries = ?, skills = ?, piPath = ? WHERE id = ?',
+          [updated.name, updated.role, updated.status, updated.activeTask, updated.uptime, updated.principles ?? '', updated.boundaries ?? '', JSON.stringify(updated.skills ?? []), updated.piPath ?? '', id],
         );
         this._notify();
         return updated;

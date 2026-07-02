@@ -48,6 +48,13 @@ type ElectronAPI = {
     terminateAll: () => Promise<void>;
     terminate: (ulid: string) => Promise<void>;
   };
+  fs: {
+    pathExists: (p: string) => Promise<boolean>;
+    ensureDir: (p: string) => Promise<boolean>;
+  };
+  app: {
+    agentsDir: () => Promise<string>;
+  };
   pty: {
     spawn: (id: string, agentPath: string, cols?: number, rows?: number) => Promise<{ ok: true } | { ok: false; error: string }>;
     write: (id: string, data: string) => Promise<boolean>;

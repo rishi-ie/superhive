@@ -41,7 +41,7 @@ export function spawnPty(id: PtyId, agentPath: string, cols = 80, rows = 24): { 
   }
 
   const shell = process.platform === 'win32' ? 'powershell.exe' : 'bash';
-  const shellArgs = process.platform === 'win32' ? [] : ['-c', `cd "${agentPath}" && ./agent.sh`];
+  const shellArgs: string[] = [];
 
   log.info(`agent-host: spawning PTY for ${id} with agent path: ${agentPath}`);
 
@@ -74,6 +74,25 @@ export function spawnPty(id: PtyId, agentPath: string, cols = 80, rows = 24): { 
   });
 
   processes.set(id, { pty: ptyProcess, onDataCallbacks: new Set() });
+
+  // Write a welcome banner once the shell is ready. The banner auto-runs
+  // ./agent.sh if it exists in the cwd, otherwise gives a hint.
+  const banner =
+    process.platform === 'win32'
+      ? `Write-Host "Pi agent shell - $PWD"\r\n`
+      : `printf '\\033[1;36mPi agent shell\\033[0m — %s\\n' "$(pwd)"; ` +
+        `if [ -x ./agent.sh ]; then printf '\\033[1;32m→ Found agent.sh, starting…\\033[0m\\n'; ./agent.sh; ` +
+        `elif [ -f ./agent.sh ]; then printf '\\033[1;33m→ Found agent.sh but not executable — run: chmod +x ./agent.sh\\033[0m\\n'; ` +
+        `else printf '\\033[1;33m→ No agent.sh in %s. Add one and run ./agent.sh.\\033[0m\\n' "$(pwd)"; fi\r`;
+
+  setTimeout(() => {
+    try {
+      ptyProcess.write(banner);
+    } catch (err) {
+      log.warn(`agent-host: failed to write banner for ${id}:`, err);
+    }
+  }, 80);
+
   return { ok: true };
 }
 

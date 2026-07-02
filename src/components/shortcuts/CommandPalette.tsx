@@ -120,6 +120,7 @@ export function buildDefaultPaletteItems(api: {
   openShortcuts: () => void;
   newProject: () => void;
   newTicket: () => void;
+  newAgent: () => void;
   openProjectsAll: () => void;
   openTicketsAll: () => void;
   openChannelsAll: () => void;
@@ -137,6 +138,7 @@ export function buildDefaultPaletteItems(api: {
 
     { id: 'new-project',     label: 'New project',                      group: 'Create',   icon: FolderPlus,    shortcutId: 'project.new',  perform: api.newProject },
     { id: 'new-ticket',      label: 'New ticket',                       group: 'Create',   icon: TicketPlus,    shortcutId: 'ticket.new',   perform: api.newTicket },
+    { id: 'new-agent',       label: 'New agent',                        group: 'Create',   icon: Bot,           shortcutId: 'agent.new',    perform: api.newAgent },
 
     { id: 'view-projects',   label: 'All projects',                     group: 'Views',    icon: Layers,         shortcutId: 'project.universal', perform: api.openProjectsAll },
     { id: 'view-tickets',    label: 'All tickets',                      group: 'Views',    icon: ClipboardCheck, shortcutId: 'ticket.universal',  perform: api.openTicketsAll },

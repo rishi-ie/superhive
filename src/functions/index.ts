@@ -10,3 +10,4 @@ export * from './tickets';
 export * from './workspaces';
 export * from './favorites';
 export * from './activity';
+export * from './agents';

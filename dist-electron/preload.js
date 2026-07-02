@@ -37,6 +37,11 @@ contextBridge.exposeInMainWorld("electron", {
 		terminateAll: () => ipcRenderer.invoke("agents:terminate-all"),
 		terminate: (ulid) => ipcRenderer.invoke("agents:terminate", ulid)
 	},
+	fs: {
+		pathExists: (p) => ipcRenderer.invoke("fs:path-exists", p),
+		ensureDir: (p) => ipcRenderer.invoke("fs:ensure-dir", p)
+	},
+	app: { agentsDir: () => ipcRenderer.invoke("app:agents-dir") },
 	pty: {
 		spawn: (id, agentPath, cols = 80, rows = 24) => ipcRenderer.invoke("pty:spawn", id, agentPath, cols, rows),
 		write: (id, data) => ipcRenderer.invoke("pty:write", id, data),

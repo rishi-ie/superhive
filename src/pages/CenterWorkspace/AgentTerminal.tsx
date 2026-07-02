@@ -19,6 +19,8 @@ type AgentTerminalProps = {
   agentId: string;
 };
 
+const RAPID_EXIT_WINDOW_MS = 3000;
+
 export function AgentTerminal({ agentId }: AgentTerminalProps) {
   const [status, setStatus] = useState<PtyStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,7 @@ export function AgentTerminal({ agentId }: AgentTerminalProps) {
   const colsRef = useRef<number>(80);
   const rowsRef = useRef<number>(24);
   const unsubsRef = useRef<Array<() => void>>([]);
+  const spawnStartedAtRef = useRef<number>(0);
 
   const spawnPty = useCallback(async () => {
     const piPath = piPathRef.current;
@@ -53,7 +56,9 @@ export function AgentTerminal({ agentId }: AgentTerminalProps) {
       void window.electron.pty.kill(ulidRef.current);
     }
 
+    setError(null);
     setStatus('starting');
+    spawnStartedAtRef.current = Date.now();
 
     const result = await window.electron.pty.spawn(ulid, piPath, cols, rows);
 
@@ -80,7 +85,13 @@ export function AgentTerminal({ agentId }: AgentTerminalProps) {
     });
 
     const unsubExit = window.electron.pty.onExit(ulid, () => {
-      setStatus('dead');
+      const elapsed = Date.now() - spawnStartedAtRef.current;
+      if (elapsed < RAPID_EXIT_WINDOW_MS) {
+        setError(`PTY exited immediately (after ${elapsed}ms) — check that the path exists, is readable, and contains a runnable shell.`);
+        setStatus('errored');
+      } else {
+        setStatus('dead');
+      }
       try {
         terminateAgentProcess(ulid);
       } catch {
@@ -145,8 +156,8 @@ export function AgentTerminal({ agentId }: AgentTerminalProps) {
 
   if (status === 'errored' && error) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        <p>{error}</p>
+      <div className="flex h-full items-center justify-center text-muted-foreground px-6 text-center">
+        <p className="max-w-md text-sm leading-relaxed">{error}</p>
       </div>
     );
   }
