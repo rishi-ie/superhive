@@ -20,7 +20,7 @@ import { listWorkspaces } from '@/data/workspaces/store';
 import type { CenterTab } from '@/data/tabs/interface';
 
 type TabBodyProps = {
-  tab: CenterTab;
+  tab: CenterTab | null;
   onTicketSelect?: (id: string) => void;
   onAgentSelect?: (id: string) => void;
   onProjectSelect?: (id: string, workspaceId: string) => void;
@@ -80,6 +80,7 @@ export function TabBody({
   onDismissReady,
   onOpenSettings,
 }: TabBodyProps) {
+  if (!tab) return null;
   switch (tab.type) {
     case 'project': {
       const project = tab.selectedProjectId ? getProject(tab.selectedProjectId) : null;

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import type { CenterTab as CenterTabType } from '@/data/tabs/interface';
 import type { CenterTabType as NewTabType } from '@/data/tabs/interface';
-import { listWorkspaces } from '@/data/workspaces/store';
 
 type CenterTabStripProps = {
   tabs: CenterTabType[];
@@ -49,7 +48,7 @@ export function CenterTabStrip({
 }: CenterTabStripProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const wsId = activeWorkspaceId ?? tabs.find(t => t.id === activeTabId)?.workspaceId ?? listWorkspaces()[0]?.id ?? 'acme';
+  const wsId = activeWorkspaceId ?? tabs.find(t => t.id === activeTabId)?.workspaceId ?? '';
 
   const homeTab = tabs.find(t => t.type === 'home');
   const otherTabs = tabs.filter(t => t.type !== 'home');

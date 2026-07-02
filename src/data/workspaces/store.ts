@@ -20,6 +20,10 @@ export function listWorkspaces(): Workspace[] {
   return repo.list();
 }
 
+export function getCurrentWorkspaceId(): string {
+  return currentWorkspaceId;
+}
+
 export function getCurrentWorkspace(): Workspace | undefined {
   return repo.list().find((w) => w.id === currentWorkspaceId) ?? repo.list()[0];
 }

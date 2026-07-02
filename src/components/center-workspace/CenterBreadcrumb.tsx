@@ -7,7 +7,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import type { CenterTab } from '@/data/tabs/interface';
 
 type CenterBreadcrumbProps = {
-  tab: CenterTab;
+  tab: CenterTab | null;
   workspaceName: string;
   onJump?: (workspaceId: string, section?: string) => void;
 };
@@ -15,11 +15,12 @@ type CenterBreadcrumbProps = {
 type TabSegment = { label: string; onClick?: () => void; isLast: boolean };
 
 function getBreadcrumbSegments(
-  tab: CenterTab,
+  tab: CenterTab | null,
   workspaceName: string,
   workspaceId: string,
   onJump?: (workspaceId: string, section?: string) => void,
 ): TabSegment[] {
+  if (!tab) return [];
   const sections: Record<CenterTab['type'], string | null> = {
     home: null,
     project: 'Project',
@@ -75,7 +76,7 @@ function getBreadcrumbSegments(
  * @param onJump - Called when a breadcrumb segment is clicked
  */
 export function CenterBreadcrumb({ tab, workspaceName, onJump }: CenterBreadcrumbProps) {
-  const workspaceId = tab.workspaceId;
+  const workspaceId = tab?.workspaceId ?? '';
   const segments = getBreadcrumbSegments(tab, workspaceName, workspaceId, onJump);
 
   return (

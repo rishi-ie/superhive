@@ -14,7 +14,7 @@ type LeftNavProps = {
   width: number;
   onWidthChange: (width: number) => void;
   workspaces?: Workspace[];
-  currentWorkspace?: Workspace;
+  currentWorkspace?: Workspace | null;
   favorites?: FavoriteItem[];
   activeAgents?: ActiveAgent[];
   archivedProjects?: ArchivedProjectSummary[];
@@ -29,6 +29,7 @@ type LeftNavProps = {
   currentView?: string;
   onToggleLeftPanel?: () => void;
   onToggleRightPanel?: () => void;
+  onSetupWizard?: () => void;
 };
 
 const MIN_WIDTH = 180;
@@ -58,7 +59,7 @@ export function LeftNav({
   width,
   onWidthChange,
   workspaces = [],
-  currentWorkspace = { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: new Date().toISOString(), retentionDays: 90, archivedAt: null },
+  currentWorkspace,
   favorites = [],
   activeAgents = [],
   archivedProjects = [],
@@ -72,6 +73,7 @@ export function LeftNav({
   onAgentSelect,
   onToggleLeftPanel,
   onToggleRightPanel,
+  onSetupWizard,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -140,7 +142,7 @@ export function LeftNav({
           <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onAgentSelect} onProjectClick={onProjectClick} />
         </div>
 
-        <Utilities onSettingsClick={onSettingsClick} />
+        <Utilities onSettingsClick={onSettingsClick} onSetupWizard={onSetupWizard} />
 
         <ArchivedProjectsSection
           projects={archivedProjects}

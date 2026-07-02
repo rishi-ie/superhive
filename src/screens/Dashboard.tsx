@@ -107,9 +107,9 @@ export function Dashboard({
 }: DashboardProps) {
   const [tabState, setTabState] = useState(() => {
     const firstWs = listWorkspaces()[0];
-    return makeInitialTabState(firstWs?.id ?? 'acme');
+    return makeInitialTabState(firstWs?.id ?? '');
   });
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => listWorkspaces()[0]?.id ?? 'acme');
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => listWorkspaces()[0]?.id ?? '');
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [createTicketOpen, setCreateTicketOpen] = useState(false);
@@ -122,8 +122,19 @@ export function Dashboard({
   const { update: updateSettings } = useSettings();
   const toast = useToast();
 
+  // Sync activeWorkspaceId when workspaces change (e.g., created from Settings)
   const workspaces_data = listWorkspaces().filter(w => !w.archivedAt);
-  const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: new Date().toISOString(), retentionDays: 90, archivedAt: null };
+
+  useEffect(() => {
+    if (activeWorkspaceId === '' && workspaces_data.length > 0) {
+      setActiveWorkspaceId(workspaces_data[0]!.id);
+    } else if (activeWorkspaceId !== '' && !workspaces_data.find(w => w.id === activeWorkspaceId)) {
+      setActiveWorkspaceId(workspaces_data[0]?.id ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaces_data.length]);
+
+  const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? null;
   const favorites_data = listFavorites();
   const workspaceAgents = listProjectAgents(activeWorkspaceId);
   const workspaceAgentNames = new Set(workspaceAgents.map(a => a.name));
@@ -539,6 +550,11 @@ export function Dashboard({
     dismissSetup();
   }, [dismissSetup]);
 
+  const handleReopenSetup = useCallback(() => {
+    setSetupDismissed(false);
+    sessionStorage.removeItem('wizard:setup:dismissed');
+  }, []);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <PermissionToastContainer />
@@ -561,6 +577,7 @@ export function Dashboard({
         onProjectClick={handleProjectSelect}
         onToggleLeftPanel={handleToggleLeftPanel}
         onToggleRightPanel={handleToggleRightPanel}
+        onSetupWizard={handleReopenSetup}
       />
       <CenterWorkspace
         tabs={tabState.tabs}

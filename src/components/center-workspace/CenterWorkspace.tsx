@@ -84,9 +84,9 @@ export function CenterWorkspace({
   onDismissReady,
   onOpenSettings,
 }: CenterWorkspaceProps) {
-  const activeTab = tabs.find(t => t.id === activeTabId)!;
+  const activeTab = tabs.find(t => t.id === activeTabId) ?? null;
 
-  const wsId = activeTab.workspaceId;
+  const wsId = activeTab?.workspaceId ?? '';
   const workspaceName = workspaceMap[wsId] ?? wsId;
 
   return (

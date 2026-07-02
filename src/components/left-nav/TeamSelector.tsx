@@ -10,7 +10,7 @@ export type { Workspace };
 
 type TeamSelectorProps = {
   workspaces: Workspace[];
-  currentWorkspace: Workspace;
+  currentWorkspace: Workspace | null | undefined;
   onWorkspaceSelect?: (workspace: Workspace) => void;
   onSettingsClick?: () => void;
 };
@@ -41,7 +41,9 @@ export function TeamSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const triggerAvatarColor = currentWorkspace.avatarColor ?? 'bg-chart-1';
+  const triggerAvatarColor = currentWorkspace?.avatarColor ?? 'bg-chart-1';
+  const triggerName = currentWorkspace?.name ?? 'Select workspace';
+  const triggerInitials = currentWorkspace?.initials ?? '?';
 
   return (
     <div className="px-2 pt-1 pb-2" ref={dropdownRef}>
@@ -53,10 +55,10 @@ export function TeamSelector({
           <div
             className={`size-6 shrink-0 rounded-md ${triggerAvatarColor} flex items-center justify-center text-[10px] font-bold text-sidebar-primary-foreground`}
           >
-            {currentWorkspace.initials}
+            {triggerInitials}
           </div>
           <span className="flex-1 text-left text-sidebar-foreground truncate">
-            {currentWorkspace.name}
+            {triggerName}
           </span>
           <ChevronsUpDown size={12} className="text-muted-foreground shrink-0" />
         </button>
@@ -83,7 +85,7 @@ export function TeamSelector({
                   {workspace.initials}
                 </div>
                 <span className="flex-1 text-left text-xs">{workspace.name}</span>
-                {workspace.id === currentWorkspace.id && (
+                {workspace.id === currentWorkspace?.id && (
                   <Check size={12} strokeWidth={STROKE_WIDTH} className="shrink-0 text-chart-2" />
                 )}
               </button>
