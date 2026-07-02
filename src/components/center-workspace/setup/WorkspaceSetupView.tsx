@@ -5,6 +5,7 @@
  */
 import { useToast } from '@/lib/toast-context';
 import { createWorkspace } from '@/data/workspaces/store';
+import { spawnAgentStub } from '@/lib/agent-manager';
 import { SetupWizardLayout } from './SetupWizardLayout';
 import { buildInitialSetupRows } from './rows/initialSetupRows';
 
@@ -29,6 +30,7 @@ export function WorkspaceSetupView({ onWorkspaceCreated, onDismiss }: WorkspaceS
       return;
     }
     const ws = createWorkspace({ name: name.trim() });
+    spawnAgentStub({ kind: 'workspace', entityId: ws.id, name: 'Workspace Agent' });
     toast({ title: 'Workspace created', description: ws.name });
     onWorkspaceCreated(ws.id);
   };

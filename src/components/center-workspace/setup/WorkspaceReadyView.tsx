@@ -2,11 +2,6 @@
  * WorkspaceReadyView — shown in the center panel for a workspace with no projects or agents.
  * Thin view that wires action handlers to the empty-workspace row config and the shared layout.
  * Renders in place of HomeView when conditions match.
- *
- * DORMANT — currently inactive. Activate by:
- *   1. Uncomment the WorkspaceReadyView import in SetupWizardView.tsx
- *   2. Uncomment the showReady useMemo block in SetupWizardView.tsx
- *   3. Change `return null` → `return <WorkspaceReadyView ... />`
  */
 import { useToast } from '@/lib/toast-context';
 import { SetupWizardLayout } from './SetupWizardLayout';
@@ -16,6 +11,7 @@ type WorkspaceReadyViewProps = {
   workspaceName: string;
   onDismiss: () => void;
   onOpenSettings: () => void;
+  onCreateProject: () => void;
 };
 
 /**
@@ -24,8 +20,14 @@ type WorkspaceReadyViewProps = {
  * @param workspaceName - Name of the current workspace shown in the eyebrow
  * @param onDismiss - Called when the user dismisses via "Skip for now"
  * @param onOpenSettings - Navigates to settings
+ * @param onCreateProject - Opens the create project dialog
  */
-export function WorkspaceReadyView({ workspaceName, onDismiss, onOpenSettings }: WorkspaceReadyViewProps) {
+export function WorkspaceReadyView({
+  workspaceName,
+  onDismiss,
+  onOpenSettings,
+  onCreateProject,
+}: WorkspaceReadyViewProps) {
   const toast = useToast();
 
   const stubSoon = (label: string) => () =>
@@ -35,6 +37,7 @@ export function WorkspaceReadyView({ workspaceName, onDismiss, onOpenSettings }:
     onDismiss,
     onOpenSettings,
     onStub: stubSoon,
+    onCreateProject,
   });
 
   return (

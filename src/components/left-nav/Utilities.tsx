@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import { Settings, HelpCircle } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { HelpPopover } from './HelpPopover';
+import { HelpModal } from './HelpModal';
 
 type UtilitiesProps = {
   onSettingsClick?: () => void;
@@ -16,6 +17,7 @@ type UtilitiesProps = {
  */
 export function Utilities({ onSettingsClick }: UtilitiesProps) {
   const [helpOpen, setHelpOpen] = useState(false);
+  const [helpSection, setHelpSection] = useState<'docs' | 'changelog' | null>(null);
   const helpBtnRef = useRef<HTMLButtonElement>(null);
 
   return (
@@ -42,9 +44,14 @@ export function Utilities({ onSettingsClick }: UtilitiesProps) {
             anchorRef={helpBtnRef}
             open={helpOpen}
             onClose={() => setHelpOpen(false)}
+            onHelpSelect={setHelpSection}
           />
         </div>
       </div>
+      <HelpModal
+        section={helpSection}
+        onClose={() => setHelpSection(null)}
+      />
     </div>
   );
 }

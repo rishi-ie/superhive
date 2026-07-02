@@ -7,6 +7,9 @@ export type Agent = {
   status: AgentStatus;
   activeTask: string;
   uptime: string;
+  principles?: string;
+  boundaries?: string;
+  skills?: string[];
 };
 
 export type Telemetry = {

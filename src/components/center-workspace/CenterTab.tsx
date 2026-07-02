@@ -2,8 +2,8 @@
  * Individual tab pill with icon, label, and close button.
  */
 import {
-  MessageSquare, Layers, ClipboardCheck, FolderOpen,
-  MessageCircle, Bot, Users, Settings, Lock, X, Home,
+  MessageSquare, ClipboardCheck, FolderOpen,
+  MessageCircle, Bot, Users, Lock, X, Home, Sparkles,
 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { IconButton } from '@/components/ui/IconButton';
@@ -11,8 +11,8 @@ import type { CenterTab as CenterTabType, CenterTabType as TabType } from '@/dat
 
 const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
   home: Home,
-  projects: Layers,
   tickets: ClipboardCheck,
+  ticket: ClipboardCheck,
   project: FolderOpen,
   channels: MessageCircle,
   channel: MessageCircle,
@@ -21,13 +21,14 @@ const TAB_ICONS: Record<TabType, typeof MessageSquare> = {
   'universal-agents': Users,
   'universal-projects': FolderOpen,
   'universal-channels': MessageSquare,
-  settings: Settings,
+  'workspace-agent': Sparkles,
+  'project-agent': Sparkles,
 };
 
 const TYPE_LABELS: Record<TabType, string> = {
   home: 'Home',
-  projects: 'Projects',
   tickets: 'Tickets',
+  ticket: 'Ticket',
   project: 'Project',
   channels: 'Comms',
   channel: 'Channel',
@@ -36,7 +37,8 @@ const TYPE_LABELS: Record<TabType, string> = {
   'universal-agents': 'Agents',
   'universal-projects': 'Projects',
   'universal-channels': 'Channels',
-  settings: 'Settings',
+  'workspace-agent': 'Workspace Agent',
+  'project-agent': 'Project Agent',
 };
 
 type CenterTabProps = {

@@ -4,7 +4,7 @@
  */
 import { useState } from 'react';
 import {
-  ChevronDown, AlertTriangle, Sparkles, Cpu, Globe, Bot,
+  ChevronDown, AlertTriangle, Sparkles, Cpu, Globe, Bot, Pencil,
 } from 'lucide-react';
 import {
   STROKE_WIDTH, COST_PER_TASK, MIN_TOKENS, MAX_TOKENS, TOKEN_STEP,
@@ -31,6 +31,7 @@ import {
   type Permissions,
 } from '@/data/agents/store';
 import type { CommitAuthority } from '@/data/agents/interface';
+import { AgentEditDialog } from '@/components/center-workspace/AgentEditDialog';
 
 /* ─── Model catalog ───────────────────────────────────── */
 
@@ -314,6 +315,7 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
   const initial = getPermissions(agent.id);
   const toast = useToast();
   const [permissions, setLocalPermissions] = useState<Permissions>(initial);
+  const [editOpen, setEditOpen] = useState(false);
 
   const persist = (next: Permissions, label: string) => {
     setLocalPermissions(next);
@@ -342,6 +344,13 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
           <div className="flex items-center gap-1.5">
             <Avatar size="sm" name={agent.name} className="size-5" />
             <span className="text-xs text-foreground">{agent.name}</span>
+            <button
+              onClick={() => setEditOpen(true)}
+              aria-label="Edit agent"
+              className="ml-1 p-1 rounded text-muted-foreground hover:text-foreground hover:bg-hover-tint transition-colors"
+            >
+              <Pencil size={12} strokeWidth={STROKE_WIDTH} />
+            </button>
           </div>
         </div>
         <p className="text-[11px] text-muted-foreground leading-snug">
@@ -451,6 +460,12 @@ export function ControlMatrix({ agent, onTerminate }: ControlMatrixProps) {
           Terminate agent execution
         </Button>
       </div>
+
+      <AgentEditDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        agent={agent}
+      />
 
     </div>
   );

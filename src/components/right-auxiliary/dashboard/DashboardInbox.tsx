@@ -8,7 +8,7 @@ import { FilterChips } from '@/components/right-auxiliary/shared/FilterChips';
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
-import { listUniversalTickets } from '@/data/tickets/store';
+import { listUniversalTickets, markTicketDone, snoozeTicket } from '@/data/tickets/store';
 import { useToast } from '@/lib/toast-context';
 
 type DashboardInboxProps = {
@@ -50,7 +50,9 @@ export function DashboardInbox({ onTicketClick }: DashboardInboxProps) {
 
   const filtered = filter === 'all' ? items : items.filter(i => i.kind === filter);
 
-  const dismiss = (id: string, label: string) => {
+  const dismiss = (id: string, label: string, refId: string, done = false) => {
+    if (done) markTicketDone(refId);
+    else snoozeTicket(refId);
     toast({ title: label });
     setItems(prev => prev.filter(i => i.id !== id));
     setSelected(prev => { const n = new Set(prev); n.delete(id); return n; });
@@ -66,6 +68,10 @@ export function DashboardInbox({ onTicketClick }: DashboardInboxProps) {
 
   const markAllDone = () => {
     const count = selected.size;
+    for (const id of selected) {
+      const item = items.find(i => i.id === id);
+      if (item) markTicketDone(item.refId);
+    }
     toast({ title: `Marked ${count} done` });
     setItems(prev => prev.filter(i => !selected.has(i.id)));
     setSelected(new Set());
@@ -110,14 +116,14 @@ export function DashboardInbox({ onTicketClick }: DashboardInboxProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => dismiss(item.id, 'Snoozed')}
+                    onClick={() => dismiss(item.id, 'Snoozed', item.refId)}
                   >
                     Snooze
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => dismiss(item.id, 'Done')}
+                    onClick={() => dismiss(item.id, 'Done', item.refId, true)}
                   >
                     Done
                   </Button>

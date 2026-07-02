@@ -1,7 +1,6 @@
 /**
  * Right auxiliary barrel — all right panel components.
  */
-export { AuditQueue } from './AuditQueue';
 export { ChannelManageTab } from './ChannelManageTab';
 export { ChannelOverviewTab } from './ChannelOverviewTab';
 export { ControlMatrix } from './ControlMatrix';

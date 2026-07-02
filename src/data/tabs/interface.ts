@@ -1,8 +1,8 @@
 export type CenterTabType =
   | 'home'
-  | 'projects'
   | 'project'
   | 'tickets'
+  | 'ticket'
   | 'channels'
   | 'channel'
   | 'agents'
@@ -10,7 +10,8 @@ export type CenterTabType =
   | 'universal-agents'
   | 'universal-projects'
   | 'universal-channels'
-  | 'settings';
+  | 'workspace-agent'
+  | 'project-agent';
 
 export type TabSelection = {
   selectedAgentId: string | null;

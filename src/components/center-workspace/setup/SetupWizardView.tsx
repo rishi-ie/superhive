@@ -1,16 +1,12 @@
 /**
  * SetupWizardView — wizard facade. Given the active tab and wizard state,
- * picks which wizard view to render (currently only the initial setup wizard is active).
- *
- * DORMANT WIZARD: WorkspaceReadyView is preserved in code but not rendered.
- * To activate it:
- *   1. Uncomment the WorkspaceReadyView import below
- *   2. Uncomment the showReady useMemo block
- *   3. Change `return null` → `return <WorkspaceReadyView workspaceName={...} onDismiss={onDismissReady} onOpenSettings={onOpenSettings} />`
+ * picks which wizard view to render (initial setup OR per-workspace ready).
  */
 import { listWorkspaces } from '@/data/workspaces/store';
+import { listProjects } from '@/data/projects/store';
+import { listProjectAgents } from '@/data/projects/store';
 import { WorkspaceSetupView } from './WorkspaceSetupView';
-// import { WorkspaceReadyView } from './WorkspaceReadyView';
+import { WorkspaceReadyView } from './WorkspaceReadyView';
 import type { CenterTab } from '@/data/tabs/interface';
 
 type SetupWizardViewProps = {
@@ -21,6 +17,7 @@ type SetupWizardViewProps = {
   onDismissSetup: () => void;
   onDismissReady: () => void;
   onOpenSettings: () => void;
+  onCreateProject: () => void;
 };
 
 /**
@@ -42,6 +39,7 @@ export function SetupWizardView({
   onDismissSetup,
   onDismissReady,
   onOpenSettings,
+  onCreateProject,
 }: SetupWizardViewProps) {
   const workspaces = listWorkspaces();
   const isSetupActive = workspaces.length === 0 && !setupDismissed;
@@ -55,25 +53,27 @@ export function SetupWizardView({
     );
   }
 
-  // DORMANT: uncomment when activating WorkspaceReadyView
-  // const hasNoProjects = listProjects({ status: 'ACTIVE' }).filter(p => p.workspaceId === tab.workspaceId).length === 0;
-  // const hasNoAgents = listProjectAgents(tab.workspaceId).length === 0;
-  // const isReadyActive = hasNoProjects && hasNoAgents && !readyDismissed;
-  // if (isReadyActive) {
-  //   const workspaceName = workspaces.find(w => w.id === tab.workspaceId)?.name ?? tab.workspaceId;
-  //   return (
-  //     <WorkspaceReadyView
-  //       workspaceName={workspaceName}
-  //       onDismiss={onDismissReady}
-  //       onOpenSettings={onOpenSettings}
-  //     />
-  //   );
-  // }
+  const workspaceProjects = listProjects({ status: 'ACTIVE' }).filter(
+    (p) => p.workspaceId === tab.workspaceId,
+  );
+  const hasNoProjects = workspaceProjects.length === 0;
+  const hasNoAgents = listProjectAgents(tab.workspaceId).length === 0;
+  const isReadyActive = hasNoProjects && hasNoAgents && !readyDismissed;
+
+  if (isReadyActive) {
+    const workspaceName =
+      workspaces.find((w) => w.id === tab.workspaceId)?.name ?? tab.workspaceId;
+    return (
+      <WorkspaceReadyView
+        workspaceName={workspaceName}
+        onDismiss={onDismissReady}
+        onOpenSettings={onOpenSettings}
+        onCreateProject={onCreateProject}
+      />
+    );
+  }
 
   void tab;
-  void readyDismissed;
-  void onDismissReady;
-  void onOpenSettings;
 
   return null;
 }

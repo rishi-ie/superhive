@@ -13,6 +13,7 @@ import type {
   SwarmActivity,
   CreateProjectInput,
   ProjectStatus,
+  ChannelStatus,
 } from './interface';
 
 export class ProjectsRepository {
@@ -62,6 +63,34 @@ export class ProjectsRepository {
 
   patchAgents(projectId: string, agents: ProjectAgent[]): void {
     this.ds.projects.update(projectId, { agents });
+  }
+
+  addAgent(projectId: string, agent: ProjectAgent): ProjectAgent | undefined {
+    const p = this.byId(projectId);
+    if (!p) return undefined;
+    if (p.agents.some((a) => a.id === agent.id)) return undefined;
+    const next = [...p.agents, agent];
+    this.ds.projects.update(projectId, { agents: next });
+    this.ds.projectAgents.create({
+      projectId,
+      agentId: agent.id,
+      role: agent.role,
+      currentStatus: agent.currentStatus,
+      assignedTicketId: agent.assignedTicketId ?? undefined,
+      joinedAt: new Date().toISOString(),
+    });
+    return agent;
+  }
+
+  removeAgent(projectId: string, agentId: string): ProjectAgent | undefined {
+    const p = this.byId(projectId);
+    if (!p) return undefined;
+    const removed = p.agents.find((a) => a.id === agentId);
+    if (!removed) return undefined;
+    const next = p.agents.filter((a) => a.id !== agentId);
+    this.ds.projects.update(projectId, { agents: next });
+    this.ds.projectAgents.delete(projectId, agentId);
+    return removed;
   }
 
   archive(id: string): void {
@@ -145,6 +174,55 @@ export class ProjectsRepository {
     return (
       this.list().find((p) => p.tickets.some((t) => t.id === ticketId))?.id ?? null
     );
+  }
+
+  patch(id: string, patch: Partial<Pick<Project, 'title' | 'description' | 'successCriteria'>>): Project | undefined {
+    return this.ds.projects.update(id, patch) as Project | undefined;
+  }
+
+  createChannel(input: {
+    projectId: string;
+    topic: string;
+    status: ChannelStatus;
+    participants: string[];
+    relatedTicketId?: string;
+  }): CommunicationChannel | undefined {
+    const project = this.byId(input.projectId);
+    if (!project) return undefined;
+    const id = `ch-${Date.now().toString(36)}`;
+    const channel: CommunicationChannel = {
+      id,
+      participants: input.participants,
+      topic: input.topic,
+      relatedTicketId: input.relatedTicketId ?? '',
+      status: input.status,
+      lastMessagePreview: '',
+      messageCount: 0,
+      updatedAt: new Date().toISOString(),
+      unread: false,
+      workspaceId: project.workspaceId,
+    };
+    this.ds.projects.update(input.projectId, {
+      channels: [...project.channels, channel],
+    });
+    return channel;
+  }
+
+  findProjectByChannelId(channelId: string): Project | undefined {
+    return this.list().find((p) => p.channels.some((c) => c.id === channelId));
+  }
+
+  patchChannel(channelId: string, patch: Partial<Pick<CommunicationChannel, 'topic' | 'status' | 'participants'>>): CommunicationChannel | undefined {
+    const project = this.findProjectByChannelId(channelId);
+    if (!project) return undefined;
+    const channelIdx = project.channels.findIndex((c) => c.id === channelId);
+    if (channelIdx === -1) return undefined;
+    const original = project.channels[channelIdx];
+    const updatedChannel: CommunicationChannel = { ...original, ...patch } as CommunicationChannel;
+    const updatedChannels = [...project.channels];
+    updatedChannels[channelIdx] = updatedChannel;
+    this.ds.projects.update(project.id, { channels: updatedChannels });
+    return updatedChannel;
   }
 }
 

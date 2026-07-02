@@ -2,7 +2,6 @@
  * Dispatches to the correct view based on tab type.
  */
 import { ChatView } from './ChatView';
-import { ProjectsView } from './ProjectsView';
 import { ProjectDetailView } from './ProjectDetailView';
 import { TicketsView } from './TicketsView';
 import { AgentsView } from './AgentsView';
@@ -12,6 +11,9 @@ import { UniversalAgentsView } from './UniversalAgentsView';
 import { UniversalChannelsView } from './UniversalChannelsView';
 import { ChannelDetailView } from './ChannelDetailView';
 import { HomeView } from './HomeView';
+import { WorkspaceAgentView } from './WorkspaceAgentView';
+import { ProjectAgentView } from './ProjectAgentView';
+import { TicketDetailView } from './TicketDetailView';
 import { SetupWizardView } from './setup';
 import { getProject } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
@@ -79,17 +81,6 @@ export function TabBody({
   onOpenSettings,
 }: TabBodyProps) {
   switch (tab.type) {
-    case 'projects':
-      return (
-        <ProjectsView
-          workspaceId={tab.workspaceId}
-          onTicketSelect={onTicketSelect}
-          onAgentClick={onAgentSelect}
-          onChannelClick={onChannelSelect}
-          onOpenTickets={onOpenTickets}
-        />
-      );
-
     case 'project': {
       const project = tab.selectedProjectId ? getProject(tab.selectedProjectId) : null;
       return (
@@ -102,6 +93,9 @@ export function TabBody({
         />
       );
     }
+
+    case 'ticket':
+      return <TicketDetailView ticketId={tab.selectedTicketId ?? ''} />;
 
     case 'tickets':
       return (
@@ -145,6 +139,7 @@ export function TabBody({
             onDismissSetup={onDismissSetup}
             onDismissReady={onDismissReady}
             onOpenSettings={onOpenSettings}
+            onCreateProject={onCreateProject ?? (() => {})}
           />
         );
       }
@@ -171,6 +166,7 @@ export function TabBody({
           workspaceId={tab.workspaceId}
           onAgentSelect={onAgentSelect}
           selectedAgentId={tab.selectedAgentId ?? undefined}
+          onCreateAgent={onCreateAgent}
         />
       );
 
@@ -188,7 +184,6 @@ export function TabBody({
         <UniversalAgentsView
           onAgentSelect={onAgentSelect}
           selectedAgentId={tab.selectedAgentId ?? undefined}
-          onCreateAgent={onCreateAgent}
         />
       );
 
@@ -209,6 +204,12 @@ export function TabBody({
           onCreateChannel={onCreateChannel}
         />
       );
+
+    case 'workspace-agent':
+      return <WorkspaceAgentView workspaceId={tab.workspaceId} onSend={onSend} />;
+
+    case 'project-agent':
+      return <ProjectAgentView projectId={tab.selectedProjectId ?? ''} workspaceId={tab.workspaceId} onSend={onSend} />;
 
     default:
       return null;

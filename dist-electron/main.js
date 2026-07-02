@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import { BrowserWindow, app, ipcMain } from "electron";
-import { dirname, join } from "path";
+import { dirname, join, relative } from "path";
 import { fileURLToPath } from "url";
 import * as fs from "fs";
 import { Buffer as Buffer$1 } from "node:buffer";
@@ -6982,7 +6982,7 @@ require_receiver();
 require_sender();
 require_subprotocol();
 var import_websocket = /* @__PURE__ */ __toESM(require_websocket(), 1);
-require_websocket_server();
+var import_websocket_server = /* @__PURE__ */ __toESM(require_websocket_server(), 1);
 //#endregion
 //#region node_modules/@libsql/hrana-client/lib-esm/client.js
 /** A client for the Hrana protocol (a "database connection pool"). */
@@ -10833,6 +10833,182 @@ function _createClient(config) {
 	else return _createClient$3(config);
 }
 //#endregion
+//#region electron/agent-handler.ts
+/**
+* Agent message handlers — invoked by the WS server for each incoming message.
+* Handles AGENT_HELLO, AGENT_STATE, HEARTBEAT, PERMISSION_REQUEST, INTER_AGENT_MESSAGE,
+* TICKET_PROPOSAL, SUBAGENT_SPAWN_REQUEST.
+*/
+async function handleAgentMessage(msg, ctx) {
+	const { type } = msg;
+	switch (type) {
+		case "AGENT_HELLO":
+			ctx.ulid = msg.ulid ?? ctx.ulid;
+			import_main.default.info(`AGENT_HELLO from ulid=${ctx.ulid} name=${msg.name}`);
+			ctx.send({
+				type: "AGENT_HELLO_ACK",
+				ulid: ctx.ulid,
+				ts: Date.now()
+			});
+			broadcastToRenderer({
+				type: "agent:hello",
+				ulid: ctx.ulid,
+				payload: msg
+			});
+			return;
+		case "HEARTBEAT":
+			broadcastToRenderer({
+				type: "agent:heartbeat",
+				ulid: ctx.ulid,
+				ts: Date.now()
+			});
+			return;
+		case "AGENT_STATE":
+			broadcastToRenderer({
+				type: "agent:state",
+				ulid: ctx.ulid,
+				payload: msg
+			});
+			return;
+		case "PERMISSION_REQUEST": {
+			import_main.default.info(`PERMISSION_REQUEST from ulid=${ctx.ulid} action=${msg.action}`);
+			const id = `pr-${Date.now().toString(36)}`;
+			ctx.send({
+				type: "PERMISSION_REQUEST_ACK",
+				id
+			});
+			broadcastToRenderer({
+				type: "permission:request",
+				id,
+				ulid: ctx.ulid,
+				action: msg.action,
+				toolName: msg.toolName ?? null,
+				args: msg.args ?? null,
+				ts: Date.now()
+			});
+			return;
+		}
+		case "INTER_AGENT_MESSAGE":
+			import_main.default.info(`INTER_AGENT_MESSAGE from ulid=${ctx.ulid} to=${msg.to}`);
+			broadcastToRenderer({
+				type: "agent:message",
+				from: ctx.ulid,
+				to: msg.to,
+				body: msg.body,
+				ts: Date.now()
+			});
+			return;
+		case "TICKET_PROPOSAL":
+			import_main.default.info(`TICKET_PROPOSAL from ulid=${ctx.ulid}`);
+			broadcastToRenderer({
+				type: "ticket:proposal",
+				ulid: ctx.ulid,
+				proposal: msg.proposal,
+				ts: Date.now()
+			});
+			return;
+		case "SUBAGENT_SPAWN_REQUEST":
+			import_main.default.info(`SUBAGENT_SPAWN_REQUEST from ulid=${ctx.ulid} kind=${msg.kind}`);
+			broadcastToRenderer({
+				type: "subagent:spawn-request",
+				ulid: ctx.ulid,
+				name: msg.name,
+				kind: msg.kind,
+				description: msg.description,
+				ts: Date.now()
+			});
+			return;
+		default: import_main.default.warn(`WS: unknown message type: ${type}`);
+	}
+}
+function broadcastToRenderer(payload) {
+	const wins = BrowserWindow.getAllWindows();
+	for (const win of wins) {
+		if (win.isDestroyed()) continue;
+		try {
+			win.webContents.send("ws:event", payload);
+		} catch (err) {
+			import_main.default.warn(`WS: failed to send to renderer: ${err}`);
+		}
+	}
+}
+//#endregion
+//#region electron/ws-server.ts
+/**
+* WebSocket host server — runs inside Electron main process.
+* Listens on ws://127.0.0.1:7711 and forwards agent messages to handlers.
+*/
+var WS_PORT = 7711;
+var HEARTBEAT_TIMEOUT_MS = 6e4;
+var wss = null;
+var clients = /* @__PURE__ */ new Map();
+function heartbeat() {
+	const now = Date.now();
+	for (const [ws, client] of clients.entries()) if (now - client.lastSeen > HEARTBEAT_TIMEOUT_MS) {
+		import_main.default.info(`WS: dropping silent client (ulid=${client.ulid ?? "?"})`);
+		try {
+			ws.terminate();
+		} catch {}
+		clients.delete(ws);
+	}
+}
+function startWsServer() {
+	if (wss) return;
+	wss = new import_websocket_server.default({
+		port: WS_PORT,
+		host: "127.0.0.1"
+	});
+	import_main.default.info(`WS server listening on ws://127.0.0.1:${WS_PORT}`);
+	wss.on("connection", (ws) => {
+		const client = {
+			ws,
+			lastSeen: Date.now()
+		};
+		clients.set(ws, client);
+		import_main.default.info("WS: client connected");
+		ws.on("message", async (raw) => {
+			client.lastSeen = Date.now();
+			let msg;
+			try {
+				msg = JSON.parse(raw.toString());
+			} catch (err) {
+				import_main.default.warn(`WS: invalid JSON: ${err}`);
+				return;
+			}
+			if (!msg.type) {
+				import_main.default.warn("WS: message missing type");
+				return;
+			}
+			if (msg.ulid) client.ulid = msg.ulid;
+			try {
+				await handleAgentMessage(msg, {
+					ulid: client.ulid,
+					send: (m) => ws.send(JSON.stringify(m))
+				});
+			} catch (err) {
+				import_main.default.error(`WS: handler error: ${err}`);
+			}
+		});
+		ws.on("close", () => {
+			clients.delete(ws);
+			import_main.default.info(`WS: client disconnected (ulid=${client.ulid ?? "?"})`);
+		});
+		ws.on("error", (err) => {
+			import_main.default.error(`WS: socket error: ${err.message}`);
+		});
+	});
+	setInterval(heartbeat, 1e4).unref();
+}
+function stopWsServer() {
+	if (!wss) return;
+	for (const ws of clients.keys()) try {
+		ws.close();
+	} catch {}
+	clients.clear();
+	wss.close();
+	wss = null;
+}
+//#endregion
 //#region electron/main.ts
 var __dirname$1 = dirname(fileURLToPath(import.meta.url));
 import_main.default.initialize();
@@ -11010,6 +11186,89 @@ ipcMain.handle("okf:write-concept", (_event, projectId, path, frontmatter, body)
 	fs.writeFileSync(filePath, `---\n${yaml}\n---\n${body}`, "utf-8");
 	return true;
 });
+ipcMain.handle("okf:delete-bundle", (_event, projectId) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (fs.existsSync(bundleDir)) {
+		fs.rmSync(bundleDir, {
+			recursive: true,
+			force: true
+		});
+		import_main.default.info(`Deleted OKF bundle for project ${projectId}`);
+	}
+	return true;
+});
+ipcMain.handle("okf:delete-all-bundles", () => {
+	const okfRoot = join(app.getPath("userData"), ".superhive", "okf");
+	if (fs.existsSync(okfRoot)) {
+		fs.rmSync(okfRoot, {
+			recursive: true,
+			force: true
+		});
+		import_main.default.info("Deleted all OKF bundles");
+	}
+	return true;
+});
+function buildTree(root, base) {
+	const stat = fs.statSync(root);
+	const rel = relative(base, root);
+	if (stat.isFile()) return {
+		name: base.split("/").pop() ?? root,
+		path: rel,
+		isDir: false
+	};
+	const entries = fs.readdirSync(root, { withFileTypes: true });
+	return {
+		name: base.split("/").pop() ?? root,
+		path: rel,
+		isDir: true,
+		children: entries.sort((a, b) => {
+			if (a.isDirectory() && !b.isDirectory()) return -1;
+			if (!a.isDirectory() && b.isDirectory()) return 1;
+			return a.name.localeCompare(b.name);
+		}).map((e) => buildTree(join(root, e.name), e.name))
+	};
+}
+ipcMain.handle("okf:list-tree", (_event, projectId) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (!fs.existsSync(bundleDir)) return null;
+	return buildTree(bundleDir, projectId);
+});
+ipcMain.handle("okf:read-concept", (_event, projectId, path) => {
+	const filePath = join(app.getPath("userData"), ".superhive", "okf", projectId, path);
+	if (!fs.existsSync(filePath)) return null;
+	return parseOkfFile(fs.readFileSync(filePath, "utf-8"));
+});
+ipcMain.handle("okf:search", (_event, projectId, query) => {
+	const bundleDir = join(app.getPath("userData"), ".superhive", "okf", projectId);
+	if (!fs.existsSync(bundleDir)) return [];
+	const q = query.toLowerCase();
+	const results = [];
+	const walk = (dir) => {
+		for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+			const full = join(dir, e.name);
+			if (e.isDirectory()) walk(full);
+			else if (e.name.endsWith(".md")) {
+				const content = fs.readFileSync(full, "utf-8");
+				if (content.toLowerCase().includes(q)) {
+					const rel = relative(bundleDir, full);
+					const idx = content.toLowerCase().indexOf(q);
+					const start = Math.max(0, idx - 40);
+					const preview = (start > 0 ? "…" : "") + content.slice(start, idx + 60).replace(/\n/g, " ");
+					results.push({
+						path: rel,
+						preview
+					});
+				}
+			}
+		}
+	};
+	walk(bundleDir);
+	return results.slice(0, 50);
+});
+ipcMain.handle("agents:terminate-all", () => {
+	import_main.default.info("Terminating all agent processes (best-effort)");
+	return true;
+});
 function parseOkfFile(raw) {
 	const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 	if (!match) return {
@@ -11037,6 +11296,7 @@ function parseOkfFile(raw) {
 }
 app.whenReady().then(() => {
 	import_main.default.info("App ready");
+	startWsServer();
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -11044,6 +11304,7 @@ app.whenReady().then(() => {
 });
 app.on("window-all-closed", () => {
 	import_main.default.info("All windows closed");
+	stopWsServer();
 	if (process.platform !== "darwin") app.quit();
 });
 process.on("uncaughtException", (error) => {

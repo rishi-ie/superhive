@@ -18,6 +18,7 @@ import {
   listChannels,
   listChannelMessages,
   addChannelMessage,
+  findProjectByChannelId,
   type ProjectAgent,
 } from '@/data/projects/store';
 import { listUniversalTickets } from '@/data/tickets/store';
@@ -110,6 +111,8 @@ export function RightAuxiliary({
   const channelData = context?.kind === 'channel'
     ? listChannels(context.workspaceId).find(c => c.id === context.channelId)
     : null;
+
+  const channelProject = channelData ? findProjectByChannelId(channelData.id) : null;
 
   const universalTickets = listUniversalTickets();
   const workspacesData = listWorkspaces();
@@ -312,6 +315,7 @@ export function RightAuxiliary({
             {context.kind === 'channel' && channelData && (
               <ChannelManageTab
                 channel={channelData}
+                projectId={channelProject?.id}
                 availableAgents={listProjectAgents(context.workspaceId)}
               />
             )}
@@ -328,7 +332,7 @@ export function RightAuxiliary({
               />
             )}
             {context.kind === 'ticket' && ticketData && (
-              <TicketInbox ticketId={ticketData.id} />
+              <TicketInbox ticketId={ticketData.id} onTicketClick={onTicketClick} />
             )}
             {context.kind === 'project' && projectData && (
               <ProjectInbox

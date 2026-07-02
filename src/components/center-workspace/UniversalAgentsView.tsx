@@ -1,12 +1,12 @@
 /**
  * All agents across workspaces with search, status filter, and sort.
+ * Note: no "New Agent" button — that lives in AgentsView (the canonical entry point).
  */
 import { useMemo, useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { StatusFilter } from '@/components/ui/StatusFilter';
-import { NewButton } from '@/components/ui/NewButton';
 import { Select } from '@/components/ui/Select';
 import { UniversalListCard } from '@/components/ui/UniversalListCard';
 import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
@@ -47,15 +47,13 @@ function ContextBar({ value }: { value: number }) {
 type UniversalAgentsViewProps = {
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
-  onCreateAgent?: () => void;
 };
 
 /**
  * @param onAgentSelect - Called when an agent is selected
  * @param selectedAgentId - Currently selected agent ID
- * @param onCreateAgent - Called when "New Agent" is clicked
  */
-export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onCreateAgent }: UniversalAgentsViewProps) {
+export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: UniversalAgentsViewProps) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AgentStatus>('ALL');
   const [sort, setSort] = useState<SortKey>('status');
@@ -132,7 +130,6 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId, onCreateAg
           onChange={v => setSort(v as SortKey)}
           className="w-32"
         />
-        <NewButton label="New Agent" onClick={onCreateAgent} />
       </div>
 
       <div className="px-6 pb-3 shrink-0">

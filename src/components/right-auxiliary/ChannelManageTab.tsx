@@ -10,10 +10,14 @@ import { Select } from '@/components/ui/Select';
 import { TextInput } from '@/components/ui/TextInput';
 import { SaveBar } from '@/components/ui/SaveBar';
 import { useToast } from '@/lib/toast-context';
+import { updateChannel } from '@/data/channels/store';
+import { listProjectAgents } from '@/data/projects/store';
+import { addChannelParticipant, removeChannelParticipant } from '@/data/channel_participants/store';
 import type { CommunicationChannel, ProjectAgent } from '@/data/projects/store';
 
 type ChannelManageTabProps = {
   channel: CommunicationChannel;
+  projectId?: string;
   availableAgents: ProjectAgent[];
 };
 
@@ -34,7 +38,7 @@ const STATUS_SELECTED: Record<CommunicationChannel['status'], string> = {
  * @param channel - Channel to manage
  * @param availableAgents - Agents available to add as participants
  */
-export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabProps) {
+export function ChannelManageTab({ channel, projectId, availableAgents }: ChannelManageTabProps) {
   const [topic, setTopic] = useState(channel.topic);
   const [status, setStatus] = useState(channel.status);
   const [participants, setParticipants] = useState(channel.participants);
@@ -47,7 +51,27 @@ export function ChannelManageTab({ channel, availableAgents }: ChannelManageTabP
   };
 
   const handleSave = () => {
-    toast({ title: 'Saved', description: channel.topic });
+    const updated = projectId ? updateChannel(channel.id, { topic, status, participants }) : undefined;
+    if (updated) {
+      if (projectId) {
+        const projectAgents = listProjectAgents(projectId);
+        const currentNames = new Set(participants);
+        const originalNames = new Set(channel.participants);
+        const addedNames = participants.filter(n => !originalNames.has(n));
+        const removedNames = channel.participants.filter(n => !currentNames.has(n));
+        for (const name of addedNames) {
+          const agent = projectAgents.find(a => a.name === name);
+          if (agent) addChannelParticipant({ channelId: channel.id, agentId: agent.id, type: 'agent', canRead: true, canWrite: true });
+        }
+        for (const name of removedNames) {
+          const agent = projectAgents.find(a => a.name === name);
+          if (agent) removeChannelParticipant(channel.id, agent.id, 'agent');
+        }
+      }
+      toast({ title: 'Saved', description: channel.topic });
+    } else {
+      toast({ title: 'Error', description: 'Failed to save channel' });
+    }
     setIsDirty(false);
   };
 

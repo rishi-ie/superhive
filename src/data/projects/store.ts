@@ -16,6 +16,7 @@ import type {
   ChannelMessage,
   CreateProjectInput,
   ProjectStatus,
+  ChannelStatus,
 } from './interface';
 
 const repo = new ProjectsRepository(getDataSource());
@@ -107,4 +108,54 @@ export function getProjectIdByTicketId(ticketId: string): string | null {
   return repo.getProjectIdByTicketId(ticketId);
 }
 
-export type { Ticket, ProjectAgent, SwarmActivity, CommunicationChannel, Project, ChannelMessage, CreateProjectInput, ProjectStatus };
+export function patchProject(id: string, patch: Partial<Pick<Project, 'title' | 'description' | 'successCriteria'>>): Project | null {
+  const updated = repo.patch(id, patch);
+  return updated ?? null;
+}
+
+export function patchChannel(channelId: string, patch: { topic?: string; status?: ChannelStatus; participants?: string[] }): ReturnType<typeof repo.patchChannel> {
+  return repo.patchChannel(channelId, patch);
+}
+
+export function findProjectByChannelId(channelId: string): Project | undefined {
+  return repo.findProjectByChannelId(channelId);
+}
+
+export function removeAgentFromProject(projectId: string, agentId: string): ProjectAgent | undefined {
+  return repo.removeAgent(projectId, agentId);
+}
+
+export function addAgentToProject(projectId: string, agentId: string): ProjectAgent | undefined {
+  const globalAgents = listAgents();
+  const a = globalAgents.find((g) => g.id === agentId);
+  if (!a) return undefined;
+  const projectAgent: ProjectAgent = {
+    id: a.id,
+    name: a.name,
+    role: a.role,
+    currentStatus: 'IDLE',
+    assignedTicketId: null,
+    initials: getInitials(a.name),
+  };
+  return repo.addAgent(projectId, projectAgent);
+}
+
+export function createChannel(input: {
+  projectId: string;
+  topic: string;
+  status?: ChannelStatus;
+  participants: string[];
+  relatedTicketId?: string;
+}): CommunicationChannel | null {
+  if (!input.topic.trim() || !input.projectId) return null;
+  const channel = repo.createChannel({
+    projectId: input.projectId,
+    topic: input.topic.trim(),
+    status: input.status ?? 'OPEN',
+    participants: input.participants,
+    relatedTicketId: input.relatedTicketId,
+  });
+  return channel ?? null;
+}
+
+export type { Ticket, ProjectAgent, SwarmActivity, CommunicationChannel, ChannelStatus, Project, ChannelMessage, CreateProjectInput, ProjectStatus };

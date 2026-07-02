@@ -291,16 +291,19 @@ export class DbDataSource implements DataSource {
 
     // agents
     this._agents = asArray<Row>(
-      (await window.electron.dbQuery('SELECT id, name, role, status, activeTask, uptime FROM agents')).rows,
+      (await window.electron.dbQuery('SELECT id, name, role, status, activeTask, uptime, principles, boundaries, skills FROM agents')).rows,
     ).map((r) => ({
       id: String(r.id), name: String(r.name), role: String(r.role),
       status: r.status as Agent['status'],
       activeTask: String(r.activeTask ?? ''), uptime: String(r.uptime ?? ''),
+      principles: String(r.principles ?? ''),
+      boundaries: String(r.boundaries ?? ''),
+      skills: (() => { try { return JSON.parse(String(r.skills ?? '[]')) as string[]; } catch { return []; } })(),
     }));
 
     // universal_tickets
     this._tickets = asArray<Row>(
-      (await window.electron.dbQuery('SELECT id, title, projectName, workspaceId, status, priority, type, assigneeName, assigneeAvatarUrl, assigneeIsAI FROM universal_tickets')).rows,
+      (await window.electron.dbQuery('SELECT id, title, projectName, workspaceId, status, priority, type, assigneeName, assigneeAvatarUrl, assigneeIsAI, archived_at FROM universal_tickets')).rows,
     ).map((r) => ({
       id: String(r.id), title: String(r.title), projectName: String(r.projectName),
       workspaceId: String(r.workspaceId),
@@ -312,6 +315,7 @@ export class DbDataSource implements DataSource {
         avatarUrl: (r.assigneeAvatarUrl as string | null) ?? undefined,
         isAI: Number(r.assigneeIsAI) === 1,
       },
+      archivedAt: (r.archived_at as string | null) ?? null,
     }));
 
     // chat_threads — JSON-blob messages
@@ -898,8 +902,8 @@ export class DbDataSource implements DataSource {
         const item = r as Agent;
         this._agents.push(item);
         this._persist(
-          'INSERT INTO agents (id, name, role, status, activeTask, uptime) VALUES (?, ?, ?, ?, ?, ?)',
-          [item.id, item.name, item.role, item.status, item.activeTask, item.uptime],
+          'INSERT INTO agents (id, name, role, status, activeTask, uptime, principles, boundaries, skills) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.name, item.role, item.status, item.activeTask, item.uptime, item.principles ?? '', item.boundaries ?? '', JSON.stringify(item.skills ?? [])],
         );
         this._notify();
         return item;
@@ -910,8 +914,8 @@ export class DbDataSource implements DataSource {
         this._agents[idx] = { ...this._agents[idx], ...patch } as Agent;
         const updated: Agent = this._agents[idx]!;
         this._persist(
-          'UPDATE agents SET name = ?, role = ?, status = ?, activeTask = ?, uptime = ? WHERE id = ?',
-          [updated.name, updated.role, updated.status, updated.activeTask, updated.uptime, id],
+          'UPDATE agents SET name = ?, role = ?, status = ?, activeTask = ?, uptime = ?, principles = ?, boundaries = ?, skills = ? WHERE id = ?',
+          [updated.name, updated.role, updated.status, updated.activeTask, updated.uptime, updated.principles ?? '', updated.boundaries ?? '', JSON.stringify(updated.skills ?? []), id],
         );
         this._notify();
         return updated;
@@ -938,8 +942,8 @@ export class DbDataSource implements DataSource {
         this._tickets.push(item);
         const a = item.assignee;
         this._persist(
-          'INSERT INTO universal_tickets (id, title, projectName, workspaceId, status, priority, type, assigneeName, assigneeAvatarUrl, assigneeIsAI) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          [item.id, item.title, item.projectName, item.workspaceId, item.status, item.priority, item.type, a.name, a.avatarUrl ?? null, a.isAI ? 1 : 0],
+          'INSERT INTO universal_tickets (id, title, projectName, workspaceId, status, priority, type, assigneeName, assigneeAvatarUrl, assigneeIsAI, archived_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [item.id, item.title, item.projectName, item.workspaceId, item.status, item.priority, item.type, a.name, a.avatarUrl ?? null, a.isAI ? 1 : 0, item.archivedAt ?? null],
         );
         this._notify();
         return item;
@@ -951,8 +955,8 @@ export class DbDataSource implements DataSource {
         const updated: UniversalTicket = this._tickets[idx]!;
         const a = updated.assignee;
         this._persist(
-          'UPDATE universal_tickets SET title = ?, projectName = ?, workspaceId = ?, status = ?, priority = ?, type = ?, assigneeName = ?, assigneeAvatarUrl = ?, assigneeIsAI = ? WHERE id = ?',
-          [updated.title, updated.projectName, updated.workspaceId, updated.status, updated.priority, updated.type, a.name, a.avatarUrl ?? null, a.isAI ? 1 : 0, id],
+          'UPDATE universal_tickets SET title = ?, projectName = ?, workspaceId = ?, status = ?, priority = ?, type = ?, assigneeName = ?, assigneeAvatarUrl = ?, assigneeIsAI = ?, archived_at = ? WHERE id = ?',
+          [updated.title, updated.projectName, updated.workspaceId, updated.status, updated.priority, updated.type, a.name, a.avatarUrl ?? null, a.isAI ? 1 : 0, updated.archivedAt ?? null, id],
         );
         this._notify();
         return updated;

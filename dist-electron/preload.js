@@ -16,13 +16,24 @@ contextBridge.exposeInMainWorld("electron", {
 	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
 	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts),
 	dbExecMulti: (sql) => ipcRenderer.invoke("db:exec-multi", sql),
+	onWsEvent: (callback) => {
+		const listener = (_, payload) => callback(payload);
+		ipcRenderer.on("ws:event", listener);
+		return () => ipcRenderer.removeListener("ws:event", listener);
+	},
 	okf: {
 		getDataDir: () => ipcRenderer.invoke("okf:get-data-dir"),
 		bundleExists: (projectId) => ipcRenderer.invoke("okf:bundle-exists", projectId),
 		createBundle: (projectId) => ipcRenderer.invoke("okf:create-bundle", projectId),
 		readBundle: (projectId) => ipcRenderer.invoke("okf:read-bundle", projectId),
-		writeConcept: (projectId, path, frontmatter, body) => ipcRenderer.invoke("okf:write-concept", projectId, path, frontmatter, body)
-	}
+		writeConcept: (projectId, path, frontmatter, body) => ipcRenderer.invoke("okf:write-concept", projectId, path, frontmatter, body),
+		readConcept: (projectId, path) => ipcRenderer.invoke("okf:read-concept", projectId, path),
+		listTree: (projectId) => ipcRenderer.invoke("okf:list-tree", projectId),
+		search: (projectId, query) => ipcRenderer.invoke("okf:search", projectId, query),
+		deleteBundle: (projectId) => ipcRenderer.invoke("okf:delete-bundle", projectId),
+		deleteAllBundles: () => ipcRenderer.invoke("okf:delete-all-bundles")
+	},
+	agents: { terminateAll: () => ipcRenderer.invoke("agents:terminate-all") }
 });
 console.log("Preload script loaded");
 //#endregion

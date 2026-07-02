@@ -59,12 +59,19 @@ export type ShortcutAPI = {
   closeOtherTabs: () => void;
   openOrFocusTab: (tab: Omit<CenterTab, 'id' | 'createdAt'>) => void;
   openNewTabMenu: () => void;
+  togglePin: () => void;
 
   // Right Panel
   setRightPanelTab: (id: RightPanelTabId) => void;
 
   // Projects
   openProjectDialog: () => void;
+
+  // Tickets
+  openTicketDialog: () => void;
+
+  // Channels
+  openChannelDialog: () => void;
 
   // Chat
   sendActiveChatMessage: () => void;

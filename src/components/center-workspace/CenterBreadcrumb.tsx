@@ -22,9 +22,9 @@ function getBreadcrumbSegments(
 ): TabSegment[] {
   const sections: Record<CenterTab['type'], string | null> = {
     home: null,
-    projects: 'Projects',
     project: 'Project',
     tickets: 'Tickets',
+    ticket: 'Tickets',
     channels: 'Comms',
     channel: 'Comms',
     agents: 'Agents',
@@ -32,7 +32,8 @@ function getBreadcrumbSegments(
     'universal-agents': 'Agents',
     'universal-projects': 'Projects',
     'universal-channels': 'Channels',
-    settings: 'Settings',
+    'workspace-agent': 'Workspace Agent',
+    'project-agent': 'Project Agent',
   };
 
   const segments: TabSegment[] = [];

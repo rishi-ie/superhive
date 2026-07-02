@@ -11,6 +11,10 @@ import { CenterWorkspace } from '@/components/center-workspace/CenterWorkspace';
 import { RightAuxiliary } from '@/components/right-auxiliary/RightAuxiliary';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { CreateProjectDialog } from '@/components/center-workspace/CreateProjectDialog';
+import { CreateTicketDialog } from '@/components/center-workspace/CreateTicketDialog';
+import { CreateChannelDialog } from '@/components/center-workspace/CreateChannelDialog';
+import { PermissionToastContainer } from '@/components/ui/PermissionToastContainer';
+import { SubAgentSpawnToastContainer } from '@/components/ui/SubAgentSpawnToast';
 import { CommandPalette, buildDefaultPaletteItems } from '@/components/shortcuts';
 import {
   useGlobalShortcuts,
@@ -25,7 +29,7 @@ import { getProject, getProjectByWorkspace, listProjectAgents, listProjects } fr
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, getAgentWorkspace } from '@/data/agents/store';
-import { addMessageToActiveThread } from '@/data/chat/store';
+import { addMessageToActiveThread, getThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
   openOrFocusTab as openTabOp,
@@ -33,7 +37,6 @@ import {
   selectTab as selectTabOp,
   getActiveTab,
   findTab,
-  setSelection,
   pinTab as pinTabOp,
 } from '@/data/tabs/store';
 import type { CenterTabType, CenterTab } from '@/data/tabs/interface';
@@ -108,6 +111,8 @@ export function Dashboard({
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>(() => listWorkspaces()[0]?.id ?? 'acme');
   const [rightPanelTab, setRightPanelTab] = useState<RightPanelTabId>('overview');
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
+  const [createChannelOpen, setCreateChannelOpen] = useState(false);
   const [projectsVersion, setProjectsVersion] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [pendingSettingsSection, setPendingSettingsSection] = useState<string | null>(null);
@@ -116,7 +121,7 @@ export function Dashboard({
   const { update: updateSettings } = useSettings();
   const toast = useToast();
 
-  const workspaces_data = listWorkspaces();
+  const workspaces_data = listWorkspaces().filter(w => !w.archivedAt);
   const currentWorkspace = workspaces_data.find(w => w.id === activeWorkspaceId) ?? workspaces_data[0] ?? { id: '1', name: 'My Workspace', initials: 'MW', avatarColor: 'bg-chart-1', createdAt: new Date().toISOString(), retentionDays: 90, archivedAt: null };
   const favorites_data = listFavorites();
   const workspaceAgents = listProjectAgents(activeWorkspaceId);
@@ -209,12 +214,11 @@ export function Dashboard({
     const ws = ticket?.workspaceId ?? activeWorkspaceId;
 
     setTabState(prev => {
-      const existing = findTab(prev, 'tickets', ws, null);
+      const existing = findTab(prev, 'ticket', ws, ticketId);
       if (existing) {
-        const updated = setSelection(prev, existing.id, { selectedTicketId: ticketId });
-        return selectTabOp(updated, existing.id);
+        return selectTabOp(prev, existing.id);
       }
-      return openTabOp(prev, buildTab('tickets', ws, 'Tickets', { selectedTicketId: ticketId }));
+      return openTabOp(prev, buildTab('ticket', ws, ticket?.title ?? 'Ticket', { selectedTicketId: ticketId }));
     });
     setRightPanelTab('overview');
   }, [activeWorkspaceId]);
@@ -272,7 +276,7 @@ export function Dashboard({
   const handleBreadcrumbJump = useCallback((workspaceId: string, section?: string) => {
     if (section) {
       const SECTION_TAB: Record<string, CenterTabType> = {
-        Projects: 'projects',
+        Projects: 'universal-projects',
         Tickets: 'tickets',
         Comms: 'channels',
         Agents: 'agents',
@@ -280,7 +284,7 @@ export function Dashboard({
       const type = SECTION_TAB[section];
       if (type) openTab(buildTab(type, workspaceId, section));
     } else {
-      openTab(buildTab('projects', workspaceId, 'Projects', {},));
+      openTab(buildTab('universal-projects', workspaceId, 'Projects', {},));
     }
   }, [openTab]);
 
@@ -289,16 +293,16 @@ export function Dashboard({
   }, []);
 
   const handleCreateTicket = useCallback(() => {
-    openTab(buildTab('tickets', activeWorkspaceId, 'Tickets'));
-  }, [openTab, activeWorkspaceId]);
+    setCreateTicketOpen(true);
+  }, []);
 
   const handleCreateChannel = useCallback(() => {
-    openTab(buildTab('channels', activeWorkspaceId, 'Comms'));
-  }, [openTab, activeWorkspaceId]);
+    setCreateChannelOpen(true);
+  }, []);
 
   const handleCreateAgent = useCallback(() => {
-    openTab(buildTab('agents', activeWorkspaceId, 'Agents'));
-  }, [openTab, activeWorkspaceId]);
+    toast({ title: 'Agent creation wizard', description: 'Coming soon (Phases 32-37 are manual).', type: 'info' });
+  }, [toast]);
 
   const handleProjectCreated = useCallback((project: import('@/data/projects/interface').Project) => {
     bumpProjectsVersion();
@@ -330,9 +334,15 @@ export function Dashboard({
 
   const handleChannelClick = handleChannelSelect;
 
-  const handleThreadSelect = useCallback((_threadId: string) => {
-    toast({ title: 'Reopen thread coming soon', type: 'info' });
-  }, [toast]);
+  const handleThreadSelect = useCallback((threadId: string) => {
+    const thread = getThread(threadId);
+    if (!thread) return;
+    const ws = thread.workspaceId ?? activeWorkspaceId;
+    const agentId = thread.agentId;
+    if (agentId) {
+      openTab(buildTab('agent', ws, thread.title || 'Agent', { selectedAgentId: agentId }));
+    }
+  }, [openTab, activeWorkspaceId]);
 
   const handleSendMessage = useCallback((message: string) => {
     addMessageToActiveThread(message);
@@ -458,10 +468,13 @@ export function Dashboard({
     closeOtherTabs,
     openOrFocusTab,
     openNewTabMenu,
+    togglePin: handleTogglePin,
 
     setRightPanelTab,
 
     openProjectDialog: () => setCreateProjectOpen(true),
+    openTicketDialog: () => setCreateTicketOpen(true),
+    openChannelDialog: () => setCreateChannelOpen(true),
 
     sendActiveChatMessage,
     focusChatInput,
@@ -472,7 +485,7 @@ export function Dashboard({
     paletteOpen, requestOpenSection, handleToggleTheme,
     activeWorkspaceId, tabState.tabs, activeTab, tabState.activeTabId,
     handleTabClick, handleTabClickByIndex, handleTabClose, closeOtherTabs,
-    openOrFocusTab, openNewTabMenu, setRightPanelTab,
+    openOrFocusTab, openNewTabMenu, handleTogglePin, setRightPanelTab,
     sendActiveChatMessage, focusChatInput, confirmActiveModal,
   ]);
 
@@ -480,7 +493,6 @@ export function Dashboard({
   void newTabMenuIndex;
   void setNewTabMenuIndex;
   void newTabMenuTrigger;
-  void handleTogglePin;
   void updateSettings;
 
   // ─── Global keyboard shortcut manager ────────────────────────────────
@@ -520,6 +532,8 @@ export function Dashboard({
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
+      <PermissionToastContainer />
+      <SubAgentSpawnToastContainer />
       <LeftNav
         width={leftWidth}
         onWidthChange={onLeftWidthChange}
@@ -586,6 +600,22 @@ export function Dashboard({
         open={createProjectOpen}
         onOpenChange={setCreateProjectOpen}
         onCreated={handleProjectCreated}
+        defaultWorkspaceId={activeWorkspaceId}
+      />
+      <CreateTicketDialog
+        open={createTicketOpen}
+        onOpenChange={setCreateTicketOpen}
+        onCreated={(ticket) => {
+          handleTicketSelect(ticket.id);
+        }}
+        defaultWorkspaceId={activeWorkspaceId}
+      />
+      <CreateChannelDialog
+        open={createChannelOpen}
+        onOpenChange={setCreateChannelOpen}
+        onCreated={(channel) => {
+          handleChannelSelect(channel.id, channel.workspaceId ?? activeWorkspaceId);
+        }}
         defaultWorkspaceId={activeWorkspaceId}
       />
       <CommandPalette

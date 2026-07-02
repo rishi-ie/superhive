@@ -11,6 +11,7 @@ type HelpPopoverProps = {
   anchorRef: React.RefObject<HTMLElement | null>;
   open: boolean;
   onClose: () => void;
+  onHelpSelect: (id: 'docs' | 'changelog') => void;
 };
 
 const items = [
@@ -19,13 +20,16 @@ const items = [
   { id: 'shortcuts',   label: 'Shortcuts',      Icon: Command, shortcutHint: 'palette.open' },
 ];
 
-function dispatchItem(id: string) {
+function handleItem(
+  id: string,
+  onHelpSelect: (id: 'docs' | 'changelog') => void,
+) {
   if (id === 'shortcuts') {
     window.dispatchEvent(new CustomEvent('app:open-command-palette'));
     return;
   }
   if (id === 'docs' || id === 'changelog') {
-    window.dispatchEvent(new CustomEvent('app:open-help', { detail: { id } }));
+    onHelpSelect(id);
   }
 }
 
@@ -34,8 +38,9 @@ function dispatchItem(id: string) {
  * @param anchorRef - Ref to the element to anchor the popover to
  * @param open - Whether the popover is visible
  * @param onClose - Called when popover should close
+ * @param onHelpSelect - Called when docs or changelog item is selected
  */
-export function HelpPopover({ anchorRef, open, onClose }: HelpPopoverProps) {
+export function HelpPopover({ anchorRef, open, onClose, onHelpSelect }: HelpPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -59,7 +64,7 @@ export function HelpPopover({ anchorRef, open, onClose }: HelpPopoverProps) {
       {items.map(({ id, label, Icon }) => (
         <button
           key={id}
-          onClick={() => { dispatchItem(id); onClose(); }}
+          onClick={() => { handleItem(id, onHelpSelect); onClose(); }}
           className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-popover-foreground hover:bg-accent transition-colors"
         >
           <Icon size={14} strokeWidth={STROKE_WIDTH} className="shrink-0" />

@@ -12,6 +12,10 @@ export class ChatRepository {
     return this.ds.chat.findAll();
   }
 
+  getById(id: string): ChatThread | undefined {
+    return this.ds.chat.findById(id);
+  }
+
   listThreadsByScope(opts: { projectId?: string; workspaceId?: string; kind?: string }): ChatThread[] {
     return this.listThreads().filter((t) => {
       if (opts.kind && t.threadKind !== opts.kind) return false;

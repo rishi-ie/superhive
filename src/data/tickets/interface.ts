@@ -17,4 +17,5 @@ export type UniversalTicket = {
   priority: Priority;
   type: TicketType;
   assignee: Assignee;
+  archivedAt?: string | null;
 };

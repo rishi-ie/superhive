@@ -24,6 +24,8 @@ import { useToast } from '@/lib/toast-context';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listAgents } from '@/data/agents/store';
 import { createProject } from '@/data/projects/store';
+import { spawnAgentStub } from '@/lib/agent-manager';
+import { createBundle } from '@/data/okf/fs';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type { Project } from '@/data/projects/interface';
 
@@ -114,6 +116,8 @@ export function CreateProjectDialog({
       setSubmitting(false);
       return;
     }
+    spawnAgentStub({ kind: 'project', entityId: project.id, name: 'Project Agent' });
+    void createBundle(project.id).catch(() => { /* ignore — bundle optional */ });
     toast({ title: 'Project created', description: project.title });
     onCreated?.(project);
     onOpenChange(false);

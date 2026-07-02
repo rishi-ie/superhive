@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
 import { useToast } from '@/lib/toast-context';
 import { listWorkspaces, createWorkspace, renameWorkspace, setRetention, archiveWorkspace } from '@/data/workspaces/store';
+import { spawnAgentStub } from '@/lib/agent-manager';
 import type { Workspace } from '@/data/workspaces/store';
 
 const RETENTION_OPTIONS = [
@@ -235,11 +236,12 @@ export function WorkspacesSettings() {
   const handleCreate = () => {
     const trimmed = createName.trim();
     if (!trimmed) return;
-    createWorkspace({ name: trimmed });
+    const ws = createWorkspace({ name: trimmed });
+    spawnAgentStub({ kind: 'workspace', entityId: ws.id, name: 'Workspace Agent' });
     setTrigger(t => t + 1);
     setShowCreate(false);
     setCreateName('');
-    toast({ title: 'Workspace created' });
+    toast({ title: 'Workspace created', description: trimmed });
   };
 
   return (

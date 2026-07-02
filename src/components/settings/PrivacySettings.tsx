@@ -11,7 +11,8 @@ import { Select } from '@/components/ui/Select';
 import { ConfirmationModal } from '@/components/right-auxiliary/shared';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
-import { listWorkspaces } from '@/data/workspaces/store';
+import { listWorkspaces, deleteWorkspace, deleteAllWorkspaces } from '@/data/workspaces/store';
+import { deleteAllBundles } from '@/data/okf/fs';
 import { Trash2 } from 'lucide-react';
 
 const RETENTION_OPTIONS = [
@@ -31,6 +32,7 @@ export function PrivacySettings() {
   const toast = useToast();
   const [showDeleteWorkspace, setShowDeleteWorkspace] = useState<string | null>(null);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [, setTrigger] = useState(0);
   const workspaces = listWorkspaces();
 
   const handleExport = () => {
@@ -143,9 +145,17 @@ export function PrivacySettings() {
         confirmLabel="Delete"
         destructive
         confirmText={showDeleteWorkspace ?? undefined}
-        onConfirm={() => {
-          toast({ title: `Workspace ${showDeleteWorkspace} data deleted` });
+        onConfirm={async () => {
+          const wsId = showDeleteWorkspace;
           setShowDeleteWorkspace(null);
+          if (!wsId) return;
+          const ok = await deleteWorkspace(wsId);
+          if (ok) {
+            toast({ title: `Workspace data deleted`, description: wsId });
+            setTrigger(t => t + 1);
+          } else {
+            toast({ title: 'Error', description: 'Failed to delete workspace', type: 'error' });
+          }
         }}
         onCancel={() => setShowDeleteWorkspace(null)}
       />
@@ -157,9 +167,18 @@ export function PrivacySettings() {
         confirmLabel="Delete my account"
         destructive
         confirmText="delete"
-        onConfirm={() => {
-          toast({ title: 'Account deleted' });
+        onConfirm={async () => {
           setShowDeleteAccount(false);
+          try {
+            await window.electron.agents.terminateAll();
+            await deleteAllWorkspaces();
+            await deleteAllBundles();
+            resetAll();
+            setTrigger(t => t + 1);
+            toast({ title: 'Account deleted', description: 'All data has been wiped.' });
+          } catch (err) {
+            toast({ title: 'Error', description: 'Failed to delete account', type: 'error' });
+          }
         }}
         onCancel={() => setShowDeleteAccount(false)}
       />

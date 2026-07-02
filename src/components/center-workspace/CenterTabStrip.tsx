@@ -23,7 +23,7 @@ type CenterTabStripProps = {
 const NEW_TAB_OPTIONS: { type: NewTabType; label: string; icon: string }[] = [
   { type: 'home', label: 'Home', icon: '🏠' },
   { type: 'agent', label: 'Chat', icon: '💬' },
-  { type: 'projects', label: 'Projects', icon: '📋' },
+  { type: 'universal-projects', label: 'Projects', icon: '📋' },
   { type: 'tickets', label: 'Tickets', icon: '🎫' },
   { type: 'channels', label: 'Comms', icon: '💭' },
   { type: 'agents', label: 'Agents', icon: '🤖' },

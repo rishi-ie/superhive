@@ -160,6 +160,14 @@ export const DEFAULT_SHORTCUTS: ShortcutDef[] = [
     scope: 'global',
   },
   {
+    id: 'tab.pin',
+    category: 'tabs',
+    label: 'Pin active tab',
+    description: 'Pin or unpin the currently focused tab.',
+    chord: chord('Mod+Shift+l'),
+    scope: 'global',
+  },
+  {
     id: 'tab.cycle.1',
     category: 'tabs',
     label: 'Switch to tab 1',

@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 12;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (
@@ -87,7 +87,10 @@ CREATE TABLE IF NOT EXISTS agents (
   role TEXT NOT NULL,
   status TEXT NOT NULL,
   activeTask TEXT NOT NULL DEFAULT '',
-  uptime TEXT NOT NULL DEFAULT ''
+  uptime TEXT NOT NULL DEFAULT '',
+  principles TEXT NOT NULL DEFAULT '',
+  boundaries TEXT NOT NULL DEFAULT '',
+  skills TEXT NOT NULL DEFAULT '[]'
 );
 
 CREATE TABLE IF NOT EXISTS universal_tickets (
@@ -100,7 +103,8 @@ CREATE TABLE IF NOT EXISTS universal_tickets (
   type TEXT NOT NULL,
   assigneeName TEXT NOT NULL,
   assigneeAvatarUrl TEXT,
-  assigneeIsAI INTEGER NOT NULL DEFAULT 0
+  assigneeIsAI INTEGER NOT NULL DEFAULT 0,
+  archived_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_universal_tickets_workspace ON universal_tickets(workspaceId);
 

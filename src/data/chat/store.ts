@@ -13,6 +13,10 @@ export function listThreads(): ChatThread[] {
   return repo.listThreads();
 }
 
+export function getThread(id: string): ChatThread | undefined {
+  return repo.getById(id);
+}
+
 export function listThreadsByScope(opts: { projectId?: string; workspaceId?: string; kind?: string }): ChatThread[] {
   return repo.listThreadsByScope(opts);
 }

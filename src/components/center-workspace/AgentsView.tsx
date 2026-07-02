@@ -3,6 +3,7 @@
  */
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusDot } from '@/components/ui/StatusDot';
+import { NewButton } from '@/components/ui/NewButton';
 import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { Bot } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -43,14 +44,16 @@ type AgentsViewProps = {
   workspaceId?: string;
   onAgentSelect?: (id: string) => void;
   selectedAgentId?: string | null;
+  onCreateAgent?: () => void;
 };
 
 /**
  * @param workspaceId - Optional workspace to filter agents
  * @param onAgentSelect - Called when an agent is selected
  * @param selectedAgentId - Currently selected agent ID
+ * @param onCreateAgent - Called when "New Agent" button is clicked
  */
-export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId }: AgentsViewProps) {
+export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId, onCreateAgent }: AgentsViewProps) {
   const allAgents = listAgents();
   const workspaceAgentIds = workspaceId
     ? new Set(listProjectAgents(workspaceId).map(a => a.id))
@@ -61,11 +64,17 @@ export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId }: Agen
 
   if (agents.length === 0) {
     return (
-      <EmptyState
-        icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
-        title="No agents yet"
-        description="AI agents execute work, monitor systems, and coordinate with the swarm"
-      />
+      <div className="flex flex-col gap-4 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold text-foreground">Agents</h1>
+          {onCreateAgent && <NewButton label="New Agent" onClick={onCreateAgent} />}
+        </div>
+        <EmptyState
+          icon={<Bot size={32} strokeWidth={STROKE_WIDTH} />}
+          title="No agents yet"
+          description="AI agents execute work, monitor systems, and coordinate with the swarm"
+        />
+      </div>
     );
   }
 
@@ -73,7 +82,10 @@ export function AgentsView({ workspaceId, onAgentSelect, selectedAgentId }: Agen
     <div className="flex flex-col gap-4 p-4 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-background flex-1">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground">Agents</h1>
-        <span className="text-xs text-muted-foreground">{agents.length} agent{agents.length !== 1 ? 's' : ''}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground">{agents.length} agent{agents.length !== 1 ? 's' : ''}</span>
+          {onCreateAgent && <NewButton label="New Agent" onClick={onCreateAgent} />}
+        </div>
       </div>
       <div className="flex flex-col gap-1.5">
         {agents.map(agent => (

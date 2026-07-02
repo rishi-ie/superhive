@@ -7,6 +7,7 @@ import { Select } from '@/components/ui/Select';
 import { SaveBar } from '@/components/ui/SaveBar';
 import { ConfirmationModal } from './shared/ConfirmationModal';
 import { useToast } from '@/lib/toast-context';
+import { patchTicket, archiveTicket } from '@/data/tickets/store';
 import type { UniversalTicket, UniversalTicketStatus, Priority, TicketType } from '@/data/tickets/store';
 import type { Agent } from '@/data/agents/store';
 
@@ -69,7 +70,12 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
   };
 
   const handleSave = () => {
-    toast({ title: 'Saved', description: ticket.title });
+    const updated = patchTicket(ticket.id, { status, priority, type, assigneeName: assignee });
+    if (updated) {
+      toast({ title: 'Saved', description: ticket.title });
+    } else {
+      toast({ title: 'Error', description: 'Failed to save ticket' });
+    }
     setIsDirty(false);
   };
 
@@ -82,15 +88,20 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
   };
 
   const handleCloseConfirm = () => {
+    patchTicket(ticket.id, { status: 'MERGED' });
     setStatus('MERGED');
     setShowCloseModal(false);
     toast({ title: 'Ticket closed', description: ticket.title });
-    setIsDirty(true);
   };
 
   const handleArchiveConfirm = () => {
-    setShowArchiveModal(false);
-    toast({ title: 'Ticket archived', description: ticket.title });
+    const updated = archiveTicket(ticket.id);
+    if (updated) {
+      setShowArchiveModal(false);
+      toast({ title: 'Ticket archived', description: ticket.title });
+    } else {
+      toast({ title: 'Error', description: 'Failed to archive ticket' });
+    }
   };
 
   return (

@@ -3,7 +3,7 @@
  */
 import { getDataSource } from '@/data/datasource/index';
 import { IntegrationsRepository } from './repository';
-import type { Integration, IntegrationChannel } from './interface';
+import type { Integration, IntegrationChannel, IntegrationProvider } from './interface';
 
 const repo = new IntegrationsRepository(getDataSource());
 
@@ -35,4 +35,4 @@ export function removeChannel(id: string): boolean {
   return repo.removeChannel(id);
 }
 
-export type { Integration, IntegrationChannel };
+export type { Integration, IntegrationChannel, IntegrationProvider };

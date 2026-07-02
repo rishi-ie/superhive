@@ -1,6 +1,5 @@
 /**
  * Row configuration for the empty-workspace ready wizard.
- * DORMANT — currently inactive. Activate by uncommenting in SetupWizardView.
  */
 import { FolderPlus, Bot, Cpu, Settings, X } from 'lucide-react';
 import type { MenuRow } from '../SetupMenuList';
@@ -9,6 +8,7 @@ export type EmptyWorkspaceActions = {
   onDismiss: () => void;
   onOpenSettings: () => void;
   onStub: (label: string) => () => void;
+  onCreateProject: () => void;
 };
 
 export function buildEmptyWorkspaceRows(actions: EmptyWorkspaceActions): MenuRow[] {
@@ -18,7 +18,10 @@ export function buildEmptyWorkspaceRows(actions: EmptyWorkspaceActions): MenuRow
       icon: FolderPlus,
       label: 'Create a project',
       chord: { mac: 'Mod+Shift+P', default: 'Ctrl+Shift+P' },
-      onClick: actions.onStub('Create a project'),
+      onClick: () => {
+        actions.onCreateProject();
+        actions.onDismiss();
+      },
     },
     {
       id: 'hire-agent',

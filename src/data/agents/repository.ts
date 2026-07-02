@@ -23,6 +23,10 @@ export class AgentsRepository {
     return this.ds.agents.findById(id);
   }
 
+  patch(id: string, partial: { name?: string; role?: string; principles?: string; boundaries?: string; skills?: string[] }): Agent | undefined {
+    return this.ds.agents.update(id, partial as Partial<Agent>);
+  }
+
   getTelemetry(agentId: string): Telemetry | null {
     const rec = this.ds.telemetry.findByAgentId(agentId);
     if (rec) {

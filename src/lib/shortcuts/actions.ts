@@ -43,6 +43,7 @@ export const closeTab          = (api: ShortcutAPI) => {
   if (api.activeTab && !api.activeTab.pinned) api.handleTabClose(api.activeTab.id);
 };
 export const closeOtherTabs    = (api: ShortcutAPI) => api.closeOtherTabs();
+export const togglePin         = (api: ShortcutAPI) => api.togglePin();
 export const makeCycleTab      = (n: number) => (api: ShortcutAPI) => api.handleTabClickByIndex(n);
 export const cycleTab1         = makeCycleTab(1);
 export const cycleTab2         = makeCycleTab(2);
@@ -67,7 +68,7 @@ export const newProject      = (api: ShortcutAPI) => api.openProjectDialog();
 export const openProjectsAll = (api: ShortcutAPI) => api.openOrFocusTab(buildTab(api, 'universal-projects', 'Projects'));
 
 // ─── Tickets ──────────────────────────────────────────────────────────
-export const newTicket       = (api: ShortcutAPI) => api.openOrFocusTab(buildTab(api, 'tickets', 'Tickets'));
+export const newTicket       = (api: ShortcutAPI) => api.openTicketDialog();
 export const openTicketsAll  = (api: ShortcutAPI) => api.openOrFocusTab(buildTab(api, 'tickets', 'Tickets'));
 
 // ─── Channels ─────────────────────────────────────────────────────────
@@ -96,6 +97,7 @@ export const ACTIONS: Record<string, (api: ShortcutAPI) => void> = {
   newTab,
   closeTab,
   closeOtherTabs,
+  togglePin,
   cycleTab1, cycleTab2, cycleTab3, cycleTab4, cycleTab5,
   cycleTab6, cycleTab7, cycleTab8, cycleTab9,
   openOverview,

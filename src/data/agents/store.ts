@@ -17,6 +17,13 @@ export function getAgent(id: string): Agent | undefined {
   return repo.byId(id);
 }
 
+export function patchAgent(
+  id: string,
+  patch: { name?: string; role?: string; principles?: string; boundaries?: string; skills?: string[] },
+): Agent | undefined {
+  return repo.patch(id, patch);
+}
+
 export function getActiveAgent(preferredId?: string | null): Agent | null {
   const agents = repo.list();
   if (preferredId) {
@@ -40,8 +47,7 @@ export function getPermissions(agentId: string): Permissions {
 
 export function setPermissions(agentId: string, permissions: Permissions): void {
   const ds = getDataSource();
-  ds.permissions.upsert(agentId, permissions as unknown as Permissions);
-  void agentId;
+  ds.permissions.upsert(agentId, { agentId, ...permissions });
 }
 
 export function getAuditItems(agentId?: string): AuditItem[] {

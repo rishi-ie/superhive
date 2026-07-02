@@ -20,7 +20,6 @@ export { ExecutionStream } from './ExecutionStream';
 export { KanbanBoard } from './KanbanBoard';
 export { KanbanColumn } from './KanbanColumn';
 export { ProjectDetailView } from './ProjectDetailView';
-export { ProjectsView } from './ProjectsView';
 export { SwarmRoster } from './SwarmRoster';
 export { TabBody } from './TabBody';
 export { TicketsView } from './TicketsView';
