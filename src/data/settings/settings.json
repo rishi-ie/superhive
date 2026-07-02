@@ -56,22 +56,7 @@
     ]
   },
   "workflows": {
-    "workflows": [
-      {
-        "id": "wf-1",
-        "name": "Daily Standup Summary",
-        "type": "schedule",
-        "cronExpression": "0 9 * * 1-5",
-        "lastRun": "2026-06-25T09:00:00Z"
-      },
-      {
-        "id": "wf-2",
-        "name": "Ticket Review Reminder",
-        "type": "schedule",
-        "cronExpression": "0 14 * * 5",
-        "lastRun": "2026-06-20T14:00:00Z"
-      }
-    ]
+    "workflows": []
   },
   "costUsage": {
     "monthlyBudgetCap": 500,
@@ -88,94 +73,28 @@
     "defaultEngine": "sonnet"
   },
   "workspaces": {
-    "workspaces": [
-      {
-        "id": "ws-vela",
-        "name": "Vela",
-        "dataRetentionDays": 90,
-        "createdAt": "2026-01-15T00:00:00Z"
-      },
-      {
-        "id": "ws-cosmos",
-        "name": "Cosmos",
-        "dataRetentionDays": 90,
-        "createdAt": "2026-02-20T00:00:00Z"
-      }
-    ]
+    "workspaces": []
   },
   "integrations": {
-    "integrations": [
-      {
-        "id": "int-github",
-        "provider": "github",
-        "label": "GitHub",
-        "connected": true,
-        "channels": [
-          { "id": "ch-github-1", "name": "superhive/repo", "events": ["push", "pull_request", "issue"] }
-        ]
-      },
-      {
-        "id": "int-slack",
-        "provider": "slack",
-        "label": "Slack",
-        "connected": false,
-        "channels": []
-      },
-      {
-        "id": "int-linear",
-        "provider": "linear",
-        "label": "Linear",
-        "connected": false,
-        "channels": []
-      },
-      {
-        "id": "int-notion",
-        "provider": "notion",
-        "label": "Notion",
-        "connected": false,
-        "channels": []
-      },
-      {
-        "id": "int-jira",
-        "provider": "jira",
-        "label": "Jira",
-        "connected": false,
-        "channels": []
-      },
-      {
-        "id": "int-webhook",
-        "provider": "webhook",
-        "label": "Custom Webhook",
-        "connected": false,
-        "channels": []
-      }
-    ]
+    "integrations": []
   },
   "billing": {
     "plan": {
-      "tier": "pro",
-      "name": "Pro",
-      "priceMonthly": 49,
-      "includedQuota": "50 agent-hours / month",
-      "seats": 5,
+      "tier": "free",
+      "name": "Free",
+      "priceMonthly": 0,
+      "includedQuota": "10 agent-hours / month",
+      "seats": 1,
       "canUpgrade": true
     },
-    "paymentMethod": {
-      "brand": "Visa",
-      "last4": "4242",
-      "expiry": "12/27"
-    }
+    "paymentMethod": null
   },
   "account": {
-    "name": "Your Name",
-    "email": "you@example.com",
-    "username": "you",
+    "name": "",
+    "email": "",
+    "username": "",
     "avatarUrl": null,
-    "connectedAccounts": [
-      { "provider": "github", "label": "GitHub", "connected": true, "email": "you@github.com" },
-      { "provider": "google", "label": "Google", "connected": false, "email": null },
-      { "provider": "apple", "label": "Apple", "connected": false, "email": null }
-    ],
+    "connectedAccounts": [],
     "defaultWorkspaceId": null,
     "timezone": "America/New_York"
   }

@@ -152,7 +152,7 @@ export interface ChatQuickStartCollection {
 export interface WorkspaceAgentsCollection {
   findAll(): { workspaceId: string; agentId: string; role: string | null; joinedAt: string }[];
   create(record: { workspaceId: string; agentId: string; role: string | null; joinedAt: string }): { workspaceId: string; agentId: string; role: string | null; joinedAt: string };
-  delete(id: string): boolean;
+  delete(workspaceId: string, agentId: string): boolean;
 }
 
 export interface ProjectAgentsCollection {

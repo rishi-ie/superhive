@@ -37,12 +37,6 @@ export class WorkspacesAgentsRepository {
   }
 
   removeAgent(workspaceId: string, agentId: string): boolean {
-    const before = this.ds.workspaceAgents.findAll().length;
-    this.ds.workspaceAgents.findAll().forEach(w => {
-      if (w.workspaceId === workspaceId && w.agentId === agentId) {
-        void this.ds.workspaceAgents.delete(`${w.workspaceId}:${w.agentId}`);
-      }
-    });
-    return this.ds.workspaceAgents.findAll().length < before;
+    return this.ds.workspaceAgents.delete(workspaceId, agentId);
   }
 }

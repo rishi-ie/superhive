@@ -525,8 +525,16 @@ export class DbDataSource implements DataSource {
         this._notify();
         return item;
       },
-      delete: (_id: string): boolean => {
-        void _id;
+      delete: (workspaceId: string, agentId: string): boolean => {
+        const before = this._workspaceAgents.length;
+        this._workspaceAgents = this._workspaceAgents.filter(
+          (wa) => !(wa.workspaceId === workspaceId && wa.agentId === agentId),
+        );
+        if (this._workspaceAgents.length < before) {
+          this._persist('DELETE FROM workspace_agents WHERE workspace_id = ? AND agent_id = ?', [workspaceId, agentId]);
+          this._notify();
+          return true;
+        }
         return false;
       },
     };
