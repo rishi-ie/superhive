@@ -23,11 +23,7 @@ import { Label } from '@/components/ui/Label';
 import { useToast } from '@/lib/toast-context';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listAgents } from '@/data/agents/store';
-import { createProject } from '@/data/projects/store';
-import { spawnAgentStub } from '@/lib/agent-manager';
-import { createBundle } from '@/data/okf/fs';
 import { STROKE_WIDTH } from '@/lib/constants';
-import type { Project } from '@/data/projects/interface';
 
 const COLOR_SWATCHES = [
   { name: 'Blue',   value: '#0562EF' },
@@ -45,7 +41,6 @@ const MAX_CRITERIA = 500;
 export type CreateProjectDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreated?: (project: Project) => void;
   defaultWorkspaceId?: string;
 };
 
@@ -62,7 +57,6 @@ export type CreateProjectDialogProps = {
 export function CreateProjectDialog({
   open,
   onOpenChange,
-  onCreated,
   defaultWorkspaceId,
 }: CreateProjectDialogProps) {
   const toast = useToast();
@@ -102,24 +96,7 @@ export function CreateProjectDialog({
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    setSubmitting(true);
-    const project = createProject({
-      title: title.trim(),
-      workspaceId,
-      description,
-      successCriteria,
-      color,
-      agentIds: Array.from(selectedAgentIds),
-    });
-    if (!project) {
-      toast({ title: 'Could not create project', type: 'error' });
-      setSubmitting(false);
-      return;
-    }
-    spawnAgentStub({ kind: 'project', entityId: project.id, name: 'Project Agent' });
-    void createBundle(project.id).catch(() => { /* ignore — bundle optional */ });
-    toast({ title: 'Project created', description: project.title });
-    onCreated?.(project);
+    toast({ title: 'Coming soon', description: 'Project creation — wire later', type: 'info' });
     onOpenChange(false);
   };
 

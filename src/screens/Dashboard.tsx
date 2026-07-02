@@ -307,8 +307,8 @@ export function Dashboard({
   }, [openTab]);
 
   const handleCreateProject = useCallback(() => {
-    setCreateProjectOpen(true);
-  }, []);
+    toast({ title: 'Coming soon', description: 'Project creation — wire later', type: 'info' });
+  }, [toast]);
 
   const handleCreateTicket = useCallback(() => {
     setCreateTicketOpen(true);
@@ -321,11 +321,6 @@ export function Dashboard({
   const handleCreateAgent = useCallback(() => {
     toast({ title: 'Agent creation wizard', description: 'Coming soon (Phases 32-37 are manual).', type: 'info' });
   }, [toast]);
-
-  const handleProjectCreated = useCallback((project: import('@/data/projects/interface').Project) => {
-    bumpProjectsVersion();
-    openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: project.id }));
-  }, [openTab, bumpProjectsVersion]);
 
   const handleTerminateAgent = useCallback((agentId: string) => {
     terminateAgentProcess(agentId);
@@ -625,7 +620,6 @@ export function Dashboard({
       <CreateProjectDialog
         open={createProjectOpen}
         onOpenChange={setCreateProjectOpen}
-        onCreated={handleProjectCreated}
         defaultWorkspaceId={activeWorkspaceId}
       />
       <CreateTicketDialog
