@@ -11,7 +11,7 @@ import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ColorPicker } from './shared/ColorPicker';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 
 /**
  * Account settings page — manage your identity, default workspace, and session.

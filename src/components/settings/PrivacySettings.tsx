@@ -8,10 +8,10 @@ import { ResetSection } from './shared/ResetSection';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
-import { ConfirmationModal } from '@/components/right-auxiliary/shared';
+import { ConfirmationModal } from '@/modals/ConfirmationModal';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
-import { listWorkspaces, deleteWorkspace, deleteAllWorkspaces } from '@/data/workspaces/store';
+import { useToast } from '@/toasts/context';
+import { listWorkspaces, deleteWorkspace, deleteAllWorkspaces } from '@/data/workspace/store';
 import { deleteAllBundles } from '@/data/okf/fs';
 import { Trash2 } from 'lucide-react';
 

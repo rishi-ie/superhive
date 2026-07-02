@@ -16,7 +16,7 @@ import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ResetSection } from './shared/ResetSection';
 import { ShortcutHint } from '@/components/shortcuts';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import { themeStore } from '@/data/themes';
 import { STROKE_WIDTH } from '@/lib/constants';
 

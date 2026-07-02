@@ -11,7 +11,7 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import type { PlanTier } from '@/data/settings/interface';
 
 type BillingPeriod = 'monthly' | 'yearly';

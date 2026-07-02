@@ -37,25 +37,29 @@ bun run electron:preview   # vite build + electron .
 ```
 src/
 ├── App.tsx · main.tsx · index.css         # React entry, Tailwind v4 theme vars
-├── screens/                               # Dashboard.tsx (3-panel) · Settings.tsx
 ├── components/
-│   ├── center-workspace/                  # Tabbed workspace views (HomeView, Projects, Tickets, Channels, Agents, Chat, …)
-│   ├── left-nav/                          # Sidebar: TeamSelector, accordion, HelpPopover
-│   ├── right-auxiliary/                   # Telemetry, audit queue, per-entity inboxes
-│   │   ├── inbox/  dashboard/  global-stats/  sessions/  shared/  telemetry/  project/
-│   ├── settings/                          # SettingsSidebar + 10 settings pages + shared/
 │   ├── ui/                                # shadcn + custom primitives — reuse, don't reinvent
+│   ├── settings/                          # SettingsSidebar + 10 settings pages + shared/
 │   ├── shortcuts/                         # KbdGroup, ShortcutHint, CommandPalette
 │   ├── channels/  chat/                   # tiny shared helpers
-├── data/
+├── pages/
+│   ├── Dashboard.tsx · Settings.tsx       # top-level page shells
+│   ├── LeftNav/                           # Fleet Command sidebar
+│   ├── CenterWorkspace/                   # Operations Deck — tabbed workspace (HomeView, Projects, Tickets, …)
+│   └── RightAuxiliary/                    # Avionics — telemetry, audit, per-entity inboxes
+├── modals/                                # ALL modal/dialog components in one place
+├── toasts/                                # ALL toast components + context in one place
+├── functions/                             # Pure business logic (no React, no DataSource)
+├── data/                                  # Data layer (seam + repository pattern)
+│   ├── datasource/                        # DataSource interface + DbDataSource (libSQL)
+│   ├── config/                            # static config: settings-registry, themes, nav, right-panel-tabs
 │   ├── seed/                              # static SQL seed — 18 tables, bundled via Vite ?raw
 │   ├── settings/                          # Settings type + settings.json (seed defaults)
-│   ├── config/                            # static config: settings-registry, themes, nav, right-panel-tabs, wizard configs
-│   └── {domain}/                          # one folder per data domain; interface.ts + store.ts
+│   └── {domain}/                          # one folder per data domain (singular: agent, project, …)
 ├── lib/
 │   ├── shortcuts/                         # single source of shortcut truth
 │   ├── settings-context.tsx               # applies appearance → DOM
-│   ├── toast-context.tsx · constants.ts · utils.ts (cn) · markdown · debounce · …
+│   ├── constants.ts · utils.ts (cn) · markdown · debounce · …
 ├── hooks/ · types/                        # small helpers
 electron/main.ts · preload.ts              # Electron main + contextBridge (use electron-log, not console.log)
 ```
@@ -87,16 +91,39 @@ electron/main.ts · preload.ts              # Electron main + contextBridge (use
 
 | New thing | Put in |
 |---|---|
-| Reusable across any panel | `src/components/ui/` |
-| Only used in settings pages | `src/components/settings/shared/` |
-| Only used in right-auxiliary | `src/components/right-auxiliary/` (or sub-dir) |
-| Center panel content | `src/components/center-workspace/` |
-| Left / right sidebar / shortcuts UI | `src/components/{left-nav \| right-auxiliary \| shortcuts}/` |
-| Pure utility (no React) | `src/lib/` |
+| Reusable UI primitive | `src/components/ui/` |
+| Top-level page shell | `src/pages/{Dashboard,Settings,LeftNav,CenterWorkspace,RightAuxiliary}/` |
+| Any modal/dialog component | `src/modals/` |
+| Any toast component | `src/toasts/` |
+| Pure business logic (no React, no DataSource) | `src/functions/` |
 | Static config (wizards, nav, tabs, themes) | `src/data/config/` |
-| A data domain | `src/data/{domain}/` with `interface.ts` + `store.ts` |
+| A data domain | `src/data/{domain}/` (singular) with `interface.ts` + `repository.ts` + `store.ts` |
 | Keyboard shortcut runtime | `src/lib/shortcuts/` |
 | Keyboard shortcut UI | `src/components/shortcuts/` |
+| Pure utility (no React) | `src/lib/` |
+
+### functions/ vs data/ split
+
+- **`functions/`** — pure logic: validation, transformation, orchestration rules. No `getDataSource()` calls.
+- **`data/{domain}/store.ts`** — thin persistence wrapper. Imports pure helpers from `functions/` and delegates persistence to `DataSource`.
+
+Example:
+```typescript
+// functions/projects.ts (pure)
+export function validateProjectInput(input: CreateProjectInput) {
+  const title = input.title.trim();
+  if (!title || !input.workspaceId) return null;
+  return { title };
+}
+
+// data/project/store.ts (persistence)
+import { validateProjectInput } from '@/functions/projects';
+export function createProject(input) {
+  const validated = validateProjectInput(input);
+  if (!validated) return null;
+  return repo.create({ ...input, title: validated.title });
+}
+```
 
 Always create an `index.ts` barrel when 2+ sibling files exist. **Never** create files at `src/components/` root.
 
@@ -125,7 +152,7 @@ Domain primitives (custom, not in shadcn) — keep them as-is: `IconButton`, `St
 
 **Today, the only implementation is `DbDataSource`** (`src/data/datasource/db-source.ts`). On first boot it loads `src/data/seed/seed.sql` (bundled via Vite `?raw`) and executes all statements against libSQL. Schema versioning is tracked in `schema_meta`; mismatches trigger a drop-and-recreate.
 
-**Adding a new domain:** create `src/data/{domain}/interface.ts` + `src/data/{domain}/store.ts`. Add seed INSERTs to `src/data/seed/seed.sql`. No factory changes.
+**Adding a new domain:** create `src/data/{domain}/interface.ts` + `src/data/{domain}/repository.ts` + `src/data/{domain}/store.ts`. Add seed INSERTs to `src/data/seed/seed.sql`. No factory changes. Domain folders are singular (`agent`, `project`, `ticket`, …).
 
 **Verify the seam holds:**
 ```sh

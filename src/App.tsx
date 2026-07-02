@@ -12,9 +12,9 @@ import {
   MAX_RIGHT_WIDTH,
   TITLEBAR_Y_MAC_PX,
 } from '@/lib/constants';
-import { Dashboard } from './screens/Dashboard';
-import { Settings } from './screens/Settings';
-import { ToastProvider } from './lib/toast-context';
+import { Dashboard } from '@/pages/Dashboard';
+import { Settings } from '@/pages/Settings';
+import { ToastProvider } from '@/toasts/context';
 import { SettingsProvider } from './lib/settings-context';
 import { TooltipProvider } from './components/ui/TooltipProvider';
 

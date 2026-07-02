@@ -17,15 +17,15 @@
  * old schema is dropped entirely, fresh SCHEMA applied, and seed.sql executed.
  */
 import type { DataSource, Collection } from './types';
-import type { Workspace } from '@/data/workspaces/interface';
-import type { Project, ChannelMessage } from '@/data/projects/interface';
-import type { UniversalTicket } from '@/data/tickets/interface';
-import type { Agent, Telemetry, Permissions, AuditItem, PendingQuestion } from '@/data/agents/interface';
+import type { Workspace } from '@/data/workspace/interface';
+import type { Project, ChannelMessage } from '@/data/project/interface';
+import type { UniversalTicket } from '@/data/ticket/interface';
+import type { Agent, Telemetry, Permissions, AuditItem, PendingQuestion } from '@/data/agent/interface';
 import type { Theme } from '@/data/settings/interface';
 import type { ActivityEvent } from '@/data/activity/interface';
 import type { ChatThread, Message, ChatQuickStartItem } from '@/data/chat/interface';
-import type { FavoriteRef } from '@/data/favorites/interface';
-import type { CostUsageEntry } from '@/data/cost-usage/interface';
+import type { FavoriteRef } from '@/data/favorite/interface';
+import type { CostUsageEntry } from '@/data/cost_usage/interface';
 import { SCHEMA, SCHEMA_VERSION } from './schema';
 import seedSql from '../seed/seed.sql?raw';
 import type {

@@ -40,7 +40,7 @@ import {
   DialogFooter,
 } from '@/components/ui/Dialog';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import type { ModelProviderConfig } from '@/data/settings/interface';
 
 /* ─── Catalog definitions ──────────────────────────────────────────────────── */

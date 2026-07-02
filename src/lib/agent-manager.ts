@@ -6,7 +6,7 @@
  * in `agent_processes` so future spawned agents can be tracked. Real
  * subprocess spawning lands when general-v1 ships.
  */
-import { registerAgentProcess, setAgentProcessStatus } from '@/data/agent_processes/store';
+import { registerAgentProcess, setAgentProcessStatus } from '@/data/agent_process/store';
 
 const STUB_STATUS = 'STUB';
 

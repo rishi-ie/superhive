@@ -22,7 +22,7 @@ import {
 } from './chord';
 import { detectPlatform, type Platform } from './platform';
 
-import type { CenterTab } from '@/data/tabs/interface';
+import type { CenterTab } from '@/data/tab/interface';
 import type { Page } from '@/App';
 import type { RightPanelTabId } from '@/data/config/right-panel-tabs';
 

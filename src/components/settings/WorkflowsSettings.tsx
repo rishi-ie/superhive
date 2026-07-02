@@ -9,7 +9,7 @@ import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import { formatRelativeTime } from '@/lib/relative-time';
 
 const CRON_HELP = 'Cron expression: minute hour day month weekday. Example: "0 9 * * 1-5" = 9am Mon–Fri.';

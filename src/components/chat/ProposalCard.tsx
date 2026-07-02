@@ -6,8 +6,8 @@ import { useState } from 'react';
 import { ClipboardCheck, Pencil, X, Check } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
-import { useToast } from '@/lib/toast-context';
-import { createTicket } from '@/data/tickets/store';
+import { useToast } from '@/toasts/context';
+import { createTicket } from '@/data/ticket/store';
 import { useWsEvents } from '@/lib/ws-client';
 
 export type Proposal = {

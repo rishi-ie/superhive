@@ -10,10 +10,10 @@ import { Switch } from '@/components/ui/Switch';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { StatCard } from '@/components/ui/StatCard';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import { useSettings } from '@/lib/settings-context';
 import { Download } from 'lucide-react';
-import { listCostUsage } from '@/data/cost-usage/store';
+import { listCostUsage } from '@/data/cost_usage/store';
 
 
 function UsageChart({ data }: { data: { date: string; cost: number }[] }) {

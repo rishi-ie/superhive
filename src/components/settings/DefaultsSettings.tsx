@@ -9,7 +9,7 @@ import {
   Eye, Settings, Inbox, Clock, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useSettings } from '@/lib/settings-context';
-import { useToast } from '@/lib/toast-context';
+import { useToast } from '@/toasts/context';
 import { Card, CardContent } from '@/components/ui/Card';
 import { SelectableCard } from './shared/SelectableCard';
 import { SettingsPageHeader } from './shared/SettingsPageHeader';
@@ -18,7 +18,7 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Pill } from '@/components/ui/Pill';
 import { IconButton } from '@/components/ui/IconButton';
 import { getInitials } from '@/lib/initials';
-import { listWorkspaces } from '@/data/workspaces/store';
+import { listWorkspaces } from '@/data/workspace/store';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type {
   StartupView,

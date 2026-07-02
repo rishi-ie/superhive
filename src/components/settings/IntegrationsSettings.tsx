@@ -12,8 +12,8 @@ import { SettingSection } from './shared/SettingSection';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
 import { Pill } from '@/components/ui/Pill';
-import { ConfirmationModal } from '@/components/right-auxiliary/shared/ConfirmationModal';
-import { useToast } from '@/lib/toast-context';
+import { ConfirmationModal } from '@/modals/ConfirmationModal';
+import { useToast } from '@/toasts/context';
 import {
   listIntegrations,
   connectIntegration,
@@ -21,9 +21,9 @@ import {
   listChannels,
   addChannel,
   removeChannel,
-} from '@/data/integrations/store';
+} from '@/data/integration/store';
 import { STROKE_WIDTH } from '@/lib/constants';
-import type { Integration, IntegrationProvider } from '@/data/integrations/store';
+import type { Integration, IntegrationProvider } from '@/data/integration/store';
 import type { LucideIcon } from 'lucide-react';
 
 type ProviderMeta = {

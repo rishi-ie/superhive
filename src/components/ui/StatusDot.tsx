@@ -1,7 +1,7 @@
 /**
  * Agent status indicator dot with pulse/spinner for active states.
  */
-import type { AgentStatus } from '@/data/agents/interface';
+import type { AgentStatus } from '@/data/agent/interface';
 import { Loader2 } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 

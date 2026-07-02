@@ -5,7 +5,7 @@
  * performs the corresponding side effect. Adding a new shortcut means adding
  * one handler here, then registering it in the ACTIONS map.
  */
-import type { CenterTabType } from '@/data/tabs/interface';
+import type { CenterTabType } from '@/data/tab/interface';
 import type { ShortcutAPI } from './useGlobalShortcuts';
 
 function buildTab(api: ShortcutAPI, type: CenterTabType, title: string) {

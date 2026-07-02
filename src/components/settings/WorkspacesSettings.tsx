@@ -15,11 +15,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Select';
 import { TextInput } from '@/components/ui/TextInput';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
-import { ConfirmationModal } from '@/components/right-auxiliary/shared';
-import { useToast } from '@/lib/toast-context';
-import { listWorkspaces, createWorkspace, renameWorkspace, setRetention, archiveWorkspace } from '@/data/workspaces/store';
+import { ConfirmationModal } from '@/modals/ConfirmationModal';
+import { useToast } from '@/toasts/context';
+import { listWorkspaces, createWorkspace, renameWorkspace, setRetention, archiveWorkspace } from '@/data/workspace/store';
 import { spawnAgentStub } from '@/lib/agent-manager';
-import type { Workspace } from '@/data/workspaces/store';
+import type { Workspace } from '@/data/workspace/store';
 
 const RETENTION_OPTIONS = [
   { value: 30, label: '30 days' },
@@ -237,6 +237,7 @@ export function WorkspacesSettings() {
     const trimmed = createName.trim();
     if (!trimmed) return;
     const ws = createWorkspace({ name: trimmed });
+    if (!ws) return;
     spawnAgentStub({ kind: 'workspace', entityId: ws.id, name: 'Workspace Agent' });
     setTrigger(t => t + 1);
     setShowCreate(false);
