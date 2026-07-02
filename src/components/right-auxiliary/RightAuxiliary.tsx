@@ -32,7 +32,6 @@ import { TicketManageTab } from './TicketManageTab';
 import { ChannelOverviewTab } from './ChannelOverviewTab';
 import { ChannelManageTab } from './ChannelManageTab';
 import { GlobalStatsTab } from './global-stats/GlobalStatsTab';
-import { DashboardOverview } from './dashboard/DashboardOverview';
 import { DashboardInbox } from './dashboard/DashboardInbox';
 import { AgentInbox } from './inbox/AgentInbox';
 import { TicketInbox } from './inbox/TicketInbox';
@@ -91,7 +90,6 @@ export function RightAuxiliary({
   onChannelClick,
   onTicketClick,
   onThreadSelect,
-  onOpenTab,
   onProjectsChanged,
 }: RightAuxiliaryProps) {
   const isResizingRef = useRef(false);
@@ -288,10 +286,21 @@ export function RightAuxiliary({
                 onChannelClick={onChannelClick}
               />
             )}
-            {context.kind === 'dashboard' && (
-              <DashboardOverview
-                onTicketClick={onTicketClick}
-                onOpenTab={onOpenTab}
+            {context.kind === 'workspace-agent' && (
+              <GlobalStatsTab
+                kind="universal-agents"
+                agents={universalAgentsData}
+                workspaces={workspacesData}
+                onAgentClick={onAgentClick}
+              />
+            )}
+            {context.kind === 'project-agent' && (
+              <GlobalStatsTab
+                kind="universal-projects"
+                projects={universalProjectsData}
+                universalTickets={universalTickets}
+                workspaces={workspacesData}
+                onProjectClick={onProjectSelect}
               />
             )}
           </>
@@ -343,8 +352,14 @@ export function RightAuxiliary({
             {context.kind === 'channel' && channelData && (
               <ChannelInbox channelId={channelData.id} />
             )}
-            {context.kind === 'dashboard' && (
+            {context.kind === 'workspace-agent' && (
               <DashboardInbox
+                onTicketClick={onTicketClick}
+              />
+            )}
+            {context.kind === 'project-agent' && projectData && (
+              <ProjectInbox
+                project={projectData}
                 onTicketClick={onTicketClick}
               />
             )}
@@ -352,7 +367,10 @@ export function RightAuxiliary({
         );
 
       case 'sessions':
-        if (context.kind === 'agent') {
+        if (context.kind === 'agent' || context.kind === 'project-agent') {
+          return <SessionsView onThreadSelect={onThreadSelect} />;
+        }
+        if (context.kind === 'workspace-agent') {
           return <SessionsView onThreadSelect={onThreadSelect} />;
         }
         return (
@@ -395,7 +413,7 @@ export function RightAuxiliary({
         className="flex h-full flex-col bg-sidebar border-l border-border/50"
         style={{ width: `${width}px`, minWidth: `${width}px` }}
       >
-        <div className="h-9 shrink-0" />
+        <div className="h-[47.5px] shrink-0" />
         {showEmptyState ? (
           <EmptyState
             title="No selection"

@@ -36,7 +36,8 @@ export interface ElectronAPI {
   };
   agents: {
     terminateAll: () => Promise<void>;
-  };
+    terminate: (ulid: string) => Promise<void>;
+  },
 }
 
 type OkfTreeNode = {
@@ -82,6 +83,7 @@ contextBridge.exposeInMainWorld('electron', {
   },
   agents: {
     terminateAll: () => ipcRenderer.invoke('agents:terminate-all'),
+    terminate: (ulid: string) => ipcRenderer.invoke('agents:terminate', ulid),
   },
 });
 

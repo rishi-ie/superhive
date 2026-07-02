@@ -18,7 +18,8 @@ export type RightPanelContext =
   | { kind: 'universal-agents' }
   | { kind: 'universal-projects' }
   | { kind: 'universal-channels' }
-  | { kind: 'dashboard' }
+  | { kind: 'workspace-agent'; workspaceId: string }
+  | { kind: 'project-agent'; projectId: string; workspaceId: string }
   | null;
 
 export type RightPanelTab = {
@@ -46,7 +47,8 @@ const CONTEXT_VISIBLE_TABS: Record<string, RightPanelTabId[]> = {
   'universal-agents': ['overview'],
   'universal-projects': ['overview'],
   'universal-channels': ['overview'],
-  dashboard:         ['overview', 'inbox'],
+  'workspace-agent':  ['overview'],
+  'project-agent':    ['overview', 'sessions'],
 };
 
 export function getRightPanelTabs(context: RightPanelContext): RightPanelTab[] {

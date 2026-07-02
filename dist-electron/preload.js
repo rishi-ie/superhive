@@ -33,7 +33,10 @@ contextBridge.exposeInMainWorld("electron", {
 		deleteBundle: (projectId) => ipcRenderer.invoke("okf:delete-bundle", projectId),
 		deleteAllBundles: () => ipcRenderer.invoke("okf:delete-all-bundles")
 	},
-	agents: { terminateAll: () => ipcRenderer.invoke("agents:terminate-all") }
+	agents: {
+		terminateAll: () => ipcRenderer.invoke("agents:terminate-all"),
+		terminate: (ulid) => ipcRenderer.invoke("agents:terminate", ulid)
+	}
 });
 console.log("Preload script loaded");
 //#endregion

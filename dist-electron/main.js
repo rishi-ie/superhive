@@ -11269,6 +11269,10 @@ ipcMain.handle("agents:terminate-all", () => {
 	import_main.default.info("Terminating all agent processes (best-effort)");
 	return true;
 });
+ipcMain.handle("agents:terminate", (_event, ulid) => {
+	import_main.default.info(`Terminating agent process: ${ulid}`);
+	return true;
+});
 function parseOkfFile(raw) {
 	const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
 	if (!match) return {

@@ -26,8 +26,14 @@ export class FavoritesRepository {
   }
 
   add(ref: FavoriteRef): FavoriteItem {
+    const existing = this.ds.favorites.findAll();
+    if (existing.some(e => e.id === ref.id)) return this.resolve(ref);
     const created = this.ds.favorites.create(ref);
     return this.resolve(created);
+  }
+
+  remove(id: string): boolean {
+    return this.ds.favorites.delete(id);
   }
 }
 

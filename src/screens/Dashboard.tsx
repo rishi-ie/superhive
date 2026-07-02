@@ -29,6 +29,7 @@ import { getProject, getProjectByWorkspace, listProjectAgents, listProjects } fr
 import { listUniversalTickets } from '@/data/tickets/store';
 import { listFavorites } from '@/data/favorites/store';
 import { listAgents, getAgentWorkspace } from '@/data/agents/store';
+import { terminateAgentProcess } from '@/data/agent_processes/store';
 import { addMessageToActiveThread, getThread } from '@/data/chat/store';
 import {
   makeInitialTabState,
@@ -166,6 +167,8 @@ export function Dashboard({
     if (activeTab.type === 'universal-projects') return { kind: 'universal-projects' };
     if (activeTab.type === 'universal-channels') return { kind: 'universal-channels' };
     if (activeTab.type === 'home') return { kind: 'home', workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'workspace-agent') return { kind: 'workspace-agent', workspaceId: activeTab.workspaceId };
+    if (activeTab.type === 'project-agent') return { kind: 'project-agent', projectId: activeTab.selectedProjectId ?? '', workspaceId: activeTab.workspaceId };
     return null;
   }, [activeTab]);
 
@@ -191,8 +194,12 @@ export function Dashboard({
       openTab(buildTab('universal-projects', ws, 'Projects'));
     } else if (id === 'tickets') {
       openTab(buildTab('tickets', ws, 'Tickets'));
+    } else if (id === 'meta-hive') {
+      openTab(buildTab('universal-agents', ws, 'Agents'));
+    } else if (id === 'remote') {
+      toast({ title: 'Remote agents', description: 'Remote agent management coming soon.', type: 'info' });
     }
-  }, [openTab, activeWorkspaceId]);
+  }, [openTab, activeWorkspaceId, toast]);
 
   const handleWorkspaceSelect = useCallback((workspace: Workspace) => {
     setActiveWorkspaceId(workspace.id);
@@ -309,13 +316,15 @@ export function Dashboard({
     openTab(buildTab('project', project.workspaceId, project.title, { selectedProjectId: project.id }));
   }, [openTab, bumpProjectsVersion]);
 
-  const handleTerminateAgent = useCallback((_agentId: string) => {
-    toast({ title: 'Terminate agent coming soon', type: 'info' });
+  const handleTerminateAgent = useCallback((agentId: string) => {
+    terminateAgentProcess(agentId);
+    window.electron.agents.terminate(agentId).catch(() => {});
+    toast({ title: 'Agent terminated', description: 'The agent process has been stopped.', type: 'success' });
   }, [toast]);
 
   const handleRefresh = useCallback(() => {
-    toast({ title: 'Refresh coming soon', type: 'info' });
-  }, [toast]);
+    window.location.reload();
+  }, []);
 
   const handleProjectSelectByWorkspace = useCallback((workspaceId: string) => {
     const project = getProjectByWorkspace(workspaceId);

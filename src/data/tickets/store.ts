@@ -20,7 +20,7 @@ export function markTicketDone(id: string): UniversalTicket | undefined {
 }
 
 export function snoozeTicket(id: string): void {
-  void id;
+  repo.patch(id, { status: 'BACKLOG' });
 }
 
 export function archiveTicket(id: string): UniversalTicket | undefined {

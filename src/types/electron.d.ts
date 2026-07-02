@@ -46,6 +46,7 @@ type ElectronAPI = {
   };
   agents: {
     terminateAll: () => Promise<void>;
+    terminate: (ulid: string) => Promise<void>;
   };
 };
 

@@ -270,7 +270,7 @@ export const DEFAULT_SHORTCUTS: ShortcutDef[] = [
     category: 'panels',
     label: 'Open Sessions tab',
     description: 'Open the right-panel Sessions tab.',
-    chord: chord('Mod+Shift+l'),
+    chord: chord('Mod+Shift+;'),
     scope: 'global',
   },
 

@@ -303,6 +303,11 @@ ipcMain.handle('agents:terminate-all', () => {
   return true;
 });
 
+ipcMain.handle('agents:terminate', (_event, ulid: string) => {
+  log.info(`Terminating agent process: ${ulid}`);
+  return true;
+});
+
 function parseOkfFile(raw: string): { frontmatter: Record<string, unknown>; body: string } {
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: raw };
