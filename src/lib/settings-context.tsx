@@ -18,14 +18,14 @@ import {
   DEFAULT_SETTINGS,
   type Settings,
   type SettingsStore,
+  type Theme,
 } from '@/data/settings/interface';
-import { ALL_THEME_VARS } from '@/data/config/themes';
-import { themeStore } from '@/data/themes';
+import { ALL_THEME_VARS, DEFAULT_THEMES } from '@/data/config/themes';
 import { debounce } from '@/lib/debounce';
 import { readSettings, writeSettings } from '@/data/settings/storage';
 
-export { DEFAULT_THEMES } from '@/data/config/themes';
-export type { Theme } from '@/data/settings/interface';
+export { DEFAULT_THEMES };
+export type { Theme };
 
 function computeHighlightForeground(highlight: string): string {
   const hex = highlight.replace('#', '');
@@ -38,7 +38,7 @@ function computeHighlightForeground(highlight: string): string {
 
 function applySettingsToDOM(settings: Settings) {
   const root = document.documentElement;
-  const { themes } = themeStore;
+  const themes = DEFAULT_THEMES;
 
   ALL_THEME_VARS.forEach((k) => root.style.removeProperty(k));
 
@@ -86,7 +86,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const isFirstRender = useRef(true);
 
-  // Load settings async on mount (persisted via IPC in Electron, localStorage in dev)
   useEffect(() => {
     readSettings().then((loaded) => {
       setSettings(loaded);

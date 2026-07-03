@@ -6,42 +6,30 @@ import type { LucideIcon } from 'lucide-react';
 import {
   User,
   Paintbrush,
-  Shield,
   SlidersHorizontal,
   Keyboard,
   Globe,
   Workflow,
-  Coins,
-  Folder,
   CreditCard,
-  Puzzle,
 } from 'lucide-react';
 
 import { AccountSettings } from '@/components/settings/AccountSettings';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
-import { PrivacySettings } from '@/components/settings/PrivacySettings';
 import { DefaultsSettings } from '@/components/settings/DefaultsSettings';
 import { KeyboardSettings } from '@/components/settings/KeyboardSettings';
 import { ModelsSettings } from '@/components/settings/ModelsSettings';
 import { WorkflowsSettings } from '@/components/settings/WorkflowsSettings';
-import { CostUsageSettings } from '@/components/settings/CostUsageSettings';
-import { WorkspacesSettings } from '@/components/settings/WorkspacesSettings';
 import { BillingSettings } from '@/components/settings/BillingSettings';
-import { IntegrationsSettings } from '@/components/settings/IntegrationsSettings';
 
 export type SettingsCategoryId = 'personal' | 'workflow' | 'organization';
 export type SettingsSectionId =
   | 'account'
   | 'appearance'
-  | 'privacy'
   | 'defaults'
   | 'keyboard'
   | 'models'
   | 'workflows'
-  | 'cost-usage'
-  | 'workspaces'
-  | 'billing'
-  | 'integrations';
+  | 'billing';
 
 export type SettingsPageEntry = {
   id: SettingsSectionId;
@@ -73,13 +61,6 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
     component: AppearanceSettings,
     category: 'personal',
   },
-  privacy: {
-    id: 'privacy',
-    label: 'Privacy & Data',
-    icon: Shield,
-    component: PrivacySettings,
-    category: 'personal',
-  },
   defaults: {
     id: 'defaults',
     label: 'Defaults',
@@ -109,33 +90,11 @@ export const settingsRegistry: Record<SettingsSectionId, SettingsPageEntry> = {
     category: 'workflow',
     comingSoon: true,
   },
-  'cost-usage': {
-    id: 'cost-usage',
-    label: 'Cost & Usage',
-    icon: Coins,
-    component: CostUsageSettings,
-    category: 'workflow',
-    comingSoon: true,
-  },
-  workspaces: {
-    id: 'workspaces',
-    label: 'Workspaces',
-    icon: Folder,
-    component: WorkspacesSettings,
-    category: 'organization',
-  },
   billing: {
     id: 'billing',
     label: 'Billing & Plans',
     icon: CreditCard,
     component: BillingSettings,
-    category: 'organization',
-  },
-  integrations: {
-    id: 'integrations',
-    label: 'Integrations',
-    icon: Puzzle,
-    component: IntegrationsSettings,
     category: 'organization',
   },
 };
@@ -144,17 +103,17 @@ export const settingsCategories: SettingsCategoryMeta[] = [
   {
     id: 'personal',
     label: 'Personal',
-    sections: ['account', 'appearance', 'privacy'],
+    sections: ['account', 'appearance'],
   },
   {
     id: 'workflow',
     label: 'Workflow',
-    sections: ['defaults', 'keyboard', 'models', 'workflows', 'cost-usage'],
+    sections: ['defaults', 'keyboard', 'models', 'workflows'],
   },
   {
     id: 'organization',
     label: 'Organization',
-    sections: ['workspaces', 'billing', 'integrations'],
+    sections: ['billing'],
   },
 ];
 

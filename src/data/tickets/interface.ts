@@ -1,21 +1,11 @@
-export type UniversalTicketStatus = 'BACKLOG' | 'EXECUTING' | 'REVIEW' | 'MERGED';
-export type Priority = 'HIGH' | 'MEDIUM' | 'LOW';
-export type TicketType = 'BUG' | 'FEATURE' | 'REFACTOR' | 'INFRA';
-
-export type Assignee = {
-  name: string;
-  avatarUrl?: string;
-  isAI: boolean;
-};
-
-export type UniversalTicket = {
+export interface UniversalTicket {
   id: string;
   title: string;
   projectName: string;
   workspaceId: string;
-  status: UniversalTicketStatus;
-  priority: Priority;
-  type: TicketType;
-  assignee: Assignee;
-  archivedAt?: string | null;
-};
+  status: string;
+  priority: string;
+  type: string;
+  assignee: string | null;
+  archivedAt?: string;
+}

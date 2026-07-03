@@ -5,10 +5,6 @@ import { useEffect, useState } from 'react';
 import { SettingsSidebar } from '@/components/settings/SettingsSidebar';
 import { settingsRegistry, defaultSettingsSection, type SettingsSectionId } from '@/data/config/settings-registry';
 
-type SettingsProps = {
-  onBack: () => void;
-};
-
 function ComingSoon({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-4">
@@ -23,12 +19,9 @@ function ComingSoon({ id }: { id: string }) {
 /**
  * Full-screen settings view with sidebar navigation.
  * Listens for `settings:open-section` custom events dispatched from
- * keyboard shortcuts (see Dashboard.tsx) to jump to a specific section
- * without the user clicking in the sidebar.
- *
- * @param onBack - Callback to return to the main Dashboard
+ * keyboard shortcuts to jump to a specific section.
  */
-export function Settings({ onBack }: SettingsProps) {
+export function Settings() {
   const [activeSection, setActiveSection] = useState<SettingsSectionId>(defaultSettingsSection);
 
   useEffect(() => {
@@ -51,7 +44,6 @@ export function Settings({ onBack }: SettingsProps) {
         <SettingsSidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}
-          onBack={onBack}
         />
       </div>
       <div className="flex-1 overflow-y-auto">

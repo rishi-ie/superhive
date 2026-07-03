@@ -66,18 +66,10 @@ ipcMain.handle('window:toggle-maximize', () => {
   toggleMaximize();
 });
 
-/**
- * Returns the path to the app's user data directory.
- * Used by the renderer to resolve .superhive/ paths.
- */
 ipcMain.handle('app:get-data-dir', () => {
   return app.getPath('userData');
 });
 
-/**
- * Reads settings from .superhive/settings.json in the user data directory.
- * Falls back to empty object if file doesn't exist.
- */
 ipcMain.handle('settings:read', () => {
   const settingsPath = join(app.getPath('userData'), '.superhive', 'settings.json');
   try {
@@ -90,9 +82,6 @@ ipcMain.handle('settings:read', () => {
   return null;
 });
 
-/**
- * Writes settings to .superhive/settings.json in the user data directory.
- */
 ipcMain.handle('settings:write', (_event, content: string) => {
   const baseDir = join(app.getPath('userData'), '.superhive');
   const settingsPath = join(baseDir, 'settings.json');
@@ -157,21 +146,8 @@ ipcMain.handle('db:batch', async (_event, stmts: Array<{ sql: string; args?: unk
   }
 });
 
-ipcMain.handle('agents:terminate-all', () => {
-  log.info('Terminating all agent processes (best-effort)');
-  return true;
-});
-
-ipcMain.handle('agents:terminate', (_event, ulid: string) => {
-  log.info(`Terminating agent process: ${ulid}`);
-  return true;
-});
-
-import { startWsServer, stopWsServer } from './ws-server';
-
 app.whenReady().then(() => {
   log.info('App ready');
-  startWsServer();
   createWindow();
 
   app.on('activate', () => {
@@ -183,7 +159,6 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   log.info('All windows closed');
-  stopWsServer();
   if (process.platform !== 'darwin') {
     app.quit();
   }

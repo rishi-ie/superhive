@@ -1,11 +1,8 @@
-export type IconKey = 'user' | 'folder';
-
-export type FavoriteRef = {
+export interface FavoriteRef {
   id: string;
-  type: 'project' | 'agent';
-};
-
-export type FavoriteItem = FavoriteRef & {
+  entityId: string;
+  entityType: string;
   label: string;
-  iconKey: IconKey;
-};
+  iconKey: string;
+  createdAt: string;
+}

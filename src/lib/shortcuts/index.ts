@@ -33,6 +33,3 @@ export {
   type ShortcutScope,
   type ShortcutCategory,
 } from './registry';
-
-export { ACTIONS } from './actions';
-export { useGlobalShortcuts, getActionFor, matchShortcutForTest, type ShortcutAPI, type ShortcutOptions } from './useGlobalShortcuts';

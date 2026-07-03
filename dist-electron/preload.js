@@ -1,1 +1,20 @@
-var{contextBridge:e,ipcRenderer:t}=require("electron");e.exposeInMainWorld(`electron`,{platform:process.platform,version:process.versions.electron,toggleMaximize:()=>t.invoke(`window:toggle-maximize`),onMaximizedChanged:e=>{let n=(t,n)=>e(n);return t.on(`window:maximized-changed`,n),()=>t.removeListener(`window:maximized-changed`,n)},getDataDir:()=>t.invoke(`app:get-data-dir`),readSettings:()=>t.invoke(`settings:read`),writeSettings:e=>t.invoke(`settings:write`,e),dbQuery:(e,n)=>t.invoke(`db:query`,e,n),dbExecute:(e,n)=>t.invoke(`db:execute`,e,n),dbBatch:e=>t.invoke(`db:batch`,e),onWsEvent:e=>{let n=(t,n)=>e(n);return t.on(`ws:event`,n),()=>t.removeListener(`ws:event`,n)},agents:{terminateAll:()=>t.invoke(`agents:terminate-all`),terminate:e=>t.invoke(`agents:terminate`,e)}}),console.log(`Preload script loaded`);
+//#region electron/preload.ts
+var { contextBridge, ipcRenderer } = require("electron");
+contextBridge.exposeInMainWorld("electron", {
+	platform: process.platform,
+	version: process.versions.electron,
+	toggleMaximize: () => ipcRenderer.invoke("window:toggle-maximize"),
+	onMaximizedChanged: (callback) => {
+		const listener = (_, isMaximized) => callback(isMaximized);
+		ipcRenderer.on("window:maximized-changed", listener);
+		return () => ipcRenderer.removeListener("window:maximized-changed", listener);
+	},
+	getDataDir: () => ipcRenderer.invoke("app:get-data-dir"),
+	readSettings: () => ipcRenderer.invoke("settings:read"),
+	writeSettings: (content) => ipcRenderer.invoke("settings:write", content),
+	dbQuery: (sql, args) => ipcRenderer.invoke("db:query", sql, args),
+	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
+	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts)
+});
+console.log("Preload script loaded");
+//#endregion

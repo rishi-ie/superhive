@@ -1,5 +1,5 @@
 /**
- * Defaults settings — startup view, default workspace, view mode, time format,
+ * Defaults settings — startup view, view mode, time format,
  * kanban columns, and right-panel default tab.
  * Auto-saves each change with a toast confirmation. No Save bar.
  */
@@ -17,8 +17,6 @@ import { ResetSection } from './shared/ResetSection';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Pill } from '@/components/ui/Pill';
 import { IconButton } from '@/components/ui/IconButton';
-import { getInitials } from '@/lib/initials';
-import { listWorkspaces } from '@/data/workspaces/store';
 import { STROKE_WIDTH } from '@/lib/constants';
 import type {
   StartupView,
@@ -27,20 +25,6 @@ import type {
   KanbanColumn,
   RightPanelTab,
 } from '@/data/settings/interface';
-
-const CHART_COLORS = ['accent', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
-type ChartColor = typeof CHART_COLORS[number];
-function avatarColor(id: string): string {
-  const idx = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % CHART_COLORS.length;
-  return (CHART_COLORS[idx] as ChartColor) ?? 'accent';
-}
-const BG: Record<string, string> = {
-  'accent': 'bg-accent',
-  'chart-2': 'bg-chart-2',
-  'chart-3': 'bg-chart-3',
-  'chart-4': 'bg-chart-4',
-  'chart-5': 'bg-chart-5',
-};
 
 const STARTUP_OPTIONS: {
   value: StartupView;
@@ -68,7 +52,7 @@ const TIME_FORMAT_OPTIONS: {
 }[] = [
   { value: 'relative', label: 'Relative',  sample: '2h ago'  },
   { value: '12h',      label: '12-hour',   sample: '2:30 PM' },
-  { value: '24h',      label: '24-hour',   sample: '14:30'   },
+  { value: '24h',      label: '24-hour',    sample: '14:30'   },
 ];
 
 const KANBAN_COLUMNS: { value: KanbanColumn; label: string }[] = [
@@ -97,25 +81,22 @@ export function DefaultsSettings() {
   const { settings, update } = useSettings();
   const toast = useToast();
   const d = settings.defaults;
-  const workspaces = listWorkspaces();
 
   type DefaultsPatch = Partial<{
-  startupView: StartupView;
-  defaultWorkspaceId: string | null;
-  viewMode: ViewMode;
-  timeFormat: TimeFormat;
-  defaultKanbanColumns: KanbanColumn[];
-  rightPanelDefaultTab: RightPanelTab;
-}>;
+    startupView: StartupView;
+    viewMode: ViewMode;
+    timeFormat: TimeFormat;
+    defaultKanbanColumns: KanbanColumn[];
+    rightPanelDefaultTab: RightPanelTab;
+  }>;
 
-const apply = useCallback((patch: DefaultsPatch) => {
+  const apply = useCallback((patch: DefaultsPatch) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (update as (domain: 'defaults', patch: DefaultsPatch) => void)('defaults', patch);
     toast({ title: 'Defaults updated', type: 'success' });
   }, [update, toast]);
 
   const setStartupView = (v: StartupView) => apply({ startupView: v });
-  const setWorkspace = (id: string | null) => apply({ defaultWorkspaceId: id });
   const setViewMode = (v: ViewMode) => apply({ viewMode: v });
   const setTimeFormat = (v: TimeFormat) => apply({ timeFormat: v });
   const setRightPanelTab = (v: RightPanelTab) => apply({ rightPanelDefaultTab: v });
@@ -169,52 +150,6 @@ const apply = useCallback((patch: DefaultsPatch) => {
               );
             })}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* ─── Default Workspace ───────────────────────────────────────── */}
-      <Card className="bg-card border border-border/40">
-        <CardContent className="p-5 flex flex-col gap-4">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Default workspace</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              Which workspace is pre-selected when the app opens.
-            </p>
-          </div>
-          {workspaces.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border/60 px-4 py-6 text-center text-xs text-muted-foreground">
-              No workspaces — create one in the Workspaces settings page first.
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2.5">
-              <SelectableCard
-                title="Last opened"
-                description="Resume the workspace you last had active."
-                icon={<History size={16} strokeWidth={STROKE_WIDTH} />}
-                selected={d.defaultWorkspaceId === null}
-                onClick={() => setWorkspace(null)}
-              />
-              {workspaces.map(ws => {
-                const color = avatarColor(ws.id);
-                return (
-                  <SelectableCard
-                    key={ws.id}
-                    title={ws.name}
-                    description={ws.id}
-                    icon={
-                      <div
-                        className={`flex size-7 items-center justify-center rounded-md ${BG[color] ?? 'bg-accent'} text-[11px] font-semibold text-highlight-foreground`}
-                      >
-                        {getInitials(ws.name)}
-                      </div>
-                    }
-                    selected={d.defaultWorkspaceId === ws.id}
-                    onClick={() => setWorkspace(ws.id)}
-                  />
-                );
-              })}
-            </div>
-          )}
         </CardContent>
       </Card>
 

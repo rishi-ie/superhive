@@ -3,7 +3,7 @@
  * Nav data derived from the settings registry — single source of truth.
  */
 import { useState, useMemo } from 'react';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { SettingSearch } from './shared/SettingSearch';
 import { ComingSoonBadge } from './shared/ComingSoonBadge';
@@ -13,16 +13,14 @@ import { settingsCategories, settingsRegistry, type SettingsSectionId } from '@/
 type SettingsSidebarProps = {
   activeSection: string;
   onSectionChange: (id: SettingsSectionId) => void;
-  onBack: () => void;
 };
 
 /**
  * Settings sidebar — searchable nav with categorized sections (Personal, Workflow, Organization).
  * @param activeSection - Currently active section ID
  * @param onSectionChange - Callback when a new section is selected
- * @param onBack - Callback to return to the main Dashboard
  */
-export function SettingsSidebar({ activeSection, onSectionChange, onBack }: SettingsSidebarProps) {
+export function SettingsSidebar({ activeSection, onSectionChange }: SettingsSidebarProps) {
   const [query, setQuery] = useState('');
 
   const filteredCategories = useMemo(() => {
@@ -42,13 +40,6 @@ export function SettingsSidebar({ activeSection, onSectionChange, onBack }: Sett
   return (
     <div className="flex h-full flex-col bg-sidebar border-r border-sidebar-border/40">
       <div className="flex flex-col gap-4 px-4 pt-[calc(1rem+var(--titlebar-y,0px))] pb-3 [-webkit-app-region:drag] [&_button]:[-webkit-app-region:no-drag] [&_input]:[-webkit-app-region:no-drag] [&_a]:[-webkit-app-region:no-drag]">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors text-left w-fit -ml-0.5"
-        >
-          <ArrowLeft size={12} strokeWidth={STROKE_WIDTH} />
-          Back to Superhive
-        </button>
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
         <SettingSearch onFilter={setQuery} />
       </div>

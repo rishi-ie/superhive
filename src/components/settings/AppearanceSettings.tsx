@@ -16,8 +16,8 @@ import { SettingsPageHeader } from './shared/SettingsPageHeader';
 import { ResetSection } from './shared/ResetSection';
 import { ShortcutHint } from '@/components/shortcuts';
 import { useSettings } from '@/lib/settings-context';
+import { DEFAULT_THEMES } from '@/data/config/themes';
 import { useToast } from '@/lib/toast-context';
-import { themeStore } from '@/data/themes';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { DARK_PALETTE } from '@/data/config/palette';
 
@@ -114,7 +114,7 @@ function MarkdownStyleSelect({ onChange }: { onChange: (id: string) => void }) {
 export function AppearanceSettings() {
   const { settings, update } = useSettings();
   const toast = useToast();
-  const themes = themeStore.themes;
+  const themes = DEFAULT_THEMES;
   const currentThemeId = settings.appearance.theme;
 
   const handleThemeChange = (id: string) => {

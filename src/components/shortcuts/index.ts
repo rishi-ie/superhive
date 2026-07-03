@@ -6,6 +6,4 @@
 export { Hint, KbdGroup, ShortcutHint, CATEGORY_ICONS, usePlatform, formatChordText } from './Hint';
 export { ShortcutRow } from './ShortcutRow';
 export { CategoryGroup } from './CategoryGroup';
-export { CommandPalette, buildDefaultPaletteItems } from './CommandPalette';
-export type { CommandPaletteItem, CommandPaletteProps } from './CommandPalette';
 export type { HintProps, KbdGroupProps, ShortcutHintProps, ShortcutRowProps, CategoryGroupProps } from './types';
