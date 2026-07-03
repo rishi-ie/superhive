@@ -20,8 +20,9 @@ function createWindow() {
     minHeight: 600,
     title: 'Superhive',
     backgroundColor: '#151110',
+    frame: false,
     titleBarStyle: 'hidden',
-    trafficLightPosition: { x: 16, y: 18 },
+    trafficLightPosition: { x: 8, y: 8 },
     show: false,
     webPreferences: {
       preload: join(__dirname, 'preload.js'),

@@ -1,6 +1,8 @@
 import {
-  Sparkles,
-  PanelLeft,
+  Users,
+  FolderOpen,
+  Hexagon,
+  Globe,
   MoreHorizontal,
   Plus,
 } from "lucide-react";
@@ -26,15 +28,27 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1.5 text-xs text-foreground hover:bg-accent">
-                <Sparkles className="size-4" />
-                <span>Automations</span>
+              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+                <Users className="size-4" />
+                <span>Agent view</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1.5 text-xs text-foreground hover:bg-accent">
-                <PanelLeft className="size-4" />
-                <span>Customize</span>
+              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+                <FolderOpen className="size-4" />
+                <span>Project view</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+                <Hexagon className="size-4" />
+                <span>Meta Hive</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+                <Globe className="size-4" />
+                <span>Remote</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -43,7 +57,7 @@ export function SidebarRepositories() {
 
       <SidebarGroup>
         <SidebarGroupLabel className="flex h-6 items-center justify-between px-1.5 text-xs font-medium text-muted-foreground">
-          <span>Repositories</span>
+          <span className="pl-1">Repositories</span>
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
