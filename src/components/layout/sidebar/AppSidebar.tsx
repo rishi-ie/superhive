@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarTopSection } from "./SidebarTopSection";
 import { SidebarRepositories } from "./SidebarRepositories";
-import { SidebarUpgrade } from "./SidebarUpgrade";
 import { SidebarUser } from "./SidebarUser";
 
 interface AppSidebarProps {
@@ -26,8 +25,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
       <SidebarContent className="gap-2 px-2">
         <SidebarRepositories />
       </SidebarContent>
-      <SidebarFooter className="gap-2 p-3">
-        <SidebarUpgrade />
+      <SidebarFooter className="p-3">
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>

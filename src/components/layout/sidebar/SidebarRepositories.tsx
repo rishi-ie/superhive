@@ -1,6 +1,5 @@
 import {
   Sparkles,
-  Home,
   PanelLeft,
   MoreHorizontal,
   Plus,
@@ -13,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { CollapsibleSection } from "./CollapsibleSection";
 
 export function SidebarRepositories() {
   return (
@@ -57,29 +57,16 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground hover:bg-accent">
-                <Home className="size-4" />
-                <span>Home</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground transition-colors hover:bg-accent">
-                <span className="flex-1 truncate">General chat</span>
-                <span className="text-xs text-muted-foreground">12:34</span>
-              </div>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground transition-colors hover:bg-accent">
-                <span className="flex-1 truncate">General chat introduction</span>
-                <span className="text-xs text-muted-foreground">12:30</span>
-              </div>
+              <CollapsibleSection trigger="Home" defaultOpen>
+                <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm text-foreground transition-colors hover:bg-accent">
+                  <span className="flex-1 truncate">General chat</span>
+                  <span className="text-xs text-muted-foreground">12:34</span>
+                </div>
+                <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 text-sm text-foreground transition-colors hover:bg-accent">
+                  <span className="flex-1 truncate">General chat introduction</span>
+                  <span className="text-xs text-muted-foreground">12:30</span>
+                </div>
+              </CollapsibleSection>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
