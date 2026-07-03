@@ -4,13 +4,6 @@
  * always available, regardless of whether anything imports this file.
  */
 
-type OkfTreeNode = {
-  name: string;
-  path: string;
-  isDir: boolean;
-  children?: OkfTreeNode[];
-};
-
 type ElectronAPI = {
   platform: NodeJS.Platform;
   version: string;
@@ -32,18 +25,6 @@ type ElectronAPI = {
   dbExecMulti: (sql: string) => Promise<void>;
   /** Subscribe to WS events from main. Returns an unsubscribe function. */
   onWsEvent: (callback: (event: Record<string, unknown>) => void) => () => void;
-  okf: {
-    getDataDir: () => Promise<string>;
-    bundleExists: (projectId: string) => Promise<boolean>;
-    createBundle: (projectId: string) => Promise<void>;
-    readBundle: (projectId: string) => Promise<Record<string, { frontmatter: Record<string, unknown>; body: string }>>;
-    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) => Promise<void>;
-    readConcept: (projectId: string, path: string) => Promise<{ frontmatter: Record<string, unknown>; body: string } | null>;
-    listTree: (projectId: string) => Promise<OkfTreeNode | null>;
-    search: (projectId: string, query: string) => Promise<Array<{ path: string; preview: string }>>;
-    deleteBundle: (projectId: string) => Promise<void>;
-    deleteAllBundles: () => Promise<void>;
-  };
   agents: {
     terminateAll: () => Promise<void>;
     terminate: (ulid: string) => Promise<void>;

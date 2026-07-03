@@ -12,28 +12,20 @@ type HelpPopoverProps = {
   open: boolean;
   onClose: () => void;
   onHelpSelect: (id: 'docs' | 'changelog') => void;
-  onSetupWizard?: () => void;
 };
 
 const items = [
   { id: 'docs',          label: 'Documentation',  Icon: Book },
   { id: 'changelog',     label: 'Changelog',      Icon: Sparkles },
   { id: 'shortcuts',     label: 'Shortcuts',      Icon: Command, shortcutHint: 'palette.open' },
-  { id: 'setupwizard',   label: 'Setup wizard',   Icon: Sparkles },
 ];
 
 function handleItem(
   id: string,
   onHelpSelect: (id: 'docs' | 'changelog') => void,
-  onSetupWizard?: () => void,
 ) {
   if (id === 'shortcuts') {
     window.dispatchEvent(new CustomEvent('app:open-command-palette'));
-    return;
-  }
-  if (id === 'setupwizard') {
-    sessionStorage.removeItem('wizard:setup:dismissed');
-    onSetupWizard?.();
     return;
   }
   if (id === 'docs' || id === 'changelog') {
@@ -48,7 +40,7 @@ function handleItem(
  * @param onClose - Called when popover should close
  * @param onHelpSelect - Called when docs or changelog item is selected
  */
-export function HelpPopover({ anchorRef, open, onClose, onHelpSelect, onSetupWizard }: HelpPopoverProps) {
+export function HelpPopover({ anchorRef, open, onClose, onHelpSelect }: HelpPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,7 +64,7 @@ export function HelpPopover({ anchorRef, open, onClose, onHelpSelect, onSetupWiz
       {items.map(({ id, label, Icon }) => (
         <button
           key={id}
-          onClick={() => { handleItem(id, onHelpSelect, onSetupWizard); onClose(); }}
+          onClick={() => { handleItem(id, onHelpSelect); onClose(); }}
           className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-popover-foreground hover:bg-accent transition-colors"
         >
           <Icon size={14} strokeWidth={STROKE_WIDTH} className="shrink-0" />

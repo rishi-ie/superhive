@@ -1,13 +1,9 @@
 /**
- * Single project detail with stats, execution stream, swarm roster, communications, and OKF sidebar.
+ * Single project detail with stats, execution stream, swarm roster, and communications.
  */
-import { useState } from 'react';
 import { ExecutionStream } from './ExecutionStream';
 import { SwarmRoster } from './SwarmRoster';
 import { Communications } from './Communications';
-import { OkfSidebar } from './OkfSidebar';
-import { OkfConceptView } from './OkfConceptView';
-import { OkfConceptEditor } from './OkfConceptEditor';
 import { EmptyState } from '@/components/right-auxiliary/shared/EmptyState';
 import { Layers } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
@@ -36,9 +32,6 @@ export function ProjectDetailView({
   onChannelClick,
   onOpenTickets,
 }: ProjectDetailViewProps) {
-  const [activeFile, setActiveFile] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-
   if (!project) {
     return (
       <EmptyState
@@ -88,49 +81,6 @@ export function ProjectDetailView({
           </div>
         </div>
       </div>
-      <aside className="w-72 border-l border-border/40 flex flex-col">
-        {activeFile ? (
-          editing ? (
-            <OkfConceptEditor
-              projectId={project.id}
-              path={activeFile}
-              onClose={() => setEditing(false)}
-              onSaved={() => { setEditing(false); setActiveFile(activeFile); }}
-            />
-          ) : (
-            <OkfConceptView
-              projectId={project.id}
-              path={activeFile}
-              onEdit={() => setEditing(true)}
-            />
-          )
-        ) : (
-          <div className="flex-1 overflow-y-auto">
-            <OkfSidebar
-              projectId={project.id}
-              onFileSelect={(p) => { setActiveFile(p); setEditing(false); }}
-              activeFile={activeFile}
-            />
-          </div>
-        )}
-        {activeFile && !editing && (
-          <div className="border-t border-border/40">
-            <button
-              onClick={() => setActiveFile(null)}
-              className="w-full px-3 py-1.5 text-[10px] text-muted-foreground hover:text-foreground text-left"
-            >
-              ← Back to tree
-            </button>
-            <div className="max-h-40 overflow-y-auto">
-              <OkfSidebar
-                projectId={project.id}
-                onFileSelect={(p) => { setActiveFile(p); setEditing(false); }}
-                activeFile={activeFile}
-              />
-            </div>
-          </div>
-        )}
-      </aside>
     </div>
   );
 }

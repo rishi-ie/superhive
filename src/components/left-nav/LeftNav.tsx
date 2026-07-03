@@ -29,7 +29,6 @@ type LeftNavProps = {
   currentView?: string;
   onToggleLeftPanel?: () => void;
   onToggleRightPanel?: () => void;
-  onSetupWizard?: () => void;
 };
 
 const MIN_WIDTH = 180;
@@ -73,7 +72,6 @@ export function LeftNav({
   onAgentSelect,
   onToggleLeftPanel,
   onToggleRightPanel,
-  onSetupWizard,
 }: LeftNavProps) {
   const isResizingRef = useRef(false);
 
@@ -142,7 +140,7 @@ export function LeftNav({
           <AccordionCore currentView={currentView} onItemClick={onNavItemClick} onAgentClick={onAgentSelect} onProjectClick={onProjectClick} />
         </div>
 
-        <Utilities onSettingsClick={onSettingsClick} onSetupWizard={onSetupWizard} />
+        <Utilities onSettingsClick={onSettingsClick} />
 
         <ArchivedProjectsSection
           projects={archivedProjects}

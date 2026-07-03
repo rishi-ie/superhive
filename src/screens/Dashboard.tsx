@@ -514,41 +514,7 @@ export function Dashboard({
   useGlobalShortcuts(shortcutApi);
 
   // ─── Setup wizard dismissal state (session-persisted) ─────────────────
-  const [setupDismissed, setSetupDismissed] = useState<boolean>(() =>
-    sessionStorage.getItem('wizard:setup:dismissed') === '1',
-  );
-  const [readyDismissedByWs, setReadyDismissedByWs] = useState<Record<string, boolean>>(() => {
-    try {
-      return JSON.parse(sessionStorage.getItem('wizard:ready:dismissed') ?? '{}');
-    } catch {
-      return {};
-    }
-  });
 
-  const readyDismissed = !!readyDismissedByWs[activeWorkspaceId];
-
-  const dismissSetup = useCallback(() => {
-    setSetupDismissed(true);
-    sessionStorage.setItem('wizard:setup:dismissed', '1');
-  }, []);
-
-  const dismissReady = useCallback(() => {
-    setReadyDismissedByWs(prev => {
-      const next = { ...prev, [activeWorkspaceId]: true };
-      sessionStorage.setItem('wizard:ready:dismissed', JSON.stringify(next));
-      return next;
-    });
-  }, [activeWorkspaceId]);
-
-  const handleWorkspaceCreated = useCallback((id: string) => {
-    setActiveWorkspaceId(id);
-    dismissSetup();
-  }, [dismissSetup]);
-
-  const handleReopenSetup = useCallback(() => {
-    setSetupDismissed(false);
-    sessionStorage.removeItem('wizard:setup:dismissed');
-  }, []);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">
@@ -572,7 +538,6 @@ export function Dashboard({
         onProjectClick={handleProjectSelect}
         onToggleLeftPanel={handleToggleLeftPanel}
         onToggleRightPanel={handleToggleRightPanel}
-        onSetupWizard={handleReopenSetup}
       />
       <CenterWorkspace
         tabs={tabState.tabs}
@@ -592,12 +557,6 @@ export function Dashboard({
         onCreateTicket={handleCreateTicket}
         onCreateChannel={handleCreateChannel}
         onCreateAgent={handleCreateAgent}
-        setupDismissed={setupDismissed}
-        readyDismissed={readyDismissed}
-        onWorkspaceCreated={handleWorkspaceCreated}
-        onDismissSetup={dismissSetup}
-        onDismissReady={dismissReady}
-        onOpenSettings={() => onNavigate('settings')}
       />
       <ErrorBoundary>
         <RightAuxiliary

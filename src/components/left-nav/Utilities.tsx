@@ -9,15 +9,13 @@ import { HelpModal } from './HelpModal';
 
 type UtilitiesProps = {
   onSettingsClick?: () => void;
-  onSetupWizard?: () => void;
 };
 
 /**
  * Sticky bottom utilities bar — settings and help popover.
  * @param onSettingsClick - Called when settings button is clicked
- * @param onSetupWizard - Called to re-open the setup wizard
  */
-export function Utilities({ onSettingsClick, onSetupWizard }: UtilitiesProps) {
+export function Utilities({ onSettingsClick }: UtilitiesProps) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [helpSection, setHelpSection] = useState<'docs' | 'changelog' | null>(null);
   const helpBtnRef = useRef<HTMLButtonElement>(null);
@@ -47,7 +45,6 @@ export function Utilities({ onSettingsClick, onSetupWizard }: UtilitiesProps) {
             open={helpOpen}
             onClose={() => setHelpOpen(false)}
             onHelpSelect={setHelpSection}
-            onSetupWizard={onSetupWizard}
           />
         </div>
       </div>

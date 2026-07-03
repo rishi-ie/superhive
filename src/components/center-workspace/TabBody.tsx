@@ -14,7 +14,6 @@ import { HomeView } from './HomeView';
 import { WorkspaceAgentView } from './WorkspaceAgentView';
 import { ProjectAgentView } from './ProjectAgentView';
 import { TicketDetailView } from './TicketDetailView';
-import { SetupWizardView } from './setup';
 import { getProject } from '@/data/projects/store';
 import { listWorkspaces } from '@/data/workspaces/store';
 import type { CenterTab } from '@/data/tabs/interface';
@@ -32,12 +31,6 @@ type TabBodyProps = {
   onCreateTicket?: () => void;
   onCreateChannel?: () => void;
   onCreateAgent?: () => void;
-  setupDismissed: boolean;
-  readyDismissed: boolean;
-  onWorkspaceCreated: (id: string) => void;
-  onDismissSetup: () => void;
-  onDismissReady: () => void;
-  onOpenSettings: () => void;
 };
 
 /**
@@ -53,12 +46,6 @@ type TabBodyProps = {
  * @param onCreateTicket - Called when "New Ticket" is clicked
  * @param onCreateChannel - Called when "New Channel" is clicked
  * @param onCreateAgent - Called when "New Agent" is clicked
- * @param setupDismissed - Whether the no-workspace setup wizard has been dismissed this session
- * @param readyDismissed - Whether the per-workspace ready wizard has been dismissed for the active workspace
- * @param onWorkspaceCreated - Called after a new workspace is created via the setup wizard
- * @param onDismissSetup - Called when the user dismisses the setup wizard
- * @param onDismissReady - Called when the user dismisses the ready wizard
- * @param onOpenSettings - Called when the user wants to open settings
  */
 export function TabBody({
   tab,
@@ -73,12 +60,6 @@ export function TabBody({
   onCreateTicket,
   onCreateChannel,
   onCreateAgent,
-  setupDismissed,
-  readyDismissed,
-  onWorkspaceCreated,
-  onDismissSetup,
-  onDismissReady,
-  onOpenSettings,
 }: TabBodyProps) {
   if (!tab) return null;
   switch (tab.type) {
@@ -128,23 +109,6 @@ export function TabBody({
 
     case 'home': {
       const workspaces = listWorkspaces();
-      const isSetupActive = workspaces.length === 0 && !setupDismissed;
-
-      if (isSetupActive) {
-        return (
-          <SetupWizardView
-            tab={tab}
-            setupDismissed={setupDismissed}
-            readyDismissed={readyDismissed}
-            onWorkspaceCreated={onWorkspaceCreated}
-            onDismissSetup={onDismissSetup}
-            onDismissReady={onDismissReady}
-            onOpenSettings={onOpenSettings}
-            onCreateProject={onCreateProject ?? (() => {})}
-          />
-        );
-      }
-
       const workspaceName = workspaces.find(w => w.id === tab.workspaceId)?.name ?? tab.workspaceId;
       return (
         <HomeView

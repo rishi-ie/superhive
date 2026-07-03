@@ -22,30 +22,11 @@ export interface ElectronAPI {
   dbExecMulti: (sql: string) => Promise<void>;
   /** Subscribe to WS events from main. Returns an unsubscribe function. */
   onWsEvent: (callback: (event: Record<string, unknown>) => void) => () => void;
-  okf: {
-    getDataDir: () => Promise<string>;
-    bundleExists: (projectId: string) => Promise<boolean>;
-    createBundle: (projectId: string) => Promise<void>;
-    readBundle: (projectId: string) => Promise<Record<string, { frontmatter: Record<string, unknown>; body: string }>>;
-    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) => Promise<void>;
-    readConcept: (projectId: string, path: string) => Promise<{ frontmatter: Record<string, unknown>; body: string } | null>;
-    listTree: (projectId: string) => Promise<OkfTreeNode | null>;
-    search: (projectId: string, query: string) => Promise<Array<{ path: string; preview: string }>>;
-    deleteBundle: (projectId: string) => Promise<void>;
-    deleteAllBundles: () => Promise<void>;
-  };
   agents: {
     terminateAll: () => Promise<void>;
     terminate: (ulid: string) => Promise<void>;
   },
 }
-
-type OkfTreeNode = {
-  name: string;
-  path: string;
-  isDir: boolean;
-  children?: OkfTreeNode[];
-};
 
 contextBridge.exposeInMainWorld('electron', {
   platform: process.platform,
@@ -67,19 +48,6 @@ contextBridge.exposeInMainWorld('electron', {
     const listener = (_: unknown, payload: unknown) => callback(payload as Record<string, unknown>);
     ipcRenderer.on('ws:event', listener);
     return () => ipcRenderer.removeListener('ws:event', listener);
-  },
-  okf: {
-    getDataDir: () => ipcRenderer.invoke('okf:get-data-dir'),
-    bundleExists: (projectId: string) => ipcRenderer.invoke('okf:bundle-exists', projectId),
-    createBundle: (projectId: string) => ipcRenderer.invoke('okf:create-bundle', projectId),
-    readBundle: (projectId: string) => ipcRenderer.invoke('okf:read-bundle', projectId),
-    writeConcept: (projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) =>
-      ipcRenderer.invoke('okf:write-concept', projectId, path, frontmatter, body),
-    readConcept: (projectId: string, path: string) => ipcRenderer.invoke('okf:read-concept', projectId, path),
-    listTree: (projectId: string) => ipcRenderer.invoke('okf:list-tree', projectId),
-    search: (projectId: string, query: string) => ipcRenderer.invoke('okf:search', projectId, query),
-    deleteBundle: (projectId: string) => ipcRenderer.invoke('okf:delete-bundle', projectId),
-    deleteAllBundles: () => ipcRenderer.invoke('okf:delete-all-bundles'),
   },
   agents: {
     terminateAll: () => ipcRenderer.invoke('agents:terminate-all'),

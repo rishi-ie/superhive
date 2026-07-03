@@ -12,7 +12,6 @@ import { ConfirmationModal } from '@/components/right-auxiliary/shared';
 import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { listWorkspaces, deleteWorkspace, deleteAllWorkspaces } from '@/data/workspaces/store';
-import { deleteAllBundles } from '@/data/okf/fs';
 import { Trash2 } from 'lucide-react';
 
 const RETENTION_OPTIONS = [
@@ -172,7 +171,6 @@ export function PrivacySettings() {
           try {
             await window.electron.agents.terminateAll();
             await deleteAllWorkspaces();
-            await deleteAllBundles();
             resetAll();
             setTrigger(t => t + 1);
             toast({ title: 'Account deleted', description: 'All data has been wiped.' });

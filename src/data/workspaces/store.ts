@@ -2,14 +2,13 @@
  * Workspaces store — mutable list of workspaces plus active workspace tracking.
  *
  * Built-in read functions (listWorkspaces, getCurrentWorkspace) are used everywhere.
- * The createWorkspace / setCurrentWorkspace mutators are used by the setup wizards.
+ * createWorkspace is used by WorkspacesSettings and the workspace setup wizard.
  *
  * Delegates to WorkspacesRepository, which wraps DataSource.workspaces.
  * currentWorkspaceId is tracked locally (ephemeral session state, not persisted).
  */
 import { getDataSource } from '@/data/datasource/index';
 import { WorkspacesRepository } from './repository';
-import { deleteBundle as deleteOkfBundle } from '@/data/okf/fs';
 import type { Workspace } from './interface';
 
 const repo = new WorkspacesRepository(getDataSource());
@@ -49,10 +48,6 @@ export function archiveWorkspace(id: string): Workspace | undefined {
 export async function deleteWorkspace(id: string): Promise<boolean> {
   const projects = getDataSource().projects.findAll().filter((p) => p.workspaceId === id);
   const projectIds = projects.map((p) => p.id);
-
-  for (const pid of projectIds) {
-    try { await deleteOkfBundle(pid); } catch { /* ignore */ }
-  }
 
   for (const pid of projectIds) {
     getDataSource().projects.delete(pid);

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { join, dirname, relative } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import log from 'electron-log/main';
@@ -167,137 +167,6 @@ ipcMain.handle('db:exec-multi', async (_event, sql: string) => {
   }
 });
 
-/* ─── OKF file-system handlers ──────────────────────────────────────────── */
-
-ipcMain.handle('okf:get-data-dir', () => {
-  return join(app.getPath('userData'), '.superhive', 'okf');
-});
-
-ipcMain.handle('okf:bundle-exists', (_event, projectId: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  return fs.existsSync(bundleDir);
-});
-
-ipcMain.handle('okf:create-bundle', (_event, projectId: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (!fs.existsSync(bundleDir)) {
-    fs.mkdirSync(bundleDir, { recursive: true });
-  }
-  return true;
-});
-
-ipcMain.handle('okf:read-bundle', async (_event, projectId: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (!fs.existsSync(bundleDir)) return {};
-  const result: Record<string, { frontmatter: Record<string, unknown>; body: string }> = {};
-  const entries = fs.readdirSync(bundleDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.isFile() && entry.name.endsWith('.md')) {
-      const filePath = join(bundleDir, entry.name);
-      const raw = fs.readFileSync(filePath, 'utf-8');
-      const { frontmatter, body } = parseOkfFile(raw);
-      result[entry.name] = { frontmatter, body };
-    }
-  }
-  return result;
-});
-
-ipcMain.handle('okf:write-concept', (_event, projectId: string, path: string, frontmatter: Record<string, unknown>, body: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (!fs.existsSync(bundleDir)) {
-    fs.mkdirSync(bundleDir, { recursive: true });
-  }
-  const filePath = join(bundleDir, path);
-  const yaml = Object.entries(frontmatter).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join('\n');
-  fs.writeFileSync(filePath, `---\n${yaml}\n---\n${body}`, 'utf-8');
-  return true;
-});
-
-ipcMain.handle('okf:delete-bundle', (_event, projectId: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (fs.existsSync(bundleDir)) {
-    fs.rmSync(bundleDir, { recursive: true, force: true });
-    log.info(`Deleted OKF bundle for project ${projectId}`);
-  }
-  return true;
-});
-
-ipcMain.handle('okf:delete-all-bundles', () => {
-  const okfRoot = join(app.getPath('userData'), '.superhive', 'okf');
-  if (fs.existsSync(okfRoot)) {
-    fs.rmSync(okfRoot, { recursive: true, force: true });
-    log.info('Deleted all OKF bundles');
-  }
-  return true;
-});
-
-type OkfTreeNode = {
-  name: string;
-  path: string;
-  isDir: boolean;
-  children?: OkfTreeNode[];
-};
-
-function buildTree(root: string, base: string): OkfTreeNode {
-  const stat = fs.statSync(root);
-  const rel = relative(base, root);
-  if (stat.isFile()) {
-    return { name: base.split('/').pop() ?? root, path: rel, isDir: false };
-  }
-  const entries = fs.readdirSync(root, { withFileTypes: true });
-  return {
-    name: base.split('/').pop() ?? root,
-    path: rel,
-    isDir: true,
-    children: entries
-      .sort((a, b) => {
-        if (a.isDirectory() && !b.isDirectory()) return -1;
-        if (!a.isDirectory() && b.isDirectory()) return 1;
-        return a.name.localeCompare(b.name);
-      })
-      .map((e) => buildTree(join(root, e.name), e.name)),
-  };
-}
-
-ipcMain.handle('okf:list-tree', (_event, projectId: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (!fs.existsSync(bundleDir)) return null;
-  return buildTree(bundleDir, projectId);
-});
-
-ipcMain.handle('okf:read-concept', (_event, projectId: string, path: string) => {
-  const filePath = join(app.getPath('userData'), '.superhive', 'okf', projectId, path);
-  if (!fs.existsSync(filePath)) return null;
-  const raw = fs.readFileSync(filePath, 'utf-8');
-  return parseOkfFile(raw);
-});
-
-ipcMain.handle('okf:search', (_event, projectId: string, query: string) => {
-  const bundleDir = join(app.getPath('userData'), '.superhive', 'okf', projectId);
-  if (!fs.existsSync(bundleDir)) return [];
-  const q = query.toLowerCase();
-  const results: Array<{ path: string; preview: string }> = [];
-  const walk = (dir: string) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = join(dir, e.name);
-      if (e.isDirectory()) {
-        walk(full);
-      } else if (e.name.endsWith('.md')) {
-        const content = fs.readFileSync(full, 'utf-8');
-        if (content.toLowerCase().includes(q)) {
-          const rel = relative(bundleDir, full);
-          const idx = content.toLowerCase().indexOf(q);
-          const start = Math.max(0, idx - 40);
-          const preview = (start > 0 ? '…' : '') + content.slice(start, idx + 60).replace(/\n/g, ' ');
-          results.push({ path: rel, preview });
-        }
-      }
-    }
-  };
-  walk(bundleDir);
-  return results.slice(0, 50);
-});
-
 ipcMain.handle('agents:terminate-all', () => {
   log.info('Terminating all agent processes (best-effort)');
   return true;
@@ -307,22 +176,6 @@ ipcMain.handle('agents:terminate', (_event, ulid: string) => {
   log.info(`Terminating agent process: ${ulid}`);
   return true;
 });
-
-function parseOkfFile(raw: string): { frontmatter: Record<string, unknown>; body: string } {
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  if (!match) return { frontmatter: {}, body: raw };
-  const yamlStr = match[1]!;
-  const body = match[2]!;
-  const frontmatter: Record<string, unknown> = {};
-  for (const line of yamlStr.split('\n')) {
-    const colonIdx = line.indexOf(':');
-    if (colonIdx === -1) continue;
-    const key = line.slice(0, colonIdx).trim();
-    const val = line.slice(colonIdx + 1).trim();
-    try { frontmatter[key] = JSON.parse(val); } catch { frontmatter[key] = val; }
-  }
-  return { frontmatter, body };
-}
 
 import { startWsServer, stopWsServer } from './ws-server';
 

@@ -38,7 +38,6 @@ export interface DataSource {
   get workspaces(): Collection<import('../workspaces/interface').Workspace>;
   get workspaceAgents(): WorkspaceAgentsCollection;
   get projectAgents(): ProjectAgentsCollection;
-  get okfBundles(): OkfBundlesCollection;
   get agentProcesses(): AgentProcessesCollection;
   get integrations(): IntegrationsCollection;
   get integrationChannels(): IntegrationChannelsCollection;
@@ -159,21 +158,6 @@ export interface ProjectAgentsCollection {
   findAll(): { projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null }[];
   create(record: { projectId: string; agentId: string; role?: string; currentStatus?: string; assignedTicketId?: string; joinedAt?: string; contextSnapshotPath?: string }): { projectId: string; agentId: string; role: string | null; currentStatus: string; assignedTicketId: string | null; joinedAt: string; contextSnapshotPath: string | null };
   delete(projectId: string, agentId: string): boolean;
-}
-
-export interface OkfBundleRecord {
-  projectId: string;
-  rootPath: string;
-  lastSyncedAt: string | null;
-  entryCount: number;
-}
-
-export interface OkfBundlesCollection {
-  findAll(): OkfBundleRecord[];
-  findByProjectId(projectId: string): OkfBundleRecord | undefined;
-  upsert(projectId: string, rootPath: string): OkfBundleRecord;
-  setLastSynced(projectId: string, at: string): void;
-  incrementEntryCount(projectId: string): void;
 }
 
 export type AgentProcessRecord = {
