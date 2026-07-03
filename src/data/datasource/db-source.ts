@@ -14,7 +14,7 @@
  *     app still runs with no data
  *
  * One-shot seed: checked via schema_meta version stamp. On version mismatch the
- * old schema is dropped entirely, fresh SCHEMA applied, and seed.sql executed.
+ * old schema is dropped entirely and fresh SCHEMA applied.
  */
 import type { DataSource, Collection } from './types';
 import type { Workspace } from '@/data/workspaces/interface';
@@ -27,7 +27,6 @@ import type { ChatThread, Message, ChatQuickStartItem } from '@/data/chat/interf
 import type { FavoriteRef } from '@/data/favorites/interface';
 import type { CostUsageEntry } from '@/data/cost-usage/interface';
 import { SCHEMA, SCHEMA_VERSION } from './schema';
-import seedSql from '../seed/seed.sql?raw';
 import type {
   TelemetryCollection,
   PermissionsCollection,
@@ -133,8 +132,6 @@ export class DbDataSource implements DataSource {
           [String(SCHEMA_VERSION)],
         );
 
-        // 2d. Seed
-        await window.electron.dbExecMulti(seedSql);
       }
 
       // 3. Hydrate cache

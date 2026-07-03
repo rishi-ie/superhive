@@ -18,8 +18,6 @@ export interface ElectronAPI {
   dbExecute: (sql: string, args?: unknown[]) => Promise<{ rowsAffected: number; lastInsertRowid?: number }>;
   /** Executes a batch of statements inside one transaction-like call. */
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => Promise<void>;
-  /** Executes a multi-statement SQL string (e.g. seed.sql) in one call. */
-  dbExecMulti: (sql: string) => Promise<void>;
   /** Subscribe to WS events from main. Returns an unsubscribe function. */
   onWsEvent: (callback: (event: Record<string, unknown>) => void) => () => void;
   agents: {
@@ -43,7 +41,6 @@ contextBridge.exposeInMainWorld('electron', {
   dbQuery: (sql: string, args?: unknown[]) => ipcRenderer.invoke('db:query', sql, args),
   dbExecute: (sql: string, args?: unknown[]) => ipcRenderer.invoke('db:execute', sql, args),
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => ipcRenderer.invoke('db:batch', stmts),
-  dbExecMulti: (sql: string) => ipcRenderer.invoke('db:exec-multi', sql),
   onWsEvent: (callback: (event: Record<string, unknown>) => void) => {
     const listener = (_: unknown, payload: unknown) => callback(payload as Record<string, unknown>);
     ipcRenderer.on('ws:event', listener);

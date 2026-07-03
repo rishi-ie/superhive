@@ -15,7 +15,6 @@ contextBridge.exposeInMainWorld("electron", {
 	dbQuery: (sql, args) => ipcRenderer.invoke("db:query", sql, args),
 	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
 	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts),
-	dbExecMulti: (sql) => ipcRenderer.invoke("db:exec-multi", sql),
 	onWsEvent: (callback) => {
 		const listener = (_, payload) => callback(payload);
 		ipcRenderer.on("ws:event", listener);

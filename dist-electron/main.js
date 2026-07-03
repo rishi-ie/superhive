@@ -11143,14 +11143,6 @@ ipcMain.handle("db:batch", async (_event, stmts) => {
 		throw err;
 	}
 });
-ipcMain.handle("db:exec-multi", async (_event, sql) => {
-	try {
-		await (await getDbClient()).executeMultiple(sql);
-	} catch (err) {
-		import_main.default.error("db:exec-multi error:", err);
-		throw err;
-	}
-});
 ipcMain.handle("agents:terminate-all", () => {
 	import_main.default.info("Terminating all agent processes (best-effort)");
 	return true;

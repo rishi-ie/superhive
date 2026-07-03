@@ -14,7 +14,7 @@
  *   - `meta` is a key/value table for app-level singletons (seeded flag, currentWorkspaceId).
  *   - `schema_meta` tracks the schema version only — independent of user data.
  */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS schema_meta (

@@ -21,8 +21,6 @@ type ElectronAPI = {
   dbExecute: (sql: string, args?: unknown[]) => Promise<{ rowsAffected: number; lastInsertRowid?: number }>;
   /** Executes a batch of statements against the libSQL data DB. */
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => Promise<void>;
-  /** Executes a multi-statement SQL string (e.g. seed.sql) in one call. */
-  dbExecMulti: (sql: string) => Promise<void>;
   /** Subscribe to WS events from main. Returns an unsubscribe function. */
   onWsEvent: (callback: (event: Record<string, unknown>) => void) => () => void;
   agents: {

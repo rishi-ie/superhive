@@ -157,16 +157,6 @@ ipcMain.handle('db:batch', async (_event, stmts: Array<{ sql: string; args?: unk
   }
 });
 
-ipcMain.handle('db:exec-multi', async (_event, sql: string) => {
-  try {
-    const client = await getDbClient();
-    await client.executeMultiple(sql);
-  } catch (err) {
-    log.error('db:exec-multi error:', err);
-    throw err;
-  }
-});
-
 ipcMain.handle('agents:terminate-all', () => {
   log.info('Terminating all agent processes (best-effort)');
   return true;
