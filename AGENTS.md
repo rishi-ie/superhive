@@ -131,16 +131,54 @@ See `.ai/skills/shadcn.md` for MCP configuration.
 superhive/
 ├── electron/              # Electron main/preload (DO NOT MODIFY)
 ├── src/                   # Renderer process (React app)
-│   ├── components/        # React components (shadcn goes here)
-│   │   └── ui/            # shadcn components
-│   ├── lib/               # Utilities (utils.ts lives here)
-│   ├── screens/           # Screen/page components
+│   ├── components/
+│   │   ├── ui/            # shadcn UI components
+│   │   ├── layout/        # Layout components (AppLayout, Sidebar, Workspace, etc.)
+│   │   └── shared/        # Shared/reusable components
+│   ├── lib/               # Utilities (cn() in utils.ts)
+│   ├── routes/            # Route definitions
+│   │   └── routes.tsx     # react-router configuration
+│   ├── screens/           # Page components
+│   │   ├── Dashboard/     # Dashboard page
+│   │   └── Settings/      # Settings page (to be built)
+│   ├── App.tsx            # Root component with Router
+│   ├── main.tsx           # Entry point
 │   └── index.css          # Global styles + Tailwind theme
 ├── .ai/                   # Agent configuration
 │   └── skills/            # Skills (shadcn.md + local-ui.md)
-├── components.json       # shadcn configuration
+├── components.json        # shadcn configuration
 └── package.json
 ```
+
+### Layout Structure
+
+The app uses a **3-column layout** defined in `src/components/layout/`:
+
+```
+┌──────────┬───────────────────────┬────────────┐
+│   Left   │      Workspace         │   Right    │
+│ Sidebar  │      (Center)         │   Panel    │
+│  w-64    │      flex-1           │   w-64     │
+└──────────┴───────────────────────┴────────────┘
+```
+
+- **LeftSidebar** (`w-64`): Navigation and context
+- **Workspace** (`flex-1`): Main content area with `<Outlet />` for nested routes
+- **RightPanel** (`w-64`): Details, properties, or inspector
+
+### Routing
+
+Routes are defined in `src/routes/routes.tsx` using react-router:
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | Dashboard | Landing page |
+| `/settings` | Settings | Settings page (to be built) |
+
+When adding new pages:
+1. Create the screen component in `src/screens/<PageName>/`
+2. Add the route to `src/routes/routes.tsx`
+3. Compose the page using components from `src/components/`
 
 ---
 

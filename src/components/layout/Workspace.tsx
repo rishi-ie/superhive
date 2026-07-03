@@ -7,10 +7,8 @@ interface WorkspaceProps {
 
 export function Workspace({ children }: WorkspaceProps) {
   return (
-    <main className="flex flex-1 flex-col overflow-hidden">
-      <ScrollArea className="flex-1">
-        {children}
-      </ScrollArea>
+    <main className="relative flex flex-1 flex-col overflow-hidden bg-background">
+      <ScrollArea className="flex-1">{children}</ScrollArea>
     </main>
   );
 }

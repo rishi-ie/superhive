@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import '@fontsource-variable/geist';
 import App from './App';
 import { bootDataSource } from '@/data/datasource/db-source';
 import './index.css';

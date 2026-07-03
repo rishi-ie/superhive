@@ -1,15 +1,28 @@
-/**
- * Dashboard — landing screen after boot.
- * Uses the AppLayout 3-column structure.
- */
+import {
+  BottomHint,
+  ComposerCard,
+  SuggestedActions,
+  TopHandle,
+  TopRightControls,
+  WorkspaceBreadcrumb,
+} from "./components";
+
 export function Dashboard() {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-background">
-      <div className="flex flex-col items-center gap-3">
-        <h1 className="text-3xl font-semibold text-foreground">Dashboard</h1>
-        <span className="text-xs text-muted-foreground">
-          Welcome to Superhive
-        </span>
+    <div className="relative flex h-full w-full flex-col bg-background">
+      <TopHandle />
+      <TopRightControls />
+
+      <div className="flex flex-1 items-center justify-center px-8">
+        <div className="flex w-full max-w-[620px] flex-col items-center gap-8">
+          <WorkspaceBreadcrumb />
+          <ComposerCard />
+          <SuggestedActions />
+        </div>
+      </div>
+
+      <div className="px-8 pb-6">
+        <BottomHint />
       </div>
     </div>
   );

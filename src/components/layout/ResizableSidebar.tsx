@@ -1,17 +1,19 @@
 import * as React from "react";
-import { Outlet } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./sidebar/AppSidebar";
-import { Workspace } from "./Workspace";
+import { cn } from "@/lib/utils";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
 const DEFAULT_WIDTH = 330;
 
-export function AppLayout() {
-  const [sidebarWidth, setSidebarWidth] = React.useState(DEFAULT_WIDTH);
+interface ResizableSidebarProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function ResizableSidebar({ children, className }: ResizableSidebarProps) {
+  const [width, setWidth] = React.useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = React.useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
 
   const startResizing = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -24,11 +26,11 @@ export function AppLayout() {
 
   const resize = React.useCallback(
     (e: MouseEvent) => {
-      if (isResizing) {
+      if (isResizing && sidebarRef.current) {
         let newWidth = e.clientX;
         if (newWidth < MIN_WIDTH) newWidth = MIN_WIDTH;
         if (newWidth > MAX_WIDTH) newWidth = MAX_WIDTH;
-        setSidebarWidth(newWidth);
+        setWidth(newWidth);
       }
     },
     [isResizing]
@@ -50,23 +52,16 @@ export function AppLayout() {
   }, [isResizing, resize, stopResizing]);
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-background">
-        <div
-          ref={containerRef}
-          className="relative flex h-full flex-shrink-0"
-          style={{ width: `${sidebarWidth}px` }}
-        >
-          <AppSidebar width={sidebarWidth} />
-          <div
-            onMouseDown={startResizing}
-            className="absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-white/10 active:bg-white/20"
-          />
-        </div>
-        <Workspace>
-          <Outlet />
-        </Workspace>
-      </div>
-    </SidebarProvider>
+    <div
+      ref={sidebarRef}
+      style={{ width: `${width}px` }}
+      className={cn("relative flex h-full flex-shrink-0", className)}
+    >
+      {children}
+      <div
+        onMouseDown={startResizing}
+        className="absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-white/10 active:bg-white/20"
+      />
+    </div>
   );
 }
