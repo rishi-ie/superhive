@@ -13,6 +13,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CollapsibleSection } from "./CollapsibleSection";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function SidebarRepositories() {
   return (
@@ -40,18 +45,32 @@ export function SidebarRepositories() {
         <SidebarGroupLabel className="flex h-7 items-center justify-between px-2 text-xs font-medium text-muted-foreground">
           <span>Repositories</span>
           <div className="flex items-center gap-1">
-            <button
-              type="button"
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <Plus className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <MoreHorizontal className="size-3.5" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <Plus className="size-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Add repository</span>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <MoreHorizontal className="size-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <span>Repository options</span>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </SidebarGroupLabel>
         <SidebarGroupContent>

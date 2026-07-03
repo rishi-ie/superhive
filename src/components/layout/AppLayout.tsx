@@ -60,7 +60,7 @@ export function AppLayout() {
           <AppSidebar width={sidebarWidth} />
           <div
             onMouseDown={startResizing}
-            className="absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-white/10 active:bg-white/20"
+            className="absolute right-0 top-0 z-50 h-full w-1 cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
           />
         </div>
         <Workspace>

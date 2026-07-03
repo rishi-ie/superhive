@@ -1,10 +1,12 @@
-/**
- * Root shell — renders the router.
- */
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Routes } from "./routes/routes";
 
 function App() {
-  return <Routes />;
+  return (
+    <TooltipProvider>
+      <Routes />
+    </TooltipProvider>
+  );
 }
 
 export default App;

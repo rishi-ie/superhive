@@ -8,6 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function ComposerCard() {
   return (
@@ -17,13 +22,20 @@ export function ComposerCard() {
         className="min-h-[120px] resize-none border-0 bg-transparent px-4 py-4 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
       />
       <div className="flex items-center justify-between gap-2 px-1 pb-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <Plus className="size-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Plus className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span>Add attachment</span>
+          </TooltipContent>
+        </Tooltip>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -44,13 +56,20 @@ export function ComposerCard() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
-        >
-          <Mic className="size-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+            >
+              <Mic className="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <span>Voice input</span>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </Card>
   );
