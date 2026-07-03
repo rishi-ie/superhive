@@ -9,7 +9,7 @@ import {
 
 export function Dashboard() {
   return (
-    <div className="flex h-full w-full flex-col bg-background">
+    <div className="flex h-full w-full flex-col bg-[#141414]">
       <div className="flex justify-center pt-2">
         <TopHandle />
       </div>
