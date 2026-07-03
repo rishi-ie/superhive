@@ -155,7 +155,7 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onCr
             <button
               type="button"
               onClick={() => { setQuery(''); setStatusFilter('ALL'); }}
-              className="mt-2 text-xs text-chart-1 hover:underline"
+              className="mt-2 text-xs text-accent hover:underline"
             >
               Clear filters
             </button>
@@ -180,7 +180,7 @@ export function UniversalChannelsView({ onChannelSelect, selectedChannelId, onCr
                       {channel.topic}
                     </span>
                     {channel.unread && (
-                      <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />
+                      <span className="size-1.5 rounded-full bg-accent shrink-0" />
                     )}
                     <span className="text-[10px] text-muted-foreground shrink-0">
                       {formatRelativeTime(channel.updatedAt)}

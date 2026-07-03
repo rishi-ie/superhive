@@ -22,7 +22,7 @@ function AgentCard({ agent, selected, onClick }: AgentCardProps) {
       onClick={onClick}
       type="button"
       className={`flex items-center gap-2 p-2 rounded-md border bg-card hover:border-border/80 transition-colors w-full text-left ${
-        selected ? 'border-chart-1' : 'border-border'
+        selected ? 'border-accent' : 'border-border'
       }`}
     >
       <Avatar size="xs" fallback={agent.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)} />

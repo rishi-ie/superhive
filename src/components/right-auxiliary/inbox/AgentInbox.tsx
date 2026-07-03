@@ -41,8 +41,8 @@ function ApprovalCard({ item, selected, onToggle, onApprove, onDeny }: ApprovalC
     <div
       className={`
         rounded-md border border-border bg-card p-3
-        border-l-2 ${isAuth ? 'border-l-chart-1' : 'border-l-chart-2'}
-        ${selected ? 'ring-1 ring-chart-1/50' : ''}
+        border-l-2 ${isAuth ? 'border-l-accent' : 'border-l-chart-2'}
+        ${selected ? 'ring-1 ring-accent/50' : ''}
       `}
     >
       {/* Header row */}
@@ -54,14 +54,14 @@ function ApprovalCard({ item, selected, onToggle, onApprove, onDeny }: ApprovalC
           className="mt-0.5"
         />
         {isAuth ? (
-          <ShieldAlert size={13} strokeWidth={STROKE_WIDTH} className="text-chart-1 shrink-0 mt-0.5" />
+          <ShieldAlert size={13} strokeWidth={STROKE_WIDTH} className="text-accent shrink-0 mt-0.5" />
         ) : (
           <GitMerge size={13} strokeWidth={STROKE_WIDTH} className="text-chart-2 shrink-0 mt-0.5" />
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
             <span className={`text-[9px] font-semibold uppercase tracking-wider px-1 py-0.5 rounded ${
-              isAuth ? 'text-chart-1 bg-chart-1/10' : 'text-chart-2 bg-chart-2/10'
+              isAuth ? 'text-accent bg-accent/10' : 'text-chart-2 bg-chart-2/10'
             }`}>
               {isAuth ? 'AUTH' : (item.prId ?? 'DIFF')}
             </span>

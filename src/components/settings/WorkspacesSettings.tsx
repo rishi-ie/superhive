@@ -29,15 +29,15 @@ const RETENTION_OPTIONS = [
   { value: -1, label: 'Forever' },
 ];
 
-const CHART_COLORS = ['chart-1', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
+const CHART_COLORS = ['accent', 'chart-2', 'chart-3', 'chart-4', 'chart-5'] as const;
 
 function avatarColor(id: string): string {
   const idx = id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % CHART_COLORS.length;
-  return CHART_COLORS[idx] ?? 'chart-1';
+  return CHART_COLORS[idx] ?? 'accent';
 }
 
 const BG: Record<string, string> = {
-  'chart-1': 'bg-chart-1',
+  'accent': 'bg-accent',
   'chart-2': 'bg-chart-2',
   'chart-3': 'bg-chart-3',
   'chart-4': 'bg-chart-4',
@@ -87,7 +87,7 @@ function WorkspaceCard({ workspace, isDefault, onRetentionChange, onRename, onAr
           <div className="flex items-center gap-4 px-4 py-3">
             {/* Avatar */}
             <div
-              className={`size-9 shrink-0 rounded-md ${BG[color] ?? 'bg-chart-1'} flex items-center justify-center text-[11px] font-bold text-sidebar-primary-foreground uppercase select-none`}
+              className={`size-9 shrink-0 rounded-md ${BG[color] ?? 'bg-accent'} flex items-center justify-center text-[11px] font-bold text-sidebar-primary-foreground uppercase select-none`}
             >
               {initials}
             </div>

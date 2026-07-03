@@ -47,7 +47,7 @@ export function SegmentedControl({ options, value, onChange, size = 'md', classN
               sizeMap[size]
             } ${
               isActive
-                ? 'bg-chart-1/15 text-foreground'
+                ? 'bg-accent/15 text-foreground'
                 : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary'
             } ${!isFirst ? 'border-l border-border' : ''} ${
               !isLast ? 'border-r border-border' : ''

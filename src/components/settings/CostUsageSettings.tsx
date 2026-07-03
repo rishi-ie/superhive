@@ -26,7 +26,7 @@ function UsageChart({ data }: { data: { date: string; cost: number }[] }) {
           return (
             <div
               key={i}
-              className="flex-1 rounded-sm bg-chart-1/60 hover:bg-chart-1 transition-colors group relative cursor-default"
+              className="flex-1 rounded-sm bg-accent/60 hover:bg-accent transition-colors group relative cursor-default"
               style={{ height: `${height}%` }}
             >
               <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-popover border border-border rounded-md px-2 py-1 text-[10px] text-foreground whitespace-nowrap pointer-events-none z-10 shadow-lg">
@@ -92,7 +92,7 @@ export function CostUsageSettings() {
           <UsageChart data={usageData} />
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <div className="size-2 rounded-sm bg-chart-1" />
+              <div className="size-2 rounded-sm bg-accent" />
               Daily spend
             </div>
             <Button variant="ghost" size="sm" onClick={handleExportCsv} className="gap-1.5">

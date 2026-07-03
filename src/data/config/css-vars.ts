@@ -30,7 +30,7 @@ export const ALL_CSS_VARS: string[] = [
   '--overlay',
   '--hover-tint',
   '--switch-thumb-shadow',
-  '--chart-1',
+  '--accent',
   '--chart-2',
   '--chart-3',
   '--chart-4',

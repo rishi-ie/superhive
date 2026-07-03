@@ -31,7 +31,7 @@ export function Checkbox({ checked = false, onCheckedChange, disabled = false, s
       onCheckedChange={onCheckedChange}
       disabled={disabled}
       className={cn(
-        `${boxSize} shrink-0 rounded border border-border bg-input hover:border-muted-foreground/60 data-[state=checked]:bg-chart-1 data-[state=checked]:border-chart-1 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed`,
+        `${boxSize} shrink-0 rounded border border-border bg-input hover:border-muted-foreground/60 data-[state=checked]:bg-accent data-[state=checked]:border-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed`,
         className
       )}
     >

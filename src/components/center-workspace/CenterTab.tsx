@@ -73,7 +73,7 @@ export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: Ce
       onContextMenu={(e) => { e.preventDefault(); }}
       className={`group relative flex items-center gap-2 h-9 px-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
         isActive
-          ? 'border-chart-1 text-foreground'
+          ? 'border-accent text-foreground'
           : 'border-transparent text-muted-foreground hover:text-foreground'
       }`}
       title={label}
@@ -84,7 +84,7 @@ export function CenterTab({ tab, workspaceName, isActive, onClick, onClose }: Ce
       <Icon size={14} strokeWidth={STROKE_WIDTH} className="shrink-0" />
       <span className="truncate max-w-[180px]">{label}</span>
       {tab.modified && (
-        <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />
+        <span className="size-1.5 rounded-full bg-accent shrink-0" />
       )}
       {tab.pinned ? null : (
         <IconButton

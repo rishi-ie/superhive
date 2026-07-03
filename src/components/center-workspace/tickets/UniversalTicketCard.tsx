@@ -34,7 +34,7 @@ export function UniversalTicketCard({ ticket, selected, onClick }: UniversalTick
       className={`
         flex flex-col p-2 rounded-md border bg-card text-left
         hover:bg-card/80 transition-colors w-full cursor-grab active:cursor-grabbing
-        ${isExecuting ? 'border-l-2 border-l-chart-1 border-border' : 'border-border'}
+        ${isExecuting ? 'border-l-2 border-l-accent border-border' : 'border-border'}
         ${selected ? 'bg-muted border-foreground/40' : ''}
       `}
     >

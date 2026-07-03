@@ -119,13 +119,13 @@ function PlanCard({ def, isCurrent, billingPeriod, onSelect }: PlanCardProps) {
     <div
       className={`
         relative flex flex-col rounded-md border p-4
-        ${def.mostPopular ? 'border-chart-1 ring-2 ring-chart-1/20' : 'border-border'}
-        ${isCurrent ? 'bg-chart-1/5 border-chart-1/60' : 'bg-card'}
+        ${def.mostPopular ? 'border-accent ring-2 ring-accent/20' : 'border-border'}
+        ${isCurrent ? 'bg-accent/5 border-accent/60' : 'bg-card'}
       `}
     >
       {def.mostPopular && (
         <div className="absolute -top-2.5 left-4">
-          <span className="inline-block bg-chart-1 text-highlight-foreground text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wide">
+          <span className="inline-block bg-accent text-highlight-foreground text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wide">
             Most Popular
           </span>
         </div>
@@ -159,7 +159,7 @@ function PlanCard({ def, isCurrent, billingPeriod, onSelect }: PlanCardProps) {
             <CheckCircle2
               size={12}
               strokeWidth={STROKE_WIDTH}
-              className="text-chart-1 shrink-0 mt-0.5"
+              className="text-accent shrink-0 mt-0.5"
             />
             <span className="text-[11px] text-muted-foreground leading-snug">{f}</span>
           </div>
@@ -226,7 +226,7 @@ function EnterpriseCard({ onContact }: EnterpriseCardProps) {
             <CheckCircle2
               size={13}
               strokeWidth={STROKE_WIDTH}
-              className="text-chart-1 shrink-0 mt-0.5"
+              className="text-accent shrink-0 mt-0.5"
             />
             <span className="text-xs text-muted-foreground leading-snug">{f}</span>
           </div>
@@ -250,7 +250,7 @@ function MetaHiveStepper({ agents, billingPeriod, onChange }: MetaHiveStepperPro
   const suffix = billingPeriod === 'yearly' ? 'agent/mo, billed yearly' : 'agent/month';
 
   return (
-    <div className="rounded-md border border-chart-1/40 bg-chart-1/5 p-4">
+    <div className="rounded-md border border-accent/40 bg-accent/5 p-4">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-semibold text-foreground">Meta-hive agents</span>
@@ -306,7 +306,7 @@ function MetaHiveStepper({ agents, billingPeriod, onChange }: MetaHiveStepperPro
       <div className="mt-2 flex items-center justify-between">
         <span className="text-[10px] text-muted-foreground">Min 1 · Max 50</span>
         {billingPeriod === 'yearly' && (
-          <span className="text-[10px] text-chart-1 font-medium">
+          <span className="text-[10px] text-accent font-medium">
             Save 20% with yearly billing
           </span>
         )}
@@ -323,7 +323,7 @@ const BILLING_OPTIONS = [
     value: 'yearly' as BillingPeriod,
     label: 'Yearly',
     icon: (
-      <span className="text-[9px] bg-chart-1/20 text-chart-1 px-1.5 py-0.5 rounded-sm font-medium">
+      <span className="text-[9px] bg-accent/20 text-accent px-1.5 py-0.5 rounded-sm font-medium">
         Save 20%
       </span>
     ),
@@ -395,7 +395,7 @@ export function BillingSettings() {
 
       {/* Current Plan + Billing Toggle */}
       <SettingSection title="Current Plan">
-        <Card className="border-chart-1/30 bg-card">
+        <Card className="border-accent/30 bg-card">
           <CardContent className="p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               {/* Left: plan info */}

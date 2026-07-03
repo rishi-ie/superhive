@@ -148,13 +148,13 @@ function FilterChip({ active, onClick, label, count, icon }: FilterChipProps) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors',
         active
-          ? 'border-chart-1 bg-chart-1/10 text-foreground'
+          ? 'border-accent bg-accent/10 text-foreground'
           : 'border-border/60 bg-card text-muted-foreground hover:text-foreground hover:bg-muted/40',
       )}
     >
       {icon}
       <span>{label}</span>
-      <span className={cn('rounded-full px-1.5 text-[9.5px] tabular-nums', active ? 'bg-chart-1/20 text-foreground/90' : 'bg-muted/60 text-muted-foreground')}>
+      <span className={cn('rounded-full px-1.5 text-[9.5px] tabular-nums', active ? 'bg-accent/20 text-foreground/90' : 'bg-muted/60 text-muted-foreground')}>
         {count}
       </span>
     </button>

@@ -52,7 +52,7 @@ function MessageRow({ message }: { message: ChannelMessage }) {
       <Avatar
         name={message.senderName}
         size="xs3"
-        color={message.isAI ? 'bg-chart-1' : 'bg-chart-2'}
+        color={message.isAI ? 'bg-accent' : 'bg-chart-2'}
         className="font-bold text-sidebar-primary-foreground shrink-0 mt-0.5"
       />
       <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ function MessageRow({ message }: { message: ChannelMessage }) {
             {message.timestamp}
           </span>
           {message.isAI && (
-            <span className="text-[8px] text-chart-1 font-medium uppercase tracking-wider">AI</span>
+            <span className="text-[8px] text-accent font-medium uppercase tracking-wider">AI</span>
           )}
         </div>
         <p className="text-[11px] text-foreground leading-relaxed line-clamp-3">

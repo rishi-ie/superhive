@@ -17,7 +17,7 @@ type UniversalListCardProps = HTMLAttributes<HTMLDivElement> & {
  */
 export function UniversalListCard({ onClick, selected, children, className = '', ...rest }: UniversalListCardProps) {
   const baseClasses = 'rounded-md border bg-card transition-colors';
-  const borderClasses = selected ? 'border-chart-1' : 'border-border hover:border-border/80';
+  const borderClasses = selected ? 'border-accent' : 'border-border hover:border-border/80';
 
   if (onClick) {
     return (

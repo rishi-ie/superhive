@@ -24,7 +24,7 @@ export function TicketCard({ ticket, agent, onClick }: TicketCardProps) {
       className={`
         flex flex-col gap-1.5 p-2 rounded-md border bg-card text-left
         hover:bg-card/80 transition-colors w-full
-        ${isExecuting ? 'border-l-2 border-l-chart-1 border-border' : 'border-border'}
+        ${isExecuting ? 'border-l-2 border-l-accent border-border' : 'border-border'}
       `}
     >
       <span className="text-[9px] font-fustat text-muted-foreground/80 bg-secondary/80 rounded px-1 py-0.5 w-fit">

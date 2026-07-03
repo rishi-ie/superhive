@@ -34,7 +34,7 @@ export function ChannelStats({ channels, onChannelClick }: ChannelStatsProps) {
       </div>
 
       {unread > 0 && (
-        <div className="text-[10px] text-chart-1 bg-chart-1/10 rounded px-2 py-1.5">
+        <div className="text-[10px] text-accent bg-accent/10 rounded px-2 py-1.5">
           {unread} channel{unread !== 1 ? 's' : ''} with unread messages
         </div>
       )}

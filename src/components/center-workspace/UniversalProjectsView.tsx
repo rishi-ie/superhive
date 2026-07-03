@@ -143,7 +143,7 @@ export function UniversalProjectsView({ onProjectSelect, selectedProjectId, onCr
             <button
               type="button"
               onClick={() => { setQuery(''); setWorkspaceFilter('ALL'); }}
-              className="mt-2 text-xs text-chart-1 hover:underline"
+              className="mt-2 text-xs text-accent hover:underline"
             >
               Clear filters
             </button>

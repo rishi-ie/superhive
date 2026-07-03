@@ -54,12 +54,12 @@ function SeeMoreCard({ onClick, heightClass }: { onClick: () => void; heightClas
       onClick={onClick}
       type="button"
       aria-label="See more"
-      className={`w-full flex items-center justify-center rounded-md border border-dashed border-border/60 hover:border-chart-1/60 hover:bg-hover-tint transition-colors group ${heightClass}`}
+      className={`w-full flex items-center justify-center rounded-md border border-dashed border-border/60 hover:border-accent/60 hover:bg-hover-tint transition-colors group ${heightClass}`}
     >
       <ArrowUpRight
         size={16}
         strokeWidth={STROKE_WIDTH}
-        className="text-muted-foreground group-hover:text-chart-1 transition-colors"
+        className="text-muted-foreground group-hover:text-accent transition-colors"
       />
     </button>
   );
@@ -192,9 +192,9 @@ export function HomeView({
                 <div className="flex items-center gap-2">
                   <span
                     className="size-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: p.color ?? 'var(--chart-1)' }}
+                    style={{ backgroundColor: p.color ?? 'var(--accent)' }}
                   />
-                  <span className="text-sm font-semibold text-foreground truncate group-hover:text-chart-1 transition-colors">
+                  <span className="text-sm font-semibold text-foreground truncate group-hover:text-accent transition-colors">
                     {p.title}
                   </span>
                 </div>
@@ -240,11 +240,11 @@ export function HomeView({
                       size="xs"
                       name={agent.name}
                       fallback={agent.name.slice(0, 2).toUpperCase()}
-                      color="bg-chart-1"
+                      color="bg-accent"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <span className="text-xs font-semibold text-foreground truncate group-hover:text-chart-1 transition-colors">
+                        <span className="text-xs font-semibold text-foreground truncate group-hover:text-accent transition-colors">
                           {agent.name}
                         </span>
                         <StatusDot status={agent.status} size="xs" />
@@ -294,7 +294,7 @@ export function HomeView({
                     strokeWidth={STROKE_WIDTH}
                     className="text-muted-foreground shrink-0"
                   />
-                  <span className="text-xs text-foreground flex-1 truncate group-hover:text-chart-1 transition-colors">
+                  <span className="text-xs text-foreground flex-1 truncate group-hover:text-accent transition-colors">
                     {ch.topic}
                   </span>
                   <ChannelStatusPill status={ch.status} />

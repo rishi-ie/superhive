@@ -36,7 +36,7 @@ export function SelectableCard({
 }: SelectableCardProps) {
   const baseClasses = 'rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
   const stateClasses = selected
-    ? 'border-chart-1/60 bg-chart-1/5'
+    ? 'border-accent/60 bg-accent/5'
     : 'border-border/40 bg-card/30 hover:border-border/80 hover:bg-card/50';
 
   const content = (

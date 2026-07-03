@@ -28,14 +28,14 @@ import type { ActivityEvent, ActivityKind } from '@/data/activity/store';
 const KIND_META: Record<ActivityKind, { icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>; tone: string; label: string }> = {
   agent_executing:     { icon: PlayCircle,          tone: 'chart-2', label: 'exec'  },
   agent_compiling:     { icon: Loader2,           tone: 'chart-3', label: 'comp'  },
-  agent_awaiting_human:{ icon: Clock,             tone: 'chart-1', label: 'await' },
+  agent_awaiting_human:{ icon: Clock,             tone: 'accent', label: 'await' },
   agent_error_loop:    { icon: AlertTriangle,     tone: 'chart-5', label: 'error' },
   agent_idle:          { icon: MinusCircle,       tone: 'muted-foreground', label: 'idle'  },
-  ticket_created:      { icon: PlusCircle,         tone: 'chart-1', label: '+'     },
+  ticket_created:      { icon: PlusCircle,         tone: 'accent', label: '+'     },
   ticket_executing:    { icon: PlayCircle,         tone: 'chart-2', label: '▶'     },
   ticket_review:       { icon: Eye,                tone: 'chart-3', label: 'review' },
   ticket_merged:       { icon: CheckCircle2,       tone: 'chart-4', label: '✓'     },
-  audit_auth:          { icon: ShieldAlert,         tone: 'chart-1', label: 'auth'   },
+  audit_auth:          { icon: ShieldAlert,         tone: 'accent', label: 'auth'   },
   audit_diff:          { icon: GitMerge,             tone: 'chart-2', label: 'diff'   },
   question_pending:    { icon: HelpCircle,           tone: 'chart-3', label: '?'      },
   channel_message:     { icon: MessageCircleMore,    tone: 'chart-4', label: 'msg'    },
@@ -45,14 +45,14 @@ const KIND_META: Record<ActivityKind, { icon: React.ComponentType<{ size?: numbe
 const KIND_PIP_COLOR: Record<ActivityKind, string> = {
   agent_executing:     'bg-chart-2',
   agent_compiling:     'bg-chart-3',
-  agent_awaiting_human:'bg-chart-1',
+  agent_awaiting_human:'bg-accent',
   agent_error_loop:    'bg-chart-5',
   agent_idle:          'bg-muted-foreground/40',
-  ticket_created:      'bg-chart-1',
+  ticket_created:      'bg-accent',
   ticket_executing:    'bg-chart-2',
   ticket_review:       'bg-chart-3',
   ticket_merged:       'bg-chart-4',
-  audit_auth:          'bg-chart-1',
+  audit_auth:          'bg-accent',
   audit_diff:          'bg-chart-2',
   question_pending:    'bg-chart-3',
   channel_message:     'bg-chart-4',
@@ -60,7 +60,7 @@ const KIND_PIP_COLOR: Record<ActivityKind, string> = {
 };
 
 const TONE_BG: Record<string, string> = {
-  'chart-1':            'bg-chart-1/10',
+  'accent':            'bg-accent/10',
   'chart-2':            'bg-chart-2/10',
   'chart-3':            'bg-chart-3/10',
   'chart-4':            'bg-chart-4/10',
@@ -69,7 +69,7 @@ const TONE_BG: Record<string, string> = {
 };
 
 const TONE_TEXT: Record<string, string> = {
-  'chart-1':            'text-chart-1',
+  'accent':            'text-accent',
   'chart-2':            'text-chart-2',
   'chart-3':            'text-chart-3',
   'chart-4':            'text-chart-4',
@@ -140,14 +140,14 @@ export function HomeActivityRow({ event, onAgentClick, onTicketClick, onChannelC
       <span className="shrink-0">
         {isAgent ? (
           <div className="relative">
-            <Avatar size="xs" name={event.actor} fallback={event.actor.slice(0, 2).toUpperCase()} color="bg-chart-1" />
+            <Avatar size="xs" name={event.actor} fallback={event.actor.slice(0, 2).toUpperCase()} color="bg-accent" />
             <div className="absolute -bottom-0.5 -right-0.5">
               <StatusDot status={agentStatus!} size="xs" />
             </div>
           </div>
         ) : (
-          <div className={`size-4 rounded-full flex items-center justify-center ${TONE_BG[meta.tone] ?? 'bg-chart-1/10'}`}>
-            <Icon size={10} strokeWidth={STROKE_WIDTH} className={TONE_TEXT[meta.tone] ?? 'text-chart-1'} />
+          <div className={`size-4 rounded-full flex items-center justify-center ${TONE_BG[meta.tone] ?? 'bg-accent/10'}`}>
+            <Icon size={10} strokeWidth={STROKE_WIDTH} className={TONE_TEXT[meta.tone] ?? 'text-accent'} />
           </div>
         )}
       </span>

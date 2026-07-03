@@ -4,6 +4,7 @@
  * messages) that in the old store were separate top-level arrays.
  */
 import type { DataSource } from '@/data/datasource/types';
+import { DARK_PALETTE } from '@/data/config/palette';
 import type {
   Project,
   ProjectAgent,
@@ -51,7 +52,7 @@ export class ProjectsRepository {
       title: input.title.trim(),
       description: input.description?.trim() ?? '',
       successCriteria: input.successCriteria?.trim() ?? '',
-      color: input.color ?? '#0562EF',
+      color: input.color ?? DARK_PALETTE.accent,
       status: 'ACTIVE',
       tickets: [],
       agents: [],

@@ -44,7 +44,7 @@ function ChannelMessageItem({ msg, agentMap, onParticipantClick }: {
             variant="ghost"
             size="sm"
             onClick={() => agentId && onParticipantClick?.(agentId)}
-            className="text-[11px] font-semibold text-foreground hover:text-chart-1 transition-colors p-0 h-auto"
+            className="text-[11px] font-semibold text-foreground hover:text-accent transition-colors p-0 h-auto"
           >
             {msg.senderName}
           </Button>
@@ -198,7 +198,7 @@ export function ChannelDetailView({
             size="sm"
             onClick={handleSend}
             disabled={!input.trim()}
-            className="shrink-0 size-8 rounded-md bg-chart-1 flex items-center justify-center text-highlight-foreground hover:bg-chart-1/90 transition-colors disabled:opacity-40"
+            className="shrink-0 size-8 rounded-md bg-accent flex items-center justify-center text-highlight-foreground hover:bg-accent/90 transition-colors disabled:opacity-40"
           >
             <Send size={14} strokeWidth={STROKE_WIDTH} />
           </Button>

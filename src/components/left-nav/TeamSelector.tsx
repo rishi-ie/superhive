@@ -41,7 +41,7 @@ export function TeamSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const triggerAvatarColor = currentWorkspace?.avatarColor ?? 'bg-chart-1';
+  const triggerAvatarColor = currentWorkspace?.avatarColor ?? 'bg-accent';
   const triggerName = currentWorkspace?.name ?? 'Select workspace';
   const triggerInitials = currentWorkspace?.initials ?? '?';
 
@@ -80,7 +80,7 @@ export function TeamSelector({
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-popover-foreground hover:bg-accent transition-colors"
               >
                 <div
-                  className={`size-5 shrink-0 rounded ${workspace.avatarColor ?? 'bg-chart-1'} flex items-center justify-center text-[9px] font-bold text-sidebar-primary-foreground`}
+                  className={`size-5 shrink-0 rounded ${workspace.avatarColor ?? 'bg-accent'} flex items-center justify-center text-[9px] font-bold text-sidebar-primary-foreground`}
                 >
                   {workspace.initials}
                 </div>

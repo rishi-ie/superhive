@@ -54,7 +54,7 @@ export function ChatThreadList({ threads, activeThreadId, onThreadSelect, onNewT
               onClick={() => onThreadSelect?.(thread)}
               className={`w-full text-left px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-2 ${
                 thread.id === activeThreadId
-                  ? 'bg-sidebar-accent/70 border border-chart-1/30'
+                  ? 'bg-sidebar-accent/70 border border-accent/30'
                   : 'hover:bg-hover-tint border border-transparent'
               }`}
             >

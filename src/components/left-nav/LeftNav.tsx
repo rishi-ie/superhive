@@ -148,7 +148,7 @@ export function LeftNav({
         />
       </div>
       <div
-        className="w-px bg-sidebar-border/40 hover:bg-chart-1 cursor-ew-resize shrink-0 transition-colors"
+        className="w-px bg-sidebar-border/40 hover:bg-accent cursor-ew-resize shrink-0 transition-colors"
         onMouseDown={startResize}
       />
     </>

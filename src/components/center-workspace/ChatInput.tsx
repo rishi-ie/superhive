@@ -83,7 +83,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
   return (
     <div className="shrink-0 border-t border-border/40 px-3 py-3">
       {/* Input card — textarea + attach + send */}
-      <div className="flex items-start gap-2 bg-card rounded-lg px-3 py-2 border border-border shadow-sm focus-within:border-chart-1 focus-within:ring-1 focus-within:ring-chart-1/20 transition-all">
+      <div className="flex items-start gap-2 bg-card rounded-lg px-3 py-2 border border-border shadow-sm focus-within:border-accent focus-within:ring-1 focus-within:ring-accent/20 transition-all">
         <IconButton
           variant="ghost"
           size="sm"
@@ -120,7 +120,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
           <Pill
             active={autoMode}
             onClick={() => setAutoMode(a => !a)}
-            className={autoMode ? 'bg-chart-1/15 text-chart-1 border border-chart-1/30' : ''}
+            className={autoMode ? 'bg-accent/15 text-accent border border-accent/30' : ''}
           >
             Auto
           </Pill>
@@ -144,7 +144,7 @@ export function ChatInput({ placeholder = 'Describe an objective…', defaultMod
                       type="button"
                       onClick={() => { setModel(m); setShowModelPicker(false); }}
                       className={`w-full text-left px-2.5 py-1.5 text-[11px] transition-colors ${
-                        m === model ? 'bg-chart-1/10 text-chart-1' : 'text-foreground hover:bg-sidebar-accent'
+                        m === model ? 'bg-accent/10 text-accent' : 'text-foreground hover:bg-sidebar-accent'
                       }`}
                     >
                       {m}

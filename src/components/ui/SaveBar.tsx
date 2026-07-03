@@ -68,7 +68,7 @@ export function SaveBar({
           size="sm"
           onClick={handleSave}
           disabled={disabled}
-          className="bg-chart-1 text-highlight-foreground hover:bg-chart-1/90"
+          className="bg-accent text-highlight-foreground hover:bg-accent/90"
         >
           {resolvedSaveLabel}
         </Button>

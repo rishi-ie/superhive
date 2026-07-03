@@ -24,13 +24,14 @@ import { useToast } from '@/lib/toast-context';
 import { listWorkspaces } from '@/data/workspaces/store';
 import { listAgents } from '@/data/agents/store';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { DARK_PALETTE } from '@/data/config/palette';
 
 const COLOR_SWATCHES = [
-  { name: 'Blue',   value: '#0562EF' },
-  { name: 'Green',  value: '#50a878' },
-  { name: 'Amber',  value: '#d4a84b' },
-  { name: 'Violet', value: '#7b68ee' },
-  { name: 'Rose',   value: '#dc6b6b' },
+  { name: 'Blue',   value: DARK_PALETTE.accent },
+  { name: 'Green',  value: DARK_PALETTE.chart2 },
+  { name: 'Amber',  value: DARK_PALETTE.chart3 },
+  { name: 'Violet', value: DARK_PALETTE.chart4 },
+  { name: 'Rose',   value: DARK_PALETTE.chart5 },
   { name: 'Slate',  value: '#6b7280' },
 ];
 
@@ -105,7 +106,7 @@ export function CreateProjectDialog({
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-md bg-chart-1/15 text-chart-1">
+            <div className="flex size-8 items-center justify-center rounded-md bg-accent/15 text-accent">
               <Layers size={16} strokeWidth={STROKE_WIDTH} />
             </div>
             <div>

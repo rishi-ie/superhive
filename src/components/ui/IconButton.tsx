@@ -25,7 +25,7 @@ const variantMap: Record<IconButtonVariant, string> = {
   ghost:
     'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50',
   solid:
-    'bg-chart-1 text-highlight-foreground hover:bg-chart-1/90',
+    'bg-accent text-highlight-foreground hover:bg-accent/90',
   outline:
     'border border-border bg-secondary text-foreground hover:bg-tertiary',
 };

@@ -82,7 +82,7 @@ export function Communications({ channels, agents, onChannelClick, onParticipant
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-semibold text-foreground truncate">{ch.topic}</span>
                     {ch.unread && (
-                      <span className="size-1.5 rounded-full bg-chart-1 shrink-0" />
+                      <span className="size-1.5 rounded-full bg-accent shrink-0" />
                     )}
                   </div>
                   {lastMsg && (
@@ -123,7 +123,7 @@ export function Communications({ channels, agents, onChannelClick, onParticipant
                   <button
                     onClick={(e) => { e.stopPropagation(); onTicketClick?.(ch.relatedTicketId); }}
                     type="button"
-                    className="text-[9px] font-fustat px-1.5 py-0.5 rounded bg-chart-1/10 text-chart-1 hover:bg-chart-1/20 transition-colors shrink-0"
+                    className="text-[9px] font-fustat px-1.5 py-0.5 rounded bg-accent/10 text-accent hover:bg-accent/20 transition-colors shrink-0"
                   >
                     {ch.relatedTicketId}
                   </button>

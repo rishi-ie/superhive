@@ -34,7 +34,7 @@ export function ChatEmptyState({ agentName, onSuggestionClick }: ChatEmptyStateP
       <div className="flex flex-col items-center gap-5 max-w-sm">
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex items-center justify-center size-12 rounded-full bg-secondary">
-            <Zap size={22} className="text-chart-1" strokeWidth={STROKE_WIDTH} />
+            <Zap size={22} className="text-accent" strokeWidth={STROKE_WIDTH} />
           </div>
           <div className="space-y-1">
             <p className="text-sm font-medium text-foreground">
@@ -61,7 +61,7 @@ export function ChatEmptyState({ agentName, onSuggestionClick }: ChatEmptyStateP
                 <Icon
                   size={14}
                   strokeWidth={STROKE_WIDTH}
-                  className="text-chart-1 shrink-0 mt-0.5 group-hover:text-chart-1/80 transition-colors"
+                  className="text-accent shrink-0 mt-0.5 group-hover:text-accent/80 transition-colors"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">

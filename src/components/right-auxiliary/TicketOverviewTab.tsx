@@ -104,7 +104,7 @@ export function TicketOverviewTab({
           Project:{' '}
           <button
             onClick={() => onProjectSelect?.(ticket.workspaceId)}
-            className="text-foreground hover:text-chart-1 transition-colors"
+            className="text-foreground hover:text-accent transition-colors"
           >
             {ticket.projectName}
           </button>

@@ -12,8 +12,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:       'bg-chart-1/20 text-chart-1',
-        current:      'bg-chart-1/20 text-chart-1',
+        default:       'bg-accent/20 text-accent',
+        current:      'bg-accent/20 text-accent',
         recommended:  'bg-chart-2/20 text-chart-2',
         'coming-soon':'bg-muted text-muted-foreground',
         ai:           'bg-chart-2/10 text-chart-2 border border-chart-2/40',

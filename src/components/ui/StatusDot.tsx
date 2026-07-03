@@ -14,7 +14,7 @@ type StatusDotProps = {
 const colorMap: Record<AgentStatus, string> = {
   EXECUTING:      'bg-chart-2',
   COMPILING:      'bg-chart-3',
-  AWAITING_HUMAN: 'bg-chart-1',
+  AWAITING_HUMAN: 'bg-accent',
   IDLE:           'bg-muted-foreground/40',
   ERROR_LOOP:     'bg-chart-5',
 };

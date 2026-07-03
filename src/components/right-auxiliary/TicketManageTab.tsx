@@ -157,7 +157,7 @@ export function TicketManageTab({ ticket, agents }: TicketManageTabProps) {
                 onClick={() => markDirty(() => setType(opt.value))}
                 className={`flex-1 py-1.5 text-[10px] font-medium transition-colors ${
                   type === opt.value
-                    ? 'border-chart-1 bg-chart-1/10 text-chart-1'
+                    ? 'border-accent bg-accent/10 text-accent'
                     : 'bg-card text-muted-foreground hover:text-foreground hover:bg-hover-tint'
                 }`}
               >

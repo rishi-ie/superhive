@@ -75,7 +75,7 @@ export function ChannelOverviewTab({
           {channel.unread && (
             <>
               <span>·</span>
-              <span className="text-chart-1">unread</span>
+              <span className="text-accent">unread</span>
             </>
           )}
         </div>

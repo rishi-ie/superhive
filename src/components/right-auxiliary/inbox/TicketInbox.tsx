@@ -72,7 +72,7 @@ const STATUS_COLORS: Record<string, string> = {
   BACKLOG:   'text-muted-foreground',
   EXECUTING: 'text-chart-2',
   REVIEW:    'text-chart-3',
-  MERGED:    'text-chart-1',
+  MERGED:    'text-accent',
 };
 
 function RelatedTicketCard({ ticket, onClick }: RelatedTicketCardProps) {

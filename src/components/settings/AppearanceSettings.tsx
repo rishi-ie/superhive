@@ -19,6 +19,7 @@ import { useSettings } from '@/lib/settings-context';
 import { useToast } from '@/lib/toast-context';
 import { themeStore } from '@/data/themes';
 import { STROKE_WIDTH } from '@/lib/constants';
+import { DARK_PALETTE } from '@/data/config/palette';
 
 type CodeThemeToken = { id: string; label: string; bg: string; text: string };
 
@@ -33,7 +34,7 @@ const CODE_SYNTAX_THEMES: CodeThemeToken[] = [
 
 function themeAccent(themeId: string): string {
   if (themeId === 'light') return '#0562EF';
-  return '#5b5651';
+  return DARK_PALETTE.accent;
 }
 
 function ThemePreviewCard({ themeId }: { themeId: string }) {
@@ -41,11 +42,11 @@ function ThemePreviewCard({ themeId }: { themeId: string }) {
   return (
     <div className="flex flex-col gap-0.5 w-full rounded overflow-hidden">
       <div className="flex gap-0.5 h-7 rounded-sm overflow-hidden">
-        <div className="flex-1" style={{ background: isDark ? '#151110' : '#f5f2ef' }} />
-        <div className="flex-1" style={{ background: isDark ? '#2a2827' : '#ffffff' }} />
+        <div className="flex-1" style={{ background: isDark ? DARK_PALETTE.background : '#f5f2ef' }} />
+        <div className="flex-1" style={{ background: isDark ? DARK_PALETTE.surface : '#ffffff' }} />
       </div>
       <div className="flex gap-0.5 h-4 rounded-sm overflow-hidden">
-        <div className="flex-1" style={{ background: isDark ? '#3a3835' : '#d0cbc6' }} />
+        <div className="flex-1" style={{ background: isDark ? DARK_PALETTE.border : '#d0cbc6' }} />
         <div className="flex-1" style={{ background: themeAccent(themeId) }} />
       </div>
     </div>

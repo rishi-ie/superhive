@@ -32,7 +32,7 @@ export const Pill = forwardRef<HTMLButtonElement, PillProps>(
         aria-pressed={active}
         className={cn(
           'flex items-center gap-1.5 font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed',
-          active ? 'bg-chart-1 text-highlight-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary',
+          active ? 'bg-accent text-highlight-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-tertiary',
           sizeMap[size],
           className
         )}

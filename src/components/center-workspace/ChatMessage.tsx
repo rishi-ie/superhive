@@ -34,7 +34,7 @@ function renderInline(inline: InlineElement, key: number) {
       return <em key={key} className="italic">{inline.value}</em>;
     case 'link':
       return (
-        <a key={key} href={inline.href} target="_blank" rel="noopener noreferrer" className="text-chart-1 underline hover:opacity-80">
+        <a key={key} href={inline.href} target="_blank" rel="noopener noreferrer" className="text-accent underline hover:opacity-80">
           {inline.value}
         </a>
       );
@@ -118,7 +118,7 @@ export function ChatMessage({ message, agentName, agentInitials, onRegenerate }:
         <div
           className={`px-3 py-2 rounded-2xl text-sm ${
             isUser
-              ? 'bg-chart-1 text-highlight-foreground rounded-tr-md'
+              ? 'bg-accent text-highlight-foreground rounded-tr-md'
               : 'bg-card border border-border/60 text-foreground rounded-tl-md'
           }`}
         >

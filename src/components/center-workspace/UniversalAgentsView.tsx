@@ -147,7 +147,7 @@ export function UniversalAgentsView({ onAgentSelect, selectedAgentId }: Universa
             <button
               type="button"
               onClick={() => { setQuery(''); setStatusFilter('ALL'); }}
-              className="mt-2 text-xs text-chart-1 hover:underline"
+              className="mt-2 text-xs text-accent hover:underline"
             >
               Clear filters
             </button>
