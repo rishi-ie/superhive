@@ -1,1 +1,11 @@
-var{contextBridge:e,ipcRenderer:t}=require("electron");e.exposeInMainWorld(`electron`,{readSettings:()=>t.invoke(`settings:read`),writeSettings:e=>t.invoke(`settings:write`,e),dbQuery:(e,n)=>t.invoke(`db:query`,e,n),dbExecute:(e,n)=>t.invoke(`db:execute`,e,n),dbBatch:e=>t.invoke(`db:batch`,e)}),console.log(`Preload script loaded`);
+//#region electron/preload.ts
+var { contextBridge, ipcRenderer } = require("electron");
+contextBridge.exposeInMainWorld("electron", {
+	readSettings: () => ipcRenderer.invoke("settings:read"),
+	writeSettings: (content) => ipcRenderer.invoke("settings:write", content),
+	dbQuery: (sql, args) => ipcRenderer.invoke("db:query", sql, args),
+	dbExecute: (sql, args) => ipcRenderer.invoke("db:execute", sql, args),
+	dbBatch: (stmts) => ipcRenderer.invoke("db:batch", stmts)
+});
+console.log("Preload script loaded");
+//#endregion
