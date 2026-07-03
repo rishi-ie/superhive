@@ -1,10 +1,10 @@
 /**
- * Root shell — renders Dashboard as the landing screen.
+ * Root shell — renders the router.
  */
-import { Dashboard } from './screens/Dashboard';
+import { Routes } from "./routes/routes";
 
 function App() {
-  return <Dashboard />;
+  return <Routes />;
 }
 
 export default App;
