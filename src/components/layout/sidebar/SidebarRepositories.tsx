@@ -21,13 +21,13 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground/80 hover:bg-white/[0.05]">
+              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground hover:bg-accent">
                 <Sparkles className="size-4" />
                 <span>Automations</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground/80 hover:bg-white/[0.05]">
+              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground hover:bg-accent">
                 <PanelLeft className="size-4" />
                 <span>Customize</span>
               </SidebarMenuButton>
@@ -42,13 +42,13 @@ export function SidebarRepositories() {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground/80"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <Plus className="size-3.5" />
             </button>
             <button
               type="button"
-              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground/80"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <MoreHorizontal className="size-3.5" />
             </button>
@@ -57,7 +57,7 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground/80 hover:bg-white/[0.05]">
+              <SidebarMenuButton className="h-9 rounded-lg px-2 text-sm text-foreground hover:bg-accent">
                 <Home className="size-4" />
                 <span>Home</span>
               </SidebarMenuButton>
@@ -70,13 +70,13 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground/80 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground transition-colors hover:bg-accent">
                 <span className="flex-1 truncate">General chat</span>
                 <span className="text-xs text-muted-foreground">12:34</span>
               </div>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground/80 transition-colors hover:bg-white/[0.05]">
+              <div className="flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2 pl-7 text-sm text-foreground transition-colors hover:bg-accent">
                 <span className="flex-1 truncate">General chat introduction</span>
                 <span className="text-xs text-muted-foreground">12:30</span>
               </div>

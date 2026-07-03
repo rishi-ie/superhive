@@ -11,16 +11,16 @@ import {
 
 export function ComposerCard() {
   return (
-    <Card className="w-full max-w-[620px] rounded-2xl border border-white/[0.06] bg-card p-2 shadow-2xl shadow-black/30">
+    <Card className="w-full max-w-[620px] rounded-2xl border border-border bg-card p-2 shadow-foreground/10">
       <Textarea
         placeholder="Plan, Build, / for skills, @ for context"
-        className="min-h-[120px] resize-none border-0 bg-transparent px-4 py-4 text-sm leading-relaxed text-foreground/90 placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="min-h-[120px] resize-none border-0 bg-transparent px-4 py-4 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
       />
       <div className="flex items-center justify-between gap-2 px-1 pb-1">
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 rounded-full text-muted-foreground hover:bg-white/[0.05] hover:text-foreground/80"
+          className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Plus className="size-4" />
         </Button>
@@ -30,14 +30,14 @@ export function ComposerCard() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1.5 rounded-full px-3 text-xs font-medium text-foreground/90 hover:bg-white/[0.05]"
+              className="h-8 gap-1.5 rounded-full px-3 text-xs font-medium text-foreground hover:bg-accent"
             >
               <span>Composer 2.5 Fast</span>
               <Lock className="size-3" />
               <ChevronDown className="size-3.5 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="border-white/[0.06] bg-card">
+          <DropdownMenuContent align="center" className="border-border bg-card">
             <DropdownMenuItem>Composer 2.5 Pro</DropdownMenuItem>
             <DropdownMenuItem>Composer 2.5 Fast</DropdownMenuItem>
             <DropdownMenuItem>Composer 1.5</DropdownMenuItem>
@@ -47,7 +47,7 @@ export function ComposerCard() {
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 rounded-full text-muted-foreground hover:bg-white/[0.05] hover:text-foreground/80"
+          className="size-8 rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Mic className="size-4" />
         </Button>
