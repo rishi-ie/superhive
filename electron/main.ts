@@ -131,7 +131,7 @@ ipcMain.handle('db:query', async (_event, sql: string, args?: unknown[]) => {
     const result = await client.execute({ sql, args: (args ?? []) as InValue[] });
     return { rows: result.rows ?? [] };
   } catch (err) {
-    log.error('db:query error:', err);
+    log.debug('db:query error:', err);
     throw err;
   }
 });
@@ -142,7 +142,7 @@ ipcMain.handle('db:execute', async (_event, sql: string, args?: unknown[]) => {
     const result = await client.execute({ sql, args: (args ?? []) as InValue[] });
     return { rowsAffected: result.rowsAffected, lastInsertRowid: result.lastInsertRowid };
   } catch (err) {
-    log.error('db:execute error:', err);
+    log.debug('db:execute error:', err);
     throw err;
   }
 });
@@ -152,7 +152,7 @@ ipcMain.handle('db:batch', async (_event, stmts: Array<{ sql: string; args?: unk
     const client = await getDbClient();
     await client.batch(stmts.map((s) => ({ sql: s.sql, args: (s.args ?? []) as InValue[] })));
   } catch (err) {
-    log.error('db:batch error:', err);
+    log.debug('db:batch error:', err);
     throw err;
   }
 });
