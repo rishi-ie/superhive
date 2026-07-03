@@ -14,7 +14,7 @@ export function SidebarTopSection() {
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            className="h-8 w-full justify-start gap-2 rounded-xl bg-muted text-xs font-medium text-foreground hover:bg-accent"
+            className="h-8 w-full justify-start gap-2 bg-muted text-xs font-medium text-foreground hover:bg-accent"
           >
             <Plus className="size-4" />
             <span>New Agent</span>

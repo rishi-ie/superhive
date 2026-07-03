@@ -19,7 +19,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
       collapsible="none"
       style={{ "--sidebar-width": `${width}px` } as React.CSSProperties}
     >
-      <SidebarHeader className="gap-1.5 p-2">
+      <SidebarHeader className="gap-1.5 p-2 pt-12">
         <SidebarTopSection />
       </SidebarHeader>
       <SidebarContent className="gap-1 px-1.5">
