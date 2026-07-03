@@ -9,12 +9,14 @@ import {
 
 export function Dashboard() {
   return (
-    <div className="relative flex h-full w-full flex-col bg-background">
-      <TopHandle />
+    <div className="flex h-full w-full flex-col bg-background">
+      <div className="flex justify-center pt-3">
+        <TopHandle />
+      </div>
       <TopRightControls />
 
       <div className="flex flex-1 items-center justify-center px-8">
-        <div className="flex w-full max-w-[620px] flex-col items-center gap-8">
+        <div className="flex w-full max-w-[620px] flex-col items-center gap-6">
           <WorkspaceBreadcrumb />
           <ComposerCard />
           <SuggestedActions />

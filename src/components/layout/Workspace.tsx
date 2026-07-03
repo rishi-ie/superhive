@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WorkspaceProps {
   children: ReactNode;
@@ -7,8 +6,8 @@ interface WorkspaceProps {
 
 export function Workspace({ children }: WorkspaceProps) {
   return (
-    <main className="relative flex flex-1 flex-col overflow-hidden bg-background">
-      <ScrollArea className="flex-1">{children}</ScrollArea>
+    <main className="flex h-full w-full flex-col overflow-hidden bg-background">
+      {children}
     </main>
   );
 }
