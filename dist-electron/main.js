@@ -10871,27 +10871,6 @@ function createWindow() {
 		mainWindow = null;
 	});
 }
-ipcMain.handle("settings:read", () => {
-	const settingsPath = join(app.getPath("userData"), ".superhive", "settings.json");
-	try {
-		if (fs.existsSync(settingsPath)) return fs.readFileSync(settingsPath, "utf-8");
-	} catch (err) {
-		import_main.default.error("Failed to read settings:", err);
-	}
-	return null;
-});
-ipcMain.handle("settings:write", (_event, content) => {
-	const baseDir = join(app.getPath("userData"), ".superhive");
-	const settingsPath = join(baseDir, "settings.json");
-	try {
-		if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
-		fs.writeFileSync(settingsPath, content, "utf-8");
-		return true;
-	} catch (err) {
-		import_main.default.error("Failed to write settings:", err);
-		return false;
-	}
-});
 var dbClient = null;
 async function getDbClient() {
 	if (dbClient) return dbClient;

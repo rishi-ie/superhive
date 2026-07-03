@@ -5,10 +5,6 @@
  */
 
 type ElectronAPI = {
-  /** Reads raw content of .superhive/settings.json. Returns null if absent. */
-  readSettings: () => Promise<string | null>;
-  /** Writes raw content to .superhive/settings.json. */
-  writeSettings: (content: string) => Promise<boolean>;
   /** Executes a SELECT against the libSQL data DB and returns rows. */
   dbQuery: (sql: string, args?: unknown[]) => Promise<{ rows: unknown[] }>;
   /** Executes a single INSERT/UPDATE/DELETE against the libSQL data DB. */
