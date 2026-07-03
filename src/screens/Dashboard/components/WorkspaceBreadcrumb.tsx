@@ -1,30 +1,34 @@
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, ChevronDown, Home, Laptop } from "lucide-react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function WorkspaceBreadcrumb() {
   return (
-    <Breadcrumb>
-      <BreadcrumbList className="text-xs text-muted-foreground">
-        <BreadcrumbItem>
-          <BreadcrumbLink className="flex items-center gap-1 text-muted-foreground hover:text-foreground/80">
+    <div className="flex w-full items-center gap-1 text-xs">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
             <Home className="size-3" />
             <span>Home</span>
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator>
-          <ChevronRight className="size-3" />
-        </BreadcrumbSeparator>
-        <BreadcrumbItem>
-          <BreadcrumbPage className="text-foreground/80">Local</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
+            <ChevronDown className="size-3" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="border-border bg-card">
+          <DropdownMenuItem>Home</DropdownMenuItem>
+          <DropdownMenuItem>Recent</DropdownMenuItem>
+          <DropdownMenuItem>Favorites</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ChevronRight className="size-3 text-muted-foreground" />
+      <Laptop className="size-3 text-muted-foreground" />
+      <span className="text-foreground/80">Local</span>
+    </div>
   );
 }
