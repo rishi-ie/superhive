@@ -16,10 +16,10 @@ import {
 
 export function ComposerCard() {
   return (
-    <Card className="w-full max-w-[620px] rounded-2xl border border-border bg-card p-2 shadow-foreground/10">
+    <Card className="w-full max-w-[620px] rounded-2xl border border-border bg-card p-1.5 shadow-foreground/10">
       <Textarea
         placeholder="Plan, Build, / for skills, @ for context"
-        className="min-h-[120px] resize-none border-0 bg-transparent px-4 py-4 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+        className="min-h-[90px] resize-none border-0 bg-transparent px-3 py-3 text-xs leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
       />
       <div className="flex items-center justify-between gap-2 px-1 pb-1">
         <Tooltip>

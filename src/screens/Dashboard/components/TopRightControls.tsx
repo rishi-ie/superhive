@@ -14,7 +14,7 @@ import {
 
 export function TopRightControls() {
   return (
-    <div className="absolute right-4 top-3 flex items-center gap-1.5 text-muted-foreground">
+    <div className="absolute right-3 top-2 flex items-center gap-1 text-muted-foreground">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

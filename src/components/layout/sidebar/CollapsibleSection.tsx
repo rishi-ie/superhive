@@ -19,7 +19,7 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-9 w-full items-center justify-between rounded-lg px-2 text-sm text-foreground transition-colors hover:bg-accent"
+        className="flex h-8 w-full items-center justify-between rounded-lg px-1.5 text-xs text-foreground transition-colors hover:bg-accent"
       >
         <div className="flex items-center gap-2">
           <Home className="size-4" />
@@ -31,7 +31,7 @@ export function CollapsibleSection({
           }`}
         />
       </button>
-      {isOpen && <div className="flex flex-col pl-4">{children}</div>}
+      {isOpen && <div className="flex flex-col pl-2">{children}</div>}
     </div>
   );
 }
