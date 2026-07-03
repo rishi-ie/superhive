@@ -4,7 +4,6 @@
  */
 import { createContext, useContext, type ReactNode } from 'react';
 import { toast as sonnerToast } from 'sonner';
-import { Toast } from '@/components/ui/Toast';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -38,7 +37,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <Toast />
     </ToastContext.Provider>
   );
 }

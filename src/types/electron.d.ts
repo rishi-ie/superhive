@@ -5,12 +5,6 @@
  */
 
 type ElectronAPI = {
-  platform: NodeJS.Platform;
-  version: string;
-  toggleMaximize: () => Promise<void>;
-  onMaximizedChanged: (callback: (isMaximized: boolean) => void) => () => void;
-  /** Returns the path to the app's user data directory (where .superhive/ lives). */
-  getDataDir: () => Promise<string>;
   /** Reads raw content of .superhive/settings.json. Returns null if absent. */
   readSettings: () => Promise<string | null>;
   /** Writes raw content to .superhive/settings.json. */
@@ -21,12 +15,6 @@ type ElectronAPI = {
   dbExecute: (sql: string, args?: unknown[]) => Promise<{ rowsAffected: number; lastInsertRowid?: number }>;
   /** Executes a batch of statements against the libSQL data DB. */
   dbBatch: (stmts: Array<{ sql: string; args?: unknown[] }>) => Promise<void>;
-  /** Subscribe to WS events from main. Returns an unsubscribe function. */
-  onWsEvent: (callback: (event: Record<string, unknown>) => void) => () => void;
-  agents: {
-    terminateAll: () => Promise<void>;
-    terminate: (ulid: string) => Promise<void>;
-  };
 };
 
 interface Window {

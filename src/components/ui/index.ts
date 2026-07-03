@@ -9,14 +9,8 @@ export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 export { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from './DropdownMenu';
 export { Label } from './Label';
 export { Pill } from './Pill';
-export { Select } from './Select';
-
 export { SegmentedControl } from './SegmentedControl';
 export { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetOverlay, SheetPortal, SheetTitle, SheetTrigger } from './Sheet';
-export { StatCard } from './StatCard';
-export { Switch } from './Switch';
 export { TextInput } from './TextInput';
-export { Toast } from './Toast';
-export { CodeBlock } from './CodeBlock';
 export { IconButton } from './IconButton';
 export { Kbd } from './Kbd';

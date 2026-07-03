@@ -10,7 +10,6 @@ export type Theme = {
   id: ThemeId;
   name: string;
   vars: Record<string, string>;
-  /** Optional overrides for system-mode when OS is in light scheme. */
   systemVars?: Record<string, string>;
 };
 
@@ -19,36 +18,10 @@ export type AppearanceSettings = {
   highlightColor: string;
   fontScale: number;
   reduceMotion: boolean;
-  codeSyntaxTheme: string;
 };
-
-export type PrivacySettings = {
-  exportDataLastRun: string | null;
-  conversationRetentionDays: number;
-};
-
-export type StartupView = 'last' | 'universal-agents' | 'universal-channels' | 'universal-projects' | 'tickets' | 'swarm-roster';
-export type ViewMode = 'compact' | 'comfortable';
-export type TimeFormat = '12h' | '24h' | 'relative';
-export type KanbanColumn = 'todo' | 'executing' | 'review' | 'merged';
-export type RightPanelTab = 'overview' | 'manage' | 'inbox' | 'sessions';
 
 export type DefaultsSettings = {
-  startupView: StartupView;
   defaultWorkspaceId: string | null;
-  viewMode: ViewMode;
-  timeFormat: TimeFormat;
-  defaultKanbanColumns: KanbanColumn[];
-  rightPanelDefaultTab: RightPanelTab;
-};
-
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'cohere' | 'custom';
-export type EngineId = 'opus' | 'sonnet' | 'claude' | 'codex';
-
-export type Engine = {
-  id: EngineId;
-  label: string;
-  enabled: boolean;
 };
 
 export type ModelProviderConfig = {
@@ -63,7 +36,6 @@ export type ModelProviderConfig = {
 };
 
 export type ModelsSettings = {
-  engines: Engine[];
   providers: ModelProviderConfig[];
 };
 
@@ -77,55 +49,6 @@ export type WorkflowTrigger = {
 
 export type WorkflowsSettings = {
   workflows: WorkflowTrigger[];
-};
-
-export type SpendAlert = {
-  thresholdPercent: number;
-  enabled: boolean;
-};
-
-export type CostUsageSettings = {
-  monthlyBudgetCap: number;
-  monthlyBudgetEnabled: boolean;
-  perAgentSpendingLimit: number;
-  perAgentSpendingEnabled: boolean;
-  spendAlert: SpendAlert;
-  resetCycleDay: number;
-};
-
-export type AgentsSettings = {
-  defaultEngine: EngineId;
-};
-
-export type WorkspaceItem = {
-  id: string;
-  name: string;
-  dataRetentionDays: number;
-  createdAt: string;
-};
-
-export type WorkspacesSettings = {
-  workspaces: WorkspaceItem[];
-};
-
-export type IntegrationProvider = 'github' | 'slack' | 'linear' | 'notion' | 'jira' | 'webhook';
-
-export type IntegrationChannel = {
-  id: string;
-  name: string;
-  events: string[];
-};
-
-export type Integration = {
-  id: string;
-  provider: IntegrationProvider;
-  label: string;
-  connected: boolean;
-  channels: IntegrationChannel[];
-};
-
-export type IntegrationsSettings = {
-  integrations: Integration[];
 };
 
 export type PlanTier = 'free' | 'pro' | 'meta-hive' | 'enterprise';
@@ -169,14 +92,9 @@ export type AccountSettings = {
 
 export type Settings = {
   appearance: AppearanceSettings;
-  privacy: PrivacySettings;
   defaults: DefaultsSettings;
   models: ModelsSettings;
   workflows: WorkflowsSettings;
-  costUsage: CostUsageSettings;
-  agents: AgentsSettings;
-  workspaces: WorkspacesSettings;
-  integrations: IntegrationsSettings;
   billing: BillingSettings;
   account: AccountSettings;
 };

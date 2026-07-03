@@ -15,7 +15,6 @@ import { DEFAULT_SETTINGS, STORAGE_KEY } from '@/data/settings/interface';
 interface ElectronStorageAPI {
   readSettings: () => Promise<string | null>;
   writeSettings: (content: string) => Promise<boolean>;
-  getDataDir: () => Promise<string>;
 }
 
 /** Narrow the window type to include our electron API shape. */
@@ -23,7 +22,6 @@ function getElectron(): ElectronStorageAPI | undefined {
   const w = window as unknown as { electron?: ElectronStorageAPI };
   return w.electron;
 }
-
 
 /** Read from localStorage (browser/dev fallback). */
 function readLocal(): Settings {
@@ -75,18 +73,4 @@ export async function writeSettings(s: Settings): Promise<void> {
     }
   }
   writeLocal(s);
-}
-
-/**
- * Get the resolved .superhive/ base directory path.
- * Only valid when running inside Electron; returns null in browser/dev.
- */
-export async function getDataDir(): Promise<string | null> {
-  const ep = getElectron();
-  return ep ? ep.getDataDir() : null;
-}
-
-/** Synchronous read — only for cases where async is not available (e.g. initial state). */
-export function readSettingsSync(): Settings {
-  return readLocal();
 }

@@ -3,28 +3,12 @@
     "theme": "dark",
     "highlightColor": "#81ACEC",
     "fontScale": 1,
-    "reduceMotion": false,
-    "codeSyntaxTheme": "github-dark"
-  },
-  "privacy": {
-    "exportDataLastRun": null,
-    "conversationRetentionDays": 90
+    "reduceMotion": false
   },
   "defaults": {
-    "startupView": "last",
-    "defaultWorkspaceId": null,
-    "viewMode": "comfortable",
-    "timeFormat": "relative",
-    "defaultKanbanColumns": ["todo", "executing", "review", "merged"],
-    "rightPanelDefaultTab": "overview"
+    "defaultWorkspaceId": null
   },
   "models": {
-    "engines": [
-      { "id": "opus", "label": "Opus 4.8", "enabled": true },
-      { "id": "sonnet", "label": "Sonnet 4", "enabled": true },
-      { "id": "claude", "label": "Claude 3.5", "enabled": true },
-      { "id": "codex", "label": "Codex", "enabled": true }
-    ],
     "providers": [
       {
         "id": "openai",
@@ -57,26 +41,6 @@
   },
   "workflows": {
     "workflows": []
-  },
-  "costUsage": {
-    "monthlyBudgetCap": 500,
-    "monthlyBudgetEnabled": false,
-    "perAgentSpendingLimit": 100,
-    "perAgentSpendingEnabled": false,
-    "spendAlert": {
-      "thresholdPercent": 80,
-      "enabled": true
-    },
-    "resetCycleDay": 1
-  },
-  "agents": {
-    "defaultEngine": "sonnet"
-  },
-  "workspaces": {
-    "workspaces": []
-  },
-  "integrations": {
-    "integrations": []
   },
   "billing": {
     "plan": {

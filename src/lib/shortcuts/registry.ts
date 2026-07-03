@@ -2,7 +2,6 @@
  * Master keyboard shortcut registry — THE single source of truth.
  *
  * To add/remove/change a keyboard shortcut in Superhive, edit this file.
- * Handlers are wired in `handlers.ts`; this file is pure data.
  *
  * Conventions:
  *  - `id`              : stable string identifier (kebab/path style).
@@ -14,7 +13,7 @@
  *  - `scope`           : 'global'  = fire only when not in inputs/dialogs (default)
  *                        'always'  = fire even in inputs/dialogs (e.g. send)
  *                        'in-canvas' = fire only when a center tab is active (skip on settings)
- *  - `handles?`        : Optional callback id used to look up the handler in `actions.ts`.
+ *  - `handles?`        : Optional callback id used to look up the handler.
  *                        If omitted, the id is used as the action name.
  *  - `meta`            : optional structured extras (badge, hidden, etc.)
  */
@@ -41,11 +40,8 @@ export type ShortcutDef = {
   description: string;
   chord: Chord;
   scope: ShortcutScope;
-  /** Lookup key in `actions.ts`. Defaults to `id`. */
   handles?: string;
-  /** Optional badge-like metadata. */
   meta?: {
-    /** Show a small chip in the settings page (e.g. "loop", "new"). */
     tag?: string;
   };
 };
@@ -370,91 +366,8 @@ export const DEFAULT_SHORTCUTS: ShortcutDef[] = [
 // ─── Lookups ─────────────────────────────────────────────────────────
 
 let _byId: Map<string, ShortcutDef> | null = null;
-let _byCategory: Map<ShortcutCategory, ShortcutDef[]> | null = null;
 
 export function getShortcutById(id: string): ShortcutDef | undefined {
   if (!_byId) _byId = new Map(DEFAULT_SHORTCUTS.map(s => [s.id, s]));
   return _byId.get(id);
-}
-
-export function getShortcutsByCategory(): Record<ShortcutCategory, ShortcutDef[]> {
-  if (!_byCategory) {
-    _byCategory = new Map();
-    for (const s of DEFAULT_SHORTCUTS) {
-      const arr = _byCategory.get(s.category) ?? [];
-      arr.push(s);
-      _byCategory.set(s.category, arr);
-    }
-  }
-  const result = {} as Record<ShortcutCategory, ShortcutDef[]>;
-  for (const cat of CATEGORY_ORDER) {
-    result[cat] = _byCategory.get(cat) ?? [];
-  }
-  return result;
-}
-
-// ─── Validation (dev only) ───────────────────────────────────────────
-// Build a string-keyed map of `chord-string-per-platform → id` and throw on
-// conflicts so that typos + accidental overlaps fail loudly during development.
-
-type ConflictReport = {
-  perPlatform: { platform: 'mac' | 'default'; idA: string; idB: string; chord: string }[];
-  duplicateIds: string[];
-};
-
-export function validateRegistry(): ConflictReport {
-  const report: ConflictReport = { perPlatform: [], duplicateIds: [] };
-  const seenIds = new Set<string>();
-  const seenMac = new Map<string, string>();
-  const seenDefault = new Map<string, string>();
-
-  for (const def of DEFAULT_SHORTCUTS) {
-    if (seenIds.has(def.id)) {
-      report.duplicateIds.push(def.id);
-    }
-    seenIds.add(def.id);
-
-    const macKey = def.chord.mac;
-    const defaultKey = def.chord.default;
-
-    if (seenMac.has(macKey) && seenMac.get(macKey) !== def.id) {
-      report.perPlatform.push({
-        platform: 'mac',
-        idA: seenMac.get(macKey)!,
-        idB: def.id,
-        chord: macKey,
-      });
-    } else {
-      seenMac.set(macKey, def.id);
-    }
-
-    if (defaultKey !== macKey) {
-      if (seenDefault.has(defaultKey) && seenDefault.get(defaultKey) !== def.id) {
-        report.perPlatform.push({
-          platform: 'default',
-          idA: seenDefault.get(defaultKey)!,
-          idB: def.id,
-          chord: defaultKey,
-        });
-      } else {
-        seenDefault.set(defaultKey, def.id);
-      }
-    }
-  }
-
-  return report;
-}
-
-export function runRegistryValidation(): void {
-  if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production') return;
-  const report = validateRegistry();
-  if (report.duplicateIds.length > 0) {
-    console.error('[shortcuts/registry] Duplicate IDs:', report.duplicateIds);
-  }
-  if (report.perPlatform.length > 0) {
-    const lines = report.perPlatform.map(
-      c => `  ${c.platform}: "${c.chord}" ↔ ${c.idA} and ${c.idB}`,
-    );
-    console.error('[shortcuts/registry] Chord collisions:\n' + lines.join('\n'));
-  }
 }

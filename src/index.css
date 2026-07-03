@@ -172,13 +172,6 @@ body {
   -webkit-app-region: no-drag;
 }
 
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
-}
-.pulse-executing { animation: pulse-soft 1.5s ease-in-out infinite; }
-.pulse-error { animation: pulse-soft 0.8s ease-in-out infinite; }
-
 /* shadcn animation keyframes */
 @keyframes animate-in {
   from { opacity: var(--tw-enter-opacity, 1); transform: var(--tw-enter-rotate, 0) var(--tw-enter-scale, 1) var(--tw-enter-translate-x, 0) var(--tw-enter-translate-y, 0); }
@@ -207,15 +200,6 @@ body {
   display: none;
 }
 
-/* Toast entrance animation */
-@keyframes toast-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.animate-toast-in {
-  animation: toast-in 200ms ease-out forwards;
-}
-
 /* Settings-driven theme overrides — applied via data-* on <html> */
 [data-theme="dark"] {
   color-scheme: dark;
@@ -238,45 +222,4 @@ body {
 [data-reduce-motion="true"] *::after {
   transition: none !important;
   animation: none !important;
-}
-
-/* ── Activity feed flowing animations ─────────────────────────────────── */
-
-/* New row slides in from top + fades in */
-@keyframes row-arrive {
-  from { opacity: 0; transform: translateY(-6px); max-height: 0; }
-  to   { opacity: 1; transform: translateY(0);   max-height: 40px; }
-}
-.row-arrive {
-  animation: row-arrive 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Glow pulse on the newest item — fades out over 3s */
-@keyframes glow-fade {
-  0%   { background-color: rgba(80, 168, 120, 0.10); }
-  40%  { background-color: rgba(80, 168, 120, 0.05); }
-  100% { background-color: transparent; }
-}
-.row-glow {
-  animation: glow-fade 3s ease-out forwards;
-}
-
-/* Thin flow bar at the top of the feed — fires when new events arrive */
-@keyframes flow-bar {
-  0%   { transform: scaleX(0); transform-origin: left; opacity: 1; }
-  50%  { transform: scaleX(1); transform-origin: left; opacity: 1; }
-  51%  { transform: scaleX(1); transform-origin: right; opacity: 1; }
-  100% { transform: scaleX(0); transform-origin: right; opacity: 0; }
-}
-.flow-bar-active {
-  animation: flow-bar 900ms ease-out forwards;
-}
-
-/* Continuous slow pulse on the LIVE dot */
-@keyframes live-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.35; }
-}
-.live-pulse {
-  animation: live-pulse 2s ease-in-out infinite;
 }

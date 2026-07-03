@@ -1,7 +1,7 @@
 /**
  * Billing & Plans — current plan, tier grid, Meta-hive agent stepper, payment method.
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CheckCircle2, CreditCard, Minus, Plus } from 'lucide-react';
 import { STROKE_WIDTH } from '@/lib/constants';
 import { SettingSection } from './shared/SettingSection';
@@ -342,12 +342,6 @@ export function BillingSettings() {
   const pm = settings.billing.paymentMethod;
 
   const metaHiveAgents = plan.metaHiveAgents ?? 3;
-
-  useEffect(() => {
-    if (plan.tier === 'meta-hive') {
-      update('billing', { plan: { ...plan, metaHiveAgents } });
-    }
-  }, []);
 
   const currentPrice = (() => {
     if (plan.tier === 'free') return 0;

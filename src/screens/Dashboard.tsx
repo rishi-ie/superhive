@@ -2,7 +2,7 @@
  * Dashboard — landing screen after boot.
  * Intentionally minimal: a single "Dashboard" label with a welcome subtitle.
  */
-export function Dashboard(_props: { onOpenSettings?: () => void }) {
+export function Dashboard() {
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-background">
       <div className="flex flex-col items-center gap-3">

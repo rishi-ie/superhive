@@ -13,7 +13,6 @@ export type Platform = 'mac' | 'windows' | 'linux' | 'unknown';
  */
 export function detectPlatform(): Platform {
   if (typeof navigator === 'undefined') return 'unknown';
-  // Use userAgentData if available (Chromium), fall back to UA string parsing
   const uaData = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData;
   const platformHint = uaData?.platform ?? navigator.userAgent ?? '';
   if (/Mac|iPhone|iPad/i.test(platformHint)) return 'mac';
@@ -33,7 +32,3 @@ export function usePlatform(): Platform {
   }, []);
   return platform;
 }
-
-export const isMac = (p: Platform) => p === 'mac';
-export const isWindows = (p: Platform) => p === 'windows';
-export const isLinux = (p: Platform) => p === 'linux';
