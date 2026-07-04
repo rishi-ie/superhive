@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../client';
 import { agents } from '../schema';
 import type { Agent, AgentInput } from '../types';
+import { log, logError, describePgError } from '@/lib/logger';
 
 export async function listAgents(): Promise<Agent[]> {
   const db = await getDb();
@@ -16,9 +17,20 @@ export async function getAgent(id: string): Promise<Agent | null> {
 }
 
 export async function createAgent(input: AgentInput): Promise<Agent> {
+  log('query', 'createAgent input', input);
   const db = await getDb();
-  const rows = await db.insert(agents).values(input).returning();
-  return rows[0] as Agent;
+  try {
+    const built = db.insert(agents).values(input).returning();
+    const { sql, params } = built.toSQL();
+    log('query', 'createAgent SQL', { sql, params });
+    const rows = await built;
+    log('query', `createAgent returned ${rows.length} rows`);
+    return rows[0] as Agent;
+  } catch (err) {
+    logError('query', 'createAgent FAILED', err);
+    log('query', 'createAgent pg fields', describePgError(err));
+    throw err;
+  }
 }
 
 export async function updateAgent(

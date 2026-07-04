@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { getDb } from '../client';
 import { projects } from '../schema';
 import type { Project, ProjectInput } from '../types';
+import { log, logError, describePgError } from '@/lib/logger';
 
 export async function listProjects(): Promise<Project[]> {
   const db = await getDb();
@@ -20,9 +21,20 @@ export async function getProject(id: string): Promise<Project | null> {
 }
 
 export async function createProject(input: ProjectInput): Promise<Project> {
+  log('query', 'createProject input', input);
   const db = await getDb();
-  const rows = await db.insert(projects).values(input).returning();
-  return rows[0] as Project;
+  try {
+    const built = db.insert(projects).values(input).returning();
+    const { sql, params } = built.toSQL();
+    log('query', 'createProject SQL', { sql, params });
+    const rows = await built;
+    log('query', `createProject returned ${rows.length} rows`);
+    return rows[0] as Project;
+  } catch (err) {
+    logError('query', 'createProject FAILED', err);
+    log('query', 'createProject pg fields', describePgError(err));
+    throw err;
+  }
 }
 
 export async function deleteProject(id: string): Promise<void> {

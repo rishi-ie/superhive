@@ -14,6 +14,7 @@ import { useProjects, useCreateProject } from '@/hooks/use-projects';
 import { usePicker } from '@/providers/picker-provider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { describePgError } from '@/lib/logger';
 
 const MODE_CONFIG = {
   agent: {
@@ -37,14 +38,14 @@ export function CommandPicker() {
 
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
-  const [createError, setCreateError] = useState<string | null>(null);
+  const [pgErr, setPgErr] = useState<ReturnType<typeof describePgError> | null>(null);
 
   const config = mode ? MODE_CONFIG[mode] : null;
 
   const resetCreate = () => {
     setCreating(false);
     setNewName('');
-    setCreateError(null);
+    setPgErr(null);
   };
 
   const handleOpenChange = (val: boolean) => {
@@ -59,7 +60,7 @@ export function CommandPicker() {
   const handleCreate = async () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    setCreateError(null);
+    setPgErr(null);
     try {
       if (mode === 'agent') {
         const created = await createAgent.mutateAsync({
@@ -73,7 +74,7 @@ export function CommandPicker() {
         selectProject(created.id);
       }
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : 'Failed to create');
+      setPgErr(describePgError(err));
       return;
     }
     resetCreate();
@@ -132,8 +133,37 @@ export function CommandPicker() {
                   Cancel
                 </Button>
               </div>
-              {createError && (
-                <div className="px-2 pb-2 text-xs text-red-500">{createError}</div>
+              {pgErr && (
+                <div className="mx-2 mb-2 rounded-md border border-red-500/40 bg-red-500/10 p-2 text-xs">
+                  <div className="mb-1 font-medium text-red-500">DB error</div>
+                  <div className="text-foreground/90">{pgErr.message}</div>
+                  {pgErr.code && (
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      code: {pgErr.code}
+                      {pgErr.position ? ` @ position ${pgErr.position}` : ''}
+                    </div>
+                  )}
+                  {pgErr.detail && (
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      {pgErr.detail}
+                    </div>
+                  )}
+                  {pgErr.hint && (
+                    <div className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      hint: {pgErr.hint}
+                    </div>
+                  )}
+                  {pgErr.query && (
+                    <details className="mt-1">
+                      <summary className="cursor-pointer text-[10px] text-muted-foreground">
+                        query
+                      </summary>
+                      <pre className="mt-1 overflow-x-auto whitespace-pre-wrap break-all font-mono text-[10px] text-muted-foreground">
+{pgErr.query}
+                      </pre>
+                    </details>
+                  )}
+                </div>
               )}
             </>
           ) : (

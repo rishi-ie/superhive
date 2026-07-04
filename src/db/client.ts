@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import * as schema from './schema';
 import migration0000 from '../../drizzle/0000_superb_valkyrie.sql?raw';
 import migration0001 from '../../drizzle/0001_great_scalphunter.sql?raw';
+import { log, logError, describePgError } from '@/lib/logger';
 
 type Db = ReturnType<typeof drizzle<typeof schema>>;
 
@@ -46,23 +47,39 @@ async function boot() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('wipe') === '1') {
     try {
+      log('db', 'wipe requested');
       await wipeDb();
+      log('db', 'wipe done');
     } catch (err) {
-      console.error('[db] wipe failed:', err);
+      logError('db', 'wipe failed', err);
     }
     window.history.replaceState(null, '', window.location.pathname);
   }
 
+  log('db', 'opening PGlite idb://superhive');
   _pglite = new PGlite('idb://superhive');
   _db = drizzle(_pglite, { schema });
+  log('db', 'PGlite open, drizzle ready');
 
-  try {
-    await _pglite.exec(migration0000);
-    await _pglite.exec(migration0001);
-  } catch (err) {
-    console.error('[db] migration failed:', err);
-    throw err;
+  const migrations: Array<[string, string]> = [
+    ['0000', migration0000],
+    ['0001', migration0001],
+  ];
+
+  for (const [name, sql] of migrations) {
+    try {
+      log('db', `applying migration ${name} (${sql.length} chars)`);
+      await _pglite!.exec(sql);
+      log('db', `migration ${name} ok`);
+    } catch (err) {
+      logError('db', `migration ${name} FAILED`, err);
+      const desc = describePgError(err);
+      log('db', 'pg error fields', desc);
+      throw err;
+    }
   }
+
+  log('db', 'boot complete, DB ready');
 }
 
 export { schema };

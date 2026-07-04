@@ -7,6 +7,7 @@ import {
   type Project,
   type ProjectInput,
 } from '@/db';
+import { log, logError } from '@/lib/logger';
 
 const KEY = ['projects'] as const;
 
@@ -25,10 +26,17 @@ export function useProject(id: string | undefined) {
 export function useCreateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: ProjectInput) => createProject(input),
-    onSuccess: (created: Project) => {
+    mutationFn: (input: ProjectInput) => {
+      log('hooks', 'useCreateProject START', input);
+      return createProject(input);
+    },
+    onSuccess: (created) => {
+      log('hooks', 'useCreateProject SUCCESS', { id: created.id, name: created.name });
       qc.setQueryData<Project[]>(KEY, (old) => [...(old ?? []), created]);
       qc.setQueryData([...KEY, created.id], created);
+    },
+    onError: (err) => {
+      logError('hooks', 'useCreateProject ERROR', err);
     },
   });
 }
