@@ -103,14 +103,15 @@ const MOCK_AGENT_MESSAGES: ChatMessage[] = [
 
 export interface ChatViewProps {
   category: ViewCategory;
+  agentName?: string;
 }
 
-export function ChatView({ category }: ChatViewProps) {
+export function ChatView({ category, agentName }: ChatViewProps) {
   return (
     <div className="flex h-full flex-col bg-[#141414]">
       <ChatHeader
         categoryLabel={CATEGORY_LABELS[category]}
-        agentName="Code Reviewer"
+        agentName={agentName ?? "Untitled"}
         sessionName="Review auth flow PR #142"
       />
       <MessageList messages={MOCK_AGENT_MESSAGES} />

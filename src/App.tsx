@@ -1,11 +1,14 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { Routes } from "./routes/routes";
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryProvider } from '@/providers/query-provider';
+import { Routes } from './routes/routes';
 
 function App() {
   return (
-    <TooltipProvider>
-      <Routes />
-    </TooltipProvider>
+    <QueryProvider>
+      <TooltipProvider>
+        <Routes />
+      </TooltipProvider>
+    </QueryProvider>
   );
 }
 
