@@ -2069,14 +2069,14 @@ async function seedWorkspace(name = "My Workspace") {
 }
 //#endregion
 //#region src/storage/repositories/AgentRepository.ts
-var _db = null;
-async function getDb() {
-	if (!_db) _db = await loadDb("db.agents.json", []);
-	return _db;
+var _db$1 = null;
+async function getDb$1() {
+	if (!_db$1) _db$1 = await loadDb("db.agents.json", []);
+	return _db$1;
 }
 var AgentRepository = {
 	async create(data) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const now = Date.now();
 		const agent = {
 			id: crypto.randomUUID(),
@@ -2097,16 +2097,16 @@ var AgentRepository = {
 		return agent;
 	},
 	async getById(id) {
-		return (await getDb()).data.find((a) => a.id === id);
+		return (await getDb$1()).data.find((a) => a.id === id);
 	},
 	async getAll() {
-		return (await getDb()).data;
+		return (await getDb$1()).data;
 	},
 	async getByProject(projectId) {
-		return (await getDb()).data.filter((a) => a.projectIds.includes(projectId));
+		return (await getDb$1()).data.filter((a) => a.projectIds.includes(projectId));
 	},
 	async update(id, data) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const idx = db.data.findIndex((a) => a.id === id);
 		if (idx === -1) return void 0;
 		const updated = {
@@ -2119,7 +2119,7 @@ var AgentRepository = {
 		return updated;
 	},
 	async delete(id) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const len = db.data.length;
 		db.data = db.data.filter((a) => a.id !== id);
 		if (db.data.length === len) return false;
@@ -2154,7 +2154,7 @@ var AgentRepository = {
 		return (await loadDb("db.sessions.json", [])).data.filter((s) => s.agentId === agentId);
 	},
 	async assignToProject(agentId, projectId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const projectDb = await loadDb("db.projects.json", []);
 		const agent = db.data.find((a) => a.id === agentId);
 		const project = projectDb.data.find((p) => p.id === projectId);
@@ -2171,7 +2171,7 @@ var AgentRepository = {
 		await projectDb.write();
 	},
 	async removeFromProject(agentId, projectId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const projectDb = await loadDb("db.projects.json", []);
 		const agent = db.data.find((a) => a.id === agentId);
 		const project = projectDb.data.find((p) => p.id === projectId);
@@ -2187,7 +2187,7 @@ var AgentRepository = {
 		await projectDb.write();
 	},
 	async addTask(agentId, taskId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const agent = db.data.find((a) => a.id === agentId);
 		if (agent && !agent.taskIds.includes(taskId)) {
 			agent.taskIds.push(taskId);
@@ -2196,7 +2196,7 @@ var AgentRepository = {
 		}
 	},
 	async removeTask(agentId, taskId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const agent = db.data.find((a) => a.id === agentId);
 		if (agent) {
 			agent.taskIds = agent.taskIds.filter((id) => id !== taskId);
@@ -2205,7 +2205,7 @@ var AgentRepository = {
 		}
 	},
 	async addSession(agentId, sessionId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const agent = db.data.find((a) => a.id === agentId);
 		if (agent && !agent.sessionIds.includes(sessionId)) {
 			agent.sessionIds.push(sessionId);
@@ -2214,7 +2214,7 @@ var AgentRepository = {
 		}
 	},
 	async removeSession(agentId, sessionId) {
-		const db = await getDb();
+		const db = await getDb$1();
 		const agent = db.data.find((a) => a.id === agentId);
 		if (agent) {
 			agent.sessionIds = agent.sessionIds.filter((id) => id !== sessionId);
@@ -2240,9 +2240,216 @@ function registerAgentIpc() {
 	});
 }
 //#endregion
+//#region src/storage/repositories/ProjectRepository.ts
+var _db = null;
+async function getDb() {
+	if (!_db) _db = await loadDb("db.projects.json", []);
+	return _db;
+}
+var ProjectRepository = {
+	async create(data) {
+		const db = await getDb();
+		const now = Date.now();
+		const project = {
+			id: crypto.randomUUID(),
+			name: data.name,
+			description: data.description,
+			localPath: data.localPath,
+			okfFolderPath: data.okfFolderPath,
+			color: data.color,
+			icon: data.icon,
+			archived: false,
+			agentIds: [],
+			taskIds: [],
+			channelIds: [],
+			childProjectIds: [],
+			createdAt: now,
+			updatedAt: now
+		};
+		db.data.push(project);
+		await db.write();
+		return project;
+	},
+	async getById(id) {
+		return (await getDb()).data.find((p) => p.id === id);
+	},
+	async getAll() {
+		return (await getDb()).data;
+	},
+	async getChildProjects(parentId) {
+		return (await getDb()).data.filter((p) => p.parentProjectId === parentId);
+	},
+	async getRootProjects() {
+		return (await getDb()).data.filter((p) => !p.parentProjectId);
+	},
+	async update(id, data) {
+		const db = await getDb();
+		const idx = db.data.findIndex((p) => p.id === id);
+		if (idx === -1) return void 0;
+		const updated = {
+			...db.data[idx],
+			...data,
+			updatedAt: Date.now()
+		};
+		db.data[idx] = updated;
+		await db.write();
+		return updated;
+	},
+	async delete(id) {
+		const db = await getDb();
+		const len = db.data.length;
+		db.data = db.data.filter((p) => p.id !== id);
+		if (db.data.length === len) return false;
+		const parentIdx = db.data.findIndex((p) => p.childProjectIds.includes(id));
+		if (parentIdx !== -1 && db.data[parentIdx]) db.data[parentIdx].childProjectIds = db.data[parentIdx].childProjectIds.filter((cid) => cid !== id);
+		await db.write();
+		const agentDb = await loadDb("db.agents.json", []);
+		agentDb.data.forEach((a) => {
+			a.projectIds = a.projectIds.filter((pid) => pid !== id);
+		});
+		await agentDb.write();
+		const channelDb = await loadDb("db.channels.json", []);
+		channelDb.data = channelDb.data.filter((c) => c.projectId !== id);
+		await channelDb.write();
+		const taskDb = await loadDb("db.tasks.json", []);
+		taskDb.data = taskDb.data.filter((t) => t.projectId !== id);
+		await taskDb.write();
+		return true;
+	},
+	async getAgents(projectId) {
+		const project = await this.getById(projectId);
+		if (!project) return [];
+		return (await loadDb("db.agents.json", [])).data.filter((a) => project.agentIds.includes(a.id));
+	},
+	async getTasks(projectId) {
+		const project = await this.getById(projectId);
+		if (!project) return [];
+		return (await loadDb("db.tasks.json", [])).data.filter((t) => project.taskIds.includes(t.id));
+	},
+	async getChannels(projectId) {
+		const project = await this.getById(projectId);
+		if (!project) return [];
+		return (await loadDb("db.channels.json", [])).data.filter((c) => project.channelIds.includes(c.id));
+	},
+	async addAgent(projectId, agentId) {
+		const db = await getDb();
+		const agentDb = await loadDb("db.agents.json", []);
+		const project = db.data.find((p) => p.id === projectId);
+		const agent = agentDb.data.find((a) => a.id === agentId);
+		if (!project || !agent) return;
+		if (!project.agentIds.includes(agentId)) {
+			project.agentIds.push(agentId);
+			project.updatedAt = Date.now();
+		}
+		if (!agent.projectIds.includes(projectId)) {
+			agent.projectIds.push(projectId);
+			agent.updatedAt = Date.now();
+		}
+		await db.write();
+		await agentDb.write();
+	},
+	async removeAgent(projectId, agentId) {
+		const db = await getDb();
+		const agentDb = await loadDb("db.agents.json", []);
+		const project = db.data.find((p) => p.id === projectId);
+		const agent = agentDb.data.find((a) => a.id === agentId);
+		if (project) {
+			project.agentIds = project.agentIds.filter((id) => id !== agentId);
+			project.updatedAt = Date.now();
+		}
+		if (agent) {
+			agent.projectIds = agent.projectIds.filter((id) => id !== projectId);
+			agent.updatedAt = Date.now();
+		}
+		await db.write();
+		await agentDb.write();
+	},
+	async addTask(projectId, taskId) {
+		const db = await getDb();
+		const project = db.data.find((p) => p.id === projectId);
+		if (project && !project.taskIds.includes(taskId)) {
+			project.taskIds.push(taskId);
+			project.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async removeTask(projectId, taskId) {
+		const db = await getDb();
+		const project = db.data.find((p) => p.id === projectId);
+		if (project) {
+			project.taskIds = project.taskIds.filter((id) => id !== taskId);
+			project.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async addChannel(projectId, channelId) {
+		const db = await getDb();
+		const project = db.data.find((p) => p.id === projectId);
+		if (project && !project.channelIds.includes(channelId)) {
+			project.channelIds.push(channelId);
+			project.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async removeChannel(projectId, channelId) {
+		const db = await getDb();
+		const project = db.data.find((p) => p.id === projectId);
+		if (project) {
+			project.channelIds = project.channelIds.filter((id) => id !== channelId);
+			project.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async addChildProject(parentId, childId) {
+		const db = await getDb();
+		const parent = db.data.find((p) => p.id === parentId);
+		const child = db.data.find((p) => p.id === childId);
+		if (!parent || !child) return;
+		if (!parent.childProjectIds.includes(childId)) {
+			parent.childProjectIds.push(childId);
+			parent.updatedAt = Date.now();
+		}
+		if (!child.parentProjectId) {
+			child.parentProjectId = parentId;
+			child.updatedAt = Date.now();
+		}
+		await db.write();
+	},
+	async removeChildProject(parentId, childId) {
+		const db = await getDb();
+		const parent = db.data.find((p) => p.id === parentId);
+		const child = db.data.find((p) => p.id === childId);
+		if (parent) {
+			parent.childProjectIds = parent.childProjectIds.filter((id) => id !== childId);
+			parent.updatedAt = Date.now();
+		}
+		if (child) {
+			child.parentProjectId = void 0;
+			child.updatedAt = Date.now();
+		}
+		await db.write();
+	}
+};
+//#endregion
+//#region electron/ipc/projects.ts
+function registerProjectIpc() {
+	ipcMain.handle("projects:list", () => ProjectRepository.getAll());
+	ipcMain.handle("projects:get", async (_e, id) => {
+		return await ProjectRepository.getById(id) ?? null;
+	});
+	ipcMain.handle("projects:create", async (_e, data) => {
+		if (!data.name?.trim()) throw new Error("Project name is required");
+		return ProjectRepository.create({
+			name: data.name.trim(),
+			description: data.description?.trim() || void 0
+		});
+	});
+}
+//#endregion
 //#region electron/ipc/index.ts
 function registerIpc() {
 	registerAgentIpc();
+	registerProjectIpc();
 }
 //#endregion
 //#region electron/main.ts
