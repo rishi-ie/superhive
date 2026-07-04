@@ -11,14 +11,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import type { Agent } from '@/storage/types';
 
-const STATUS_COLORS: Record<string, string> = {
-  idle: 'bg-muted text-muted-foreground',
-  running: 'bg-green-500/20 text-green-400',
-  thinking: 'bg-yellow-500/20 text-yellow-400',
-  stopped: 'bg-muted text-muted-foreground',
-  error: 'bg-red-500/20 text-red-400',
-};
-
 interface AgentChatHeaderProps {
   agent: Agent;
 }
@@ -54,12 +46,6 @@ export function AgentChatHeader({ agent }: AgentChatHeaderProps) {
             {agent.role}
           </Badge>
         )}
-        <Badge
-          variant="secondary"
-          className={`text-[10px] ${STATUS_COLORS[agent.status] ?? ''}`}
-        >
-          {agent.status}
-        </Badge>
       </div>
     </div>
   );
