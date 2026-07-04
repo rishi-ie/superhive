@@ -18,14 +18,51 @@ export async function getDb(): Promise<Db> {
   return _db;
 }
 
+export async function wipeDb(): Promise<void> {
+  if (_pglite) {
+    try {
+      await _pglite.close();
+    } catch {
+      // ignore
+    }
+    _pglite = null;
+    _db = null;
+    _ready = null;
+  }
+  await new Promise<void>((resolve, reject) => {
+    const req = indexedDB.deleteDatabase('superhive');
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    req.onblocked = () =>
+      reject(
+        new Error(
+          'IDB delete blocked — close all other tabs of this app and retry'
+        )
+      );
+  });
+}
+
 async function boot() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('wipe') === '1') {
+    try {
+      await wipeDb();
+    } catch (err) {
+      console.error('[db] wipe failed:', err);
+    }
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+
   _pglite = new PGlite('idb://superhive');
   _db = drizzle(_pglite, { schema });
 
-  // Apply migrations: drizzle-kit generates SQL in drizzle/*.sql.
-  // We import them as raw strings for Vite to bundle.
-  await _pglite.exec(migration0000);
-  await _pglite.exec(migration0001);
+  try {
+    await _pglite.exec(migration0000);
+    await _pglite.exec(migration0001);
+  } catch (err) {
+    console.error('[db] migration failed:', err);
+    throw err;
+  }
 }
 
 export { schema };
