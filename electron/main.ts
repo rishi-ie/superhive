@@ -2,6 +2,8 @@ import { app, BrowserWindow } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import log from 'electron-log/main';
+import { setUserDataPath } from '../src/storage/database';
+import { seedWorkspace } from '../src/storage/seed';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -45,8 +47,12 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   log.info('App ready');
+
+  setUserDataPath(app.getPath('userData'));
+  await seedWorkspace();
+
   createWindow();
 
   app.on('activate', () => {

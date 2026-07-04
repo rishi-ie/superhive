@@ -2,6 +2,9 @@ import { createRequire } from "node:module";
 import { BrowserWindow, app } from "electron";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { readFile, rename, writeFile } from "node:fs/promises";
+import { basename, dirname as dirname$1, join as join$1 } from "node:path";
+import { fileURLToPath as fileURLToPath$1 } from "node:url";
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -1873,10 +1876,199 @@ var require_main$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	}
 }));
 //#endregion
-//#region electron/main.ts
-var import_main = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
+//#region node_modules/electron-log/main.js
+var require_main = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_main$1();
-})))(), 1);
+}));
+//#endregion
+//#region node_modules/steno/lib/index.js
+function getTempFilename(file) {
+	const f = file instanceof URL ? fileURLToPath$1(file) : file.toString();
+	return join$1(dirname$1(f), `.${basename(f)}.tmp`);
+}
+async function retryAsyncOperation(fn, maxRetries, delayMs) {
+	for (let i = 0; i < maxRetries; i++) try {
+		return await fn();
+	} catch (error) {
+		if (i < maxRetries - 1) await new Promise((resolve) => setTimeout(resolve, delayMs));
+		else throw error;
+	}
+}
+var Writer = class {
+	#filename;
+	#tempFilename;
+	#locked = false;
+	#prev = null;
+	#next = null;
+	#nextPromise = null;
+	#nextData = null;
+	#add(data) {
+		this.#nextData = data;
+		this.#nextPromise ||= new Promise((resolve, reject) => {
+			this.#next = [resolve, reject];
+		});
+		return new Promise((resolve, reject) => {
+			this.#nextPromise?.then(resolve).catch(reject);
+		});
+	}
+	async #write(data) {
+		this.#locked = true;
+		try {
+			await writeFile(this.#tempFilename, data, "utf-8");
+			await retryAsyncOperation(async () => {
+				await rename(this.#tempFilename, this.#filename);
+			}, 10, 100);
+			this.#prev?.[0]();
+		} catch (err) {
+			if (err instanceof Error) this.#prev?.[1](err);
+			throw err;
+		} finally {
+			this.#locked = false;
+			this.#prev = this.#next;
+			this.#next = this.#nextPromise = null;
+			if (this.#nextData !== null) {
+				const nextData = this.#nextData;
+				this.#nextData = null;
+				await this.write(nextData);
+			}
+		}
+	}
+	constructor(filename) {
+		this.#filename = filename;
+		this.#tempFilename = getTempFilename(filename);
+	}
+	async write(data) {
+		return this.#locked ? this.#add(data) : this.#write(data);
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/adapters/node/TextFile.js
+var TextFile = class {
+	#filename;
+	#writer;
+	constructor(filename) {
+		this.#filename = filename;
+		this.#writer = new Writer(filename);
+	}
+	async read() {
+		let data;
+		try {
+			data = await readFile(this.#filename, "utf-8");
+		} catch (e) {
+			if (e.code === "ENOENT") return null;
+			throw e;
+		}
+		return data;
+	}
+	write(str) {
+		return this.#writer.write(str);
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/adapters/node/DataFile.js
+var DataFile = class {
+	#adapter;
+	#parse;
+	#stringify;
+	constructor(filename, { parse, stringify }) {
+		this.#adapter = new TextFile(filename);
+		this.#parse = parse;
+		this.#stringify = stringify;
+	}
+	async read() {
+		const data = await this.#adapter.read();
+		if (data === null) return null;
+		else return this.#parse(data);
+	}
+	write(obj) {
+		return this.#adapter.write(this.#stringify(obj));
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/adapters/node/JSONFile.js
+var JSONFile = class extends DataFile {
+	constructor(filename) {
+		super(filename, {
+			parse: JSON.parse,
+			stringify: (data) => JSON.stringify(data, null, 2)
+		});
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/adapters/Memory.js
+var Memory = class {
+	#data = null;
+	read() {
+		return Promise.resolve(this.#data);
+	}
+	write(obj) {
+		this.#data = obj;
+		return Promise.resolve();
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/core/Low.js
+function checkArgs(adapter, defaultData) {
+	if (adapter === void 0) throw new Error("lowdb: missing adapter");
+	if (defaultData === void 0) throw new Error("lowdb: missing default data");
+}
+var Low = class {
+	adapter;
+	data;
+	constructor(adapter, defaultData) {
+		checkArgs(adapter, defaultData);
+		this.adapter = adapter;
+		this.data = defaultData;
+	}
+	async read() {
+		const data = await this.adapter.read();
+		if (data) this.data = data;
+	}
+	async write() {
+		if (this.data) await this.adapter.write(this.data);
+	}
+	async update(fn) {
+		fn(this.data);
+		await this.write();
+	}
+};
+//#endregion
+//#region node_modules/lowdb/lib/presets/node.js
+async function JSONFilePreset(filename, defaultData) {
+	const db = new Low(process.env.NODE_ENV === "test" ? new Memory() : new JSONFile(filename), defaultData);
+	await db.read();
+	return db;
+}
+//#endregion
+//#region src/storage/database.ts
+var import_main = /* @__PURE__ */ __toESM(require_main(), 1);
+var userDataPath = null;
+function setUserDataPath(path) {
+	userDataPath = path;
+}
+async function loadDb(filename, defaults) {
+	if (!userDataPath) throw new Error("User data path not set. Call setUserDataPath() first.");
+	return JSONFilePreset(userDataPath + "/" + filename, defaults);
+}
+//#endregion
+//#region src/storage/seed.ts
+async function seedWorkspace(name = "My Workspace") {
+	const db = await loadDb("db.workspaces.json", []);
+	const now = Date.now();
+	const existing = db.data.find((w) => w.name === name);
+	if (existing) return existing;
+	const workspace = {
+		id: crypto.randomUUID(),
+		name,
+		createdAt: now,
+		updatedAt: now
+	};
+	db.data.push(workspace);
+	await db.write();
+	return workspace;
+}
+//#endregion
+//#region electron/main.ts
 var __dirname$1 = dirname(fileURLToPath(import.meta.url));
 import_main.default.initialize();
 import_main.default.info("Superhive starting...");
@@ -1915,8 +2107,10 @@ function createWindow() {
 		mainWindow = null;
 	});
 }
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
 	import_main.default.info("App ready");
+	setUserDataPath(app.getPath("userData"));
+	await seedWorkspace();
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
