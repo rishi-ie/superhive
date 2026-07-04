@@ -1,4 +1,4 @@
-import { ExternalLink, MoreHorizontal, AppWindow } from "lucide-react";
+import { PanelRight, PanelRightClose, MoreHorizontal, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,22 +12,39 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export function TopRightControls() {
+interface TopRightControlsProps {
+  rightSidebarOpen: boolean;
+  onToggleRightSidebar: () => void;
+}
+
+export function TopRightControls({
+  rightSidebarOpen,
+  onToggleRightSidebar,
+}: TopRightControlsProps) {
   return (
-    <div className="absolute right-3 top-2 flex items-center gap-1 text-muted-foreground">
+    <div className="absolute right-3 top-3 flex items-center gap-1 text-muted-foreground">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1.5 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+            className={`h-7 gap-1.5 rounded-md px-2 text-xs hover:bg-accent ${
+              rightSidebarOpen
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            onClick={onToggleRightSidebar}
           >
-            <ExternalLink className="size-3.5" />
-            <span>Editor Window</span>
+            {rightSidebarOpen ? (
+              <PanelRightClose className="size-3.5" />
+            ) : (
+              <PanelRight className="size-3.5" />
+            )}
+            <span>Control panel</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Open in editor window</span>
+          <span>{rightSidebarOpen ? "Close" : "Open"} control panel</span>
         </TooltipContent>
       </Tooltip>
 
@@ -61,11 +78,11 @@ export function TopRightControls() {
             size="icon"
             className="size-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <AppWindow className="size-4" />
+            <Bell className="size-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>Pop out window</span>
+          <span>Notifications</span>
         </TooltipContent>
       </Tooltip>
     </div>
