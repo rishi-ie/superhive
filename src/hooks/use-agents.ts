@@ -28,7 +28,7 @@ export function useCreateAgent() {
   return useMutation({
     mutationFn: (input: AgentInput) => createAgent(input),
     onSuccess: (created: Agent) => {
-      qc.invalidateQueries({ queryKey: KEY });
+      qc.setQueryData<Agent[]>(KEY, (old) => [...(old ?? []), created]);
       qc.setQueryData([...KEY, created.id], created);
     },
   });

@@ -5,7 +5,6 @@ import {
   CommandDialog,
   CommandInput,
   CommandList,
-  CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandSeparator,
@@ -18,16 +17,12 @@ import { Button } from '@/components/ui/button';
 
 const MODE_CONFIG = {
   agent: {
-    title: 'Select agent',
-    description: 'Choose an agent to chat with.',
-    emptyText: 'No agents found.',
+    emptyText: 'No agents yet',
     createText: 'Create new agent',
     Icon: Bot,
   },
   project: {
-    title: 'Select project',
-    description: 'Choose a project to work on.',
-    emptyText: 'No projects found.',
+    emptyText: 'No projects yet',
     createText: 'Create new project',
     Icon: FolderOpen,
   },
@@ -42,15 +37,19 @@ export function CommandPicker() {
 
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const config = mode ? MODE_CONFIG[mode] : null;
 
+  const resetCreate = () => {
+    setCreating(false);
+    setNewName('');
+    setCreateError(null);
+  };
+
   const handleOpenChange = (val: boolean) => {
-    if (!val) {
-      closePicker();
-      setCreating(false);
-      setNewName('');
-    }
+    if (!val) resetCreate();
+    closePicker();
   };
 
   const handleSelectCreate = () => {
@@ -60,19 +59,24 @@ export function CommandPicker() {
   const handleCreate = async () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    if (mode === 'agent') {
-      const created = await createAgent.mutateAsync({
-        name: trimmed,
-        iconName: 'Bot',
-        model: 'Composer 2.5 Pro',
-      });
-      selectAgent(created.id);
-    } else if (mode === 'project') {
-      const created = await createProject.mutateAsync({ name: trimmed });
-      selectProject(created.id);
+    setCreateError(null);
+    try {
+      if (mode === 'agent') {
+        const created = await createAgent.mutateAsync({
+          name: trimmed,
+          iconName: 'Bot',
+          model: 'Composer 2.5 Pro',
+        });
+        selectAgent(created.id);
+      } else if (mode === 'project') {
+        const created = await createProject.mutateAsync({ name: trimmed });
+        selectProject(created.id);
+      }
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create');
+      return;
     }
-    setCreating(false);
-    setNewName('');
+    resetCreate();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,14 +85,15 @@ export function CommandPicker() {
       handleCreate();
     }
     if (e.key === 'Escape') {
-      setCreating(false);
-      setNewName('');
+      resetCreate();
     }
   };
 
   if (!config || !mode) return null;
 
   const isPending = createAgent.isPending || createProject.isPending;
+  const list = mode === 'agent' ? agents : projects;
+  const isEmpty = list.length === 0;
 
   return (
     <CommandDialog open={open} onOpenChange={handleOpenChange}>
@@ -99,74 +104,98 @@ export function CommandPicker() {
           )}
         </div>
         <CommandList>
-        {creating ? (
-          <div className="flex items-center gap-2 p-2">
-            <Input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`${mode} name…`}
-              className="h-7 flex-1 text-xs"
-              autoFocus
-            />
-            <Button
-              size="sm"
-              onClick={handleCreate}
-              disabled={isPending || !newName.trim()}
-              className="h-7 px-2 text-xs"
-            >
-              Create
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => { setCreating(false); setNewName(''); }}
-              className="h-7 px-2 text-xs"
-            >
-              Cancel
-            </Button>
-          </div>
-        ) : (
-          <>
-            <CommandEmpty>{config.emptyText}</CommandEmpty>
-            <CommandGroup>
-              {mode === 'agent' &&
-                agents.map((agent) => (
+          {creating ? (
+            <>
+              <div className="flex items-center gap-2 p-2">
+                <Input
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={`${mode} name…`}
+                  className="h-7 flex-1 text-xs"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  onClick={handleCreate}
+                  disabled={isPending || !newName.trim()}
+                  className="h-7 px-2 text-xs"
+                >
+                  Create
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={resetCreate}
+                  className="h-7 px-2 text-xs"
+                >
+                  Cancel
+                </Button>
+              </div>
+              {createError && (
+                <div className="px-2 pb-2 text-xs text-red-500">{createError}</div>
+              )}
+            </>
+          ) : (
+            <>
+              {isEmpty ? (
+                <div className="flex flex-col items-center gap-2 p-6 text-center">
+                  <config.Icon className="size-6 text-muted-foreground/40" />
+                  <div className="text-xs font-medium text-foreground">{config.emptyText}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Create your first {mode} to get started.
+                  </div>
                   <CommandItem
-                    key={agent.id}
-                    value={agent.id}
-                    onSelect={() => selectAgent(agent.id)}
+                    value="__create__"
+                    onSelect={handleSelectCreate}
+                    className="mt-1 text-muted-foreground"
                   >
-                    <Bot className="size-3.5 text-[#7c3aed]" />
-                    <span className="flex-1 truncate">{agent.name}</span>
+                    <Plus className="size-3.5" />
+                    <span>{config.createText}</span>
                   </CommandItem>
-                ))}
-              {mode === 'project' &&
-                projects.map((project) => (
-                  <CommandItem
-                    key={project.id}
-                    value={project.id}
-                    onSelect={() => selectProject(project.id)}
-                  >
-                    <FolderOpen className="size-3.5 text-[#2563eb]" />
-                    <span className="flex-1 truncate">{project.name}</span>
-                  </CommandItem>
-                ))}
-            </CommandGroup>
-            <CommandSeparator />
-            <CommandGroup>
-              <CommandItem
-                value="__create__"
-                onSelect={handleSelectCreate}
-                className="text-muted-foreground"
-              >
-                <Plus className="size-3.5" />
-                <span>{config.createText}</span>
-              </CommandItem>
-            </CommandGroup>
-          </>
-        )}
-      </CommandList>
+                </div>
+              ) : (
+                <CommandGroup>
+                  {mode === 'agent' &&
+                    agents.map((agent) => (
+                      <CommandItem
+                        key={agent.id}
+                        value={agent.name}
+                        keywords={[agent.id]}
+                        onSelect={() => selectAgent(agent.id)}
+                      >
+                        <Bot className="size-3.5 text-[#7c3aed]" />
+                        <span className="flex-1 truncate">{agent.name}</span>
+                      </CommandItem>
+                    ))}
+                  {mode === 'project' &&
+                    projects.map((project) => (
+                      <CommandItem
+                        key={project.id}
+                        value={project.name}
+                        keywords={[project.id]}
+                        onSelect={() => selectProject(project.id)}
+                      >
+                        <FolderOpen className="size-3.5 text-[#2563eb]" />
+                        <span className="flex-1 truncate">{project.name}</span>
+                      </CommandItem>
+                    ))}
+                </CommandGroup>
+              )}
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem
+                  value="__create__"
+                  onSelect={handleSelectCreate}
+                  className="text-muted-foreground"
+                >
+                  <Plus className="size-3.5" />
+                  <span>{config.createText}</span>
+                </CommandItem>
+              </CommandGroup>
+            </>
+          )}
+        </CommandList>
       </Command>
     </CommandDialog>
   );

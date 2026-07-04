@@ -27,7 +27,7 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: (input: ProjectInput) => createProject(input),
     onSuccess: (created: Project) => {
-      qc.invalidateQueries({ queryKey: KEY });
+      qc.setQueryData<Project[]>(KEY, (old) => [...(old ?? []), created]);
       qc.setQueryData([...KEY, created.id], created);
     },
   });
