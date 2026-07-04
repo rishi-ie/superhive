@@ -24,7 +24,16 @@ export async function createProject(input: ProjectInput): Promise<Project> {
   log('query', 'createProject input', input);
   const db = await getDb();
   try {
-    const built = db.insert(projects).values(input).returning();
+    const values = {
+      id: crypto.randomUUID(),
+      name: input.name,
+      description: input.description ?? null,
+      iconName: input.iconName ?? null,
+      settings: input.settings ?? {},
+      stats: input.stats ?? {},
+      createdAt: new Date(),
+    };
+    const built = db.insert(projects).values(values).returning();
     const { sql, params } = built.toSQL();
     log('query', 'createProject SQL', { sql, params });
     const rows = await built;

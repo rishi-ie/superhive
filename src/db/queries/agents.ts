@@ -20,7 +20,17 @@ export async function createAgent(input: AgentInput): Promise<Agent> {
   log('query', 'createAgent input', input);
   const db = await getDb();
   try {
-    const built = db.insert(agents).values(input).returning();
+    const values = {
+      id: crypto.randomUUID(),
+      name: input.name,
+      description: input.description ?? null,
+      iconName: input.iconName ?? null,
+      model: input.model ?? null,
+      settings: input.settings ?? {},
+      stats: input.stats ?? {},
+      createdAt: new Date(),
+    };
+    const built = db.insert(agents).values(values).returning();
     const { sql, params } = built.toSQL();
     log('query', 'createAgent SQL', { sql, params });
     const rows = await built;
