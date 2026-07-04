@@ -5,11 +5,18 @@ import { ProjectView } from "@/screens/ProjectView";
 import { MetaHiveView } from "@/screens/MetaHiveView";
 import { RemoteView } from "@/screens/RemoteView";
 import { Settings } from "@/screens/Settings";
+import { PickerProvider } from "@/providers/picker-provider";
+import { CommandPicker } from "@/components/picker/CommandPicker";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <AppLayout />,
+    element: (
+      <PickerProvider>
+        <AppLayout />
+        <CommandPicker />
+      </PickerProvider>
+    ),
     children: [
       {
         index: true,
