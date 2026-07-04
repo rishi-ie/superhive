@@ -21,52 +21,57 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePicker } from "@/providers/picker-provider";
+import { useLocation } from "react-router-dom";
 
 export function SidebarRepositories() {
+  const { openPicker } = usePicker();
+  const location = useLocation();
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
+
   return (
     <>
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <NavLink
-                to="/agents"
-                className={({ isActive }) =>
-                  cn(
-                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
-                    isActive
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
-                  )
-                }
+              <button
+                type="button"
+                onClick={() => openPicker("agent")}
+                className={cn(
+                  "flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                  isActive("/agents")
+                    ? "bg-accent text-foreground"
+                    : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                )}
               >
                 <Bot className="size-4" />
                 <span>Agent view</span>
-              </NavLink>
+              </button>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <NavLink
-                to="/projects"
-                className={({ isActive }) =>
-                  cn(
-                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
-                    isActive
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
-                  )
-                }
+              <button
+                type="button"
+                onClick={() => openPicker("project")}
+                className={cn(
+                  "flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                  isActive("/projects")
+                    ? "bg-accent text-foreground"
+                    : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                )}
               >
                 <FolderOpen className="size-4" />
                 <span>Project view</span>
-              </NavLink>
+              </button>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <NavLink
                 to="/hive"
-                className={({ isActive }) =>
+                className={({ isActive: a }) =>
                   cn(
                     "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
-                    isActive
+                    a
                       ? "bg-accent text-foreground"
                       : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
                   )
@@ -79,10 +84,10 @@ export function SidebarRepositories() {
             <SidebarMenuItem>
               <NavLink
                 to="/remote"
-                className={({ isActive }) =>
+                className={({ isActive: a }) =>
                   cn(
                     "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
-                    isActive
+                    a
                       ? "bg-accent text-foreground"
                       : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
                   )

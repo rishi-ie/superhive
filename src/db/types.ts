@@ -14,12 +14,19 @@ export interface Attachment {
   type: string;
 }
 
+export type AgentSettings = Record<string, unknown>;
+export type ProjectSettings = Record<string, unknown>;
+export type AgentStats = Record<string, unknown>;
+export type ProjectStats = Record<string, unknown>;
+
 export interface Agent {
   id: string;
   name: string;
   description?: string | null;
   iconName?: string | null;
   model?: string | null;
+  settings?: AgentSettings;
+  stats?: AgentStats;
   createdAt?: Date | null;
 }
 
@@ -30,6 +37,8 @@ export interface Project {
   name: string;
   description?: string | null;
   iconName?: string | null;
+  settings?: ProjectSettings;
+  stats?: ProjectStats;
   createdAt?: Date | null;
 }
 

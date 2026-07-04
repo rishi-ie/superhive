@@ -8,6 +8,8 @@ export const agents = pgTable('agents', {
   description: text('description'),
   iconName: text('icon_name'),
   model: text('model'),
+  settings: jsonb('settings').$type<Record<string, unknown>>().default({}).notNull(),
+  stats: jsonb('stats').$type<Record<string, unknown>>().default({}).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -18,6 +20,8 @@ export const projects = pgTable('projects', {
   name: text('name').notNull(),
   description: text('description'),
   iconName: text('icon_name'),
+  settings: jsonb('settings').$type<Record<string, unknown>>().default({}).notNull(),
+  stats: jsonb('stats').$type<Record<string, unknown>>().default({}).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
