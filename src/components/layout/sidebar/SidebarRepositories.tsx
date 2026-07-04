@@ -1,5 +1,6 @@
+import { NavLink } from "react-router-dom";
 import {
-  Users,
+  Bot,
   FolderOpen,
   Hexagon,
   Globe,
@@ -11,10 +12,10 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CollapsibleSection } from "./CollapsibleSection";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -28,28 +29,68 @@ export function SidebarRepositories() {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
-                <Users className="size-4" />
+              <NavLink
+                to="/agents"
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    isActive
+                      ? "bg-accent text-foreground"
+                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                  )
+                }
+              >
+                <Bot className="size-4" />
                 <span>Agent view</span>
-              </SidebarMenuButton>
+              </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+              <NavLink
+                to="/projects"
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    isActive
+                      ? "bg-accent text-foreground"
+                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                  )
+                }
+              >
                 <FolderOpen className="size-4" />
                 <span>Project view</span>
-              </SidebarMenuButton>
+              </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+              <NavLink
+                to="/hive"
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    isActive
+                      ? "bg-accent text-foreground"
+                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                  )
+                }
+              >
                 <Hexagon className="size-4" />
                 <span>Meta Hive</span>
-              </SidebarMenuButton>
+              </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton className="h-8 rounded-lg px-1 text-xs text-[#b2b2b2] hover:bg-accent">
+              <NavLink
+                to="/remote"
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    isActive
+                      ? "bg-accent text-foreground"
+                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                  )
+                }
+              >
                 <Globe className="size-4" />
                 <span>Remote</span>
-              </SidebarMenuButton>
+              </NavLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>

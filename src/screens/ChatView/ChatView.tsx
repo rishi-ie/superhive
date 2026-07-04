@@ -3,6 +3,15 @@ import { MessageList } from "./components/MessageList";
 import { ChatComposer } from "./components/ChatComposer";
 import type { ChatMessage } from "./components/MessageBubble";
 
+export type ViewCategory = "agent" | "project" | "hive" | "remote";
+
+const CATEGORY_LABELS: Record<ViewCategory, string> = {
+  agent: "Agent view",
+  project: "Project view",
+  hive: "Meta Hive",
+  remote: "Remote",
+};
+
 const MOCK_AGENT_MESSAGES: ChatMessage[] = [
   {
     id: "1",
@@ -32,7 +41,8 @@ const MOCK_AGENT_MESSAGES: ChatMessage[] = [
     id: "4",
     role: "assistant",
     name: "Code Reviewer",
-    content: "I found **3 issues** worth addressing:\n\n**1. Missing input validation** — `src/auth/login.ts:24`\nNo check for empty email before trimming. Could cause a panic on malformed input.\n\n**2. Unhandled promise rejection** — `src/auth/session.ts:58`\n`fetchUser()` doesn't wrap its `await` in a try/catch. If the DB is down, this crashes the request handler.\n\n**3. Magic number** — `src/auth/config.ts:12`\n`tokenExpiry: 3600` should be a named constant like `TOKEN_EXPIRY_SECONDS`.\n\n---\n\nThe rest of the auth flow looks solid. Rate limiting and password hashing are well-implemented.",
+    content:
+      "I found **3 issues** worth addressing:\n\n**1. Missing input validation** — `src/auth/login.ts:24`\nNo check for empty email before trimming. Could cause a panic on malformed input.\n\n**2. Unhandled promise rejection** — `src/auth/session.ts:58`\n`fetchUser()` doesn't wrap its `await` in a try/catch. If the DB is down, this crashes the request handler.\n\n**3. Magic number** — `src/auth/config.ts:12`\n`tokenExpiry: 3600` should be a named constant like `TOKEN_EXPIRY_SECONDS`.\n\n---\n\nThe rest of the auth flow looks solid. Rate limiting and password hashing are well-implemented.",
     timestamp: "10:02 AM",
     toolCalls: [
       { name: "Read file", target: "src/auth/login.ts" },
@@ -56,7 +66,8 @@ const MOCK_AGENT_MESSAGES: ChatMessage[] = [
     id: "6",
     role: "assistant",
     name: "Code Reviewer",
-    content: "On it. Here's what I'll do:\n\n1. Add input validation to `login.ts`\n2. Extract the magic number to a constant in `config.ts`\n3. Add a `rateLimit` config object with `windowMs` and `maxRequests` fields\n\nStarting now...",
+    content:
+      "On it. Here's what I'll do:\n\n1. Add input validation to `login.ts`\n2. Extract the magic number to a constant in `config.ts`\n3. Add a `rateLimit` config object with `windowMs` and `maxRequests` fields\n\nStarting now...",
     timestamp: "10:03 AM",
     toolCalls: [
       { name: "Apply fix", target: "login.ts" },
@@ -90,10 +101,15 @@ const MOCK_AGENT_MESSAGES: ChatMessage[] = [
   },
 ];
 
-export function ChatView() {
+export interface ChatViewProps {
+  category: ViewCategory;
+}
+
+export function ChatView({ category }: ChatViewProps) {
   return (
     <div className="flex h-full flex-col bg-[#141414]">
       <ChatHeader
+        categoryLabel={CATEGORY_LABELS[category]}
         agentName="Code Reviewer"
         sessionName="Review auth flow PR #142"
       />

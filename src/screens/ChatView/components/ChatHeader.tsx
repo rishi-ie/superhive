@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/breadcrumb";
 
 interface ChatHeaderProps {
+  categoryLabel: string;
   agentName: string;
   sessionName: string;
 }
 
-export function ChatHeader({ agentName, sessionName }: ChatHeaderProps) {
+export function ChatHeader({ categoryLabel, agentName, sessionName }: ChatHeaderProps) {
   return (
     <div className="flex h-12 items-center border-b border-[#252525] px-4">
       <Breadcrumb className="flex-1">
@@ -24,7 +25,7 @@ export function ChatHeader({ agentName, sessionName }: ChatHeaderProps) {
               asChild
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              <Link to="/">Agent view</Link>
+              <Link to="/">{categoryLabel}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator>
