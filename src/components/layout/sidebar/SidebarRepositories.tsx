@@ -41,7 +41,7 @@ export function SidebarRepositories() {
                 }
               >
                 <Bot className="size-4" />
-                <span>Agent view</span>
+                <span className="font-semibold">Agent view</span>
               </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -57,7 +57,7 @@ export function SidebarRepositories() {
                 }
               >
                 <FolderOpen className="size-4" />
-                <span>Project view</span>
+                <span className="font-semibold">Project view</span>
               </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -73,7 +73,7 @@ export function SidebarRepositories() {
                 }
               >
                 <Hexagon className="size-4" />
-                <span>Meta Hive</span>
+                <span className="font-semibold">Meta Hive</span>
               </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -89,7 +89,7 @@ export function SidebarRepositories() {
                 }
               >
                 <Globe className="size-4" />
-                <span>Remote</span>
+                <span className="font-semibold">Remote</span>
               </NavLink>
             </SidebarMenuItem>
           </SidebarMenu>
