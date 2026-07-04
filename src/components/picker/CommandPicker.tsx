@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Bot, FolderOpen, Plus } from 'lucide-react';
 import {
+  Command,
   CommandDialog,
   CommandInput,
   CommandList,
@@ -91,12 +92,13 @@ export function CommandPicker() {
 
   return (
     <CommandDialog open={open} onOpenChange={handleOpenChange}>
-      <div className="p-1">
-        {!creating && (
-          <CommandInput placeholder={`Search ${mode}s…`} />
-        )}
-      </div>
-      <CommandList>
+      <Command>
+        <div className="p-1">
+          {!creating && (
+            <CommandInput placeholder={`Search ${mode}s…`} />
+          )}
+        </div>
+        <CommandList>
         {creating ? (
           <div className="flex items-center gap-2 p-2">
             <Input
@@ -165,6 +167,7 @@ export function CommandPicker() {
           </>
         )}
       </CommandList>
+      </Command>
     </CommandDialog>
   );
 }
