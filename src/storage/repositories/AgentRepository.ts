@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Agent, Project, Task, Session } from '../types'
 
-const dbPromise = loadDb<Agent[]>('db.agents.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Agent[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Agent[]>('db.agents.json', [])
+  return _db
+}
 
 export const AgentRepository = {
   async create(data: Omit<Agent, 'id' | 'createdAt' | 'updatedAt' | 'projectIds' | 'taskIds' | 'sessionIds'>): Promise<Agent> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const agent: Agent = {
       id: crypto.randomUUID(),
@@ -27,22 +32,22 @@ export const AgentRepository = {
   },
 
   async getById(id: string): Promise<Agent | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((a: Agent) => a.id === id)
   },
 
   async getAll(): Promise<Agent[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByProject(projectId: string): Promise<Agent[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((a: Agent) => a.projectIds.includes(projectId))
   },
 
   async update(id: string, data: Partial<Omit<Agent, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Agent | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((a: Agent) => a.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -53,7 +58,7 @@ export const AgentRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const len = db.data.length
     db.data = db.data.filter((a: Agent) => a.id !== id)
     if (db.data.length === len) return false
@@ -100,7 +105,7 @@ export const AgentRepository = {
   },
 
   async assignToProject(agentId: string, projectId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const projectDb = await loadDb<Project[]>('db.projects.json', [])
     const agent = db.data.find((a: Agent) => a.id === agentId)
     const project = projectDb.data.find((p: Project) => p.id === projectId)
@@ -119,7 +124,7 @@ export const AgentRepository = {
   },
 
   async removeFromProject(agentId: string, projectId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const projectDb = await loadDb<Project[]>('db.projects.json', [])
     const agent = db.data.find((a: Agent) => a.id === agentId)
     const project = projectDb.data.find((p: Project) => p.id === projectId)
@@ -136,7 +141,7 @@ export const AgentRepository = {
   },
 
   async addTask(agentId: string, taskId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agent = db.data.find((a: Agent) => a.id === agentId)
     if (agent && !agent.taskIds.includes(taskId)) {
       agent.taskIds.push(taskId)
@@ -146,7 +151,7 @@ export const AgentRepository = {
   },
 
   async removeTask(agentId: string, taskId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agent = db.data.find((a: Agent) => a.id === agentId)
     if (agent) {
       agent.taskIds = agent.taskIds.filter((id: string) => id !== taskId)
@@ -156,7 +161,7 @@ export const AgentRepository = {
   },
 
   async addSession(agentId: string, sessionId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agent = db.data.find((a: Agent) => a.id === agentId)
     if (agent && !agent.sessionIds.includes(sessionId)) {
       agent.sessionIds.push(sessionId)
@@ -166,7 +171,7 @@ export const AgentRepository = {
   },
 
   async removeSession(agentId: string, sessionId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agent = db.data.find((a: Agent) => a.id === agentId)
     if (agent) {
       agent.sessionIds = agent.sessionIds.filter((id: string) => id !== sessionId)

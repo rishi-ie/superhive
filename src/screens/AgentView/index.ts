@@ -1,1 +1,2 @@
-export { AgentView } from "./AgentView";
+export { AgentView } from './AgentView';
+export { AgentChatView } from './AgentChatView';

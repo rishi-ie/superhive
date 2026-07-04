@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Task, TaskStatus, TaskPriority, Project, Agent } from '../types'
 
-const dbPromise = loadDb<Task[]>('db.tasks.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Task[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Task[]>('db.tasks.json', [])
+  return _db
+}
 
 export const TaskRepository = {
   async create(data: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'tagIds' | 'status' | 'priority'>): Promise<Task> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const task: Task = {
       id: crypto.randomUUID(),
@@ -35,27 +40,27 @@ export const TaskRepository = {
   },
 
   async getById(id: string): Promise<Task | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((t: Task) => t.id === id)
   },
 
   async getAll(): Promise<Task[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByProject(projectId: string): Promise<Task[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((t: Task) => t.projectId === projectId)
   },
 
   async getByAgent(agentId: string): Promise<Task[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((t: Task) => t.assignedAgentId === agentId)
   },
 
   async update(id: string, data: Partial<Omit<Task, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Task | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((t: Task) => t.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -66,7 +71,7 @@ export const TaskRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const task = db.data.find((t: Task) => t.id === id)
     if (!task) return false
 
@@ -93,7 +98,7 @@ export const TaskRepository = {
   },
 
   async assignAgent(taskId: string, agentId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agentDb = await loadDb<Agent[]>('db.agents.json', [])
     const task = db.data.find((t: Task) => t.id === taskId)
     const agent = agentDb.data.find((a: Agent) => a.id === agentId)
@@ -119,7 +124,7 @@ export const TaskRepository = {
   },
 
   async unassignAgent(taskId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agentDb = await loadDb<Agent[]>('db.agents.json', [])
     const task = db.data.find((t: Task) => t.id === taskId)
     if (!task) return
@@ -147,7 +152,7 @@ export const TaskRepository = {
   },
 
   async addTag(taskId: string, tagId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const task = db.data.find((t: Task) => t.id === taskId)
     if (task && !task.tagIds.includes(tagId)) {
       task.tagIds.push(tagId)
@@ -157,7 +162,7 @@ export const TaskRepository = {
   },
 
   async removeTag(taskId: string, tagId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const task = db.data.find((t: Task) => t.id === taskId)
     if (task) {
       task.tagIds = task.tagIds.filter((tid: string) => tid !== tagId)

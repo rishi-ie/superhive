@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import {
   Bot,
   FolderOpen,
@@ -6,53 +7,56 @@ import {
   Globe,
   MoreHorizontal,
   Plus,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { CollapsibleSection } from "./CollapsibleSection";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/sidebar';
+import { CollapsibleSection } from './CollapsibleSection';
+import { AgentPickerDialog } from '@/screens/AgentView/components/AgentPickerDialog';
+import { cn } from '@/lib/utils';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip';
 
 export function SidebarRepositories() {
+  const location = useLocation();
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   return (
     <>
       <SidebarGroup>
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <NavLink
-                to="/agents"
-                className={({ isActive: a }) =>
-                  cn(
-                    "flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
-                    a
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
-                  )
-                }
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className={cn(
+                  'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
+                  location.pathname.startsWith('/agents')
+                    ? 'bg-accent text-foreground'
+                    : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
+                )}
               >
                 <Bot className="size-4" />
                 <span className="font-semibold">Agent view</span>
-              </NavLink>
+              </button>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <NavLink
                 to="/projects"
                 className={({ isActive: a }) =>
                   cn(
-                    "flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
                     a
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                      ? 'bg-accent text-foreground'
+                      : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
                   )
                 }
               >
@@ -65,10 +69,10 @@ export function SidebarRepositories() {
                 to="/hive"
                 className={({ isActive: a }) =>
                   cn(
-                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
                     a
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                      ? 'bg-accent text-foreground'
+                      : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
                   )
                 }
               >
@@ -81,10 +85,10 @@ export function SidebarRepositories() {
                 to="/remote"
                 className={({ isActive: a }) =>
                   cn(
-                    "flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors",
+                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
                     a
-                      ? "bg-accent text-foreground"
-                      : "text-[#b2b2b2] hover:bg-accent hover:text-foreground"
+                      ? 'bg-accent text-foreground'
+                      : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
                   )
                 }
               >
@@ -145,6 +149,8 @@ export function SidebarRepositories() {
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
+
+      <AgentPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} />
     </>
   );
 }

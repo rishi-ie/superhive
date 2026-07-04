@@ -1,6 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
-import { AgentView } from "@/screens/AgentView";
+import { AgentView, AgentChatView } from "@/screens/AgentView";
 import { ProjectView } from "@/screens/ProjectView";
 import { MetaHiveView } from "@/screens/MetaHiveView";
 import { RemoteView } from "@/screens/RemoteView";
@@ -17,7 +17,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "agents",
-        element: <AgentView />,
+        children: [
+          { index: true, element: <AgentView /> },
+          { path: ":agentId", element: <AgentChatView /> },
+        ],
       },
       {
         path: "projects",

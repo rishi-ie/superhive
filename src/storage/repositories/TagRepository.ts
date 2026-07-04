@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Tag, Task } from '../types'
 
-const dbPromise = loadDb<Tag[]>('db.tags.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Tag[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Tag[]>('db.tags.json', [])
+  return _db
+}
 
 export const TagRepository = {
   async create(data: Omit<Tag, 'id' | 'createdAt'>): Promise<Tag> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const tag: Tag = {
       id: crypto.randomUUID(),
@@ -19,22 +24,22 @@ export const TagRepository = {
   },
 
   async getById(id: string): Promise<Tag | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((t: Tag) => t.id === id)
   },
 
   async getAll(): Promise<Tag[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByName(name: string): Promise<Tag | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((t: Tag) => t.name.toLowerCase() === name.toLowerCase())
   },
 
   async update(id: string, data: Partial<Omit<Tag, 'id' | 'createdAt'>>): Promise<Tag | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((t: Tag) => t.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -45,7 +50,7 @@ export const TagRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const len = db.data.length
     db.data = db.data.filter((t: Tag) => t.id !== id)
     if (db.data.length === len) return false

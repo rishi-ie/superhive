@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Setting, SettingType, OwnerType } from '../types'
 
-const dbPromise = loadDb<Setting[]>('db.settings.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Setting[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Setting[]>('db.settings.json', [])
+  return _db
+}
 
 export const SettingsRepository = {
   async create(data: Omit<Setting, 'id' | 'createdAt' | 'updatedAt'>): Promise<Setting> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const setting: Setting = {
       id: crypto.randomUUID(),
@@ -27,27 +32,27 @@ export const SettingsRepository = {
   },
 
   async getById(id: string): Promise<Setting | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((s: Setting) => s.id === id)
   },
 
   async getAll(): Promise<Setting[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByOwner(ownerType: OwnerType, ownerId: string): Promise<Setting[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((s: Setting) => s.ownerType === ownerType && s.ownerId === ownerId)
   },
 
   async getByOwnerAndGroup(ownerType: OwnerType, ownerId: string, group: string): Promise<Setting[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((s: Setting) => s.ownerType === ownerType && s.ownerId === ownerId && s.group === group)
   },
 
   async getSetting(ownerType: OwnerType, ownerId: string, key: string): Promise<Setting | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((s: Setting) => s.ownerType === ownerType && s.ownerId === ownerId && s.key === key)
   },
 
@@ -62,7 +67,7 @@ export const SettingsRepository = {
     group?: string,
     order: number = 0
   ): Promise<Setting> {
-    const db = await dbPromise
+    const db = await getDb()
     const existing = db.data.find((s: Setting) => s.ownerType === ownerType && s.ownerId === ownerId && s.key === key)
 
     if (existing) {
@@ -76,7 +81,7 @@ export const SettingsRepository = {
   },
 
   async update(id: string, data: Partial<Omit<Setting, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Setting | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((s: Setting) => s.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -87,7 +92,7 @@ export const SettingsRepository = {
   },
 
   async removeSetting(ownerType: OwnerType, ownerId: string, key: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const len = db.data.length
     db.data = db.data.filter((s: Setting) => !(s.ownerType === ownerType && s.ownerId === ownerId && s.key === key))
     if (db.data.length === len) return false
@@ -96,7 +101,7 @@ export const SettingsRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const len = db.data.length
     db.data = db.data.filter((s: Setting) => s.id !== id)
     if (db.data.length === len) return false
@@ -105,7 +110,7 @@ export const SettingsRepository = {
   },
 
   async deleteByOwner(ownerType: OwnerType, ownerId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     db.data = db.data.filter((s: Setting) => !(s.ownerType === ownerType && s.ownerId === ownerId))
     await db.write()
   },

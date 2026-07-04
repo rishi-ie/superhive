@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Project, Agent, Task, Channel } from '../types'
 
-const dbPromise = loadDb<Project[]>('db.projects.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Project[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Project[]>('db.projects.json', [])
+  return _db
+}
 
 export const ProjectRepository = {
   async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'agentIds' | 'taskIds' | 'channelIds' | 'childProjectIds' | 'archived'>): Promise<Project> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const project: Project = {
       id: crypto.randomUUID(),
@@ -29,27 +34,27 @@ export const ProjectRepository = {
   },
 
   async getById(id: string): Promise<Project | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((p: Project) => p.id === id)
   },
 
   async getAll(): Promise<Project[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getChildProjects(parentId: string): Promise<Project[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((p: Project) => p.parentProjectId === parentId)
   },
 
   async getRootProjects(): Promise<Project[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((p: Project) => !p.parentProjectId)
   },
 
   async update(id: string, data: Partial<Omit<Project, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Project | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((p: Project) => p.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -60,7 +65,7 @@ export const ProjectRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const len = db.data.length
     db.data = db.data.filter((p: Project) => p.id !== id)
     if (db.data.length === len) return false
@@ -110,7 +115,7 @@ export const ProjectRepository = {
   },
 
   async addAgent(projectId: string, agentId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agentDb = await loadDb<Agent[]>('db.agents.json', [])
     const project = db.data.find((p: Project) => p.id === projectId)
     const agent = agentDb.data.find((a: Agent) => a.id === agentId)
@@ -129,7 +134,7 @@ export const ProjectRepository = {
   },
 
   async removeAgent(projectId: string, agentId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const agentDb = await loadDb<Agent[]>('db.agents.json', [])
     const project = db.data.find((p: Project) => p.id === projectId)
     const agent = agentDb.data.find((a: Agent) => a.id === agentId)
@@ -146,7 +151,7 @@ export const ProjectRepository = {
   },
 
   async addTask(projectId: string, taskId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const project = db.data.find((p: Project) => p.id === projectId)
     if (project && !project.taskIds.includes(taskId)) {
       project.taskIds.push(taskId)
@@ -156,7 +161,7 @@ export const ProjectRepository = {
   },
 
   async removeTask(projectId: string, taskId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const project = db.data.find((p: Project) => p.id === projectId)
     if (project) {
       project.taskIds = project.taskIds.filter((id: string) => id !== taskId)
@@ -166,7 +171,7 @@ export const ProjectRepository = {
   },
 
   async addChannel(projectId: string, channelId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const project = db.data.find((p: Project) => p.id === projectId)
     if (project && !project.channelIds.includes(channelId)) {
       project.channelIds.push(channelId)
@@ -176,7 +181,7 @@ export const ProjectRepository = {
   },
 
   async removeChannel(projectId: string, channelId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const project = db.data.find((p: Project) => p.id === projectId)
     if (project) {
       project.channelIds = project.channelIds.filter((id: string) => id !== channelId)
@@ -186,7 +191,7 @@ export const ProjectRepository = {
   },
 
   async addChildProject(parentId: string, childId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const parent = db.data.find((p: Project) => p.id === parentId)
     const child = db.data.find((p: Project) => p.id === childId)
     if (!parent || !child) return
@@ -203,7 +208,7 @@ export const ProjectRepository = {
   },
 
   async removeChildProject(parentId: string, childId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const parent = db.data.find((p: Project) => p.id === parentId)
     const child = db.data.find((p: Project) => p.id === childId)
     if (parent) {

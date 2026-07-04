@@ -1,5 +1,5 @@
 import { createRequire } from "node:module";
-import { BrowserWindow, app } from "electron";
+import { BrowserWindow, app, ipcMain } from "electron";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { readFile, rename, writeFile } from "node:fs/promises";
@@ -2068,6 +2068,183 @@ async function seedWorkspace(name = "My Workspace") {
 	return workspace;
 }
 //#endregion
+//#region src/storage/repositories/AgentRepository.ts
+var _db = null;
+async function getDb() {
+	if (!_db) _db = await loadDb("db.agents.json", []);
+	return _db;
+}
+var AgentRepository = {
+	async create(data) {
+		const db = await getDb();
+		const now = Date.now();
+		const agent = {
+			id: crypto.randomUUID(),
+			name: data.name,
+			role: data.role,
+			description: data.description,
+			localPath: data.localPath,
+			avatar: data.avatar,
+			status: data.status,
+			projectIds: [],
+			taskIds: [],
+			sessionIds: [],
+			createdAt: now,
+			updatedAt: now
+		};
+		db.data.push(agent);
+		await db.write();
+		return agent;
+	},
+	async getById(id) {
+		return (await getDb()).data.find((a) => a.id === id);
+	},
+	async getAll() {
+		return (await getDb()).data;
+	},
+	async getByProject(projectId) {
+		return (await getDb()).data.filter((a) => a.projectIds.includes(projectId));
+	},
+	async update(id, data) {
+		const db = await getDb();
+		const idx = db.data.findIndex((a) => a.id === id);
+		if (idx === -1) return void 0;
+		const updated = {
+			...db.data[idx],
+			...data,
+			updatedAt: Date.now()
+		};
+		db.data[idx] = updated;
+		await db.write();
+		return updated;
+	},
+	async delete(id) {
+		const db = await getDb();
+		const len = db.data.length;
+		db.data = db.data.filter((a) => a.id !== id);
+		if (db.data.length === len) return false;
+		const projectDb = await loadDb("db.projects.json", []);
+		projectDb.data.forEach((p) => {
+			p.agentIds = p.agentIds.filter((aid) => aid !== id);
+		});
+		await projectDb.write();
+		const taskDb = await loadDb("db.tasks.json", []);
+		taskDb.data.forEach((t) => {
+			if (t.assignedAgentId === id) t.assignedAgentId = void 0;
+		});
+		await taskDb.write();
+		const sessionDb = await loadDb("db.sessions.json", []);
+		sessionDb.data = sessionDb.data.filter((s) => s.agentId !== id);
+		await sessionDb.write();
+		await db.write();
+		return true;
+	},
+	async getProjects(agentId) {
+		const agent = await this.getById(agentId);
+		if (!agent) return [];
+		return (await loadDb("db.projects.json", [])).data.filter((p) => agent.projectIds.includes(p.id));
+	},
+	async getTasks(agentId) {
+		const agent = await this.getById(agentId);
+		if (!agent) return [];
+		return (await loadDb("db.tasks.json", [])).data.filter((t) => agent.taskIds.includes(t.id));
+	},
+	async getSessions(agentId) {
+		if (!await this.getById(agentId)) return [];
+		return (await loadDb("db.sessions.json", [])).data.filter((s) => s.agentId === agentId);
+	},
+	async assignToProject(agentId, projectId) {
+		const db = await getDb();
+		const projectDb = await loadDb("db.projects.json", []);
+		const agent = db.data.find((a) => a.id === agentId);
+		const project = projectDb.data.find((p) => p.id === projectId);
+		if (!agent || !project) return;
+		if (!agent.projectIds.includes(projectId)) {
+			agent.projectIds.push(projectId);
+			agent.updatedAt = Date.now();
+		}
+		if (!project.agentIds.includes(agentId)) {
+			project.agentIds.push(agentId);
+			project.updatedAt = Date.now();
+		}
+		await db.write();
+		await projectDb.write();
+	},
+	async removeFromProject(agentId, projectId) {
+		const db = await getDb();
+		const projectDb = await loadDb("db.projects.json", []);
+		const agent = db.data.find((a) => a.id === agentId);
+		const project = projectDb.data.find((p) => p.id === projectId);
+		if (agent) {
+			agent.projectIds = agent.projectIds.filter((id) => id !== projectId);
+			agent.updatedAt = Date.now();
+		}
+		if (project) {
+			project.agentIds = project.agentIds.filter((id) => id !== agentId);
+			project.updatedAt = Date.now();
+		}
+		await db.write();
+		await projectDb.write();
+	},
+	async addTask(agentId, taskId) {
+		const db = await getDb();
+		const agent = db.data.find((a) => a.id === agentId);
+		if (agent && !agent.taskIds.includes(taskId)) {
+			agent.taskIds.push(taskId);
+			agent.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async removeTask(agentId, taskId) {
+		const db = await getDb();
+		const agent = db.data.find((a) => a.id === agentId);
+		if (agent) {
+			agent.taskIds = agent.taskIds.filter((id) => id !== taskId);
+			agent.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async addSession(agentId, sessionId) {
+		const db = await getDb();
+		const agent = db.data.find((a) => a.id === agentId);
+		if (agent && !agent.sessionIds.includes(sessionId)) {
+			agent.sessionIds.push(sessionId);
+			agent.updatedAt = Date.now();
+			await db.write();
+		}
+	},
+	async removeSession(agentId, sessionId) {
+		const db = await getDb();
+		const agent = db.data.find((a) => a.id === agentId);
+		if (agent) {
+			agent.sessionIds = agent.sessionIds.filter((id) => id !== sessionId);
+			agent.updatedAt = Date.now();
+			await db.write();
+		}
+	}
+};
+//#endregion
+//#region electron/ipc/agents.ts
+function registerAgentIpc() {
+	ipcMain.handle("agents:list", () => AgentRepository.getAll());
+	ipcMain.handle("agents:get", async (_e, id) => {
+		return await AgentRepository.getById(id) ?? null;
+	});
+	ipcMain.handle("agents:create", async (_e, data) => {
+		if (!data.name?.trim()) throw new Error("Agent name is required");
+		return AgentRepository.create({
+			name: data.name.trim(),
+			role: data.role?.trim() || void 0,
+			status: data.status ?? "idle"
+		});
+	});
+}
+//#endregion
+//#region electron/ipc/index.ts
+function registerIpc() {
+	registerAgentIpc();
+}
+//#endregion
 //#region electron/main.ts
 var __dirname$1 = dirname(fileURLToPath(import.meta.url));
 import_main.default.initialize();
@@ -2111,6 +2288,7 @@ app.whenReady().then(async () => {
 	import_main.default.info("App ready");
 	setUserDataPath(app.getPath("userData"));
 	await seedWorkspace();
+	registerIpc();
 	createWindow();
 	app.on("activate", () => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();

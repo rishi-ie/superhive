@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Session, Agent } from '../types'
 
-const dbPromise = loadDb<Session[]>('db.sessions.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Session[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Session[]>('db.sessions.json', [])
+  return _db
+}
 
 export const SessionRepository = {
   async create(data: Omit<Session, 'id' | 'createdAt' | 'updatedAt'>): Promise<Session> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const session: Session = {
       id: crypto.randomUUID(),
@@ -29,22 +34,22 @@ export const SessionRepository = {
   },
 
   async getById(id: string): Promise<Session | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((s: Session) => s.id === id)
   },
 
   async getAll(): Promise<Session[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByAgent(agentId: string): Promise<Session[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((s: Session) => s.agentId === agentId)
   },
 
   async update(id: string, data: Partial<Omit<Session, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Session | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((s: Session) => s.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -55,7 +60,7 @@ export const SessionRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const session = db.data.find((s: Session) => s.id === id)
     if (!session) return false
 

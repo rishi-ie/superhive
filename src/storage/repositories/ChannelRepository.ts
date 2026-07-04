@@ -1,11 +1,16 @@
 import { loadDb } from '../database'
 import type { Channel, ChannelType, Agent, Project } from '../types'
 
-const dbPromise = loadDb<Channel[]>('db.channels.json', [])
+let _db: Awaited<ReturnType<typeof loadDb<Channel[]>>> | null = null
+
+async function getDb() {
+  if (!_db) _db = await loadDb<Channel[]>('db.channels.json', [])
+  return _db
+}
 
 export const ChannelRepository = {
   async create(data: Omit<Channel, 'id' | 'createdAt' | 'updatedAt' | 'participantAgentIds'>): Promise<Channel> {
-    const db = await dbPromise
+    const db = await getDb()
     const now = Date.now()
     const channel: Channel = {
       id: crypto.randomUUID(),
@@ -36,27 +41,27 @@ export const ChannelRepository = {
   },
 
   async getById(id: string): Promise<Channel | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.find((c: Channel) => c.id === id)
   },
 
   async getAll(): Promise<Channel[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data
   },
 
   async getByProject(projectId: string): Promise<Channel[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((c: Channel) => c.projectId === projectId)
   },
 
   async getByType(type: ChannelType): Promise<Channel[]> {
-    const db = await dbPromise
+    const db = await getDb()
     return db.data.filter((c: Channel) => c.type === type)
   },
 
   async update(id: string, data: Partial<Omit<Channel, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Channel | undefined> {
-    const db = await dbPromise
+    const db = await getDb()
     const idx = db.data.findIndex((c: Channel) => c.id === id)
     if (idx === -1) return undefined
     const existing = db.data[idx]
@@ -67,7 +72,7 @@ export const ChannelRepository = {
   },
 
   async delete(id: string): Promise<boolean> {
-    const db = await dbPromise
+    const db = await getDb()
     const channel = db.data.find((c: Channel) => c.id === id)
     if (!channel) return false
 
@@ -96,7 +101,7 @@ export const ChannelRepository = {
   },
 
   async addParticipant(channelId: string, agentId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const channel = db.data.find((c: Channel) => c.id === channelId)
     if (!channel) return
 
@@ -108,7 +113,7 @@ export const ChannelRepository = {
   },
 
   async removeParticipant(channelId: string, agentId: string): Promise<void> {
-    const db = await dbPromise
+    const db = await getDb()
     const channel = db.data.find((c: Channel) => c.id === channelId)
     if (channel) {
       channel.participantAgentIds = channel.participantAgentIds.filter((id: string) => id !== agentId)

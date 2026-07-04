@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import log from 'electron-log/main';
 import { setUserDataPath } from '../src/storage/database';
 import { seedWorkspace } from '../src/storage/seed';
+import { registerIpc } from './ipc';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -52,6 +53,7 @@ app.whenReady().then(async () => {
 
   setUserDataPath(app.getPath('userData'));
   await seedWorkspace();
+  registerIpc();
 
   createWindow();
 
