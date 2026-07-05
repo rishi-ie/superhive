@@ -30,7 +30,7 @@ function AccordionSection({
         onClick={() => setOpen((o) => !o)}
         className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors"
       >
-        <span className="flex-1 truncate text-left">{label}</span>
+        <span className="truncate text-left">{label}</span>
         <ChevronRight
           className={cn(
             'size-4 flex-shrink-0 transition-transform duration-150',
@@ -71,12 +71,6 @@ function ItemRow({
   );
 }
 
-const STATUS_COLORS: Record<MockAgent['status'], string> = {
-  online: 'bg-green-500',
-  away: 'bg-yellow-500',
-  offline: 'bg-muted',
-};
-
 export function SidebarAccordion() {
   return (
     <div className="flex flex-col gap-1 px-2">
@@ -89,14 +83,6 @@ export function SidebarAccordion() {
             key={a.id}
             icon={<Bot className="size-4 flex-shrink-0" />}
             label={a.name}
-            trailing={
-              <span
-                className={cn(
-                  'size-2 rounded-full flex-shrink-0',
-                  STATUS_COLORS[a.status]
-                )}
-              />
-            }
           />
         ))}
       </AccordionSection>
