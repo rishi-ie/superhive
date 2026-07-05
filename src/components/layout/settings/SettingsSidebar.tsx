@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SETTINGS_SECTIONS } from "./sections";
 import { goBackHome } from "@/flows/go-back-home";
@@ -9,12 +9,12 @@ export function SettingsSidebar() {
 
   return (
     <aside className="flex h-full w-64 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="flex items-center gap-2 px-3 pt-9 pb-3">
+      <div className="flex items-center gap-2 px-2 pt-9 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
         >
-          <ChevronLeft className="size-4" />
+          <ArrowLeft className="size-4" />
           <span>Back to Home</span>
         </button>
       </div>
