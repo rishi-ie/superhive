@@ -5,29 +5,28 @@ export interface BreadcrumbSegment {
   href?: string;
 }
 
-export function useCenterBreadcrumb(): BreadcrumbSegment[] {
+export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   const { pathname } = useLocation();
   const { agentId, projectId } = useParams();
 
-  if (pathname === "/") {
-    return [{ label: "Home" }];
-  }
-  if (pathname === "/hive") {
-    return [{ label: "Home", href: "/" }, { label: "Meta Hive" }];
+  if (pathname === "/landing") {
+    return null;
   }
   if (pathname === "/agents" || pathname.startsWith("/agents/")) {
-    return [
-      { label: "Home", href: "/" },
-      { label: "Agents", href: "/agents" },
-      ...(agentId ? [{ label: agentId }] : []),
-    ];
+    return agentId
+      ? [{ label: "Agents", href: "/agents" }, { label: agentId }]
+      : [{ label: "Agents" }];
   }
   if (pathname === "/projects" || pathname.startsWith("/projects/")) {
-    return [
-      { label: "Home", href: "/" },
-      { label: "Projects", href: "/projects" },
-      ...(projectId ? [{ label: projectId }] : []),
-    ];
+    return projectId
+      ? [{ label: "Projects", href: "/projects" }, { label: projectId }]
+      : [{ label: "Projects" }];
   }
-  return [{ label: "Home", href: "/" }];
+  if (pathname === "/hive") {
+    return [{ label: "Meta Hive" }];
+  }
+  if (pathname === "/remote") {
+    return [{ label: "Remote" }];
+  }
+  return [{ label: "Landing", href: "/landing" }];
 }

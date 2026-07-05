@@ -3,7 +3,7 @@ import { ComposerCard } from "./ComposerCard";
 import { SuggestedActions } from "./SuggestedActions";
 import { WorkspaceBreadcrumb } from "./WorkspaceBreadcrumb";
 
-export function Dashboard() {
+export function Landing() {
   return (
     <div className="flex h-full w-full flex-col bg-background">
       <div className="flex flex-1 items-center justify-center px-6">

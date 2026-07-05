@@ -4,8 +4,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./left-sidebar/AppSidebar";
 import { RightSidebar } from "./right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
-import { TopRightControls } from "@/components/layout/center/TopRightControls";
-import { CenterBreadcrumb } from "@/components/layout/center/CenterBreadcrumb";
+import { TopRightControls } from "@/components/layout/center/common/TopRightControls";
+import { CenterBreadcrumb } from "@/components/layout/center/common/CenterBreadcrumb";
 import { CommandPalette } from "./command-palette/CommandPalette";
 
 const MIN_WIDTH = 240;

@@ -11,6 +11,7 @@ import { useCenterBreadcrumb } from "@/flows/use-center-breadcrumb";
 
 export function CenterBreadcrumb() {
   const segments = useCenterBreadcrumb();
+  if (!segments) return null;
   return (
     <div className="flex items-center px-4 pt-3 pb-2">
       <Breadcrumb className="flex-1 font-sans">

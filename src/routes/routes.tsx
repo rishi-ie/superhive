@@ -1,10 +1,11 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
-import { Dashboard } from "@/pages/Dashboard";
 import {
+  Landing,
   AgentChatView,
   ProjectChatView,
   MetaHiveView,
+  RemoteView,
 } from "@/components/layout/center";
 
 export const router = createBrowserRouter([
@@ -14,7 +15,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: <Landing />,
       },
       {
         path: "agents",
@@ -33,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: "hive",
         element: <MetaHiveView />,
+      },
+      {
+        path: "remote",
+        element: <RemoteView />,
       },
     ],
   },
