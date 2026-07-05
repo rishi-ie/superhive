@@ -1,12 +1,6 @@
 import { useState } from 'react';
-import { Bot, ChevronRight, FolderOpen, Hash, Pin } from 'lucide-react';
+import { Bot, ChevronRight, FolderOpen, Hash, Pin, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  mockAgents,
-  mockChannels,
-  mockPinned,
-  mockProjects,
-} from './data';
 
 const BTN_BASE =
   'flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground';
@@ -70,12 +64,32 @@ function ItemRow({
   );
 }
 
+function EmptyCtaButton({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button type="button" className={BTN_BASE}>
+      {icon}
+      <span className="flex-1 truncate text-left">{label}</span>
+    </button>
+  );
+}
+
+const agents: { id: string; name: string }[] = [];
+const projects: { id: string; name: string }[] = [];
+const channels: { id: string; name: string }[] = [];
+const pinned: { id: string; name: string }[] = [];
+
 export function SidebarAccordion() {
   return (
     <div className="flex flex-col gap-1 px-2">
-      {mockPinned.length > 0 && (
+      {pinned.length > 0 && (
         <AccordionSection label="Pinned">
-          {mockPinned.map((p) => (
+          {pinned.map((p) => (
             <ItemRow
               key={p.id}
               icon={<Pin className="size-4 flex-shrink-0" />}
@@ -85,28 +99,32 @@ export function SidebarAccordion() {
         </AccordionSection>
       )}
 
-      <AccordionSection label="Agents" defaultOpen>
-        {mockAgents.map((a) => (
-          <ItemRow
-            key={a.id}
-            icon={<Bot className="size-4 flex-shrink-0" />}
-            label={a.name}
-          />
-        ))}
+      <AccordionSection label="Agents">
+        {agents.length > 0
+          ? agents.map((a) => (
+              <ItemRow
+                key={a.id}
+                icon={<Bot className="size-4 flex-shrink-0" />}
+                label={a.name}
+              />
+            ))
+          : <EmptyCtaButton icon={<Plus className="size-4 flex-shrink-0" />} label="New agent" />}
       </AccordionSection>
 
-      <AccordionSection label="Projects" defaultOpen>
-        {mockProjects.map((p) => (
-          <ItemRow
-            key={p.id}
-            icon={<FolderOpen className="size-4 flex-shrink-0" />}
-            label={p.name}
-          />
-        ))}
+      <AccordionSection label="Projects">
+        {projects.length > 0
+          ? projects.map((p) => (
+              <ItemRow
+                key={p.id}
+                icon={<FolderOpen className="size-4 flex-shrink-0" />}
+                label={p.name}
+              />
+            ))
+          : <EmptyCtaButton icon={<Plus className="size-4 flex-shrink-0" />} label="New project" />}
       </AccordionSection>
 
       <AccordionSection label="Channels">
-        {mockChannels.map((c) => (
+        {channels.map((c) => (
           <ItemRow
             key={c.id}
             icon={<Hash className="size-4 flex-shrink-0" />}

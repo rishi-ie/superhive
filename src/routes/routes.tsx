@@ -1,6 +1,6 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
-import { AgentView, AgentChatView } from "@/screens/AgentView";
+import { Dashboard } from "@/screens/Dashboard";
 import { ProjectView, ProjectChatView } from "@/screens/ProjectView";
 import { MetaHiveView } from "@/screens/MetaHiveView";
 import { RemoteView } from "@/screens/RemoteView";
@@ -13,14 +13,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/agents" replace />,
-      },
-      {
-        path: "agents",
-        children: [
-          { index: true, element: <AgentView /> },
-          { path: ":agentId", element: <AgentChatView /> },
-        ],
+        element: <Dashboard />,
       },
       {
         path: "projects",
