@@ -9,7 +9,7 @@ export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   const { pathname } = useLocation();
   const { agentId, projectId } = useParams();
 
-  if (pathname === "/landing") {
+  if (pathname === "/landing" || pathname === "/") {
     return null;
   }
   if (pathname === "/agents" || pathname.startsWith("/agents/")) {
