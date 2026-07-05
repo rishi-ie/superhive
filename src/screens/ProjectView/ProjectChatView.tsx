@@ -29,7 +29,7 @@ export function ProjectChatView() {
 
   if (notFound) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#141414] p-6">
+      <div className="flex h-full flex-col items-center justify-center gap-3 bg-background p-6">
         <div className="flex size-12 items-center justify-center rounded-full bg-accent">
           <FolderOpen className="size-6 text-[#2563eb]" />
         </div>
@@ -49,7 +49,7 @@ export function ProjectChatView() {
 
   if (!project) {
     return (
-      <div className="flex h-full items-center justify-center bg-[#141414]">
+      <div className="flex h-full items-center justify-center bg-background">
         <div className="flex size-6 items-center justify-center">
           <div className="size-4 animate-spin rounded-full border-2 border-muted border-t-foreground" />
         </div>
@@ -58,7 +58,7 @@ export function ProjectChatView() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#141414]">
+    <div className="flex h-full flex-col bg-background">
       <ProjectChatHeader project={project} />
       <ProjectEmptyState projectName={project.name} />
       <ChatComposer />

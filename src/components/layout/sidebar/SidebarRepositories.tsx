@@ -14,7 +14,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-white transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
               <Plus className="size-4" />
               <span>New chat</span>
@@ -23,7 +23,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-white transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
               <Search className="size-4" />
               <span>Search</span>
@@ -32,7 +32,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-white transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
               <Hexagon className="size-4" />
               <span>Meta hive</span>
@@ -41,7 +41,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-white transition-colors hover:bg-sidebar-accent hover:text-foreground"
             >
               <Globe className="size-4" />
               <span>Remote</span>

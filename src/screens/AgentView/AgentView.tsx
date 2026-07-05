@@ -7,7 +7,7 @@ export function AgentView() {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#141414] p-6">
+    <div className="flex h-full flex-col items-center justify-center gap-3 bg-background p-6">
       <div className="flex size-12 items-center justify-center rounded-full bg-accent">
         <Bot className="size-6 text-[#7c3aed]" />
       </div>

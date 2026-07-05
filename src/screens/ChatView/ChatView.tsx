@@ -108,7 +108,7 @@ export interface ChatViewProps {
 
 export function ChatView({ category, agentName }: ChatViewProps) {
   return (
-    <div className="flex h-full flex-col bg-[#141414]">
+    <div className="flex h-full flex-col bg-background">
       <ChatHeader
         categoryLabel={CATEGORY_LABELS[category]}
         agentName={agentName ?? "Untitled"}
