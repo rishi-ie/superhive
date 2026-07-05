@@ -52,3 +52,28 @@ export const mockConversations: MockConversation[] = [
   { id: "3", title: "Research Session"     },
   { id: "4", title: "Marketing Strategy"  },
 ];
+
+export interface MockChannel {
+  id: string;
+  name: string;
+}
+
+export interface MockPinned {
+  id: string;
+  refType: "agent" | "project";
+  refId: string;
+  name: string;
+}
+
+export const mockChannels: MockChannel[] = [
+  { id: "general",   name: "general"    },
+  { id: "engineering", name: "engineering" },
+  { id: "design",    name: "design"      },
+  { id: "random",    name: "random"      },
+];
+
+export const mockPinned: MockPinned[] = [
+  { id: "p1", refType: "agent",   refId: "coding",   name: "Coding Agent"   },
+  { id: "p2", refType: "project", refId: "hive",     name: "Super Hive"     },
+  { id: "p3", refType: "agent",   refId: "research", name: "Research Agent" },
+];

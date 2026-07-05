@@ -4,6 +4,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
+import { SidebarAccordion } from "./SidebarAccordion";
 import { SidebarRepositories } from "./SidebarRepositories";
 import { SidebarUser } from "./SidebarUser";
 
@@ -21,6 +22,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
       <SidebarHeader className="gap-1.5 p-1 pt-9" />
       <SidebarContent className="gap-0 px-0">
         <SidebarRepositories />
+        <SidebarAccordion />
       </SidebarContent>
       <SidebarFooter className="border-t border-border p-1">
         <SidebarUser />
