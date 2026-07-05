@@ -6,7 +6,6 @@ import {
   mockChannels,
   mockPinned,
   mockProjects,
-  type MockAgent,
 } from './data';
 
 const BTN_BASE =
