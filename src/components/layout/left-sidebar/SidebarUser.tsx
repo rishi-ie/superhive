@@ -3,7 +3,9 @@ import {
   LifeBuoy,
   LogOut,
   CreditCard,
+  Settings,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function SidebarUser() {
+  const navigate = useNavigate();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,7 +36,7 @@ export function SidebarUser() {
       <DropdownMenuContent
         align="start"
         side="top"
-        className="border-border bg-card"
+        className="border-border bg-sidebar font-sans text-md"
       >
         <DropdownMenuLabel className="flex items-center gap-2 p-3">
           <Avatar className="size-8">
@@ -58,6 +61,10 @@ export function SidebarUser() {
         <DropdownMenuItem className="gap-2">
           <LifeBuoy className="size-4 text-muted-foreground" />
           <span>Help & support</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="gap-2" onSelect={() => navigate("/settings")}>
+          <Settings className="size-4 text-muted-foreground" />
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50" />
         <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
