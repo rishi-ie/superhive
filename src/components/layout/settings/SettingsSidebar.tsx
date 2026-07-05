@@ -8,8 +8,8 @@ export function SettingsSidebar() {
   const navigate = useNavigate();
 
   return (
-    <aside className="flex h-full w-64 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="flex items-center gap-2 px-2 pt-9 pb-1">
+    <aside className="flex h-full w-68 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+      <div className="flex items-center gap-2 px-2 pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
           className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
