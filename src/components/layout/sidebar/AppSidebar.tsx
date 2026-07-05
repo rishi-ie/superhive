@@ -22,7 +22,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
       <SidebarContent className="gap-0 px-0">
         <SidebarRepositories />
       </SidebarContent>
-      <SidebarFooter className="p-1">
+      <SidebarFooter className="border-t border-border p-1">
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>
