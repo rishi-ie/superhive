@@ -1,7 +1,6 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
 import {
-  Landing,
   AgentChatView,
   ProjectChatView,
   MetaHiveView,
@@ -15,7 +14,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Landing />,
+        element: <Navigate to="/agents/default" replace />,
       },
       {
         path: "agents",
