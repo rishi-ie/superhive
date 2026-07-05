@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
 import {
   AgentChatView,
@@ -7,6 +7,10 @@ import {
   MetaHiveView,
   RemoteView,
 } from "@/components/layout/center";
+import {
+  SettingsLayout,
+  SettingsSectionView,
+} from "@/components/layout/settings";
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +43,14 @@ export const router = createBrowserRouter([
         path: "remote",
         element: <RemoteView />,
       },
+    ],
+  },
+  {
+    path: "/settings",
+    element: <SettingsLayout />,
+    children: [
+      { index: true, element: <Navigate to="general" replace /> },
+      { path: ":section", element: <SettingsSectionView /> },
     ],
   },
 ]);

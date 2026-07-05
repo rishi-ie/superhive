@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { goToSettings } from "@/flows/go-to-settings";
 
 export function SidebarUser() {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ export function SidebarUser() {
           <LifeBuoy className="size-4 text-muted-foreground" />
           <span>Help & support</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2" onSelect={() => navigate("/settings")}>
+        <DropdownMenuItem className="gap-2" onSelect={() => goToSettings(navigate)}>
           <Settings className="size-4 text-muted-foreground" />
           <span>Settings</span>
         </DropdownMenuItem>

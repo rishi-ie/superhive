@@ -12,6 +12,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { useCommandPalette } from "@/flows/use-command-palette";
+import { goToSettings } from "@/flows/go-to-settings";
 
 export function CommandPalette() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export function CommandPalette() {
           <CommandSeparator />
 
           <CommandGroup heading="Navigate">
-            <CommandItem onSelect={run(() => navigate("/settings"))}>
+            <CommandItem onSelect={run(() => goToSettings(navigate))}>
               <Settings />
               Settings
             </CommandItem>
