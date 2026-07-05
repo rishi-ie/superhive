@@ -27,7 +27,7 @@ function AccordionSection({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors"
+        className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors"
       >
         <span className="truncate text-left">{label}</span>
         <ChevronRight
@@ -73,48 +73,8 @@ function ItemRow({
 export function SidebarAccordion() {
   return (
     <div className="flex flex-col gap-1 px-2">
-      <AccordionSection
-        label="Agents"
-        defaultOpen
-      >
-        {mockAgents.map((a) => (
-          <ItemRow
-            key={a.id}
-            icon={<Bot className="size-4 flex-shrink-0" />}
-            label={a.name}
-          />
-        ))}
-      </AccordionSection>
-
-      <AccordionSection
-        label="Projects"
-        defaultOpen
-      >
-        {mockProjects.map((p) => (
-          <ItemRow
-            key={p.id}
-            icon={<FolderOpen className="size-4 flex-shrink-0" />}
-            label={p.name}
-          />
-        ))}
-      </AccordionSection>
-
-      <AccordionSection
-        label="Channels"
-      >
-        {mockChannels.map((c) => (
-          <ItemRow
-            key={c.id}
-            icon={<Hash className="size-4 flex-shrink-0" />}
-            label={c.name}
-          />
-        ))}
-      </AccordionSection>
-
       {mockPinned.length > 0 && (
-        <AccordionSection
-          label="Pinned"
-        >
+        <AccordionSection label="Pinned">
           {mockPinned.map((p) => (
             <ItemRow
               key={p.id}
@@ -124,6 +84,36 @@ export function SidebarAccordion() {
           ))}
         </AccordionSection>
       )}
+
+      <AccordionSection label="Agents" defaultOpen>
+        {mockAgents.map((a) => (
+          <ItemRow
+            key={a.id}
+            icon={<Bot className="size-4 flex-shrink-0" />}
+            label={a.name}
+          />
+        ))}
+      </AccordionSection>
+
+      <AccordionSection label="Projects" defaultOpen>
+        {mockProjects.map((p) => (
+          <ItemRow
+            key={p.id}
+            icon={<FolderOpen className="size-4 flex-shrink-0" />}
+            label={p.name}
+          />
+        ))}
+      </AccordionSection>
+
+      <AccordionSection label="Channels">
+        {mockChannels.map((c) => (
+          <ItemRow
+            key={c.id}
+            icon={<Hash className="size-4 flex-shrink-0" />}
+            label={c.name}
+          />
+        ))}
+      </AccordionSection>
     </div>
   );
 }
