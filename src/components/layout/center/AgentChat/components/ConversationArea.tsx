@@ -13,7 +13,7 @@ export function ConversationArea() {
 
   return (
     <ScrollArea className="flex-1 h-full">
-      <div className="mx-auto max-w-4xl px-6 py-8 flex flex-col gap-6">
+      <div className="mx-auto max-w-4xl px-14 py-8 flex flex-col gap-6">
         {MOCK_MESSAGES.map((message) =>
           message.type === "user" ? (
             <UserMessage key={message.id} message={message} />
