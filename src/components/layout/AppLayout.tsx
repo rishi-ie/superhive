@@ -8,7 +8,7 @@ import { TopRightControls } from "@/screens/Dashboard/components/TopRightControl
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
-const DEFAULT_WIDTH = 330;
+const DEFAULT_WIDTH = 280;
 const MIN_RIGHT_WIDTH = 200;
 const MAX_RIGHT_WIDTH = 480;
 const DEFAULT_RIGHT_WIDTH = 280;
