@@ -3,6 +3,5 @@ export { AgentChatView } from './AgentChat';
 export { ProjectChatView } from './ProjectChat';
 export { MetaHiveView } from './MetaHive/MetaHiveView';
 export { RemoteView } from './Remote';
-export { TopRightControls } from './common/TopRightControls';
 export { TopHandle } from './common/TopHandle';
 export { CenterBreadcrumb } from './common/CenterBreadcrumb';
