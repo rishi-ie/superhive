@@ -1,10 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
-import { Dashboard } from "@/screens/Dashboard";
-import { ProjectView, ProjectChatView } from "@/screens/ProjectView";
-import { MetaHiveView } from "@/screens/MetaHiveView";
-import { RemoteView } from "@/screens/RemoteView";
-import { Settings } from "@/screens/Settings";
+import { Dashboard } from "@/pages/Dashboard";
+import { ProjectView, ProjectChatView } from "@/pages/Projects";
+import { MetaHiveView } from "@/pages/MetaHive";
+import { RemoteView } from "@/pages/Remote";
+import { Settings } from "@/pages/Settings";
 
 export const router = createBrowserRouter([
   {

@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Outlet } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "./sidebar/AppSidebar";
-import { RightSidebar } from "./sidebar/RightSidebar";
+import { AppSidebar } from "./left-sidebar/AppSidebar";
+import { RightSidebar } from "./right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
-import { TopRightControls } from "@/screens/Dashboard/components/TopRightControls";
+import { TopRightControls } from "@/components/layout/center/TopRightControls";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
