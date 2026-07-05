@@ -1,6 +1,3 @@
 export { Dashboard } from './Dashboard';
-export { ProjectView } from './Projects';
-export { ProjectChatView } from './ProjectChat';
-export { MetaHiveView } from './MetaHive';
-export { RemoteView } from './Remote';
-export { Settings } from './Settings';
+export { ProjectChatView } from '../components/layout/center/ProjectChat/ProjectChatView';
+export { MetaHiveView } from '../components/layout/center/MetaHive/MetaHiveView';

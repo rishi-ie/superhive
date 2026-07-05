@@ -5,6 +5,7 @@ import { AppSidebar } from "./left-sidebar/AppSidebar";
 import { RightSidebar } from "./right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
 import { TopRightControls } from "@/components/layout/center/TopRightControls";
+import { CenterBreadcrumb } from "@/components/layout/center/CenterBreadcrumb";
 import { CommandPalette } from "./command-palette/CommandPalette";
 
 const MIN_WIDTH = 240;
@@ -114,6 +115,7 @@ export function AppLayout() {
             rightSidebarOpen={rightSidebarOpen}
             onToggleRightSidebar={() => setRightSidebarOpen((v) => !v)}
           />
+          <CenterBreadcrumb />
           <Outlet />
         </Workspace>
         {rightSidebarOpen && (

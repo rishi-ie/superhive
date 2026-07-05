@@ -1,1 +1,1 @@
-export { MetaHiveView } from '@/components/layout/center/Hive/MetaHiveView';
+export { MetaHiveView } from '@/components/layout/center/MetaHive/MetaHiveView';

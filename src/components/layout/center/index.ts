@@ -1,8 +1,7 @@
 export { Dashboard } from './Dashboard/Dashboard';
-export { ProjectView, ProjectChatView } from './Projects';
-export { MetaHiveView } from './Hive/MetaHiveView';
-export { RemoteView } from './Remote/RemoteView';
-export { Settings } from './Settings/Settings';
-export { ChatView } from './Chat';
+export { AgentChatView } from './AgentChat';
+export { ProjectChatView } from './ProjectChat';
+export { MetaHiveView } from './MetaHive/MetaHiveView';
 export { TopRightControls } from './TopRightControls';
 export { TopHandle } from './TopHandle';
+export { CenterBreadcrumb } from './CenterBreadcrumb';
