@@ -40,14 +40,14 @@ export function SidebarRepositories() {
                 type="button"
                 onClick={() => setAgentPickerOpen(true)}
                 className={cn(
-                  'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
+                  'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-sm transition-colors',
                   location.pathname.startsWith('/agents')
                     ? 'bg-accent text-foreground'
                     : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
                 )}
               >
                 <Bot className="size-4" />
-                <span className="font-semibold">Agent view</span>
+                <span>Agent view</span>
               </button>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -55,14 +55,14 @@ export function SidebarRepositories() {
                 type="button"
                 onClick={() => setProjectsPickerOpen(true)}
                 className={cn(
-                  'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
+                  'flex h-8 w-full items-center gap-2 rounded-lg px-1.5 text-sm transition-colors',
                   location.pathname.startsWith('/projects')
                     ? 'bg-accent text-foreground'
                     : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
                 )}
               >
                 <FolderOpen className="size-4" />
-                <span className="font-semibold">Project view</span>
+                <span>Project view</span>
               </button>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -70,7 +70,7 @@ export function SidebarRepositories() {
                 to="/hive"
                 className={({ isActive: a }) =>
                   cn(
-                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
+                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-sm transition-colors',
                     a
                       ? 'bg-accent text-foreground'
                       : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
@@ -78,7 +78,7 @@ export function SidebarRepositories() {
                 }
               >
                 <Hexagon className="size-4" />
-                <span className="font-semibold">Meta Hive</span>
+                <span>Meta Hive</span>
               </NavLink>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -86,7 +86,7 @@ export function SidebarRepositories() {
                 to="/remote"
                 className={({ isActive: a }) =>
                   cn(
-                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-xs transition-colors',
+                    'flex h-8 items-center gap-2 rounded-lg px-1.5 text-sm transition-colors',
                     a
                       ? 'bg-accent text-foreground'
                       : 'text-[#b2b2b2] hover:bg-accent hover:text-foreground'
@@ -94,7 +94,7 @@ export function SidebarRepositories() {
                 }
               >
                 <Globe className="size-4" />
-                <span className="font-semibold">Remote</span>
+                <span>Remote</span>
               </NavLink>
             </SidebarMenuItem>
           </SidebarMenu>

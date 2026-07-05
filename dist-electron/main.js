@@ -2468,8 +2468,8 @@ function createWindow() {
 		frame: false,
 		titleBarStyle: "hidden",
 		trafficLightPosition: {
-			x: 8,
-			y: 8
+			x: 16,
+			y: 16
 		},
 		show: false,
 		webPreferences: {

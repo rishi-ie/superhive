@@ -19,8 +19,7 @@ Superhive uses a **dark theme** with a **blue accent** (`#81ACEC`). The theme is
 
 ### Typography
 
-- **Font Family**: Fustat (Google Fonts) — configured in CSS
-- **Fallback**: `system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
+- **Font Family**: Apple System (SF Pro) — native system font, no external loading
 
 ---
 
@@ -366,7 +365,7 @@ For custom titlebar areas that should be draggable:
 
 ### Font
 
-The project uses Fustat. It's loaded via Google Fonts in the CSS. No additional configuration needed.
+The project uses Apple System font (SF Pro via -apple-system/BlinkMacSystemFont). No external font loading needed.
 
 ---
 
