@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bot, ChevronDown, FolderOpen, Hash, Pin } from 'lucide-react';
+import { Bot, ChevronRight, FolderOpen, Hash, Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   mockAgents,
@@ -13,12 +13,10 @@ const BTN_BASE =
   'flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground';
 
 function AccordionSection({
-  icon,
   label,
   defaultOpen = false,
   children,
 }: {
-  icon: React.ReactNode;
   label: string;
   defaultOpen?: boolean;
   children: React.ReactNode;
@@ -30,14 +28,13 @@ function AccordionSection({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={BTN_BASE}
+        className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors"
       >
-        {icon}
         <span className="flex-1 truncate text-left">{label}</span>
-        <ChevronDown
+        <ChevronRight
           className={cn(
             'size-4 flex-shrink-0 transition-transform duration-150',
-            open && 'rotate-180'
+            open && 'rotate-90'
           )}
         />
       </button>
@@ -82,9 +79,8 @@ const STATUS_COLORS: Record<MockAgent['status'], string> = {
 
 export function SidebarAccordion() {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 px-2">
       <AccordionSection
-        icon={<Bot className="size-4" />}
         label="Agents"
         defaultOpen
       >
@@ -106,7 +102,6 @@ export function SidebarAccordion() {
       </AccordionSection>
 
       <AccordionSection
-        icon={<FolderOpen className="size-4" />}
         label="Projects"
         defaultOpen
       >
@@ -120,7 +115,6 @@ export function SidebarAccordion() {
       </AccordionSection>
 
       <AccordionSection
-        icon={<Hash className="size-4" />}
         label="Channels"
       >
         {mockChannels.map((c) => (
@@ -134,7 +128,6 @@ export function SidebarAccordion() {
 
       {mockPinned.length > 0 && (
         <AccordionSection
-          icon={<Pin className="size-4" />}
           label="Pinned"
         >
           {mockPinned.map((p) => (
