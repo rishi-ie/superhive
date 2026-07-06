@@ -10,6 +10,7 @@ export const INIT_STEPS: { id: InitStep; label: string }[] = [
   { id: 'ready', label: 'Agent ready' },
 ]
 
+/** @deprecated Moved to electron/pi-protocol/types.ts — kept here for historical compatibility only. */
 export function matchBootStep(line: string): InitStep | null {
   const lower = line.toLowerCase()
   if (lower.includes('installing pi dependencies') || lower.includes('npm install')) {

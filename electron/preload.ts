@@ -1,4 +1,7 @@
 // @ts-nocheck
+// ============================================================
+// IPC BRIDGE — exposes window.api to the renderer (contextBridge)
+// ============================================================
 const { contextBridge, ipcRenderer } = require('electron');
 
 function subscribe(channel, cb) {

@@ -12,6 +12,10 @@ import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload } from '../src/types/electron'
 import { IPC } from './ipc/index'
 
+/**
+ * A single message in an in-memory agent conversation.
+ * Note: conversations are ephemeral — not persisted to disk or database.
+ */
 export interface RuntimeMessage {
   id: string
   role: 'user' | 'assistant'
@@ -19,39 +23,59 @@ export interface RuntimeMessage {
   ts: number
 }
 
+/**
+ * Live runtime state for one agent instance.
+ * Single-threaded JS: all mutations are safe without locks.
+ */
 export interface RuntimeEntry {
+  // config
   agentId: string
   agentDir: string
   manifestPiSource: string
+  // process
   process: ChildProcess | null
-  status: AgentStatus
   pid?: number
   startedAt?: number
   endedAt?: number
-  lastError?: string
+  // conversation
   messages: RuntimeMessage[]
+  // debug
   stderrLog: string[]
+  // boot
+  status: AgentStatus
   bootStep?: InitStep
+  lastError?: string
+  // adapter
   adapter: PiProtocolAdapter
 }
 
 const STDERR_LOG_LIMIT = 500
 const READY_SILENCE_MS = 2000
 
+/**
+ * Manages live Pi runtime processes for all agents.
+ * Single-threaded JS: all `entries` map mutations are safe without locks.
+ */
 class ManifestPiRuntime {
   private entries = new Map<string, RuntimeEntry>()
   private adapterFactories = new Map<string, () => PiProtocolAdapter>()
   private silenceTimers = new Map<string, NodeJS.Timeout>()
   private readyEmitted = new Set<string>()
 
+  /**
+   * Register a custom PiProtocolAdapter factory for an agent.
+   * Allows swapping the text-adapter for a structured-JSONL adapter in the future.
+   */
   registerAdapterFactory(agentId: string, factory: () => PiProtocolAdapter): void {
     this.adapterFactories.set(agentId, factory)
   }
 
+  /** Returns the full runtime entry (includes process handle — do not persist). */
   getState(agentId: string): RuntimeEntry | null {
     return this.entries.get(agentId) ?? null
   }
 
+  /** Returns a serializable snapshot of runtime state for IPC. */
   getStatusPayload(agentId: string): RuntimeStatusPayload | null {
     const entry = this.entries.get(agentId)
     if (!entry) return null
@@ -75,6 +99,7 @@ class ManifestPiRuntime {
     return !!entry?.process && entry.status !== 'stopped' && entry.status !== 'error'
   }
 
+  /** Spawn a new Pi process for an agent. Idempotent — ignored if already running. */
   start(agentId: string, agentDir: string, manifestPiSource: string): void {
     if (this.isRunning(agentId)) {
       log.info(`[runtime] agent ${agentId} already running, ignoring start`)
@@ -112,6 +137,7 @@ class ManifestPiRuntime {
     this.spawnProcess(entry)
   }
 
+  /** Send SIGABRT + SIGTERM to the process. Sets status to 'stopped'. */
   stop(agentId: string): void {
     this.clearSilenceTimer(agentId)
     this.readyEmitted.delete(agentId)
