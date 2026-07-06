@@ -1,5 +1,5 @@
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Routes } from './routes/routes';
+import { Routes } from './pages/routes';
 
 function App() {
   return (

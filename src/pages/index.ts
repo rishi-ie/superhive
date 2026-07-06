@@ -1,3 +1,3 @@
-export { Landing } from './Landing';
-export { ProjectChatView } from '../components/layout/center/ProjectChat/ProjectChatView';
-export { MetaHiveView } from '../components/layout/center/MetaHive/MetaHiveView';
+export { Landing } from './landing';
+export { ProjectChatView } from './project-chat';
+export { MetaHiveView } from './meta-hive';

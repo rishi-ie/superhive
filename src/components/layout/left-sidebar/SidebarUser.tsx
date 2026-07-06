@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { goToSettings } from "@/flows/go-to-settings";
+import { goToSettings } from "@/flows/navigation/go-to-settings";
 
 export function SidebarUser() {
   const navigate = useNavigate();

@@ -11,8 +11,8 @@ import {
   CommandItem,
   CommandSeparator,
 } from "@/components/ui/command";
-import { useCommandPalette } from "@/flows/use-command-palette";
-import { goToSettings } from "@/flows/go-to-settings";
+import { useCommandPalette } from "@/flows/ui/use-command-palette";
+import { goToSettings } from "@/flows/navigation/go-to-settings";
 
 export function CommandPalette() {
   const navigate = useNavigate();

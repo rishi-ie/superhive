@@ -1,32 +1,13 @@
 import type { Agent, AgentStatus, Project } from '@/storage/types'
+import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
+import type { InitStep, AdapterEvent } from '@/models/boot-step'
+import type { EnsureTemplateResult } from '@/models/template'
 
-export type { Agent, AgentStatus, Project } from '@/storage/types'
+export type { Agent, AgentStatus, Project }
 
-export type { InitStep, AdapterEvent } from '../../electron/pi-protocol/types'
-
-export interface RuntimeMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  ts: number
-}
-
-export interface RuntimeStatusPayload {
-  agentId: string
-  status: AgentStatus
-  pid?: number
-  startedAt?: number
-  endedAt?: number
-  lastError?: string
-  bootStep?: InitStep
-}
-
-export interface RuntimeExitPayload {
-  agentId: string
-  code: number | null
-  signal: string | null
-  status: AgentStatus
-}
+export type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload }
+export type { InitStep, AdapterEvent }
+export type { EnsureTemplateResult }
 
 export interface AgentCreateInput {
   name: string
@@ -66,10 +47,6 @@ export type ProjectCreateInput = {
   name: string
   description?: string
 }
-
-export type EnsureTemplateResult =
-  | { ok: true; path: string; cloned: boolean }
-  | { ok: false; path: string; error: string }
 
 export interface ManifestPiAPI {
   ensureTemplate: () => Promise<EnsureTemplateResult>

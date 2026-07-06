@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { listAgents } from '@/flows/list-agents';
+import { listAgents } from '@/flows/agents/crud/list-agents';
 import type { Agent } from '@/types/electron';
 import { PinnedSection } from './sections/PinnedSection';
 import { AgentsSection } from './sections/AgentsSection';

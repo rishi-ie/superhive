@@ -3,7 +3,7 @@ import { Bot, Plus } from 'lucide-react';
 import { AccordionSection } from './AccordionSection';
 import { AccordionRow } from '../primitives/AccordionRow';
 import { EmptyCtaButton } from '../primitives/EmptyCtaButton';
-import { useOpenCreateAgent } from '@/flows/open-create-agent';
+import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import type { Agent } from '@/types/electron';
 
 interface AgentsSectionProps {
