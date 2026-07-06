@@ -1,6 +1,5 @@
 import { Pin } from 'lucide-react';
-import { AccordionSection } from './AccordionSection';
-import { AccordionRow } from '../primitives/AccordionRow';
+import { AccordionSection, AccordionRow } from '@/components/layout/common/primitives';
 
 interface PinnedItem {
   id: string;

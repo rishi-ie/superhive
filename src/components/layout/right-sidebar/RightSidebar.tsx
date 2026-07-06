@@ -1,22 +1,22 @@
-import { useParams } from 'react-router-dom'
-import { Sidebar, SidebarContent } from '@/components/ui/sidebar'
-import { Bot } from 'lucide-react'
-import { AgentSettingsPanel } from './AgentSettingsPanel'
+import { useParams } from 'react-router-dom';
+import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
+import { Bot } from 'lucide-react';
+import { AgentSettingsPanel } from './AgentSettingsPanel';
 
 interface RightSidebarProps {
-  width?: number
+  width?: number;
 }
 
 export function RightSidebar({ width = 280 }: RightSidebarProps) {
-  const { agentId } = useParams()
+  const { agentId } = useParams();
 
   return (
     <Sidebar
-      className="h-full flex-shrink-0 border-l border-sidebar-border bg-background"
+      className="h-full flex-shrink-0 border-l border-sidebar-border bg-sidebar"
       collapsible="none"
       style={{ width: `${width}px` }}
     >
-      <SidebarContent className="flex h-full flex-col items-center justify-center p-0 bg-background">
+      <SidebarContent className="flex h-full flex-col items-center justify-center bg-sidebar p-0">
         {agentId ? (
           <AgentSettingsPanel agentId={agentId} />
         ) : (
@@ -29,5 +29,5 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
         )}
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

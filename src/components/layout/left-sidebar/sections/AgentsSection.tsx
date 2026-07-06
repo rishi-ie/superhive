@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Bot, Plus, Pin, MoreHorizontal } from 'lucide-react';
-import { AccordionSection } from './AccordionSection';
-import { AccordionRow } from '../primitives/AccordionRow';
-import { EmptyCtaButton } from '../primitives/EmptyCtaButton';
+import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import type { Agent } from '@/types/electron';
 

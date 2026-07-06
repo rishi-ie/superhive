@@ -1,7 +1,5 @@
 import { FolderOpen, Plus } from 'lucide-react';
-import { AccordionSection } from './AccordionSection';
-import { AccordionRow } from '../primitives/AccordionRow';
-import { EmptyCtaButton } from '../primitives/EmptyCtaButton';
+import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
 
 interface ProjectItem {
   id: string;
