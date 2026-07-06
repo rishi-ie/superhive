@@ -6,6 +6,7 @@ import log from 'electron-log/main'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus } from '../../src/storage/types'
 import { IPC } from './index'
+import { config } from '../config'
 
 interface CreateAgentInput {
   name: string
@@ -62,7 +63,7 @@ export function registerAgentIpc(): void {
         workspace: './workspace',
         model: { provider: 'minimax', name: 'MiniMax-M2.7' },
         systemPrompt: '',
-        environment: { MINIMAX_API_KEY: 'sk-cp-GwASo9pAInPri5qnJiIh_BxWu5K18O_VjoUD8dFRN09aKvUDaseH2VnnEMG3RJk8191Lb7gMN9nmbCwHbPyH5FOHC9OZImpYcL58bHbZQzQgmcp9xmi1Og8' },
+        environment: { MINIMAX_API_KEY: config.minimaxApiKey },
         skills: [],
         extensions: [],
         prompts: [],

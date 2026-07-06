@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "electron:dev": "vite",
     "electron:build": "bun run build && electron-builder",
-    "electron:preview": "vite build && electron ."
+    "electron:preview": "vite build && electron .",
+    "migrate:keys": "bun scripts/migrate-agent-keys.ts"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
@@ -38,6 +39,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "dotenv": "^16.4.5",
     "electron": "^42.4.1",
     "electron-log": "^5.4.4",
     "lowdb": "^7.0.1",
