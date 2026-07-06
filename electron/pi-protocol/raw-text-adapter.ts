@@ -5,7 +5,6 @@ import { matchBootStep } from './types'
 export class RawTextAdapter implements PiProtocolAdapter {
   private lineBuffer = ''
   private currentMessageId: string | null = null
-  private bootDone = false
 
   onStdout(chunk: string, emit: (event: AdapterEvent) => void): void {
     this.lineBuffer += chunk
@@ -16,7 +15,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
       const line = raw.trim()
       if (!line) continue
 
-      let parsed: any = null
+      let parsed: unknown = null
       try {
         parsed = JSON.parse(line)
       } catch {
@@ -24,9 +23,10 @@ export class RawTextAdapter implements PiProtocolAdapter {
       }
 
       if (parsed && typeof parsed === 'object') {
+        const obj = parsed as Record<string, unknown>
         if (
-          parsed.type === 'message_update' &&
-          parsed.assistantMessageEvent?.type === 'text_delta'
+          obj.type === 'message_update' &&
+          (obj.assistantMessageEvent as Record<string, unknown> | undefined)?.type === 'text_delta'
         ) {
           if (!this.currentMessageId) {
             this.currentMessageId = randomUUID()
@@ -35,26 +35,20 @@ export class RawTextAdapter implements PiProtocolAdapter {
           emit({
             type: 'text-delta',
             messageId: this.currentMessageId,
-            delta: parsed.assistantMessageEvent.delta ?? '',
+            delta: ((obj.assistantMessageEvent as Record<string, unknown>)?.delta as string) ?? '',
           })
-        } else if (parsed.type === 'agent_end' || parsed.type === 'message_end') {
+        } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
           }
-        } else if (parsed.type === 'response' && parsed.success === false) {
+        } else if (obj.type === 'response' && obj.success === false) {
           emit({
             type: 'error',
-            message: parsed.error ?? 'Unknown error from Pi',
+            message: (obj.error as string) ?? 'Unknown error from Pi',
             recoverable: true,
           })
         }
-      }
-
-      if (!this.bootDone) {
-        this.bootDone = true
-        emit({ type: 'boot-step', step: 'ready' })
-        emit({ type: 'ready' })
       }
     }
   }
@@ -76,6 +70,5 @@ export class RawTextAdapter implements PiProtocolAdapter {
   reset(): void {
     this.lineBuffer = ''
     this.currentMessageId = null
-    this.bootDone = false
   }
 }

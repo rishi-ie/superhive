@@ -112,7 +112,6 @@ export function useAgentRuntime(agentId: string | undefined): UseAgentRuntime {
             ];
           });
         } else if (ev.type === 'message-end') {
-          setMessages((prev) => prev.map((m) => (m.id === ev.messageId ? m : m)));
         } else if (ev.type === 'error') {
           toast.error(ev.message, { duration: Infinity });
           setLastError(ev.message);

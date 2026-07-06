@@ -1814,7 +1814,7 @@ function Ne() {
 	});
 }
 //#endregion
-//#region src/types/init-steps.ts
+//#region electron/pi-protocol/types.ts
 function Pe(e) {
 	let t = e.toLowerCase();
 	return t.includes("installing pi dependencies") || t.includes("npm install") ? "installing-deps" : t.includes("building pi workspace") || t.includes("npm run build") || t.includes("building") ? "building-runtime" : t.includes("creating default manifest") || t.includes("agent.json") ? "generating-manifest" : t.includes("workspace") || t.includes("creating workspace") ? "creating-workspace" : t.includes("launching") || t.includes("starting runtime") ? "launching-runtime" : t.includes("connecting") || t.includes("connecting chat") ? "connecting-chat" : null;
@@ -1824,7 +1824,6 @@ function Pe(e) {
 var Fe = class {
 	lineBuffer = "";
 	currentMessageId = null;
-	bootDone = !1;
 	onStdout(e, t) {
 		this.lineBuffer += e;
 		let n = this.lineBuffer.split("\n");
@@ -1842,25 +1841,25 @@ var Fe = class {
 					line: n
 				});
 			}
-			r && typeof r == "object" && (r.type === "message_update" && r.assistantMessageEvent?.type === "text_delta" ? (this.currentMessageId || (this.currentMessageId = te(), t({
-				type: "message-start",
-				messageId: this.currentMessageId,
-				role: "assistant"
-			})), t({
-				type: "text-delta",
-				messageId: this.currentMessageId,
-				delta: r.assistantMessageEvent.delta ?? ""
-			})) : r.type === "agent_end" || r.type === "message_end" ? this.currentMessageId &&= (t({
-				type: "message-end",
-				messageId: this.currentMessageId
-			}), null) : r.type === "response" && r.success === !1 && t({
-				type: "error",
-				message: r.error ?? "Unknown error from Pi",
-				recoverable: !0
-			})), this.bootDone || (this.bootDone = !0, t({
-				type: "boot-step",
-				step: "ready"
-			}), t({ type: "ready" }));
+			if (r && typeof r == "object") {
+				let e = r;
+				e.type === "message_update" && e.assistantMessageEvent?.type === "text_delta" ? (this.currentMessageId || (this.currentMessageId = te(), t({
+					type: "message-start",
+					messageId: this.currentMessageId,
+					role: "assistant"
+				})), t({
+					type: "text-delta",
+					messageId: this.currentMessageId,
+					delta: e.assistantMessageEvent?.delta ?? ""
+				})) : e.type === "agent_end" || e.type === "message_end" ? this.currentMessageId &&= (t({
+					type: "message-end",
+					messageId: this.currentMessageId
+				}), null) : e.type === "response" && e.success === !1 && t({
+					type: "error",
+					message: e.error ?? "Unknown error from Pi",
+					recoverable: !0
+				});
+			}
 		}
 	}
 	onStderr(e, t) {
@@ -1886,7 +1885,7 @@ var Fe = class {
 		}) + "\n";
 	}
 	reset() {
-		this.lineBuffer = "", this.currentMessageId = null, this.bootDone = !1;
+		this.lineBuffer = "", this.currentMessageId = null;
 	}
 }, Ie = 500, Le = 2e3, K = new class {
 	entries = /* @__PURE__ */ new Map();
