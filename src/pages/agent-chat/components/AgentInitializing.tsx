@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Loader2, RotateCw } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { CheckIcon, Loading01Icon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { INIT_STEPS } from '@/types/init-steps';
 import type { InitStep } from '@/types/electron';
 import { cn } from '@/lib/utils';
@@ -82,9 +83,9 @@ export function AgentInitializing({ currentStep, agentName, lastError, onRestart
                   )}
                 >
                   {isDone ? (
-                    <Check className="size-3" />
+                    <HugeiconsIcon icon={CheckIcon} className="size-3" />
                   ) : isActive ? (
-                    <Loader2 className="size-3 animate-spin" />
+                    <HugeiconsIcon icon={Loading01Icon} className="size-3 animate-spin" />
                   ) : (
                     <span className="block size-1.5 rounded-full bg-current" />
                   )}
@@ -107,7 +108,7 @@ export function AgentInitializing({ currentStep, agentName, lastError, onRestart
         {stuck && (
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={onRestart} className="gap-1.5">
-              <RotateCw className="size-3.5" />
+              <HugeiconsIcon icon={RefreshIcon} className="size-3.5" />
               Restart
             </Button>
           </div>

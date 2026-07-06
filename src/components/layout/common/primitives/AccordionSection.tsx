@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { cn } from '@/lib/utils';
 
 interface AccordionSectionProps {
@@ -23,7 +24,7 @@ export function AccordionSection({
         className="flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors"
       >
         <span className="truncate text-left">{label}</span>
-        <ChevronRight
+        <HugeiconsIcon icon={ArrowRight01Icon}
           className={cn(
             'size-4 flex-shrink-0 transition-transform duration-150',
             open && 'rotate-90'

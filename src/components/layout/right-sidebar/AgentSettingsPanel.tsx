@@ -1,4 +1,5 @@
-import { Bot, AlertCircle } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { BotIcon, AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { useAgentSettings } from '@/flows/agents/settings/use-agent-settings';
 import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
 import { useAutoSave } from './use-auto-save';
@@ -37,7 +38,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   if (error || !settings) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
-        <AlertCircle className="size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={AlertCircleIcon} className="size-4 text-muted-foreground" />
         <p className="text-xs text-muted-foreground">{error ?? 'No settings found'}</p>
         <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => void reload()}>
           Retry
@@ -49,7 +50,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-9 items-center gap-2 px-3">
-        <Bot className="size-4 flex-shrink-0 text-muted-foreground" />
+          <HugeiconsIcon icon={BotIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
         <span className="flex-1 truncate text-xs text-foreground">{settings.name ?? 'Agent'}</span>
         <Badge variant={STATUS_VARIANT[status] ?? 'secondary'} className="text-xs opacity-60 px-1.5 py-0">
           {status}

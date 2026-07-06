@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { MessageSquarePlus, Bot, FolderPlus, Settings, Hexagon } from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { MessageAdd01Icon, BotIcon, FolderAddIcon, Settings01Icon, HexagonIcon } from "@hugeicons/core-free-icons";
 import {
   Command,
   CommandDialog,
@@ -37,15 +38,15 @@ export function CommandPalette() {
 
           <CommandGroup heading="Actions">
             <CommandItem onSelect={run(() => toast.info("New chat — coming soon"))}>
-              <MessageSquarePlus />
+              <HugeiconsIcon icon={MessageAdd01Icon} />
               New Chat
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New agent — coming soon"))}>
-              <Bot />
+              <HugeiconsIcon icon={BotIcon} />
               New Agent
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New project — coming soon"))}>
-              <FolderPlus />
+              <HugeiconsIcon icon={FolderAddIcon} />
               New Project
             </CommandItem>
           </CommandGroup>
@@ -54,11 +55,11 @@ export function CommandPalette() {
 
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={run(() => goToSettings(navigate))}>
-              <Settings />
+              <HugeiconsIcon icon={Settings01Icon} />
               Settings
             </CommandItem>
             <CommandItem onSelect={run(() => navigate("/hive"))}>
-              <Hexagon />
+              <HugeiconsIcon icon={HexagonIcon} />
               Meta Hive
             </CommandItem>
           </CommandGroup>

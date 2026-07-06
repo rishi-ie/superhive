@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Bot, Plus, Pin, MoreHorizontal } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { BotIcon, PlusSignIcon, PinIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import type { Agent } from '@/types/electron';
@@ -11,10 +12,10 @@ interface AgentsSectionProps {
 const AgentActions = () => (
   <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
     <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
-      <Pin className="size-3.5" />
+      <HugeiconsIcon icon={PinIcon} className="size-3.5" />
     </div>
     <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
-      <MoreHorizontal className="size-3.5" />
+      <HugeiconsIcon icon={MoreHorizontalIcon} className="size-3.5" />
     </div>
   </span>
 );
@@ -29,7 +30,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
         ? items.map((a) => (
             <AccordionRow
               key={a.id}
-              icon={<Bot className="size-4 flex-shrink-0" />}
+              icon={<HugeiconsIcon icon={BotIcon} className="size-4 flex-shrink-0" />}
               label={a.name}
               trailing={<AgentActions />}
               onClick={() => navigate(`/agents/${a.id}`)}
@@ -37,7 +38,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
           ))
         : (
             <EmptyCtaButton
-              icon={<Plus className="size-4 flex-shrink-0" />}
+              icon={<HugeiconsIcon icon={PlusSignIcon} className="size-4 flex-shrink-0" />}
               label="New agent"
               onClick={() => setOpen(true)}
             />

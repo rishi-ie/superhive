@@ -1,4 +1,5 @@
-import { Copy, PenLine } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { Copy01Icon, Pen01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import type { RuntimeMessage } from '@/types/electron';
 
@@ -19,10 +20,10 @@ export function UserMessage({ message }: UserMessageProps) {
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
-          <Copy className="size-3.5" />
+          <HugeiconsIcon icon={Copy01Icon} className="size-3.5" />
         </Button>
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
-          <PenLine className="size-3.5" />
+          <HugeiconsIcon icon={Pen01Icon} className="size-3.5" />
         </Button>
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { Bot, Plus } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { BotIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 
@@ -8,14 +9,14 @@ export function AgentEmpty() {
     <div className="flex h-full w-full items-center justify-center bg-background">
       <div className="flex max-w-sm flex-col items-center gap-3 px-6 text-center">
         <div className="rounded-full bg-muted/40 p-4">
-          <Bot className="size-7 text-muted-foreground" />
+          <HugeiconsIcon icon={BotIcon} className="size-7 text-muted-foreground" />
         </div>
         <h2 className="text-base font-medium text-foreground">No agent selected</h2>
         <p className="text-sm text-muted-foreground">
           Pick an agent from the sidebar, or create a new one to begin.
         </p>
         <Button size="sm" onClick={() => setOpen(true)} className="mt-1 gap-1.5">
-          <Plus className="size-4" />
+          <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
           New Agent
         </Button>
       </div>

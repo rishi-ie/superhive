@@ -1,4 +1,5 @@
-import { PanelRight, PanelRightClose, MoreHorizontal, Bell } from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { SidebarRightIcon, SidebarRight01Icon, MoreHorizontalIcon, BellIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,9 +37,9 @@ export function TopRightControls({
             onClick={onToggleRightSidebar}
           >
             {rightSidebarOpen ? (
-              <PanelRightClose className="size-3.5" />
+              <HugeiconsIcon icon={SidebarRight01Icon} className="size-3.5" />
             ) : (
-              <PanelRight className="size-3.5" />
+              <HugeiconsIcon icon={SidebarRightIcon} className="size-3.5" />
             )}
             <span>Control panel</span>
           </Button>
@@ -57,7 +58,7 @@ export function TopRightControls({
                 size="icon"
                 className="size-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
               >
-                <MoreHorizontal className="size-4" />
+                <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="border-border bg-card">
@@ -78,7 +79,7 @@ export function TopRightControls({
             size="icon"
             className="size-7 rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <Bell className="size-4" />
+              <HugeiconsIcon icon={BellIcon} className="size-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>

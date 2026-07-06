@@ -1,4 +1,5 @@
-import { Hash } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { HashtagIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection, AccordionRow } from '@/components/layout/common/primitives';
 
 interface ChannelItem {
@@ -16,7 +17,7 @@ export function ChannelsSection({ items }: ChannelsSectionProps) {
       {items.map((c) => (
         <AccordionRow
           key={c.id}
-          icon={<Hash className="size-4 flex-shrink-0" />}
+          icon={<HugeiconsIcon icon={HashtagIcon} className="size-4 flex-shrink-0" />}
           label={c.name}
         />
       ))}

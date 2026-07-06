@@ -242,20 +242,23 @@ Use for detail panels, filters, or secondary content:
 
 ## Icons
 
-**Lucide React** is the configured icon library. Use icons consistently:
+**Hugeicons (free tier)** is the configured icon library. Import the wrapper and icon components, then compose:
 
 ```tsx
-import { SettingsIcon, SearchIcon, PlusIcon } from "lucide-react"
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { Settings01Icon, SearchingIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 
 // In Button
 <Button>
-  <SettingsIcon data-icon="inline-start" />
+  <HugeiconsIcon icon={Settings01Icon} data-icon="inline-start" />
   Settings
 </Button>
 
 // Standalone
-<SearchIcon className="size-4" />
+<HugeiconsIcon icon={SearchingIcon} className="size-4" />
 ```
+
+Icons are tree-shakeable from `@hugeicons/core-free-icons`. See `src/components/ui/icon.tsx` for wrapper defaults (size 16, strokeWidth 1.5, currentColor).
 
 ---
 

@@ -1,4 +1,5 @@
-import { FolderOpen, Plus } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { FolderOpenIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
 
 interface ProjectItem {
@@ -17,11 +18,11 @@ export function ProjectsSection({ items }: ProjectsSectionProps) {
         ? items.map((p) => (
             <AccordionRow
               key={p.id}
-              icon={<FolderOpen className="size-4 flex-shrink-0" />}
+              icon={<HugeiconsIcon icon={FolderOpenIcon} className="size-4 flex-shrink-0" />}
               label={p.name}
             />
           ))
-        : <EmptyCtaButton icon={<Plus className="size-4 flex-shrink-0" />} label="New project" />}
+        :             <EmptyCtaButton icon={<HugeiconsIcon icon={PlusSignIcon} className="size-4 flex-shrink-0" />} label="New project" />}
     </AccordionSection>
   );
 }

@@ -1,10 +1,5 @@
-import {
-  Keyboard,
-  LifeBuoy,
-  LogOut,
-  CreditCard,
-  Settings,
-} from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { KeyboardIcon, CustomerServiceIcon, Logout01Icon, CreditCardIcon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -52,24 +47,24 @@ export function SidebarUser() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border/50" />
         <DropdownMenuItem className="gap-2">
-          <CreditCard className="size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={CreditCardIcon} className="size-4 text-muted-foreground" />
           <span>Manage subscription</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2">
-          <Keyboard className="size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={KeyboardIcon} className="size-4 text-muted-foreground" />
           <span>Keyboard shortcuts</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2">
-          <LifeBuoy className="size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={CustomerServiceIcon} className="size-4 text-muted-foreground" />
           <span>Help & support</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2" onSelect={() => goToSettings(navigate)}>
-          <Settings className="size-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Settings01Icon} className="size-4 text-muted-foreground" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50" />
         <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
-          <LogOut className="size-4" />
+          <HugeiconsIcon icon={Logout01Icon} className="size-4" />
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

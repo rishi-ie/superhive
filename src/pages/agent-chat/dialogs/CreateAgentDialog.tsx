@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Folder, Loader2 } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { Folder01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
 import {
   Dialog,
   DialogContent,
@@ -145,7 +146,7 @@ export function CreateAgentDialog() {
                 'flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground'
               )}
             >
-              <Folder className="size-3.5 flex-shrink-0" />
+              <HugeiconsIcon icon={Folder01Icon} className="size-3.5 flex-shrink-0" />
               <span className="font-mono truncate">{fullPath}</span>
             </div>
           )}
@@ -169,7 +170,7 @@ export function CreateAgentDialog() {
               Cancel
             </Button>
             <Button type="submit" disabled={!canSubmit}>
-              {submitting && <Loader2 className="size-3.5 animate-spin" />}
+              {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>
           </DialogFooter>

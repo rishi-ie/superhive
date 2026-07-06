@@ -1,4 +1,5 @@
-import { Plus, Mic, Lock } from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { PlusSignIcon, LockIcon, MicIcon } from "@hugeicons/core-free-icons";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export function ComposerCard() {
               size="icon"
               className="size-8 rounded-full bg-[#2a2a2a] text-muted-foreground hover:bg-[#333333] hover:text-foreground"
             >
-              <Plus className="size-4" />
+              <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -44,7 +45,7 @@ export function ComposerCard() {
               size="sm"
               className="h-8 gap-1.5 rounded-full px-3 text-xs font-medium text-foreground hover:bg-accent"
             >
-              <Lock className="size-3" />
+              <HugeiconsIcon icon={LockIcon} className="size-3" />
               <span>Composer 2.5 Fast</span>
             </Button>
           </DropdownMenuTrigger>
@@ -64,7 +65,7 @@ export function ComposerCard() {
               size="icon"
               className="size-8 rounded-full bg-white text-black hover:bg-white/90"
             >
-              <Mic className="size-4" />
+              <HugeiconsIcon icon={MicIcon} className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

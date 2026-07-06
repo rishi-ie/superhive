@@ -1,4 +1,5 @@
-import { Pin } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { PinIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection, AccordionRow } from '@/components/layout/common/primitives';
 
 interface PinnedItem {
@@ -18,7 +19,7 @@ export function PinnedSection({ items }: PinnedSectionProps) {
       {items.map((p) => (
         <AccordionRow
           key={p.id}
-          icon={<Pin className="size-4 flex-shrink-0" />}
+          icon={<HugeiconsIcon icon={PinIcon} className="size-4 flex-shrink-0" />}
           label={p.name}
         />
       ))}

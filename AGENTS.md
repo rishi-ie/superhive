@@ -339,7 +339,7 @@ This project uses **Tailwind CSS v4** with CSS-first configuration. Theme is in 
 
 ## Icon Library
 
-**Lucide React**. Use `lucide-react` for all icons.
+**Hugeicons (free tier)**. Use `@hugeicons/react` + `@hugeicons/core-free-icons` via the wrapper at `@/components/ui/icon`. Import icons from `@hugeicons/core-free-icons`, then wrap with `<HugeiconsIcon icon={IconName} className="..." />`. Default size is 16px, color `currentColor`, strokeWidth 1.5.
 
 ---
 

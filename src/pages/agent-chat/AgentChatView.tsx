@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { Plus, Send } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { PlusSignIcon, SentIcon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
@@ -96,7 +97,7 @@ export function AgentChatView() {
                 variant="ghost"
                 className="text-muted-foreground hover:text-foreground h-8 w-8 border-0"
               >
-                <Plus className="size-5" />
+                <HugeiconsIcon icon={PlusSignIcon} className="size-5" />
               </Button>
               <Button
                 size="icon-sm"
@@ -105,7 +106,7 @@ export function AgentChatView() {
                 disabled={isBusy || input.trim().length === 0}
                 className="text-muted-foreground hover:text-foreground h-8 w-8 border-0"
               >
-                <Send className="size-5" />
+                <HugeiconsIcon icon={SentIcon} className="size-5" />
               </Button>
             </div>
           </div>

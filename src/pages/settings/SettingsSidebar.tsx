@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { SETTINGS_SECTIONS } from "./sections";
 import { goBackHome } from "@/flows/navigation/go-back-home";
@@ -14,7 +15,7 @@ export function SettingsSidebar() {
           onClick={() => goBackHome(navigate)}
           className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
         >
-          <ArrowLeft className="size-4" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
           <span>Back to Home</span>
         </button>
       </div>

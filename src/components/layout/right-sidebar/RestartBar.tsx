@@ -1,4 +1,5 @@
-import { RotateCw, Square } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { RefreshIcon, SquareIcon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import { restartAgent } from '@/flows/agents/runtime/restart-agent';
 import { stopAgent } from '@/flows/agents/runtime/stop-agent';
@@ -32,7 +33,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
           onClick={() => void stopAgent(agentId)}
           disabled={!canStop}
         >
-          <Square className="size-3.5" />
+          <HugeiconsIcon icon={SquareIcon} className="size-3.5" />
           Stop
         </Button>
         <Button
@@ -42,7 +43,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
           onClick={() => void restartAgent(agentId)}
           disabled={status === 'initializing'}
         >
-          <RotateCw className="size-3.5" />
+          <HugeiconsIcon icon={RefreshIcon} className="size-3.5" />
           Restart
         </Button>
       </div>

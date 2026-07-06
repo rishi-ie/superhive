@@ -1,4 +1,5 @@
-import { Plus, Search, Hexagon, Globe } from 'lucide-react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon } from "@hugeicons/core-free-icons";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -17,7 +18,7 @@ export function SidebarRepositories() {
               type="button"
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Plus className="size-4" />
+              <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
               <span>New chat</span>
             </button>
           </SidebarMenuItem>
@@ -26,7 +27,7 @@ export function SidebarRepositories() {
               type="button"
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Search className="size-4" />
+              <HugeiconsIcon icon={Search01Icon} className="size-4" />
               <span>Search</span>
             </button>
           </SidebarMenuItem>
@@ -35,7 +36,7 @@ export function SidebarRepositories() {
               type="button"
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Hexagon className="size-4" />
+              <HugeiconsIcon icon={HexagonIcon} className="size-4" />
               <span>Meta hive</span>
               <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
             </button>
@@ -45,7 +46,7 @@ export function SidebarRepositories() {
               type="button"
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Globe className="size-4" />
+              <HugeiconsIcon icon={GlobalIcon} className="size-4" />
               <span>Remote</span>
               <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
             </button>

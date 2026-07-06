@@ -1,4 +1,5 @@
-import { ChevronRight, ChevronDown, Home, Laptop } from "lucide-react";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { ArrowRight01Icon, ArrowDown01Icon, Home01Icon, LaptopIcon } from "@hugeicons/core-free-icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +16,9 @@ export function WorkspaceBreadcrumb() {
             type="button"
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
           >
-            <Home className="size-3" />
+            <HugeiconsIcon icon={Home01Icon} className="size-3" />
             <span>Home</span>
-            <ChevronDown className="size-3" />
+            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="border-border bg-card">
@@ -26,8 +27,8 @@ export function WorkspaceBreadcrumb() {
           <DropdownMenuItem>Favorites</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <ChevronRight className="size-3 text-muted-foreground" />
-      <Laptop className="size-3 text-muted-foreground" />
+      <HugeiconsIcon icon={ArrowRight01Icon} className="size-3 text-muted-foreground" />
+      <HugeiconsIcon icon={LaptopIcon} className="size-3 text-muted-foreground" />
       <span className="text-foreground/80">Local</span>
     </div>
   );
