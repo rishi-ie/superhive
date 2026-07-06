@@ -20,7 +20,7 @@ export function AccordionSection({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors"
+        className="flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors"
       >
         <span className="truncate text-left">{label}</span>
         <ChevronRight
