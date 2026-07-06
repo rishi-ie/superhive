@@ -58,7 +58,18 @@ export function registerAgentIpc(): void {
       await mkdir(agentDir, { recursive: true })
       await cp(join(manifestPiSource, 'agent.sh'), join(agentDir, 'agent.sh'))
       await chmod(join(agentDir, 'agent.sh'), 0o755)
+
+      const agent = await AgentRepository.create({
+        name: data.name.trim(),
+        role: data.role?.trim() || undefined,
+        description: data.description?.trim() || undefined,
+        localPath: agentDir,
+        manifestPiSource,
+        status: 'initializing',
+      })
+
       await writeFile(join(agentDir, 'agent.json'), JSON.stringify({
+        superhiveId: agent.id,
         version: 1,
         name: data.name.trim(),
         description: data.description?.trim() ?? '',
@@ -75,15 +86,6 @@ export function registerAgentIpc(): void {
         logging: { enabled: true },
       }, null, 2) + '\n', 'utf8')
       await writeFile(join(agentDir, '.agent-initialized'), '', 'utf8')
-
-      const agent = await AgentRepository.create({
-        name: data.name.trim(),
-        role: data.role?.trim() || undefined,
-        description: data.description?.trim() || undefined,
-        localPath: agentDir,
-        manifestPiSource,
-        status: 'initializing',
-      })
 
       return agent
     }
