@@ -13,7 +13,8 @@
     "electron:dev": "vite",
     "electron:build": "bun run build && electron-builder",
     "electron:preview": "vite build && electron .",
-    "migrate:keys": "bun scripts/migrate-agent-keys.ts"
+    "migrate:keys": "bun scripts/migrate-agent-keys.ts",
+    "wipe:agents": "bun scripts/wipe-agents.ts"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",

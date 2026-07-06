@@ -1,8 +1,10 @@
 import { ipcMain } from 'electron'
 import { mkdir, cp, writeFile, chmod } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import log from 'electron-log/main'
+import { runtime } from '../manifest-pi-runtime'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus } from '../../src/storage/types'
 import { IPC } from './index'
@@ -92,6 +94,21 @@ export function registerAgentIpc(): void {
   })
 
   ipcMain.handle(IPC.AGENTS.DELETE, async (_e, id: string) => {
-    return AgentRepository.delete(id)
+    const agent = await AgentRepository.getById(id)
+    if (!agent) return false
+
+    const status = runtime.getStatusPayload(id)
+    if (status && status.status !== 'stopped' && status.status !== 'idle') {
+      await runtime.stop(id)
+    }
+
+    const deleted = await AgentRepository.delete(id)
+    if (!deleted) return false
+
+    if (agent.localPath && existsSync(agent.localPath)) {
+      log.info(`[agents:delete] removing ${agent.localPath}`)
+      await rm(agent.localPath, { recursive: true, force: true })
+    }
+    return true
   })
 }
