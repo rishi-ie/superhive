@@ -84,7 +84,6 @@ class ManifestPiRuntime {
     const existing = this.entries.get(agentId)
     const factory = this.adapterFactories.get(agentId) ?? (() => new RawTextAdapter())
     const adapter = factory()
-    adapter.reset()
 
     const entry: RuntimeEntry = existing ?? {
       agentId,
@@ -96,6 +95,7 @@ class ManifestPiRuntime {
       stderrLog: [],
       adapter,
     }
+
     entry.adapter = adapter
     entry.agentDir = agentDir
     entry.manifestPiSource = manifestPiSource
@@ -105,7 +105,7 @@ class ManifestPiRuntime {
     entry.lastError = undefined
     entry.bootStep = undefined
     entry.stderrLog = []
-    entry.adapter.reset()
+    adapter.reset()
 
     this.entries.set(agentId, entry)
     this.emitStatus(agentId)
@@ -118,21 +118,14 @@ class ManifestPiRuntime {
     const entry = this.entries.get(agentId)
     if (!entry?.process) {
       if (entry) {
-        entry.status = 'stopped'
-        this.emitStatus(agentId)
+        this.transitionStatus(entry, 'stopped')
       }
       return
     }
-    const proc = entry.process
-    try {
-      proc.stdin?.write(JSON.stringify({ type: 'abort' }) + '\n')
-    } catch {}
-    try {
-      proc.stdin?.end()
-    } catch {}
+    this.terminateProcess(entry.process)
     setTimeout(() => {
-      if (!proc.killed) {
-        proc.kill('SIGTERM')
+      if (!entry.process?.killed) {
+        entry.process?.kill('SIGTERM')
       }
     }, 500)
   }
@@ -155,22 +148,17 @@ class ManifestPiRuntime {
       ts: Date.now(),
     }
     entry.messages.push(userMsg)
-    const prevStatus = entry.status
-    entry.status = 'busy'
-    this.emitStatus(agentId)
+    this.transitionStatus(entry, 'busy')
     this.emitMessages(agentId)
     console.log(`[runtime.send] agent=${agentId} wire=${entry.adapter.serializeInput(text).replace(/\n$/, '')}`)
     try {
       const wire = entry.adapter.serializeInput(text)
       entry.process.stdin?.write(wire)
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → busy`)
       return true
     } catch (err) {
       log.error(`[runtime] send failed for ${agentId}:`, err)
       entry.lastError = err instanceof Error ? err.message : String(err)
-      entry.status = 'error'
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → error`)
-      this.emitStatus(agentId)
+      this.transitionStatus(entry, 'error')
       return false
     }
   }
@@ -180,29 +168,20 @@ class ManifestPiRuntime {
       this.clearSilenceTimer(agentId)
     }
     this.readyEmitted.clear()
-    for (const [agentId, entry] of this.entries) {
+    for (const [, entry] of this.entries) {
       if (entry.process) {
-        const proc = entry.process
-        try {
-          proc.stdin?.write(JSON.stringify({ type: 'abort' }) + '\n')
-        } catch {}
-        try {
-          proc.stdin?.end()
-        } catch {}
-        try {
-          proc.kill('SIGTERM')
-        } catch {}
+        this.terminateProcess(entry.process)
         entry.status = 'stopped'
-        log.info(`[runtime] shutdown agent ${agentId}`)
+        log.info(`[runtime] shutdown agent ${entry.agentId}`)
       }
     }
     setTimeout(() => {
-      for (const [agentId, entry] of this.entries) {
+      for (const [, entry] of this.entries) {
         if (entry.process && !entry.process.killed) {
           try {
             entry.process.kill('SIGKILL')
           } catch {}
-          log.warn(`[runtime] SIGKILL agent ${agentId}`)
+          log.warn(`[runtime] SIGKILL agent ${entry.agentId}`)
         }
       }
     }, 3000)
@@ -214,6 +193,10 @@ class ManifestPiRuntime {
     this.stop(agentId)
     this.entries.delete(agentId)
   }
+
+  // ============================================================
+  // PROCESS MANAGEMENT
+  // ============================================================
 
   private spawnProcess(entry: RuntimeEntry): void {
     const { agentId, agentDir, manifestPiSource } = entry
@@ -234,9 +217,8 @@ class ManifestPiRuntime {
       })
     } catch (err) {
       log.error(`[runtime] spawn failed for ${agentId}:`, err)
-      entry.status = 'error'
       entry.lastError = err instanceof Error ? err.message : String(err)
-      this.emitStatus(agentId)
+      this.transitionStatus(entry, 'error')
       return
     }
 
@@ -276,10 +258,10 @@ class ManifestPiRuntime {
       entry.pid = undefined
       entry.endedAt = Date.now()
       if (code === 0 || signal === 'SIGTERM' || signal === 'SIGKILL') {
-        entry.status = 'stopped'
+        this.transitionStatus(entry, 'stopped')
       } else {
-        entry.status = 'error'
         entry.lastError = entry.stderrLog.slice(-3).join(' | ') || `Process exited with code ${code}`
+        this.transitionStatus(entry, 'error')
       }
       this.emitStatus(agentId)
       this.sendExitEvent(agentId, code, signal)
@@ -288,16 +270,40 @@ class ManifestPiRuntime {
     proc.on('error', (err) => {
       log.error(`[runtime] agent ${agentId} error:`, err)
       entry.lastError = err.message
-      entry.status = 'error'
-      this.emitStatus(agentId)
+      this.transitionStatus(entry, 'error')
     })
   }
+
+  private terminateProcess(proc: ChildProcess): void {
+    try {
+      proc.stdin?.write(JSON.stringify({ type: 'abort' }) + '\n')
+    } catch {}
+    try {
+      proc.stdin?.end()
+    } catch {}
+  }
+
+  // ============================================================
+  // STATUS STATE MACHINE
+  // ============================================================
+
+  private transitionStatus(entry: RuntimeEntry, next: AgentStatus, reason?: string): void {
+    const prev = entry.status
+    if (prev === next) return
+    entry.status = next
+    console.log(
+      `[runtime.status] agent=${entry.agentId} ${prev} → ${next}${reason ? ` (${reason})` : ''}`
+    )
+    this.emitStatus(entry.agentId)
+  }
+
+  // ============================================================
+  // EVENT BROADCAST
+  // ============================================================
 
   private handleAdapterEvent(agentId: string, event: AdapterEvent): void {
     const entry = this.entries.get(agentId)
     if (!entry) return
-
-    const prevStatus = entry.status
 
     if (event.type === 'boot-step') {
       entry.bootStep = event.step
@@ -306,10 +312,8 @@ class ManifestPiRuntime {
     }
 
     if (event.type === 'ready') {
-      entry.status = 'running'
+      this.transitionStatus(entry, 'running')
       console.log(`[runtime.event] agent=${agentId} type=ready`)
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running`)
-      this.emitStatus(agentId)
       return
     }
 
@@ -321,10 +325,8 @@ class ManifestPiRuntime {
         ts: Date.now(),
       }
       entry.messages.push(msg)
-      entry.status = 'busy'
+      this.transitionStatus(entry, 'busy')
       console.log(`[runtime.event] agent=${agentId} type=message-start role=${event.role}`)
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → busy`)
-      this.emitStatus(agentId)
       this.emitMessages(agentId)
       return
     }
@@ -345,10 +347,8 @@ class ManifestPiRuntime {
       if (msg) {
         this.emitEvent(agentId, event)
       }
-      entry.status = 'running'
+      this.transitionStatus(entry, 'running')
       console.log(`[runtime.event] agent=${agentId} type=message-end`)
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running`)
-      this.emitStatus(agentId)
       return
     }
 
@@ -362,9 +362,7 @@ class ManifestPiRuntime {
     if (event.type === 'error') {
       console.log(`[runtime.event] agent=${agentId} type=error message=${JSON.stringify(event.message)} recoverable=${event.recoverable}`)
       entry.lastError = event.message
-      entry.status = 'running'
-      console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running (error: ${event.message})`)
-      this.emitStatus(agentId)
+      this.transitionStatus(entry, 'running')
       this.emitEvent(agentId, event)
       return
     }
@@ -420,6 +418,10 @@ class ManifestPiRuntime {
       status: entry?.status ?? 'stopped',
     })
   }
+
+  // ============================================================
+  // READINESS DETECTION
+  // ============================================================
 
   private resetSilenceTimer(entry: RuntimeEntry): void {
     const agentId = entry.agentId

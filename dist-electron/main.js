@@ -1923,9 +1923,7 @@ var Fe = class {
 			L.default.info(`[runtime] agent ${e} already running, ignoring start`);
 			return;
 		}
-		let r = this.entries.get(e), i = (this.adapterFactories.get(e) ?? (() => new Fe()))();
-		i.reset();
-		let a = r ?? {
+		let r = this.entries.get(e), i = (this.adapterFactories.get(e) ?? (() => new Fe()))(), a = r ?? {
 			agentId: e,
 			agentDir: t,
 			manifestPiSource: n,
@@ -1935,24 +1933,17 @@ var Fe = class {
 			stderrLog: [],
 			adapter: i
 		};
-		a.adapter = i, a.agentDir = t, a.manifestPiSource = n, a.status = "initializing", a.startedAt = Date.now(), a.endedAt = void 0, a.lastError = void 0, a.bootStep = void 0, a.stderrLog = [], a.adapter.reset(), this.entries.set(e, a), this.emitStatus(e), this.spawnProcess(a);
+		a.adapter = i, a.agentDir = t, a.manifestPiSource = n, a.status = "initializing", a.startedAt = Date.now(), a.endedAt = void 0, a.lastError = void 0, a.bootStep = void 0, a.stderrLog = [], i.reset(), this.entries.set(e, a), this.emitStatus(e), this.spawnProcess(a);
 	}
 	stop(e) {
 		this.clearSilenceTimer(e), this.readyEmitted.delete(e);
 		let t = this.entries.get(e);
 		if (!t?.process) {
-			t && (t.status = "stopped", this.emitStatus(e));
+			t && this.transitionStatus(t, "stopped");
 			return;
 		}
-		let n = t.process;
-		try {
-			n.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
-		} catch {}
-		try {
-			n.stdin?.end();
-		} catch {}
-		setTimeout(() => {
-			n.killed || n.kill("SIGTERM");
+		this.terminateProcess(t.process), setTimeout(() => {
+			t.process?.killed || t.process?.kill("SIGTERM");
 		}, 500);
 	}
 	restart(e) {
@@ -1968,38 +1959,24 @@ var Fe = class {
 			content: t,
 			ts: Date.now()
 		};
-		n.messages.push(r);
-		let i = n.status;
-		n.status = "busy", this.emitStatus(e), this.emitMessages(e), console.log(`[runtime.send] agent=${e} wire=${n.adapter.serializeInput(t).replace(/\n$/, "")}`);
+		n.messages.push(r), this.transitionStatus(n, "busy"), this.emitMessages(e), console.log(`[runtime.send] agent=${e} wire=${n.adapter.serializeInput(t).replace(/\n$/, "")}`);
 		try {
-			let r = n.adapter.serializeInput(t);
-			return n.process.stdin?.write(r), console.log(`[runtime.status] agent=${e} ${i} → busy`), !0;
+			let e = n.adapter.serializeInput(t);
+			return n.process.stdin?.write(e), !0;
 		} catch (t) {
-			return L.default.error(`[runtime] send failed for ${e}:`, t), n.lastError = t instanceof Error ? t.message : String(t), n.status = "error", console.log(`[runtime.status] agent=${e} ${i} → error`), this.emitStatus(e), !1;
+			return L.default.error(`[runtime] send failed for ${e}:`, t), n.lastError = t instanceof Error ? t.message : String(t), this.transitionStatus(n, "error"), !1;
 		}
 	}
 	shutdownAll() {
 		for (let e of Array.from(this.silenceTimers.keys())) this.clearSilenceTimer(e);
 		this.readyEmitted.clear();
-		for (let [e, t] of this.entries) if (t.process) {
-			let n = t.process;
-			try {
-				n.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
-			} catch {}
-			try {
-				n.stdin?.end();
-			} catch {}
-			try {
-				n.kill("SIGTERM");
-			} catch {}
-			t.status = "stopped", L.default.info(`[runtime] shutdown agent ${e}`);
-		}
+		for (let [, e] of this.entries) e.process && (this.terminateProcess(e.process), e.status = "stopped", L.default.info(`[runtime] shutdown agent ${e.agentId}`));
 		setTimeout(() => {
-			for (let [e, t] of this.entries) if (t.process && !t.process.killed) {
+			for (let [, e] of this.entries) if (e.process && !e.process.killed) {
 				try {
-					t.process.kill("SIGKILL");
+					e.process.kill("SIGKILL");
 				} catch {}
-				L.default.warn(`[runtime] SIGKILL agent ${e}`);
+				L.default.warn(`[runtime] SIGKILL agent ${e.agentId}`);
 			}
 		}, 3e3);
 	}
@@ -2029,7 +2006,7 @@ var Fe = class {
 				}
 			});
 		} catch (n) {
-			L.default.error(`[runtime] spawn failed for ${t}:`, n), e.status = "error", e.lastError = n instanceof Error ? n.message : String(n), this.emitStatus(t);
+			L.default.error(`[runtime] spawn failed for ${t}:`, n), e.lastError = n instanceof Error ? n.message : String(n), this.transitionStatus(e, "error");
 			return;
 		}
 		e.process = o, e.pid = o.pid, this.readyEmitted.delete(t), this.resetSilenceTimer(e), o.stdout?.on("data", (n) => {
@@ -2044,31 +2021,42 @@ var Fe = class {
 			let i = r.length > 200 ? r.slice(0, 200) + "..." : r;
 			console.log(`[runtime.stderr] agent=${t} len=${n.length} preview=${JSON.stringify(i)}`), e.adapter.onStderr(r, (e) => this.handleAdapterEvent(t, e)), this.resetSilenceTimer(e);
 		}), o.on("exit", (n, r) => {
-			L.default.info(`[runtime] agent ${t} exited code=${n} signal=${r}`), this.clearSilenceTimer(t), e.process = null, e.pid = void 0, e.endedAt = Date.now(), n === 0 || r === "SIGTERM" || r === "SIGKILL" ? e.status = "stopped" : (e.status = "error", e.lastError = e.stderrLog.slice(-3).join(" | ") || `Process exited with code ${n}`), this.emitStatus(t), this.sendExitEvent(t, n, r);
+			L.default.info(`[runtime] agent ${t} exited code=${n} signal=${r}`), this.clearSilenceTimer(t), e.process = null, e.pid = void 0, e.endedAt = Date.now(), n === 0 || r === "SIGTERM" || r === "SIGKILL" ? this.transitionStatus(e, "stopped") : (e.lastError = e.stderrLog.slice(-3).join(" | ") || `Process exited with code ${n}`, this.transitionStatus(e, "error")), this.emitStatus(t), this.sendExitEvent(t, n, r);
 		}), o.on("error", (n) => {
-			L.default.error(`[runtime] agent ${t} error:`, n), e.lastError = n.message, e.status = "error", this.emitStatus(t);
+			L.default.error(`[runtime] agent ${t} error:`, n), e.lastError = n.message, this.transitionStatus(e, "error");
 		});
+	}
+	terminateProcess(e) {
+		try {
+			e.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
+		} catch {}
+		try {
+			e.stdin?.end();
+		} catch {}
+	}
+	transitionStatus(e, t, n) {
+		let r = e.status;
+		r !== t && (e.status = t, console.log(`[runtime.status] agent=${e.agentId} ${r} → ${t}${n ? ` (${n})` : ""}`), this.emitStatus(e.agentId));
 	}
 	handleAdapterEvent(e, t) {
 		let n = this.entries.get(e);
 		if (!n) return;
-		let r = n.status;
 		if (t.type === "boot-step") {
 			n.bootStep = t.step, this.emitStatus(e);
 			return;
 		}
 		if (t.type === "ready") {
-			n.status = "running", console.log(`[runtime.event] agent=${e} type=ready`), console.log(`[runtime.status] agent=${e} ${r} → running`), this.emitStatus(e);
+			this.transitionStatus(n, "running"), console.log(`[runtime.event] agent=${e} type=ready`);
 			return;
 		}
 		if (t.type === "message-start") {
-			let i = {
+			let r = {
 				id: t.messageId,
 				role: t.role,
 				content: "",
 				ts: Date.now()
 			};
-			n.messages.push(i), n.status = "busy", console.log(`[runtime.event] agent=${e} type=message-start role=${t.role}`), console.log(`[runtime.status] agent=${e} ${r} → busy`), this.emitStatus(e), this.emitMessages(e);
+			n.messages.push(r), this.transitionStatus(n, "busy"), console.log(`[runtime.event] agent=${e} type=message-start role=${t.role}`), this.emitMessages(e);
 			return;
 		}
 		if (t.type === "text-delta") {
@@ -2081,7 +2069,7 @@ var Fe = class {
 			return;
 		}
 		if (t.type === "message-end") {
-			n.messages.find((e) => e.id === t.messageId) && this.emitEvent(e, t), n.status = "running", console.log(`[runtime.event] agent=${e} type=message-end`), console.log(`[runtime.status] agent=${e} ${r} → running`), this.emitStatus(e);
+			n.messages.find((e) => e.id === t.messageId) && this.emitEvent(e, t), this.transitionStatus(n, "running"), console.log(`[runtime.event] agent=${e} type=message-end`);
 			return;
 		}
 		if (t.type === "log") {
@@ -2090,11 +2078,11 @@ var Fe = class {
 			return;
 		}
 		if (t.type === "error") {
-			console.log(`[runtime.event] agent=${e} type=error message=${JSON.stringify(t.message)} recoverable=${t.recoverable}`), n.lastError = t.message, n.status = "running", console.log(`[runtime.status] agent=${e} ${r} → running (error: ${t.message})`), this.emitStatus(e), this.emitEvent(e, t);
+			console.log(`[runtime.event] agent=${e} type=error message=${JSON.stringify(t.message)} recoverable=${t.recoverable}`), n.lastError = t.message, this.transitionStatus(n, "running"), this.emitEvent(e, t);
 			return;
 		}
-		let i = JSON.stringify(t), a = i.length > 300 ? i.slice(0, 300) + "..." : i;
-		console.log(`[runtime.event] agent=${e} ${a}`), this.emitEvent(e, t);
+		let r = JSON.stringify(t), i = r.length > 300 ? r.slice(0, 300) + "..." : r;
+		console.log(`[runtime.event] agent=${e} ${i}`), this.emitEvent(e, t);
 	}
 	getWindow() {
 		return t.getAllWindows()[0] ?? null;
