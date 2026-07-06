@@ -222,42 +222,34 @@ export function disposeSlice(agentId: string): void {
 }
 
 export function useAgentRuntime(agentId: string | undefined) {
-  if (!agentId) {
-    return {
-      agent: null,
-      status: 'stopped' as AgentStatus,
-      messages: [] as RuntimeMessage[],
-      lastError: undefined as string | undefined,
-      bootStep: undefined as InitStep | undefined,
-      loading: true,
-      send: (_text: string) => {},
-      restart: () => {},
-    }
-  }
+  const slice = React.useMemo(() => {
+    if (!agentId) return null
+    return initRuntimeSlice(agentId)
+  }, [agentId])
 
-  initRuntimeSlice(agentId)
-  const slice = runtimeSlices.get(agentId)!
+  const [agent, setAgent] = React.useState<Agent | null>(null)
+  const [status, setStatus] = React.useState<AgentStatus>('stopped')
+  const [messages, setMessages] = React.useState<RuntimeMessage[]>([])
+  const [lastError, setLastError] = React.useState<string | undefined>(undefined)
+  const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
+  const [loading, setLoading] = React.useState(true)
 
-  const [agent, setAgent] = React.useState(slice.agent)
-  const [status, setStatus] = React.useState(slice.status)
-  const [messages, setMessages] = React.useState(slice.messages)
-  const [lastError, setLastError] = React.useState(slice.lastError)
-  const [bootStep, setBootStep] = React.useState(slice.bootStep)
-  const [loading, setLoading] = React.useState(slice.loading)
-
-  const sliceRef = React.useRef(slice)
+  const sliceRef = React.useRef<RuntimeSlice | null>(null)
   sliceRef.current = slice
 
   React.useEffect(() => {
+    if (!slice) return
     const entry = sliceRef.current
+    if (!entry) return
 
     const sync = () => {
-      setAgent(entry.agent)
-      setStatus(entry.status)
-      setMessages([...entry.messages])
-      setLastError(entry.lastError)
-      setBootStep(entry.bootStep)
-      setLoading(entry.loading)
+      if (!sliceRef.current) return
+      setAgent(sliceRef.current.agent)
+      setStatus(sliceRef.current.status)
+      setMessages([...sliceRef.current.messages])
+      setLastError(sliceRef.current.lastError)
+      setBootStep(sliceRef.current.bootStep)
+      setLoading(sliceRef.current.loading)
     }
 
     sync()
@@ -265,9 +257,8 @@ export function useAgentRuntime(agentId: string | undefined) {
     const id = setInterval(sync, 50)
     return () => {
       clearInterval(id)
-      disposeRuntimeSliceNow(agentId)
     }
-  }, [agentId])
+  }, [slice])
 
   const send = React.useCallback((text: string) => {
     if (!agentId) return
@@ -283,34 +274,28 @@ export function useAgentRuntime(agentId: string | undefined) {
 }
 
 export function useAgentSettings(agentId: string | null) {
-  if (!agentId) {
-    return {
-      settings: null,
-      isLoading: false,
-      error: null,
-      patch: (_key: string, _value: unknown) => {},
-      flush: async (_p: Record<string, unknown>) => {},
-      reload: async () => {},
-    }
-  }
+  const slice = React.useMemo(() => {
+    if (!agentId) return null
+    return initSettingsSlice(agentId)
+  }, [agentId])
 
-  initSettingsSlice(agentId)
-  const slice = settingsSlices.get(agentId)!
+  const [settings, setSettings] = React.useState<AgentSettingsState | null>(null)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
-  const [settings, setSettings] = React.useState(slice.settings)
-  const [isLoading, setIsLoading] = React.useState(slice.isLoading)
-  const [error, setError] = React.useState(slice.error)
-
-  const sliceRef = React.useRef(slice)
+  const sliceRef = React.useRef<SettingsSlice | null>(null)
   sliceRef.current = slice
 
   React.useEffect(() => {
+    if (!slice) return
     const entry = sliceRef.current
+    if (!entry) return
 
     const sync = () => {
-      setSettings(entry.settings)
-      setIsLoading(entry.isLoading)
-      setError(entry.error)
+      if (!sliceRef.current) return
+      setSettings(sliceRef.current.settings)
+      setIsLoading(sliceRef.current.isLoading)
+      setError(sliceRef.current.error)
     }
 
     sync()
@@ -318,11 +303,11 @@ export function useAgentSettings(agentId: string | null) {
     const id = setInterval(sync, 50)
     return () => {
       clearInterval(id)
-      disposeSettingsSliceNow(agentId)
     }
-  }, [agentId])
+  }, [slice])
 
   const patch = React.useCallback((key: string, value: unknown) => {
+    if (!agentId) return
     const entry = settingsSlices.get(agentId)
     if (!entry) return
     if (!entry.dirty) entry.dirty = {}
@@ -339,6 +324,7 @@ export function useAgentSettings(agentId: string | null) {
   }, [agentId])
 
   const flush = React.useCallback(async (p: Record<string, unknown>) => {
+    if (!agentId) return
     const entry = settingsSlices.get(agentId)
     if (!entry) return
     if (entry.debounceTimer) {
