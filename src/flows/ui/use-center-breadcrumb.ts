@@ -5,6 +5,7 @@ import { agents } from "@/api/agents";
 export interface BreadcrumbSegment {
   label: string;
   href?: string;
+  clickable?: boolean;
 }
 
 export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
@@ -24,8 +25,8 @@ export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   }
   if (pathname === "/agents" || pathname.startsWith("/agents/")) {
     return agentId
-      ? [{ label: "Agents", href: "/agents" }, { label: agentName ?? agentId }]
-      : [{ label: "Agents" }];
+      ? [{ label: "Agent", clickable: false }, { label: agentName ?? agentId }]
+      : [{ label: "Agent" }];
   }
   if (pathname === "/projects" || pathname.startsWith("/projects/")) {
     return projectId

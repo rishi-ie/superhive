@@ -21,7 +21,7 @@ export function CenterBreadcrumb() {
             return (
               <React.Fragment key={`${i}-${seg.label}`}>
                 <BreadcrumbItem>
-                  {isLast ? (
+                  {isLast || seg.clickable === false ? (
                     <BreadcrumbPage className="text-sm font-medium text-[#727272]">
                       {seg.label}
                     </BreadcrumbPage>
