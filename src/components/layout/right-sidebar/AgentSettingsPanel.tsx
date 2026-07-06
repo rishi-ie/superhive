@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { BotIcon, AlertCircleIcon } from "@hugeicons/core-free-icons";
+import { UserIcon, AlertCircleIcon } from "@hugeicons/core-free-icons";
 import { useAgentSettings } from '@/flows/agents/settings/use-agent-settings';
 import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
 import { useAutoSave } from './use-auto-save';
@@ -50,7 +50,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-9 items-center gap-2 px-3">
-          <HugeiconsIcon icon={BotIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
+          <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
         <span className="flex-1 truncate text-xs text-foreground">{settings.name ?? 'Agent'}</span>
         <Badge variant={STATUS_VARIANT[status] ?? 'secondary'} className="text-xs opacity-60 px-1.5 py-0">
           {status}

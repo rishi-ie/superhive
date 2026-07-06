@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { MessageAdd01Icon, BotIcon, FolderAddIcon, Settings01Icon, HexagonIcon } from "@hugeicons/core-free-icons";
+import { MessageAdd01Icon, UserIcon, FolderAddIcon, Settings01Icon, HexagonIcon } from "@hugeicons/core-free-icons";
 import {
   Command,
   CommandDialog,
@@ -42,7 +42,7 @@ export function CommandPalette() {
               New Chat
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New agent — coming soon"))}>
-              <HugeiconsIcon icon={BotIcon} />
+              <HugeiconsIcon icon={UserIcon} />
               New Agent
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New project — coming soon"))}>

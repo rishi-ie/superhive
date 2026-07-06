@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { BotIcon, PlusSignIcon, PinIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import { UserIcon, PlusSignIcon, PinIcon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import type { Agent } from '@/types/electron';
@@ -30,7 +30,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
         ? items.map((a) => (
             <AccordionRow
               key={a.id}
-              icon={<HugeiconsIcon icon={BotIcon} className="size-4 flex-shrink-0" />}
+              icon={<HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />}
               label={a.name}
               trailing={<AgentActions />}
               onClick={() => navigate(`/agents/${a.id}`)}

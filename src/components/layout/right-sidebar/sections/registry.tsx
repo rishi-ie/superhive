@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 import { HugeiconsIcon } from "@/components/ui/icon"
-import { BotIcon, CpuIcon, SlidersHorizontalIcon, PackageIcon } from "@hugeicons/core-free-icons"
+import { UserIcon, CpuIcon, SlidersHorizontalIcon, PackageIcon } from "@hugeicons/core-free-icons"
 import type { IconSvgElement } from "@hugeicons/react"
 import type { ReactNode } from "react"
 import { IdentitySection } from './IdentitySection'
@@ -34,7 +34,7 @@ export interface SettingsSectionDefinition {
 }
 
 export const SETTING_SECTIONS: SettingsSectionDefinition[] = [
-  { id: 'identity', label: 'Identity', icon: makeIcon(BotIcon), readOnly: false, order: 1, Component: IdentitySection },
+  { id: 'identity', label: 'Identity', icon: makeIcon(UserIcon), readOnly: false, order: 1, Component: IdentitySection },
   { id: 'model',    label: 'Model',   icon: makeIcon(CpuIcon), readOnly: false, order: 2, Component: ModelSection },
   { id: 'behavior', label: 'Behavior', icon: makeIcon(SlidersHorizontalIcon), readOnly: false, order: 3, Component: BehaviorSection },
   { id: 'skills',   label: 'Skills',  icon: makeIcon(PackageIcon), readOnly: true,  order: 4, Component: SkillsSection },
