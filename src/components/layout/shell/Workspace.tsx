@@ -6,7 +6,7 @@ interface WorkspaceProps {
 
 export function Workspace({ children }: WorkspaceProps) {
   return (
-      <main className="relative flex h-full w-full flex-col overflow-hidden bg-background">
+    <main className="relative flex h-full w-full flex-col overflow-hidden bg-background">
       {children}
     </main>
   );

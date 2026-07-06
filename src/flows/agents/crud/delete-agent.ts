@@ -1,5 +1,6 @@
 import { toast } from 'sonner';
 import { agents } from '@/api/agents';
+import { disposeSlice } from '../agent-store';
 
 export interface DeleteAgentResult {
   ok: boolean;
@@ -15,6 +16,7 @@ export async function deleteAgent(id: string): Promise<DeleteAgentResult> {
       return { ok: false, error: 'Agent not found' };
     }
     toast.success('Agent deleted');
+    disposeSlice(id);
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to delete agent';
