@@ -6,6 +6,7 @@ import { RightSidebar } from "./right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
 import { CenterBreadcrumb } from "@/components/layout/center/common/CenterBreadcrumb";
 import { CommandPalette } from "./command-palette/CommandPalette";
+import { CreateAgentDialog } from "./center/AgentChat/dialogs/CreateAgentDialog";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -124,6 +125,7 @@ export function AppLayout() {
         )}
       </div>
       <CommandPalette />
+      <CreateAgentDialog />
     </SidebarProvider>
   );
 }

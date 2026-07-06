@@ -5,6 +5,7 @@ import log from 'electron-log/main';
 import { setUserDataPath } from '../src/storage/database';
 import { seedWorkspace } from '../src/storage/seed';
 import { registerIpc } from './ipc';
+import { runtime } from './manifest-pi-runtime';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -69,6 +70,11 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('before-quit', () => {
+  log.info('Shutting down agent runtimes...');
+  runtime.shutdownAll();
 });
 
 process.on('uncaughtException', (error) => {

@@ -1,9 +1,16 @@
-export type AgentStatus = 'idle' | 'running' | 'thinking' | 'stopped' | 'error'
+export type AgentStatus =
+  | 'initializing'
+  | 'running'
+  | 'busy'
+  | 'idle'
+  | 'stopped'
+  | 'error'
+
 export type TaskStatus = 'todo' | 'running' | 'blocked' | 'completed' | 'cancelled'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
 export type ChannelType = 'project' | 'agent' | 'system'
 export type SettingType = 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'multiselect' | 'json' | 'color' | 'slider' | 'file' | 'directory'
-export type OwnerType = 'workspace' | 'project' | 'agent' | 'task' | 'channel'
+export type OwnerType = 'workspace' | 'project' | 'agent' | 'task' | 'channel' | 'global'
 
 export interface BaseEntity {
   id: string
@@ -20,8 +27,10 @@ export interface Agent extends BaseEntity {
   role?: string
   description?: string
   localPath?: string
+  manifestPiSource?: string
   avatar?: string
   status: AgentStatus
+  lastError?: string
   projectIds: string[]
   taskIds: string[]
   sessionIds: string[]
