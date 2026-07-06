@@ -18,7 +18,6 @@ export const AgentRepository = {
       role: data.role,
       description: data.description,
       localPath: data.localPath,
-      manifestPiSource: data.manifestPiSource,
       avatar: data.avatar,
       status: data.status,
       lastError: data.lastError,

@@ -27,7 +27,6 @@ export interface Agent extends BaseEntity {
   role?: string
   description?: string
   localPath?: string
-  manifestPiSource?: string
   avatar?: string
   status: AgentStatus
   lastError?: string

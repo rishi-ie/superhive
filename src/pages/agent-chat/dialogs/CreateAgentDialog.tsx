@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/agents';
 
-type SubmitPhase = 'idle' | 'cloning' | 'creating';
+type SubmitPhase = 'idle' | 'creating';
 
 export function CreateAgentDialog() {
   const { open, setOpen } = useOpenCreateAgent();
@@ -65,6 +65,7 @@ export function CreateAgentDialog() {
     e.preventDefault();
     if (!canSubmit) return;
     setError(null);
+    setPhase('creating');
     const result = await createAgent(
       {
         name: name.trim(),
@@ -72,7 +73,6 @@ export function CreateAgentDialog() {
         parentDir: parentDir.trim(),
       },
       navigate,
-      (p) => setPhase(p)
     );
     if (result.ok) {
       setOpen(false);
@@ -84,11 +84,7 @@ export function CreateAgentDialog() {
 
   const submitting = phase !== 'idle';
   const buttonLabel =
-    phase === 'cloning'
-      ? 'Cloning Manifest Pi…'
-      : phase === 'creating'
-        ? 'Creating Agent…'
-        : 'Create Agent';
+    phase === 'creating' ? 'Creating Agent…' : 'Create Agent';
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -96,7 +92,7 @@ export function CreateAgentDialog() {
         <DialogHeader>
           <DialogTitle>New Agent</DialogTitle>
           <DialogDescription>
-            Superhive will fetch the Manifest Pi template and bootstrap a new agent.
+            Create a new agent in your local workspace.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">

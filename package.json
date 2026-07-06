@@ -14,7 +14,9 @@
     "electron:build": "bun run build && electron-builder",
     "electron:preview": "vite build && electron .",
     "migrate:keys": "bun scripts/migrate-agent-keys.ts",
-    "wipe:agents": "bun scripts/wipe-agents.ts"
+    "wipe:agents": "bun scripts/wipe-agents.ts",
+    "install:pi": "bun scripts/install-manifest-pi.ts",
+    "reset": "bun scripts/reset-superhive.ts"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",

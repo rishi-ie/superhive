@@ -2,14 +2,14 @@ import { ipcMain } from 'electron'
 import { runtime } from '../manifest-pi-runtime'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { IPC } from './index'
+import { TEMPLATE_DIR } from '../install-bootstrap'
 
 export function registerRuntimeIpc(): void {
   ipcMain.handle(IPC.AGENTS.START, async (_e, agentId: string) => {
     const agent = await AgentRepository.getById(agentId)
     if (!agent) throw new Error(`Agent not found: ${agentId}`)
     if (!agent.localPath) throw new Error(`Agent has no localPath: ${agentId}`)
-    if (!agent.manifestPiSource) throw new Error(`Agent has no manifestPiSource: ${agentId}`)
-    runtime.start(agentId, agent.localPath, agent.manifestPiSource)
+    runtime.start(agentId, agent.localPath, TEMPLATE_DIR)
     await AgentRepository.update(agentId, { status: 'initializing', lastError: undefined })
     return { ok: true }
   })

@@ -8,6 +8,7 @@ import { registerIpc } from './ipc';
 import { runtime } from './manifest-pi-runtime';
 import { reconcileAgents } from './reconcile-agents';
 import { reconcileRuntime } from './reconcile-runtime';
+import { isManifestPiTemplateReady } from './install-bootstrap';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -55,7 +56,16 @@ app.whenReady().then(async () => {
   log.info('App ready');
 
   setUserDataPath(app.getPath('userData'));
+
+  if (!isManifestPiTemplateReady()) {
+    log.warn(
+      '[main] manifest-pi template not found at ~/.superhive/manifest-pi-template/\n' +
+      '[main] Agent creation will fail until you run: bun run install:pi',
+    )
+  }
+
   await seedWorkspace();
+  runtime.pruneStaleEntries();
   await reconcileAgents();
   await reconcileRuntime();
   registerIpc();

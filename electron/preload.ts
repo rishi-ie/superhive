@@ -33,10 +33,6 @@ contextBridge.exposeInMainWorld('api', {
     onExit:     (id, cb) => subscribe(`agent:${id}:exit`,     cb),
     onSettingsChanged: (id, cb) => subscribe(`settings:${id}:changed`, cb),
   },
-  manifestPi: {
-    ensureTemplate: () => ipcRenderer.invoke('manifest-pi:ensureTemplate'),
-    checkTemplate:  () => ipcRenderer.invoke('manifest-pi:checkTemplate'),
-  },
   projects: {
     list:   () => ipcRenderer.invoke('projects:list'),
     get:    (id) => ipcRenderer.invoke('projects:get', id),

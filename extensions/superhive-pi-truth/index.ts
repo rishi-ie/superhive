@@ -111,6 +111,40 @@ async function runExtension(pi: ExtensionAPI, ctx: ExtensionContext): Promise<vo
 	});
 	state.previousSettings = current;
 
+	// 3a. First-launch env migration: surface inherited *_API_KEY env vars
+	//     into the settings JSON so the file becomes the source of truth.
+	//     This runs every session; the no-op case is when the JSON already
+	//     contains the keys (subsequent launches). Newly seen keys get persisted.
+	{
+		const envPatch: Record<string, string> = {};
+		const currentEnv = current.environment ?? {};
+		for (const [k, v] of Object.entries(process.env)) {
+			if (v && /_API_KEY$/.test(k) && !currentEnv[k]) {
+				envPatch[k] = v;
+			}
+		}
+		if (Object.keys(envPatch).length > 0) {
+			const merged: SettingsFile = {
+				...current,
+				environment: { ...currentEnv, ...envPatch },
+			};
+			try {
+				writeSettings(state.settingsFilePath, merged);
+				applySettingsDiff(current, merged, { pi, hasUI: ctx.hasUI, notify });
+				state.previousSettings = merged;
+				notify(
+					`Seeded ${Object.keys(envPatch).length} API key(s) from process.env into settings`,
+					"info",
+				);
+			} catch (err) {
+				notify(
+					`Failed to seed env keys: ${(err as Error).message}`,
+					"error",
+				);
+			}
+		}
+	}
+
 	// 4. Start watcher. On external change → re-read → diff → apply.
 	state.watcher = createWatcher(state.settingsFilePath, {
 		debounceMs: 100,

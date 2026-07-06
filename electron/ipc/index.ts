@@ -1,7 +1,6 @@
 import { registerAgentIpc } from './agents';
 import { registerProjectIpc } from './projects';
 import { registerRuntimeIpc } from './runtime';
-import { registerManifestPiIpc } from './manifest-pi';
 
 export const IPC = {
   AGENTS: {
@@ -28,15 +27,10 @@ export const IPC = {
     GET: 'projects:get',
     CREATE: 'projects:create',
   },
-  MANIFEST_PI: {
-    ENSURE_TEMPLATE: 'manifest-pi:ensureTemplate',
-    CHECK_TEMPLATE:  'manifest-pi:checkTemplate',
-  },
 } as const;
 
 export function registerIpc(): void {
   registerAgentIpc();
   registerProjectIpc();
   registerRuntimeIpc();
-  registerManifestPiIpc();
 }
