@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
-import { mkdir, cp, writeFile, chmod } from 'node:fs/promises'
+import { mkdir, cp, writeFile, chmod, rename, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, basename } from 'node:path'
 import log from 'electron-log/main'
 import { runtime } from '../manifest-pi-runtime'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
@@ -56,8 +56,21 @@ export function registerAgentIpc(): void {
 
       log.info(`[agents:create] creating agent dir ${agentDir}`)
       await mkdir(agentDir, { recursive: true })
+      await mkdir(join(agentDir, 'extensions'), { recursive: true })
       await cp(join(manifestPiSource, 'agent.sh'), join(agentDir, 'agent.sh'))
       await chmod(join(agentDir, 'agent.sh'), 0o755)
+
+      const extSrc = join(manifestPiSource, 'extensions', 'superhive-pi-truth')
+      const extDst = join(agentDir, 'extensions', 'superhive-pi-truth')
+      if (existsSync(join(extSrc, 'index.ts'))) {
+        await cp(extSrc, extDst, { recursive: true })
+        log.info(`[agents:create] copied superhive-pi-truth extension`)
+      } else {
+        log.warn(
+          `[agents:create] template missing superhive-pi-truth extension at ${extSrc} — ` +
+          `settings flow unavailable. Update: cd ${manifestPiSource} && git pull`,
+        )
+      }
 
       const agent = await AgentRepository.create({
         name: data.name.trim(),
@@ -68,7 +81,7 @@ export function registerAgentIpc(): void {
         status: 'initializing',
       })
 
-      await writeFile(join(agentDir, 'agent.json'), JSON.stringify({
+      await writeFile(join(agentDir, 'manifest.json'), JSON.stringify({
         superhiveId: agent.id,
         version: 1,
         name: data.name.trim(),
@@ -85,7 +98,7 @@ export function registerAgentIpc(): void {
         context: {},
         logging: { enabled: true },
       }, null, 2) + '\n', 'utf8')
-      await writeFile(join(agentDir, '.agent-initialized'), '', 'utf8')
+      await writeFile(join(agentDir, '.manifest-initialized'), '', 'utf8')
 
       return agent
     }
@@ -112,5 +125,36 @@ export function registerAgentIpc(): void {
       await rm(agent.localPath, { recursive: true, force: true })
     }
     return true
+  })
+
+  ipcMain.handle(IPC.AGENTS.READ_SETTINGS, async (_e, agentId: string) => {
+    const agent = await AgentRepository.getById(agentId)
+    if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+    const folderName = basename(agent.localPath)
+    const settingsPath = join(agent.localPath, `Superhive-pi-${folderName}.json`)
+    if (!existsSync(settingsPath)) return null
+    const raw = await readFile(settingsPath, 'utf8')
+    return JSON.parse(raw)
+  })
+
+  ipcMain.handle(IPC.AGENTS.WRITE_SETTINGS, async (_e, agentId: string, patch: Record<string, unknown>) => {
+    const agent = await AgentRepository.getById(agentId)
+    if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+    const folderName = basename(agent.localPath)
+    const settingsPath = join(agent.localPath, `Superhive-pi-${folderName}.json`)
+    const raw = await readFile(settingsPath, 'utf8').catch(() => '{}')
+    const current = JSON.parse(raw) as Record<string, unknown>
+    const m = /#(\d+)$/.exec((current.managedBy as string) ?? '')
+    const counter = m ? parseInt(m[1] ?? '0') : 0
+    const next: Record<string, unknown> = {
+      ...current,
+      ...patch,
+      managedBy: `superhive-pi-truth@1#${counter + 1}`,
+      lastModified: new Date().toISOString(),
+    }
+    const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`
+    await writeFile(tmp, JSON.stringify(next, null, '\t') + '\n', 'utf8')
+    await rename(tmp, settingsPath)
+    return next
   })
 }

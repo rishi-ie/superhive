@@ -19,7 +19,7 @@ export function matchBootStep(line: string): InitStep | null {
   if (lower.includes('building pi workspace') || lower.includes('npm run build') || lower.includes('building')) {
     return 'building-runtime'
   }
-  if (lower.includes('creating default manifest') || lower.includes('agent.json')) {
+  if (lower.includes('creating default manifest') || lower.includes('manifest.json')) {
     return 'generating-manifest'
   }
   if (lower.includes('workspace') || lower.includes('creating workspace')) {

@@ -23,6 +23,11 @@ export const agents = {
   getRuntimeState: (id: string): Promise<RuntimeStatusPayload | null> =>
     window.api.agents.getRuntimeState(id),
 
+  readSettings: (id: string): Promise<Record<string, unknown> | null> =>
+    window.api.agents.readSettings(id),
+  writeSettings: (id: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> =>
+    window.api.agents.writeSettings(id, patch),
+
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),
   onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void): (() => void) => window.api.agents.onMessages(id, cb),

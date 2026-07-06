@@ -30,6 +30,8 @@ export interface AgentsAPI {
   restart: (id: string) => Promise<{ ok: boolean }>
   send: (id: string, message: string) => Promise<{ ok: boolean }>
   getRuntimeState: (id: string) => Promise<RuntimeStatusPayload | null>
+  readSettings: (id: string) => Promise<Record<string, unknown> | null>
+  writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void) => () => void
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void) => () => void

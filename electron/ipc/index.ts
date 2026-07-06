@@ -15,6 +15,8 @@ export const IPC = {
     RESTART: 'agents:restart',
     SEND: 'agents:send',
     GET_RUNTIME_STATE: 'agents:getRuntimeState',
+    READ_SETTINGS: 'agents:readSettings',
+    WRITE_SETTINGS: 'agents:writeSettings',
     ON_EVENT:    (id: string) => `agent:${id}:event`,
     ON_STATUS:   (id: string) => `agent:${id}:status`,
     ON_MESSAGES: (id: string) => `agent:${id}:messages`,

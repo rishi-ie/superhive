@@ -21,7 +21,7 @@ let skipped = 0
 const entries = await readdir(agentsDir, { withFileTypes: true }).catch(() => [])
 for (const entry of entries) {
   if (!entry.isDirectory()) continue
-  const agentJsonPath = join(agentsDir, entry.name, 'agent.json')
+  const agentJsonPath = join(agentsDir, entry.name, 'manifest.json')
   try {
     await stat(agentJsonPath)
   } catch {
