@@ -42,7 +42,7 @@ The application is a **single-page 3-region layout**:
 - **Center Panel** (`flex-1`): The active page (Dashboard by default). `<Outlet />` for nested routes. Houses `TopRightControls` (absolute over center) and `TopHandle` (drag handle).
 - **RightPanel** (`w-64` to `w-80`): Context inspector for the active selection in center. Collapsible.
 
-Files live under `src/components/layout/{left-sidebar, center, right-sidebar}/`. Cross-region coupling is not allowed.
+Files live under `src/components/layout/{shell, left-sidebar, right-sidebar, common, command-palette}/`. Cross-region coupling is not allowed. Page-view components live in `src/pages/<feature>/`, not here.
 
 ---
 
@@ -56,13 +56,13 @@ Files live under `src/components/layout/{left-sidebar, center, right-sidebar}/`.
 UI Component (React)  ──▶  Flow (TS function)  ──▶  API wrapper (window.api)
        │                       │                       │
        ▼                       ▼                       ▼
-   layout &              validation,             preload bridge
-   presentation          API call,
-   only                  toast,
-                         navigation
-                                                  │
-                                                  ▼
-                                              IPC handler  ──▶  Repo  ──▶  LowDB
+    layout &              validation,             preload bridge
+    presentation          API call,
+    only                  toast,
+                          navigation
+                                                   │
+                                                   ▼
+                                               IPC handler  ──▶  Repo  ──▶  LowDB
 ```
 
 ### Rules
@@ -70,8 +70,8 @@ UI Component (React)  ──▶  Flow (TS function)  ──▶  API wrapper (win
 ✅ Allowed:
 ```ts
 // src/components/foo.tsx
-import { createProject } from '@/flows/create-project';
-import { listAgents } from '@/flows/list-agents';
+import { createProject } from '@/flows/agents/crud/create-project';
+import { listAgents } from '@/flows/agents/crud/list-agents';
 ```
 
 ❌ Forbidden:
@@ -83,43 +83,63 @@ import { agents } from '@/api/agents';
 
 ✅ Flows themselves freely import from `@/api/*`, `sonner`, `react-router-dom`.
 
-### Naming Convention for Flows
+### Flow Sub-folder Structure
 
-`src/flows/` is **flat** (no subfolders). Naming pattern: `<verb>-<entity>.ts`.
+`src/flows/` is **nested by entity, then by kind**. Pattern:
 
-| Verb family | Pattern | Example |
+```
+src/flows/<entity>/<kind>/<file>.ts
+```
+
+| `<kind>` | Purpose | File naming |
 |---|---|---|
-| CRUD — create | `create-<entity>.ts` | `create-project.ts` |
-| CRUD — read one | `load-<entity>.ts` | `load-project.ts` |
-| CRUD — read list | `list-<entities>.ts` | `list-agents.ts` |
-| CRUD — update | `update-<entity>.ts` | `update-agent.ts` |
-| CRUD — delete | `delete-<entity>.ts` | `delete-project.ts` |
-| Navigation | `select-<entity>.ts`, `go-to-<destination>.ts` | `select-project.ts` |
-| UI control | `open-<thing>.ts`, `toggle-<thing>.ts`, `close-<thing>.ts` | `toggle-right-panel.ts` |
+| `crud/` | Create, list, load, update, delete, select | `<verb>-<entity>.ts` |
+| `runtime/` | Runtime hooks, start/stop helpers | `<use|start>-<entity>-runtime.ts` |
+| `ui/` | Global UI state (dialog open/close, panel toggle) | `<open|close|toggle>-<thing>.ts` |
+
+Cross-entity flows (navigation, global UI) use top-level folders:
+
+```
+src/flows/navigation/<go|select>-*.ts
+src/flows/ui/<use>-*.ts
+```
+
+Every sub-folder MUST have an `index.ts` barrel.
+
+**Current structure:**
+```
+src/flows/
+├── agents/
+│   ├── crud/     (list-agents, load-agent, create-agent, delete-agent, select-agent)
+│   ├── runtime/   (use-agent-runtime, start-agent-runtime)
+│   └── ui/       (open-create-agent)
+├── navigation/    (go-back-home, go-to-settings, go-to-settings-section)
+└── ui/          (use-command-palette, use-center-breadcrumb)
+```
 
 ### Flow Signature Pattern
 
 ```ts
-// src/flows/create-project.ts
-import { projects } from '@/api/projects';
+// src/flows/agents/crud/create-agent.ts
+import { agents } from '@/api/agents';
 import { toast } from 'sonner';
-import type { Project } from '@/storage/types';
+import type { Agent } from '@/storage/types';
 
-export interface CreateProjectInput { name: string; description?: string }
-export interface CreateProjectResult { ok: boolean; project?: Project; error?: string }
+export interface CreateAgentInput { name: string; folderName: string; parentDir: string; manifestPiSource: string }
+export interface CreateAgentResult { ok: boolean; agent?: Agent; error?: string }
 
-export async function createProject(input: CreateProjectInput): Promise<CreateProjectResult> {
+export async function createAgent(input: CreateAgentInput): Promise<CreateAgentResult> {
   const trimmed = input.name.trim();
   if (!trimmed) {
-    toast.error('Project name is required');
-    return { ok: false, error: 'Project name is required' };
+    toast.error('Agent name is required');
+    return { ok: false, error: 'Agent name is required' };
   }
   try {
-    const project = await projects.create({ name: trimmed, description: input.description?.trim() || undefined });
-    toast.success(`Project "${project.name}" created`);
-    return { ok: true, project };
+    const agent = await agents.create({ name: trimmed, ...input });
+    toast.success(`Agent "${agent.name}" created`);
+    return { ok: true, agent };
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create project';
+    const message = err instanceof Error ? err.message : 'Failed to create agent';
     toast.error(message);
     return { ok: false, error: message };
   }
@@ -137,14 +157,17 @@ This grep is part of the per-phase verification in any restructure or feature wo
 
 ---
 
-## Flows Folder
+## Flow Organization
 
-`src/flows/` is the **only** path from UI to data. Currently empty (restructure pass). Populate as features are added.
+`src/flows/` is the **only** path from UI to data. Populate as features are added.
 
 When wiring a new entity:
-1. Create the flow files (7 per entity): `create-`, `list-`, `load-`, `update-`, `delete-`, `select-`, `open-create-`
-2. Add a thin section file under `src/components/layout/left-sidebar/sections/`
-3. The section consumes flows via `useEffect(() => flow().then(setState), [])`
+1. Create flow files under `src/flows/<entity>/crud/`: `list-`, `load-`, `create-`, `update-`, `delete-`, `select-`
+2. Create runtime flows under `src/flows/<entity>/runtime/`: `<use|start>-<entity>-runtime.ts`
+3. Create UI flows under `src/flows/<entity>/ui/`: `<open|close|toggle>-<entity>.ts`
+4. Add an `index.ts` barrel in each sub-folder
+5. Add a section file under `src/components/layout/left-sidebar/sections/`
+6. The section consumes flows via `useEffect(() => flow().then(setState), [])`
 
 ---
 
@@ -207,66 +230,86 @@ The shadcn MCP server provides these tools:
 
 ```
 src/
-├── lib/                              # cn() etc.
-├── types/                            # global types
-├── storage/                          # LowDB — 8 repositories
+├── flows/                            # Side-effect handlers — ONLY path from UI to data
+│   ├── agents/
+│   │   ├── crud/                    # list, load, create, delete, select
+│   │   ├── runtime/                 # use-agent-runtime, start-agent-runtime
+│   │   └── ui/                     # open-create-agent
+│   ├── projects/
+│   ├── navigation/                  # go-back-home, go-to-settings, go-to-settings-section
+│   ├── ui/                         # use-command-palette, use-center-breadcrumb
+│   └── index.ts                    # top-level barrel
+│
+├── pages/                            # Route targets — one folder per feature
+│   ├── routes.tsx                   # createBrowserRouter config
+│   ├── landing/                     # Landing page + inner components
+│   ├── agent-chat/                 # AgentChatView + components + dialogs
+│   │   ├── components/              # ConversationArea, UserMessage, AssistantMessage, …
+│   │   └── dialogs/                 # CreateAgentDialog
+│   ├── project-chat/
+│   ├── meta-hive/
+│   ├── remote/
+│   ├── settings/                    # SettingsLayout + SettingsSidebar + SettingsSectionView
+│   └── *_Legacy.tsx               # Orphan re-exports (no longer used — keep, don't delete)
+│
+├── components/                      # All UI
+│   ├── ui/                         # shadcn primitives (24 components, 7 unused)
+│   ├── common/                     # EmptyState, Spinner, PanelHeader, FormField (unused)
+│   └── layout/                     # Shell layer (see 3-Panel Architecture)
+│       ├── shell/                  # AppLayout, Workspace
+│       ├── command-palette/        # CommandPalette
+│       ├── left-sidebar/            # AppSidebar, SidebarAccordion, SidebarRepositories,
+│       │                            # SidebarUser, sections/, primitives/
+│       ├── right-sidebar/
+│       └── common/                # CenterBreadcrumb, TopHandle (unused), TopRightControls
+│
+├── models/                          # Domain shapes for renderer/UI (not storage or IPC)
+│   ├── runtime.ts                  # RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload
+│   ├── boot-step.ts               # InitStep, AdapterEvent, INIT_STEPS
+│   ├── template.ts                # EnsureTemplateResult
+│   └── index.ts
+│
+├── styles/
+│   └── globals.css                 # Tailwind v4 + @theme inline + dark mode
+│
+├── storage/                         # LowDB repositories
 │   ├── database.ts
 │   ├── seed.ts
 │   ├── types.ts
-│   └── repositories/
-├── api/                              # window.api IPC wrappers
-├── hooks/                            # custom React hooks
+│   └── repositories/               # Agent, Project, Task, Session, Channel, Workspace, Tag, Settings
 │
-├── flows/                            # Side-effect handlers (CRUD, navigation)
-│                                    # see "Flow Isolation" above
+├── api/                             # window.api IPC wrappers
+│   ├── agents.ts
+│   ├── manifest-pi.ts
+│   └── projects.ts
 │
-├── components/
-│   ├── ui/                           # shadcn primitives (NO business logic)
-│   ├── common/                       # cross-region primitives
-│   │   ├── icons/
-│   │   ├── EmptyState.tsx
-│   │   ├── Spinner.tsx
-│   │   ├── PanelHeader.tsx
-│   │   └── FormField.tsx
-│   └── layout/                       # 3-panel hierarchy (see "3-Panel Architecture")
-│       ├── AppLayout.tsx             # shell
-│       ├── Workspace.tsx             # center panel root
-│       ├── left-sidebar/              # LEFT region
-│       │   ├── AppSidebar.tsx
-│       │   ├── header/
-│       │   ├── sections/
-│       │   └── primitives/
-│       ├── center/                   # CENTER region (pages compose from here)
-│       │   ├── Dashboard/
-│       │   ├── Chat/
-│       │   ├── Projects/             # + dialogs/
-│       │   ├── Hive/
-│       │   ├── Remote/
-│       │   ├── Settings/
-│       │   └── Agents/
-│       └── right-sidebar/            # RIGHT region
+├── hooks/                           # Generic React hooks (no business logic)
+├── lib/                             # cn() utilities
+├── types/                           # IPC contract declarations
+│   ├── electron.d.ts               # window.api.* + runtime type re-exports
+│   └── init-steps.ts              # INIT_STEPS (legacy)
 │
-├── pages/                            # thin route targets (re-exports)
-├── routes/                           # react-router config
-├── App.tsx                           # TooltipProvider + Routes
-├── main.tsx                          # renderer entry
-└── index.css                         # Tailwind + tokens
+├── App.tsx                         # TooltipProvider + Routes
+├── main.tsx                        # renderer entry
+└── vite-env.d.ts
 ```
 
 ---
 
 ## Routing
 
-| Path | Component | Description |
+| Path | Component | Folder |
 |---|---|---|
-| `/` | `Dashboard` (re-export) | Landing — composer + suggested actions |
-| `/projects` | `Projects` (re-export) | Empty state + browse projects dialog |
-| `/projects/:projectId` | `ProjectChat` (re-export) | Per-project chat |
-| `/hive` | `MetaHive` (re-export) | Meta hive conversation |
-| `/remote` | `Remote` (re-export) | Remote conversation |
-| `/settings` | `Settings` (re-export) | Settings page |
+| `/` | `Landing` | `@/pages/landing` |
+| `/agents` | `AgentChatView` | `@/pages/agent-chat` |
+| `/agents/:agentId` | `AgentChatView` | `@/pages/agent-chat` |
+| `/projects` | `ProjectChatView` | `@/pages/project-chat` |
+| `/projects/:projectId` | `ProjectChatView` | `@/pages/project-chat` |
+| `/hive` | `MetaHiveView` | `@/pages/meta-hive` |
+| `/remote` | `RemoteView` | `@/pages/remote` |
+| `/settings` | `SettingsLayout` → `SettingsSectionView` | `@/pages/settings` |
 
-Routes import from `@/pages` only, never directly from `@/components/layout/center/`.
+Routes config lives at `src/pages/routes.tsx`. Page components are imported directly from `@/pages/<feature>`.
 
 ---
 
@@ -290,7 +333,7 @@ See `storage.md` for full repository reference.
 
 ## Tailwind Version
 
-This project uses **Tailwind CSS v4** with CSS-first configuration. Theme is in `src/index.css` via `@theme inline`.
+This project uses **Tailwind CSS v4** with CSS-first configuration. Theme is in `src/styles/globals.css` via `@theme inline`.
 
 ---
 
