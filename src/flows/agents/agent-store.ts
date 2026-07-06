@@ -82,10 +82,12 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
 
   agents.getRuntimeState(agentId).then((s) => {
     const entry = runtimeSlices.get(agentId)
-    if (!entry || !s) return
-    entry.status = s.status
-    entry.bootStep = s.bootStep
-    entry.lastError = s.lastError
+    if (!entry) return
+    if (s) {
+      entry.status = s.status
+      entry.bootStep = s.bootStep
+      entry.lastError = s.lastError
+    }
     entry.loading = false
   })
 
