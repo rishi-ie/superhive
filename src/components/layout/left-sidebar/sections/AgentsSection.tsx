@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Bot, Plus } from 'lucide-react';
+import { Bot, Plus, Pin, MoreHorizontal } from 'lucide-react';
 import { AccordionSection } from './AccordionSection';
 import { AccordionRow } from '../primitives/AccordionRow';
 import { EmptyCtaButton } from '../primitives/EmptyCtaButton';
@@ -9,6 +9,27 @@ import type { Agent } from '@/types/electron';
 interface AgentsSectionProps {
   items: Agent[];
 }
+
+const AgentActions = () => (
+  <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => { e.stopPropagation(); }}
+      className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]"
+    >
+      <Pin className="size-3.5" />
+    </div>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => { e.stopPropagation(); }}
+      className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]"
+    >
+      <MoreHorizontal className="size-3.5" />
+    </div>
+  </span>
+);
 
 export function AgentsSection({ items }: AgentsSectionProps) {
   const navigate = useNavigate();
@@ -22,6 +43,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
               key={a.id}
               icon={<Bot className="size-4 flex-shrink-0" />}
               label={a.name}
+              trailing={<AgentActions />}
               onClick={() => navigate(`/agents/${a.id}`)}
             />
           ))
