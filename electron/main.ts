@@ -7,6 +7,7 @@ import { seedWorkspace } from '../src/storage/seed';
 import { registerIpc } from './ipc';
 import { runtime } from './manifest-pi-runtime';
 import { reconcileAgents } from './reconcile-agents';
+import { reconcileRuntime } from './reconcile-runtime';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +57,7 @@ app.whenReady().then(async () => {
   setUserDataPath(app.getPath('userData'));
   await seedWorkspace();
   await reconcileAgents();
+  await reconcileRuntime();
   registerIpc();
 
   createWindow();

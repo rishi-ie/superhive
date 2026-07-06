@@ -45,7 +45,7 @@ export function AgentChatView() {
   }
 
   if (status === 'initializing') {
-    return <AgentInitializing currentStep={bootStep} agentName={agent.name} />;
+    return <AgentInitializing currentStep={bootStep} agentName={agent.name} lastError={lastError} onRestart={restart} />;
   }
 
   if (status === 'error') {

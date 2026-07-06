@@ -36,32 +36,28 @@ export function useAgentRuntime(agentId: string | undefined): UseAgentRuntime {
 
     let mounted = true;
     setLoading(true);
-    agents
-      .get(agentId)
-      .then((a) => {
-        if (!mounted) return;
-        setAgent(a);
-        setStatus(a?.status ?? 'stopped');
-        setLastError(a?.lastError);
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!mounted) return;
-        setAgent(null);
-        setLoading(false);
-      });
 
     agents
       .getRuntimeState(agentId)
       .then((s) => {
-        if (!mounted || !s) return;
-        setStatus(s.status);
-        setBootStep(s.bootStep);
-        setLastError(s.lastError);
+        if (!mounted) return;
+        if (s) {
+          setStatus(s.status);
+          setBootStep(s.bootStep);
+          setLastError(s.lastError);
+        }
+        setLoading(false);
       })
       .catch(() => {
-        // ignore — runtime may not be started yet
+        if (!mounted) return;
+        setLoading(false);
       });
+
+    agents.get(agentId).then((a) => {
+      if (!mounted) return;
+      setAgent(a);
+      if (a?.lastError) setLastError(a.lastError);
+    });
 
     return () => {
       mounted = false;
@@ -121,9 +117,11 @@ export function useAgentRuntime(agentId: string | undefined): UseAgentRuntime {
 
     unsubs.push(
       agents.onExit(agentId, () => {
-        agents.get(agentId).then((a) => {
-          if (a) setStatus(a.status);
-          if (a?.lastError) setLastError(a.lastError);
+        agents.getRuntimeState(agentId).then((s) => {
+          if (s) {
+            setStatus(s.status);
+            setLastError(s.lastError);
+          }
         });
       })
     );
@@ -135,18 +133,17 @@ export function useAgentRuntime(agentId: string | undefined): UseAgentRuntime {
 
   const autoStartIfStopped = React.useCallback(() => {
     if (!agentId) return;
-    if (status === 'stopped' || status === 'error') {
+    agents.getRuntimeState(agentId).then((s) => {
+      if (s && s.status !== 'stopped' && s.status !== 'error') return;
       agents.start(agentId).catch(() => {});
-    }
-  }, [agentId, status]);
+    });
+  }, [agentId]);
 
   React.useEffect(() => {
     if (loading) return;
     if (!agent) return;
-    if (status === 'stopped') {
-      autoStartIfStopped();
-    }
-  }, [loading, agent, status, autoStartIfStopped]);
+    autoStartIfStopped();
+  }, [loading, agent, autoStartIfStopped]);
 
   const send = React.useCallback(
     (text: string) => {

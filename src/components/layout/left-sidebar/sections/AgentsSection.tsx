@@ -12,20 +12,10 @@ interface AgentsSectionProps {
 
 const AgentActions = () => (
   <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={(e) => { e.stopPropagation(); }}
-      className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]"
-    >
+    <div className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
       <Pin className="size-3.5" />
     </div>
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={(e) => { e.stopPropagation(); }}
-      className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]"
-    >
+    <div className="flex size-5 cursor-pointer items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
       <MoreHorizontal className="size-3.5" />
     </div>
   </span>

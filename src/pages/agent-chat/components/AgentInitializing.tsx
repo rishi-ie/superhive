@@ -1,17 +1,38 @@
-import { Check, Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, Loader2, RotateCw } from 'lucide-react';
 import { INIT_STEPS } from '@/types/init-steps';
 import type { InitStep } from '@/types/electron';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface AgentInitializingProps {
   currentStep?: InitStep;
   agentName?: string;
+  lastError?: string;
+  onRestart: () => void;
 }
 
-export function AgentInitializing({ currentStep, agentName }: AgentInitializingProps) {
+const STUCK_THRESHOLD_MS = 90_000;
+
+export function AgentInitializing({ currentStep, agentName, lastError, onRestart }: AgentInitializingProps) {
   const activeIndex = currentStep
     ? INIT_STEPS.findIndex((s) => s.id === currentStep)
     : -1;
+
+  const [stuck, setStuck] = useState(false);
+  const stepRef = useRef(currentStep);
+
+  useEffect(() => {
+    if (currentStep && currentStep !== stepRef.current) {
+      stepRef.current = currentStep;
+      setStuck(false);
+    }
+  }, [currentStep]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setStuck(true), STUCK_THRESHOLD_MS);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-background">
@@ -20,9 +41,22 @@ export function AgentInitializing({ currentStep, agentName }: AgentInitializingP
           <h2 className="text-base font-medium text-foreground">
             {agentName ? `Starting ${agentName}` : 'Initializing agent'}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            This may take up to 30 seconds on first run.
-          </p>
+          {stuck ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">
+                This is taking longer than usual.
+              </p>
+              {lastError && (
+                <p className="text-xs font-mono text-destructive break-words">
+                  {lastError}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              This may take up to 90 seconds on first run.
+            </p>
+          )}
         </div>
 
         <ol className="flex flex-col gap-1">
@@ -69,6 +103,15 @@ export function AgentInitializing({ currentStep, agentName }: AgentInitializingP
             );
           })}
         </ol>
+
+        {stuck && (
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={onRestart} className="gap-1.5">
+              <RotateCw className="size-3.5" />
+              Restart
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

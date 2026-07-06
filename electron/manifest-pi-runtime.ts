@@ -11,6 +11,7 @@ import {
 import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload } from '../src/types/electron'
 import { IPC } from './ipc/index'
+import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 
 /**
  * A single message in an in-memory agent conversation.
@@ -321,6 +322,16 @@ class ManifestPiRuntime {
       `[runtime.status] agent=${entry.agentId} ${prev} → ${next}${reason ? ` (${reason})` : ''}`
     )
     this.emitStatus(entry.agentId)
+    this.persistStatus(entry)
+  }
+
+  private persistStatus(entry: RuntimeEntry): void {
+    AgentRepository.update(entry.agentId, {
+      status: entry.status,
+      lastError: entry.lastError,
+    }).catch((err) => {
+      log.warn(`[runtime] failed to persist status for ${entry.agentId}:`, err)
+    })
   }
 
   // ============================================================
