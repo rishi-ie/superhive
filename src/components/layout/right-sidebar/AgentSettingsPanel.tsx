@@ -1,14 +1,14 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { UserIcon, AlertCircleIcon } from "@hugeicons/core-free-icons";
+import { UserIcon, AlertCircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { useAgentSettings } from '@/flows/agents/settings/use-agent-settings';
 import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
 import { useAutoSave } from './use-auto-save';
 import { SETTING_SECTIONS } from './sections/registry';
-import { RestartBar } from './RestartBar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { restartAgent } from '@/flows/agents/runtime/restart-agent';
 
 interface AgentSettingsPanelProps {
   agentId: string;
@@ -55,6 +55,15 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         <Badge variant={STATUS_VARIANT[status] ?? 'secondary'} className="text-xs opacity-60 px-1.5 py-0">
           {status}
         </Badge>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0"
+          onClick={() => void restartAgent(agentId)}
+          disabled={status === 'initializing'}
+        >
+          <HugeiconsIcon icon={RefreshIcon} className="size-3.5" />
+        </Button>
       </div>
 
       <Tabs defaultValue="identity" className="flex flex-col flex-1 min-h-0">
@@ -86,8 +95,6 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
           </TabsContent>
         ))}
       </Tabs>
-
-      <RestartBar agentId={agentId} status={status} />
     </div>
   );
 }
