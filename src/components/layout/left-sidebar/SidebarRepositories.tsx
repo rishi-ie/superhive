@@ -5,6 +5,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
 
 export function SidebarRepositories() {
   return (
@@ -36,6 +37,7 @@ export function SidebarRepositories() {
             >
               <Hexagon className="size-4" />
               <span>Meta hive</span>
+              <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
             </button>
           </SidebarMenuItem>
           <SidebarMenuItem>
@@ -45,6 +47,7 @@ export function SidebarRepositories() {
             >
               <Globe className="size-4" />
               <span>Remote</span>
+              <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
             </button>
           </SidebarMenuItem>
         </SidebarMenu>
