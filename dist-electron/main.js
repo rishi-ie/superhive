@@ -1,142 +1,89 @@
-import { createRequire } from "node:module";
-import { BrowserWindow, app, ipcMain } from "electron";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import { existsSync } from "node:fs";
-import { chmod, cp, mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { basename, dirname as dirname$1, join as join$1 } from "node:path";
-import { fileURLToPath as fileURLToPath$1 } from "node:url";
-import { execFile, spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
-import { promisify } from "node:util";
-import { homedir } from "node:os";
+import { createRequire as e } from "node:module";
+import { BrowserWindow as t, app as n, ipcMain as r } from "electron";
+import { dirname as i, join as a } from "path";
+import { fileURLToPath as o } from "url";
+import { existsSync as s } from "node:fs";
+import { chmod as c, cp as l, mkdir as u, readFile as d, rename as f, writeFile as p } from "node:fs/promises";
+import { basename as m, dirname as h, join as g } from "node:path";
+import { fileURLToPath as _ } from "node:url";
+import { execFile as v, spawn as ee } from "node:child_process";
+import { randomUUID as te } from "node:crypto";
+import { promisify as ne } from "node:util";
+import { homedir as y } from "node:os";
 //#region \0rolldown/runtime.js
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
-var __copyProps = (to, from, except, desc) => {
-	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
-		key = keys[i];
-		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
-			get: ((k) => from[k]).bind(null, key),
-			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
-		});
-	}
-	return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
-	value: mod,
-	enumerable: true
-}) : target, mod));
-var __require = /* @__PURE__ */ createRequire(import.meta.url);
-//#endregion
-//#region node_modules/electron-log/src/node/packageJson.js
-var require_packageJson = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs$4 = __require("fs");
-	var path$5 = __require("path");
-	module.exports = {
-		findAndReadPackageJson,
-		tryReadJsonAt
+var re = Object.create, b = Object.defineProperty, ie = Object.getOwnPropertyDescriptor, x = Object.getOwnPropertyNames, S = Object.getPrototypeOf, ae = Object.prototype.hasOwnProperty, C = (e, t) => () => (t || (e((t = { exports: {} }).exports, t), e = null), t.exports), oe = (e, t, n, r) => {
+	if (t && typeof t == "object" || typeof t == "function") for (var i = x(t), a = 0, o = i.length, s; a < o; a++) s = i[a], !ae.call(e, s) && s !== n && b(e, s, {
+		get: ((e) => t[e]).bind(null, s),
+		enumerable: !(r = ie(t, s)) || r.enumerable
+	});
+	return e;
+}, se = (e, t, n) => (n = e == null ? {} : re(S(e)), oe(t || !e || !e.__esModule ? b(n, "default", {
+	value: e,
+	enumerable: !0
+}) : n, e)), w = /* @__PURE__ */ e(import.meta.url), ce = /* @__PURE__ */ C(((e, t) => {
+	var n = w("fs"), r = w("path");
+	t.exports = {
+		findAndReadPackageJson: i,
+		tryReadJsonAt: a
 	};
-	/**
-	* @return {{ name?: string, version?: string}}
-	*/
-	function findAndReadPackageJson() {
-		return tryReadJsonAt(getMainModulePath()) || tryReadJsonAt(extractPathFromArgs()) || tryReadJsonAt(process.resourcesPath, "app.asar") || tryReadJsonAt(process.resourcesPath, "app") || tryReadJsonAt(process.cwd()) || {
+	function i() {
+		return a(c()) || a(s()) || a(process.resourcesPath, "app.asar") || a(process.resourcesPath, "app") || a(process.cwd()) || {
 			name: void 0,
 			version: void 0
 		};
 	}
-	/**
-	* @param {...string} searchPaths
-	* @return {{ name?: string, version?: string } | undefined}
-	*/
-	function tryReadJsonAt(...searchPaths) {
-		if (!searchPaths[0]) return;
-		try {
-			const fileName = findUp("package.json", path$5.join(...searchPaths));
-			if (!fileName) return;
-			const json = JSON.parse(fs$4.readFileSync(fileName, "utf8"));
-			const name = json?.productName || json?.name;
-			if (!name || name.toLowerCase() === "electron") return;
-			if (name) return {
-				name,
-				version: json?.version
-			};
-			return;
-		} catch (e) {
-			return;
-		}
-	}
-	/**
-	* @param {string} fileName
-	* @param {string} [cwd]
-	* @return {string | null}
-	*/
-	function findUp(fileName, cwd) {
-		let currentPath = cwd;
-		while (true) {
-			const parsedPath = path$5.parse(currentPath);
-			const root = parsedPath.root;
-			const dir = parsedPath.dir;
-			if (fs$4.existsSync(path$5.join(currentPath, fileName))) return path$5.resolve(path$5.join(currentPath, fileName));
-			if (currentPath === root) return null;
-			currentPath = dir;
-		}
-	}
-	/**
-	* Get app path from --user-data-dir cmd arg, passed to a renderer process
-	* @return {string|null}
-	*/
-	function extractPathFromArgs() {
-		const matchedArgs = process.argv.filter((arg) => {
-			return arg.indexOf("--user-data-dir=") === 0;
-		});
-		if (matchedArgs.length === 0 || typeof matchedArgs[0] !== "string") return null;
-		return matchedArgs[0].replace("--user-data-dir=", "");
-	}
-	function getMainModulePath() {
-		try {
-			return __require.main?.filename;
+	function a(...e) {
+		if (e[0]) try {
+			let t = o("package.json", r.join(...e));
+			if (!t) return;
+			let i = JSON.parse(n.readFileSync(t, "utf8")), a = i?.productName || i?.name;
+			return !a || a.toLowerCase() === "electron" ? void 0 : a ? {
+				name: a,
+				version: i?.version
+			} : void 0;
 		} catch {
 			return;
 		}
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/NodeExternalApi.js
-var require_NodeExternalApi = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var childProcess = __require("child_process");
-	var os$3 = __require("os");
-	var path$4 = __require("path");
-	var packageJson = require_packageJson();
-	var NodeExternalApi = class {
+	function o(e, t) {
+		let i = t;
+		for (;;) {
+			let t = r.parse(i), a = t.root, o = t.dir;
+			if (n.existsSync(r.join(i, e))) return r.resolve(r.join(i, e));
+			if (i === a) return null;
+			i = o;
+		}
+	}
+	function s() {
+		let e = process.argv.filter((e) => e.indexOf("--user-data-dir=") === 0);
+		return e.length === 0 || typeof e[0] != "string" ? null : e[0].replace("--user-data-dir=", "");
+	}
+	function c() {
+		try {
+			return w.main?.filename;
+		} catch {
+			return;
+		}
+	}
+})), le = /* @__PURE__ */ C(((e, t) => {
+	var n = w("child_process"), r = w("os"), i = w("path"), a = ce();
+	t.exports = class {
 		appName = void 0;
 		appPackageJson = void 0;
 		platform = process.platform;
-		getAppLogPath(appName = this.getAppName()) {
-			if (this.platform === "darwin") return path$4.join(this.getSystemPathHome(), "Library/Logs", appName);
-			return path$4.join(this.getAppUserDataPath(appName), "logs");
+		getAppLogPath(e = this.getAppName()) {
+			return this.platform === "darwin" ? i.join(this.getSystemPathHome(), "Library/Logs", e) : i.join(this.getAppUserDataPath(e), "logs");
 		}
 		getAppName() {
-			const appName = this.appName || this.getAppPackageJson()?.name;
-			if (!appName) throw new Error("electron-log can't determine the app name. It tried these methods:\n1. Use `electron.app.name`\n2. Use productName or name from the nearest package.json`\nYou can also set it through log.transports.file.setAppName()");
-			return appName;
+			let e = this.appName || this.getAppPackageJson()?.name;
+			if (!e) throw Error("electron-log can't determine the app name. It tried these methods:\n1. Use `electron.app.name`\n2. Use productName or name from the nearest package.json`\nYou can also set it through log.transports.file.setAppName()");
+			return e;
 		}
-		/**
-		* @private
-		* @returns {undefined}
-		*/
 		getAppPackageJson() {
-			if (typeof this.appPackageJson !== "object") this.appPackageJson = packageJson.findAndReadPackageJson();
-			return this.appPackageJson;
+			return typeof this.appPackageJson != "object" && (this.appPackageJson = a.findAndReadPackageJson()), this.appPackageJson;
 		}
-		getAppUserDataPath(appName = this.getAppName()) {
-			return appName ? path$4.join(this.getSystemPathAppData(), appName) : void 0;
+		getAppUserDataPath(e = this.getAppName()) {
+			return e ? i.join(this.getSystemPathAppData(), e) : void 0;
 		}
 		getAppVersion() {
 			return this.getAppPackageJson()?.version;
@@ -145,57 +92,42 @@ var require_NodeExternalApi = /* @__PURE__ */ __commonJSMin(((exports, module) =
 			return this.getAppLogPath();
 		}
 		getMacOsVersion() {
-			const release = Number(os$3.release().split(".")[0]);
-			if (release <= 19) return `10.${release - 4}`;
-			return release - 9;
+			let e = Number(r.release().split(".")[0]);
+			return e <= 19 ? `10.${e - 4}` : e - 9;
 		}
-		/**
-		* @protected
-		* @returns {string}
-		*/
 		getOsVersion() {
-			let osName = os$3.type().replace("_", " ");
-			let osVersion = os$3.release();
-			if (osName === "Darwin") {
-				osName = "macOS";
-				osVersion = this.getMacOsVersion();
-			}
-			return `${osName} ${osVersion}`;
+			let e = r.type().replace("_", " "), t = r.release();
+			return e === "Darwin" && (e = "macOS", t = this.getMacOsVersion()), `${e} ${t}`;
 		}
-		/**
-		* @return {PathVariables}
-		*/
 		getPathVariables() {
-			const appName = this.getAppName();
-			const appVersion = this.getAppVersion();
-			const self = this;
+			let e = this.getAppName(), t = this.getAppVersion(), n = this;
 			return {
 				appData: this.getSystemPathAppData(),
-				appName,
-				appVersion,
+				appName: e,
+				appVersion: t,
 				get electronDefaultDir() {
-					return self.getElectronLogPath();
+					return n.getElectronLogPath();
 				},
 				home: this.getSystemPathHome(),
-				libraryDefaultDir: this.getAppLogPath(appName),
+				libraryDefaultDir: this.getAppLogPath(e),
 				libraryTemplate: this.getAppLogPath("{appName}"),
 				temp: this.getSystemPathTemp(),
-				userData: this.getAppUserDataPath(appName)
+				userData: this.getAppUserDataPath(e)
 			};
 		}
 		getSystemPathAppData() {
-			const home = this.getSystemPathHome();
+			let e = this.getSystemPathHome();
 			switch (this.platform) {
-				case "darwin": return path$4.join(home, "Library/Application Support");
-				case "win32": return process.env.APPDATA || path$4.join(home, "AppData/Roaming");
-				default: return process.env.XDG_CONFIG_HOME || path$4.join(home, ".config");
+				case "darwin": return i.join(e, "Library/Application Support");
+				case "win32": return process.env.APPDATA || i.join(e, "AppData/Roaming");
+				default: return process.env.XDG_CONFIG_HOME || i.join(e, ".config");
 			}
 		}
 		getSystemPathHome() {
-			return os$3.homedir?.() || process.env.HOME;
+			return r.homedir?.() || process.env.HOME;
 		}
 		getSystemPathTemp() {
-			return os$3.tmpdir();
+			return r.tmpdir();
 		}
 		getVersions() {
 			return {
@@ -208,97 +140,65 @@ var require_NodeExternalApi = /* @__PURE__ */ __commonJSMin(((exports, module) =
 			return process.env.NODE_ENV === "development" || process.env.ELECTRON_IS_DEV === "1";
 		}
 		isElectron() {
-			return Boolean(process.versions.electron);
+			return !!process.versions.electron;
 		}
-		onAppEvent(_eventName, _handler) {}
-		onAppReady(handler) {
-			handler();
+		onAppEvent(e, t) {}
+		onAppReady(e) {
+			e();
 		}
-		onEveryWebContentsEvent(eventName, handler) {}
-		/**
-		* Listen to async messages sent from opposite process
-		* @param {string} channel
-		* @param {function} listener
-		*/
-		onIpc(channel, listener) {}
-		onIpcInvoke(channel, listener) {}
-		/**
-		* @param {string} url
-		* @param {Function} [logFunction]
-		*/
-		openUrl(url, logFunction = console.error) {
-			const start = {
+		onEveryWebContentsEvent(e, t) {}
+		onIpc(e, t) {}
+		onIpcInvoke(e, t) {}
+		openUrl(e, t = console.error) {
+			let r = {
 				darwin: "open",
 				win32: "start",
 				linux: "xdg-open"
 			}[process.platform] || "xdg-open";
-			childProcess.exec(`${start} ${url}`, {}, (err) => {
-				if (err) logFunction(err);
+			n.exec(`${r} ${e}`, {}, (e) => {
+				e && t(e);
 			});
 		}
-		setAppName(appName) {
-			this.appName = appName;
+		setAppName(e) {
+			this.appName = e;
 		}
-		setPlatform(platform) {
-			this.platform = platform;
+		setPlatform(e) {
+			this.platform = e;
 		}
-		setPreloadFileForSessions({ filePath, includeFutureSession = true, getSessions = () => [] }) {}
-		/**
-		* Sent a message to opposite process
-		* @param {string} channel
-		* @param {any} message
-		*/
-		sendIpc(channel, message) {}
-		showErrorBox(title, message) {}
+		setPreloadFileForSessions({ filePath: e, includeFutureSession: t = !0, getSessions: n = () => [] }) {}
+		sendIpc(e, t) {}
+		showErrorBox(e, t) {}
 	};
-	module.exports = NodeExternalApi;
-}));
-//#endregion
-//#region node_modules/electron-log/src/main/ElectronExternalApi.js
-var require_ElectronExternalApi = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var path$3 = __require("path");
-	var NodeExternalApi = require_NodeExternalApi();
-	var ElectronExternalApi = class extends NodeExternalApi {
-		/**
-		* @type {typeof Electron}
-		*/
+})), ue = /* @__PURE__ */ C(((e, t) => {
+	var n = w("path"), r = le();
+	t.exports = class extends r {
 		electron = void 0;
-		/**
-		* @param {object} options
-		* @param {typeof Electron} [options.electron]
-		*/
-		constructor({ electron } = {}) {
-			super();
-			this.electron = electron;
+		constructor({ electron: e } = {}) {
+			super(), this.electron = e;
 		}
 		getAppName() {
-			let appName;
+			let e;
 			try {
-				appName = this.appName || this.electron.app?.name || this.electron.app?.getName();
+				e = this.appName || this.electron.app?.name || this.electron.app?.getName();
 			} catch {}
-			return appName || super.getAppName();
+			return e || super.getAppName();
 		}
-		getAppUserDataPath(appName) {
-			return this.getPath("userData") || super.getAppUserDataPath(appName);
+		getAppUserDataPath(e) {
+			return this.getPath("userData") || super.getAppUserDataPath(e);
 		}
 		getAppVersion() {
-			let appVersion;
+			let e;
 			try {
-				appVersion = this.electron.app?.getVersion();
+				e = this.electron.app?.getVersion();
 			} catch {}
-			return appVersion || super.getAppVersion();
+			return e || super.getAppVersion();
 		}
 		getElectronLogPath() {
 			return this.getPath("logs") || super.getElectronLogPath();
 		}
-		/**
-		* @private
-		* @param {any} name
-		* @returns {string|undefined}
-		*/
-		getPath(name) {
+		getPath(e) {
 			try {
-				return this.electron.app?.getPath(name);
+				return this.electron.app?.getPath(e);
 			} catch {
 				return;
 			}
@@ -314,922 +214,702 @@ var require_ElectronExternalApi = /* @__PURE__ */ __commonJSMin(((exports, modul
 			return this.getPath("appData") || super.getSystemPathAppData();
 		}
 		isDev() {
-			if (this.electron.app?.isPackaged !== void 0) return !this.electron.app.isPackaged;
-			if (typeof process.execPath === "string") return path$3.basename(process.execPath).toLowerCase().startsWith("electron");
-			return super.isDev();
+			return this.electron.app?.isPackaged === void 0 ? typeof process.execPath == "string" ? n.basename(process.execPath).toLowerCase().startsWith("electron") : super.isDev() : !this.electron.app.isPackaged;
 		}
-		onAppEvent(eventName, handler) {
-			this.electron.app?.on(eventName, handler);
-			return () => {
-				this.electron.app?.off(eventName, handler);
+		onAppEvent(e, t) {
+			return this.electron.app?.on(e, t), () => {
+				this.electron.app?.off(e, t);
 			};
 		}
-		onAppReady(handler) {
-			if (this.electron.app?.isReady()) handler();
-			else if (this.electron.app?.once) this.electron.app?.once("ready", handler);
-			else handler();
+		onAppReady(e) {
+			this.electron.app?.isReady() ? e() : this.electron.app?.once ? this.electron.app?.once("ready", e) : e();
 		}
-		onEveryWebContentsEvent(eventName, handler) {
-			this.electron.webContents?.getAllWebContents()?.forEach((webContents) => {
-				webContents.on(eventName, handler);
-			});
-			this.electron.app?.on("web-contents-created", onWebContentsCreated);
-			return () => {
-				this.electron.webContents?.getAllWebContents().forEach((webContents) => {
-					webContents.off(eventName, handler);
-				});
-				this.electron.app?.off("web-contents-created", onWebContentsCreated);
+		onEveryWebContentsEvent(e, t) {
+			return this.electron.webContents?.getAllWebContents()?.forEach((n) => {
+				n.on(e, t);
+			}), this.electron.app?.on("web-contents-created", n), () => {
+				this.electron.webContents?.getAllWebContents().forEach((n) => {
+					n.off(e, t);
+				}), this.electron.app?.off("web-contents-created", n);
 			};
-			function onWebContentsCreated(_, webContents) {
-				webContents.on(eventName, handler);
+			function n(n, r) {
+				r.on(e, t);
 			}
 		}
-		/**
-		* Listen to async messages sent from opposite process
-		* @param {string} channel
-		* @param {function} listener
-		*/
-		onIpc(channel, listener) {
-			this.electron.ipcMain?.on(channel, listener);
+		onIpc(e, t) {
+			this.electron.ipcMain?.on(e, t);
 		}
-		onIpcInvoke(channel, listener) {
-			this.electron.ipcMain?.handle?.(channel, listener);
+		onIpcInvoke(e, t) {
+			this.electron.ipcMain?.handle?.(e, t);
 		}
-		/**
-		* @param {string} url
-		* @param {Function} [logFunction]
-		*/
-		openUrl(url, logFunction = console.error) {
-			this.electron.shell?.openExternal(url).catch(logFunction);
+		openUrl(e, t = console.error) {
+			this.electron.shell?.openExternal(e).catch(t);
 		}
-		setPreloadFileForSessions({ filePath, includeFutureSession = true, getSessions = () => [this.electron.session?.defaultSession] }) {
-			for (const session of getSessions().filter(Boolean)) setPreload(session);
-			if (includeFutureSession) this.onAppEvent("session-created", (session) => {
-				setPreload(session);
+		setPreloadFileForSessions({ filePath: e, includeFutureSession: t = !0, getSessions: n = () => [this.electron.session?.defaultSession] }) {
+			for (let e of n().filter(Boolean)) r(e);
+			t && this.onAppEvent("session-created", (e) => {
+				r(e);
 			});
-			/**
-			* @param {Session} session
-			*/
-			function setPreload(session) {
-				if (typeof session.registerPreloadScript === "function") session.registerPreloadScript({
-					filePath,
+			function r(t) {
+				typeof t.registerPreloadScript == "function" ? t.registerPreloadScript({
+					filePath: e,
 					id: "electron-log-preload",
 					type: "frame"
-				});
-				else session.setPreloads([...session.getPreloads(), filePath]);
+				}) : t.setPreloads([...t.getPreloads(), e]);
 			}
 		}
-		/**
-		* Sent a message to opposite process
-		* @param {string} channel
-		* @param {any} message
-		*/
-		sendIpc(channel, message) {
-			this.electron.BrowserWindow?.getAllWindows()?.forEach((wnd) => {
-				if (wnd.webContents?.isDestroyed() === false && wnd.webContents?.isCrashed() === false) wnd.webContents.send(channel, message);
+		sendIpc(e, t) {
+			this.electron.BrowserWindow?.getAllWindows()?.forEach((n) => {
+				n.webContents?.isDestroyed() === !1 && n.webContents?.isCrashed() === !1 && n.webContents.send(e, t);
 			});
 		}
-		showErrorBox(title, message) {
-			this.electron.dialog?.showErrorBox(title, message);
+		showErrorBox(e, t) {
+			this.electron.dialog?.showErrorBox(e, t);
 		}
 	};
-	module.exports = ElectronExternalApi;
-}));
-//#endregion
-//#region node_modules/electron-log/src/renderer/electron-log-preload.js
-var require_electron_log_preload = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var electron = {};
+})), de = /* @__PURE__ */ C(((e, t) => {
+	var n = {};
 	try {
-		electron = __require("electron");
-	} catch (e) {}
-	if (electron.ipcRenderer) initialize(electron);
-	if (typeof module === "object") module.exports = initialize;
-	/**
-	* @param {Electron.ContextBridge} contextBridge
-	* @param {Electron.IpcRenderer} ipcRenderer
-	*/
-	function initialize({ contextBridge, ipcRenderer }) {
-		if (!ipcRenderer) return;
-		ipcRenderer.on("__ELECTRON_LOG_IPC__", (_, message) => {
+		n = w("electron");
+	} catch {}
+	n.ipcRenderer && r(n), typeof t == "object" && (t.exports = r);
+	function r({ contextBridge: e, ipcRenderer: t }) {
+		if (!t) return;
+		t.on("__ELECTRON_LOG_IPC__", (e, t) => {
 			window.postMessage({
 				cmd: "message",
-				...message
+				...t
 			});
-		});
-		ipcRenderer.invoke("__ELECTRON_LOG__", { cmd: "getOptions" }).catch((e) => console.error(/* @__PURE__ */ new Error(`electron-log isn't initialized in the main process. Please call log.initialize() before. ${e.message}`)));
-		const electronLog = {
-			sendToMain(message) {
+		}), t.invoke("__ELECTRON_LOG__", { cmd: "getOptions" }).catch((e) => console.error(/* @__PURE__ */ Error(`electron-log isn't initialized in the main process. Please call log.initialize() before. ${e.message}`)));
+		let n = {
+			sendToMain(e) {
 				try {
-					ipcRenderer.send("__ELECTRON_LOG__", message);
-				} catch (e) {
-					console.error("electronLog.sendToMain ", e, "data:", message);
-					ipcRenderer.send("__ELECTRON_LOG__", {
+					t.send("__ELECTRON_LOG__", e);
+				} catch (n) {
+					console.error("electronLog.sendToMain ", n, "data:", e), t.send("__ELECTRON_LOG__", {
 						cmd: "errorHandler",
 						error: {
-							message: e?.message,
-							stack: e?.stack
+							message: n?.message,
+							stack: n?.stack
 						},
 						errorName: "sendToMain"
 					});
 				}
 			},
-			log(...data) {
-				electronLog.sendToMain({
-					data,
+			log(...e) {
+				n.sendToMain({
+					data: e,
 					level: "info"
 				});
 			}
 		};
-		for (const level of [
+		for (let e of [
 			"error",
 			"warn",
 			"info",
 			"verbose",
 			"debug",
 			"silly"
-		]) electronLog[level] = (...data) => electronLog.sendToMain({
-			data,
-			level
+		]) n[e] = (...t) => n.sendToMain({
+			data: t,
+			level: e
 		});
-		if (contextBridge && process.contextIsolated) try {
-			contextBridge.exposeInMainWorld("__electronLog", electronLog);
+		if (e && process.contextIsolated) try {
+			e.exposeInMainWorld("__electronLog", n);
 		} catch {}
-		if (typeof window === "object") window.__electronLog = electronLog;
-		else __electronLog = electronLog;
+		typeof window == "object" ? window.__electronLog = n : __electronLog = n;
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/main/initialize.js
-var require_initialize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs$3 = __require("fs");
-	var os$2 = __require("os");
-	var path$2 = __require("path");
-	var preloadInitializeFn = require_electron_log_preload();
-	var preloadInitialized = false;
-	var spyConsoleInitialized = false;
-	module.exports = { initialize({ externalApi, getSessions, includeFutureSession, logger, preload = true, spyRendererConsole = false }) {
-		externalApi.onAppReady(() => {
+})), fe = /* @__PURE__ */ C(((e, t) => {
+	var n = w("fs"), r = w("os"), i = w("path"), a = de(), o = !1, s = !1;
+	t.exports = { initialize({ externalApi: e, getSessions: t, includeFutureSession: n, logger: r, preload: i = !0, spyRendererConsole: a = !1 }) {
+		e.onAppReady(() => {
 			try {
-				if (preload) initializePreload({
-					externalApi,
-					getSessions,
-					includeFutureSession,
-					logger,
-					preloadOption: preload
+				i && c({
+					externalApi: e,
+					getSessions: t,
+					includeFutureSession: n,
+					logger: r,
+					preloadOption: i
+				}), a && l({
+					externalApi: e,
+					logger: r
 				});
-				if (spyRendererConsole) initializeSpyRendererConsole({
-					externalApi,
-					logger
-				});
-			} catch (err) {
-				logger.warn(err);
+			} catch (e) {
+				r.warn(e);
 			}
 		});
 	} };
-	function initializePreload({ externalApi, getSessions, includeFutureSession, logger, preloadOption }) {
-		let preloadPath = typeof preloadOption === "string" ? preloadOption : void 0;
-		if (preloadInitialized) {
-			logger.warn((/* @__PURE__ */ new Error("log.initialize({ preload }) already called")).stack);
+	function c({ externalApi: e, getSessions: t, includeFutureSession: s, logger: c, preloadOption: l }) {
+		let u = typeof l == "string" ? l : void 0;
+		if (o) {
+			c.warn((/* @__PURE__ */ Error("log.initialize({ preload }) already called")).stack);
 			return;
 		}
-		preloadInitialized = true;
+		o = !0;
 		try {
-			preloadPath = path$2.resolve(__dirname, "../renderer/electron-log-preload.js");
+			u = i.resolve(__dirname, "../renderer/electron-log-preload.js");
 		} catch {}
-		if (!preloadPath || !fs$3.existsSync(preloadPath)) {
-			preloadPath = path$2.join(externalApi.getAppUserDataPath() || os$2.tmpdir(), "electron-log-preload.js");
-			const preloadCode = `
+		if (!u || !n.existsSync(u)) {
+			u = i.join(e.getAppUserDataPath() || r.tmpdir(), "electron-log-preload.js");
+			let t = `
       try {
-        (${preloadInitializeFn.toString()})(require('electron'));
+        (${a.toString()})(require('electron'));
       } catch(e) {
         console.error(e);
       }
     `;
-			fs$3.writeFileSync(preloadPath, preloadCode, "utf8");
+			n.writeFileSync(u, t, "utf8");
 		}
-		externalApi.setPreloadFileForSessions({
-			filePath: preloadPath,
-			includeFutureSession,
-			getSessions
+		e.setPreloadFileForSessions({
+			filePath: u,
+			includeFutureSession: s,
+			getSessions: t
 		});
 	}
-	function initializeSpyRendererConsole({ externalApi, logger }) {
-		if (spyConsoleInitialized) {
-			logger.warn((/* @__PURE__ */ new Error("log.initialize({ spyRendererConsole }) already called")).stack);
+	function l({ externalApi: e, logger: t }) {
+		if (s) {
+			t.warn((/* @__PURE__ */ Error("log.initialize({ spyRendererConsole }) already called")).stack);
 			return;
 		}
-		spyConsoleInitialized = true;
-		const levels = [
+		s = !0;
+		let n = [
 			"debug",
 			"info",
 			"warn",
 			"error"
 		];
-		externalApi.onEveryWebContentsEvent("console-message", (event, level, message) => {
-			logger.processMessage({
-				data: [message],
-				level: levels[level],
+		e.onEveryWebContentsEvent("console-message", (e, r, i) => {
+			t.processMessage({
+				data: [i],
+				level: n[r],
 				variables: { processType: "renderer" }
 			});
 		});
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/scope.js
-var require_scope = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = scopeFactory;
-	function scopeFactory(logger) {
-		return Object.defineProperties(scope, {
+})), pe = /* @__PURE__ */ C(((e, t) => {
+	t.exports = n;
+	function n(e) {
+		return Object.defineProperties(t, {
 			defaultLabel: {
 				value: "",
-				writable: true
+				writable: !0
 			},
 			labelPadding: {
-				value: true,
-				writable: true
+				value: !0,
+				writable: !0
 			},
 			maxLabelLength: {
 				value: 0,
-				writable: true
+				writable: !0
 			},
 			labelLength: { get() {
-				switch (typeof scope.labelPadding) {
-					case "boolean": return scope.labelPadding ? scope.maxLabelLength : 0;
-					case "number": return scope.labelPadding;
+				switch (typeof t.labelPadding) {
+					case "boolean": return t.labelPadding ? t.maxLabelLength : 0;
+					case "number": return t.labelPadding;
 					default: return 0;
 				}
 			} }
 		});
-		function scope(label) {
-			scope.maxLabelLength = Math.max(scope.maxLabelLength, label.length);
-			const newScope = {};
-			for (const level of logger.levels) newScope[level] = (...d) => logger.logData(d, {
-				level,
-				scope: label
+		function t(n) {
+			t.maxLabelLength = Math.max(t.maxLabelLength, n.length);
+			let r = {};
+			for (let t of e.levels) r[t] = (...r) => e.logData(r, {
+				level: t,
+				scope: n
 			});
-			newScope.log = newScope.info;
-			return newScope;
+			return r.log = r.info, r;
 		}
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/Buffering.js
-var require_Buffering = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffering = class {
-		constructor({ processMessage }) {
-			this.processMessage = processMessage;
-			this.buffer = [];
-			this.enabled = false;
-			this.begin = this.begin.bind(this);
-			this.commit = this.commit.bind(this);
-			this.reject = this.reject.bind(this);
+})), me = /* @__PURE__ */ C(((e, t) => {
+	t.exports = class {
+		constructor({ processMessage: e }) {
+			this.processMessage = e, this.buffer = [], this.enabled = !1, this.begin = this.begin.bind(this), this.commit = this.commit.bind(this), this.reject = this.reject.bind(this);
 		}
-		addMessage(message) {
-			this.buffer.push(message);
+		addMessage(e) {
+			this.buffer.push(e);
 		}
 		begin() {
 			this.enabled = [];
 		}
 		commit() {
-			this.enabled = false;
-			this.buffer.forEach((item) => this.processMessage(item));
-			this.buffer = [];
+			this.enabled = !1, this.buffer.forEach((e) => this.processMessage(e)), this.buffer = [];
 		}
 		reject() {
-			this.enabled = false;
-			this.buffer = [];
+			this.enabled = !1, this.buffer = [];
 		}
 	};
-	module.exports = Buffering;
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/Logger.js
-var require_Logger = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var scopeFactory = require_scope();
-	var Buffering = require_Buffering();
-	module.exports = class Logger {
+})), he = /* @__PURE__ */ C(((e, t) => {
+	var n = pe(), r = me();
+	t.exports = class e {
 		static instances = {};
 		dependencies = {};
 		errorHandler = null;
 		eventLogger = null;
 		functions = {};
 		hooks = [];
-		isDev = false;
+		isDev = !1;
 		levels = null;
 		logId = null;
 		scope = null;
 		transports = {};
 		variables = {};
-		constructor({ allowUnknownLevel = false, dependencies = {}, errorHandler, eventLogger, initializeFn, isDev = false, levels = [
+		constructor({ allowUnknownLevel: t = !1, dependencies: i = {}, errorHandler: a, eventLogger: o, initializeFn: s, isDev: c = !1, levels: l = [
 			"error",
 			"warn",
 			"info",
 			"verbose",
 			"debug",
 			"silly"
-		], logId, transportFactories = {}, variables } = {}) {
-			this.addLevel = this.addLevel.bind(this);
-			this.create = this.create.bind(this);
-			this.initialize = this.initialize.bind(this);
-			this.logData = this.logData.bind(this);
-			this.processMessage = this.processMessage.bind(this);
-			this.allowUnknownLevel = allowUnknownLevel;
-			this.buffering = new Buffering(this);
-			this.dependencies = dependencies;
-			this.initializeFn = initializeFn;
-			this.isDev = isDev;
-			this.levels = levels;
-			this.logId = logId;
-			this.scope = scopeFactory(this);
-			this.transportFactories = transportFactories;
-			this.variables = variables || {};
-			for (const name of this.levels) this.addLevel(name, false);
-			this.log = this.info;
-			this.functions.log = this.log;
-			this.errorHandler = errorHandler;
-			errorHandler?.setOptions({
-				...dependencies,
+		], logId: u, transportFactories: d = {}, variables: f } = {}) {
+			this.addLevel = this.addLevel.bind(this), this.create = this.create.bind(this), this.initialize = this.initialize.bind(this), this.logData = this.logData.bind(this), this.processMessage = this.processMessage.bind(this), this.allowUnknownLevel = t, this.buffering = new r(this), this.dependencies = i, this.initializeFn = s, this.isDev = c, this.levels = l, this.logId = u, this.scope = n(this), this.transportFactories = d, this.variables = f || {};
+			for (let e of this.levels) this.addLevel(e, !1);
+			this.log = this.info, this.functions.log = this.log, this.errorHandler = a, a?.setOptions({
+				...i,
 				logFn: this.error
-			});
-			this.eventLogger = eventLogger;
-			eventLogger?.setOptions({
-				...dependencies,
+			}), this.eventLogger = o, o?.setOptions({
+				...i,
 				logger: this
 			});
-			for (const [name, factory] of Object.entries(transportFactories)) this.transports[name] = factory(this, dependencies);
-			Logger.instances[logId] = this;
+			for (let [e, t] of Object.entries(d)) this.transports[e] = t(this, i);
+			e.instances[u] = this;
 		}
-		static getInstance({ logId }) {
-			return this.instances[logId] || this.instances.default;
+		static getInstance({ logId: e }) {
+			return this.instances[e] || this.instances.default;
 		}
-		addLevel(level, index = this.levels.length) {
-			if (index !== false) this.levels.splice(index, 0, level);
-			this[level] = (...args) => this.logData(args, { level });
-			this.functions[level] = this[level];
+		addLevel(e, t = this.levels.length) {
+			t !== !1 && this.levels.splice(t, 0, e), this[e] = (...t) => this.logData(t, { level: e }), this.functions[e] = this[e];
 		}
-		catchErrors(options) {
-			this.processMessage({
+		catchErrors(e) {
+			return this.processMessage({
 				data: ["log.catchErrors is deprecated. Use log.errorHandler instead"],
 				level: "warn"
-			}, { transports: ["console"] });
-			return this.errorHandler.startCatching(options);
+			}, { transports: ["console"] }), this.errorHandler.startCatching(e);
 		}
-		create(options) {
-			if (typeof options === "string") options = { logId: options };
-			return new Logger({
+		create(t) {
+			return typeof t == "string" && (t = { logId: t }), new e({
 				dependencies: this.dependencies,
 				errorHandler: this.errorHandler,
 				initializeFn: this.initializeFn,
 				isDev: this.isDev,
 				transportFactories: this.transportFactories,
 				variables: { ...this.variables },
-				...options
+				...t
 			});
 		}
-		compareLevels(passLevel, checkLevel, levels = this.levels) {
-			const pass = levels.indexOf(passLevel);
-			const check = levels.indexOf(checkLevel);
-			if (check === -1 || pass === -1) return true;
-			return check <= pass;
+		compareLevels(e, t, n = this.levels) {
+			let r = n.indexOf(e), i = n.indexOf(t);
+			return i === -1 || r === -1 ? !0 : i <= r;
 		}
-		initialize(options = {}) {
+		initialize(e = {}) {
 			this.initializeFn({
 				logger: this,
 				...this.dependencies,
-				...options
+				...e
 			});
 		}
-		logData(data, options = {}) {
-			if (this.buffering.enabled) this.buffering.addMessage({
-				data,
+		logData(e, t = {}) {
+			this.buffering.enabled ? this.buffering.addMessage({
+				data: e,
 				date: /* @__PURE__ */ new Date(),
-				...options
-			});
-			else this.processMessage({
-				data,
-				...options
+				...t
+			}) : this.processMessage({
+				data: e,
+				...t
 			});
 		}
-		processMessage(message, { transports = this.transports } = {}) {
-			if (message.cmd === "errorHandler") {
-				this.errorHandler.handle(message.error, {
-					errorName: message.errorName,
+		processMessage(e, { transports: t = this.transports } = {}) {
+			if (e.cmd === "errorHandler") {
+				this.errorHandler.handle(e.error, {
+					errorName: e.errorName,
 					processType: "renderer",
-					showDialog: Boolean(message.showDialog)
+					showDialog: !!e.showDialog
 				});
 				return;
 			}
-			let level = message.level;
-			if (!this.allowUnknownLevel) level = this.levels.includes(message.level) ? message.level : "info";
-			const normalizedMessage = {
+			let n = e.level;
+			this.allowUnknownLevel || (n = this.levels.includes(e.level) ? e.level : "info");
+			let r = {
 				date: /* @__PURE__ */ new Date(),
 				logId: this.logId,
-				...message,
-				level,
+				...e,
+				level: n,
 				variables: {
 					...this.variables,
-					...message.variables
+					...e.variables
 				}
 			};
-			for (const [transName, transFn] of this.transportEntries(transports)) {
-				if (typeof transFn !== "function" || transFn.level === false) continue;
-				if (!this.compareLevels(transFn.level, message.level)) continue;
-				try {
-					const transformedMsg = this.hooks.reduce((msg, hook) => {
-						return msg ? hook(msg, transFn, transName) : msg;
-					}, normalizedMessage);
-					if (transformedMsg) transFn({
-						...transformedMsg,
-						data: [...transformedMsg.data]
-					});
-				} catch (e) {
-					this.processInternalErrorFn(e);
-				}
+			for (let [n, i] of this.transportEntries(t)) if (!(typeof i != "function" || i.level === !1) && this.compareLevels(i.level, e.level)) try {
+				let e = this.hooks.reduce((e, t) => e && t(e, i, n), r);
+				e && i({
+					...e,
+					data: [...e.data]
+				});
+			} catch (e) {
+				this.processInternalErrorFn(e);
 			}
 		}
-		processInternalErrorFn(_e) {}
-		transportEntries(transports = this.transports) {
-			return (Array.isArray(transports) ? transports : Object.entries(transports)).map((item) => {
-				switch (typeof item) {
-					case "string": return this.transports[item] ? [item, this.transports[item]] : null;
-					case "function": return [item.name, item];
-					default: return Array.isArray(item) ? item : null;
+		processInternalErrorFn(e) {}
+		transportEntries(e = this.transports) {
+			return (Array.isArray(e) ? e : Object.entries(e)).map((e) => {
+				switch (typeof e) {
+					case "string": return this.transports[e] ? [e, this.transports[e]] : null;
+					case "function": return [e.name, e];
+					default: return Array.isArray(e) ? e : null;
 				}
 			}).filter(Boolean);
 		}
 	};
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/ErrorHandler.js
-var require_ErrorHandler = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var ErrorHandler = class {
+})), ge = /* @__PURE__ */ C(((e, t) => {
+	var n = class {
 		externalApi = void 0;
-		isActive = false;
+		isActive = !1;
 		logFn = void 0;
 		onError = void 0;
-		showDialog = true;
-		constructor({ externalApi, logFn = void 0, onError = void 0, showDialog = void 0 } = {}) {
-			this.createIssue = this.createIssue.bind(this);
-			this.handleError = this.handleError.bind(this);
-			this.handleRejection = this.handleRejection.bind(this);
-			this.setOptions({
-				externalApi,
-				logFn,
-				onError,
-				showDialog
-			});
-			this.startCatching = this.startCatching.bind(this);
-			this.stopCatching = this.stopCatching.bind(this);
+		showDialog = !0;
+		constructor({ externalApi: e, logFn: t = void 0, onError: n = void 0, showDialog: r = void 0 } = {}) {
+			this.createIssue = this.createIssue.bind(this), this.handleError = this.handleError.bind(this), this.handleRejection = this.handleRejection.bind(this), this.setOptions({
+				externalApi: e,
+				logFn: t,
+				onError: n,
+				showDialog: r
+			}), this.startCatching = this.startCatching.bind(this), this.stopCatching = this.stopCatching.bind(this);
 		}
-		handle(error, { logFn = this.logFn, onError = this.onError, processType = "browser", showDialog = this.showDialog, errorName = "" } = {}) {
-			error = normalizeError(error);
+		handle(e, { logFn: t = this.logFn, onError: n = this.onError, processType: i = "browser", showDialog: a = this.showDialog, errorName: o = "" } = {}) {
+			e = r(e);
 			try {
-				if (typeof onError === "function") {
-					const versions = this.externalApi?.getVersions() || {};
-					const createIssue = this.createIssue;
-					if (onError({
-						createIssue,
-						error,
-						errorName,
-						processType,
-						versions
-					}) === false) return;
+				if (typeof n == "function") {
+					let t = this.externalApi?.getVersions() || {}, r = this.createIssue;
+					if (n({
+						createIssue: r,
+						error: e,
+						errorName: o,
+						processType: i,
+						versions: t
+					}) === !1) return;
 				}
-				errorName ? logFn(errorName, error) : logFn(error);
-				if (showDialog && !errorName.includes("rejection") && this.externalApi) this.externalApi.showErrorBox(`A JavaScript error occurred in the ${processType} process`, error.stack);
+				o ? t(o, e) : t(e), a && !o.includes("rejection") && this.externalApi && this.externalApi.showErrorBox(`A JavaScript error occurred in the ${i} process`, e.stack);
 			} catch {
-				console.error(error);
+				console.error(e);
 			}
 		}
-		setOptions({ externalApi, logFn, onError, showDialog }) {
-			if (typeof externalApi === "object") this.externalApi = externalApi;
-			if (typeof logFn === "function") this.logFn = logFn;
-			if (typeof onError === "function") this.onError = onError;
-			if (typeof showDialog === "boolean") this.showDialog = showDialog;
+		setOptions({ externalApi: e, logFn: t, onError: n, showDialog: r }) {
+			typeof e == "object" && (this.externalApi = e), typeof t == "function" && (this.logFn = t), typeof n == "function" && (this.onError = n), typeof r == "boolean" && (this.showDialog = r);
 		}
-		startCatching({ onError, showDialog } = {}) {
-			if (this.isActive) return;
-			this.isActive = true;
-			this.setOptions({
-				onError,
-				showDialog
-			});
-			process.on("uncaughtException", this.handleError);
-			process.on("unhandledRejection", this.handleRejection);
+		startCatching({ onError: e, showDialog: t } = {}) {
+			this.isActive || (this.isActive = !0, this.setOptions({
+				onError: e,
+				showDialog: t
+			}), process.on("uncaughtException", this.handleError), process.on("unhandledRejection", this.handleRejection));
 		}
 		stopCatching() {
-			this.isActive = false;
-			process.removeListener("uncaughtException", this.handleError);
-			process.removeListener("unhandledRejection", this.handleRejection);
+			this.isActive = !1, process.removeListener("uncaughtException", this.handleError), process.removeListener("unhandledRejection", this.handleRejection);
 		}
-		createIssue(pageUrl, queryParams) {
-			this.externalApi?.openUrl(`${pageUrl}?${new URLSearchParams(queryParams).toString()}`);
+		createIssue(e, t) {
+			this.externalApi?.openUrl(`${e}?${new URLSearchParams(t).toString()}`);
 		}
-		handleError(error) {
-			this.handle(error, { errorName: "Unhandled" });
+		handleError(e) {
+			this.handle(e, { errorName: "Unhandled" });
 		}
-		handleRejection(reason) {
-			const error = reason instanceof Error ? reason : new Error(JSON.stringify(reason));
-			this.handle(error, { errorName: "Unhandled rejection" });
+		handleRejection(e) {
+			let t = e instanceof Error ? e : Error(JSON.stringify(e));
+			this.handle(t, { errorName: "Unhandled rejection" });
 		}
 	};
-	function normalizeError(e) {
+	function r(e) {
 		if (e instanceof Error) return e;
-		if (e && typeof e === "object") {
-			if (e.message) return Object.assign(new Error(e.message), e);
+		if (e && typeof e == "object") {
+			if (e.message) return Object.assign(Error(e.message), e);
 			try {
-				return new Error(JSON.stringify(e));
-			} catch (serErr) {
-				return /* @__PURE__ */ new Error(`Couldn't normalize error ${String(e)}: ${serErr}`);
+				return Error(JSON.stringify(e));
+			} catch (t) {
+				return /* @__PURE__ */ Error(`Couldn't normalize error ${String(e)}: ${t}`);
 			}
 		}
-		return /* @__PURE__ */ new Error(`Can't normalize error ${String(e)}`);
+		return /* @__PURE__ */ Error(`Can't normalize error ${String(e)}`);
 	}
-	module.exports = ErrorHandler;
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/EventLogger.js
-var require_EventLogger = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var EventLogger = class {
+	t.exports = n;
+})), _e = /* @__PURE__ */ C(((e, t) => {
+	t.exports = class {
 		disposers = [];
 		format = "{eventSource}#{eventName}:";
 		formatters = {
 			app: {
-				"certificate-error": ({ args }) => {
-					return this.arrayToObject(args.slice(1, 4), [
-						"url",
-						"error",
-						"certificate"
-					]);
-				},
-				"child-process-gone": ({ args }) => {
-					return args.length === 1 ? args[0] : args;
-				},
-				"render-process-gone": ({ args: [webContents, details] }) => {
-					return details && typeof details === "object" ? {
-						...details,
-						...this.getWebContentsDetails(webContents)
-					} : [];
-				}
+				"certificate-error": ({ args: e }) => this.arrayToObject(e.slice(1, 4), [
+					"url",
+					"error",
+					"certificate"
+				]),
+				"child-process-gone": ({ args: e }) => e.length === 1 ? e[0] : e,
+				"render-process-gone": ({ args: [e, t] }) => t && typeof t == "object" ? {
+					...t,
+					...this.getWebContentsDetails(e)
+				} : []
 			},
 			webContents: {
-				"console-message": ({ args: [level, message, line, sourceId] }) => {
-					if (level < 3) return;
-					return {
-						message,
-						source: `${sourceId}:${line}`
+				"console-message": ({ args: [e, t, n, r] }) => {
+					if (!(e < 3)) return {
+						message: t,
+						source: `${r}:${n}`
 					};
 				},
-				"did-fail-load": ({ args }) => {
-					return this.arrayToObject(args, [
-						"errorCode",
-						"errorDescription",
-						"validatedURL",
-						"isMainFrame",
-						"frameProcessId",
-						"frameRoutingId"
-					]);
-				},
-				"did-fail-provisional-load": ({ args }) => {
-					return this.arrayToObject(args, [
-						"errorCode",
-						"errorDescription",
-						"validatedURL",
-						"isMainFrame",
-						"frameProcessId",
-						"frameRoutingId"
-					]);
-				},
-				"plugin-crashed": ({ args }) => {
-					return this.arrayToObject(args, ["name", "version"]);
-				},
-				"preload-error": ({ args }) => {
-					return this.arrayToObject(args, ["preloadPath", "error"]);
-				}
+				"did-fail-load": ({ args: e }) => this.arrayToObject(e, [
+					"errorCode",
+					"errorDescription",
+					"validatedURL",
+					"isMainFrame",
+					"frameProcessId",
+					"frameRoutingId"
+				]),
+				"did-fail-provisional-load": ({ args: e }) => this.arrayToObject(e, [
+					"errorCode",
+					"errorDescription",
+					"validatedURL",
+					"isMainFrame",
+					"frameProcessId",
+					"frameRoutingId"
+				]),
+				"plugin-crashed": ({ args: e }) => this.arrayToObject(e, ["name", "version"]),
+				"preload-error": ({ args: e }) => this.arrayToObject(e, ["preloadPath", "error"])
 			}
 		};
 		events = {
 			app: {
-				"certificate-error": true,
-				"child-process-gone": true,
-				"render-process-gone": true
+				"certificate-error": !0,
+				"child-process-gone": !0,
+				"render-process-gone": !0
 			},
 			webContents: {
-				"did-fail-load": true,
-				"did-fail-provisional-load": true,
-				"plugin-crashed": true,
-				"preload-error": true,
-				"unresponsive": true
+				"did-fail-load": !0,
+				"did-fail-provisional-load": !0,
+				"plugin-crashed": !0,
+				"preload-error": !0,
+				unresponsive: !0
 			}
 		};
 		externalApi = void 0;
 		level = "error";
 		scope = "";
-		constructor(options = {}) {
-			this.setOptions(options);
+		constructor(e = {}) {
+			this.setOptions(e);
 		}
-		setOptions({ events, externalApi, level, logger, format, formatters, scope }) {
-			if (typeof events === "object") this.events = events;
-			if (typeof externalApi === "object") this.externalApi = externalApi;
-			if (typeof level === "string") this.level = level;
-			if (typeof logger === "object") this.logger = logger;
-			if (typeof format === "string" || typeof format === "function") this.format = format;
-			if (typeof formatters === "object") this.formatters = formatters;
-			if (typeof scope === "string") this.scope = scope;
+		setOptions({ events: e, externalApi: t, level: n, logger: r, format: i, formatters: a, scope: o }) {
+			typeof e == "object" && (this.events = e), typeof t == "object" && (this.externalApi = t), typeof n == "string" && (this.level = n), typeof r == "object" && (this.logger = r), (typeof i == "string" || typeof i == "function") && (this.format = i), typeof a == "object" && (this.formatters = a), typeof o == "string" && (this.scope = o);
 		}
-		startLogging(options = {}) {
-			this.setOptions(options);
-			this.disposeListeners();
-			for (const eventName of this.getEventNames(this.events.app)) this.disposers.push(this.externalApi.onAppEvent(eventName, (...handlerArgs) => {
+		startLogging(e = {}) {
+			this.setOptions(e), this.disposeListeners();
+			for (let e of this.getEventNames(this.events.app)) this.disposers.push(this.externalApi.onAppEvent(e, (...t) => {
 				this.handleEvent({
 					eventSource: "app",
-					eventName,
-					handlerArgs
+					eventName: e,
+					handlerArgs: t
 				});
 			}));
-			for (const eventName of this.getEventNames(this.events.webContents)) this.disposers.push(this.externalApi.onEveryWebContentsEvent(eventName, (...handlerArgs) => {
+			for (let e of this.getEventNames(this.events.webContents)) this.disposers.push(this.externalApi.onEveryWebContentsEvent(e, (...t) => {
 				this.handleEvent({
 					eventSource: "webContents",
-					eventName,
-					handlerArgs
+					eventName: e,
+					handlerArgs: t
 				});
 			}));
 		}
 		stopLogging() {
 			this.disposeListeners();
 		}
-		arrayToObject(array, fieldNames) {
-			const obj = {};
-			fieldNames.forEach((fieldName, index) => {
-				obj[fieldName] = array[index];
-			});
-			if (array.length > fieldNames.length) obj.unknownArgs = array.slice(fieldNames.length);
-			return obj;
+		arrayToObject(e, t) {
+			let n = {};
+			return t.forEach((t, r) => {
+				n[t] = e[r];
+			}), e.length > t.length && (n.unknownArgs = e.slice(t.length)), n;
 		}
 		disposeListeners() {
-			this.disposers.forEach((disposer) => disposer());
-			this.disposers = [];
+			this.disposers.forEach((e) => e()), this.disposers = [];
 		}
-		formatEventLog({ eventName, eventSource, handlerArgs }) {
-			const [event, ...args] = handlerArgs;
-			if (typeof this.format === "function") return this.format({
-				args,
-				event,
-				eventName,
-				eventSource
+		formatEventLog({ eventName: e, eventSource: t, handlerArgs: n }) {
+			let [r, ...i] = n;
+			if (typeof this.format == "function") return this.format({
+				args: i,
+				event: r,
+				eventName: e,
+				eventSource: t
 			});
-			const formatter = this.formatters[eventSource]?.[eventName];
-			let formattedArgs = args;
-			if (typeof formatter === "function") formattedArgs = formatter({
-				args,
-				event,
-				eventName,
-				eventSource
-			});
-			if (!formattedArgs) return;
-			const eventData = {};
-			if (Array.isArray(formattedArgs)) eventData.args = formattedArgs;
-			else if (typeof formattedArgs === "object") Object.assign(eventData, formattedArgs);
-			if (eventSource === "webContents") Object.assign(eventData, this.getWebContentsDetails(event?.sender));
-			return [this.format.replace("{eventSource}", eventSource === "app" ? "App" : "WebContents").replace("{eventName}", eventName), eventData];
+			let a = this.formatters[t]?.[e], o = i;
+			if (typeof a == "function" && (o = a({
+				args: i,
+				event: r,
+				eventName: e,
+				eventSource: t
+			})), !o) return;
+			let s = {};
+			return Array.isArray(o) ? s.args = o : typeof o == "object" && Object.assign(s, o), t === "webContents" && Object.assign(s, this.getWebContentsDetails(r?.sender)), [this.format.replace("{eventSource}", t === "app" ? "App" : "WebContents").replace("{eventName}", e), s];
 		}
-		getEventNames(eventMap) {
-			if (!eventMap || typeof eventMap !== "object") return [];
-			return Object.entries(eventMap).filter(([_, listen]) => listen).map(([eventName]) => eventName);
+		getEventNames(e) {
+			return !e || typeof e != "object" ? [] : Object.entries(e).filter(([e, t]) => t).map(([e]) => e);
 		}
-		getWebContentsDetails(webContents) {
-			if (!webContents?.loadURL) return {};
+		getWebContentsDetails(e) {
+			if (!e?.loadURL) return {};
 			try {
 				return { webContents: {
-					id: webContents.id,
-					url: webContents.getURL()
+					id: e.id,
+					url: e.getURL()
 				} };
 			} catch {
 				return {};
 			}
 		}
-		handleEvent({ eventName, eventSource, handlerArgs }) {
-			const log = this.formatEventLog({
-				eventName,
-				eventSource,
-				handlerArgs
+		handleEvent({ eventName: e, eventSource: t, handlerArgs: n }) {
+			let r = this.formatEventLog({
+				eventName: e,
+				eventSource: t,
+				handlerArgs: n
 			});
-			if (log) (this.scope ? this.logger.scope(this.scope) : this.logger)?.[this.level]?.(...log);
+			r && (this.scope ? this.logger.scope(this.scope) : this.logger)?.[this.level]?.(...r);
 		}
 	};
-	module.exports = EventLogger;
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/transforms/transform.js
-var require_transform = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = { transform };
-	function transform({ logger, message, transport, initialData = message?.data || [], transforms = transport?.transforms }) {
-		return transforms.reduce((data, trans) => {
-			if (typeof trans === "function") return trans({
-				data,
-				logger,
-				message,
-				transport
-			});
-			return data;
-		}, initialData);
+})), T = /* @__PURE__ */ C(((e, t) => {
+	t.exports = { transform: n };
+	function n({ logger: e, message: t, transport: n, initialData: r = t?.data || [], transforms: i = n?.transforms }) {
+		return i.reduce((r, i) => typeof i == "function" ? i({
+			data: r,
+			logger: e,
+			message: t,
+			transport: n
+		}) : r, r);
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/transforms/format.js
-var require_format = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var { transform } = require_transform();
-	module.exports = {
-		concatFirstStringElements,
-		formatScope,
-		formatText,
-		formatVariables,
-		timeZoneFromOffset,
-		format({ message, logger, transport, data = message?.data }) {
-			switch (typeof transport.format) {
-				case "string": return transform({
-					message,
-					logger,
+})), E = /* @__PURE__ */ C(((e, t) => {
+	var { transform: n } = T();
+	t.exports = {
+		concatFirstStringElements: r,
+		formatScope: a,
+		formatText: s,
+		formatVariables: o,
+		timeZoneFromOffset: i,
+		format({ message: e, logger: t, transport: r, data: i = e?.data }) {
+			switch (typeof r.format) {
+				case "string": return n({
+					message: e,
+					logger: t,
 					transforms: [
-						formatVariables,
-						formatScope,
-						formatText
+						o,
+						a,
+						s
 					],
-					transport,
-					initialData: [transport.format, ...data]
+					transport: r,
+					initialData: [r.format, ...i]
 				});
-				case "function": return transport.format({
-					data,
-					level: message?.level || "info",
-					logger,
-					message,
-					transport
+				case "function": return r.format({
+					data: i,
+					level: e?.level || "info",
+					logger: t,
+					message: e,
+					transport: r
 				});
-				default: return data;
+				default: return i;
 			}
 		}
 	};
-	/**
-	* The first argument of console.log may contain a template. In the library
-	* the first element is a string related to transports.console.format. So
-	* this function concatenates first two elements to make templates like %d
-	* work
-	* @param {*[]} data
-	* @return {*[]}
-	*/
-	function concatFirstStringElements({ data }) {
-		if (typeof data[0] !== "string" || typeof data[1] !== "string") return data;
-		if (data[0].match(/%[1cdfiOos]/)) return data;
-		return [`${data[0]} ${data[1]}`, ...data.slice(2)];
+	function r({ data: e }) {
+		return typeof e[0] != "string" || typeof e[1] != "string" || e[0].match(/%[1cdfiOos]/) ? e : [`${e[0]} ${e[1]}`, ...e.slice(2)];
 	}
-	function timeZoneFromOffset(minutesOffset) {
-		const minutesPositive = Math.abs(minutesOffset);
-		return `${minutesOffset > 0 ? "-" : "+"}${Math.floor(minutesPositive / 60).toString().padStart(2, "0")}:${(minutesPositive % 60).toString().padStart(2, "0")}`;
+	function i(e) {
+		let t = Math.abs(e);
+		return `${e > 0 ? "-" : "+"}${Math.floor(t / 60).toString().padStart(2, "0")}:${(t % 60).toString().padStart(2, "0")}`;
 	}
-	function formatScope({ data, logger, message }) {
-		const { defaultLabel, labelLength } = logger?.scope || {};
-		const template = data[0];
-		let label = message.scope;
-		if (!label) label = defaultLabel;
-		let scopeText;
-		if (label === "") scopeText = labelLength > 0 ? "".padEnd(labelLength + 3) : "";
-		else if (typeof label === "string") scopeText = ` (${label})`.padEnd(labelLength + 3);
-		else scopeText = "";
-		data[0] = template.replace("{scope}", scopeText);
-		return data;
+	function a({ data: e, logger: t, message: n }) {
+		let { defaultLabel: r, labelLength: i } = t?.scope || {}, a = e[0], o = n.scope;
+		o ||= r;
+		let s;
+		return s = o === "" ? i > 0 ? "".padEnd(i + 3) : "" : typeof o == "string" ? ` (${o})`.padEnd(i + 3) : "", e[0] = a.replace("{scope}", s), e;
 	}
-	function formatVariables({ data, message }) {
-		let template = data[0];
-		if (typeof template !== "string") return data;
-		template = template.replace("{level}]", `${message.level}]`.padEnd(6, " "));
-		const date = message.date || /* @__PURE__ */ new Date();
-		data[0] = template.replace(/\{(\w+)}/g, (substring, name) => {
-			switch (name) {
-				case "level": return message.level || "info";
-				case "logId": return message.logId;
-				case "y": return date.getFullYear().toString(10);
-				case "m": return (date.getMonth() + 1).toString(10).padStart(2, "0");
-				case "d": return date.getDate().toString(10).padStart(2, "0");
-				case "h": return date.getHours().toString(10).padStart(2, "0");
-				case "i": return date.getMinutes().toString(10).padStart(2, "0");
-				case "s": return date.getSeconds().toString(10).padStart(2, "0");
-				case "ms": return date.getMilliseconds().toString(10).padStart(3, "0");
-				case "z": return timeZoneFromOffset(date.getTimezoneOffset());
-				case "iso": return date.toISOString();
-				default: return message.variables?.[name] || substring;
+	function o({ data: e, message: t }) {
+		let n = e[0];
+		if (typeof n != "string") return e;
+		n = n.replace("{level}]", `${t.level}]`.padEnd(6, " "));
+		let r = t.date || /* @__PURE__ */ new Date();
+		return e[0] = n.replace(/\{(\w+)}/g, (e, n) => {
+			switch (n) {
+				case "level": return t.level || "info";
+				case "logId": return t.logId;
+				case "y": return r.getFullYear().toString(10);
+				case "m": return (r.getMonth() + 1).toString(10).padStart(2, "0");
+				case "d": return r.getDate().toString(10).padStart(2, "0");
+				case "h": return r.getHours().toString(10).padStart(2, "0");
+				case "i": return r.getMinutes().toString(10).padStart(2, "0");
+				case "s": return r.getSeconds().toString(10).padStart(2, "0");
+				case "ms": return r.getMilliseconds().toString(10).padStart(3, "0");
+				case "z": return i(r.getTimezoneOffset());
+				case "iso": return r.toISOString();
+				default: return t.variables?.[n] || e;
 			}
-		}).trim();
-		return data;
+		}).trim(), e;
 	}
-	function formatText({ data }) {
-		const template = data[0];
-		if (typeof template !== "string") return data;
-		if (template.lastIndexOf("{text}") === template.length - 6) {
-			data[0] = template.replace(/\s?{text}/, "");
-			if (data[0] === "") data.shift();
-			return data;
-		}
-		const templatePieces = template.split("{text}");
-		let result = [];
-		if (templatePieces[0] !== "") result.push(templatePieces[0]);
-		result = result.concat(data.slice(1));
-		if (templatePieces[1] !== "") result.push(templatePieces[1]);
-		return result;
+	function s({ data: e }) {
+		let t = e[0];
+		if (typeof t != "string") return e;
+		if (t.lastIndexOf("{text}") === t.length - 6) return e[0] = t.replace(/\s?{text}/, ""), e[0] === "" && e.shift(), e;
+		let n = t.split("{text}"), r = [];
+		return n[0] !== "" && r.push(n[0]), r = r.concat(e.slice(1)), n[1] !== "" && r.push(n[1]), r;
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transforms/object.js
-var require_object = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var util = __require("util");
-	module.exports = {
-		serialize,
-		maxDepth({ data, transport, depth = transport?.depth ?? 6 }) {
-			if (!data) return data;
-			if (depth < 1) {
-				if (Array.isArray(data)) return "[array]";
-				if (typeof data === "object" && data) return "[object]";
-				return data;
-			}
-			if (Array.isArray(data)) return data.map((child) => module.exports.maxDepth({
-				data: child,
-				depth: depth - 1
+})), D = /* @__PURE__ */ C(((e, t) => {
+	var n = w("util");
+	t.exports = {
+		serialize: i,
+		maxDepth({ data: e, transport: n, depth: r = n?.depth ?? 6 }) {
+			if (!e) return e;
+			if (r < 1) return Array.isArray(e) ? "[array]" : typeof e == "object" && e ? "[object]" : e;
+			if (Array.isArray(e)) return e.map((e) => t.exports.maxDepth({
+				data: e,
+				depth: r - 1
 			}));
-			if (typeof data !== "object") return data;
-			if (data && typeof data.toISOString === "function") return data;
-			if (data === null) return null;
-			if (data instanceof Error) return data;
-			const newJson = {};
-			for (const i in data) {
-				if (!Object.prototype.hasOwnProperty.call(data, i)) continue;
-				newJson[i] = module.exports.maxDepth({
-					data: data[i],
-					depth: depth - 1
-				});
-			}
-			return newJson;
+			if (typeof e != "object" || e && typeof e.toISOString == "function") return e;
+			if (e === null) return null;
+			if (e instanceof Error) return e;
+			let i = {};
+			for (let n in e) Object.prototype.hasOwnProperty.call(e, n) && (i[n] = t.exports.maxDepth({
+				data: e[n],
+				depth: r - 1
+			}));
+			return i;
 		},
-		toJSON({ data }) {
-			return JSON.parse(JSON.stringify(data, createSerializer()));
+		toJSON({ data: e }) {
+			return JSON.parse(JSON.stringify(e, r()));
 		},
-		toString({ data, transport }) {
-			const inspectOptions = transport?.inspectOptions || {};
-			const simplifiedData = data.map((item) => {
-				if (item === void 0) return;
-				try {
-					const str = JSON.stringify(item, createSerializer(), "  ");
-					return str === void 0 ? void 0 : JSON.parse(str);
-				} catch (e) {
-					return item;
+		toString({ data: e, transport: t }) {
+			let i = t?.inspectOptions || {}, a = e.map((e) => {
+				if (e !== void 0) try {
+					let t = JSON.stringify(e, r(), "  ");
+					return t === void 0 ? void 0 : JSON.parse(t);
+				} catch {
+					return e;
 				}
 			});
-			return util.formatWithOptions(inspectOptions, ...simplifiedData);
+			return n.formatWithOptions(i, ...a);
 		}
 	};
-	/**
-	* @param {object} options?
-	* @param {boolean} options.serializeMapAndSet?
-	* @return {function}
-	*/
-	function createSerializer(options = {}) {
-		const seen = /* @__PURE__ */ new WeakSet();
-		return function(key, value) {
-			if (typeof value === "object" && value !== null) {
-				if (seen.has(value)) return;
-				seen.add(value);
+	function r(e = {}) {
+		let t = /* @__PURE__ */ new WeakSet();
+		return function(n, r) {
+			if (typeof r == "object" && r) {
+				if (t.has(r)) return;
+				t.add(r);
 			}
-			return serialize(key, value, options);
+			return i(n, r, e);
 		};
 	}
-	/**
-	* @param {string} key
-	* @param {any} value
-	* @param {object} options?
-	* @return {any}
-	*/
-	function serialize(key, value, options = {}) {
-		const serializeMapAndSet = options?.serializeMapAndSet !== false;
-		if (value instanceof Error) return value.stack;
-		if (!value) return value;
-		if (typeof value === "function") return `[function] ${value.toString()}`;
-		if (value instanceof Date) return value.toISOString();
-		if (serializeMapAndSet && value instanceof Map && Object.fromEntries) return Object.fromEntries(value);
-		if (serializeMapAndSet && value instanceof Set && Array.from) return Array.from(value);
-		return value;
+	function i(e, t, n = {}) {
+		let r = n?.serializeMapAndSet !== !1;
+		return t instanceof Error ? t.stack : t && (typeof t == "function" ? `[function] ${t.toString()}` : t instanceof Date ? t.toISOString() : r && t instanceof Map && Object.fromEntries ? Object.fromEntries(t) : r && t instanceof Set && Array.from ? Array.from(t) : t);
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/core/transforms/style.js
-var require_style = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = {
-		transformStyles,
-		applyAnsiStyles({ data }) {
-			return transformStyles(data, styleToAnsi, resetAnsiStyle);
+})), O = /* @__PURE__ */ C(((e, t) => {
+	t.exports = {
+		transformStyles: a,
+		applyAnsiStyles({ data: e }) {
+			return a(e, r, i);
 		},
-		removeStyles({ data }) {
-			return transformStyles(data, () => "");
+		removeStyles({ data: e }) {
+			return a(e, () => "");
 		}
 	};
-	var ANSI_COLORS = {
+	var n = {
 		unset: "\x1B[0m",
 		black: "\x1B[30m",
 		red: "\x1B[31m",
@@ -1241,45 +921,29 @@ var require_style = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		white: "\x1B[37m",
 		gray: "\x1B[90m"
 	};
-	function styleToAnsi(style) {
-		return ANSI_COLORS[style.replace(/color:\s*(\w+).*/, "$1").toLowerCase()] || "";
+	function r(e) {
+		return n[e.replace(/color:\s*(\w+).*/, "$1").toLowerCase()] || "";
 	}
-	function resetAnsiStyle(string) {
-		return string + ANSI_COLORS.unset;
+	function i(e) {
+		return e + n.unset;
 	}
-	function transformStyles(data, onStyleFound, onStyleApplied) {
-		const foundStyles = {};
-		return data.reduce((result, item, index, array) => {
-			if (foundStyles[index]) return result;
-			if (typeof item === "string") {
-				let valueIndex = index;
-				let styleApplied = false;
-				item = item.replace(/%[1cdfiOos]/g, (match) => {
-					valueIndex += 1;
-					if (match !== "%c") return match;
-					const style = array[valueIndex];
-					if (typeof style === "string") {
-						foundStyles[valueIndex] = true;
-						styleApplied = true;
-						return onStyleFound(style, item);
-					}
-					return match;
-				});
-				if (styleApplied && onStyleApplied) item = onStyleApplied(item);
+	function a(e, t, n) {
+		let r = {};
+		return e.reduce((e, i, a, o) => {
+			if (r[a]) return e;
+			if (typeof i == "string") {
+				let e = a, s = !1;
+				i = i.replace(/%[1cdfiOos]/g, (n) => {
+					if (e += 1, n !== "%c") return n;
+					let a = o[e];
+					return typeof a == "string" ? (r[e] = !0, s = !0, t(a, i)) : n;
+				}), s && n && (i = n(i));
 			}
-			result.push(item);
-			return result;
+			return e.push(i), e;
 		}, []);
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/console.js
-var require_console = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var { concatFirstStringElements, format } = require_format();
-	var { maxDepth, toJSON } = require_object();
-	var { applyAnsiStyles, removeStyles } = require_style();
-	var { transform } = require_transform();
-	var consoleMethods = {
+})), k = /* @__PURE__ */ C(((e, t) => {
+	var { concatFirstStringElements: n, format: r } = E(), { maxDepth: i, toJSON: a } = D(), { applyAnsiStyles: o, removeStyles: s } = O(), { transform: c } = T(), l = {
 		error: console.error,
 		warn: console.warn,
 		info: console.info,
@@ -1288,11 +952,11 @@ var require_console = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		silly: console.debug,
 		log: console.log
 	};
-	module.exports = consoleTransportFactory;
-	var DEFAULT_FORMAT = `%c{h}:{i}:{s}.{ms}{scope}%c ${process.platform === "win32" ? ">" : "›"} {text}`;
-	Object.assign(consoleTransportFactory, { DEFAULT_FORMAT });
-	function consoleTransportFactory(logger) {
-		return Object.assign(transport, {
+	t.exports = d;
+	var u = `%c{h}:{i}:{s}.{ms}{scope}%c ${process.platform === "win32" ? ">" : "›"} {text}`;
+	Object.assign(d, { DEFAULT_FORMAT: u });
+	function d(e) {
+		return Object.assign(t, {
 			colorMap: {
 				error: "red",
 				warn: "yellow",
@@ -1302,963 +966,704 @@ var require_console = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 				silly: "gray",
 				default: "unset"
 			},
-			format: DEFAULT_FORMAT,
+			format: u,
 			level: "silly",
 			transforms: [
-				addTemplateColors,
-				format,
-				formatStyles,
-				concatFirstStringElements,
-				maxDepth,
-				toJSON
+				f,
+				r,
+				m,
+				n,
+				i,
+				a
 			],
 			useStyles: process.env.FORCE_STYLES,
-			writeFn({ message }) {
-				(consoleMethods[message.level] || consoleMethods.info)(...message.data);
+			writeFn({ message: e }) {
+				(l[e.level] || l.info)(...e.data);
 			}
 		});
-		function transport(message) {
-			const data = transform({
-				logger,
-				message,
-				transport
+		function t(n) {
+			let r = c({
+				logger: e,
+				message: n,
+				transport: t
 			});
-			transport.writeFn({ message: {
-				...message,
-				data
+			t.writeFn({ message: {
+				...n,
+				data: r
 			} });
 		}
 	}
-	function addTemplateColors({ data, message, transport }) {
-		if (typeof transport.format !== "string" || !transport.format.includes("%c")) return data;
-		return [
-			`color:${levelToStyle(message.level, transport)}`,
+	function f({ data: e, message: t, transport: n }) {
+		return typeof n.format != "string" || !n.format.includes("%c") ? e : [
+			`color:${h(t.level, n)}`,
 			"color:unset",
-			...data
+			...e
 		];
 	}
-	function canUseStyles(useStyleValue, level) {
-		if (typeof useStyleValue === "boolean") return useStyleValue;
-		const stream = level === "error" || level === "warn" ? process.stderr : process.stdout;
-		return stream && stream.isTTY;
+	function p(e, t) {
+		if (typeof e == "boolean") return e;
+		let n = t === "error" || t === "warn" ? process.stderr : process.stdout;
+		return n && n.isTTY;
 	}
-	function formatStyles(args) {
-		const { message, transport } = args;
-		return (canUseStyles(transport.useStyles, message.level) ? applyAnsiStyles : removeStyles)(args);
+	function m(e) {
+		let { message: t, transport: n } = e;
+		return (p(n.useStyles, t.level) ? o : s)(e);
 	}
-	function levelToStyle(level, transport) {
-		return transport.colorMap[level] || transport.colorMap.default;
+	function h(e, t) {
+		return t.colorMap[e] || t.colorMap.default;
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/file/File.js
-var require_File = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var EventEmitter$1 = __require("events");
-	var fs$2 = __require("fs");
-	var os$1 = __require("os");
-	var File = class extends EventEmitter$1 {
+})), A = /* @__PURE__ */ C(((e, t) => {
+	var n = w("events"), r = w("fs"), i = w("os");
+	t.exports = class extends n {
 		asyncWriteQueue = [];
 		bytesWritten = 0;
-		hasActiveAsyncWriting = false;
+		hasActiveAsyncWriting = !1;
 		path = null;
 		initialSize = void 0;
 		writeOptions = null;
-		writeAsync = false;
-		constructor({ path, writeOptions = {
+		writeAsync = !1;
+		constructor({ path: e, writeOptions: t = {
 			encoding: "utf8",
 			flag: "a",
 			mode: 438
-		}, writeAsync = false }) {
-			super();
-			this.path = path;
-			this.writeOptions = writeOptions;
-			this.writeAsync = writeAsync;
+		}, writeAsync: n = !1 }) {
+			super(), this.path = e, this.writeOptions = t, this.writeAsync = n;
 		}
 		get size() {
 			return this.getSize();
 		}
 		clear() {
 			try {
-				fs$2.writeFileSync(this.path, "", {
+				return r.writeFileSync(this.path, "", {
 					mode: this.writeOptions.mode,
 					flag: "w"
-				});
-				this.reset();
-				return true;
+				}), this.reset(), !0;
 			} catch (e) {
-				if (e.code === "ENOENT") return true;
-				this.emit("error", e, this);
-				return false;
+				return e.code === "ENOENT" ? !0 : (this.emit("error", e, this), !1);
 			}
 		}
-		crop(bytesAfter) {
+		crop(e) {
 			try {
-				const content = readFileSyncFromEnd(this.path, bytesAfter || 4096);
-				this.clear();
-				this.writeLine(`[log cropped]${os$1.EOL}${content}`);
+				let t = a(this.path, e || 4096);
+				this.clear(), this.writeLine(`[log cropped]${i.EOL}${t}`);
 			} catch (e) {
-				this.emit("error", /* @__PURE__ */ new Error(`Couldn't crop file ${this.path}. ${e.message}`), this);
+				this.emit("error", /* @__PURE__ */ Error(`Couldn't crop file ${this.path}. ${e.message}`), this);
 			}
 		}
 		getSize() {
 			if (this.initialSize === void 0) try {
-				const stats = fs$2.statSync(this.path);
-				this.initialSize = stats.size;
-			} catch (e) {
+				let e = r.statSync(this.path);
+				this.initialSize = e.size;
+			} catch {
 				this.initialSize = 0;
 			}
 			return this.initialSize + this.bytesWritten;
 		}
-		increaseBytesWrittenCounter(text) {
-			this.bytesWritten += Buffer.byteLength(text, this.writeOptions.encoding);
+		increaseBytesWrittenCounter(e) {
+			this.bytesWritten += Buffer.byteLength(e, this.writeOptions.encoding);
 		}
 		isNull() {
-			return false;
+			return !1;
 		}
 		nextAsyncWrite() {
-			const file = this;
+			let e = this;
 			if (this.hasActiveAsyncWriting || this.asyncWriteQueue.length === 0) return;
-			const text = this.asyncWriteQueue.join("");
-			this.asyncWriteQueue = [];
-			this.hasActiveAsyncWriting = true;
-			fs$2.writeFile(this.path, text, this.writeOptions, (e) => {
-				file.hasActiveAsyncWriting = false;
-				if (e) file.emit("error", /* @__PURE__ */ new Error(`Couldn't write to ${file.path}. ${e.message}`), this);
-				else file.increaseBytesWrittenCounter(text);
-				file.nextAsyncWrite();
+			let t = this.asyncWriteQueue.join("");
+			this.asyncWriteQueue = [], this.hasActiveAsyncWriting = !0, r.writeFile(this.path, t, this.writeOptions, (n) => {
+				e.hasActiveAsyncWriting = !1, n ? e.emit("error", /* @__PURE__ */ Error(`Couldn't write to ${e.path}. ${n.message}`), this) : e.increaseBytesWrittenCounter(t), e.nextAsyncWrite();
 			});
 		}
 		reset() {
-			this.initialSize = void 0;
-			this.bytesWritten = 0;
+			this.initialSize = void 0, this.bytesWritten = 0;
 		}
 		toString() {
 			return this.path;
 		}
-		writeLine(text) {
-			text += os$1.EOL;
-			if (this.writeAsync) {
-				this.asyncWriteQueue.push(text);
-				this.nextAsyncWrite();
+		writeLine(e) {
+			if (e += i.EOL, this.writeAsync) {
+				this.asyncWriteQueue.push(e), this.nextAsyncWrite();
 				return;
 			}
 			try {
-				fs$2.writeFileSync(this.path, text, this.writeOptions);
-				this.increaseBytesWrittenCounter(text);
+				r.writeFileSync(this.path, e, this.writeOptions), this.increaseBytesWrittenCounter(e);
 			} catch (e) {
-				this.emit("error", /* @__PURE__ */ new Error(`Couldn't write to ${this.path}. ${e.message}`), this);
+				this.emit("error", /* @__PURE__ */ Error(`Couldn't write to ${this.path}. ${e.message}`), this);
 			}
 		}
 	};
-	module.exports = File;
-	function readFileSyncFromEnd(filePath, bytesCount) {
-		const buffer = Buffer.alloc(bytesCount);
-		const stats = fs$2.statSync(filePath);
-		const readLength = Math.min(stats.size, bytesCount);
-		const offset = Math.max(0, stats.size - bytesCount);
-		const fd = fs$2.openSync(filePath, "r");
-		const totalBytes = fs$2.readSync(fd, buffer, 0, readLength, offset);
-		fs$2.closeSync(fd);
-		return buffer.toString("utf8", 0, totalBytes);
+	function a(e, t) {
+		let n = Buffer.alloc(t), i = r.statSync(e), a = Math.min(i.size, t), o = Math.max(0, i.size - t), s = r.openSync(e, "r"), c = r.readSync(s, n, 0, a, o);
+		return r.closeSync(s), n.toString("utf8", 0, c);
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/file/NullFile.js
-var require_NullFile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var File = require_File();
-	var NullFile = class extends File {
+})), j = /* @__PURE__ */ C(((e, t) => {
+	var n = A();
+	t.exports = class extends n {
 		clear() {}
 		crop() {}
 		getSize() {
 			return 0;
 		}
 		isNull() {
-			return true;
+			return !0;
 		}
 		writeLine() {}
 	};
-	module.exports = NullFile;
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/file/FileRegistry.js
-var require_FileRegistry = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var EventEmitter = __require("events");
-	var fs$1 = __require("fs");
-	var path$1 = __require("path");
-	var File = require_File();
-	var NullFile = require_NullFile();
-	var FileRegistry = class extends EventEmitter {
+})), M = /* @__PURE__ */ C(((e, t) => {
+	var n = w("events"), r = w("fs"), i = w("path"), a = A(), o = j();
+	t.exports = class extends n {
 		store = {};
 		constructor() {
-			super();
-			this.emitError = this.emitError.bind(this);
+			super(), this.emitError = this.emitError.bind(this);
 		}
-		/**
-		* Provide a File object corresponding to the filePath
-		* @param {string} filePath
-		* @param {WriteOptions} [writeOptions]
-		* @param {boolean} [writeAsync]
-		* @return {File}
-		*/
-		provide({ filePath, writeOptions = {}, writeAsync = false }) {
-			let file;
+		provide({ filePath: e, writeOptions: t = {}, writeAsync: n = !1 }) {
+			let r;
 			try {
-				filePath = path$1.resolve(filePath);
-				if (this.store[filePath]) return this.store[filePath];
-				file = this.createFile({
-					filePath,
-					writeOptions,
-					writeAsync
+				if (e = i.resolve(e), this.store[e]) return this.store[e];
+				r = this.createFile({
+					filePath: e,
+					writeOptions: t,
+					writeAsync: n
 				});
-			} catch (e) {
-				file = new NullFile({ path: filePath });
-				this.emitError(e, file);
+			} catch (t) {
+				r = new o({ path: e }), this.emitError(t, r);
 			}
-			file.on("error", this.emitError);
-			this.store[filePath] = file;
-			return file;
+			return r.on("error", this.emitError), this.store[e] = r, r;
 		}
-		/**
-		* @param {string} filePath
-		* @param {WriteOptions} writeOptions
-		* @param {boolean} async
-		* @return {File}
-		* @private
-		*/
-		createFile({ filePath, writeOptions, writeAsync }) {
-			this.testFileWriting({
-				filePath,
-				writeOptions
-			});
-			return new File({
-				path: filePath,
-				writeOptions,
-				writeAsync
+		createFile({ filePath: e, writeOptions: t, writeAsync: n }) {
+			return this.testFileWriting({
+				filePath: e,
+				writeOptions: t
+			}), new a({
+				path: e,
+				writeOptions: t,
+				writeAsync: n
 			});
 		}
-		/**
-		* @param {Error} error
-		* @param {File} file
-		* @private
-		*/
-		emitError(error, file) {
-			this.emit("error", error, file);
+		emitError(e, t) {
+			this.emit("error", e, t);
 		}
-		/**
-		* @param {string} filePath
-		* @param {WriteOptions} writeOptions
-		* @private
-		*/
-		testFileWriting({ filePath, writeOptions }) {
-			fs$1.mkdirSync(path$1.dirname(filePath), { recursive: true });
-			fs$1.writeFileSync(filePath, "", {
+		testFileWriting({ filePath: e, writeOptions: t }) {
+			r.mkdirSync(i.dirname(e), { recursive: !0 }), r.writeFileSync(e, "", {
 				flag: "a",
-				mode: writeOptions.mode
+				mode: t.mode
 			});
 		}
 	};
-	module.exports = FileRegistry;
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/file/index.js
-var require_file = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fs = __require("fs");
-	var os = __require("os");
-	var path = __require("path");
-	var FileRegistry = require_FileRegistry();
-	var { transform } = require_transform();
-	var { removeStyles } = require_style();
-	var { format, concatFirstStringElements } = require_format();
-	var { toString } = require_object();
-	module.exports = fileTransportFactory;
-	var globalRegistry = new FileRegistry();
-	function fileTransportFactory(logger, { registry = globalRegistry, externalApi } = {}) {
-		/** @type {PathVariables} */
-		let pathVariables;
-		if (registry.listenerCount("error") < 1) registry.on("error", (e, file) => {
-			logConsole(`Can't write to ${file}`, e);
-		});
-		return Object.assign(transport, {
-			fileName: getDefaultFileName(logger.variables.processType),
+})), N = /* @__PURE__ */ C(((e, t) => {
+	var n = w("fs"), r = w("os"), i = w("path"), a = M(), { transform: o } = T(), { removeStyles: s } = O(), { format: c, concatFirstStringElements: l } = E(), { toString: u } = D();
+	t.exports = f;
+	var d = new a();
+	function f(e, { registry: t = d, externalApi: a } = {}) {
+		let f;
+		return t.listenerCount("error") < 1 && t.on("error", (e, t) => {
+			g(`Can't write to ${t}`, e);
+		}), Object.assign(m, {
+			fileName: p(e.variables.processType),
 			format: "[{y}-{m}-{d} {h}:{i}:{s}.{ms}] [{level}]{scope} {text}",
-			getFile,
+			getFile: _,
 			inspectOptions: { depth: 5 },
 			level: "silly",
 			maxSize: 1024 ** 2,
-			readAllLogs,
-			sync: true,
+			readAllLogs: v,
+			sync: !0,
 			transforms: [
-				removeStyles,
-				format,
-				concatFirstStringElements,
-				toString
+				s,
+				c,
+				l,
+				u
 			],
 			writeOptions: {
 				flag: "a",
 				mode: 438,
 				encoding: "utf8"
 			},
-			archiveLogFn(file) {
-				const oldPath = file.toString();
-				const inf = path.parse(oldPath);
+			archiveLogFn(e) {
+				let t = e.toString(), r = i.parse(t);
 				try {
-					fs.renameSync(oldPath, path.join(inf.dir, `${inf.name}.old${inf.ext}`));
-				} catch (e) {
-					logConsole("Could not rotate log", e);
-					const quarterOfMaxSize = Math.round(transport.maxSize / 4);
-					file.crop(Math.min(quarterOfMaxSize, 256 * 1024));
+					n.renameSync(t, i.join(r.dir, `${r.name}.old${r.ext}`));
+				} catch (t) {
+					g("Could not rotate log", t);
+					let n = Math.round(m.maxSize / 4);
+					e.crop(Math.min(n, 256 * 1024));
 				}
 			},
-			resolvePathFn(vars) {
-				return path.join(vars.libraryDefaultDir, vars.fileName);
+			resolvePathFn(e) {
+				return i.join(e.libraryDefaultDir, e.fileName);
 			},
-			setAppName(name) {
-				logger.dependencies.externalApi.setAppName(name);
+			setAppName(t) {
+				e.dependencies.externalApi.setAppName(t);
 			}
 		});
-		function transport(message) {
-			const file = getFile(message);
-			if (transport.maxSize > 0 && file.size > transport.maxSize) {
-				transport.archiveLogFn(file);
-				file.reset();
-			}
-			const content = transform({
-				logger,
-				message,
-				transport
+		function m(t) {
+			let n = _(t);
+			m.maxSize > 0 && n.size > m.maxSize && (m.archiveLogFn(n), n.reset());
+			let r = o({
+				logger: e,
+				message: t,
+				transport: m
 			});
-			file.writeLine(content);
+			n.writeLine(r);
 		}
-		function initializeOnFirstAccess() {
-			if (pathVariables) return;
-			pathVariables = Object.create(Object.prototype, {
-				...Object.getOwnPropertyDescriptors(externalApi.getPathVariables()),
+		function h() {
+			f || (f = Object.create(Object.prototype, {
+				...Object.getOwnPropertyDescriptors(a.getPathVariables()),
 				fileName: {
 					get() {
-						return transport.fileName;
+						return m.fileName;
 					},
-					enumerable: true
+					enumerable: !0
 				}
-			});
-			if (typeof transport.archiveLog === "function") {
-				transport.archiveLogFn = transport.archiveLog;
-				logConsole("archiveLog is deprecated. Use archiveLogFn instead");
-			}
-			if (typeof transport.resolvePath === "function") {
-				transport.resolvePathFn = transport.resolvePath;
-				logConsole("resolvePath is deprecated. Use resolvePathFn instead");
-			}
+			}), typeof m.archiveLog == "function" && (m.archiveLogFn = m.archiveLog, g("archiveLog is deprecated. Use archiveLogFn instead")), typeof m.resolvePath == "function" && (m.resolvePathFn = m.resolvePath, g("resolvePath is deprecated. Use resolvePathFn instead")));
 		}
-		function logConsole(message, error = null, level = "error") {
-			const data = [`electron-log.transports.file: ${message}`];
-			if (error) data.push(error);
-			logger.transports.console({
-				data,
+		function g(t, n = null, r = "error") {
+			let i = [`electron-log.transports.file: ${t}`];
+			n && i.push(n), e.transports.console({
+				data: i,
 				date: /* @__PURE__ */ new Date(),
-				level
+				level: r
 			});
 		}
-		function getFile(msg) {
-			initializeOnFirstAccess();
-			const filePath = transport.resolvePathFn(pathVariables, msg);
-			return registry.provide({
-				filePath,
-				writeAsync: !transport.sync,
-				writeOptions: transport.writeOptions
+		function _(e) {
+			h();
+			let n = m.resolvePathFn(f, e);
+			return t.provide({
+				filePath: n,
+				writeAsync: !m.sync,
+				writeOptions: m.writeOptions
 			});
 		}
-		function readAllLogs({ fileFilter = (f) => f.endsWith(".log") } = {}) {
-			initializeOnFirstAccess();
-			const logsPath = path.dirname(transport.resolvePathFn(pathVariables));
-			if (!fs.existsSync(logsPath)) return [];
-			return fs.readdirSync(logsPath).map((fileName) => path.join(logsPath, fileName)).filter(fileFilter).map((logPath) => {
+		function v({ fileFilter: e = (e) => e.endsWith(".log") } = {}) {
+			h();
+			let t = i.dirname(m.resolvePathFn(f));
+			return n.existsSync(t) ? n.readdirSync(t).map((e) => i.join(t, e)).filter(e).map((e) => {
 				try {
 					return {
-						path: logPath,
-						lines: fs.readFileSync(logPath, "utf8").split(os.EOL)
+						path: e,
+						lines: n.readFileSync(e, "utf8").split(r.EOL)
 					};
 				} catch {
 					return null;
 				}
-			}).filter(Boolean);
+			}).filter(Boolean) : [];
 		}
 	}
-	function getDefaultFileName(processType = process.type) {
-		switch (processType) {
+	function p(e = process.type) {
+		switch (e) {
 			case "renderer": return "renderer.log";
 			case "worker": return "worker.log";
 			default: return "main.log";
 		}
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/ipc.js
-var require_ipc = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var { maxDepth, toJSON } = require_object();
-	var { transform } = require_transform();
-	module.exports = ipcTransportFactory;
-	/**
-	* @param logger
-	* @param {ElectronExternalApi} externalApi
-	* @returns {transport|null}
-	*/
-	function ipcTransportFactory(logger, { externalApi }) {
-		Object.assign(transport, {
+})), P = /* @__PURE__ */ C(((e, t) => {
+	var { maxDepth: n, toJSON: r } = D(), { transform: i } = T();
+	t.exports = a;
+	function a(e, { externalApi: t }) {
+		return Object.assign(a, {
 			depth: 3,
 			eventId: "__ELECTRON_LOG_IPC__",
-			level: logger.isDev ? "silly" : false,
-			transforms: [toJSON, maxDepth]
-		});
-		return externalApi?.isElectron() ? transport : void 0;
-		function transport(message) {
-			if (message?.variables?.processType === "renderer") return;
-			externalApi?.sendIpc(transport.eventId, {
-				...message,
-				data: transform({
-					logger,
-					message,
-					transport
+			level: e.isDev ? "silly" : !1,
+			transforms: [r, n]
+		}), t?.isElectron() ? a : void 0;
+		function a(n) {
+			n?.variables?.processType !== "renderer" && t?.sendIpc(a.eventId, {
+				...n,
+				data: i({
+					logger: e,
+					message: n,
+					transport: a
 				})
 			});
 		}
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/transports/remote.js
-var require_remote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var http = __require("http");
-	var https = __require("https");
-	var { transform } = require_transform();
-	var { removeStyles } = require_style();
-	var { toJSON, maxDepth } = require_object();
-	module.exports = remoteTransportFactory;
-	function remoteTransportFactory(logger) {
-		return Object.assign(transport, {
+})), F = /* @__PURE__ */ C(((e, t) => {
+	var n = w("http"), r = w("https"), { transform: i } = T(), { removeStyles: a } = O(), { toJSON: o, maxDepth: s } = D();
+	t.exports = c;
+	function c(e) {
+		return Object.assign(t, {
 			client: { name: "electron-application" },
 			depth: 6,
-			level: false,
+			level: !1,
 			requestOptions: {},
 			transforms: [
-				removeStyles,
-				toJSON,
-				maxDepth
+				a,
+				o,
+				s
 			],
-			makeBodyFn({ message }) {
+			makeBodyFn({ message: e }) {
 				return JSON.stringify({
-					client: transport.client,
-					data: message.data,
-					date: message.date.getTime(),
-					level: message.level,
-					scope: message.scope,
-					variables: message.variables
+					client: t.client,
+					data: e.data,
+					date: e.date.getTime(),
+					level: e.level,
+					scope: e.scope,
+					variables: e.variables
 				});
 			},
-			processErrorFn({ error }) {
-				logger.processMessage({
-					data: [`electron-log: can't POST ${transport.url}`, error],
+			processErrorFn({ error: n }) {
+				e.processMessage({
+					data: [`electron-log: can't POST ${t.url}`, n],
 					level: "warn"
 				}, { transports: ["console", "file"] });
 			},
-			sendRequestFn({ serverUrl, requestOptions, body }) {
-				const request = (serverUrl.startsWith("https:") ? https : http).request(serverUrl, {
+			sendRequestFn({ serverUrl: e, requestOptions: t, body: i }) {
+				let a = (e.startsWith("https:") ? r : n).request(e, {
 					method: "POST",
-					...requestOptions,
+					...t,
 					headers: {
 						"Content-Type": "application/json",
-						"Content-Length": body.length,
-						...requestOptions.headers
+						"Content-Length": i.length,
+						...t.headers
 					}
 				});
-				request.write(body);
-				request.end();
-				return request;
+				return a.write(i), a.end(), a;
 			}
 		});
-		function transport(message) {
-			if (!transport.url) return;
-			const body = transport.makeBodyFn({
-				logger,
+		function t(n) {
+			if (!t.url) return;
+			let r = t.makeBodyFn({
+				logger: e,
 				message: {
-					...message,
-					data: transform({
-						logger,
-						message,
-						transport
+					...n,
+					data: i({
+						logger: e,
+						message: n,
+						transport: t
 					})
 				},
-				transport
+				transport: t
+			}), a = t.sendRequestFn({
+				serverUrl: t.url,
+				requestOptions: t.requestOptions,
+				body: Buffer.from(r, "utf8")
 			});
-			const request = transport.sendRequestFn({
-				serverUrl: transport.url,
-				requestOptions: transport.requestOptions,
-				body: Buffer.from(body, "utf8")
-			});
-			request.on("error", (error) => transport.processErrorFn({
-				error,
-				logger,
-				message,
-				request,
-				transport
+			a.on("error", (r) => t.processErrorFn({
+				error: r,
+				logger: e,
+				message: n,
+				request: a,
+				transport: t
 			}));
 		}
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/node/createDefaultLogger.js
-var require_createDefaultLogger = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Logger = require_Logger();
-	var ErrorHandler = require_ErrorHandler();
-	var EventLogger = require_EventLogger();
-	var transportConsole = require_console();
-	var transportFile = require_file();
-	var transportIpc = require_ipc();
-	var transportRemote = require_remote();
-	module.exports = createDefaultLogger;
-	function createDefaultLogger({ dependencies, initializeFn }) {
-		const defaultLogger = new Logger({
-			dependencies,
-			errorHandler: new ErrorHandler(),
-			eventLogger: new EventLogger(),
-			initializeFn,
-			isDev: dependencies.externalApi?.isDev(),
+})), I = /* @__PURE__ */ C(((e, t) => {
+	var n = he(), r = ge(), i = _e(), a = k(), o = N(), s = P(), c = F();
+	t.exports = l;
+	function l({ dependencies: e, initializeFn: t }) {
+		let l = new n({
+			dependencies: e,
+			errorHandler: new r(),
+			eventLogger: new i(),
+			initializeFn: t,
+			isDev: e.externalApi?.isDev(),
 			logId: "default",
 			transportFactories: {
-				console: transportConsole,
-				file: transportFile,
-				ipc: transportIpc,
-				remote: transportRemote
+				console: a,
+				file: o,
+				ipc: s,
+				remote: c
 			},
 			variables: { processType: "main" }
 		});
-		defaultLogger.default = defaultLogger;
-		defaultLogger.Logger = Logger;
-		defaultLogger.processInternalErrorFn = (e) => {
-			defaultLogger.transports.console.writeFn({ message: {
+		return l.default = l, l.Logger = n, l.processInternalErrorFn = (e) => {
+			l.transports.console.writeFn({ message: {
 				data: ["Unhandled electron-log error", e],
 				level: "error"
 			} });
-		};
-		return defaultLogger;
+		}, l;
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/src/main/index.js
-var require_main$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var electron = __require("electron");
-	var ElectronExternalApi = require_ElectronExternalApi();
-	var { initialize } = require_initialize();
-	var createDefaultLogger = require_createDefaultLogger();
-	var externalApi = new ElectronExternalApi({ electron });
-	var defaultLogger = createDefaultLogger({
-		dependencies: { externalApi },
-		initializeFn: initialize
+})), ve = /* @__PURE__ */ C(((e, t) => {
+	var n = w("electron"), r = ue(), { initialize: i } = fe(), a = I(), o = new r({ electron: n }), s = a({
+		dependencies: { externalApi: o },
+		initializeFn: i
 	});
-	module.exports = defaultLogger;
-	externalApi.onIpc("__ELECTRON_LOG__", (_, message) => {
-		if (message.scope) defaultLogger.Logger.getInstance(message).scope(message.scope);
-		const date = new Date(message.date);
-		processMessage({
-			...message,
-			date: date.getTime() ? date : /* @__PURE__ */ new Date()
+	t.exports = s, o.onIpc("__ELECTRON_LOG__", (e, t) => {
+		t.scope && s.Logger.getInstance(t).scope(t.scope);
+		let n = new Date(t.date);
+		c({
+			...t,
+			date: n.getTime() ? n : /* @__PURE__ */ new Date()
 		});
-	});
-	externalApi.onIpcInvoke("__ELECTRON_LOG__", (_, { cmd = "", logId }) => {
-		switch (cmd) {
+	}), o.onIpcInvoke("__ELECTRON_LOG__", (e, { cmd: t = "", logId: n }) => {
+		switch (t) {
 			case "getOptions": return {
-				levels: defaultLogger.Logger.getInstance({ logId }).levels,
-				logId
+				levels: s.Logger.getInstance({ logId: n }).levels,
+				logId: n
 			};
-			default:
-				processMessage({
-					data: [`Unknown cmd '${cmd}'`],
-					level: "error"
-				});
-				return {};
+			default: return c({
+				data: [`Unknown cmd '${t}'`],
+				level: "error"
+			}), {};
 		}
 	});
-	function processMessage(message) {
-		defaultLogger.Logger.getInstance(message)?.processMessage(message);
+	function c(e) {
+		s.Logger.getInstance(e)?.processMessage(e);
 	}
-}));
-//#endregion
-//#region node_modules/electron-log/main.js
-var require_main = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_main$1();
+})), ye = /* @__PURE__ */ C(((e, t) => {
+	t.exports = ve();
 }));
 //#endregion
 //#region node_modules/steno/lib/index.js
-function getTempFilename(file) {
-	const f = file instanceof URL ? fileURLToPath$1(file) : file.toString();
-	return join$1(dirname$1(f), `.${basename(f)}.tmp`);
+function be(e) {
+	let t = e instanceof URL ? _(e) : e.toString();
+	return g(h(t), `.${m(t)}.tmp`);
 }
-async function retryAsyncOperation(fn, maxRetries, delayMs) {
-	for (let i = 0; i < maxRetries; i++) try {
-		return await fn();
-	} catch (error) {
-		if (i < maxRetries - 1) await new Promise((resolve) => setTimeout(resolve, delayMs));
-		else throw error;
+async function xe(e, t, n) {
+	for (let r = 0; r < t; r++) try {
+		return await e();
+	} catch (e) {
+		if (r < t - 1) await new Promise((e) => setTimeout(e, n));
+		else throw e;
 	}
 }
-var Writer = class {
-	#filename;
-	#tempFilename;
-	#locked = false;
-	#prev = null;
-	#next = null;
-	#nextPromise = null;
-	#nextData = null;
-	#add(data) {
-		this.#nextData = data;
-		this.#nextPromise ||= new Promise((resolve, reject) => {
-			this.#next = [resolve, reject];
-		});
-		return new Promise((resolve, reject) => {
-			this.#nextPromise?.then(resolve).catch(reject);
+var Se = class {
+	#e;
+	#t;
+	#n = !1;
+	#r = null;
+	#i = null;
+	#a = null;
+	#o = null;
+	#s(e) {
+		return this.#o = e, this.#a ||= new Promise((e, t) => {
+			this.#i = [e, t];
+		}), new Promise((e, t) => {
+			this.#a?.then(e).catch(t);
 		});
 	}
-	async #write(data) {
-		this.#locked = true;
+	async #c(e) {
+		this.#n = !0;
 		try {
-			await writeFile(this.#tempFilename, data, "utf-8");
-			await retryAsyncOperation(async () => {
-				await rename(this.#tempFilename, this.#filename);
-			}, 10, 100);
-			this.#prev?.[0]();
-		} catch (err) {
-			if (err instanceof Error) this.#prev?.[1](err);
-			throw err;
+			await p(this.#t, e, "utf-8"), await xe(async () => {
+				await f(this.#t, this.#e);
+			}, 10, 100), this.#r?.[0]();
+		} catch (e) {
+			throw e instanceof Error && this.#r?.[1](e), e;
 		} finally {
-			this.#locked = false;
-			this.#prev = this.#next;
-			this.#next = this.#nextPromise = null;
-			if (this.#nextData !== null) {
-				const nextData = this.#nextData;
-				this.#nextData = null;
-				await this.write(nextData);
+			if (this.#n = !1, this.#r = this.#i, this.#i = this.#a = null, this.#o !== null) {
+				let e = this.#o;
+				this.#o = null, await this.write(e);
 			}
 		}
 	}
-	constructor(filename) {
-		this.#filename = filename;
-		this.#tempFilename = getTempFilename(filename);
+	constructor(e) {
+		this.#e = e, this.#t = be(e);
 	}
-	async write(data) {
-		return this.#locked ? this.#add(data) : this.#write(data);
+	async write(e) {
+		return this.#n ? this.#s(e) : this.#c(e);
 	}
-};
-//#endregion
-//#region node_modules/lowdb/lib/adapters/node/TextFile.js
-var TextFile = class {
-	#filename;
-	#writer;
-	constructor(filename) {
-		this.#filename = filename;
-		this.#writer = new Writer(filename);
+}, Ce = class {
+	#e;
+	#t;
+	constructor(e) {
+		this.#e = e, this.#t = new Se(e);
 	}
 	async read() {
-		let data;
+		let e;
 		try {
-			data = await readFile(this.#filename, "utf-8");
+			e = await d(this.#e, "utf-8");
 		} catch (e) {
 			if (e.code === "ENOENT") return null;
 			throw e;
 		}
-		return data;
+		return e;
 	}
-	write(str) {
-		return this.#writer.write(str);
+	write(e) {
+		return this.#t.write(e);
 	}
-};
-//#endregion
-//#region node_modules/lowdb/lib/adapters/node/DataFile.js
-var DataFile = class {
-	#adapter;
-	#parse;
-	#stringify;
-	constructor(filename, { parse, stringify }) {
-		this.#adapter = new TextFile(filename);
-		this.#parse = parse;
-		this.#stringify = stringify;
+}, we = class {
+	#e;
+	#t;
+	#n;
+	constructor(e, { parse: t, stringify: n }) {
+		this.#e = new Ce(e), this.#t = t, this.#n = n;
 	}
 	async read() {
-		const data = await this.#adapter.read();
-		if (data === null) return null;
-		else return this.#parse(data);
+		let e = await this.#e.read();
+		return e === null ? null : this.#t(e);
 	}
-	write(obj) {
-		return this.#adapter.write(this.#stringify(obj));
+	write(e) {
+		return this.#e.write(this.#n(e));
 	}
-};
-//#endregion
-//#region node_modules/lowdb/lib/adapters/node/JSONFile.js
-var JSONFile = class extends DataFile {
-	constructor(filename) {
-		super(filename, {
+}, Te = class extends we {
+	constructor(e) {
+		super(e, {
 			parse: JSON.parse,
-			stringify: (data) => JSON.stringify(data, null, 2)
+			stringify: (e) => JSON.stringify(e, null, 2)
 		});
 	}
-};
-//#endregion
-//#region node_modules/lowdb/lib/adapters/Memory.js
-var Memory = class {
-	#data = null;
+}, Ee = class {
+	#e = null;
 	read() {
-		return Promise.resolve(this.#data);
+		return Promise.resolve(this.#e);
 	}
-	write(obj) {
-		this.#data = obj;
-		return Promise.resolve();
+	write(e) {
+		return this.#e = e, Promise.resolve();
 	}
 };
 //#endregion
 //#region node_modules/lowdb/lib/core/Low.js
-function checkArgs(adapter, defaultData) {
-	if (adapter === void 0) throw new Error("lowdb: missing adapter");
-	if (defaultData === void 0) throw new Error("lowdb: missing default data");
+function De(e, t) {
+	if (e === void 0) throw Error("lowdb: missing adapter");
+	if (t === void 0) throw Error("lowdb: missing default data");
 }
-var Low = class {
+var Oe = class {
 	adapter;
 	data;
-	constructor(adapter, defaultData) {
-		checkArgs(adapter, defaultData);
-		this.adapter = adapter;
-		this.data = defaultData;
+	constructor(e, t) {
+		De(e, t), this.adapter = e, this.data = t;
 	}
 	async read() {
-		const data = await this.adapter.read();
-		if (data) this.data = data;
+		let e = await this.adapter.read();
+		e && (this.data = e);
 	}
 	async write() {
-		if (this.data) await this.adapter.write(this.data);
+		this.data && await this.adapter.write(this.data);
 	}
-	async update(fn) {
-		fn(this.data);
-		await this.write();
+	async update(e) {
+		e(this.data), await this.write();
 	}
 };
 //#endregion
 //#region node_modules/lowdb/lib/presets/node.js
-async function JSONFilePreset(filename, defaultData) {
-	const db = new Low(process.env.NODE_ENV === "test" ? new Memory() : new JSONFile(filename), defaultData);
-	await db.read();
-	return db;
+async function ke(e, t) {
+	let n = new Oe(process.env.NODE_ENV === "test" ? new Ee() : new Te(e), t);
+	return await n.read(), n;
 }
 //#endregion
 //#region src/storage/database.ts
-var import_main = /* @__PURE__ */ __toESM(require_main(), 1);
-var userDataPath = null;
-function setUserDataPath(path) {
-	userDataPath = path;
+var L = /* @__PURE__ */ se(ye(), 1), R = null;
+function Ae(e) {
+	R = e;
 }
-async function loadDb(filename, defaults) {
-	if (!userDataPath) throw new Error("User data path not set. Call setUserDataPath() first.");
-	return JSONFilePreset(userDataPath + "/" + filename, defaults);
+async function z(e, t) {
+	if (!R) throw Error("User data path not set. Call setUserDataPath() first.");
+	return ke(R + "/" + e, t);
 }
 //#endregion
 //#region src/storage/seed.ts
-async function seedWorkspace(name = "My Workspace") {
-	const db = await loadDb("db.workspaces.json", []);
-	const now = Date.now();
-	const existing = db.data.find((w) => w.name === name);
-	if (existing) return existing;
-	const workspace = {
+async function je(e = "My Workspace") {
+	let t = await z("db.workspaces.json", []), n = Date.now(), r = t.data.find((t) => t.name === e);
+	if (r) return r;
+	let i = {
 		id: crypto.randomUUID(),
-		name,
-		createdAt: now,
-		updatedAt: now
+		name: e,
+		createdAt: n,
+		updatedAt: n
 	};
-	db.data.push(workspace);
-	await db.write();
-	return workspace;
+	return t.data.push(i), await t.write(), i;
 }
 //#endregion
 //#region src/storage/repositories/AgentRepository.ts
-var _db$1 = null;
-async function getDb$1() {
-	if (!_db$1) _db$1 = await loadDb("db.agents.json", []);
-	return _db$1;
+var B = null;
+async function V() {
+	return B ||= await z("db.agents.json", []), B;
 }
-var AgentRepository = {
-	async create(data) {
-		const db = await getDb$1();
-		const now = Date.now();
-		const agent = {
+var H = {
+	async create(e) {
+		let t = await V(), n = Date.now(), r = {
 			id: crypto.randomUUID(),
-			name: data.name,
-			role: data.role,
-			description: data.description,
-			localPath: data.localPath,
-			manifestPiSource: data.manifestPiSource,
-			avatar: data.avatar,
-			status: data.status,
-			lastError: data.lastError,
+			name: e.name,
+			role: e.role,
+			description: e.description,
+			localPath: e.localPath,
+			manifestPiSource: e.manifestPiSource,
+			avatar: e.avatar,
+			status: e.status,
+			lastError: e.lastError,
 			projectIds: [],
 			taskIds: [],
 			sessionIds: [],
-			createdAt: now,
-			updatedAt: now
+			createdAt: n,
+			updatedAt: n
 		};
-		db.data.push(agent);
-		await db.write();
-		return agent;
+		return t.data.push(r), await t.write(), r;
 	},
-	async getById(id) {
-		return (await getDb$1()).data.find((a) => a.id === id);
+	async getById(e) {
+		return (await V()).data.find((t) => t.id === e);
 	},
 	async getAll() {
-		return (await getDb$1()).data;
+		return (await V()).data;
 	},
-	async getByProject(projectId) {
-		return (await getDb$1()).data.filter((a) => a.projectIds.includes(projectId));
+	async getByProject(e) {
+		return (await V()).data.filter((t) => t.projectIds.includes(e));
 	},
-	async update(id, data) {
-		const db = await getDb$1();
-		const idx = db.data.findIndex((a) => a.id === id);
-		if (idx === -1) return void 0;
-		const updated = {
-			...db.data[idx],
-			...data,
+	async update(e, t) {
+		let n = await V(), r = n.data.findIndex((t) => t.id === e);
+		if (r === -1) return;
+		let i = {
+			...n.data[r],
+			...t,
 			updatedAt: Date.now()
 		};
-		db.data[idx] = updated;
-		await db.write();
-		return updated;
+		return n.data[r] = i, await n.write(), i;
 	},
-	async delete(id) {
-		const db = await getDb$1();
-		const len = db.data.length;
-		db.data = db.data.filter((a) => a.id !== id);
-		if (db.data.length === len) return false;
-		const projectDb = await loadDb("db.projects.json", []);
-		projectDb.data.forEach((p) => {
-			p.agentIds = p.agentIds.filter((aid) => aid !== id);
-		});
-		await projectDb.write();
-		const taskDb = await loadDb("db.tasks.json", []);
-		taskDb.data.forEach((t) => {
-			if (t.assignedAgentId === id) t.assignedAgentId = void 0;
-		});
-		await taskDb.write();
-		const sessionDb = await loadDb("db.sessions.json", []);
-		sessionDb.data = sessionDb.data.filter((s) => s.agentId !== id);
-		await sessionDb.write();
-		await db.write();
-		return true;
+	async delete(e) {
+		let t = await V(), n = t.data.length;
+		if (t.data = t.data.filter((t) => t.id !== e), t.data.length === n) return !1;
+		let r = await z("db.projects.json", []);
+		r.data.forEach((t) => {
+			t.agentIds = t.agentIds.filter((t) => t !== e);
+		}), await r.write();
+		let i = await z("db.tasks.json", []);
+		i.data.forEach((t) => {
+			t.assignedAgentId === e && (t.assignedAgentId = void 0);
+		}), await i.write();
+		let a = await z("db.sessions.json", []);
+		return a.data = a.data.filter((t) => t.agentId !== e), await a.write(), await t.write(), !0;
 	},
-	async getProjects(agentId) {
-		const agent = await this.getById(agentId);
-		if (!agent) return [];
-		return (await loadDb("db.projects.json", [])).data.filter((p) => agent.projectIds.includes(p.id));
+	async getProjects(e) {
+		let t = await this.getById(e);
+		return t ? (await z("db.projects.json", [])).data.filter((e) => t.projectIds.includes(e.id)) : [];
 	},
-	async getTasks(agentId) {
-		const agent = await this.getById(agentId);
-		if (!agent) return [];
-		return (await loadDb("db.tasks.json", [])).data.filter((t) => agent.taskIds.includes(t.id));
+	async getTasks(e) {
+		let t = await this.getById(e);
+		return t ? (await z("db.tasks.json", [])).data.filter((e) => t.taskIds.includes(e.id)) : [];
 	},
-	async getSessions(agentId) {
-		if (!await this.getById(agentId)) return [];
-		return (await loadDb("db.sessions.json", [])).data.filter((s) => s.agentId === agentId);
+	async getSessions(e) {
+		return await this.getById(e) ? (await z("db.sessions.json", [])).data.filter((t) => t.agentId === e) : [];
 	},
-	async assignToProject(agentId, projectId) {
-		const db = await getDb$1();
-		const projectDb = await loadDb("db.projects.json", []);
-		const agent = db.data.find((a) => a.id === agentId);
-		const project = projectDb.data.find((p) => p.id === projectId);
-		if (!agent || !project) return;
-		if (!agent.projectIds.includes(projectId)) {
-			agent.projectIds.push(projectId);
-			agent.updatedAt = Date.now();
-		}
-		if (!project.agentIds.includes(agentId)) {
-			project.agentIds.push(agentId);
-			project.updatedAt = Date.now();
-		}
-		await db.write();
-		await projectDb.write();
+	async assignToProject(e, t) {
+		let n = await V(), r = await z("db.projects.json", []), i = n.data.find((t) => t.id === e), a = r.data.find((e) => e.id === t);
+		!i || !a || (i.projectIds.includes(t) || (i.projectIds.push(t), i.updatedAt = Date.now()), a.agentIds.includes(e) || (a.agentIds.push(e), a.updatedAt = Date.now()), await n.write(), await r.write());
 	},
-	async removeFromProject(agentId, projectId) {
-		const db = await getDb$1();
-		const projectDb = await loadDb("db.projects.json", []);
-		const agent = db.data.find((a) => a.id === agentId);
-		const project = projectDb.data.find((p) => p.id === projectId);
-		if (agent) {
-			agent.projectIds = agent.projectIds.filter((id) => id !== projectId);
-			agent.updatedAt = Date.now();
-		}
-		if (project) {
-			project.agentIds = project.agentIds.filter((id) => id !== agentId);
-			project.updatedAt = Date.now();
-		}
-		await db.write();
-		await projectDb.write();
+	async removeFromProject(e, t) {
+		let n = await V(), r = await z("db.projects.json", []), i = n.data.find((t) => t.id === e), a = r.data.find((e) => e.id === t);
+		i && (i.projectIds = i.projectIds.filter((e) => e !== t), i.updatedAt = Date.now()), a && (a.agentIds = a.agentIds.filter((t) => t !== e), a.updatedAt = Date.now()), await n.write(), await r.write();
 	},
-	async addTask(agentId, taskId) {
-		const db = await getDb$1();
-		const agent = db.data.find((a) => a.id === agentId);
-		if (agent && !agent.taskIds.includes(taskId)) {
-			agent.taskIds.push(taskId);
-			agent.updatedAt = Date.now();
-			await db.write();
-		}
+	async addTask(e, t) {
+		let n = await V(), r = n.data.find((t) => t.id === e);
+		r && !r.taskIds.includes(t) && (r.taskIds.push(t), r.updatedAt = Date.now(), await n.write());
 	},
-	async removeTask(agentId, taskId) {
-		const db = await getDb$1();
-		const agent = db.data.find((a) => a.id === agentId);
-		if (agent) {
-			agent.taskIds = agent.taskIds.filter((id) => id !== taskId);
-			agent.updatedAt = Date.now();
-			await db.write();
-		}
+	async removeTask(e, t) {
+		let n = await V(), r = n.data.find((t) => t.id === e);
+		r && (r.taskIds = r.taskIds.filter((e) => e !== t), r.updatedAt = Date.now(), await n.write());
 	},
-	async addSession(agentId, sessionId) {
-		const db = await getDb$1();
-		const agent = db.data.find((a) => a.id === agentId);
-		if (agent && !agent.sessionIds.includes(sessionId)) {
-			agent.sessionIds.push(sessionId);
-			agent.updatedAt = Date.now();
-			await db.write();
-		}
+	async addSession(e, t) {
+		let n = await V(), r = n.data.find((t) => t.id === e);
+		r && !r.sessionIds.includes(t) && (r.sessionIds.push(t), r.updatedAt = Date.now(), await n.write());
 	},
-	async removeSession(agentId, sessionId) {
-		const db = await getDb$1();
-		const agent = db.data.find((a) => a.id === agentId);
-		if (agent) {
-			agent.sessionIds = agent.sessionIds.filter((id) => id !== sessionId);
-			agent.updatedAt = Date.now();
-			await db.write();
-		}
+	async removeSession(e, t) {
+		let n = await V(), r = n.data.find((t) => t.id === e);
+		r && (r.sessionIds = r.sessionIds.filter((e) => e !== t), r.updatedAt = Date.now(), await n.write());
 	}
 };
 //#endregion
 //#region electron/ipc/agents.ts
-function registerAgentIpc() {
-	ipcMain.handle("agents:list", () => AgentRepository.getAll());
-	ipcMain.handle("agents:get", async (_e, id) => {
-		return await AgentRepository.getById(id) ?? null;
-	});
-	ipcMain.handle("agents:create", async (_e, data) => {
-		if (!data.name?.trim()) throw new Error("Agent name is required");
-		if (!data.folderName?.trim()) throw new Error("Agent folder name is required");
-		if (!data.parentDir?.trim()) throw new Error("Parent directory is required");
-		if (!data.manifestPiSource?.trim()) throw new Error("Manifest Pi source is required");
-		const folderName = data.folderName.trim();
-		const parentDir = data.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? "");
-		const manifestPiSource = data.manifestPiSource.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? "");
-		if (!/^[a-z0-9][a-z0-9-]*$/.test(folderName)) throw new Error("Folder name must be lowercase letters, digits, and hyphens (start with letter/digit)");
-		import_main.default.info(`[agents:create] ensuring parent dir ${parentDir}`);
-		await mkdir(parentDir, { recursive: true });
-		if (!existsSync(join$1(manifestPiSource, "agent.sh"))) throw new Error(`Manifest Pi source invalid (missing agent.sh): ${manifestPiSource}`);
-		const agentDir = join$1(parentDir, folderName);
-		if (existsSync(agentDir)) throw new Error(`Agent folder already exists: ${agentDir}`);
-		import_main.default.info(`[agents:create] creating agent dir ${agentDir}`);
-		await mkdir(agentDir, { recursive: true });
-		await cp(join$1(manifestPiSource, "agent.sh"), join$1(agentDir, "agent.sh"));
-		await chmod(join$1(agentDir, "agent.sh"), 493);
-		await writeFile(join$1(agentDir, "agent.json"), JSON.stringify({
+function Me() {
+	r.handle(X.AGENTS.LIST, () => H.getAll()), r.handle(X.AGENTS.GET, async (e, t) => await H.getById(t) ?? null), r.handle(X.AGENTS.CREATE, async (e, t) => {
+		if (!t.name?.trim()) throw Error("Agent name is required");
+		if (!t.folderName?.trim()) throw Error("Agent folder name is required");
+		if (!t.parentDir?.trim()) throw Error("Parent directory is required");
+		if (!t.manifestPiSource?.trim()) throw Error("Manifest Pi source is required");
+		let n = t.folderName.trim(), r = t.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? ""), i = t.manifestPiSource.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? "");
+		if (!/^[a-z0-9][a-z0-9-]*$/.test(n)) throw Error("Folder name must be lowercase letters, digits, and hyphens (start with letter/digit)");
+		if (L.default.info(`[agents:create] ensuring parent dir ${r}`), await u(r, { recursive: !0 }), !s(g(i, "agent.sh"))) throw Error(`Manifest Pi source invalid (missing agent.sh): ${i}`);
+		let a = g(r, n);
+		if (s(a)) throw Error(`Agent folder already exists: ${a}`);
+		return L.default.info(`[agents:create] creating agent dir ${a}`), await u(a, { recursive: !0 }), await l(g(i, "agent.sh"), g(a, "agent.sh")), await c(g(a, "agent.sh"), 493), await p(g(a, "agent.json"), JSON.stringify({
 			version: 1,
-			name: data.name.trim(),
-			description: data.description?.trim() ?? "",
+			name: t.name.trim(),
+			description: t.description?.trim() ?? "",
 			workspace: "./workspace",
 			model: {
 				provider: "minimax",
@@ -2270,500 +1675,349 @@ function registerAgentIpc() {
 			extensions: [],
 			prompts: [],
 			permissions: {
-				filesystem: true,
-				terminal: true,
-				network: true
+				filesystem: !0,
+				terminal: !0,
+				network: !0
 			},
 			memory: {},
 			context: {},
-			logging: { enabled: true }
-		}, null, 2) + "\n", "utf8");
-		await writeFile(join$1(agentDir, ".agent-initialized"), "", "utf8");
-		return await AgentRepository.create({
-			name: data.name.trim(),
-			role: data.role?.trim() || void 0,
-			description: data.description?.trim() || void 0,
-			localPath: agentDir,
-			manifestPiSource,
+			logging: { enabled: !0 }
+		}, null, 2) + "\n", "utf8"), await p(g(a, ".agent-initialized"), "", "utf8"), await H.create({
+			name: t.name.trim(),
+			role: t.role?.trim() || void 0,
+			description: t.description?.trim() || void 0,
+			localPath: a,
+			manifestPiSource: i,
 			status: "initializing"
 		});
-	});
-	ipcMain.handle("agents:updateStatus", async (_e, id, status, lastError) => {
-		return AgentRepository.update(id, {
-			status,
-			lastError
-		});
-	});
-	ipcMain.handle("agents:delete", async (_e, id) => {
-		return AgentRepository.delete(id);
-	});
+	}), r.handle(X.AGENTS.UPDATE_STATUS, async (e, t, n, r) => H.update(t, {
+		status: n,
+		lastError: r
+	})), r.handle(X.AGENTS.DELETE, async (e, t) => H.delete(t));
 }
 //#endregion
 //#region src/storage/repositories/ProjectRepository.ts
-var _db = null;
-async function getDb() {
-	if (!_db) _db = await loadDb("db.projects.json", []);
-	return _db;
+var U = null;
+async function W() {
+	return U ||= await z("db.projects.json", []), U;
 }
-var ProjectRepository = {
-	async create(data) {
-		const db = await getDb();
-		const now = Date.now();
-		const project = {
+var G = {
+	async create(e) {
+		let t = await W(), n = Date.now(), r = {
 			id: crypto.randomUUID(),
-			name: data.name,
-			description: data.description,
-			localPath: data.localPath,
-			okfFolderPath: data.okfFolderPath,
-			color: data.color,
-			icon: data.icon,
-			archived: false,
+			name: e.name,
+			description: e.description,
+			localPath: e.localPath,
+			okfFolderPath: e.okfFolderPath,
+			color: e.color,
+			icon: e.icon,
+			archived: !1,
 			agentIds: [],
 			taskIds: [],
 			channelIds: [],
 			childProjectIds: [],
-			createdAt: now,
-			updatedAt: now
+			createdAt: n,
+			updatedAt: n
 		};
-		db.data.push(project);
-		await db.write();
-		return project;
+		return t.data.push(r), await t.write(), r;
 	},
-	async getById(id) {
-		return (await getDb()).data.find((p) => p.id === id);
+	async getById(e) {
+		return (await W()).data.find((t) => t.id === e);
 	},
 	async getAll() {
-		return (await getDb()).data;
+		return (await W()).data;
 	},
-	async getChildProjects(parentId) {
-		return (await getDb()).data.filter((p) => p.parentProjectId === parentId);
+	async getChildProjects(e) {
+		return (await W()).data.filter((t) => t.parentProjectId === e);
 	},
 	async getRootProjects() {
-		return (await getDb()).data.filter((p) => !p.parentProjectId);
+		return (await W()).data.filter((e) => !e.parentProjectId);
 	},
-	async update(id, data) {
-		const db = await getDb();
-		const idx = db.data.findIndex((p) => p.id === id);
-		if (idx === -1) return void 0;
-		const updated = {
-			...db.data[idx],
-			...data,
+	async update(e, t) {
+		let n = await W(), r = n.data.findIndex((t) => t.id === e);
+		if (r === -1) return;
+		let i = {
+			...n.data[r],
+			...t,
 			updatedAt: Date.now()
 		};
-		db.data[idx] = updated;
-		await db.write();
-		return updated;
+		return n.data[r] = i, await n.write(), i;
 	},
-	async delete(id) {
-		const db = await getDb();
-		const len = db.data.length;
-		db.data = db.data.filter((p) => p.id !== id);
-		if (db.data.length === len) return false;
-		const parentIdx = db.data.findIndex((p) => p.childProjectIds.includes(id));
-		if (parentIdx !== -1 && db.data[parentIdx]) db.data[parentIdx].childProjectIds = db.data[parentIdx].childProjectIds.filter((cid) => cid !== id);
-		await db.write();
-		const agentDb = await loadDb("db.agents.json", []);
-		agentDb.data.forEach((a) => {
-			a.projectIds = a.projectIds.filter((pid) => pid !== id);
-		});
-		await agentDb.write();
-		const channelDb = await loadDb("db.channels.json", []);
-		channelDb.data = channelDb.data.filter((c) => c.projectId !== id);
-		await channelDb.write();
-		const taskDb = await loadDb("db.tasks.json", []);
-		taskDb.data = taskDb.data.filter((t) => t.projectId !== id);
-		await taskDb.write();
-		return true;
+	async delete(e) {
+		let t = await W(), n = t.data.length;
+		if (t.data = t.data.filter((t) => t.id !== e), t.data.length === n) return !1;
+		let r = t.data.findIndex((t) => t.childProjectIds.includes(e));
+		r !== -1 && t.data[r] && (t.data[r].childProjectIds = t.data[r].childProjectIds.filter((t) => t !== e)), await t.write();
+		let i = await z("db.agents.json", []);
+		i.data.forEach((t) => {
+			t.projectIds = t.projectIds.filter((t) => t !== e);
+		}), await i.write();
+		let a = await z("db.channels.json", []);
+		a.data = a.data.filter((t) => t.projectId !== e), await a.write();
+		let o = await z("db.tasks.json", []);
+		return o.data = o.data.filter((t) => t.projectId !== e), await o.write(), !0;
 	},
-	async getAgents(projectId) {
-		const project = await this.getById(projectId);
-		if (!project) return [];
-		return (await loadDb("db.agents.json", [])).data.filter((a) => project.agentIds.includes(a.id));
+	async getAgents(e) {
+		let t = await this.getById(e);
+		return t ? (await z("db.agents.json", [])).data.filter((e) => t.agentIds.includes(e.id)) : [];
 	},
-	async getTasks(projectId) {
-		const project = await this.getById(projectId);
-		if (!project) return [];
-		return (await loadDb("db.tasks.json", [])).data.filter((t) => project.taskIds.includes(t.id));
+	async getTasks(e) {
+		let t = await this.getById(e);
+		return t ? (await z("db.tasks.json", [])).data.filter((e) => t.taskIds.includes(e.id)) : [];
 	},
-	async getChannels(projectId) {
-		const project = await this.getById(projectId);
-		if (!project) return [];
-		return (await loadDb("db.channels.json", [])).data.filter((c) => project.channelIds.includes(c.id));
+	async getChannels(e) {
+		let t = await this.getById(e);
+		return t ? (await z("db.channels.json", [])).data.filter((e) => t.channelIds.includes(e.id)) : [];
 	},
-	async addAgent(projectId, agentId) {
-		const db = await getDb();
-		const agentDb = await loadDb("db.agents.json", []);
-		const project = db.data.find((p) => p.id === projectId);
-		const agent = agentDb.data.find((a) => a.id === agentId);
-		if (!project || !agent) return;
-		if (!project.agentIds.includes(agentId)) {
-			project.agentIds.push(agentId);
-			project.updatedAt = Date.now();
-		}
-		if (!agent.projectIds.includes(projectId)) {
-			agent.projectIds.push(projectId);
-			agent.updatedAt = Date.now();
-		}
-		await db.write();
-		await agentDb.write();
+	async addAgent(e, t) {
+		let n = await W(), r = await z("db.agents.json", []), i = n.data.find((t) => t.id === e), a = r.data.find((e) => e.id === t);
+		!i || !a || (i.agentIds.includes(t) || (i.agentIds.push(t), i.updatedAt = Date.now()), a.projectIds.includes(e) || (a.projectIds.push(e), a.updatedAt = Date.now()), await n.write(), await r.write());
 	},
-	async removeAgent(projectId, agentId) {
-		const db = await getDb();
-		const agentDb = await loadDb("db.agents.json", []);
-		const project = db.data.find((p) => p.id === projectId);
-		const agent = agentDb.data.find((a) => a.id === agentId);
-		if (project) {
-			project.agentIds = project.agentIds.filter((id) => id !== agentId);
-			project.updatedAt = Date.now();
-		}
-		if (agent) {
-			agent.projectIds = agent.projectIds.filter((id) => id !== projectId);
-			agent.updatedAt = Date.now();
-		}
-		await db.write();
-		await agentDb.write();
+	async removeAgent(e, t) {
+		let n = await W(), r = await z("db.agents.json", []), i = n.data.find((t) => t.id === e), a = r.data.find((e) => e.id === t);
+		i && (i.agentIds = i.agentIds.filter((e) => e !== t), i.updatedAt = Date.now()), a && (a.projectIds = a.projectIds.filter((t) => t !== e), a.updatedAt = Date.now()), await n.write(), await r.write();
 	},
-	async addTask(projectId, taskId) {
-		const db = await getDb();
-		const project = db.data.find((p) => p.id === projectId);
-		if (project && !project.taskIds.includes(taskId)) {
-			project.taskIds.push(taskId);
-			project.updatedAt = Date.now();
-			await db.write();
-		}
+	async addTask(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e);
+		r && !r.taskIds.includes(t) && (r.taskIds.push(t), r.updatedAt = Date.now(), await n.write());
 	},
-	async removeTask(projectId, taskId) {
-		const db = await getDb();
-		const project = db.data.find((p) => p.id === projectId);
-		if (project) {
-			project.taskIds = project.taskIds.filter((id) => id !== taskId);
-			project.updatedAt = Date.now();
-			await db.write();
-		}
+	async removeTask(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e);
+		r && (r.taskIds = r.taskIds.filter((e) => e !== t), r.updatedAt = Date.now(), await n.write());
 	},
-	async addChannel(projectId, channelId) {
-		const db = await getDb();
-		const project = db.data.find((p) => p.id === projectId);
-		if (project && !project.channelIds.includes(channelId)) {
-			project.channelIds.push(channelId);
-			project.updatedAt = Date.now();
-			await db.write();
-		}
+	async addChannel(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e);
+		r && !r.channelIds.includes(t) && (r.channelIds.push(t), r.updatedAt = Date.now(), await n.write());
 	},
-	async removeChannel(projectId, channelId) {
-		const db = await getDb();
-		const project = db.data.find((p) => p.id === projectId);
-		if (project) {
-			project.channelIds = project.channelIds.filter((id) => id !== channelId);
-			project.updatedAt = Date.now();
-			await db.write();
-		}
+	async removeChannel(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e);
+		r && (r.channelIds = r.channelIds.filter((e) => e !== t), r.updatedAt = Date.now(), await n.write());
 	},
-	async addChildProject(parentId, childId) {
-		const db = await getDb();
-		const parent = db.data.find((p) => p.id === parentId);
-		const child = db.data.find((p) => p.id === childId);
-		if (!parent || !child) return;
-		if (!parent.childProjectIds.includes(childId)) {
-			parent.childProjectIds.push(childId);
-			parent.updatedAt = Date.now();
-		}
-		if (!child.parentProjectId) {
-			child.parentProjectId = parentId;
-			child.updatedAt = Date.now();
-		}
-		await db.write();
+	async addChildProject(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e), i = n.data.find((e) => e.id === t);
+		!r || !i || (r.childProjectIds.includes(t) || (r.childProjectIds.push(t), r.updatedAt = Date.now()), i.parentProjectId || (i.parentProjectId = e, i.updatedAt = Date.now()), await n.write());
 	},
-	async removeChildProject(parentId, childId) {
-		const db = await getDb();
-		const parent = db.data.find((p) => p.id === parentId);
-		const child = db.data.find((p) => p.id === childId);
-		if (parent) {
-			parent.childProjectIds = parent.childProjectIds.filter((id) => id !== childId);
-			parent.updatedAt = Date.now();
-		}
-		if (child) {
-			child.parentProjectId = void 0;
-			child.updatedAt = Date.now();
-		}
-		await db.write();
+	async removeChildProject(e, t) {
+		let n = await W(), r = n.data.find((t) => t.id === e), i = n.data.find((e) => e.id === t);
+		r && (r.childProjectIds = r.childProjectIds.filter((e) => e !== t), r.updatedAt = Date.now()), i && (i.parentProjectId = void 0, i.updatedAt = Date.now()), await n.write();
 	}
 };
 //#endregion
 //#region electron/ipc/projects.ts
-function registerProjectIpc() {
-	ipcMain.handle("projects:list", () => ProjectRepository.getAll());
-	ipcMain.handle("projects:get", async (_e, id) => {
-		return await ProjectRepository.getById(id) ?? null;
-	});
-	ipcMain.handle("projects:create", async (_e, data) => {
-		if (!data.name?.trim()) throw new Error("Project name is required");
-		return ProjectRepository.create({
-			name: data.name.trim(),
-			description: data.description?.trim() || void 0
+function Ne() {
+	r.handle(X.PROJECTS.LIST, () => G.getAll()), r.handle(X.PROJECTS.GET, async (e, t) => await G.getById(t) ?? null), r.handle(X.PROJECTS.CREATE, async (e, t) => {
+		if (!t.name?.trim()) throw Error("Project name is required");
+		return G.create({
+			name: t.name.trim(),
+			description: t.description?.trim() || void 0
 		});
 	});
 }
 //#endregion
 //#region src/types/init-steps.ts
-function matchBootStep(line) {
-	const lower = line.toLowerCase();
-	if (lower.includes("installing pi dependencies") || lower.includes("npm install")) return "installing-deps";
-	if (lower.includes("building pi workspace") || lower.includes("npm run build") || lower.includes("building")) return "building-runtime";
-	if (lower.includes("creating default manifest") || lower.includes("agent.json")) return "generating-manifest";
-	if (lower.includes("workspace") || lower.includes("creating workspace")) return "creating-workspace";
-	if (lower.includes("launching") || lower.includes("starting runtime")) return "launching-runtime";
-	if (lower.includes("connecting") || lower.includes("connecting chat")) return "connecting-chat";
-	return null;
+function Pe(e) {
+	let t = e.toLowerCase();
+	return t.includes("installing pi dependencies") || t.includes("npm install") ? "installing-deps" : t.includes("building pi workspace") || t.includes("npm run build") || t.includes("building") ? "building-runtime" : t.includes("creating default manifest") || t.includes("agent.json") ? "generating-manifest" : t.includes("workspace") || t.includes("creating workspace") ? "creating-workspace" : t.includes("launching") || t.includes("starting runtime") ? "launching-runtime" : t.includes("connecting") || t.includes("connecting chat") ? "connecting-chat" : null;
 }
 //#endregion
 //#region electron/pi-protocol/raw-text-adapter.ts
-var RawTextAdapter = class {
+var Fe = class {
 	lineBuffer = "";
 	currentMessageId = null;
-	bootDone = false;
-	onStdout(chunk, emit) {
-		this.lineBuffer += chunk;
-		const lines = this.lineBuffer.split("\n");
-		this.lineBuffer = lines.pop() ?? "";
-		for (const raw of lines) {
-			const line = raw.trim();
-			if (!line) continue;
-			let parsed = null;
+	bootDone = !1;
+	onStdout(e, t) {
+		this.lineBuffer += e;
+		let n = this.lineBuffer.split("\n");
+		this.lineBuffer = n.pop() ?? "";
+		for (let e of n) {
+			let n = e.trim();
+			if (!n) continue;
+			let r = null;
 			try {
-				parsed = JSON.parse(line);
+				r = JSON.parse(n);
 			} catch {
-				emit({
+				t({
 					type: "log",
 					stream: "stdout",
-					line
+					line: n
 				});
 			}
-			if (parsed && typeof parsed === "object") {
-				if (parsed.type === "message_update" && parsed.assistantMessageEvent?.type === "text_delta") {
-					if (!this.currentMessageId) {
-						this.currentMessageId = randomUUID();
-						emit({
-							type: "message-start",
-							messageId: this.currentMessageId,
-							role: "assistant"
-						});
-					}
-					emit({
-						type: "text-delta",
-						messageId: this.currentMessageId,
-						delta: parsed.assistantMessageEvent.delta ?? ""
-					});
-				} else if (parsed.type === "agent_end" || parsed.type === "message_end") {
-					if (this.currentMessageId) {
-						emit({
-							type: "message-end",
-							messageId: this.currentMessageId
-						});
-						this.currentMessageId = null;
-					}
-				} else if (parsed.type === "response" && parsed.success === false) emit({
-					type: "error",
-					message: parsed.error ?? "Unknown error from Pi",
-					recoverable: true
-				});
-			}
-			if (!this.bootDone) {
-				this.bootDone = true;
-				emit({
-					type: "boot-step",
-					step: "ready"
-				});
-				emit({ type: "ready" });
-			}
+			r && typeof r == "object" && (r.type === "message_update" && r.assistantMessageEvent?.type === "text_delta" ? (this.currentMessageId || (this.currentMessageId = te(), t({
+				type: "message-start",
+				messageId: this.currentMessageId,
+				role: "assistant"
+			})), t({
+				type: "text-delta",
+				messageId: this.currentMessageId,
+				delta: r.assistantMessageEvent.delta ?? ""
+			})) : r.type === "agent_end" || r.type === "message_end" ? this.currentMessageId &&= (t({
+				type: "message-end",
+				messageId: this.currentMessageId
+			}), null) : r.type === "response" && r.success === !1 && t({
+				type: "error",
+				message: r.error ?? "Unknown error from Pi",
+				recoverable: !0
+			})), this.bootDone || (this.bootDone = !0, t({
+				type: "boot-step",
+				step: "ready"
+			}), t({ type: "ready" }));
 		}
 	}
-	onStderr(chunk, emit) {
-		for (const raw of chunk.split("\n")) {
-			const line = raw.trim();
-			if (!line) continue;
-			emit({
+	onStderr(e, t) {
+		for (let n of e.split("\n")) {
+			let e = n.trim();
+			if (!e) continue;
+			t({
 				type: "log",
 				stream: "stderr",
-				line
+				line: e
 			});
-			const step = matchBootStep(line);
-			if (step) emit({
+			let r = Pe(e);
+			r && t({
 				type: "boot-step",
-				step
+				step: r
 			});
 		}
 	}
-	serializeInput(text) {
+	serializeInput(e) {
 		return JSON.stringify({
 			type: "prompt",
-			message: text
+			message: e
 		}) + "\n";
 	}
 	reset() {
-		this.lineBuffer = "";
-		this.currentMessageId = null;
-		this.bootDone = false;
+		this.lineBuffer = "", this.currentMessageId = null, this.bootDone = !1;
 	}
-};
-//#endregion
-//#region electron/manifest-pi-runtime.ts
-var STDERR_LOG_LIMIT = 500;
-var READY_SILENCE_MS = 2e3;
-var ManifestPiRuntime = class {
+}, Ie = 500, Le = 2e3, K = new class {
 	entries = /* @__PURE__ */ new Map();
 	adapterFactories = /* @__PURE__ */ new Map();
 	silenceTimers = /* @__PURE__ */ new Map();
 	readyEmitted = /* @__PURE__ */ new Set();
-	registerAdapterFactory(agentId, factory) {
-		this.adapterFactories.set(agentId, factory);
+	registerAdapterFactory(e, t) {
+		this.adapterFactories.set(e, t);
 	}
-	getState(agentId) {
-		return this.entries.get(agentId) ?? null;
+	getState(e) {
+		return this.entries.get(e) ?? null;
+	}
+	getStatusPayload(e) {
+		let t = this.entries.get(e);
+		return t ? {
+			agentId: t.agentId,
+			status: t.status,
+			pid: t.pid,
+			startedAt: t.startedAt,
+			endedAt: t.endedAt,
+			lastError: t.lastError,
+			bootStep: t.bootStep
+		} : null;
 	}
 	listAgents() {
 		return Array.from(this.entries.keys());
 	}
-	isRunning(agentId) {
-		const entry = this.entries.get(agentId);
-		return !!entry?.process && entry.status !== "stopped" && entry.status !== "error";
+	isRunning(e) {
+		let t = this.entries.get(e);
+		return !!t?.process && t.status !== "stopped" && t.status !== "error";
 	}
-	start(agentId, agentDir, manifestPiSource) {
-		if (this.isRunning(agentId)) {
-			import_main.default.info(`[runtime] agent ${agentId} already running, ignoring start`);
+	start(e, t, n) {
+		if (this.isRunning(e)) {
+			L.default.info(`[runtime] agent ${e} already running, ignoring start`);
 			return;
 		}
-		const existing = this.entries.get(agentId);
-		const adapter = (this.adapterFactories.get(agentId) ?? (() => new RawTextAdapter()))();
-		adapter.reset();
-		const entry = existing ?? {
-			agentId,
-			agentDir,
-			manifestPiSource,
+		let r = this.entries.get(e), i = (this.adapterFactories.get(e) ?? (() => new Fe()))();
+		i.reset();
+		let a = r ?? {
+			agentId: e,
+			agentDir: t,
+			manifestPiSource: n,
 			process: null,
 			status: "initializing",
 			messages: [],
 			stderrLog: [],
-			adapter
+			adapter: i
 		};
-		entry.adapter = adapter;
-		entry.agentDir = agentDir;
-		entry.manifestPiSource = manifestPiSource;
-		entry.status = "initializing";
-		entry.startedAt = Date.now();
-		entry.endedAt = void 0;
-		entry.lastError = void 0;
-		entry.bootStep = void 0;
-		entry.stderrLog = [];
-		entry.adapter.reset();
-		this.entries.set(agentId, entry);
-		this.emitStatus(agentId);
-		this.spawnProcess(entry);
+		a.adapter = i, a.agentDir = t, a.manifestPiSource = n, a.status = "initializing", a.startedAt = Date.now(), a.endedAt = void 0, a.lastError = void 0, a.bootStep = void 0, a.stderrLog = [], a.adapter.reset(), this.entries.set(e, a), this.emitStatus(e), this.spawnProcess(a);
 	}
-	stop(agentId) {
-		this.clearSilenceTimer(agentId);
-		this.readyEmitted.delete(agentId);
-		const entry = this.entries.get(agentId);
-		if (!entry?.process) {
-			if (entry) {
-				entry.status = "stopped";
-				this.emitStatus(agentId);
-			}
+	stop(e) {
+		this.clearSilenceTimer(e), this.readyEmitted.delete(e);
+		let t = this.entries.get(e);
+		if (!t?.process) {
+			t && (t.status = "stopped", this.emitStatus(e));
 			return;
 		}
-		const proc = entry.process;
+		let n = t.process;
 		try {
-			proc.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
+			n.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
 		} catch {}
 		try {
-			proc.stdin?.end();
+			n.stdin?.end();
 		} catch {}
 		setTimeout(() => {
-			if (!proc.killed) proc.kill("SIGTERM");
+			n.killed || n.kill("SIGTERM");
 		}, 500);
 	}
-	restart(agentId) {
-		const entry = this.entries.get(agentId);
-		if (!entry) return;
-		this.stop(agentId);
-		setTimeout(() => this.start(agentId, entry.agentDir, entry.manifestPiSource), 800);
+	restart(e) {
+		let t = this.entries.get(e);
+		t && (this.stop(e), setTimeout(() => this.start(e, t.agentDir, t.manifestPiSource), 800));
 	}
-	send(agentId, text) {
-		const entry = this.entries.get(agentId);
-		if (!entry?.process) return false;
-		if (!text.trim()) return false;
-		const userMsg = {
+	send(e, t) {
+		let n = this.entries.get(e);
+		if (!n?.process || !t.trim()) return !1;
+		let r = {
 			id: crypto.randomUUID(),
 			role: "user",
-			content: text,
+			content: t,
 			ts: Date.now()
 		};
-		entry.messages.push(userMsg);
-		const prevStatus = entry.status;
-		entry.status = "busy";
-		this.emitStatus(agentId);
-		this.emitMessages(agentId);
-		console.log(`[runtime.send] agent=${agentId} wire=${entry.adapter.serializeInput(text).replace(/\n$/, "")}`);
+		n.messages.push(r);
+		let i = n.status;
+		n.status = "busy", this.emitStatus(e), this.emitMessages(e), console.log(`[runtime.send] agent=${e} wire=${n.adapter.serializeInput(t).replace(/\n$/, "")}`);
 		try {
-			const wire = entry.adapter.serializeInput(text);
-			entry.process.stdin?.write(wire);
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → busy`);
-			return true;
-		} catch (err) {
-			import_main.default.error(`[runtime] send failed for ${agentId}:`, err);
-			entry.lastError = err instanceof Error ? err.message : String(err);
-			entry.status = "error";
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → error`);
-			this.emitStatus(agentId);
-			return false;
+			let r = n.adapter.serializeInput(t);
+			return n.process.stdin?.write(r), console.log(`[runtime.status] agent=${e} ${i} → busy`), !0;
+		} catch (t) {
+			return L.default.error(`[runtime] send failed for ${e}:`, t), n.lastError = t instanceof Error ? t.message : String(t), n.status = "error", console.log(`[runtime.status] agent=${e} ${i} → error`), this.emitStatus(e), !1;
 		}
 	}
 	shutdownAll() {
-		for (const agentId of Array.from(this.silenceTimers.keys())) this.clearSilenceTimer(agentId);
+		for (let e of Array.from(this.silenceTimers.keys())) this.clearSilenceTimer(e);
 		this.readyEmitted.clear();
-		for (const [agentId, entry] of this.entries) if (entry.process) {
-			const proc = entry.process;
+		for (let [e, t] of this.entries) if (t.process) {
+			let n = t.process;
 			try {
-				proc.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
+				n.stdin?.write(JSON.stringify({ type: "abort" }) + "\n");
 			} catch {}
 			try {
-				proc.stdin?.end();
+				n.stdin?.end();
 			} catch {}
 			try {
-				proc.kill("SIGTERM");
+				n.kill("SIGTERM");
 			} catch {}
-			entry.status = "stopped";
-			import_main.default.info(`[runtime] shutdown agent ${agentId}`);
+			t.status = "stopped", L.default.info(`[runtime] shutdown agent ${e}`);
 		}
 		setTimeout(() => {
-			for (const [agentId, entry] of this.entries) if (entry.process && !entry.process.killed) {
+			for (let [e, t] of this.entries) if (t.process && !t.process.killed) {
 				try {
-					entry.process.kill("SIGKILL");
+					t.process.kill("SIGKILL");
 				} catch {}
-				import_main.default.warn(`[runtime] SIGKILL agent ${agentId}`);
+				L.default.warn(`[runtime] SIGKILL agent ${e}`);
 			}
 		}, 3e3);
 	}
-	removeEntry(agentId) {
-		this.clearSilenceTimer(agentId);
-		this.readyEmitted.delete(agentId);
-		this.stop(agentId);
-		this.entries.delete(agentId);
+	removeEntry(e) {
+		this.clearSilenceTimer(e), this.readyEmitted.delete(e), this.stop(e), this.entries.delete(e);
 	}
-	spawnProcess(entry) {
-		const { agentId, agentDir, manifestPiSource } = entry;
-		const agentSh = join$1(agentDir, "agent.sh");
-		const piDir = join$1(manifestPiSource, "pi");
-		import_main.default.info(`[runtime] spawning ${agentSh} (PI_DIR=${piDir})`);
-		let proc;
+	spawnProcess(e) {
+		let { agentId: t, agentDir: n, manifestPiSource: r } = e, i = g(n, "agent.sh"), a = g(r, "pi");
+		L.default.info(`[runtime] spawning ${i} (PI_DIR=${a})`);
+		let o;
 		try {
-			proc = spawn("/bin/bash", [
-				agentSh,
+			o = ee("/bin/bash", [
+				i,
 				"--mode",
 				"rpc",
 				"--no-session"
 			], {
-				cwd: agentDir,
+				cwd: n,
 				stdio: [
 					"pipe",
 					"pipe",
@@ -2771,370 +2025,264 @@ var ManifestPiRuntime = class {
 				],
 				env: {
 					...process.env,
-					PI_DIR: piDir
+					PI_DIR: a
 				}
 			});
-		} catch (err) {
-			import_main.default.error(`[runtime] spawn failed for ${agentId}:`, err);
-			entry.status = "error";
-			entry.lastError = err instanceof Error ? err.message : String(err);
-			this.emitStatus(agentId);
+		} catch (n) {
+			L.default.error(`[runtime] spawn failed for ${t}:`, n), e.status = "error", e.lastError = n instanceof Error ? n.message : String(n), this.emitStatus(t);
 			return;
 		}
-		entry.process = proc;
-		entry.pid = proc.pid;
-		this.readyEmitted.delete(agentId);
-		this.resetSilenceTimer(entry);
-		proc.stdout?.on("data", (chunk) => {
-			const text = chunk.toString("utf8");
-			const preview = text.length > 200 ? text.slice(0, 200) + "..." : text;
-			console.log(`[runtime.stdout] agent=${agentId} len=${chunk.length} preview=${JSON.stringify(preview)}`);
-			entry.adapter.onStdout(text, (ev) => this.handleAdapterEvent(agentId, ev));
-			this.resetSilenceTimer(entry);
-		});
-		proc.stderr?.on("data", (chunk) => {
-			const text = chunk.toString("utf8");
-			for (const line of text.split("\n")) {
-				const trimmed = line.trim();
-				if (!trimmed) continue;
-				entry.stderrLog.push(trimmed);
-				if (entry.stderrLog.length > STDERR_LOG_LIMIT) entry.stderrLog.shift();
+		e.process = o, e.pid = o.pid, this.readyEmitted.delete(t), this.resetSilenceTimer(e), o.stdout?.on("data", (n) => {
+			let r = n.toString("utf8"), i = r.length > 200 ? r.slice(0, 200) + "..." : r;
+			console.log(`[runtime.stdout] agent=${t} len=${n.length} preview=${JSON.stringify(i)}`), e.adapter.onStdout(r, (e) => this.handleAdapterEvent(t, e)), this.resetSilenceTimer(e);
+		}), o.stderr?.on("data", (n) => {
+			let r = n.toString("utf8");
+			for (let t of r.split("\n")) {
+				let n = t.trim();
+				n && (e.stderrLog.push(n), e.stderrLog.length > Ie && e.stderrLog.shift());
 			}
-			const preview = text.length > 200 ? text.slice(0, 200) + "..." : text;
-			console.log(`[runtime.stderr] agent=${agentId} len=${chunk.length} preview=${JSON.stringify(preview)}`);
-			entry.adapter.onStderr(text, (ev) => this.handleAdapterEvent(agentId, ev));
-			this.resetSilenceTimer(entry);
-		});
-		proc.on("exit", (code, signal) => {
-			import_main.default.info(`[runtime] agent ${agentId} exited code=${code} signal=${signal}`);
-			this.clearSilenceTimer(agentId);
-			entry.process = null;
-			entry.pid = void 0;
-			entry.endedAt = Date.now();
-			if (code === 0 || signal === "SIGTERM" || signal === "SIGKILL") entry.status = "stopped";
-			else {
-				entry.status = "error";
-				entry.lastError = entry.stderrLog.slice(-3).join(" | ") || `Process exited with code ${code}`;
-			}
-			this.emitStatus(agentId);
-			this.sendExitEvent(agentId, code, signal);
-		});
-		proc.on("error", (err) => {
-			import_main.default.error(`[runtime] agent ${agentId} error:`, err);
-			entry.lastError = err.message;
-			entry.status = "error";
-			this.emitStatus(agentId);
+			let i = r.length > 200 ? r.slice(0, 200) + "..." : r;
+			console.log(`[runtime.stderr] agent=${t} len=${n.length} preview=${JSON.stringify(i)}`), e.adapter.onStderr(r, (e) => this.handleAdapterEvent(t, e)), this.resetSilenceTimer(e);
+		}), o.on("exit", (n, r) => {
+			L.default.info(`[runtime] agent ${t} exited code=${n} signal=${r}`), this.clearSilenceTimer(t), e.process = null, e.pid = void 0, e.endedAt = Date.now(), n === 0 || r === "SIGTERM" || r === "SIGKILL" ? e.status = "stopped" : (e.status = "error", e.lastError = e.stderrLog.slice(-3).join(" | ") || `Process exited with code ${n}`), this.emitStatus(t), this.sendExitEvent(t, n, r);
+		}), o.on("error", (n) => {
+			L.default.error(`[runtime] agent ${t} error:`, n), e.lastError = n.message, e.status = "error", this.emitStatus(t);
 		});
 	}
-	handleAdapterEvent(agentId, event) {
-		const entry = this.entries.get(agentId);
-		if (!entry) return;
-		const prevStatus = entry.status;
-		if (event.type === "boot-step") {
-			entry.bootStep = event.step;
-			this.emitStatus(agentId);
+	handleAdapterEvent(e, t) {
+		let n = this.entries.get(e);
+		if (!n) return;
+		let r = n.status;
+		if (t.type === "boot-step") {
+			n.bootStep = t.step, this.emitStatus(e);
 			return;
 		}
-		if (event.type === "ready") {
-			entry.status = "running";
-			console.log(`[runtime.event] agent=${agentId} type=ready`);
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running`);
-			this.emitStatus(agentId);
+		if (t.type === "ready") {
+			n.status = "running", console.log(`[runtime.event] agent=${e} type=ready`), console.log(`[runtime.status] agent=${e} ${r} → running`), this.emitStatus(e);
 			return;
 		}
-		if (event.type === "message-start") {
-			const msg = {
-				id: event.messageId,
-				role: event.role,
+		if (t.type === "message-start") {
+			let i = {
+				id: t.messageId,
+				role: t.role,
 				content: "",
 				ts: Date.now()
 			};
-			entry.messages.push(msg);
-			entry.status = "busy";
-			console.log(`[runtime.event] agent=${agentId} type=message-start role=${event.role}`);
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → busy`);
-			this.emitStatus(agentId);
-			this.emitMessages(agentId);
+			n.messages.push(i), n.status = "busy", console.log(`[runtime.event] agent=${e} type=message-start role=${t.role}`), console.log(`[runtime.status] agent=${e} ${r} → busy`), this.emitStatus(e), this.emitMessages(e);
 			return;
 		}
-		if (event.type === "text-delta") {
-			const msg = entry.messages.find((m) => m.id === event.messageId);
-			if (msg) {
-				msg.content += event.delta;
-				const preview = event.delta.length > 100 ? event.delta.slice(0, 100) + "..." : event.delta;
-				console.log(`[runtime.event] agent=${agentId} type=text-delta delta=${JSON.stringify(preview)}`);
-				this.emitEvent(agentId, event);
+		if (t.type === "text-delta") {
+			let r = n.messages.find((e) => e.id === t.messageId);
+			if (r) {
+				r.content += t.delta;
+				let n = t.delta.length > 100 ? t.delta.slice(0, 100) + "..." : t.delta;
+				console.log(`[runtime.event] agent=${e} type=text-delta delta=${JSON.stringify(n)}`), this.emitEvent(e, t);
 			}
 			return;
 		}
-		if (event.type === "message-end") {
-			if (entry.messages.find((m) => m.id === event.messageId)) this.emitEvent(agentId, event);
-			entry.status = "running";
-			console.log(`[runtime.event] agent=${agentId} type=message-end`);
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running`);
-			this.emitStatus(agentId);
+		if (t.type === "message-end") {
+			n.messages.find((e) => e.id === t.messageId) && this.emitEvent(e, t), n.status = "running", console.log(`[runtime.event] agent=${e} type=message-end`), console.log(`[runtime.status] agent=${e} ${r} → running`), this.emitStatus(e);
 			return;
 		}
-		if (event.type === "log") {
-			const preview = event.line.length > 200 ? event.line.slice(0, 200) + "..." : event.line;
-			console.log(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`);
-			this.emitEvent(agentId, event);
+		if (t.type === "log") {
+			let n = t.line.length > 200 ? t.line.slice(0, 200) + "..." : t.line;
+			console.log(`[runtime.event] agent=${e} type=log stream=${t.stream} line=${JSON.stringify(n)}`), this.emitEvent(e, t);
 			return;
 		}
-		if (event.type === "error") {
-			console.log(`[runtime.event] agent=${agentId} type=error message=${JSON.stringify(event.message)} recoverable=${event.recoverable}`);
-			entry.lastError = event.message;
-			entry.status = "running";
-			console.log(`[runtime.status] agent=${agentId} ${prevStatus} → running (error: ${event.message})`);
-			this.emitStatus(agentId);
-			this.emitEvent(agentId, event);
+		if (t.type === "error") {
+			console.log(`[runtime.event] agent=${e} type=error message=${JSON.stringify(t.message)} recoverable=${t.recoverable}`), n.lastError = t.message, n.status = "running", console.log(`[runtime.status] agent=${e} ${r} → running (error: ${t.message})`), this.emitStatus(e), this.emitEvent(e, t);
 			return;
 		}
-		const payload = JSON.stringify(event);
-		const truncated = payload.length > 300 ? payload.slice(0, 300) + "..." : payload;
-		console.log(`[runtime.event] agent=${agentId} ${truncated}`);
-		this.emitEvent(agentId, event);
+		let i = JSON.stringify(t), a = i.length > 300 ? i.slice(0, 300) + "..." : i;
+		console.log(`[runtime.event] agent=${e} ${a}`), this.emitEvent(e, t);
 	}
 	getWindow() {
-		return BrowserWindow.getAllWindows()[0] ?? null;
+		return t.getAllWindows()[0] ?? null;
 	}
-	emitEvent(agentId, event) {
-		const win = this.getWindow();
-		if (!win || win.isDestroyed()) return;
-		win.webContents.send(`agent:${agentId}:event`, event);
+	emitEvent(e, t) {
+		let n = this.getWindow();
+		!n || n.isDestroyed() || n.webContents.send(X.AGENTS.ON_EVENT(e), t);
 	}
-	emitStatus(agentId) {
-		const win = this.getWindow();
-		if (!win || win.isDestroyed()) return;
-		const entry = this.entries.get(agentId);
-		if (!entry) return;
-		win.webContents.send(`agent:${agentId}:status`, {
-			agentId,
-			status: entry.status,
-			pid: entry.pid,
-			startedAt: entry.startedAt,
-			endedAt: entry.endedAt,
-			lastError: entry.lastError,
-			bootStep: entry.bootStep
+	emitStatus(e) {
+		let t = this.getWindow();
+		if (!t || t.isDestroyed()) return;
+		let n = this.entries.get(e);
+		n && t.webContents.send(X.AGENTS.ON_STATUS(e), {
+			agentId: e,
+			status: n.status,
+			pid: n.pid,
+			startedAt: n.startedAt,
+			endedAt: n.endedAt,
+			lastError: n.lastError,
+			bootStep: n.bootStep
 		});
 	}
-	emitMessages(agentId) {
-		const win = this.getWindow();
-		if (!win || win.isDestroyed()) return;
-		const entry = this.entries.get(agentId);
-		if (!entry) return;
-		win.webContents.send(`agent:${agentId}:messages`, entry.messages);
+	emitMessages(e) {
+		let t = this.getWindow();
+		if (!t || t.isDestroyed()) return;
+		let n = this.entries.get(e);
+		n && t.webContents.send(X.AGENTS.ON_MESSAGES(e), n.messages);
 	}
-	sendExitEvent(agentId, code, signal) {
-		const win = this.getWindow();
-		if (!win || win.isDestroyed()) return;
-		const entry = this.entries.get(agentId);
-		win.webContents.send(`agent:${agentId}:exit`, {
-			agentId,
-			code,
-			signal,
-			status: entry?.status ?? "stopped"
+	sendExitEvent(e, t, n) {
+		let r = this.getWindow();
+		if (!r || r.isDestroyed()) return;
+		let i = this.entries.get(e);
+		r.webContents.send(X.AGENTS.ON_EXIT(e), {
+			agentId: e,
+			code: t,
+			signal: n,
+			status: i?.status ?? "stopped"
 		});
 	}
-	resetSilenceTimer(entry) {
-		const agentId = entry.agentId;
-		const existing = this.silenceTimers.get(agentId);
-		if (existing) clearTimeout(existing);
-		const timer = setTimeout(() => this.maybeEmitReady(agentId), READY_SILENCE_MS);
-		this.silenceTimers.set(agentId, timer);
+	resetSilenceTimer(e) {
+		let t = e.agentId, n = this.silenceTimers.get(t);
+		n && clearTimeout(n);
+		let r = setTimeout(() => this.maybeEmitReady(t), Le);
+		this.silenceTimers.set(t, r);
 	}
-	clearSilenceTimer(agentId) {
-		const existing = this.silenceTimers.get(agentId);
-		if (existing) {
-			clearTimeout(existing);
-			this.silenceTimers.delete(agentId);
-		}
+	clearSilenceTimer(e) {
+		let t = this.silenceTimers.get(e);
+		t && (clearTimeout(t), this.silenceTimers.delete(e));
 	}
-	maybeEmitReady(agentId) {
-		this.silenceTimers.delete(agentId);
-		if (this.readyEmitted.has(agentId)) return;
-		const entry = this.entries.get(agentId);
-		if (!entry || !entry.process) return;
-		this.readyEmitted.add(agentId);
-		entry.bootStep = "ready";
-		entry.status = "running";
-		import_main.default.info(`[runtime] agent ${agentId} ready (silence-based)`);
-		this.emitStatus(agentId);
-		this.emitEvent(agentId, {
+	maybeEmitReady(e) {
+		if (this.silenceTimers.delete(e), this.readyEmitted.has(e)) return;
+		let t = this.entries.get(e);
+		!t || !t.process || (this.readyEmitted.add(e), t.bootStep = "ready", t.status = "running", L.default.info(`[runtime] agent ${e} ready (silence-based)`), this.emitStatus(e), this.emitEvent(e, {
 			type: "boot-step",
 			step: "ready"
-		});
-		this.emitEvent(agentId, { type: "ready" });
+		}), this.emitEvent(e, { type: "ready" }));
 	}
-};
-var runtime = new ManifestPiRuntime();
+}();
 //#endregion
 //#region electron/ipc/runtime.ts
-function registerRuntimeIpc() {
-	ipcMain.handle("agents:start", async (_e, agentId) => {
-		const agent = await AgentRepository.getById(agentId);
-		if (!agent) throw new Error(`Agent not found: ${agentId}`);
-		if (!agent.localPath) throw new Error(`Agent has no localPath: ${agentId}`);
-		if (!agent.manifestPiSource) throw new Error(`Agent has no manifestPiSource: ${agentId}`);
-		runtime.start(agentId, agent.localPath, agent.manifestPiSource);
-		await AgentRepository.update(agentId, {
+function Re() {
+	r.handle(X.AGENTS.START, async (e, t) => {
+		let n = await H.getById(t);
+		if (!n) throw Error(`Agent not found: ${t}`);
+		if (!n.localPath) throw Error(`Agent has no localPath: ${t}`);
+		if (!n.manifestPiSource) throw Error(`Agent has no manifestPiSource: ${t}`);
+		return K.start(t, n.localPath, n.manifestPiSource), await H.update(t, {
 			status: "initializing",
 			lastError: void 0
-		});
-		return { ok: true };
-	});
-	ipcMain.handle("agents:stop", async (_e, agentId) => {
-		runtime.stop(agentId);
-		await AgentRepository.update(agentId, { status: "stopped" });
-		return { ok: true };
-	});
-	ipcMain.handle("agents:restart", async (_e, agentId) => {
-		runtime.restart(agentId);
-		await AgentRepository.update(agentId, {
-			status: "initializing",
-			lastError: void 0
-		});
-		return { ok: true };
-	});
-	ipcMain.handle("agents:send", async (_e, agentId, message) => {
-		return { ok: runtime.send(agentId, message) };
-	});
-	ipcMain.handle("agents:getRuntimeState", (_e, agentId) => {
-		const entry = runtime.getState(agentId);
-		if (!entry) return null;
-		return {
-			agentId: entry.agentId,
-			status: entry.status,
-			pid: entry.pid,
-			startedAt: entry.startedAt,
-			endedAt: entry.endedAt,
-			lastError: entry.lastError,
-			bootStep: entry.bootStep
-		};
-	});
+		}), { ok: !0 };
+	}), r.handle(X.AGENTS.STOP, async (e, t) => (K.stop(t), await H.update(t, { status: "stopped" }), { ok: !0 })), r.handle(X.AGENTS.RESTART, async (e, t) => (K.restart(t), await H.update(t, {
+		status: "initializing",
+		lastError: void 0
+	}), { ok: !0 })), r.handle(X.AGENTS.SEND, async (e, t, n) => ({ ok: K.send(t, n) })), r.handle(X.AGENTS.GET_RUNTIME_STATE, (e, t) => K.getStatusPayload(t));
 }
 //#endregion
 //#region electron/ipc/manifest-pi.ts
-var execFileP = promisify(execFile);
-var TEMPLATE_PATH = join$1(homedir(), ".superhive", "manifest-pi-template");
-var TEMPLATE_URL = "https://github.com/rishi-ie/manifest-pi.git";
-var CLONE_TIMEOUT_MS = 18e4;
-async function isValidClone() {
-	return existsSync(join$1(TEMPLATE_PATH, "agent.sh"));
+var ze = ne(v), q = g(y(), ".superhive", "manifest-pi-template"), Be = "https://github.com/rishi-ie/manifest-pi.git", Ve = 18e4;
+async function J() {
+	return s(g(q, "agent.sh"));
 }
-function registerManifestPiIpc() {
-	ipcMain.handle("manifest-pi:ensureTemplate", async () => {
-		if (await isValidClone()) return {
-			ok: true,
-			path: TEMPLATE_PATH,
-			cloned: false
+function Y() {
+	r.handle(X.MANIFEST_PI.ENSURE_TEMPLATE, async () => {
+		if (await J()) return {
+			ok: !0,
+			path: q,
+			cloned: !1
 		};
 		try {
-			await mkdir(join$1(homedir(), ".superhive"), { recursive: true });
-			import_main.default.info(`[manifest-pi] cloning template to ${TEMPLATE_PATH}`);
-			await execFileP("git", [
+			return await u(g(y(), ".superhive"), { recursive: !0 }), L.default.info(`[manifest-pi] cloning template to ${q}`), await ze("git", [
 				"clone",
-				TEMPLATE_URL,
-				TEMPLATE_PATH
-			], { timeout: CLONE_TIMEOUT_MS });
-			if (!await isValidClone()) return {
-				ok: false,
-				path: TEMPLATE_PATH,
+				Be,
+				q
+			], { timeout: Ve }), await J() ? {
+				ok: !0,
+				path: q,
+				cloned: !0
+			} : {
+				ok: !1,
+				path: q,
 				error: "Clone finished but agent.sh is missing in the result."
 			};
-			return {
-				ok: true,
-				path: TEMPLATE_PATH,
-				cloned: true
-			};
-		} catch (err) {
-			const error = err instanceof Error ? err.message : String(err);
-			import_main.default.error(`[manifest-pi] clone failed:`, error);
-			return {
-				ok: false,
-				path: TEMPLATE_PATH,
-				error
+		} catch (e) {
+			let t = e instanceof Error ? e.message : String(e);
+			return L.default.error("[manifest-pi] clone failed:", t), {
+				ok: !1,
+				path: q,
+				error: t
 			};
 		}
-	});
-	ipcMain.handle("manifest-pi:checkTemplate", async () => {
-		return {
-			ok: await isValidClone(),
-			path: TEMPLATE_PATH
-		};
-	});
+	}), r.handle(X.MANIFEST_PI.CHECK_TEMPLATE, async () => ({
+		ok: await J(),
+		path: q
+	}));
 }
 //#endregion
 //#region electron/ipc/index.ts
-function registerIpc() {
-	registerAgentIpc();
-	registerProjectIpc();
-	registerRuntimeIpc();
-	registerManifestPiIpc();
+var X = {
+	AGENTS: {
+		LIST: "agents:list",
+		GET: "agents:get",
+		CREATE: "agents:create",
+		DELETE: "agents:delete",
+		UPDATE_STATUS: "agents:updateStatus",
+		START: "agents:start",
+		STOP: "agents:stop",
+		RESTART: "agents:restart",
+		SEND: "agents:send",
+		GET_RUNTIME_STATE: "agents:getRuntimeState",
+		ON_EVENT: (e) => `agent:${e}:event`,
+		ON_STATUS: (e) => `agent:${e}:status`,
+		ON_MESSAGES: (e) => `agent:${e}:messages`,
+		ON_EXIT: (e) => `agent:${e}:exit`
+	},
+	PROJECTS: {
+		LIST: "projects:list",
+		GET: "projects:get",
+		CREATE: "projects:create"
+	},
+	MANIFEST_PI: {
+		ENSURE_TEMPLATE: "manifest-pi:ensureTemplate",
+		CHECK_TEMPLATE: "manifest-pi:checkTemplate"
+	}
+};
+function He() {
+	Me(), Ne(), Re(), Y();
 }
 //#endregion
 //#region electron/main.ts
-var __dirname$1 = dirname(fileURLToPath(import.meta.url));
-import_main.default.initialize();
-import_main.default.info("Superhive starting...");
-var mainWindow = null;
-function createWindow() {
-	mainWindow = new BrowserWindow({
+var Z = i(o(import.meta.url));
+L.default.initialize(), L.default.info("Superhive starting...");
+var Q = null;
+function $() {
+	Q = new t({
 		width: 1200,
 		height: 800,
 		minWidth: 800,
 		minHeight: 600,
 		title: "Superhive",
 		backgroundColor: "#151110",
-		frame: false,
+		frame: !1,
 		titleBarStyle: "hidden",
 		trafficLightPosition: {
 			x: 16,
 			y: 16
 		},
-		show: false,
+		show: !1,
 		webPreferences: {
-			preload: join(__dirname$1, "preload.js"),
-			contextIsolation: true,
-			nodeIntegration: false
+			preload: a(Z, "preload.js"),
+			contextIsolation: !0,
+			nodeIntegration: !1
 		}
-	});
-	mainWindow.maximize();
-	mainWindow.show();
-	if (process.env.VITE_DEV_SERVER_URL) {
-		import_main.default.info("Loading dev server:", process.env.VITE_DEV_SERVER_URL);
-		mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-	} else {
-		import_main.default.info("Loading production build");
-		mainWindow.loadFile(join(__dirname$1, "../dist/index.html"));
-	}
-	mainWindow.on("closed", () => {
-		mainWindow = null;
+	}), Q.maximize(), Q.show(), process.env.VITE_DEV_SERVER_URL ? (L.default.info("Loading dev server:", process.env.VITE_DEV_SERVER_URL), Q.loadURL(process.env.VITE_DEV_SERVER_URL)) : (L.default.info("Loading production build"), Q.loadFile(a(Z, "../dist/index.html"))), Q.on("closed", () => {
+		Q = null;
 	});
 }
-app.whenReady().then(async () => {
-	import_main.default.info("App ready");
-	setUserDataPath(app.getPath("userData"));
-	await seedWorkspace();
-	registerIpc();
-	createWindow();
-	app.on("activate", () => {
-		if (BrowserWindow.getAllWindows().length === 0) createWindow();
+n.whenReady().then(async () => {
+	L.default.info("App ready"), Ae(n.getPath("userData")), await je(), He(), $(), n.on("activate", () => {
+		t.getAllWindows().length === 0 && $();
 	});
-});
-app.on("window-all-closed", () => {
-	import_main.default.info("All windows closed");
-	if (process.platform !== "darwin") app.quit();
-});
-app.on("before-quit", () => {
-	import_main.default.info("Shutting down agent runtimes...");
-	runtime.shutdownAll();
-});
-process.on("uncaughtException", (error) => {
-	import_main.default.error("Uncaught exception:", error);
-});
-process.on("unhandledRejection", (reason) => {
-	import_main.default.error("Unhandled rejection:", reason);
+}), n.on("window-all-closed", () => {
+	L.default.info("All windows closed"), process.platform !== "darwin" && n.quit();
+}), n.on("before-quit", () => {
+	L.default.info("Shutting down agent runtimes..."), K.shutdownAll();
+}), process.on("uncaughtException", (e) => {
+	L.default.error("Uncaught exception:", e);
+}), process.on("unhandledRejection", (e) => {
+	L.default.error("Unhandled rejection:", e);
 });
 //#endregion
 export {};

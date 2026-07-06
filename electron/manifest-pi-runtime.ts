@@ -9,6 +9,8 @@ import {
   RawTextAdapter,
 } from './pi-protocol'
 import type { AgentStatus } from '../src/storage/types'
+import type { RuntimeStatusPayload } from '../src/types/electron'
+import { IPC } from './ipc/index'
 
 export interface RuntimeMessage {
   id: string
@@ -48,6 +50,20 @@ class ManifestPiRuntime {
 
   getState(agentId: string): RuntimeEntry | null {
     return this.entries.get(agentId) ?? null
+  }
+
+  getStatusPayload(agentId: string): RuntimeStatusPayload | null {
+    const entry = this.entries.get(agentId)
+    if (!entry) return null
+    return {
+      agentId: entry.agentId,
+      status: entry.status,
+      pid: entry.pid,
+      startedAt: entry.startedAt,
+      endedAt: entry.endedAt,
+      lastError: entry.lastError,
+      bootStep: entry.bootStep,
+    }
   }
 
   listAgents(): string[] {
@@ -366,7 +382,7 @@ class ManifestPiRuntime {
   private emitEvent(agentId: string, event: AdapterEvent): void {
     const win = this.getWindow()
     if (!win || win.isDestroyed()) return
-    win.webContents.send(`agent:${agentId}:event`, event)
+    win.webContents.send(IPC.AGENTS.ON_EVENT(agentId), event)
   }
 
   private emitStatus(agentId: string): void {
@@ -374,7 +390,7 @@ class ManifestPiRuntime {
     if (!win || win.isDestroyed()) return
     const entry = this.entries.get(agentId)
     if (!entry) return
-    win.webContents.send(`agent:${agentId}:status`, {
+    win.webContents.send(IPC.AGENTS.ON_STATUS(agentId), {
       agentId,
       status: entry.status,
       pid: entry.pid,
@@ -390,14 +406,14 @@ class ManifestPiRuntime {
     if (!win || win.isDestroyed()) return
     const entry = this.entries.get(agentId)
     if (!entry) return
-    win.webContents.send(`agent:${agentId}:messages`, entry.messages)
+    win.webContents.send(IPC.AGENTS.ON_MESSAGES(agentId), entry.messages)
   }
 
   private sendExitEvent(agentId: string, code: number | null, signal: NodeJS.Signals | null): void {
     const win = this.getWindow()
     if (!win || win.isDestroyed()) return
     const entry = this.entries.get(agentId)
-    win.webContents.send(`agent:${agentId}:exit`, {
+    win.webContents.send(IPC.AGENTS.ON_EXIT(agentId), {
       agentId,
       code,
       signal,

@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import log from 'electron-log/main'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus } from '../../src/storage/types'
+import { IPC } from './index'
 
 interface CreateAgentInput {
   name: string
@@ -16,14 +17,14 @@ interface CreateAgentInput {
 }
 
 export function registerAgentIpc(): void {
-  ipcMain.handle('agents:list', () => AgentRepository.getAll())
+  ipcMain.handle(IPC.AGENTS.LIST, () => AgentRepository.getAll())
 
-  ipcMain.handle('agents:get', async (_e, id: string) => {
+  ipcMain.handle(IPC.AGENTS.GET, async (_e, id: string) => {
     return (await AgentRepository.getById(id)) ?? null
   })
 
   ipcMain.handle(
-    'agents:create',
+    IPC.AGENTS.CREATE,
     async (_e, data: CreateAgentInput): Promise<Agent> => {
       if (!data.name?.trim()) throw new Error('Agent name is required')
       if (!data.folderName?.trim()) throw new Error('Agent folder name is required')
@@ -85,11 +86,11 @@ export function registerAgentIpc(): void {
     }
   )
 
-  ipcMain.handle('agents:updateStatus', async (_e, id: string, status: AgentStatus, lastError?: string) => {
+  ipcMain.handle(IPC.AGENTS.UPDATE_STATUS, async (_e, id: string, status: AgentStatus, lastError?: string) => {
     return AgentRepository.update(id, { status, lastError })
   })
 
-  ipcMain.handle('agents:delete', async (_e, id: string) => {
+  ipcMain.handle(IPC.AGENTS.DELETE, async (_e, id: string) => {
     return AgentRepository.delete(id)
   })
 }

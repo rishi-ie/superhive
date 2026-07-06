@@ -1,15 +1,16 @@
 import { ipcMain } from 'electron';
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository';
+import { IPC } from './index';
 
 export function registerProjectIpc(): void {
-  ipcMain.handle('projects:list', () => ProjectRepository.getAll());
+  ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
 
-  ipcMain.handle('projects:get', async (_e, id: string) => {
+  ipcMain.handle(IPC.PROJECTS.GET, async (_e, id: string) => {
     return (await ProjectRepository.getById(id)) ?? null;
   });
 
   ipcMain.handle(
-    'projects:create',
+    IPC.PROJECTS.CREATE,
     async (_e, data: { name: string; description?: string }) => {
       if (!data.name?.trim()) {
         throw new Error('Project name is required');

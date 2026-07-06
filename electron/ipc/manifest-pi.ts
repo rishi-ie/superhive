@@ -6,6 +6,7 @@ import { homedir } from 'node:os'
 import { mkdir } from 'node:fs/promises'
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
+import { IPC } from './index'
 
 const execFileP = promisify(execFile)
 
@@ -22,7 +23,7 @@ async function isValidClone(): Promise<boolean> {
 }
 
 export function registerManifestPiIpc(): void {
-  ipcMain.handle('manifest-pi:ensureTemplate', async () => {
+  ipcMain.handle(IPC.MANIFEST_PI.ENSURE_TEMPLATE, async () => {
     if (await isValidClone()) {
       return { ok: true as const, path: TEMPLATE_PATH, cloned: false }
     }
@@ -50,7 +51,7 @@ export function registerManifestPiIpc(): void {
     }
   })
 
-  ipcMain.handle('manifest-pi:checkTemplate', async () => {
+  ipcMain.handle(IPC.MANIFEST_PI.CHECK_TEMPLATE, async () => {
     return { ok: await isValidClone(), path: TEMPLATE_PATH }
   })
 }
