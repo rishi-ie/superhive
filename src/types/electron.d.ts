@@ -37,6 +37,7 @@ export interface AgentsAPI {
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void) => () => void
   onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void) => () => void
   onExit:     (id: string, cb: (payload: RuntimeExitPayload) => void) => () => void
+  onSettingsChanged: (id: string, cb: (agentId: string) => void) => () => void
 }
 
 export interface ProjectsAPI {

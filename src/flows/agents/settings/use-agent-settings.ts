@@ -23,5 +23,11 @@ export function useAgentSettings(agentId: string | null) {
 
   useEffect(() => { void reload() }, [reload])
 
+  useEffect(() => {
+    if (!agentId) return
+    const unsub = agents.onSettingsChanged(agentId, () => { void reload() })
+    return unsub
+  }, [agentId, reload])
+
   return { settings, isLoading, error, reload }
 }

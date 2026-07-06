@@ -32,4 +32,6 @@ export const agents = {
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),
   onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void): (() => void) => window.api.agents.onMessages(id, cb),
   onExit:     (id: string, cb: (payload: RuntimeExitPayload) => void): (() => void) => window.api.agents.onExit(id, cb),
+  onSettingsChanged: (id: string, cb: (agentId: string) => void): (() => void) =>
+    window.api.agents.onSettingsChanged(id, cb),
 }

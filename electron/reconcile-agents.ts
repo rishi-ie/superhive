@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { homedir } from 'node:os'
 import log from 'electron-log/main'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
+import { getBundledExtensionPath, hasBundledExtension } from './extension-source'
 
 const DEFAULT_PARENT_DIR = join(homedir(), '.superhive', 'agents')
 
@@ -59,18 +60,32 @@ export async function reconcileAgents(): Promise<void> {
     log.warn('[reconcile] migration pass failed:', err)
   }
 
-  // 0.5. Backfill extension dir onto existing DB agents that don't have it
+  // 0.5. Backfill extension dir AND patch manifest.json in a single pass per agent.
+  //       This avoids the ordering bug where 0.5 ran before 0.6 — leaving agents with
+  //       an on-disk extension but no manifest reference (dead end for the bridge).
   for (const agent of dbAgents) {
-    if (!agent.localPath || !agent.manifestPiSource) continue
-    const extDst = join(agent.localPath, 'extensions', 'superhive-pi-truth', 'index.ts')
-    if (!existsSync(extDst)) {
-      const extSrc = join(agent.manifestPiSource, 'extensions', 'superhive-pi-truth')
-      if (existsSync(join(extSrc, 'index.ts'))) {
-        await mkdir(join(agent.localPath, 'extensions'), { recursive: true })
-        await cp(extSrc, join(agent.localPath, 'extensions', 'superhive-pi-truth'), { recursive: true })
-        log.info(`[reconcile] backfilled extension for ${agent.name} (${agent.id})`)
-      }
+    if (!agent.localPath) continue
+    const jsonPath = join(agent.localPath, 'manifest.json')
+    if (!existsSync(jsonPath)) continue
+    const extIndexPath = join(agent.localPath, 'extensions', 'superhive-pi-truth', 'index.ts')
+
+    // Backfill extension dir from bundled source if missing
+    if (!existsSync(extIndexPath) && hasBundledExtension()) {
+      const bundledSrc = getBundledExtensionPath()
+      await mkdir(join(agent.localPath, 'extensions'), { recursive: true })
+      await cp(bundledSrc, join(agent.localPath, 'extensions', 'superhive-pi-truth'), { recursive: true })
+      log.info(`[reconcile] backfilled bundled extension for ${agent.name}`)
     }
+
+    // Patch manifest.extensions if extension dir is now on disk
+    if (!existsSync(extIndexPath)) continue
+    const raw = JSON.parse(readFileSync(jsonPath, 'utf8')) as Record<string, unknown>
+    const existing = Array.isArray(raw.extensions) ? (raw.extensions as unknown[]) : []
+    const extPath = './extensions/superhive-pi-truth'
+    if (existing.includes(extPath)) continue
+    raw.extensions = [...existing, extPath]
+    writeFileSync(jsonPath, JSON.stringify(raw, null, '\t') + '\n', 'utf8')
+    log.info(`[reconcile] patched manifest.json extensions for ${agent.name}`)
   }
 
   // 1. Scan default parent dir for orphan folders (no DB row)
@@ -103,13 +118,23 @@ export async function reconcileAgents(): Promise<void> {
       log.info(`[reconcile] adopted ${folder} → ${agent.id}`)
 
       // Backfill extension dir onto newly adopted orphan
-      if (disk.manifestPiSource) {
-        const extSrc = join(disk.manifestPiSource, 'extensions', 'superhive-pi-truth')
-        const extDst = join(localPath, 'extensions', 'superhive-pi-truth', 'index.ts')
-        if (!existsSync(extDst) && existsSync(join(extSrc, 'index.ts'))) {
-          await mkdir(join(localPath, 'extensions'), { recursive: true })
-          await cp(extSrc, join(localPath, 'extensions', 'superhive-pi-truth'), { recursive: true })
-          log.info(`[reconcile] backfilled extension for orphan ${folder}`)
+      if (!existsSync(join(localPath, 'extensions', 'superhive-pi-truth', 'index.ts')) && hasBundledExtension()) {
+        const bundledSrc = getBundledExtensionPath()
+        await mkdir(join(localPath, 'extensions'), { recursive: true })
+        await cp(bundledSrc, join(localPath, 'extensions', 'superhive-pi-truth'), { recursive: true })
+        log.info(`[reconcile] backfilled bundled extension for orphan ${folder}`)
+      }
+
+      // Patch manifest.extensions for orphan (after backfill so ext dir is present)
+      const extIndexPath = join(localPath, 'extensions', 'superhive-pi-truth', 'index.ts')
+      if (existsSync(extIndexPath)) {
+        const raw = JSON.parse(readFileSync(jsonPath, 'utf8')) as Record<string, unknown>
+        const existing = Array.isArray(raw.extensions) ? (raw.extensions as unknown[]) : []
+        const extPath = './extensions/superhive-pi-truth'
+        if (!existing.includes(extPath)) {
+          raw.extensions = [...existing, extPath]
+          writeFileSync(jsonPath, JSON.stringify(raw, null, '\t') + '\n', 'utf8')
+          log.info(`[reconcile] patched orphan manifest.json extensions for ${folder}`)
         }
       }
     }
@@ -128,6 +153,21 @@ export async function reconcileAgents(): Promise<void> {
     })
     missing++
     log.info(`[reconcile] missing folder for ${agent.name} (${agent.id})`)
+  }
+
+  // 3. Sync agent.json from manifest.json so legacy `agent.sh` --manifest path
+  //    resolves to the up-to-date config. Final pass so we capture any
+  //    extensions additions from step 0.5 above.
+  for (const agent of dbAgents) {
+    if (!agent.localPath) continue
+    const manifestPath = join(agent.localPath, 'manifest.json')
+    const agentJsonPath = join(agent.localPath, 'agent.json')
+    if (!existsSync(manifestPath)) continue
+    const content = readFileSync(manifestPath, 'utf8')
+    const existing = existsSync(agentJsonPath) ? readFileSync(agentJsonPath, 'utf8') : null
+    if (existing === content) continue
+    writeFileSync(agentJsonPath, content, 'utf8')
+    log.info(`[reconcile] synced agent.json from manifest.json for ${agent.name}`)
   }
 
   log.info(`[reconcile] done — adopted=${adopted} missing=${missing}`)

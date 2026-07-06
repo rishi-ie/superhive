@@ -5,6 +5,7 @@ import { rm } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 import log from 'electron-log/main'
 import { runtime } from '../manifest-pi-runtime'
+import { getBundledExtensionPath, hasBundledExtension } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus } from '../../src/storage/types'
 import { IPC } from './index'
@@ -60,15 +61,15 @@ export function registerAgentIpc(): void {
       await cp(join(manifestPiSource, 'agent.sh'), join(agentDir, 'agent.sh'))
       await chmod(join(agentDir, 'agent.sh'), 0o755)
 
-      const extSrc = join(manifestPiSource, 'extensions', 'superhive-pi-truth')
+      const bundledSrc = getBundledExtensionPath()
       const extDst = join(agentDir, 'extensions', 'superhive-pi-truth')
-      if (existsSync(join(extSrc, 'index.ts'))) {
-        await cp(extSrc, extDst, { recursive: true })
-        log.info(`[agents:create] copied superhive-pi-truth extension`)
+      if (hasBundledExtension()) {
+        await cp(bundledSrc, extDst, { recursive: true })
+        log.info(`[agents:create] copied bundled superhive-pi-truth extension`)
       } else {
-        log.warn(
-          `[agents:create] template missing superhive-pi-truth extension at ${extSrc} — ` +
-          `settings flow unavailable. Update: cd ${manifestPiSource} && git pull`,
+        log.error(
+          `[agents:create] bundled extension missing at ${bundledSrc} — ` +
+          `settings flow unavailable. Rebuild: bun run build`,
         )
       }
 
@@ -81,7 +82,7 @@ export function registerAgentIpc(): void {
         status: 'initializing',
       })
 
-      await writeFile(join(agentDir, 'manifest.json'), JSON.stringify({
+      const manifestContent = JSON.stringify({
         superhiveId: agent.id,
         version: 1,
         name: data.name.trim(),
@@ -91,13 +92,15 @@ export function registerAgentIpc(): void {
         systemPrompt: '',
         environment: { MINIMAX_API_KEY: config.minimaxApiKey },
         skills: [],
-        extensions: [],
+        extensions: ["./extensions/superhive-pi-truth"],
         prompts: [],
         permissions: { filesystem: true, terminal: true, network: true },
         memory: {},
         context: {},
         logging: { enabled: true },
-      }, null, 2) + '\n', 'utf8')
+      }, null, 2) + '\n'
+      await writeFile(join(agentDir, 'manifest.json'), manifestContent, 'utf8')
+      await writeFile(join(agentDir, 'agent.json'), manifestContent, 'utf8')
       await writeFile(join(agentDir, '.manifest-initialized'), '', 'utf8')
 
       return agent
@@ -134,6 +137,7 @@ export function registerAgentIpc(): void {
     const settingsPath = join(agent.localPath, `Superhive-pi-${folderName}.json`)
     if (!existsSync(settingsPath)) return null
     const raw = await readFile(settingsPath, 'utf8')
+    runtime.ensureSettingsWatcher(agentId, settingsPath)
     return JSON.parse(raw)
   })
 

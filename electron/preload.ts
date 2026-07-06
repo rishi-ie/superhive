@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('api', {
     onStatus:   (id, cb) => subscribe(`agent:${id}:status`,   cb),
     onMessages: (id, cb) => subscribe(`agent:${id}:messages`, cb),
     onExit:     (id, cb) => subscribe(`agent:${id}:exit`,     cb),
+    onSettingsChanged: (id, cb) => subscribe(`settings:${id}:changed`, cb),
   },
   manifestPi: {
     ensureTemplate: () => ipcRenderer.invoke('manifest-pi:ensureTemplate'),

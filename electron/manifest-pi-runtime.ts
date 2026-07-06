@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process'
+import { watch, type FSWatcher } from 'node:fs'
 import { join } from 'node:path'
 import { BrowserWindow } from 'electron'
 import log from 'electron-log/main'
@@ -62,6 +63,7 @@ class ManifestPiRuntime {
   private adapterFactories = new Map<string, () => PiProtocolAdapter>()
   private silenceTimers = new Map<string, NodeJS.Timeout>()
   private readyEmitted = new Set<string>()
+  private settingsWatchers = new Map<string, FSWatcher>()
 
   /**
    * Register a custom PiProtocolAdapter factory for an agent.
@@ -191,6 +193,7 @@ class ManifestPiRuntime {
   }
 
   shutdownAll(): void {
+    this.closeAllSettingsWatchers()
     for (const agentId of Array.from(this.silenceTimers.keys())) {
       this.clearSilenceTimer(agentId)
     }
@@ -214,9 +217,47 @@ class ManifestPiRuntime {
     }, 3000)
   }
 
+  ensureSettingsWatcher(agentId: string, settingsPath: string): void {
+    if (this.settingsWatchers.has(agentId)) return
+    const win = this.getWindow()
+    if (!win) return
+
+    let debounceTimer: NodeJS.Timeout | null = null
+    const watcher = watch(settingsPath, (eventType) => {
+      if (eventType !== 'change' && eventType !== 'rename') return
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        if (win.isDestroyed()) return
+        win.webContents.send(IPC.AGENTS.ON_SETTINGS_CHANGED(agentId), agentId)
+      }, 100)
+    })
+
+    watcher.on('error', (err) => {
+      log.warn(`[settings-watcher] error for ${agentId}:`, err)
+    })
+
+    this.settingsWatchers.set(agentId, watcher)
+    log.info(`[settings-watcher] started for ${agentId} → ${settingsPath}`)
+  }
+
+  private closeSettingsWatcher(agentId: string): void {
+    const existing = this.settingsWatchers.get(agentId)
+    if (!existing) return
+    existing.close()
+    this.settingsWatchers.delete(agentId)
+    log.info(`[settings-watcher] stopped for ${agentId}`)
+  }
+
+  private closeAllSettingsWatchers(): void {
+    for (const [agentId] of this.settingsWatchers) {
+      this.closeSettingsWatcher(agentId)
+    }
+  }
+
   removeEntry(agentId: string): void {
     this.clearSilenceTimer(agentId)
     this.readyEmitted.delete(agentId)
+    this.closeSettingsWatcher(agentId)
     this.stop(agentId)
     this.entries.delete(agentId)
   }
