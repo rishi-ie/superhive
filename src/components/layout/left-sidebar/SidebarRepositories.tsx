@@ -15,7 +15,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Plus className="size-4" />
               <span>New chat</span>
@@ -24,7 +24,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Search className="size-4" />
               <span>Search</span>
@@ -33,7 +33,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Hexagon className="size-4" />
               <span>Meta hive</span>
@@ -43,7 +43,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Globe className="size-4" />
               <span>Remote</span>
