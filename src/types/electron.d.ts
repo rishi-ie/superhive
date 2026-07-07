@@ -48,6 +48,7 @@ export interface ProjectsAPI {
 export type ProjectCreateInput = {
 	name: string
 	description?: string
+	localPath?: string
 }
 
 export interface ElectronAPI {

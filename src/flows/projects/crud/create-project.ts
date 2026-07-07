@@ -5,6 +5,7 @@ import type { Project } from '@/storage/types';
 export interface CreateProjectInput {
   name: string;
   description?: string;
+  localPath?: string;
 }
 
 export interface CreateProjectResult {
@@ -16,6 +17,7 @@ export interface CreateProjectResult {
 export async function createProject(input: CreateProjectInput): Promise<CreateProjectResult> {
   const name = input.name?.trim();
   const description = input.description?.trim();
+  const localPath = input.localPath?.trim();
 
   if (!name) {
     toast.error('Project name is required');
@@ -23,7 +25,7 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
   }
 
   try {
-    const project = await projects.create({ name, description: description || undefined });
+    const project = await projects.create({ name, description: description || undefined, localPath: localPath || undefined });
     toast.success(`Project "${project.name}" created`);
     return { ok: true, project };
   } catch (err) {

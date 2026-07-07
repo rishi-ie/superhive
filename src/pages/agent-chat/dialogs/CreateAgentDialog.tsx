@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import { createAgent } from '@/flows/agents/crud/create-agent';
 import { cn } from '@/lib/utils';
+import { slugify } from '@/lib/slugify';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/agents';
 
@@ -46,12 +47,7 @@ export function CreateAgentDialog() {
       setFolderName('');
       return;
     }
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-    setFolderName(slug);
+    setFolderName(slugify(name));
   }, [name]);
 
   const fullPath = parentDir ? `${parentDir}/${folderName || '<folder-name>'}` : '';

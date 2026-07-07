@@ -8,5 +8,6 @@ export const projects = {
   create: (data: {
     name: string;
     description?: string;
+    localPath?: string;
   }): Promise<Project> => window.api.projects.create(data),
 };
