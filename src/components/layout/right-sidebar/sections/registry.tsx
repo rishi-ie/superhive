@@ -1,41 +1,34 @@
-import type { ComponentType } from 'react'
-import { HugeiconsIcon } from "@/components/ui/icon"
-import { UserIcon, CpuIcon, SlidersHorizontalIcon, PackageIcon } from "@hugeicons/core-free-icons"
-import type { IconSvgElement } from "@hugeicons/react"
-import type { ReactNode } from "react"
-import { IdentitySection } from './IdentitySection'
-import { ModelSection } from './ModelSection'
-import { BehaviorSection } from './BehaviorSection'
-import { SkillsSection } from './SkillsSection'
-import type { AgentSettingsState } from '@/flows/agents/settings'
+import type { ComponentType } from "react";
+import type { AgentSettingsState } from "@/flows/agents/settings";
+import { OverviewSection } from "./OverviewSection";
+import { IdentityManageSection } from "./IdentityManageSection";
+import { ModelManageSection } from "./ModelManageSection";
+import { BehaviorManageSection } from "./BehaviorManageSection";
+import { InboxSection } from "./InboxSection";
+import { SkillsSection } from "./SkillsSection";
 
 export interface SettingsSectionProps {
-  settings: AgentSettingsState
-  agentId: string
-  patch: (key: string, value: unknown) => void
-  flush: (p: Record<string, unknown>) => Promise<void>
+  settings: AgentSettingsState;
+  agentId: string;
+  patch: (key: string, value: unknown) => void;
+  flush: (p: Record<string, unknown>) => Promise<void>;
 }
 
-type IconComp = (props: { className?: string }) => ReactNode;
+export { OverviewSection };
+export { IdentityManageSection };
+export { ModelManageSection };
+export { BehaviorManageSection };
+export { SkillsSection };
+export { InboxSection };
 
-function makeIcon(icon: IconSvgElement): IconComp {
-  return function Icon({ className }: { className?: string }) {
-    return <HugeiconsIcon icon={icon} className={className} />;
-  };
+export interface ManageSectionDef {
+  id: string;
+  label: string;
+  Component: ComponentType<SettingsSectionProps>;
 }
 
-export interface SettingsSectionDefinition {
-  id: string
-  label: string
-  icon: IconComp
-  readOnly: boolean
-  order: number
-  Component: ComponentType<SettingsSectionProps>
-}
-
-export const SETTING_SECTIONS: SettingsSectionDefinition[] = [
-  { id: 'identity', label: 'Identity', icon: makeIcon(UserIcon), readOnly: false, order: 1, Component: IdentitySection },
-  { id: 'model',    label: 'Model',   icon: makeIcon(CpuIcon), readOnly: false, order: 2, Component: ModelSection },
-  { id: 'behavior', label: 'Behavior', icon: makeIcon(SlidersHorizontalIcon), readOnly: false, order: 3, Component: BehaviorSection },
-  { id: 'skills',   label: 'Skills',  icon: makeIcon(PackageIcon), readOnly: true,  order: 4, Component: SkillsSection },
-].sort((a, b) => a.order - b.order)
+export const MANAGE_SECTIONS: ManageSectionDef[] = [
+  { id: "identity", label: "Identity", Component: IdentityManageSection },
+  { id: "model", label: "Model", Component: ModelManageSection },
+  { id: "behavior", label: "Behavior", Component: BehaviorManageSection },
+];
