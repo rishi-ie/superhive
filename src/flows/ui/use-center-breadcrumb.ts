@@ -1,6 +1,7 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { agents } from "@/api/agents";
+import { loadProject } from "@/flows/projects/crud/load-project";
 
 export interface BreadcrumbSegment {
   label: string;
@@ -12,6 +13,7 @@ export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   const { pathname } = useLocation();
   const { agentId, projectId } = useParams();
   const [agentName, setAgentName] = useState<string | null>(null);
+  const [projectName, setProjectName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!agentId) return;
@@ -19,6 +21,13 @@ export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
       setAgentName(a?.name ?? agentId);
     });
   }, [agentId]);
+
+  useEffect(() => {
+    if (!projectId) return;
+    loadProject(projectId).then((p) => {
+      setProjectName(p?.name ?? projectId);
+    });
+  }, [projectId]);
 
   if (pathname === "/landing" || pathname === "/") {
     return null;
@@ -30,7 +39,7 @@ export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   }
   if (pathname === "/projects" || pathname.startsWith("/projects/")) {
     return projectId
-      ? [{ label: "Projects", href: "/projects" }, { label: projectId }]
+      ? [{ label: "Projects", href: "/projects" }, { label: projectName ?? projectId }]
       : [{ label: "Projects" }];
   }
   if (pathname === "/hive") {
