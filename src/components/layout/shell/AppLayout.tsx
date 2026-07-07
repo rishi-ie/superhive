@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Outlet } from "react-router-dom";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "../left-sidebar/AppSidebar";
 import { RightSidebar } from "../right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
@@ -8,6 +8,9 @@ import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
 import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { LayoutAlignLeftIcon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -17,6 +20,15 @@ const MAX_RIGHT_WIDTH = 480;
 const DEFAULT_RIGHT_WIDTH = 330;
 
 export function AppLayout() {
+  return (
+    <SidebarProvider>
+      <AppLayoutShell />
+    </SidebarProvider>
+  );
+}
+
+function AppLayoutShell() {
+  const { open: leftSidebarOpen, state: leftSidebarState, toggleSidebar } = useSidebar();
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
@@ -97,20 +109,38 @@ export function AppLayout() {
   }, [isResizingRight, resizeRight, stopResizingRight]);
 
   return (
-    <SidebarProvider>
+    <>
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
-        <div
-          ref={leftContainerRef}
-          className="relative flex h-full flex-shrink-0"
-          style={{ width: `${leftSidebarWidth}px` }}
+
+        {/* Left sidebar toggle — always visible */}
+        <Button
+          variant="ghost"
+          size="icon-lg"
+          className="no-drag absolute top-1.5 left-[92px] z-[80] border-none text-muted-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
+          onClick={() => toggleSidebar()}
+          title={leftSidebarState === "expanded" ? "Collapse sidebar" : "Open sidebar"}
         >
-          <AppSidebar width={leftSidebarWidth} />
-          <div
-            onMouseDown={startResizingLeft}
-            className="no-drag absolute right-0 top-0 z-[60] h-full w-1 cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
+          <HugeiconsIcon
+            icon={leftSidebarState === "expanded" ? LayoutAlignLeftIcon : LayoutAlignRightIcon}
+            className="size-4"
           />
-        </div>
+        </Button>
+
+        {leftSidebarOpen && (
+          <div
+            ref={leftContainerRef}
+            className="relative flex h-full flex-shrink-0"
+            style={{ width: `${leftSidebarWidth}px` }}
+          >
+            <AppSidebar width={leftSidebarWidth} />
+            <div
+              onMouseDown={startResizingLeft}
+              className="no-drag absolute right-0 top-0 z-[60] h-full w-1 cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
+            />
+          </div>
+        )}
+
         <Workspace>
           <CenterBreadcrumb />
           <TopRightControls
@@ -131,6 +161,6 @@ export function AppLayout() {
       </div>
       <CommandPalette />
       <CreateAgentDialog />
-    </SidebarProvider>
+    </>
   );
 }
