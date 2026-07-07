@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon, UserIcon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon, UserIcon, FolderOpenIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -63,6 +63,16 @@ export function SidebarRepositories() {
             >
               <HugeiconsIcon icon={UserIcon} className="size-4" />
               <span>Agents</span>
+            </button>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <button
+              type="button"
+              onClick={() => navigate('/projects')}
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+            >
+              <HugeiconsIcon icon={FolderOpenIcon} className="size-4" />
+              <span>Projects</span>
             </button>
           </SidebarMenuItem>
         </SidebarMenu>
