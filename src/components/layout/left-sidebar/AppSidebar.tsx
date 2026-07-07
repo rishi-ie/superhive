@@ -6,7 +6,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { SidebarLeft01Icon } from "@hugeicons/core-free-icons";
+import { LayoutAlignLeftIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { SidebarAccordion } from "./SidebarAccordion";
 import { SidebarRepositories } from "./SidebarRepositories";
@@ -31,10 +31,10 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
           size="icon-lg"
           className="border-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           onClick={() => toggleSidebar()}
-          title="Close sidebar"
+          title="Collapse sidebar"
         >
-          <HugeiconsIcon icon={SidebarLeft01Icon} />
-          <span className="sr-only">Close sidebar</span>
+          <HugeiconsIcon icon={LayoutAlignLeftIcon} />
+          <span className="sr-only">Collapse sidebar</span>
         </Button>
       </div>
 
