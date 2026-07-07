@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { SidebarRightIcon, SidebarRight01Icon } from "@hugeicons/core-free-icons";
+import { LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -27,9 +27,9 @@ export function TopRightControls({
             onClick={onToggleRightSidebar}
           >
             {rightSidebarOpen ? (
-              <HugeiconsIcon icon={SidebarRight01Icon} className="size-4" />
+              <HugeiconsIcon icon={LayoutAlignRightIcon} className="size-4" />
             ) : (
-              <HugeiconsIcon icon={SidebarRightIcon} className="size-4" />
+              <HugeiconsIcon icon={LayoutAlignRightIcon} className="size-4" />
             )}
           </Button>
         </TooltipTrigger>
