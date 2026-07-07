@@ -23,7 +23,7 @@ export function TopRightControls({
           <Button
             variant="ghost"
             size="icon-lg"
-            className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
             onClick={onToggleRightSidebar}
           >
             {rightSidebarOpen ? (
