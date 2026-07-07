@@ -7,21 +7,28 @@ interface AccordionSectionProps {
   label: string;
   defaultOpen?: boolean;
   children: React.ReactNode;
+  onClick?: () => void;
 }
 
 export function AccordionSection({
   label,
   defaultOpen = false,
   children,
+  onClick,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+
+  const handleClick = () => {
+    if (onClick) onClick();
+    setOpen((o) => !o);
+  };
 
   return (
     <div className="flex flex-col">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors"
+        onClick={handleClick}
+        className="flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#727272] transition-colors hover:bg-sidebar-accent hover:text-foreground"
       >
         <span className="truncate text-left">{label}</span>
         <HugeiconsIcon icon={ArrowRight01Icon}

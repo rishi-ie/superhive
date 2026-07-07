@@ -6,11 +6,6 @@ import { ProjectsSection } from './sections/ProjectsSection';
 
 const pinned: { id: string; name: string }[] = [];
 
-const mockProjects = [
-  { id: 'p_boros', name: 'BOROS Architecture', agentIds: [] as string[] },
-  { id: 'p_hive', name: 'Meta Hive Strategy', agentIds: [] as string[] },
-];
-
 export function SidebarAccordion() {
   const [agents, setAgents] = React.useState<Agent[]>([]);
 
@@ -33,7 +28,7 @@ export function SidebarAccordion() {
   return (
     <div className="flex flex-col gap-1 px-2">
       <PinnedSection items={pinned} />
-      <ProjectsSection items={mockProjects} agents={agents} />
+      <ProjectsSection items={[]} agents={agents} />
     </div>
   );
 }

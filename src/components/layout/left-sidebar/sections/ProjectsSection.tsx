@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { FolderOpenIcon } from "@hugeicons/core-free-icons";
 import { AccordionSection } from '@/components/layout/common/primitives';
@@ -20,12 +21,19 @@ function isAgentActive(status: Agent['status']): boolean {
 }
 
 export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
+  const navigate = useNavigate();
+
   return (
     <>
       {items.map((p) => {
         const projectAgents = agents.filter(a => p.agentIds.includes(a.id));
         return (
-          <AccordionSection key={p.id} label={p.name} defaultOpen={false}>
+          <AccordionSection
+            key={p.id}
+            label={p.name}
+            defaultOpen={false}
+            onClick={() => navigate(`/projects/${p.id}`)}
+          >
             {projectAgents.length > 0
               ? projectAgents.map((a) => (
                   <AgentRow
@@ -33,7 +41,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
                     name={a.name}
                     status={isAgentActive(a.status) ? 'active' : 'idle'}
                     currentAction="Working…"
-                    onClick={() => {}}
+                    onClick={() => navigate(`/agents/${a.id}`)}
                   />
                 ))
               : (
