@@ -29,7 +29,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
         <Button
           variant="ghost"
           size="icon-lg"
-          className="border-none text-muted-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="border-none text-muted-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
           onClick={() => toggleSidebar()}
           title="Collapse sidebar"
         >
