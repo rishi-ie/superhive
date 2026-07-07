@@ -31,15 +31,6 @@ export function SidebarRepositories() {
               type="button"
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <HugeiconsIcon icon={Search01Icon} className="size-4" />
-              <span>Search</span>
-            </button>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <button
-              type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
-            >
               <HugeiconsIcon icon={HexagonIcon} className="size-4" />
               <span>Meta hive</span>
               <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
@@ -63,6 +54,15 @@ export function SidebarRepositories() {
             >
               <HugeiconsIcon icon={UserIcon} className="size-4" />
               <span>Agents</span>
+            </button>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <button
+              type="button"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+            >
+              <HugeiconsIcon icon={Search01Icon} className="size-4" />
+              <span>Search</span>
             </button>
           </SidebarMenuItem>
           <div className="group flex h-8 w-full cursor-default items-center gap-2 px-2 text-sm text-[#9ca3af]">
