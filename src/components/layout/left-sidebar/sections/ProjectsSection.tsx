@@ -1,28 +1,50 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { FolderOpenIcon, PlusSignIcon } from "@hugeicons/core-free-icons";
-import { AccordionSection, AccordionRow, EmptyCtaButton } from '@/components/layout/common/primitives';
+import { FolderOpenIcon } from "@hugeicons/core-free-icons";
+import { AccordionSection } from '@/components/layout/common/primitives';
+import { AgentRow } from '@/components/layout/common/primitives/AgentRow';
+import type { Agent } from '@/types/electron';
 
 interface ProjectItem {
   id: string;
   name: string;
+  agentIds: string[];
 }
 
 interface ProjectsSectionProps {
   items: ProjectItem[];
+  agents: Agent[];
 }
 
-export function ProjectsSection({ items }: ProjectsSectionProps) {
+function isAgentActive(status: Agent['status']): boolean {
+  return status === 'running' || status === 'busy';
+}
+
+export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
   return (
-    <AccordionSection label="Projects">
-      {items.length > 0
-        ? items.map((p) => (
-            <AccordionRow
-              key={p.id}
-              icon={<HugeiconsIcon icon={FolderOpenIcon} className="size-4 flex-shrink-0" />}
-              label={p.name}
-            />
-          ))
-        :             <EmptyCtaButton icon={<HugeiconsIcon icon={PlusSignIcon} className="size-4 flex-shrink-0" />} label="New project" />}
-    </AccordionSection>
+    <>
+      {items.map((p) => {
+        const projectAgents = agents.filter(a => p.agentIds.includes(a.id));
+        return (
+          <AccordionSection key={p.id} label={p.name} defaultOpen={false}>
+            {projectAgents.length > 0
+              ? projectAgents.map((a) => (
+                  <AgentRow
+                    key={a.id}
+                    name={a.name}
+                    status={isAgentActive(a.status) ? 'active' : 'idle'}
+                    currentAction="Working…"
+                    onClick={() => {}}
+                  />
+                ))
+              : (
+                  <div className="flex items-center gap-2 px-2 py-1.5">
+                    <HugeiconsIcon icon={FolderOpenIcon} className="size-4 flex-shrink-0 text-[#727272]" />
+                    <span className="text-xs text-[#727272]">No agents assigned</span>
+                  </div>
+                )}
+          </AccordionSection>
+        );
+      })}
+    </>
   );
 }

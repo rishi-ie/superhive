@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon, UserIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -53,6 +53,16 @@ export function SidebarRepositories() {
               <HugeiconsIcon icon={GlobalIcon} className="size-4" />
               <span>Remote</span>
               <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
+            </button>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <button
+              type="button"
+              onClick={() => navigate('/agents')}
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+            >
+              <HugeiconsIcon icon={UserIcon} className="size-4" />
+              <span>Agents</span>
             </button>
           </SidebarMenuItem>
         </SidebarMenu>

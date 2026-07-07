@@ -1,0 +1,56 @@
+import type { MouseEventHandler } from 'react';
+import { HugeiconsIcon } from "@/components/ui/icon";
+import { UserIcon, MoreHorizontalIcon, PinIcon } from "@hugeicons/core-free-icons";
+
+interface AgentRowProps {
+  name: string;
+  status: 'idle' | 'active';
+  currentAction?: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+}
+
+const AgentActions = () => (
+  <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
+    <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
+      <HugeiconsIcon icon={PinIcon} className="size-3.5" />
+    </div>
+    <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
+      <HugeiconsIcon icon={MoreHorizontalIcon} className="size-3.5" />
+    </div>
+  </span>
+);
+
+export function AgentRow({ name, status, currentAction = "Working…", onClick }: AgentRowProps) {
+  if (status === 'active') {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="group flex h-16 w-full cursor-default flex-col items-stretch gap-0 overflow-hidden rounded-lg px-2 py-1 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+      >
+        <div className="flex h-8 flex-shrink-0 items-center gap-2">
+          <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+          <span className="flex-1 truncate text-left">{name}</span>
+          <AgentActions />
+        </div>
+        <div className="flex h-8 flex-shrink-0 items-center gap-1.5 pl-6">
+          <div className="size-3 rounded-full border border-[#727272] border-t-[#dedede] animate-spin" />
+          <span className="truncate text-xs text-[#727272]">{currentAction}</span>
+        </div>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+    >
+      <div className="size-2 rounded-full bg-green-500 flex-shrink-0" />
+      <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+      <span className="flex-1 truncate text-left">{name}</span>
+      <AgentActions />
+    </button>
+  );
+}
