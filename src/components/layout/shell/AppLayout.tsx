@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "../left-sidebar/AppSidebar";
 import { RightSidebar } from "../right-sidebar/RightSidebar";
@@ -29,12 +29,17 @@ export function AppLayout() {
 
 function AppLayoutShell() {
   const { open: leftSidebarOpen, state: leftSidebarState, toggleSidebar } = useSidebar();
+  const location = useLocation();
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
   const [isResizingRight, setIsResizingRight] = React.useState(false);
-  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(location.pathname === "/");
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    setRightSidebarOpen(location.pathname !== "/");
+  }, [location.pathname]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
