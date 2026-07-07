@@ -17,11 +17,11 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
       collapsible="none"
       style={{ width: `${width}px` }}
     >
-      <SidebarContent className="flex h-full flex-col items-stretch justify-start bg-background p-0 pt-8">
+      <SidebarContent className="flex h-full flex-col items-stretch bg-background p-0 pt-8">
         {agentId ? (
           <AgentSettingsPanel agentId={agentId} />
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 p-4">
+          <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
             <HugeiconsIcon icon={UserIcon} className="size-6 text-muted-foreground/40" />
             <div className="text-center text-xs text-muted-foreground">
               Select an agent or project
