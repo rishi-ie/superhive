@@ -65,7 +65,7 @@ export function SidebarRepositories() {
               <span>Search</span>
             </button>
           </SidebarMenuItem>
-          <div className="group flex h-8 w-full cursor-default items-center gap-2 px-2 text-sm text-[#9ca3af]">
+          <div className="group flex h-8 w-full cursor-default items-center gap-2 px-2 text-sm text-[#727272]">
             <span>Projects</span>
             <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button

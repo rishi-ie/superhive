@@ -33,6 +33,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
             label={p.name}
             defaultOpen={false}
             onClick={() => navigate(`/projects/${p.id}`)}
+            labelClassName="text-[#9ca3af]"
           >
             {projectAgents.length > 0
               ? projectAgents.map((a) => (
