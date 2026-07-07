@@ -10,8 +10,8 @@ import {
 
 export function ComposerCard() {
   return (
-    <div className="w-full max-w-[700px]">
-      <div className="rounded-3xl bg-[#2a2a2a]">
+    <div className="relative w-full max-w-[700px]">
+      <div className="relative z-10 rounded-3xl bg-[#2a2a2a]">
         <textarea
           placeholder="Do anything"
           className="min-h-[60px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -41,7 +41,8 @@ export function ComposerCard() {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 bg-[#1c1c1c] px-4 py-3 rounded-b-3xl max-w-[690px] mx-auto">
+      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 z-0 w-full max-w-[690px] rounded-3xl bg-[#1c1c1c]" />
+      <div className="relative z-20 flex items-center gap-2 px-4 py-3 max-w-[690px] mx-auto">
         <HugeiconsIcon icon={NotebookIcon} className="size-4 text-white" />
         <span className="text-sm text-white">Choose project</span>
       </div>
