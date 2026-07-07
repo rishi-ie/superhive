@@ -24,7 +24,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
   const navigate = useNavigate();
 
   return (
-    <>
+    <div className="pl-2">
       {items.map((p) => {
         const projectAgents = agents.filter(a => p.agentIds.includes(a.id));
         return (
@@ -53,6 +53,6 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
           </AccordionSection>
         );
       })}
-    </>
+    </div>
   );
 }
