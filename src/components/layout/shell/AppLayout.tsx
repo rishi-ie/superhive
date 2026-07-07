@@ -5,6 +5,7 @@ import { AppSidebar } from "../left-sidebar/AppSidebar";
 import { RightSidebar } from "../right-sidebar/RightSidebar";
 import { Workspace } from "./Workspace";
 import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
+import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 
@@ -20,7 +21,7 @@ export function AppLayout() {
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
   const [isResizingRight, setIsResizingRight] = React.useState(false);
-  const [rightSidebarOpen] = React.useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(true);
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
@@ -112,6 +113,10 @@ export function AppLayout() {
         </div>
         <Workspace>
           <CenterBreadcrumb />
+          <TopRightControls
+            rightSidebarOpen={rightSidebarOpen}
+            onToggleRightSidebar={() => setRightSidebarOpen(o => !o)}
+          />
           <Outlet />
         </Workspace>
         {rightSidebarOpen && (
