@@ -1,78 +1,50 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon, LockIcon, MicIcon } from "@hugeicons/core-free-icons";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  PlusSignIcon,
+  HandIcon,
+  ArrowDown01Icon,
+  ArrowUp01Icon,
+  Mic01Icon,
+  NotebookIcon,
+} from "@hugeicons/core-free-icons";
 
 export function ComposerCard() {
   return (
-    <Card className="w-full max-w-[620px] rounded-2xl border border-border bg-card p-1.5 shadow-foreground/10">
-      <Textarea
-        placeholder="Plan, Build, / for skills, @ for context"
-        className="min-h-[90px] resize-none border-0 bg-transparent px-3 py-3 text-xs leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
-      />
-      <div className="flex items-center gap-2 px-1 pb-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 rounded-full bg-[#2a2a2a] text-muted-foreground hover:bg-[#333333] hover:text-foreground"
-            >
-              <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <span>Add attachment</span>
-          </TooltipContent>
-        </Tooltip>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5 rounded-full px-3 text-xs font-medium text-foreground hover:bg-accent"
-            >
-              <HugeiconsIcon icon={LockIcon} className="size-3" />
-              <span>Composer 2.5 Fast</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="border-border bg-card">
-            <DropdownMenuItem>Composer 2.5 Pro</DropdownMenuItem>
-            <DropdownMenuItem>Composer 2.5 Fast</DropdownMenuItem>
-            <DropdownMenuItem>Composer 1.5</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="flex-1" />
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8 rounded-full bg-white text-black hover:bg-white/90"
-            >
-              <HugeiconsIcon icon={MicIcon} className="size-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <span>Voice input</span>
-          </TooltipContent>
-        </Tooltip>
+    <div className="w-full max-w-[800px] rounded-2xl bg-[#222222]">
+      <div className="rounded-t-2xl">
+        <textarea
+          placeholder="Do anything"
+          className="min-h-[80px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-4">
+            <button className="text-[#9ca3af] hover:text-white cursor-default">
+              <HugeiconsIcon icon={PlusSignIcon} className="size-5" />
+            </button>
+            <button className="flex items-center gap-1.5 text-sm text-[#9ca3af] hover:text-white cursor-default">
+              <HugeiconsIcon icon={HandIcon} className="size-4" />
+              <span>Ask for approval</span>
+              <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-1 text-sm text-[#9ca3af] hover:text-white cursor-default">
+              <span>5.5 Extra High</span>
+              <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+            </button>
+            <button className="text-[#9ca3af] hover:text-white cursor-default">
+              <HugeiconsIcon icon={Mic01Icon} className="size-5" />
+            </button>
+            <button className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] cursor-default">
+              <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5 text-[#222222]" />
+            </button>
+          </div>
+        </div>
       </div>
-    </Card>
+      <div className="flex items-center gap-2 border-t border-[#333] bg-[#1a1a1a] px-4 py-3 rounded-b-2xl">
+        <HugeiconsIcon icon={NotebookIcon} className="size-4 text-white" />
+        <span className="text-sm text-white">Choose project</span>
+      </div>
+    </div>
   );
 }
