@@ -1,5 +1,6 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { PlusSignIcon, Search01Icon, HexagonIcon, GlobalIcon } from "@hugeicons/core-free-icons";
+import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,8 +8,10 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
+import { goBackHome } from "@/flows/navigation";
 
 export function SidebarRepositories() {
+  const navigate = useNavigate();
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -16,6 +19,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
+              onClick={() => goBackHome(navigate)}
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
