@@ -41,7 +41,7 @@ export function ComposerCard() {
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2 bg-[#1a1a1a] px-4 py-3 rounded-b-lg">
+      <div className="flex items-center gap-2 bg-[#1c1c1c] px-4 py-3 rounded-b-3xl max-w-[690px] mx-auto">
         <HugeiconsIcon icon={NotebookIcon} className="size-4 text-white" />
         <span className="text-sm text-white">Choose project</span>
       </div>
