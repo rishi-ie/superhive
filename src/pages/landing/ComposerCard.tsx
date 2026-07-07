@@ -10,11 +10,11 @@ import {
 
 export function ComposerCard() {
   return (
-    <div className="w-full max-w-[800px]">
+    <div className="w-full max-w-[700px]">
       <div className="rounded-3xl bg-[#2a2a2a]">
         <textarea
           placeholder="Do anything"
-          className="min-h-[80px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="min-h-[60px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
