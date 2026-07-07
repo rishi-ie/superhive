@@ -9,9 +9,13 @@ import {
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
 import { goBackHome } from "@/flows/navigation";
+import { useCommandPalette } from "@/flows/ui/use-command-palette";
+import { useOpenCreateProject } from "@/flows/projects/ui/open-create-project";
 
 export function SidebarRepositories() {
   const navigate = useNavigate();
+  const { setOpen: setCommandOpen } = useCommandPalette();
+  const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -59,6 +63,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
+              onClick={() => setCommandOpen(true)}
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <HugeiconsIcon icon={Search01Icon} className="size-4" />
@@ -70,7 +75,7 @@ export function SidebarRepositories() {
             <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); }}
+                onClick={(e) => { e.stopPropagation(); setCreateProjectOpen(true); }}
                 className="flex size-6 cursor-default items-center justify-center rounded-lg text-[#9ca3af] hover:bg-sidebar-accent hover:text-foreground"
                 title="Add project"
               >

@@ -8,6 +8,7 @@ import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
 import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
+import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { LayoutAlignLeftIcon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
@@ -166,6 +167,7 @@ function AppLayoutShell() {
       </div>
       <CommandPalette />
       <CreateAgentDialog />
+      <CreateProjectDialog />
     </>
   );
 }
