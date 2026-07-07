@@ -11,7 +11,7 @@ import {
 export function ComposerCard() {
   return (
     <div className="w-full max-w-[800px]">
-      <div className="rounded-2xl bg-[#2a2a2a]">
+      <div className="rounded-3xl bg-[#2a2a2a]">
         <textarea
           placeholder="Do anything"
           className="min-h-[80px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
