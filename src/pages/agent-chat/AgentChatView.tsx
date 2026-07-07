@@ -86,9 +86,9 @@ export function AgentChatView() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               autoFocus
-              className="min-h-[48px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-4 pt-3 pb-2 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center justify-between px-4 py-2">
               <div className="flex items-center gap-4">
                 <button className="text-[#9ca3af] hover:text-white cursor-default">
                   <HugeiconsIcon icon={PlusSignIcon} className="size-5" />
