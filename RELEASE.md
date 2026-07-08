@@ -7,22 +7,22 @@ Canonical reference for developing, versioning, publishing, and distributing Sup
 ## 1. TL;DR — Workflow Cheat Sheet
 
 ```bash
-# 1. Bump 3 files (package.json + app-meta.ts + README.md)
-# 2. Verify
-bun run typecheck && bun run build
+# 1. Bump 3 files (package.json + app-meta.ts + README.md) on dev
+git switch dev
+# edit files
+git add -A && git commit -m "v0.1.X: <summary>" && git push origin dev
+# → silent. No CI.
 
-# 3. Commit + push to main (no CI runs — silent)
-git add -A && git commit -m "v0.1.X: <summary>" && git push origin main
+# 2. Merge dev → main to trigger release
+git switch main
+git merge dev --ff-only
+git push origin main
+# → CI runs (~5–7 min first build, ~2 min cached)
 
-# 4. Merge to release branch to trigger the pipeline
-git switch release 2>/dev/null || git switch -c release
-git merge main --ff-only
-git push origin release
+# 3. Watch CI
+gh run watch $(gh run list --limit 1 --json databaseId --jq '.[0].databaseId')
 
-# 5. Watch CI (~5–7 min first build, ~2 min cached)
-gh run watch $(gh run list --limit 1 --json id --jq '.[0].id')
-
-# 6. Verify artifacts
+# 4. Verify artifacts
 gh release view v0.1.X --json assets --jq '.[].assets[].name'
 # expect: ZIP, DMG, latest-mac.yml, blockmaps
 ```
@@ -85,7 +85,7 @@ marketing push.
 
 **File:** `.github/workflows/release.yml`
 **Triggers:**
-- **Push to `release` branch** — main release pipeline; publishes `v{version}` from `package.json`
+- **Push to `main` branch** — main release pipeline; publishes `v{version}` from `package.json`
 - **Manual (`workflow_dispatch`)** — emergency or test release from GitHub Actions UI; optionally override version
 
 **Runner:** `macos-latest` (macOS 14, Apple Silicon)
@@ -93,7 +93,7 @@ marketing push.
 ```yaml
 on:
   push:
-    branches: [release]
+    branches: [main]
   workflow_dispatch:
     inputs:
       version:
@@ -131,20 +131,21 @@ gh run view <id> --log-failed  # failed-step logs
 
 ### Two release types
 
-**Release branch push (standard)**
-Push to `release` branch triggers the pipeline. `main` stays clean for daily work.
-Use this for every planned release:
+**Merge to `main` (standard)**
+Daily work happens on `dev`. When ready to ship, merge `dev` → `main` and push:
 
 ```bash
-git switch main && git pull
+git switch dev && git pull
 # edit package.json + app-meta.ts + README.md to bump version
-git add -A && git commit -m "v0.1.X" && git push origin main
-git switch release && git merge main --ff-only && git push origin release
+git add -A && git commit -m "v0.1.X" && git push origin dev
+git switch main
+git merge dev --ff-only
+git push origin main
 # → release.yml runs → v0.1.X published → users see update pill
 ```
 
 **Manual (`workflow_dispatch`)**
-Emergency releases or testing without pushing to `release`:
+Emergency releases or testing without merging to `main`:
 
 1. https://github.com/rishi-ie/superhive/actions/workflows/release.yml → **Run workflow**
 2. Leave `version` empty (uses `package.json`) or enter a specific version

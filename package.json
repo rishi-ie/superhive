@@ -1,6 +1,6 @@
 {
   "name": "superhive",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Superhive Desktop App",
   "author": "Superhive",
   "main": "dist-electron/main.js",
