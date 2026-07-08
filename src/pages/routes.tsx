@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/shell";
 import { Landing } from "@/pages/landing";
 import { AgentChatView } from "@/pages/agent-chat";
@@ -7,7 +7,7 @@ import { MetaHiveView } from "@/pages/meta-hive";
 import { RemoteView } from "@/pages/remote";
 import { SettingsLayout, SettingsSectionView } from "@/pages/settings";
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: "/",
     element: <AppLayout />,
