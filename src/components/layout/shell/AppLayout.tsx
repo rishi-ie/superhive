@@ -9,9 +9,6 @@ import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { LayoutAlignLeftIcon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
-import { Button } from "@/components/ui/button";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -29,7 +26,7 @@ export function AppLayout() {
 }
 
 function AppLayoutShell() {
-  const { open: leftSidebarOpen, state: leftSidebarState, toggleSidebar } = useSidebar();
+  const { open: leftSidebarOpen } = useSidebar();
   const location = useLocation();
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
@@ -118,20 +115,6 @@ function AppLayoutShell() {
     <>
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
-
-        {/* Left sidebar toggle — always visible */}
-        <Button
-          variant="ghost"
-          size="icon-lg"
-          className="no-drag absolute top-1.5 left-[92px] z-[80] border-none text-muted-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
-          onClick={() => toggleSidebar()}
-          title={leftSidebarState === "expanded" ? "Collapse sidebar" : "Open sidebar"}
-        >
-          <HugeiconsIcon
-            icon={leftSidebarState === "expanded" ? LayoutAlignLeftIcon : LayoutAlignRightIcon}
-            className="size-4"
-          />
-        </Button>
 
         {leftSidebarOpen && (
           <div
