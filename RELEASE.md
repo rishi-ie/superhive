@@ -79,10 +79,24 @@ marketing push.
 ## 4. CI/CD Pipeline
 
 **File:** `.github/workflows/release.yml`
-**Trigger:** push to `main`
+**Triggers:**
+- **Push to `main`** — automatic; publishes `v{version}` from `package.json`
+- **Manual (`workflow_dispatch`)** — dedicated release from GitHub Actions UI; optionally override version
+
 **Runner:** `macos-latest` (macOS 14, Apple Silicon)
 
 ```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 0.1.4). Defaults to package.json if empty.'
+        required: false
+        type: string
+        default: ''
+
 steps:
   - actions/checkout@v4
   - actions/setup-node@v4 (node-version: '20')
@@ -90,7 +104,12 @@ steps:
   - bun install
   - bun run build
   - bun x electron-builder --mac dmg zip --x64=false --publish never
-  - Read version: bun -e "console.log(require('./package.json').version)"
+  - Read version (uses workflow_dispatch input if provided, else package.json):
+      if [[ -n "${{ inputs.version }}" ]]; then
+        echo "VERSION=${{ inputs.version }}"
+      else
+        echo "VERSION=$(bun -e "require('./package.json').version")"
+      fi
   - softprops/action-gh-release@v2
       tag_name: v${{ steps.version.outputs.VERSION }}
       files: release/*       # ZIP + DMG + latest-mac.yml + blockmaps
@@ -104,6 +123,27 @@ steps:
 gh run watch <id>              # live status
 gh run view <id> --log-failed  # failed-step logs
 ```
+
+### Two release types
+
+**Push-to-main (automatic)**
+Every commit merged to `main` triggers a release. The version comes from
+`package.json`. Use for regular shipping after PR review.
+
+**Dedicated release (manual)**
+Use when you want to release without merging, test the pipeline, or release a
+specific version without pushing to `main`:
+
+1. Go to: https://github.com/rishi-ie/superhive/actions/workflows/release.yml
+2. Click **"Run workflow"** (right side)
+3. Leave `version` empty to use `package.json` version, or enter a specific
+   version (e.g. `0.1.5`)
+4. Click **Run workflow**
+
+> **Note:** `workflow_dispatch` checks out the `main` branch. For the version
+> input to take effect, the version must already exist in `package.json` on
+> `main` (either pre-committed, or by running the workflow empty first to
+> confirm the commit is clean, then committing the version bump separately).
 
 **Known CI annotations (ignore):**
 - Node 20 deprecation on actions — runner ships Node 24; still works.
