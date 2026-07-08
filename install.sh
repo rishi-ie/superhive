@@ -5,9 +5,15 @@ REPO="rishi-ie/superhive"
 APP_NAME="Superhive"
 APP_PATH="/Applications/${APP_NAME}.app"
 TMP_DIR="$(mktemp -d)"
-ZIP_URL="https://github.com/${REPO}/releases/latest/download/Superhive-latest-arm64-mac.zip"
 
-echo "Downloading ${APP_NAME} from ${REPO} (latest release)..."
+# Resolve the latest release tag by following GitHub's /releases/latest redirect
+LATEST_URL=$(curl -fsSL -o /dev/null -w "%{url_effective}" \
+	"https://github.com/${REPO}/releases/latest")
+TAG=$(echo "$LATEST_URL" | sed 's|.*tag/||')
+VERSION="${TAG#v}"
+ZIP_URL="https://github.com/${REPO}/releases/download/${TAG}/Superhive-${VERSION}-arm64-mac.zip"
+
+echo "Downloading ${APP_NAME} v${VERSION}..."
 curl -fL --retry 3 -o "${TMP_DIR}/superhive.zip" "${ZIP_URL}"
 
 echo "Extracting..."
@@ -22,7 +28,7 @@ rm -rf "${TMP_DIR}"
 
 cat << EOF
 
-${APP_NAME} is now installed at ${APP_PATH}.
+${APP_NAME} v${VERSION} is now installed at ${APP_PATH}.
 
 **One-time setup (Gatekeeper):**
 1. Launch ${APP_NAME} from /Applications.

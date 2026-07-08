@@ -31,18 +31,18 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
           bun run build
-          bun x electron-builder --mac dmg --x64=false --publish never
+          bun x electron-builder --mac dmg zip --x64=false --publish never
 
       - name: Read version
         id: version
         run: echo "VERSION=$(bun -e "console.log(require('./package.json').version)")" >> $GITHUB_OUTPUT
 
-      - name: Upload DMG to release
+      - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
           name: v${{ steps.version.outputs.VERSION }}
           generate_release_notes: false
           files: |
-            release/*.dmg
+            release/*
           fail_on_unmatched_files: false
