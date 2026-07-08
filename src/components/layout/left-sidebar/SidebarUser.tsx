@@ -1,5 +1,5 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { KeyboardIcon, CustomerServiceIcon, Logout01Icon, CreditCardIcon, Settings01Icon } from "@hugeicons/core-free-icons";
+import { KeyboardIcon, CustomerServiceIcon, Logout01Icon, CreditCardIcon, Settings01Icon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -17,17 +17,14 @@ export function SidebarUser() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex cursor-pointer items-center gap-2 rounded-lg p-2 transition-colors hover:bg-accent">
-          <Avatar className="size-10">
-            <AvatarFallback className="bg-muted text-sm font-medium text-foreground">
-              U
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-1 flex-col">
-            <span className="text-sm font-medium text-foreground">User</span>
-            <span className="text-sm text-muted-foreground">Free</span>
-          </div>
-        </div>
+        <button
+          type="button"
+          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+        >
+          <HugeiconsIcon icon={Settings01Icon} className="size-4" />
+          <span className="flex-1 text-left">Settings</span>
+          <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4 text-muted-foreground" />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
