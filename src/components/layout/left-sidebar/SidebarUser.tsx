@@ -32,9 +32,9 @@ export function SidebarUser() {
       <DropdownMenuContent
         align="start"
         side="top"
-        className="border-border bg-sidebar font-sans text-md"
+        className="border-border bg-sidebar font-sans text-sm p-[6px]"
       >
-        <DropdownMenuLabel className="flex items-center gap-2 p-3">
+        <DropdownMenuLabel className="flex items-center gap-2 p-2 rounded-md">
           <Avatar className="size-8">
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
               U
@@ -45,25 +45,25 @@ export function SidebarUser() {
             <span className="text-xs text-muted-foreground">Free plan</span>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-border/50" />
-        <DropdownMenuItem className="gap-2">
+        <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
+        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
           <HugeiconsIcon icon={CreditCardIcon} className="size-4 text-muted-foreground" />
           <span>Manage subscription</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
+        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
           <HugeiconsIcon icon={KeyboardIcon} className="size-4 text-muted-foreground" />
           <span>Keyboard shortcuts</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
+        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
           <HugeiconsIcon icon={CustomerServiceIcon} className="size-4 text-muted-foreground" />
           <span>Help & support</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2" onSelect={() => goToSettings(navigate)}>
+        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5" onSelect={() => goToSettings(navigate)}>
           <HugeiconsIcon icon={Settings01Icon} className="size-4 text-muted-foreground" />
           <span>Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-border/50" />
-        <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+        <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
+        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5 text-destructive focus:text-destructive">
           <HugeiconsIcon icon={Logout01Icon} className="size-4" />
           <span>Sign out</span>
         </DropdownMenuItem>
