@@ -75,7 +75,7 @@ latest-mac.yml                     ← electron-updater feed
 **Bump order:** edit all three files → commit → push. CI auto-publishes
 `v{version}` from `package.json`. Do not create tags manually.
 
-**Marketing vs. build version:** currently coupled (`'0.1.4'` in both
+**Marketing vs. build version:** currently coupled (`'0.1.7'` in both
 `package.json` and `app-meta.ts`). Decoupling deferred until a future 1.x
 marketing push.
 
@@ -97,7 +97,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g. 0.1.4). Defaults to package.json if empty.'
+        description: 'Version to release (e.g. 0.1.7). Defaults to package.json if empty.'
         required: false
         type: string
         default: ''
@@ -262,7 +262,7 @@ electron-builder generates this at the root of the artifact set:
 provider: github
 owner: rishi-ie
 repo: superhive
-path: Superhive-0.1.4-arm64-mac.zip   # exact match to ZIP asset name
+path: Superhive-0.1.7-arm64-mac.zip   # exact match to ZIP asset name
 ```
 
 **Cross-signing caveat:** unsigned `0.x` → signed `1.0` updates are blocked
