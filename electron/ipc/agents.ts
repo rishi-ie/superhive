@@ -9,7 +9,7 @@ import { getBundledExtensionPath, hasBundledExtension, BUNDLED_EXTENSION_NAME } 
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus } from '../../src/storage/types'
 import { IPC } from './index'
-import { TEMPLATE_DIR, isManifestPiTemplateReady } from '../install-bootstrap'
+import { TEMPLATE_DIR, ensureManifestPiTemplate } from '../install-bootstrap'
 import { config } from '../config'
 import {
 	type SettingsFile,
@@ -40,11 +40,7 @@ export function registerAgentIpc(): void {
 			if (!data.folderName?.trim()) throw new Error('Agent folder name is required')
 			if (!data.parentDir?.trim()) throw new Error('Parent directory is required')
 
-			if (!isManifestPiTemplateReady()) {
-				throw new Error(
-					`manifest-pi template missing. Run \`bun run install:pi\` to install it.`,
-				)
-			}
+			ensureManifestPiTemplate()
 
 			const folderName = data.folderName.trim()
 			const parentDir = data.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? '')
