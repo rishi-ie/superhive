@@ -2,7 +2,7 @@
 
 Desktop app for running AI agents and projects locally. Built on Electron + React + Vite + Tailwind v4.
 
-> **Beta status (v0.1.4).** Expect rough edges.
+> **Beta status (v0.1.6).** Expect rough edges.
 >
 > **Do not install v0.1.0 or v0.1.1** — those artifacts trigger an unrecoverable Gatekeeper "damaged and cannot be opened" error on macOS. v0.1.2 fixes this. Always use the [latest release](../../releases).
 
@@ -72,7 +72,7 @@ Outputs to `release/`. The ZIP and DMG are both produced; the ZIP is what auto-u
 
 ### Release flow
 
-Push to `main` → CI builds the unsigned ZIP + DMG → uploads to GitHub Releases as `v{version}`. Bump version in [`package.json`](./package.json) (e.g. `0.1.3` → `0.1.4`) before pushing.
+Push to `release` branch → CI builds the unsigned ZIP + DMG → uploads to GitHub Releases as `v{version}`. Bump version in [`package.json`](./package.json) (e.g. `0.1.5` → `0.1.6`) before pushing.
 
 ---
 
