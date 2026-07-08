@@ -10,9 +10,6 @@ asar: true
 extraResources:
   - from: extensions
     to: extensions
-# Never auto-publish from electron-builder — even in CI. Releases are managed
-# via softprops/action-gh-release in .github/workflows/release.yml.
-publish: never
 mac:
   target:
     - dmg
