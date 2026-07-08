@@ -3,6 +3,13 @@ name: release
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g. 0.1.4). Defaults to package.json version if empty.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   build:
@@ -35,7 +42,12 @@ jobs:
 
       - name: Read version
         id: version
-        run: echo "VERSION=$(bun -e "console.log(require('./package.json').version)")" >> $GITHUB_OUTPUT
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            echo "VERSION=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=$(bun -e "console.log(require('./package.json').version)")" >> $GITHUB_OUTPUT
+          fi
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@v2
