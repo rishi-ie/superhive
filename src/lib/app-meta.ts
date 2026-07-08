@@ -1,5 +1,5 @@
 export const APP_META = {
   name: 'Superhive',
-  version: '0.1',
+  version: '0.1.4',
   channel: 'beta',
 } as const;

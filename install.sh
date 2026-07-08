@@ -30,16 +30,16 @@ cat << EOF
 
 ${APP_NAME} v${VERSION} is now installed at ${APP_PATH}.
 
-**One-time setup (Gatekeeper):**
-1. Launch ${APP_NAME} from /Applications.
-2. macOS will show: "Apple could not verify ${APP_NAME} is free of malware."
-3. Click OK.
-4. Open System Settings -> Privacy & Security.
-5. Scroll to the Security section at the bottom.
-6. Click "Open Anyway" next to "${APP_NAME} was blocked to protect your Mac".
-7. Click "Open" to confirm.
-8. ${APP_NAME} launches. Subsequent launches are instant.
+**Launch:** open ${APP_NAME} from /Applications.
 
-You only do this once per major version.
+**Gatekeeper prompt (only if you downloaded via browser, not via this installer):**
+If macOS shows "Apple could not verify ${APP_NAME} is free of malware":
+  1. Click OK.
+  2. System Settings -> Privacy & Security.
+  3. Click "Open Anyway" -> "Open".
+
+This installer extracted the ZIP via Terminal, so macOS skipped the quarantine
+check and you should see no prompt. If you do see one, the steps above recover it
+in under a minute. No setup needed after that.
 
 EOF

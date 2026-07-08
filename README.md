@@ -2,7 +2,7 @@
 
 Desktop app for running AI agents and projects locally. Built on Electron + React + Vite + Tailwind v4.
 
-> **Beta status (v0.1.2).** Expect rough edges.
+> **Beta status (v0.1.4).** Expect rough edges.
 >
 > **Do not install v0.1.0 or v0.1.1** — those artifacts trigger an unrecoverable Gatekeeper "damaged and cannot be opened" error on macOS. v0.1.2 fixes this. Always use the [latest release](../../releases).
 
@@ -27,19 +27,18 @@ This downloads the latest ZIP, extracts it, and moves `Superhive.app` into `/App
 3. Drag `Superhive.app` from the extracted folder into `/Applications`.
 4. Launch Superhive from `/Applications`.
 
-### First launch — "Apple could not verify Superhive is free of malware"
+### First launch
 
-This is **Gatekeeper** blocking the unsigned app. It's recoverable — it's not actually broken or dangerous. One-time setup, ~30 seconds:
+Most installs launch with no prompt — the `install.sh` one-liner extracts via Terminal, so macOS skips the quarantine check and our ad-hoc signature satisfies Gatekeeper's signature verification.
+
+If you downloaded the ZIP directly via browser and see **"Apple could not verify Superhive is free of malware"**:
 
 1. Click **OK** on the popup.
 2. Open **System Settings → Privacy & Security**.
-3. Scroll to the **Security** section at the bottom.
-4. Find: *"Superhive was blocked to protect your Mac."*
-5. Click **"Open Anyway"**.
-6. Click **"Open"** in the next dialog.
-7. Superhive launches.
+3. Click **"Open Anyway"** (under *Superhive was blocked to protect your Mac*).
+4. Click **"Open"** to confirm.
 
-You only do this **once per major version**. Subsequent launches are instant.
+One-time, ~30 seconds. Subsequent launches are instant.
 
 ---
 
@@ -73,7 +72,7 @@ Outputs to `release/`. The ZIP and DMG are both produced; the ZIP is what auto-u
 
 ### Release flow
 
-Push to `main` → CI builds the unsigned ZIP + DMG → uploads to GitHub Releases as `v{version}`. Bump version in [`package.json`](./package.json) (e.g. `0.1.2` → `0.1.3`) before pushing.
+Push to `main` → CI builds the unsigned ZIP + DMG → uploads to GitHub Releases as `v{version}`. Bump version in [`package.json`](./package.json) (e.g. `0.1.3` → `0.1.4`) before pushing.
 
 ---
 
