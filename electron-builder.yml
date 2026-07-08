@@ -15,6 +15,9 @@ mac:
     - dmg
     - zip
   category: public.app-category.productivity
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
 win:
   target:
     - nsis
