@@ -7,6 +7,7 @@ import {
 import { SidebarAccordion } from "./SidebarAccordion";
 import { SidebarRepositories } from "./SidebarRepositories";
 import { SidebarUser } from "./SidebarUser";
+import { UpdateBanner } from "./UpdateBanner";
 
 interface AppSidebarProps {
   width?: number;
@@ -26,7 +27,8 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
         <SidebarAccordion />
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-1">
+      <SidebarFooter className="flex flex-col gap-1 border-t border-border p-1">
+        <UpdateBanner />
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>

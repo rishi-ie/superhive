@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import log from 'electron-log/main';
+import { autoUpdater } from 'electron-updater';
 import { setUserDataPath } from '../src/storage/database';
 import { seedWorkspace } from '../src/storage/seed';
 import { registerIpc } from './ipc';
@@ -9,6 +10,8 @@ import { runtime } from './manifest-pi-runtime';
 import { reconcileAgents } from './reconcile-agents';
 import { reconcileRuntime } from './reconcile-runtime';
 import { isManifestPiTemplateReady } from './install-bootstrap';
+
+const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -52,6 +55,40 @@ function createWindow() {
   });
 }
 
+function setupAutoUpdater(window: BrowserWindow) {
+  if (!app.isPackaged) return;
+  log.info('[autoUpdater] starting update checks (every 1h)');
+
+  autoUpdater.autoDownload = true;
+
+  autoUpdater.on('update-available', (info) => {
+    log.info(`[autoUpdater] update available: ${info.version}`);
+    window.webContents.send('app:update-available', { version: info.version });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    log.info(`[autoUpdater] update downloaded: ${info.version}`);
+    window.webContents.send('app:update-downloaded', {
+      version: info.version,
+      releaseName: info.releaseName,
+    });
+  });
+
+  autoUpdater.on('error', (err) => {
+    log.warn(`[autoUpdater] error: ${err.message}`);
+  });
+
+  autoUpdater.checkForUpdates().catch((err: Error) =>
+    log.warn(`[autoUpdater] initial check failed: ${err.message}`)
+  );
+
+  setInterval(() => {
+    autoUpdater.checkForUpdates().catch((err: Error) =>
+      log.warn(`[autoUpdater] hourly check failed: ${err.message}`)
+    );
+  }, UPDATE_CHECK_INTERVAL_MS);
+}
+
 app.whenReady().then(async () => {
   log.info('App ready');
 
@@ -71,6 +108,7 @@ app.whenReady().then(async () => {
   registerIpc();
 
   createWindow();
+  if (mainWindow) setupAutoUpdater(mainWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

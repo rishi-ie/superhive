@@ -1,6 +1,7 @@
 import { registerAgentIpc } from './agents';
 import { registerProjectIpc } from './projects';
 import { registerRuntimeIpc } from './runtime';
+import { registerAppIpc } from './app';
 
 export const IPC = {
   AGENTS: {
@@ -20,12 +21,16 @@ export const IPC = {
     ON_STATUS:   (id: string) => `agent:${id}:status`,
     ON_MESSAGES: (id: string) => `agent:${id}:messages`,
     ON_EXIT:     (id: string) => `agent:${id}:exit`,
-    ON_SETTINGS_CHANGED: (id: string) => `settings:${id}:changed`,
+    ON_SETTINGS_CHANGED: (settings: string) => `settings:${settings}:changed`,
   },
   PROJECTS: {
     LIST: 'projects:list',
     GET: 'projects:get',
     CREATE: 'projects:create',
+  },
+  APP: {
+    GET_VERSION: 'app:get-version',
+    INSTALL_UPDATE: 'app:install-update',
   },
 } as const;
 
@@ -33,4 +38,5 @@ export function registerIpc(): void {
   registerAgentIpc();
   registerProjectIpc();
   registerRuntimeIpc();
+  registerAppIpc();
 }

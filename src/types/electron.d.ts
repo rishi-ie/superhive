@@ -51,9 +51,22 @@ export type ProjectCreateInput = {
 	localPath?: string
 }
 
+export interface AppUpdateInfo {
+	version: string
+	releaseName?: string
+}
+
+export interface AppAPI {
+	getVersion: () => Promise<string>
+	onUpdateAvailable: (cb: (info: AppUpdateInfo) => void) => () => void
+	onUpdateDownloaded: (cb: (info: AppUpdateInfo) => void) => () => void
+	installUpdate: () => Promise<{ ok: boolean }>
+}
+
 export interface ElectronAPI {
 	agents: AgentsAPI
 	projects: ProjectsAPI
+	app: AppAPI
 }
 
 declare global {

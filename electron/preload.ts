@@ -38,4 +38,10 @@ contextBridge.exposeInMainWorld('api', {
     get:    (id) => ipcRenderer.invoke('projects:get', id),
     create: (data) => ipcRenderer.invoke('projects:create', data),
   },
+  app: {
+    getVersion: () => ipcRenderer.invoke('app:get-version'),
+    onUpdateAvailable: (cb) => subscribe('app:update-available', cb),
+    onUpdateDownloaded: (cb) => subscribe('app:update-downloaded', cb),
+    installUpdate: () => ipcRenderer.invoke('app:install-update'),
+  },
 });
