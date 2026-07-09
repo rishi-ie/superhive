@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@/components/ui/icon';
 import { RefreshIcon } from '@hugeicons/core-free-icons';
 import { installUpdate } from '@/flows/ui/install-update';
@@ -9,10 +9,20 @@ interface UpdateInfo {
 }
 
 export function UpdateBanner() {
-	const [pending] = useState<UpdateInfo>({
-		version: '0.1.8',
-		releaseName: 'Test Update',
-	});
+	const [pending, setPending] = useState<UpdateInfo | null>(null);
+
+	useEffect(() => {
+		const offAvail = window.api.app.onUpdateAvailable(() => {});
+		const offDone = window.api.app.onUpdateDownloaded((info) => {
+			setPending(info);
+		});
+		return () => {
+			offAvail();
+			offDone();
+		};
+	}, []);
+
+	if (!pending) return null;
 
 	const onInstall = () => {
 		void installUpdate();
