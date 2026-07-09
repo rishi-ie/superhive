@@ -3,7 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository';
 import { IPC } from './index';
-import type { ProjectCreateInput } from '../../src/types/electron';
+import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
 
 export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
@@ -36,4 +36,12 @@ export function registerProjectIpc(): void {
       });
     }
   );
+
+  ipcMain.handle(IPC.PROJECTS.UPDATE, async (_e, id: string, data: ProjectUpdateInput) => {
+    return ProjectRepository.update(id, data);
+  });
+
+  ipcMain.handle(IPC.PROJECTS.DELETE, async (_e, id: string) => {
+    return ProjectRepository.delete(id);
+  });
 }

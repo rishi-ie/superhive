@@ -44,13 +44,19 @@ export interface ProjectsAPI {
 	list: () => Promise<Project[]>
 	get: (id: string) => Promise<Project | null>
 	create: (data: ProjectCreateInput) => Promise<Project>
+	update: (id: string, data: ProjectUpdateInput) => Promise<Project | null>
+	delete: (id: string) => Promise<boolean>
 }
 
 export type ProjectCreateInput = {
 	name: string
 	description?: string
 	localPath?: string
+	agentFolderName?: string
+	agentParentDir?: string
 }
+
+export type ProjectUpdateInput = Partial<Pick<Project, 'name' | 'description' | 'localPath' | 'channelId'>>
 
 export interface AppUpdateInfo {
 	version: string

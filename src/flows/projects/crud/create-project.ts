@@ -1,4 +1,5 @@
 import { projects } from '@/api/projects';
+import { agents } from '@/api/agents';
 import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import { createProjectAgent } from '@/flows/agents/crud/create-project-agent';
@@ -6,9 +7,11 @@ import { createChannel } from '@/flows/channels/crud/create-channel';
 import { appendMessage } from '@/flows/channels/ui/append-message';
 
 export interface CreateProjectInput {
-  name: string;
-  description?: string;
-  localPath?: string;
+	name: string;
+	description?: string;
+	localPath?: string;
+	agentFolderName?: string;
+	agentParentDir?: string;
 }
 
 export interface CreateProjectResult {
@@ -18,22 +21,69 @@ export interface CreateProjectResult {
 }
 
 export async function createProject(input: CreateProjectInput): Promise<CreateProjectResult> {
-  const name = input.name?.trim();
-  const description = input.description?.trim();
-  const localPath = input.localPath?.trim();
+	const name = input.name?.trim();
+	const description = input.description?.trim();
+	const localPath = input.localPath?.trim();
 
-  if (!name) {
-    toast.error('Project name is required');
-    return { ok: false, error: 'Project name is required' };
-  }
+	if (!name) {
+		toast.error('Project name is required');
+		return { ok: false, error: 'Project name is required' };
+	}
 
-  try {
-    const project = await projects.create({ name, description: description || undefined, localPath: localPath || undefined });
-    toast.success(`Project "${project.name}" created`);
-    return { ok: true, project };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to create project';
-    toast.error(message);
-    return { ok: false, error: message };
-  }
+	// Step 1: Create the project
+	let project: Project;
+	try {
+		project = await projects.create({
+			name,
+			description: description || undefined,
+			localPath: localPath || undefined,
+		});
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Failed to create project';
+		toast.error(message);
+		return { ok: false, error: message };
+	}
+
+	// Step 2: Create the project-agent
+	const agentResult = await createProjectAgent({
+		name: `${name} (Coordinator)`,
+		folderName: input.agentFolderName ?? '.agent',
+		parentDir: input.agentParentDir ?? localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
+	});
+	if (!agentResult.ok || !agentResult.agent) {
+		await projects.delete(project.id).catch(() => {});
+		return { ok: false, error: agentResult.error ?? 'Failed to create project agent', project };
+	}
+	const projectAgent = agentResult.agent;
+
+	// Step 3: Create the channel
+	const channelResult = await createChannel({
+		name: `${name} coordination`,
+		type: 'project',
+		projectId: project.id,
+		participantAgentIds: [projectAgent.id],
+	});
+	if (!channelResult.ok || !channelResult.channel) {
+		await projects.delete(project.id).catch(() => {});
+		await agents.delete(projectAgent.id).catch(() => {});
+		return { ok: false, error: channelResult.error ?? 'Failed to create channel', project };
+	}
+	const channel = channelResult.channel;
+
+	// Step 4: Link channel to project
+	try {
+		await window.api.projects.update(project.id, { channelId: channel.id });
+	} catch {
+		// Non-fatal — channel exists independently
+	}
+
+	// Step 5: Write initial system message
+	try {
+		await appendMessage(channel.id, 'system', projectAgent.id, `Welcome to ${name}. I'm the project coordinator.`);
+	} catch {
+		// Non-fatal — channel works without initial message
+	}
+
+	toast.success(`Project "${project.name}" created`);
+	return { ok: true, project };
 }

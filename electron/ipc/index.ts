@@ -28,6 +28,8 @@ export const IPC = {
     LIST: 'projects:list',
     GET: 'projects:get',
     CREATE: 'projects:create',
+    UPDATE: 'projects:update',
+    DELETE: 'projects:delete',
   },
   APP: {
     GET_VERSION: 'app:get-version',

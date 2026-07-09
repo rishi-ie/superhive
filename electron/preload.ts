@@ -37,6 +37,8 @@ contextBridge.exposeInMainWorld('api', {
     list:   () => ipcRenderer.invoke('projects:list'),
     get:    (id) => ipcRenderer.invoke('projects:get', id),
     create: (data) => ipcRenderer.invoke('projects:create', data),
+    update: (id, data) => ipcRenderer.invoke('projects:update', id, data),
+    delete: (id) => ipcRenderer.invoke('projects:delete', id),
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:get-version'),
