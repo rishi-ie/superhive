@@ -25,7 +25,7 @@ export function SettingsSidebar() {
           <span>Search</span>
         </button>
       </div>
-      <nav className="flex flex-col gap-0.5 px-2">
+      <nav className="flex flex-col gap-4 px-2">
         {SETTINGS_GROUPS.map((group, gi) => (
           <div key={gi} className="flex flex-col gap-0.5">
             {group.sections.map((section) => (
@@ -44,9 +44,6 @@ export function SettingsSidebar() {
                 <span>{section.label}</span>
               </NavLink>
             ))}
-            {gi < SETTINGS_GROUPS.length - 1 && (
-              <div className="my-2 h-px bg-sidebar-border" />
-            )}
           </div>
         ))}
       </nav>
