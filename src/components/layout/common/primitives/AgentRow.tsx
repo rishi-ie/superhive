@@ -4,7 +4,8 @@ import { UserIcon, MoreHorizontalIcon, PinIcon } from "@hugeicons/core-free-icon
 
 interface AgentRowProps {
   name: string;
-  status: 'idle' | 'active';
+  status?: 'idle' | 'active';
+  showStatus?: boolean;
   currentAction?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
@@ -20,8 +21,8 @@ const AgentActions = () => (
   </span>
 );
 
-export function AgentRow({ name, status, currentAction = "Working…", onClick }: AgentRowProps) {
-  if (status === 'active') {
+export function AgentRow({ name, status = 'idle', showStatus = true, currentAction = "Working…", onClick }: AgentRowProps) {
+  if (showStatus && status === 'active') {
     return (
       <button
         type="button"
@@ -41,13 +42,27 @@ export function AgentRow({ name, status, currentAction = "Working…", onClick }
     );
   }
 
+  if (showStatus) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="group flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
+      >
+        <div className="size-2 rounded-full bg-green-500 flex-shrink-0" />
+        <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+        <span className="flex-1 truncate text-left">{name}</span>
+        <AgentActions />
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
       onClick={onClick}
       className="group flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
     >
-      <div className="size-2 rounded-full bg-green-500 flex-shrink-0" />
       <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
       <span className="flex-1 truncate text-left">{name}</span>
       <AgentActions />

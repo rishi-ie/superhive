@@ -7,7 +7,7 @@ import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
 import { AgentError } from './components/AgentError';
 import { AgentStopped } from './components/AgentStopped';
-import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
+import { useAgentRuntime } from '@/flows/agents/runtime';
 
 export function AgentChatView() {
   const { agentId } = useParams();

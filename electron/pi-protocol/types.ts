@@ -55,3 +55,13 @@ export function matchBootStep(line: string): InitStep | null {
   }
   return null
 }
+
+export const INIT_STEPS: { id: InitStep; label: string }[] = [
+  { id: 'installing-deps', label: 'Installing Manifest Pi' },
+  { id: 'building-runtime', label: 'Building Pi runtime' },
+  { id: 'generating-manifest', label: 'Generating default manifest' },
+  { id: 'creating-workspace', label: 'Creating workspace' },
+  { id: 'launching-runtime', label: 'Launching runtime' },
+  { id: 'connecting-chat', label: 'Connecting chat' },
+  { id: 'ready', label: 'Agent ready' },
+]

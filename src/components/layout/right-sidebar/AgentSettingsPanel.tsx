@@ -6,8 +6,8 @@ import {
   Settings01Icon,
   InboxIcon,
 } from "@hugeicons/core-free-icons";
-import { useAgentSettings } from "@/flows/agents/settings/use-agent-settings";
-import { useAgentRuntime } from "@/flows/agents/runtime/use-agent-runtime";
+import { useAgentSettings } from "@/flows/agents/settings";
+import { useAgentRuntime } from "@/flows/agents/runtime";
 import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,

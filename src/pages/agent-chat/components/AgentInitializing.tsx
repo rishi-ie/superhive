@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { CheckIcon, Loading01Icon, RefreshIcon } from "@hugeicons/core-free-icons";
-import { INIT_STEPS } from '@/types/init-steps';
-import type { InitStep } from '@/types/electron';
+import { INIT_STEPS } from '@/models/runtime';
+import type { InitStep } from '@/models/runtime';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 

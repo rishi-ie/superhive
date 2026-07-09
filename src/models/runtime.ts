@@ -1,4 +1,6 @@
 import type { InitStep } from '../../electron/pi-protocol/types'
+export type { InitStep } from '../../electron/pi-protocol/types'
+export { INIT_STEPS } from '../../electron/pi-protocol/types'
 
 export interface RuntimeMessage {
   id: string

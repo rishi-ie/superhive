@@ -1,6 +1,6 @@
 import type { Agent, AgentStatus, Project, Channel } from '@/storage/types'
 import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
-import type { InitStep, AdapterEvent } from '@/models/boot-step'
+import type { InitStep, AdapterEvent } from '@/models/runtime'
 import type { EnsureTemplateResult } from '@/models/template'
 
 export type { Agent, AgentStatus, Project, Channel }

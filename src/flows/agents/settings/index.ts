@@ -10,5 +10,5 @@ export interface AgentSettingsState {
   [k: string]: unknown
 }
 
-export { useAgentSettings } from './use-agent-settings'
+export { useAgentSettings } from '../agent-store'
 export { updateAgentSettings } from './update-agent-settings'

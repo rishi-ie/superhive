@@ -30,7 +30,7 @@ import { ProjectAgentStopped } from './components/ProjectAgentStopped';
 import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
-import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
+import { useAgentRuntime } from '@/flows/agents/runtime';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
