@@ -25,7 +25,7 @@ export function SidebarAccordion() {
     };
   }, []);
 
-  const projectItems = projects.map((p) => ({ id: p.id, name: p.name }));
+  const projectItems = projects.map((p) => ({ id: p.id, name: p.name, agentIds: p.agentIds }));
 
   return (
     <div className="flex flex-col gap-1 px-2">
