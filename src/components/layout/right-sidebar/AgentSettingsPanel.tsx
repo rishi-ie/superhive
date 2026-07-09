@@ -50,7 +50,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
-        <TabsList variant="line" className="w-full h-9 justify-start px-0">
+        <TabsList className="w-full h-9 justify-start">
           <TabsTrigger value="overview" className="cursor-default">
             <HugeiconsIcon icon={Layout01Icon} data-icon="inline-start" className="size-3.5" />
             Overview
