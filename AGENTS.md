@@ -4,7 +4,7 @@
 
 This is an **Electron + React + Vite + Tailwind v4** project using **Bun** as the package manager. The UI framework is **shadcn/ui**.
 
-> **Branch model:** `main` triggers releases; `dev` is for daily work. See [`RELEASE.md`](./RELEASE.md) for the full release pipeline.
+> **Branch model:** Only 2 branches exist — `main` triggers releases, `dev` is for daily work. No feature branches, no PRs — commit directly to `dev`, merge `dev` → `main` to ship. See [`RELEASE.md`](./RELEASE.md) for the full release pipeline.
 
 ---
 

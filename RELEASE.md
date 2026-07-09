@@ -7,6 +7,9 @@ Canonical reference for developing, versioning, publishing, and distributing Sup
 ## 1. TL;DR — Workflow Cheat Sheet
 
 ```bash
+# RULE: Only 2 branches exist — dev (work) and main (release).
+# No feature branches, no chore branches, no PRs. Commit directly to dev.
+
 # 1. Bump 3 files (package.json + app-meta.ts + README.md) on dev
 git switch dev
 # edit files
