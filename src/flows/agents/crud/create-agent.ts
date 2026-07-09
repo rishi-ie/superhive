@@ -1,3 +1,17 @@
+/**
+ * createAgent — creates a standalone working agent.
+ *
+ * Use this flow when the user creates an agent they will interact
+ * with directly. Standalone agents:
+ * - Have their own folder at `<parentDir>/<folderName>/`
+ * - Are tagged with `agentKind: 'standard'` (default)
+ * - Auto-start their runtime immediately after creation
+ * - Auto-navigate to `/agents/:agentId` on success
+ *
+ * For project-coordinator agents (lives inside a project folder,
+ * no auto-start, no auto-navigate), use `createProjectAgent` instead.
+ */
+
 import { toast } from 'sonner';
 import { agents } from '@/api/agents';
 import type { NavigateFunction } from 'react-router-dom';

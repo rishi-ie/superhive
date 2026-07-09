@@ -15,6 +15,7 @@ export interface AgentCreateInput {
 	parentDir: string
 	role?: string
 	description?: string
+	agentKind?: string
 }
 
 export interface AgentsAPI {

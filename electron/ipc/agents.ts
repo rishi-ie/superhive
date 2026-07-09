@@ -7,7 +7,7 @@ import log from 'electron-log/main'
 import { runtime } from '../manifest-pi-runtime'
 import { getBundledExtensionPath, hasBundledExtension, BUNDLED_EXTENSION_NAME } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
-import type { Agent, AgentStatus } from '../../src/storage/types'
+import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { TEMPLATE_DIR, ensureManifestPiTemplate } from '../install-bootstrap'
 import { config } from '../config'
@@ -24,6 +24,7 @@ interface CreateAgentInput {
 	parentDir: string
 	role?: string
 	description?: string
+	agentKind?: string
 }
 
 export function registerAgentIpc(): void {
@@ -84,6 +85,7 @@ export function registerAgentIpc(): void {
 				description: data.description?.trim() || undefined,
 				localPath: agentDir,
 				status: 'initializing',
+				agentKind: data.agentKind as AgentKind | undefined,
 			})
 
 			// Minimal manifest — just enough for agent.sh --manifest to load Pi and the extension.
