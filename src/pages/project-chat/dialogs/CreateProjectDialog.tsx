@@ -86,16 +86,16 @@ export function CreateProjectDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>New Project</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-6 gap-6">
+        <DialogHeader className="gap-2 pb-3 border-b border-sidebar-border">
+          <DialogTitle className="text-sidebar-foreground">New Project</DialogTitle>
+          <DialogDescription className="text-sidebar-foreground/60">
             Create a new project to group agents and tasks.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="project-name">
+        <form onSubmit={onSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="project-name" className="text-sidebar-foreground">
               Project Name<span className="text-destructive ml-0.5">*</span>
             </Label>
             <Input
@@ -105,33 +105,34 @@ export function CreateProjectDialog() {
               onChange={(e) => setName(e.target.value)}
               autoFocus
               required
+              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="project-folder">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="project-folder" className="text-sidebar-foreground">
               Project Folder
             </Label>
             <div className="relative">
               <HugeiconsIcon
                 icon={FolderOpenIcon}
-                className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-sidebar-foreground/40 pointer-events-none"
               />
               <Input
                 id="project-folder"
                 placeholder="~/.superhive/projects/my-project"
                 value={localPath}
                 onChange={handleLocalPathChange}
-                className="pl-9 font-mono text-xs"
+                className="pl-9 font-mono text-xs bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
               />
             </div>
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-xs text-sidebar-foreground/50">
               Auto-suggested from project name. An agent will be created inside this folder.
             </span>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="project-description">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="project-description" className="text-sidebar-foreground">
               Description
             </Label>
             <Textarea
@@ -139,7 +140,7 @@ export function CreateProjectDialog() {
               placeholder="What is this project about?"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] resize-none"
+              className="min-h-[80px] resize-none bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
             />
           </div>
 
@@ -155,13 +156,15 @@ export function CreateProjectDialog() {
           <DialogFooter className="gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
+              size="lg"
               onClick={() => setOpen(false)}
               disabled={submitting}
+              className="border-sidebar-border text-sidebar-foreground"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!canSubmit}>
+            <Button type="submit" size="lg" disabled={!canSubmit}>
               {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>

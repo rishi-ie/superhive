@@ -85,16 +85,16 @@ export function CreateAgentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>New Agent</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-6 gap-6">
+        <DialogHeader className="gap-2 pb-3 border-b border-sidebar-border">
+          <DialogTitle className="text-sidebar-foreground">New Agent</DialogTitle>
+          <DialogDescription className="text-sidebar-foreground/60">
             Create a new agent in your local workspace.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="agent-name">
+        <form onSubmit={onSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="agent-name" className="text-sidebar-foreground">
               Agent Name<span className="text-destructive ml-0.5">*</span>
             </Label>
             <Input
@@ -104,11 +104,12 @@ export function CreateAgentDialog() {
               onChange={(e) => setName(e.target.value)}
               autoFocus
               required
+              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="agent-folder">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="agent-folder" className="text-sidebar-foreground">
               Agent Folder Name<span className="text-destructive ml-0.5">*</span>
             </Label>
             <Input
@@ -117,14 +118,15 @@ export function CreateAgentDialog() {
               value={folderName}
               onChange={(e) => setFolderName(e.target.value.toLowerCase())}
               required
+              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-xs text-sidebar-foreground/50">
               Lowercase letters, digits, hyphens. Used as the directory name.
             </span>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="agent-parent">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="agent-parent" className="text-sidebar-foreground">
               Parent Directory<span className="text-destructive ml-0.5">*</span>
             </Label>
             <Input
@@ -133,13 +135,14 @@ export function CreateAgentDialog() {
               value={parentDir}
               onChange={(e) => setParentDir(e.target.value)}
               required
+              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
           </div>
 
           {fullPath && (
             <div
               className={cn(
-                'flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground'
+                'flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent/30 px-3 py-2 text-xs text-sidebar-foreground/60'
               )}
             >
               <HugeiconsIcon icon={Folder01Icon} className="size-3.5 flex-shrink-0" />
@@ -159,13 +162,15 @@ export function CreateAgentDialog() {
           <DialogFooter className="gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
+              size="lg"
               onClick={() => setOpen(false)}
               disabled={submitting}
+              className="border-sidebar-border text-sidebar-foreground"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!canSubmit}>
+            <Button type="submit" size="lg" disabled={!canSubmit}>
               {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>
