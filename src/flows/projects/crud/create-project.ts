@@ -1,6 +1,9 @@
 import { projects } from '@/api/projects';
 import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
+import { createProjectAgent } from '@/flows/agents/crud/create-project-agent';
+import { createChannel } from '@/flows/channels/crud/create-channel';
+import { appendMessage } from '@/flows/channels/ui/append-message';
 
 export interface CreateProjectInput {
   name: string;
