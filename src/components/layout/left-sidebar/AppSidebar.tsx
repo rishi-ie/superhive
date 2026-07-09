@@ -22,13 +22,15 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
     >
       <SidebarHeader />
 
-      <SidebarContent className="gap-0 px-0 pt-6">
+      <SidebarContent className="flex flex-col gap-0 px-0 pt-6">
         <SidebarRepositories />
         <SidebarAccordion />
+        <div className="mt-auto px-3 py-2">
+          <UpdateBanner />
+        </div>
       </SidebarContent>
 
-      <SidebarFooter className="flex flex-col gap-1 border-t border-border p-1">
-        <UpdateBanner />
+      <SidebarFooter className="border-t border-border p-1">
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>
