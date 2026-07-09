@@ -11,6 +11,7 @@ import {
   Book01Icon,
   TestTubeIcon,
   Book02Icon,
+  ArrowUpRight01Icon,
 } from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { ReactNode } from "react";
@@ -27,6 +28,7 @@ export interface SettingsSection {
   id: string;
   label: string;
   icon: IconComponent;
+  trailingIcon?: IconComponent;
 }
 
 export interface SettingsSectionGroup {
@@ -55,7 +57,7 @@ export const SETTINGS_GROUPS: SettingsSectionGroup[] = [
   {
     sections: [
       { id: "beta", label: "Beta", icon: makeIcon(TestTubeIcon) },
-      { id: "docs", label: "Docs", icon: makeIcon(Book02Icon) },
+      { id: "docs", label: "Docs", icon: makeIcon(Book02Icon), trailingIcon: makeIcon(ArrowUpRight01Icon) },
     ],
   },
 ];

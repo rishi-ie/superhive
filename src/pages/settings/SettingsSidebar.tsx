@@ -40,8 +40,11 @@ export function SettingsSidebar() {
                   )
                 }
               >
-                <section.icon className="size-4" />
-                <span>{section.label}</span>
+                <section.icon className="size-4 shrink-0" />
+                <span className="flex-1">{section.label}</span>
+                {section.trailingIcon && (
+                  <section.trailingIcon className="size-4 shrink-0 text-muted-foreground" />
+                )}
               </NavLink>
             ))}
           </div>
