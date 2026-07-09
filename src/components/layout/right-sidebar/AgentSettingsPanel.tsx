@@ -51,16 +51,16 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
     <div className="flex h-full flex-col px-3">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-9 justify-start bg-transparent">
-          <TabsTrigger value="overview" className="cursor-default !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
-            <HugeiconsIcon icon={Layout01Icon} data-icon="inline-start" className="size-3.5" />
+          <TabsTrigger value="overview" className="cursor-default justify-start px-0 !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
+            <HugeiconsIcon icon={Layout01Icon} className="size-3.5" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="manage" className="cursor-default !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
-            <HugeiconsIcon icon={Settings01Icon} data-icon="inline-start" className="size-3.5" />
+          <TabsTrigger value="manage" className="cursor-default justify-start px-0 !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
+            <HugeiconsIcon icon={Settings01Icon} className="size-3.5" />
             Manage
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="cursor-default !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
-            <HugeiconsIcon icon={InboxIcon} data-icon="inline-start" className="size-3.5" />
+          <TabsTrigger value="inbox" className="cursor-default justify-start px-0 !border-transparent data-[state=active]:!border-border data-[state=active]:!bg-transparent">
+            <HugeiconsIcon icon={InboxIcon} className="size-3.5" />
             Inbox
           </TabsTrigger>
         </TabsList>
