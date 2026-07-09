@@ -3,7 +3,7 @@ import {
   PlusSignIcon,
   HandIcon,
   ArrowDown01Icon,
-  Mic01Icon,
+  Mic02Icon,
   NotebookIcon,
 } from "@hugeicons/core-free-icons";
 import { Send } from "lucide-react";
@@ -33,7 +33,7 @@ export function ComposerCard() {
               <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
             </button>
             <button className="text-[#9ca3af] hover:text-white cursor-default">
-              <HugeiconsIcon icon={Mic01Icon} className="size-5" />
+              <HugeiconsIcon icon={Mic02Icon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full bg-sidebar-accent hover:bg-sidebar-accent/80 cursor-default">
               <Send className="size-3.5 text-sidebar-accent-foreground" />
