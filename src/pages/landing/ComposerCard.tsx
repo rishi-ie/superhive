@@ -3,7 +3,7 @@ import {
   PlusSignIcon,
   HandIcon,
   ArrowDown01Icon,
-  ArrowUp01Icon,
+  SentIcon,
   Mic01Icon,
   NotebookIcon,
 } from "@hugeicons/core-free-icons";
@@ -36,7 +36,7 @@ export function ComposerCard() {
               <HugeiconsIcon icon={Mic01Icon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] cursor-default">
-              <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5 text-[#222222]" />
+              <HugeiconsIcon icon={SentIcon} className="size-3.5 text-[#222222]" />
             </button>
           </div>
         </div>
