@@ -44,4 +44,12 @@ contextBridge.exposeInMainWorld('api', {
     onUpdateDownloaded: (cb) => subscribe('app:update-downloaded', cb),
     installUpdate: () => ipcRenderer.invoke('app:install-update'),
   },
+  channels: {
+    create: (input) => ipcRenderer.invoke('channels:create', input),
+    get: (id) => ipcRenderer.invoke('channels:get', id),
+    list: () => ipcRenderer.invoke('channels:list'),
+    appendMessage: (channelId, message) =>
+      ipcRenderer.invoke('channels:append-message', channelId, message),
+    readMessages: (channelId) => ipcRenderer.invoke('channels:read-messages', channelId),
+  },
 });
