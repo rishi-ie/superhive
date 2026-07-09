@@ -1,4 +1,4 @@
 export { SettingsLayout } from './SettingsLayout'
 export { SettingsSidebar } from './SettingsSidebar'
 export { SettingsSectionView } from './SettingsSectionView'
-export { SETTINGS_SECTIONS } from './sections'
+export { SETTINGS_SECTIONS, SETTINGS_GROUPS } from './sections'

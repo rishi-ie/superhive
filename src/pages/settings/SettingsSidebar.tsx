@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
-import { SETTINGS_SECTIONS } from "./sections";
+import { SETTINGS_GROUPS } from "./sections";
 import { goBackHome } from "@/flows/navigation/go-back-home";
 
 export function SettingsSidebar() {
@@ -10,31 +10,44 @@ export function SettingsSidebar() {
 
   return (
     <aside className="flex h-full w-68 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="flex items-center gap-2 px-2 pt-12 pb-1">
+      <div className="flex flex-col gap-1 px-2 pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
-          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
+          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
           <span>Back to Home</span>
         </button>
+        <button
+          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
+        >
+          <HugeiconsIcon icon={Search01Icon} className="size-4" />
+          <span>Search</span>
+        </button>
       </div>
       <nav className="flex flex-col gap-0.5 px-2">
-        {SETTINGS_SECTIONS.map((section) => (
-          <NavLink
-            key={section.id}
-            to={`/settings/${section.id}`}
-            className={({ isActive }) =>
-              cn(
-                "flex h-8 items-center gap-2 rounded-lg px-2 text-sm transition-colors",
-                "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
-                isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-              )
-            }
-          >
-            <section.icon className="size-4" />
-            <span>{section.label}</span>
-          </NavLink>
+        {SETTINGS_GROUPS.map((group, gi) => (
+          <div key={gi} className="flex flex-col gap-0.5">
+            {group.sections.map((section) => (
+              <NavLink
+                key={section.id}
+                to={`/settings/${section.id}`}
+                className={({ isActive }) =>
+                  cn(
+                    "flex h-8 items-center gap-2 rounded-lg px-2 text-sm transition-colors",
+                    "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                  )
+                }
+              >
+                <section.icon className="size-4" />
+                <span>{section.label}</span>
+              </NavLink>
+            ))}
+            {gi < SETTINGS_GROUPS.length - 1 && (
+              <div className="my-2 h-px bg-sidebar-border" />
+            )}
+          </div>
         ))}
       </nav>
     </aside>

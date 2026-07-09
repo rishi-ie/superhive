@@ -1,5 +1,17 @@
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { UserIcon, PaintBrush01Icon, Key01Icon } from "@hugeicons/core-free-icons";
+import {
+  Settings01Icon,
+  UserIcon,
+  PaintBrush01Icon,
+  AiBrain01Icon,
+  Robot02Icon,
+  ChartLineData01Icon,
+  GlobalIcon,
+  ToolsIcon,
+  Book01Icon,
+  TestTubeIcon,
+  Book02Icon,
+} from "@hugeicons/core-free-icons";
 import type { IconSvgElement } from "@hugeicons/react";
 import type { ReactNode } from "react";
 
@@ -17,8 +29,36 @@ export interface SettingsSection {
   icon: IconComponent;
 }
 
-export const SETTINGS_SECTIONS: SettingsSection[] = [
-  { id: "general", label: "General", icon: makeIcon(PaintBrush01Icon) },
-  { id: "account", label: "Account", icon: makeIcon(UserIcon) },
-  { id: "api", label: "API Keys", icon: makeIcon(Key01Icon) },
+export interface SettingsSectionGroup {
+  title?: string;
+  sections: SettingsSection[];
+}
+
+export const SETTINGS_GROUPS: SettingsSectionGroup[] = [
+  {
+    sections: [
+      { id: "general", label: "General", icon: makeIcon(Settings01Icon) },
+      { id: "account", label: "Account", icon: makeIcon(UserIcon) },
+      { id: "appearance", label: "Appearance", icon: makeIcon(PaintBrush01Icon) },
+    ],
+  },
+  {
+    sections: [
+      { id: "models", label: "Models", icon: makeIcon(AiBrain01Icon) },
+      { id: "agents", label: "Agents", icon: makeIcon(Robot02Icon) },
+      { id: "plans", label: "Plans and Usage", icon: makeIcon(ChartLineData01Icon) },
+      { id: "remote", label: "Remote", icon: makeIcon(GlobalIcon) },
+      { id: "tools", label: "Tools", icon: makeIcon(ToolsIcon) },
+      { id: "rules", label: "Rules & Skills", icon: makeIcon(Book01Icon) },
+    ],
+  },
+  {
+    sections: [
+      { id: "beta", label: "Beta", icon: makeIcon(TestTubeIcon) },
+      { id: "docs", label: "Docs", icon: makeIcon(Book02Icon) },
+    ],
+  },
 ];
+
+export const SETTINGS_SECTIONS: SettingsSection[] =
+  SETTINGS_GROUPS.flatMap((g) => g.sections);
