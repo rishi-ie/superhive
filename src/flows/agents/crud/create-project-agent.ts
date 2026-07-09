@@ -3,7 +3,7 @@
  *
  * Use this flow when you need an Agent record that represents the
  * project itself (not a standalone working agent). Project-agents:
- * - Live inside the project folder at `<localPath>/.agent/`
+ * - Live inside the project folder at `<localPath>/agent/`
  * - Are tagged with `agentKind: 'project-coordinator'`
  * - Do NOT auto-start a runtime (decision: stays idle until user clicks Start)
  * - Do NOT auto-navigate (caller navigates to /projects/:projectId, not /agents/:agentId)

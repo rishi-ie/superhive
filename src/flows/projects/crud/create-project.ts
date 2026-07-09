@@ -10,8 +10,6 @@ export interface CreateProjectInput {
 	name: string;
 	description?: string;
 	localPath?: string;
-	agentFolderName?: string;
-	agentParentDir?: string;
 }
 
 export interface CreateProjectResult {
@@ -44,11 +42,11 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
 		return { ok: false, error: message };
 	}
 
-	// Step 2: Create the project-agent
+	// Step 2: Create the project-agent inside the project's folder
 	const agentResult = await createProjectAgent({
 		name: `${name} (Coordinator)`,
-		folderName: input.agentFolderName ?? 'agent',
-		parentDir: input.agentParentDir ?? localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
+		folderName: 'agent',
+		parentDir: localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
 	});
 	if (!agentResult.ok || !agentResult.agent) {
 		await projects.delete(project.id).catch(() => {});
