@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
 import { createProject } from '@/flows/projects/crud/create-project';
 import { slugify } from '@/lib/slugify';
+import { sanitizeFolderName } from '@/lib/sanitize-folder-name';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/projects';
 type SubmitPhase = 'idle' | 'creating';
@@ -27,6 +28,8 @@ export function CreateProjectDialog() {
   const [description, setDescription] = React.useState('');
   const [localPath, setLocalPath] = React.useState('');
   const [localPathTouched, setLocalPathTouched] = React.useState(false);
+  const [agentFolderName, setAgentFolderName] = React.useState('agent');
+  const [agentFolderNameTouched, setAgentFolderNameTouched] = React.useState(false);
   const [phase, setPhase] = React.useState<SubmitPhase>('idle');
   const [error, setError] = React.useState<string | null>(null);
 
@@ -35,6 +38,8 @@ export function CreateProjectDialog() {
     setDescription('');
     setLocalPath('');
     setLocalPathTouched(false);
+    setAgentFolderName('agent');
+    setAgentFolderNameTouched(false);
     setPhase('idle');
     setError(null);
   };
@@ -54,11 +59,19 @@ export function CreateProjectDialog() {
       const slug = slugify(name);
       setLocalPath(`${DEFAULT_PARENT_DIR}/${slug || 'project'}`);
     }
-  }, [name, localPathTouched]);
+    if (!agentFolderNameTouched) {
+      setAgentFolderName('agent');
+    }
+  }, [name, localPathTouched, agentFolderNameTouched]);
 
   const handleLocalPathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalPathTouched(true);
     setLocalPath(e.target.value);
+  };
+
+  const handleAgentFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAgentFolderNameTouched(true);
+    setAgentFolderName(e.target.value);
   };
 
   const canSubmit = phase === 'idle' && name.trim().length > 0;
@@ -72,6 +85,7 @@ export function CreateProjectDialog() {
       name: name.trim(),
       description: description.trim() || undefined,
       localPath: localPath.trim() || undefined,
+      agentFolderName: agentFolderName.trim() || '.agent',
     });
     if (result.ok) {
       setOpen(false);
@@ -127,6 +141,26 @@ export function CreateProjectDialog() {
             </div>
             <span className="text-[11px] text-muted-foreground">
               Auto-suggested from project name. Agents connected to this project will use it as their workspace center.
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="agent-folder-name">
+              Agent Folder Name
+            </Label>
+            <Input
+              id="agent-folder-name"
+              placeholder=".agent"
+              value={agentFolderName}
+              onChange={handleAgentFolderChange}
+              className="font-mono text-xs"
+            />
+            <span className="text-[11px] text-muted-foreground">
+              {(() => {
+                const sanitized = sanitizeFolderName(agentFolderName) || 'agent';
+                const base = localPath || '~/.superhive/projects/...';
+                return `${base}/${sanitized} — where the project-agent's state lives`;
+              })()}
             </span>
           </div>
 

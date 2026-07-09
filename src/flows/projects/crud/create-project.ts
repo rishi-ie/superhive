@@ -47,7 +47,7 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
 	// Step 2: Create the project-agent
 	const agentResult = await createProjectAgent({
 		name: `${name} (Coordinator)`,
-		folderName: input.agentFolderName ?? '.agent',
+		folderName: input.agentFolderName ?? 'agent',
 		parentDir: input.agentParentDir ?? localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
 	});
 	if (!agentResult.ok || !agentResult.agent) {

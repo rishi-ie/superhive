@@ -11,6 +11,7 @@ import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { TEMPLATE_DIR, ensureManifestPiTemplate } from '../install-bootstrap'
 import { config } from '../config'
+import { sanitizeFolderName } from '../../src/lib/sanitize-folder-name'
 import {
 	type SettingsFile,
 	DEFAULT_SETTINGS,
@@ -43,14 +44,14 @@ export function registerAgentIpc(): void {
 
 			ensureManifestPiTemplate()
 
-			const folderName = data.folderName.trim()
-			const parentDir = data.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? '')
-
-			if (!/^[a-z0-9][a-z0-9-]*$/.test(folderName)) {
+			const rawFolderName = data.folderName.trim()
+			const folderName = sanitizeFolderName(rawFolderName)
+			if (!folderName) {
 				throw new Error(
-					'Folder name must be lowercase letters, digits, and hyphens (start with letter/digit)',
+					`Invalid folder name "${rawFolderName}" — cannot be empty, ".", "..", or contain path separators`,
 				)
 			}
+			const parentDir = data.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? '')
 
 			await mkdir(parentDir, { recursive: true })
 
