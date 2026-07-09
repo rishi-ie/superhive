@@ -1,5 +1,7 @@
 import * as React from 'react';
+import { listAgents } from '@/flows/agents/crud/list-agents';
 import { listProjects } from '@/flows/projects/crud/list-projects';
+import type { Agent } from '@/types/electron';
 import type { Project } from '@/storage/types';
 import { PinnedSection } from './sections/PinnedSection';
 import { ProjectsSection } from './sections/ProjectsSection';
@@ -7,7 +9,24 @@ import { ProjectsSection } from './sections/ProjectsSection';
 const pinned: { id: string; name: string }[] = [];
 
 export function SidebarAccordion() {
+  const [agents, setAgents] = React.useState<Agent[]>([]);
   const [projects, setProjects] = React.useState<Project[]>([]);
+
+  React.useEffect(() => {
+    let mounted = true;
+    listAgents().then((list) => {
+      if (mounted) setAgents(list);
+    });
+    const interval = setInterval(() => {
+      listAgents().then((list) => {
+        if (mounted) setAgents(list);
+      });
+    }, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   React.useEffect(() => {
     let mounted = true;
@@ -30,7 +49,7 @@ export function SidebarAccordion() {
   return (
     <div className="flex flex-col gap-1 px-2">
       <PinnedSection items={pinned} />
-      <ProjectsSection items={projectItems} />
+      <ProjectsSection items={projectItems} agents={agents} />
     </div>
   );
 }
