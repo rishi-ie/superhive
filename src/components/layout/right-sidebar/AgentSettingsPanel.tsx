@@ -50,18 +50,15 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
-        <TabsList variant="line" className="w-full h-9 justify-start px-0">
-          <TabsTrigger value="overview" className="cursor-default">
-            <HugeiconsIcon icon={Layout01Icon} data-icon="inline-start" className="size-3.5" />
-            Overview
+        <TabsList variant="line" className="w-full h-9 justify-center px-0 gap-0">
+          <TabsTrigger value="overview" aria-label="Overview" className="flex-1 size-9 px-0 cursor-default">
+            <HugeiconsIcon icon={Layout01Icon} className="size-4" />
           </TabsTrigger>
-          <TabsTrigger value="manage" className="cursor-default">
-            <HugeiconsIcon icon={Settings01Icon} data-icon="inline-start" className="size-3.5" />
-            Manage
+          <TabsTrigger value="manage" aria-label="Manage" className="flex-1 size-9 px-0 cursor-default">
+            <HugeiconsIcon icon={Settings01Icon} className="size-4" />
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="cursor-default">
-            <HugeiconsIcon icon={InboxIcon} data-icon="inline-start" className="size-3.5" />
-            Inbox
+          <TabsTrigger value="inbox" aria-label="Inbox" className="flex-1 size-9 px-0 cursor-default">
+            <HugeiconsIcon icon={InboxIcon} className="size-4" />
           </TabsTrigger>
         </TabsList>
 
