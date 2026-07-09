@@ -35,8 +35,8 @@ export function ComposerCard() {
             <button className="text-[#9ca3af] hover:text-white cursor-default">
               <HugeiconsIcon icon={Mic01Icon} className="size-5" />
             </button>
-            <button className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] cursor-default">
-              <HugeiconsIcon icon={SentIcon} className="size-3.5 text-[#222222]" />
+            <button className="flex size-7 items-center justify-center rounded-full bg-sidebar-accent hover:bg-sidebar-accent/80 cursor-default">
+              <HugeiconsIcon icon={SentIcon} className="size-3.5 text-sidebar-accent-foreground" />
             </button>
           </div>
         </div>
