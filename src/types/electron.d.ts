@@ -52,8 +52,6 @@ export type ProjectCreateInput = {
 	name: string
 	description?: string
 	localPath?: string
-	agentFolderName?: string
-	agentParentDir?: string
 }
 
 export type ProjectUpdateInput = Partial<Pick<Project, 'name' | 'description' | 'localPath' | 'channelId'>>

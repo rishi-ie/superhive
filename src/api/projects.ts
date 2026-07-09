@@ -9,8 +9,6 @@ export const projects = {
     name: string;
     description?: string;
     localPath?: string;
-    agentFolderName?: string;
-    agentParentDir?: string;
   }): Promise<Project> => window.api.projects.create(data),
 
   update: (id: string, data: ProjectUpdateInput): Promise<Project | null> =>
