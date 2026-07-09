@@ -36,7 +36,7 @@ export function ComposerCard() {
               <HugeiconsIcon icon={Mic02Icon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
-              <Send className="size-3.5" />
+              <Send className="size-5" />
             </button>
           </div>
         </div>
