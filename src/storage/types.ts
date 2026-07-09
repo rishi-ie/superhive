@@ -6,6 +6,8 @@ export type AgentStatus =
   | 'stopped'
   | 'error'
 
+export type AgentKind = 'standard' | 'project-coordinator'
+
 export type TaskStatus = 'todo' | 'running' | 'blocked' | 'completed' | 'cancelled'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
 export type ChannelType = 'project' | 'agent' | 'system'
@@ -33,6 +35,7 @@ export interface Agent extends BaseEntity {
   projectIds: string[]
   taskIds: string[]
   sessionIds: string[]
+  agentKind?: AgentKind
 }
 
 export interface Project extends BaseEntity {
@@ -46,6 +49,7 @@ export interface Project extends BaseEntity {
   agentIds: string[]
   taskIds: string[]
   channelIds: string[]
+  channelId?: string
   parentProjectId?: string
   childProjectIds: string[]
 }
