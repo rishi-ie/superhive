@@ -23,7 +23,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
   const canStop = STOPPABLE[status] ?? false;
 
   return (
-    <div className="flex items-center justify-between border-t border-sidebar-border px-3 py-2">
+    <div className="flex items-center justify-between border-t border-sidebar-border py-2">
       <span className="text-xs text-muted-foreground">Live runtime</span>
       <div className="flex items-center gap-1.5">
         <Button
