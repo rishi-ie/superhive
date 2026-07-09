@@ -1,37 +1,57 @@
 import { useParams } from 'react-router-dom';
 import * as React from 'react';
+import { ProjectChatHeader } from './components/ProjectChatHeader';
+import { ProjectChatConversation } from './components/ProjectChatConversation';
+import { ProjectChatInput } from './components/ProjectChatInput';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { loadMessages } from '@/flows/channels/ui/load-messages';
+import { listAgents } from '@/flows/agents/crud/list-agents';
 import type { Project } from '@/storage/types';
-import type { ChannelMessage } from '@/types/electron';
+import type { ChannelMessage, Agent } from '@/types/electron';
 
 export function ProjectChatView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = React.useState<Project | null>(null);
-  const [_messages, setMessages] = React.useState<ChannelMessage[]>([]);
+  const [agents, setAgents] = React.useState<Agent[]>([]);
+  const [projectAgent, setProjectAgent] = React.useState<Agent | null>(null);
+  const [channelId, setChannelId] = React.useState<string | null>(null);
+  const [messages, setMessages] = React.useState<ChannelMessage[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     if (!projectId) return;
     let cancelled = false;
     setLoading(true);
-    loadProject(projectId)
-      .then((p) => {
+
+    (async () => {
+      try {
+        const p = await loadProject(projectId);
         if (cancelled) return;
-        setProject(p ?? null);
-        if (p?.channelId) {
-          return loadMessages(p.channelId);
+        setProject(p);
+
+        if (!p) {
+          setLoading(false);
+          return;
         }
-        return [];
-      })
-      .then((msgs) => {
+
+        const allAgents = await listAgents();
         if (cancelled) return;
-        setMessages(msgs ?? []);
-        setLoading(false);
-      })
-      .catch(() => {
+        setAgents(allAgents);
+        setProjectAgent(allAgents.find((a) => a.agentKind === 'project-coordinator') ?? null);
+
+        if (p.channelId) {
+          setChannelId(p.channelId);
+          const msgs = await loadMessages(p.channelId);
+          if (cancelled) return;
+          setMessages(msgs);
+        }
+      } catch {
+        // ignore — leave state as-is
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
@@ -55,8 +75,23 @@ export function ProjectChatView() {
 
   return (
     <div className="flex h-full flex-col bg-background">
-      <div className="flex-1 overflow-y-auto">
-        <span className="text-sm text-muted-foreground">Project: {project.name}</span>
+      <ProjectChatHeader project={project} members={agents} />
+      <div className="flex flex-1 flex-col min-h-0">
+        <div className="flex-1 min-h-0">
+          <ProjectChatConversation
+            messages={messages}
+            projectAgentName={projectAgent?.name ?? 'Project Agent'}
+          />
+        </div>
+        {channelId && (
+          <ProjectChatInput
+            channelId={channelId}
+            senderId="user"
+            onMessageSent={(msg) =>
+              setMessages((prev) => [...prev, msg as ChannelMessage])
+            }
+          />
+        )}
       </div>
     </div>
   );
