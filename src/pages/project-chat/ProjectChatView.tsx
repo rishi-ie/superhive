@@ -1,63 +1,61 @@
+/**
+ * ProjectChatView — project-coordinator chat surface.
+ *
+ * Architecture mirrors AgentChatView (split into outer loader + inner runtime)
+ * so we can call `useAgentRuntime` only after we've identified the
+ * project-agent. Project-agent runtimes are intentionally isolated from
+ * standard-agent runtimes via the forked components in this folder; the
+ * underlying `useAgentRuntime` hook is shared (agent-store is generic).
+ */
+
 import { useParams } from 'react-router-dom';
 import * as React from 'react';
 import { ProjectChatHeader } from './components/ProjectChatHeader';
 import { ProjectChatConversation } from './components/ProjectChatConversation';
 import { ProjectChatInput } from './components/ProjectChatInput';
+import { ProjectAgentInitializing } from './components/ProjectAgentInitializing';
+import { ProjectAgentError } from './components/ProjectAgentError';
+import { ProjectAgentStopped } from './components/ProjectAgentStopped';
+import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
-import { loadMessages } from '@/flows/channels/ui/load-messages';
 import { listAgents } from '@/flows/agents/crud/list-agents';
+import { useAgentRuntime } from '@/flows/agents/runtime/use-agent-runtime';
 import type { Project } from '@/storage/types';
-import type { ChannelMessage, Agent } from '@/types/electron';
+import type { Agent } from '@/types/electron';
 
 export function ProjectChatView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = React.useState<Project | null>(null);
-  const [agents, setAgents] = React.useState<Agent[]>([]);
   const [projectAgent, setProjectAgent] = React.useState<Agent | null>(null);
-  const [channelId, setChannelId] = React.useState<string | null>(null);
-  const [messages, setMessages] = React.useState<ChannelMessage[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [projectResolved, setProjectResolved] = React.useState(false);
 
   React.useEffect(() => {
     if (!projectId) return;
     let cancelled = false;
-    setLoading(true);
-
+    setProjectResolved(false);
     (async () => {
-      try {
-        const p = await loadProject(projectId);
-        if (cancelled) return;
-        setProject(p);
-
-        if (!p) {
-          setLoading(false);
-          return;
-        }
-
-        const allAgents = await listAgents();
-        if (cancelled) return;
-        setAgents(allAgents);
-        setProjectAgent(allAgents.find((a) => a.agentKind === 'project-coordinator') ?? null);
-
-        if (p.channelId) {
-          setChannelId(p.channelId);
-          const msgs = await loadMessages(p.channelId);
-          if (cancelled) return;
-          setMessages(msgs);
-        }
-      } catch {
-        // ignore — leave state as-is
-      } finally {
-        if (!cancelled) setLoading(false);
+      const p = await loadProject(projectId);
+      if (cancelled) return;
+      setProject(p);
+      if (!p) {
+        setProjectResolved(true);
+        return;
       }
-    })();
 
+      const allAgents = await listAgents();
+      if (cancelled) return;
+      const coordinator = allAgents.find((a) => a.agentKind === 'project-coordinator') ?? null;
+      setProjectAgent(coordinator);
+      setProjectResolved(true);
+    })();
     return () => {
       cancelled = true;
     };
   }, [projectId]);
 
-  if (loading) {
+  if (!projectId) return <ProjectAgentEmpty />;
+
+  if (!projectResolved) {
     return (
       <div className="flex h-full items-center justify-center bg-background">
         <span className="text-sm text-muted-foreground">Loading project...</span>
@@ -73,26 +71,67 @@ export function ProjectChatView() {
     );
   }
 
+  if (!projectAgent) {
+    return (
+      <div className="flex h-full items-center justify-center bg-background">
+        <span className="text-sm text-muted-foreground">Loading project agent...</span>
+      </div>
+    );
+  }
+
+  return <ProjectChatContent project={project} projectAgent={projectAgent} />;
+}
+
+function ProjectChatContent({ project, projectAgent }: { project: Project; projectAgent: Agent }) {
+  const { status, messages, lastError, bootStep, loading, send, restart } = useAgentRuntime(projectAgent.id);
+  const [input, setInput] = React.useState('');
+
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center bg-background">
+        <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-foreground/70 animate-spin" />
+      </div>
+    );
+  }
+
+  if (status === 'initializing') {
+    return (
+      <ProjectAgentInitializing
+        currentStep={bootStep}
+        agentName={projectAgent.name}
+        lastError={lastError}
+        onRestart={restart}
+      />
+    );
+  }
+
+  if (status === 'error') {
+    return <ProjectAgentError lastError={lastError} onRestart={restart} projectId={project.id} />;
+  }
+
+  if (status === 'stopped') {
+    return <ProjectAgentStopped onStart={restart} />;
+  }
+
+  const isLive = status === 'running' || status === 'busy';
+
+  const onSend = () => {
+    const t = input.trim();
+    if (!t || !isLive) return;
+    send(t);
+    setInput('');
+  };
+
   return (
     <div className="flex h-full flex-col bg-background">
-      <ProjectChatHeader project={project} members={agents} />
-      <div className="flex flex-1 flex-col min-h-0">
-        <div className="flex-1 min-h-0">
-          <ProjectChatConversation
-            messages={messages}
-            projectAgentName={projectAgent?.name ?? 'Project Agent'}
-          />
-        </div>
-        {channelId && (
-          <ProjectChatInput
-            channelId={channelId}
-            senderId="user"
-            onMessageSent={(msg) =>
-              setMessages((prev) => [...prev, msg as ChannelMessage])
-            }
-          />
-        )}
+      <ProjectChatHeader project={project} members={[projectAgent]} />
+      <div className="flex-1 min-h-0">
+        <ProjectChatConversation
+          messages={messages}
+          projectAgentName={projectAgent.name}
+        />
       </div>
+      <ProjectChatInput onSend={onSend} disabled={!isLive} />
     </div>
   );
 }

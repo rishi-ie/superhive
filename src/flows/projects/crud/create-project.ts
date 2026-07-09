@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import { createProjectAgent } from '@/flows/agents/crud/create-project-agent';
 import { createChannel } from '@/flows/channels/crud/create-channel';
-import { appendMessage } from '@/flows/channels/ui/append-message';
 
 export interface CreateProjectInput {
 	name: string;
@@ -54,7 +53,7 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
 	}
 	const projectAgent = agentResult.agent;
 
-	// Step 3: Create the channel
+	// Step 3: Create the channel (record-only; runtime drives messaging now)
 	const channelResult = await createChannel({
 		name: `${name} coordination`,
 		type: 'project',
@@ -68,18 +67,11 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
 	}
 	const channel = channelResult.channel;
 
-	// Step 4: Link channel to project
+	// Step 4: Link channel to project (for future L3 multi-agent routing)
 	try {
 		await window.api.projects.update(project.id, { channelId: channel.id });
 	} catch {
 		// Non-fatal — channel exists independently
-	}
-
-	// Step 5: Write initial system message
-	try {
-		await appendMessage(channel.id, 'system', projectAgent.id, `Welcome to ${name}. I'm the project coordinator.`);
-	} catch {
-		// Non-fatal — channel works without initial message
 	}
 
 	toast.success(`Project "${project.name}" created`);

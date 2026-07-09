@@ -1,20 +1,11 @@
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
-import type { ChannelMessage } from '@/types/electron';
+import type { RuntimeMessage } from '@/types/electron';
 
 interface ProjectChatConversationProps {
-  messages: ChannelMessage[];
+  messages: RuntimeMessage[];
   projectAgentName: string;
 }
 
-export function ProjectChatConversation({ messages, projectAgentName: _projectAgentName }: ProjectChatConversationProps) {
-  return (
-    <ConversationArea
-      messages={messages.map((m) => ({
-        id: m.id,
-        role: m.senderType === 'user' ? 'user' : 'assistant',
-        content: m.content,
-        ts: m.timestamp,
-      }))}
-    />
-  );
+export function ProjectChatConversation({ messages }: ProjectChatConversationProps) {
+  return <ConversationArea messages={messages} />;
 }
