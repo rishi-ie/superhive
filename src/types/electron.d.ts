@@ -1,9 +1,9 @@
-import type { Agent, AgentStatus, Project } from '@/storage/types'
+import type { Agent, AgentStatus, Project, Channel } from '@/storage/types'
 import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
 import type { InitStep, AdapterEvent } from '@/models/boot-step'
 import type { EnsureTemplateResult } from '@/models/template'
 
-export type { Agent, AgentStatus, Project }
+export type { Agent, AgentStatus, Project, Channel }
 
 export type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload }
 export type { InitStep, AdapterEvent }
@@ -68,6 +68,30 @@ export interface ElectronAPI {
 	agents: AgentsAPI
 	projects: ProjectsAPI
 	app: AppAPI
+	channels: ChannelsAPI
+}
+
+export interface ChannelMessage {
+	id: string
+	senderType: 'user' | 'agent' | 'system'
+	senderId: string
+	content: string
+	timestamp: number
+}
+
+export interface CreateChannelInput {
+	name: string
+	type: 'project' | 'agent' | 'system'
+	projectId?: string
+	participantAgentIds: string[]
+}
+
+export interface ChannelsAPI {
+	create(input: CreateChannelInput): Promise<Channel>
+	get(id: string): Promise<Channel | null>
+	list(): Promise<Channel[]>
+	appendMessage(channelId: string, message: Omit<ChannelMessage, 'id' | 'timestamp'>): Promise<ChannelMessage>
+	readMessages(channelId: string): Promise<ChannelMessage[]>
 }
 
 declare global {
