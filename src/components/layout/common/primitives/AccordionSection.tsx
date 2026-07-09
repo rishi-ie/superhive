@@ -19,11 +19,10 @@ export function AccordionSection({
   labelClassName,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
-  const hasChildren = !!children;
 
   const handleClick = () => {
     if (onClick) onClick();
-    if (hasChildren) setOpen((o) => !o);
+    setOpen((o) => !o);
   };
 
   return (
@@ -37,28 +36,24 @@ export function AccordionSection({
         )}
       >
         <span className="truncate text-left">{label}</span>
-        {hasChildren && (
-          <HugeiconsIcon icon={ArrowRight01Icon}
-            className={cn(
-              'size-4 flex-shrink-0 transition-transform duration-150',
-              open && 'rotate-90'
-            )}
-          />
-        )}
+        <HugeiconsIcon icon={ArrowRight01Icon}
+          className={cn(
+            'size-4 flex-shrink-0 transition-transform duration-150',
+            open && 'rotate-90'
+          )}
+        />
       </button>
 
-      {hasChildren && (
-        <div
-          className={cn(
-            'grid overflow-hidden transition-[grid-template-rows] duration-150 ease-out',
-            open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-          )}
-        >
-          <div className="min-h-0 pl-2">
-            <div className="flex flex-col gap-0.5 py-0.5">{children}</div>
-          </div>
+      <div
+        className={cn(
+          'grid overflow-hidden transition-[grid-template-rows] duration-150 ease-out',
+          open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        )}
+      >
+        <div className="min-h-0 pl-2">
+          <div className="flex flex-col gap-0.5 py-0.5">{children}</div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
