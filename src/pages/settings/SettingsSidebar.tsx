@@ -10,7 +10,7 @@ export function SettingsSidebar() {
 
   return (
     <aside className="flex h-full w-68 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
-      <div className="flex flex-col gap-4 px-2 pt-12 pb-1">
+      <div className="flex flex-col gap-1 px-2 pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
           className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
@@ -25,7 +25,7 @@ export function SettingsSidebar() {
           <span>Search</span>
         </button>
       </div>
-      <nav className="flex flex-col gap-4 px-2">
+      <nav className="flex flex-col gap-4 px-2 pt-4">
         {SETTINGS_GROUPS.map((group, gi) => (
           <div key={gi} className="flex flex-col gap-0.5">
             {group.sections.map((section) => (
