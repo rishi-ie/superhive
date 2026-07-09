@@ -55,7 +55,9 @@ export function ProjectChatView() {
 
       const allAgents = await listAgents();
       if (cancelled) return;
-      const coordinator = allAgents.find((a) => a.agentKind === 'project-coordinator') ?? null;
+      const coordinator = allAgents.find(
+        (a) => a.agentKind === 'project-coordinator' && p.agentIds.includes(a.id)
+      ) ?? null;
       setProjectAgent(coordinator);
       setProjectResolved(true);
     })();

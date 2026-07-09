@@ -15,4 +15,7 @@ export const projects = {
     window.api.projects.update(id, data),
 
   delete: (id: string): Promise<boolean> => window.api.projects.delete(id),
+
+  addAgent: (projectId: string, agentId: string): Promise<void> =>
+    window.api.projects.addAgent(projectId, agentId),
 };

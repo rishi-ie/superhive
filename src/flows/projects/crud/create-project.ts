@@ -53,6 +53,17 @@ export async function createProject(input: CreateProjectInput): Promise<CreatePr
 	}
 	const projectAgent = agentResult.agent;
 
+	// Step 2.5: Link project-agent to project (both directions via ProjectRepository.addAgent)
+	try {
+		await projects.addAgent(project.id, projectAgent.id);
+	} catch (err) {
+		const message = err instanceof Error ? err.message : 'Failed to link project agent';
+		toast.error(message);
+		await projects.delete(project.id).catch(() => {});
+		await agents.delete(projectAgent.id).catch(() => {});
+		return { ok: false, error: message, project };
+	}
+
 	// Step 3: Create the channel (record-only; runtime drives messaging now)
 	const channelResult = await createChannel({
 		name: `${name} coordination`,

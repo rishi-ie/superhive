@@ -30,6 +30,7 @@ export const IPC = {
     CREATE: 'projects:create',
     UPDATE: 'projects:update',
     DELETE: 'projects:delete',
+    ADD_AGENT: 'projects:addAgent',
   },
   APP: {
     GET_VERSION: 'app:get-version',

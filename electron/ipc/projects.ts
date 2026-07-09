@@ -44,4 +44,8 @@ export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.DELETE, async (_e, id: string) => {
     return ProjectRepository.delete(id);
   });
+
+  ipcMain.handle(IPC.PROJECTS.ADD_AGENT, async (_e, projectId: string, agentId: string) => {
+    await ProjectRepository.addAgent(projectId, agentId);
+  });
 }
