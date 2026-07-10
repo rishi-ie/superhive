@@ -58,7 +58,7 @@ export async function applySettingsDiff(
 	const result: ApplyResult = { needsReload: false, applied: [], failed: [], reloadFields: [] };
 
 	// --- Tier 1: model ---
-	if (modelChanged(prev.model, next.model)) {
+	if (modelChanged(prev.model, next.model, ctx)) {
 		try {
 			const ok = await applyModel(next.model, ctx);
 			if (ok) {
@@ -220,8 +220,14 @@ export async function applySettingsDiff(
 // Helpers
 // ---------------------------------------------------------------------------
 
-function modelChanged(a: SettingsFile["model"], b: SettingsFile["model"]): boolean {
-	if (!b || !b.provider || !b.name) return false;
+function modelChanged(a: SettingsFile["model"], b: SettingsFile["model"], ctx: ApplyContext): boolean {
+	if (!b || !b.provider || !b.name) {
+		// Empty model: do not apply, but warn the user that no model is selected.
+		// Without this notification, the UI guard ("Pick a model first") is the
+		// only signal and the agent quietly falls through to the env-var fallback.
+		ctx.notify("No model selected in settings", "warning");
+		return false;
+	}
 	if (!a || a.provider !== b.provider || a.name !== b.name) return true;
 	return false;
 }
