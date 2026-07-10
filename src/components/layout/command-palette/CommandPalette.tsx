@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { MessageAdd01Icon, UserIcon, FolderAddIcon, Settings01Icon, HexagonIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { ChatCircleDotsIcon, UserIcon, FolderPlusIcon, GearIcon, HexagonIcon } from "@phosphor-icons/react";
 import {
   Command,
   CommandDialog,
@@ -38,15 +38,15 @@ export function CommandPalette() {
 
           <CommandGroup heading="Actions">
             <CommandItem onSelect={run(() => toast.info("New chat — coming soon"))}>
-              <HugeiconsIcon icon={MessageAdd01Icon} />
+              <Icon icon={ChatCircleDotsIcon} />
               New Chat
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New agent — coming soon"))}>
-              <HugeiconsIcon icon={UserIcon} />
+              <Icon icon={UserIcon} />
               New Agent
             </CommandItem>
             <CommandItem onSelect={run(() => toast.info("New project — coming soon"))}>
-              <HugeiconsIcon icon={FolderAddIcon} />
+              <Icon icon={FolderPlusIcon} />
               New Project
             </CommandItem>
           </CommandGroup>
@@ -55,11 +55,11 @@ export function CommandPalette() {
 
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={run(() => goToSettings(navigate))}>
-              <HugeiconsIcon icon={Settings01Icon} />
+              <Icon icon={GearIcon} />
               Settings
             </CommandItem>
             <CommandItem onSelect={run(() => navigate("/hive"))}>
-              <HugeiconsIcon icon={HexagonIcon} />
+              <Icon icon={HexagonIcon} />
               Meta Hive
             </CommandItem>
           </CommandGroup>
