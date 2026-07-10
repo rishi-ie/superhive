@@ -32,6 +32,8 @@ import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
+import { useAgentSettings } from '@/flows/agents/agent-store';
+import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
@@ -98,6 +100,12 @@ export function ProjectChatView() {
 
 function ProjectChatContent({ project, projectAgent }: { project: Project; projectAgent: Agent }) {
   const { status, messages, lastError, bootStep, loading, send, restart } = useAgentRuntime(projectAgent.id);
+  // Read the current model selection so we can gate the send button.
+  // Mirrors the guard in AgentChatView: chat is disabled when no model is chosen.
+  const agentSettings = useAgentSettings(projectAgent.id);
+  const hasModel = Boolean(
+    agentSettings.settings?.model?.provider && agentSettings.settings?.model?.name,
+  );
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
@@ -134,6 +142,13 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   const onSend = () => {
     const text = input.trim();
     if (!text || !isLive) return;
+    // Guard: chat is disabled when no model is selected.
+    // The send button is also disabled in this state, but a defensive guard
+    // is kept in case the user reaches onSend via keyboard (Enter).
+    if (!hasModel) {
+      toast.error('Pick a model first');
+      return;
+    }
     send(text);
     setInput('');
     requestAnimationFrame(() => textareaRef.current?.focus());
@@ -179,7 +194,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                 </button>
                 <button
                   onClick={onSend}
-                  disabled={isBusy || input.trim().length === 0}
+                  disabled={isBusy || input.trim().length === 0 || !hasModel}
+                  title={!hasModel ? 'Pick a model first' : undefined}
                   className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] disabled:bg-[#333] disabled:cursor-default cursor-default"
                 >
                   <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5 text-[#222222]" />
