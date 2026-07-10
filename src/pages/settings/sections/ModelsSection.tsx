@@ -119,9 +119,20 @@ export function ModelsSection() {
         </div>
 
         {loading ? null : sortedProviderEntries.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border bg-card/50 px-4 py-6 text-center text-xs text-muted-foreground">
-            No providers yet. Add a provider to start configuring your own API keys.
-          </p>
+          <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-border bg-card/50 px-4 py-8 text-center">
+            <p className="text-xs text-muted-foreground">
+              Add a provider to start configuring your own API keys.
+            </p>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={onAddProvider}
+              className="gap-1.5"
+            >
+              <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
+              Add provider
+            </Button>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {sortedProviderEntries.map(([name, entry]) => (
