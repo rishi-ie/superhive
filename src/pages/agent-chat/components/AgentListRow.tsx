@@ -3,6 +3,8 @@ import { HugeiconsIcon } from "@/components/ui/icon";
 import { ArrowRight01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { TableRow } from "@/components/ui/table";
+import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { Agent } from '@/types/electron';
 
@@ -31,12 +33,7 @@ interface AgentListRowProps {
 
 function initials(name?: string) {
   if (!name) return "?";
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  return name.trim().charAt(0).toUpperCase();
 }
 
 function relativeTime(timestamp?: number): string | null {
@@ -59,30 +56,38 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
   const isCoordinator = agent.agentKind === 'project-coordinator';
   const updated = relativeTime(agent.updatedAt);
 
-  const metaParts: string[] = [];
+  const activityParts: string[] = [];
   if (agent.taskIds.length > 0) {
-    metaParts.push(`${agent.taskIds.length} ${agent.taskIds.length === 1 ? 'task' : 'tasks'}`);
+    activityParts.push(`${agent.taskIds.length} ${agent.taskIds.length === 1 ? 'task' : 'tasks'}`);
   }
   if (agent.sessionIds.length > 0) {
-    metaParts.push(`${agent.sessionIds.length} ${agent.sessionIds.length === 1 ? 'session' : 'sessions'}`);
+    activityParts.push(`${agent.sessionIds.length} ${agent.sessionIds.length === 1 ? 'session' : 'sessions'}`);
   }
-  if (updated) metaParts.push(`Updated ${updated}`);
+  const activityText = activityParts.length > 0 ? activityParts.join(' · ') : '—';
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      navigate(`/agents/${agent.id}`);
+    }
+  };
 
   return (
-    <button
-      type="button"
+    <TableRow
       onClick={() => navigate(`/agents/${agent.id}`)}
-      className="group flex w-full cursor-default items-center gap-4 border-b border-border/40 px-2 py-3 text-left transition-colors hover:bg-accent/40"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="button"
+      className="group cursor-pointer"
     >
-      <Avatar size="lg">
-        <AvatarFallback className="bg-sidebar text-foreground font-medium">
-          {initials(agent.name)}
-        </AvatarFallback>
-      </Avatar>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-medium text-foreground">
+      <TableCell className="w-[260px">
+        <div className="flex items-center gap-2.5">
+          <Avatar size="sm">
+            <AvatarFallback className="bg-sidebar text-foreground font-medium text-xs">
+              {initials(agent.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate font-medium text-foreground text-sm">
             {agent.name}
           </span>
           {isCoordinator && (
@@ -90,42 +95,56 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
               Coordinator
             </Badge>
           )}
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <div className={cn("size-1.5 rounded-full", STATUS_DOT[agent.status])} />
-            {agent.status === 'initializing' ? (
-              <HugeiconsIcon
-                icon={Loading01Icon}
-                className="size-2.5 animate-spin text-yellow-500"
-              />
-            ) : null}
-            <span className="text-xs text-muted-foreground">
-              {STATUS_LABEL[agent.status]}
-            </span>
-          </div>
         </div>
+      </TableCell>
 
-        {agent.role && (
-          <span className="truncate text-xs text-muted-foreground">
-            {agent.role}
+      <TableCell>
+        {agent.role ? (
+          <span className="line-clamp-1 text-muted-foreground text-sm">{agent.role}</span>
+        ) : (
+          <span className="text-muted-foreground/40 text-sm">—</span>
+        )}
+      </TableCell>
+
+      <TableCell className="w-[140px">
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
+          <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
+          {agent.status === 'initializing' ? (
+            <HugeiconsIcon
+              icon={Loading01Icon}
+              className="size-2.5 animate-spin shrink-0 text-yellow-500"
+            />
+          ) : null}
+          <span className="text-xs text-muted-foreground">
+            {STATUS_LABEL[agent.status]}
           </span>
-        )}
+        </div>
+      </TableCell>
 
-        {(metaParts.length > 0 || projectName) && (
-          <div className="flex items-center gap-3 truncate text-xs text-muted-foreground/70">
-            {metaParts.length > 0 && <span>{metaParts.join(' · ')}</span>}
-          </div>
-        )}
-      </div>
-
-      <div className="flex shrink-0 items-center gap-2">
-        <span className="max-w-[140px] truncate text-xs text-muted-foreground">
+      <TableCell className="w-[180px">
+        <span className="truncate text-sm text-muted-foreground">
           {isCoordinator ? 'Manages project' : (projectName ?? 'No project')}
         </span>
+      </TableCell>
+
+      <TableCell className="w-[160px">
+        <span className="whitespace-nowrap text-sm text-muted-foreground">
+          {activityText}
+        </span>
+      </TableCell>
+
+      <TableCell className="w-[100px text-right">
+        <span className="whitespace-nowrap text-xs text-muted-foreground">
+          {updated ?? '—'}
+        </span>
+      </TableCell>
+
+      <TableCell className="w-10 text-right">
         <HugeiconsIcon
           icon={ArrowRight01Icon}
           className="size-3.5 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
         />
-      </div>
-    </button>
+      </TableCell>
+    </TableRow>
   );
 }

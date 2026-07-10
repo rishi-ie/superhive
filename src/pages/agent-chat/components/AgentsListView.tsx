@@ -3,6 +3,13 @@ import { HugeiconsIcon } from "@/components/ui/icon";
 import { PlusSignIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
 import { AgentListRow } from './AgentListRow';
 import { EmptyAgentsState } from './EmptyAgentsState';
 import { listAgents } from '@/flows/agents/crud/list-agents';
@@ -107,14 +114,29 @@ export function AgentsListView() {
               </span>
             </div>
           ) : (
-            <div className="flex flex-col">
-              {filtered.map((agent) => (
-                <AgentListRow
-                  key={agent.id}
-                  agent={agent}
-                  projectName={projectNameFor(agent)}
-                />
-              ))}
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-[260px">Name</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead className="w-[140px">Status</TableHead>
+                    <TableHead className="w-[180px">Project</TableHead>
+                    <TableHead className="w-[160px">Activity</TableHead>
+                    <TableHead className="w-[100px] text-right">Updated</TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((agent) => (
+                    <AgentListRow
+                      key={agent.id}
+                      agent={agent}
+                      projectName={projectNameFor(agent)}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
