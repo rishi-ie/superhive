@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from '@/components/ui/icon';
-import { ViewIcon, ViewOffIcon, Copy01Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
+import { EyeIcon, EyeSlashIcon, CopyIcon } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -47,7 +47,7 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
               disabled={!hasValue}
               aria-label="Copy value"
             >
-              <HugeiconsIcon icon={Copy01Icon} className="size-3.5" />
+              <Icon icon={CopyIcon} className="size-3.5" />
             </Button>
           )}
           <Button
@@ -59,8 +59,8 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
             disabled={!hasValue}
             aria-label={revealed ? 'Hide value' : 'Reveal value'}
           >
-            <HugeiconsIcon
-              icon={revealed ? ViewOffIcon : ViewIcon}
+            <Icon
+              icon={revealed ? EyeSlashIcon : EyeIcon}
               className="size-3.5"
             />
           </Button>
