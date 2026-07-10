@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { PlusIcon } from "@phosphor-icons/react";
 import { AccordionSection } from '@/components/layout/common/primitives';
 import { AgentRow } from '@/components/layout/common/primitives/AgentRow';
 import { EmptyCtaButton } from '@/components/layout/common/primitives/EmptyCtaButton';
@@ -33,7 +33,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
           ))
         : (
             <EmptyCtaButton
-              icon={<HugeiconsIcon icon={PlusSignIcon} className="size-4 flex-shrink-0" />}
+              icon={<Icon icon={PlusIcon} className="size-4 flex-shrink-0" />}
               label="New agent"
               onClick={() => setOpen(true)}
             />
