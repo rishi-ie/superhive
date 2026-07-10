@@ -15,7 +15,14 @@ import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/common/PasswordInput';
 import { setProvider } from '@/flows/settings/crud/set-provider';
 import { listProviders } from '@/flows/settings/crud/list-providers';
+import { toast } from 'sonner';
 import type { ProviderEntry } from '@/types/electron';
+
+// Provider name format: lowercase slug with optional digits/underscore/dash.
+// Mirrors the env-var -> provider derivation in
+// `extensions/superhive-pi-truth/provider-map.ts::envVarToProvider` so that
+// "minimax" and "MINIMAX_API_KEY" resolve to the same key.
+const PROVIDER_NAME_PATTERN = /^[a-z0-9_-]+$/;
 
 interface ProviderDialogProps {
   open: boolean;
@@ -59,15 +66,26 @@ export function ProviderDialog({
     }
   }, [open, initialName]);
 
-  const canSubmit = phase === 'idle' && name.trim().length > 0;
+  const trimmedName = name.trim();
+  const isNameValid = trimmedName.length > 0 && PROVIDER_NAME_PATTERN.test(trimmedName);
+  const canSubmit = phase === 'idle' && isNameValid;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      // Defensive guard for cases where the submit handler is reached
+      // before the inline validation message can render.
+      if (trimmedName.length === 0) {
+        toast.error('Provider name is required');
+      } else if (!isNameValid) {
+        toast.error('Provider name must be lowercase letters, digits, underscores, or dashes');
+      }
+      return;
+    }
     setError(null);
     setPhase('saving');
     const result = await setProvider({
-      name: name.trim(),
+      name: trimmedName,
       baseUrl: baseUrl.trim() || undefined,
       apiKey: apiKey.trim() || undefined,
     });
@@ -109,11 +127,18 @@ export function ProviderDialog({
               onChange={(e) => setName(e.target.value)}
               autoFocus
               required
+              aria-invalid={trimmedName.length > 0 && !isNameValid}
               className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
-            <span className="text-xs text-sidebar-foreground/50">
-              Unique key used to identify the provider (e.g. anthropic, openai, my-local).
-            </span>
+            {trimmedName.length > 0 && !isNameValid ? (
+              <span className="text-xs text-destructive">
+                Lowercase letters, digits, underscores, or dashes only.
+              </span>
+            ) : (
+              <span className="text-xs text-sidebar-foreground/50">
+                Unique key used to identify the provider (e.g. anthropic, openai, my-local).
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
