@@ -1,10 +1,10 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
+import { Icon } from "@/components/ui/icon";
 import {
-  AlertCircleIcon,
-  Layout01Icon,
-  Settings01Icon,
-  InboxIcon,
-} from "@hugeicons/core-free-icons";
+  WarningCircleIcon,
+  SquaresFourIcon,
+  GearIcon,
+  TrayIcon,
+} from "@phosphor-icons/react";
 import { useAgentSettings } from "@/flows/agents/settings";
 import { useAutoSave } from "./use-auto-save";
 import {
@@ -35,7 +35,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   if (error || !settings) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
-        <HugeiconsIcon icon={AlertCircleIcon} className="size-4 text-muted-foreground" />
+        <Icon icon={WarningCircleIcon} className="size-4 text-muted-foreground" />
         <p className="text-xs text-muted-foreground">{error ?? "No settings found"}</p>
         <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => void reload()}>
           Retry
@@ -49,15 +49,15 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <HugeiconsIcon icon={Layout01Icon} className="size-3.5" />
+            <Icon icon={SquaresFourIcon} className="size-3.5" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <HugeiconsIcon icon={Settings01Icon} className="size-3.5" />
+            <Icon icon={GearIcon} className="size-3.5" />
             Manage
           </TabsTrigger>
           <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <HugeiconsIcon icon={InboxIcon} className="size-3.5" />
+            <Icon icon={TrayIcon} className="size-3.5" />
             Inbox
           </TabsTrigger>
         </TabsList>
