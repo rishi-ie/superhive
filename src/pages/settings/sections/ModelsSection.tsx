@@ -103,7 +103,43 @@ export function ModelsSection() {
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-full mx-auto px-6">
+    <div className="flex flex-col gap-8 w-1/2 max-w-2xl mx-auto px-6">
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Models</h2>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setModelDialogOpen(true)}
+            className="gap-1.5"
+          >
+            <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
+            Add model
+          </Button>
+        </div>
+
+        {loading ? null : merged.length === 0 ? (
+          <p className="rounded-md border border-dashed border-border bg-card/50 px-4 py-6 text-center text-xs text-muted-foreground">
+            No models available.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {merged.map((m) => {
+              const hasProvider = providerNames.has(m.provider);
+              return (
+                <ModelRow
+                  key={m.id}
+                  model={m}
+                  hasProvider={hasProvider}
+                  onToggleEnabled={(enabled: boolean) => onToggleModel(m, enabled, hasProvider)}
+                  onDelete={m.isFromCatalog ? undefined : () => onDeleteModel(m.id)}
+                />
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Providers</h2>
@@ -144,42 +180,6 @@ export function ModelsSection() {
                 onDelete={() => onDeleteProvider(name)}
               />
             ))}
-          </div>
-        )}
-      </section>
-
-      <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Models</h2>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setModelDialogOpen(true)}
-            className="gap-1.5"
-          >
-            <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
-            Add model
-          </Button>
-        </div>
-
-        {loading ? null : merged.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border bg-card/50 px-4 py-6 text-center text-xs text-muted-foreground">
-            No models available.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {merged.map((m) => {
-              const hasProvider = providerNames.has(m.provider);
-              return (
-                <ModelRow
-                  key={m.id}
-                  model={m}
-                  hasProvider={hasProvider}
-                  onToggleEnabled={(enabled: boolean) => onToggleModel(m, enabled, hasProvider)}
-                  onDelete={m.isFromCatalog ? undefined : () => onDeleteModel(m.id)}
-                />
-              );
-            })}
           </div>
         )}
       </section>
