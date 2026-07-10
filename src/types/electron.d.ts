@@ -74,6 +74,7 @@ export interface ElectronAPI {
 	projects: ProjectsAPI
 	app: AppAPI
 	channels: ChannelsAPI
+	settings: SettingsAPI
 }
 
 export interface ChannelMessage {
@@ -97,6 +98,31 @@ export interface ChannelsAPI {
 	list(): Promise<Channel[]>
 	appendMessage(channelId: string, message: Omit<ChannelMessage, 'id' | 'timestamp'>): Promise<ChannelMessage>
 	readMessages(channelId: string): Promise<ChannelMessage[]>
+}
+
+export interface ProviderEntry {
+	name?: string
+	baseUrl?: string | null
+	apiKey?: string
+}
+
+export interface ModelEntry {
+	id: string
+	provider: string
+	name: string
+	enabled: boolean
+	isCustom?: boolean
+}
+
+export interface SettingsAPI {
+	getProviders: () => Promise<Record<string, ProviderEntry>>
+	setProvider: (input: { name: string; baseUrl?: string; apiKey?: string }) => Promise<void>
+	deleteProvider: (name: string) => Promise<void>
+	getModels: () => Promise<ModelEntry[]>
+	setModelEnabled: (id: string, enabled: boolean) => Promise<void>
+	addModel: (input: { provider: string; name: string }) => Promise<void>
+	deleteModel: (id: string) => Promise<void>
+	getEnabledModels: () => Promise<Array<{ id: string; provider: string; name: string }>>
 }
 
 declare global {
