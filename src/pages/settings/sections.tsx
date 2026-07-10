@@ -18,7 +18,7 @@ import type { ReactNode } from "react";
 type IconComponent = (props: { className?: string }) => ReactNode;
 
 function makeIcon(icon: PhosphorIcon): IconComponent {
-  return function Icon({ className }: { className?: string }) {
+  return function SettingsIcon({ className }: { className?: string }) {
     return <Icon icon={icon} className={className} />;
   };
 }
