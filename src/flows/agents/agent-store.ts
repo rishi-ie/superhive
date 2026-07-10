@@ -319,10 +319,19 @@ export function useAgentSettings(agentId: string | null) {
     // `defaultModel` from the per-agent settings file to resolve the initial
     // model on session start; without this sync, picking a model only updates
     // `model` and the next restart falls through to the env-var fallback.
+    // Also maintain `enabledModels` so the picked id is in the scoped set
+    // used for cycle-scoped model lists in the Pi session.
     if (key === 'model' && value && typeof value === 'object') {
       const m = value as { provider?: string; name?: string }
       entry.dirty['defaultProvider'] = m.provider ?? ''
       entry.dirty['defaultModel'] = m.name ?? ''
+      if (m.provider && m.name) {
+        const pickedId = `${m.provider}:${m.name}`
+        const current = (entry.settings?.enabledModels ?? []) as string[]
+        if (!current.includes(pickedId)) {
+          entry.dirty['enabledModels'] = [...current, pickedId]
+        }
+      }
     }
     if (entry.debounceTimer) clearTimeout(entry.debounceTimer)
     entry.debounceTimer = setTimeout(async () => {
