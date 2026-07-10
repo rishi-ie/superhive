@@ -1,7 +1,7 @@
 import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/shell";
 import { Landing } from "@/pages/landing";
-import { AgentChatView } from "@/pages/agent-chat";
+import { AgentChatView, AgentsListView } from "@/pages/agent-chat";
 import { ProjectChatView } from "@/pages/project-chat";
 import { MetaHiveView } from "@/pages/meta-hive";
 import { RemoteView } from "@/pages/remote";
@@ -19,7 +19,7 @@ export const router = createHashRouter([
       {
         path: "agents",
         children: [
-          { index: true, element: <AgentChatView /> },
+          { index: true, element: <AgentsListView /> },
           { path: ":agentId", element: <AgentChatView /> },
         ],
       },
