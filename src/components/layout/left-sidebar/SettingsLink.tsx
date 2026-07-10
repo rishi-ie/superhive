@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Settings01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { GearIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function SettingsLink() {
@@ -15,7 +15,7 @@ export function SettingsLink() {
         )
       }
     >
-      <HugeiconsIcon icon={Settings01Icon} className="size-4" />
+      <Icon icon={GearIcon} className="size-4" />
       <span>Settings</span>
     </NavLink>
   );
