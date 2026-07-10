@@ -1,4 +1,3 @@
-import * as React from "react";
 import { HugeiconsIcon } from "@/components/ui/icon";
 import {
   PlusSignIcon,
@@ -8,17 +7,9 @@ import {
   NotebookIcon,
 } from "@hugeicons/core-free-icons";
 import { Send } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-const MODELS = ["5.5 Extra High", "Claude Sonnet 4.5", "GPT-4o", "Gemini 2.5 Pro", "DeepSeek V3"];
+import { ModelPicker } from "@/components/layout/composer/ModelPicker";
 
 export function ComposerCard() {
-  const [selectedModel, setSelectedModel] = React.useState("5.5 Extra High");
   return (
     <div className="relative w-full max-w-[700px]">
       <div className="relative z-10 rounded-3xl bg-[#2a2a2a]">
@@ -38,21 +29,7 @@ export function ComposerCard() {
             </button>
           </div>
           <div className="flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1 text-sm text-[#9ca3af] hover:text-white cursor-default">
-                  <span>{selectedModel}</span>
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {MODELS.map((m) => (
-                  <DropdownMenuItem key={m} onSelect={() => setSelectedModel(m)}>
-                    {m}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ModelPicker />
             <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
               <HugeiconsIcon icon={Mic02Icon} className="size-5" />
             </button>
