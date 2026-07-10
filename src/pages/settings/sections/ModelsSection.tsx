@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { PlusIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { ProviderDialog } from './ModelsSection/ProviderDialog';
 import { ModelDialog } from './ModelsSection/ModelDialog';
@@ -113,7 +113,7 @@ export function ModelsSection() {
             onClick={() => setModelDialogOpen(true)}
             className="gap-1.5"
           >
-            <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
+            <Icon icon={PlusIcon} className="size-3.5" />
             Add model
           </Button>
         </div>
@@ -149,7 +149,7 @@ export function ModelsSection() {
             onClick={onAddProvider}
             className="gap-1.5"
           >
-            <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
+            <Icon icon={PlusIcon} className="size-3.5" />
             Add provider
           </Button>
         </div>
@@ -165,7 +165,7 @@ export function ModelsSection() {
               onClick={onAddProvider}
               className="gap-1.5"
             >
-              <HugeiconsIcon icon={PlusSignIcon} className="size-3.5" />
+              <Icon icon={PlusIcon} className="size-3.5" />
               Add provider
             </Button>
           </div>
