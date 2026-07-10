@@ -341,7 +341,7 @@ This project uses **Tailwind CSS v4** with CSS-first configuration. Theme is in 
 
 ## Icon Library
 
-**Hugeicons (free tier)**. Use `@hugeicons/react` + `@hugeicons/core-free-icons` via the wrapper at `@/components/ui/icon`. Import icons from `@hugeicons/core-free-icons`, then wrap with `<HugeiconsIcon icon={IconName} className="..." />`. Default size is 16px, color `currentColor`, strokeWidth 1.5.
+**Phosphor Icons** (`@phosphor-icons/react`). Use the wrapper at `@/components/ui/icon`. Import icons from `@phosphor-icons/react`, then render via `<Icon icon={IconName} className="..." />`. Default size 16px, weight `regular`, color `currentColor`.
 
 ---
 
