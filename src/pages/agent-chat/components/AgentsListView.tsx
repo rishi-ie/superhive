@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { PlusIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -86,15 +86,15 @@ export function AgentsListView() {
             onClick={() => setCreateOpen(true)}
             className="gap-1.5"
           >
-            <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
+            <Icon icon={PlusIcon} className="size-4" />
             New agent
           </Button>
         </div>
 
         {nonCoordinators.length > 0 && (
           <div className="relative mt-2 max-w-md">
-            <HugeiconsIcon
-              icon={Search01Icon}
+            <Icon
+              icon={MagnifyingGlassIcon}
               className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
             />
             <input
