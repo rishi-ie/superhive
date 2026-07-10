@@ -9,6 +9,7 @@ import type { Agent } from '@/types/electron';
 
 interface AgentCardProps {
   agent: Agent;
+  projectName?: string;
 }
 
 function initials(name?: string) {
@@ -21,7 +22,7 @@ function initials(name?: string) {
     .slice(0, 2);
 }
 
-const STATUS_DOT: Record<Agent['status'], string> = {
+export const STATUS_DOT: Record<Agent['status'], string> = {
   running: "bg-green-500",
   busy: "bg-blue-500",
   idle: "bg-muted-foreground/40",
@@ -30,7 +31,7 @@ const STATUS_DOT: Record<Agent['status'], string> = {
   error: "bg-destructive",
 };
 
-const STATUS_LABEL: Record<Agent['status'], string> = {
+export const STATUS_LABEL: Record<Agent['status'], string> = {
   running: "Running",
   busy: "Busy",
   idle: "Idle",
@@ -39,8 +40,9 @@ const STATUS_LABEL: Record<Agent['status'], string> = {
   error: "Error",
 };
 
-export function AgentCard({ agent }: AgentCardProps) {
+export function AgentCard({ agent, projectName }: AgentCardProps) {
   const navigate = useNavigate();
+  const isCoordinator = agent.agentKind === 'project-coordinator';
 
   return (
     <Card
@@ -68,7 +70,7 @@ export function AgentCard({ agent }: AgentCardProps) {
             <span className="truncate text-sm font-medium text-foreground">
               {agent.name}
             </span>
-            {agent.agentKind === 'project-coordinator' && (
+            {isCoordinator && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-[0.5625rem]">
                 Coordinator
               </Badge>
@@ -110,8 +112,8 @@ export function AgentCard({ agent }: AgentCardProps) {
           </span>
         </div>
 
-        <span className="text-xs text-muted-foreground">
-          {agent.projectIds.length} {agent.projectIds.length === 1 ? 'project' : 'projects'}
+        <span className="truncate text-xs text-muted-foreground">
+          {isCoordinator ? 'Manages project' : (projectName ?? 'No project')}
         </span>
       </div>
     </Card>
