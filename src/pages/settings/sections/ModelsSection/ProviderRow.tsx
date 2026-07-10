@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from '@/components/ui/icon';
-import { Edit01Icon, Delete01Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
+import { PencilIcon, TrashIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ProviderEntry } from '@/types/electron';
@@ -49,7 +49,7 @@ export function ProviderRow({ name, entry, onEdit, onDelete }: ProviderRowProps)
           aria-label={`Edit ${name}`}
           className="text-muted-foreground hover:text-foreground cursor-default"
         >
-          <HugeiconsIcon icon={Edit01Icon} className="size-3.5" />
+          <Icon icon={PencilIcon} className="size-3.5" />
         </Button>
         <Button
           type="button"
@@ -59,7 +59,7 @@ export function ProviderRow({ name, entry, onEdit, onDelete }: ProviderRowProps)
           aria-label={`Delete ${name}`}
           className="text-muted-foreground hover:text-destructive cursor-default"
         >
-          <HugeiconsIcon icon={Delete01Icon} className="size-3.5" />
+          <Icon icon={TrashIcon} className="size-3.5" />
         </Button>
       </div>
     </div>
