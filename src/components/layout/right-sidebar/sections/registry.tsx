@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 import type { AgentSettingsState } from "@/flows/agents/settings";
 import { OverviewSection } from "./OverviewSection";
 import { IdentityManageSection } from "./IdentityManageSection";
-import { ModelManageSection } from "./ModelManageSection";
 import { BehaviorManageSection } from "./BehaviorManageSection";
 import { InboxSection } from "./InboxSection";
 import { SkillsSection } from "./SkillsSection";
@@ -16,7 +15,6 @@ export interface SettingsSectionProps {
 
 export { OverviewSection };
 export { IdentityManageSection };
-export { ModelManageSection };
 export { BehaviorManageSection };
 export { SkillsSection };
 export { InboxSection };
@@ -29,6 +27,5 @@ export interface ManageSectionDef {
 
 export const MANAGE_SECTIONS: ManageSectionDef[] = [
   { id: "identity", label: "Identity", Component: IdentityManageSection },
-  { id: "model", label: "Model", Component: ModelManageSection },
   { id: "behavior", label: "Behavior", Component: BehaviorManageSection },
 ];
