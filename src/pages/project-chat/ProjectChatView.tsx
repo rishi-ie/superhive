@@ -24,6 +24,7 @@ import {
   Mic01Icon,
 } from '@hugeicons/core-free-icons';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
+import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ProjectAgentInitializing } from './components/ProjectAgentInitializing';
 import { ProjectAgentError } from './components/ProjectAgentError';
 import { ProjectAgentStopped } from './components/ProjectAgentStopped';
@@ -172,10 +173,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                 </button>
               </div>
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-1 text-sm text-[#9ca3af] hover:text-white cursor-default">
-                  <span>5.5 Extra High</span>
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
-                </button>
+                <ModelPicker agentId={projectAgent.id} />
                 <button className="text-[#9ca3af] hover:text-white cursor-default">
                   <HugeiconsIcon icon={Mic01Icon} className="size-5" />
                 </button>
