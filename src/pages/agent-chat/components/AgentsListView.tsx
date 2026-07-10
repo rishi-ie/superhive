@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { HugeiconsIcon } from "@/components/ui/icon";
-import { PlusSignIcon, Search01Icon, LayoutGridIcon, Menu01Icon } from "@hugeicons/core-free-icons";
+import { PlusSignIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { AgentCard } from './AgentCard';
 import { AgentListRow } from './AgentListRow';
 import { EmptyAgentsState } from './EmptyAgentsState';
 import { listAgents } from '@/flows/agents/crud/list-agents';
@@ -12,14 +10,11 @@ import { listProjects } from '@/flows/projects/crud/list-projects';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import type { Agent, Project } from '@/types/electron';
 
-type ViewMode = 'grid' | 'list';
-
 export function AgentsListView() {
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [projectsById, setProjectsById] = React.useState<Record<string, Project>>({});
   const [loading, setLoading] = React.useState(true);
   const [filter, setFilter] = React.useState('');
-  const [view, setView] = React.useState<ViewMode>('grid');
   const { setOpen: setCreateOpen } = useOpenCreateAgent();
 
   React.useEffect(() => {
@@ -74,44 +69,14 @@ export function AgentsListView() {
                 : `${agents.length} ${agents.length === 1 ? 'agent' : 'agents'}`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center rounded-md border border-border bg-input/20 p-0.5">
-              <button
-                type="button"
-                onClick={() => setView('grid')}
-                aria-label="Grid view"
-                className={cn(
-                  "flex size-7 cursor-default items-center justify-center rounded-sm transition-colors",
-                  view === 'grid'
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <HugeiconsIcon icon={LayoutGridIcon} className="size-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setView('list')}
-                aria-label="List view"
-                className={cn(
-                  "flex size-7 cursor-default items-center justify-center rounded-sm transition-colors",
-                  view === 'list'
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <HugeiconsIcon icon={Menu01Icon} className="size-3.5" />
-              </button>
-            </div>
-            <Button
-              size="default"
-              onClick={() => setCreateOpen(true)}
-              className="gap-1.5"
-            >
-              <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
-              New agent
-            </Button>
-          </div>
+          <Button
+            size="default"
+            onClick={() => setCreateOpen(true)}
+            className="gap-1.5"
+          >
+            <HugeiconsIcon icon={PlusSignIcon} className="size-4" />
+            New agent
+          </Button>
         </div>
 
         {agents.length > 0 && (
@@ -140,16 +105,6 @@ export function AgentsListView() {
               <span className="text-sm text-muted-foreground">
                 No agents match "{filter}"
               </span>
-            </div>
-          ) : view === 'grid' ? (
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-              {filtered.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  agent={agent}
-                  projectName={projectNameFor(agent)}
-                />
-              ))}
             </div>
           ) : (
             <div className="flex flex-col">

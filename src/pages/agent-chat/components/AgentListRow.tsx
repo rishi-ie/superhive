@@ -4,8 +4,25 @@ import { ArrowRight01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { STATUS_DOT, STATUS_LABEL } from './AgentCard';
 import type { Agent } from '@/types/electron';
+
+const STATUS_DOT: Record<Agent['status'], string> = {
+  running: "bg-green-500",
+  busy: "bg-blue-500",
+  idle: "bg-muted-foreground/40",
+  initializing: "bg-yellow-500",
+  stopped: "bg-muted-foreground/30",
+  error: "bg-destructive",
+};
+
+const STATUS_LABEL: Record<Agent['status'], string> = {
+  running: "Running",
+  busy: "Busy",
+  idle: "Idle",
+  initializing: "Initializing",
+  stopped: "Stopped",
+  error: "Error",
+};
 
 interface AgentListRowProps {
   agent: Agent;
