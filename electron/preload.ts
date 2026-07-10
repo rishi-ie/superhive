@@ -55,4 +55,15 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('channels:append-message', channelId, message),
     readMessages: (channelId) => ipcRenderer.invoke('channels:read-messages', channelId),
   },
+  settings: {
+    getProviders: () => ipcRenderer.invoke('settings:get-providers'),
+    setProvider: (input) => ipcRenderer.invoke('settings:set-provider', input),
+    deleteProvider: (name) => ipcRenderer.invoke('settings:delete-provider', name),
+    getModels: () => ipcRenderer.invoke('settings:get-models'),
+    setModelEnabled: (id, enabled) =>
+      ipcRenderer.invoke('settings:set-model-enabled', id, enabled),
+    addModel: (input) => ipcRenderer.invoke('settings:add-model', input),
+    deleteModel: (id) => ipcRenderer.invoke('settings:delete-model', id),
+    getEnabledModels: () => ipcRenderer.invoke('settings:get-enabled-models'),
+  },
 });
