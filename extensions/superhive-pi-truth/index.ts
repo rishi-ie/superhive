@@ -22,7 +22,7 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { applySettingsDiff } from "./applier.ts";
+import { applySettingsDiff, applyInitialProviders } from "./applier.ts";
 import { createCatalogScanner } from "./catalog-scanner.ts";
 import { readSettings, writeSettings, writerCounter } from "./file-io.ts";
 import { createSessionsIndexer } from "./sessions-indexer.ts";
@@ -144,6 +144,13 @@ async function runExtension(pi: ExtensionAPI, ctx: ExtensionContext): Promise<vo
 			}
 		}
 	}
+
+	// 3b. Register the providers block on first load. The watcher only
+	//     triggers on external file changes, so without this call the
+	//     first LLM request would have no provider auth and would fall
+	//     through to the env-var fallback. This makes the file's
+	//     `providers` block the source of truth from the very first turn.
+	applyInitialProviders(current.providers, { pi, hasUI: ctx.hasUI, notify });
 
 	// 4. Start watcher. On external change → re-read → diff → apply.
 	state.watcher = createWatcher(state.settingsFilePath, {

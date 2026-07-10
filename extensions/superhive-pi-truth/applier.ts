@@ -314,6 +314,22 @@ function applyProviders(
 	}
 }
 
+/**
+ * Initial-load provider registration. Called once on `session_start` after the
+ * settings file is loaded, so that the `providers` block in the file becomes
+ * the source of truth for `pi.registerProvider` from the very first turn.
+ *
+ * The watcher-driven `applySettingsDiff` only fires on external file changes,
+ * so without this call the first LLM request would have no provider auth
+ * (the model-resolver would fall back to env-var keys from `.env.local`).
+ */
+export function applyInitialProviders(
+	providers: Record<string, { name?: string; baseUrl?: string | null; apiKey?: string }> | undefined,
+	ctx: ApplyContext,
+): void {
+	applyProviders(providers ?? {}, {}, ctx);
+}
+
 function arraysEqual<T>(a: T[], b: T[]): boolean {
 	if (a.length !== b.length) return false;
 	for (let i = 0; i < a.length; i++) {
