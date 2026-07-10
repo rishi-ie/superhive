@@ -1,6 +1,6 @@
 import type { MouseEventHandler } from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { UserIcon, MoreHorizontalIcon, PinIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { UserIcon, DotsThreeIcon, PushPinIcon } from "@phosphor-icons/react";
 
 interface AgentRowProps {
   name: string;
@@ -13,10 +13,10 @@ interface AgentRowProps {
 const AgentActions = () => (
   <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
     <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
-      <HugeiconsIcon icon={PinIcon} className="size-3.5" />
+      <Icon icon={PushPinIcon} className="size-3.5" />
     </div>
     <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-[#727272] hover:bg-sidebar-accent hover:text-[#dedede]">
-      <HugeiconsIcon icon={MoreHorizontalIcon} className="size-3.5" />
+      <Icon icon={DotsThreeIcon} className="size-3.5" />
     </div>
   </span>
 );
@@ -30,7 +30,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, currentActi
         className="group flex h-16 w-full cursor-default flex-col items-stretch gap-0 overflow-hidden rounded-lg px-2 py-1 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
       >
         <div className="flex h-8 flex-shrink-0 items-center gap-2">
-          <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+          <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
           <span className="flex-1 truncate text-left">{name}</span>
           <AgentActions />
         </div>
@@ -50,7 +50,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, currentActi
         className="group flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
       >
         <div className="size-2 rounded-full bg-green-500 flex-shrink-0" />
-        <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+        <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
         <span className="flex-1 truncate text-left">{name}</span>
         <AgentActions />
       </button>
@@ -63,7 +63,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, currentActi
       onClick={onClick}
       className="group flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground"
     >
-      <HugeiconsIcon icon={UserIcon} className="size-4 flex-shrink-0" />
+      <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
       <span className="flex-1 truncate text-left">{name}</span>
       <AgentActions />
     </button>
