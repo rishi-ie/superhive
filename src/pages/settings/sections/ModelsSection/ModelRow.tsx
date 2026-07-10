@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from '@/components/ui/icon';
-import { Delete01Icon, AlertCircleIcon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
+import { TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -39,7 +39,7 @@ export function ModelRow({
             <span
               className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive"
             >
-              <HugeiconsIcon icon={AlertCircleIcon} className="size-2.5" />
+              <Icon icon={WarningCircleIcon} className="size-2.5" />
               No key
             </span>
           )}
@@ -74,7 +74,7 @@ export function ModelRow({
             aria-label={`Delete ${model.name}`}
             className="text-muted-foreground hover:text-destructive cursor-default"
           >
-            <HugeiconsIcon icon={Delete01Icon} className="size-3.5" />
+            <Icon icon={TrashIcon} className="size-3.5" />
           </Button>
         )}
       </div>
