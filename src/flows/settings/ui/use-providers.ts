@@ -1,0 +1,34 @@
+import * as React from 'react';
+import { listProviders } from '@/flows/settings/crud/list-providers';
+import type { ProviderEntry } from '@/types/electron';
+
+export interface UseProvidersResult {
+  providers: Record<string, ProviderEntry>;
+  loading: boolean;
+  error: string | null;
+  refresh: () => Promise<void>;
+}
+
+export function useProviders(): UseProvidersResult {
+  const [providers, setProviders] = React.useState<Record<string, ProviderEntry>>({});
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const refresh = React.useCallback(async () => {
+    try {
+      const list = await listProviders();
+      setProviders(list);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load providers');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  return { providers, loading, error, refresh };
+}
