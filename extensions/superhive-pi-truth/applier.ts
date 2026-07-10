@@ -22,6 +22,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import type { Model } from "@earendil-works/pi-ai";
+import { apiForProvider } from "./provider-map.ts";
 import type { SettingsFile } from "./settings-schema.ts";
 
 const FILESYSTEM_TOOLS = ["read", "write", "edit", "ls", "find", "grep"];
@@ -227,18 +228,17 @@ function modelChanged(a: SettingsFile["model"], b: SettingsFile["model"]): boole
 
 async function applyModel(target: SettingsFile["model"], ctx: ApplyContext): Promise<boolean> {
 	if (!target?.provider || !target.name) return false;
-	const registry = (ctx.pi as unknown as { events: { emit: (ch: string, d: unknown) => void } }).events
-		? null
-		: null;
 	// Use the public ExtensionAPI to look up the model
 	// The model registry isn't directly exposed, so we use a well-known shape
 	// and call setModel with a typed Model object.
+	// The `api` field must match the provider's wire protocol — derive it
+	// from the provider name via the shared lookup table.
 	const model: Model<any> = {
 		id: target.name,
 		name: target.name,
 		provider: target.provider,
 		// biome-ignore lint/suspicious/noExplicitAny: Model is generic over Api; we don't constrain here
-		api: "anthropic-messages" as any,
+		api: apiForProvider(target.provider) as any,
 		baseUrl: undefined,
 		reasoning: false,
 		input: ["text", "image"],
