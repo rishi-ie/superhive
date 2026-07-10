@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { PinIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { PushPinIcon } from "@phosphor-icons/react";
 import { AccordionSection, AccordionRow } from '@/components/layout/common/primitives';
 
 interface PinnedItem {
@@ -19,7 +19,7 @@ export function PinnedSection({ items }: PinnedSectionProps) {
       {items.map((p) => (
         <AccordionRow
           key={p.id}
-          icon={<HugeiconsIcon icon={PinIcon} className="size-4 flex-shrink-0" />}
+          icon={<Icon icon={PushPinIcon} className="size-4 flex-shrink-0" />}
           label={p.name}
         />
       ))}
