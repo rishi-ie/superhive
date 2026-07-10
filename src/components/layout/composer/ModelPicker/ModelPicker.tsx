@@ -76,6 +76,18 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
     };
   }, [agentId, refetch]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Re-fetch the enabled models list when the window regains focus.
+  // This picks up changes the user made in the Settings → Models page
+  // (added a key, enabled a model) without requiring a full reload of the
+  // chat. Silent re-fetch — no loading flash on the trigger button.
+  React.useEffect(() => {
+    const onFocus = () => {
+      refetch().catch(() => undefined);
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [refetch]);
+
   // When the filtered list changes, prune the local selection to a valid entry.
   React.useEffect(() => {
     if (!agentId) {
