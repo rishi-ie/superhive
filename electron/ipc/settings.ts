@@ -83,6 +83,29 @@ export function registerSettingsIpc(): void {
 			GLOBAL_OWNER_ID,
 			name
 		)
+		// Cascade: disable every model that referenced this provider so the
+		// ModelPicker no longer shows stale entries. We don't delete the
+		// model rows — the user may add a new key for the same provider and
+		// re-enable them. Only `enabled` is touched.
+		const modelRows = await SettingsRepository.getByOwnerAndGroup(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			GROUP_MODELS
+		)
+		for (const row of modelRows) {
+			const entry = row.value as ModelEntry
+			if (entry.provider !== name || !entry.enabled) continue
+			await SettingsRepository.setSetting(
+				GLOBAL_OWNER_TYPE,
+				GLOBAL_OWNER_ID,
+				row.key,
+				{ ...entry, enabled: false },
+				'json',
+				entry.name,
+				undefined,
+				GROUP_MODELS
+			)
+		}
 		// Re-seed every agent so a removed key is no longer registered.
 		await reSeedAllAgents()
 	})
