@@ -2,6 +2,7 @@ import { HugeiconsIcon } from '@/components/ui/icon';
 import { Delete01Icon, AlertCircleIcon } from '@hugeicons/core-free-icons';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ModelEntry } from '@/types/electron';
 
@@ -18,10 +19,15 @@ export function ModelRow({
   onToggleEnabled,
   onDelete,
 }: ModelRowProps) {
+  // A model can only be enabled when its provider has a key configured.
+  // When missing, the toggle is disabled and a tooltip explains why.
+  const tooltipText = `Add a key for "${model.provider}" in Providers above to enable`;
+
   return (
     <div
       className={cn(
-        'flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3'
+        'flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3',
+        !hasProvider && 'opacity-40'
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -45,11 +51,20 @@ export function ModelRow({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        <Switch
-          checked={model.enabled}
-          onCheckedChange={onToggleEnabled}
-          aria-label={`Enable ${model.name}`}
-        />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {/* Span wrapper so the disabled Switch still receives pointer events for the tooltip */}
+            <span>
+              <Switch
+                checked={model.enabled}
+                disabled={!hasProvider}
+                onCheckedChange={onToggleEnabled}
+                aria-label={`Enable ${model.name}`}
+              />
+            </span>
+          </TooltipTrigger>
+          {!hasProvider && <TooltipContent>{tooltipText}</TooltipContent>}
+        </Tooltip>
         {onDelete && (
           <Button
             type="button"
