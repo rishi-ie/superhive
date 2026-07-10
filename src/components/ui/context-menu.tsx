@@ -4,8 +4,8 @@ import * as React from "react"
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowRight01Icon, CheckIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
 
 function ContextMenu({
   ...props
@@ -118,7 +118,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <HugeiconsIcon icon={ArrowRight01Icon} className="ml-auto" />
+      <Icon icon={CaretRightIcon} className="ml-auto" />
     </ContextMenuPrimitive.SubTrigger>
   )
 }
@@ -158,7 +158,7 @@ function ContextMenuCheckboxItem({
     >
       <span className="pointer-events-none absolute right-2 flex items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <HugeiconsIcon icon={CheckIcon}
+          <Icon icon={CheckIcon}
           />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
@@ -187,7 +187,7 @@ function ContextMenuRadioItem({
     >
       <span className="pointer-events-none absolute right-2 flex items-center justify-center">
         <ContextMenuPrimitive.ItemIndicator>
-          <HugeiconsIcon icon={CheckIcon}
+          <Icon icon={CheckIcon}
           />
         </ContextMenuPrimitive.ItemIndicator>
       </span>
