@@ -6,6 +6,7 @@ import { ProviderDialog } from './ModelsSection/ProviderDialog';
 import { ModelDialog } from './ModelsSection/ModelDialog';
 import { ProviderRow } from './ModelsSection/ProviderRow';
 import { ModelRow } from './ModelsSection/ModelRow';
+import { toast } from 'sonner';
 import { useProviders, useModels } from '@/flows/settings';
 import { setModelEnabled } from '@/flows/settings/crud/set-model-enabled';
 import { addModel } from '@/flows/settings/crud/add-model';
@@ -76,7 +77,14 @@ export function ModelsSection() {
     await refreshProviders();
   };
 
-  const onToggleModel = async (m: MergedModel, enabled: boolean) => {
+  const onToggleModel = async (m: MergedModel, enabled: boolean, hasProvider: boolean) => {
+    // Block toggling a model whose provider has no key configured.
+    // The switch is also visually disabled (see ModelRow), but a defensive guard
+    // is kept here in case the row is reached programmatically.
+    if (!hasProvider) {
+      toast.error(`Add a key for "${m.provider}" first`);
+      return;
+    }
     if (m.isFromCatalog && !storedModels.find((s) => s.id === m.id)) {
       await addModel({ provider: m.provider, name: m.name });
     }
@@ -149,15 +157,18 @@ export function ModelsSection() {
           </p>
         ) : (
           <div className="flex flex-col gap-2">
-            {merged.map((m) => (
-              <ModelRow
-                key={m.id}
-                model={m}
-                hasProvider={providerNames.has(m.provider)}
-                onToggleEnabled={(enabled: boolean) => onToggleModel(m, enabled)}
-                onDelete={m.isFromCatalog ? undefined : () => onDeleteModel(m.id)}
-              />
-            ))}
+            {merged.map((m) => {
+              const hasProvider = providerNames.has(m.provider);
+              return (
+                <ModelRow
+                  key={m.id}
+                  model={m}
+                  hasProvider={hasProvider}
+                  onToggleEnabled={(enabled: boolean) => onToggleModel(m, enabled, hasProvider)}
+                  onDelete={m.isFromCatalog ? undefined : () => onDeleteModel(m.id)}
+                />
+              );
+            })}
           </div>
         )}
       </section>
