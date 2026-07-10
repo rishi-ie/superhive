@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getEnabledModels } from '@/flows/settings/crud/get-enabled-models';
+import { listProviders } from '@/flows/settings/crud/list-providers';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +23,9 @@ interface ModelPickerProps {
 }
 
 export function ModelPicker({ agentId }: ModelPickerProps) {
+  // Two parallel lists: enabled models and configured providers.
+  // We only show models whose provider has a key set, so the user can never
+  // pick a model that would fail at the LLM call.
   const [models, setModels] = React.useState<EnabledModel[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [localSelection, setLocalSelection] = React.useState<EnabledModel | null>(null);
@@ -36,25 +40,33 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
     };
   }, [agentSettings.settings?.model]);
 
+  const refetch = React.useCallback(async () => {
+    try {
+      const [enabledList, providersMap] = await Promise.all([
+        getEnabledModels(),
+        listProviders(),
+      ]);
+      const names = new Set(Object.keys(providersMap));
+      // Only show models whose provider has a key configured.
+      setModels(enabledList.filter((m) => names.has(m.provider)));
+    } catch {
+      setModels([]);
+    }
+  }, []);
+
   React.useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getEnabledModels()
-      .then((list) => {
+    refetch()
+      .then(() => {
         if (!cancelled) {
-          setModels(list);
-          if (!localSelection && list.length > 0) {
-            const match = persistedSelection
-              ? list.find((m) => m.id === persistedSelection.id) ?? list[0]
-              : list[0];
-            if (!agentId) {
-              setLocalSelection(match ?? null);
-            }
-          }
+          // Keep the local (decorative) selection in sync with the filtered list.
+          setLocalSelection((prev) => {
+            if (!prev) return null;
+            // If the previously selected model is no longer in the list, drop it.
+            return models.find((m) => m.id === prev.id) ? prev : null;
+          });
         }
-      })
-      .catch(() => {
-        if (!cancelled) setModels([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -62,7 +74,20 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
     return () => {
       cancelled = true;
     };
-  }, [agentId]);
+  }, [agentId, refetch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When the filtered list changes, prune the local selection to a valid entry.
+  React.useEffect(() => {
+    if (!agentId) {
+      // Decorative mode (landing): auto-pick the first model on first load.
+      const first = models[0] ?? null;
+      if (!localSelection && models.length > 0) {
+        setLocalSelection(first);
+      } else if (localSelection && !models.find((m) => m.id === localSelection.id)) {
+        setLocalSelection(first);
+      }
+    }
+  }, [models, agentId, localSelection]);
 
   const selected: EnabledModel | null = agentId
     ? persistedSelection
@@ -97,7 +122,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
         {loading ? (
           <DropdownMenuItem disabled>Loading…</DropdownMenuItem>
         ) : models.length === 0 ? (
-          <DropdownMenuItem disabled>No models enabled</DropdownMenuItem>
+          <DropdownMenuItem disabled>Add a key in Settings → Models</DropdownMenuItem>
         ) : (
           models.map((m) => (
             <DropdownMenuItem
