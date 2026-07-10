@@ -23,14 +23,14 @@ function bootstrapEnvProviders(
 }
 
 /**
- * Auto-seed the per-agent `providers` block on agent start.
- *
- * Reads the global provider store (SettingsRepository, ownerType='global'),
- * merges it with any per-agent providers (per-agent wins — power-user override),
- * and also bootstraps the env-var MiniMax key from .env.local if no `minimax`
- * provider is configured. Non-breaking for existing dev workflows.
+ * Re-seed the per-agent `providers` block by reading the global provider
+ * store and merging it into the agent's settings file (per-agent wins).
+ * Exported so the settings IPC handler can call this on provider add/update/delete.
  */
-async function autoSeedProviders(_agentId: string, agentDir: string): Promise<void> {
+export async function reSeedProviders(agentId: string): Promise<void> {
+	const agent = await AgentRepository.getById(agentId)
+	if (!agent?.localPath) return
+	const agentDir = agent.localPath
 	const settingsPath = settingsFilePathFor(agentDir)
 
 	let current: SettingsFile
@@ -73,6 +73,21 @@ async function autoSeedProviders(_agentId: string, agentDir: string): Promise<vo
 	const tmp = `${settingsPath}.tmp.${Date.now()}`
 	await writeFile(tmp, JSON.stringify(next, null, '\t') + '\n', 'utf8')
 	await rename(tmp, settingsPath)
+}
+
+/**
+ * @deprecated Use `reSeedProviders` directly. Kept as a thin wrapper for
+ * the START/RESTART IPC handlers that already pass `agentDir`.
+ */
+async function autoSeedProviders(agentId: string, agentDir: string): Promise<void> {
+	// For START, agentDir is provided. For RESTART, we re-derive it.
+	if (!agentDir) {
+		await reSeedProviders(agentId)
+		return
+	}
+	// agentDir is intentionally ignored; we re-derive from the agent record
+	// so the source of truth is the database, not a stale parameter.
+	await reSeedProviders(agentId)
 }
 
 export function registerRuntimeIpc(): void {
