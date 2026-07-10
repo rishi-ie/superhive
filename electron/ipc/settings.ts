@@ -1,6 +1,8 @@
 import { ipcMain } from 'electron'
 import { SettingsRepository } from '../../src/storage/repositories'
+import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { IPC } from './index'
+import { reSeedProviders } from './runtime'
 
 const GLOBAL_OWNER_TYPE = 'global' as const
 const GLOBAL_OWNER_ID = 'global' as const
@@ -19,6 +21,21 @@ interface ModelEntry {
 	name: string
 	enabled: boolean
 	isCustom?: boolean
+}
+
+/**
+ * Re-seed the per-agent `providers` block on every known agent. Best-effort:
+ * a single agent's failure must not block the others or the originating call.
+ */
+async function reSeedAllAgents(): Promise<void> {
+	const agents = await AgentRepository.getAll()
+	for (const agent of agents) {
+		try {
+			await reSeedProviders(agent.id)
+		} catch (err) {
+			console.error(`[settings] reSeedProviders failed for agent ${agent.id}:`, err)
+		}
+	}
 }
 
 export function registerSettingsIpc(): void {
@@ -55,6 +72,8 @@ export function registerSettingsIpc(): void {
 				undefined,
 				GROUP_PROVIDERS
 			)
+			// Re-seed every agent so the new key reaches running sessions.
+			await reSeedAllAgents()
 		}
 	)
 
@@ -64,6 +83,8 @@ export function registerSettingsIpc(): void {
 			GLOBAL_OWNER_ID,
 			name
 		)
+		// Re-seed every agent so a removed key is no longer registered.
+		await reSeedAllAgents()
 	})
 
 	ipcMain.handle(IPC.SETTINGS.GET_MODELS, async () => {
