@@ -9,6 +9,20 @@ import { TEMPLATE_DIR } from '../install-bootstrap'
 import { settingsFilePathFor, type SettingsFile } from '../agent-settings-defaults'
 
 /**
+ * Bootstrap the env-var MiniMax key from .env.local into the `providers` map.
+ * Only writes if the env var is set AND `minimax` is not already configured.
+ * Non-breaking: existing `.env.local`-based dev flows keep working.
+ */
+function bootstrapEnvProviders(
+	merged: Record<string, { name?: string; baseUrl?: string | null; apiKey?: string }>,
+): void {
+	const envKey = process.env.MINIMAX_API_KEY?.trim()
+	if (envKey && !merged.minimax) {
+		merged.minimax = { name: 'minimax', apiKey: envKey }
+	}
+}
+
+/**
  * Auto-seed the per-agent `providers` block on agent start.
  *
  * Reads the global provider store (SettingsRepository, ownerType='global'),
@@ -45,10 +59,7 @@ async function autoSeedProviders(_agentId: string, agentDir: string): Promise<vo
 		...perAgentProviders,
 	}
 
-	const envKey = process.env.MINIMAX_API_KEY?.trim()
-	if (envKey && !merged.minimax) {
-		merged.minimax = { name: 'minimax', apiKey: envKey }
-	}
+	bootstrapEnvProviders(merged)
 
 	if (Object.keys(merged).length === 0) return
 
