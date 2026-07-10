@@ -1,5 +1,3 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { CpuIcon } from "@hugeicons/core-free-icons";
 import type { AgentSettingsState } from "@/flows/agents/settings";
 import { PermissionIndicator } from "../primitives/PermissionIndicator";
 import { BadgeList } from "../primitives/BadgeList";
@@ -14,11 +12,7 @@ export function OverviewSection({ settings }: OverviewSectionProps) {
     terminal: true,
     network: true,
   };
-  const thinkingLevel = settings.runtime?.thinkingLevel ?? "medium";
   const catalog = settings.catalog;
-
-  const thinkingLabel =
-    thinkingLevel.charAt(0).toUpperCase() + thinkingLevel.slice(1) + " Thinking";
 
   return (
     <div className="flex flex-col gap-4 py-2">
@@ -34,29 +28,6 @@ export function OverviewSection({ settings }: OverviewSectionProps) {
               {settings.description}
             </span>
           )}
-        </div>
-      )}
-
-      {(settings.model?.name || settings.model?.provider) && (
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Engine Specs
-          </span>
-          <div className="flex items-center gap-2">
-            <HugeiconsIcon icon={CpuIcon} className="size-3.5 text-muted-foreground/60 flex-shrink-0" />
-            <span className="text-xs text-foreground">
-              {settings.model.provider
-                ? settings.model.provider.charAt(0).toUpperCase() +
-                  settings.model.provider.slice(1)
-                : ""}
-              {settings.model.name
-                ? ` · ${settings.model.name}`
-                : ""}
-            </span>
-            <span className="text-xs text-muted-foreground/60">
-              ({thinkingLabel})
-            </span>
-          </div>
         </div>
       )}
 
