@@ -103,7 +103,7 @@ export function ModelsSection() {
   );
 
   return (
-    <div className="flex flex-col gap-8 w-[70%] max-w-2xl mx-auto px-6">
+    <div className="flex flex-col gap-8 w-[90%] max-w-2xl mx-auto px-6">
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Models</h2>
