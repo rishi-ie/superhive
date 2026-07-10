@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Layout01Icon, InboxIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { SquaresFourIcon, TrayIcon } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -9,11 +9,11 @@ export function AgentsListPanel() {
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <HugeiconsIcon icon={Layout01Icon} className="size-3.5" />
+            <Icon icon={SquaresFourIcon} className="size-3.5" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <HugeiconsIcon icon={InboxIcon} className="size-3.5" />
+            <Icon icon={TrayIcon} className="size-3.5" />
             Inbox
           </TabsTrigger>
         </TabsList>
