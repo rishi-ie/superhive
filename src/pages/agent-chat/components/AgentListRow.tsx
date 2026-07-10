@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { ArrowRight01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -53,7 +52,6 @@ function relativeTime(timestamp?: number): string | null {
 
 export function AgentListRow({ agent, projectName }: AgentListRowProps) {
   const navigate = useNavigate();
-  const isCoordinator = agent.agentKind === 'project-coordinator';
   const updated = relativeTime(agent.updatedAt);
 
   const activityParts: string[] = [];
@@ -90,11 +88,6 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
           <span className="truncate font-medium text-foreground text-sm">
             {agent.name}
           </span>
-          {isCoordinator && (
-            <Badge variant="outline" className="h-4 px-1.5 py-0 text-[0.5625rem]">
-              Coordinator
-            </Badge>
-          )}
         </div>
       </TableCell>
 
@@ -123,7 +116,7 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
 
       <TableCell className="w-[180px">
         <span className="truncate text-sm text-muted-foreground">
-          {isCoordinator ? 'Manages project' : (projectName ?? 'No project')}
+          {projectName ?? 'No project'}
         </span>
       </TableCell>
 

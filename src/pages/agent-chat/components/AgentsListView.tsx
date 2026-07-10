@@ -45,16 +45,21 @@ export function AgentsListView() {
     };
   }, []);
 
+  const nonCoordinators = React.useMemo(
+    () => agents.filter((a) => a.agentKind !== 'project-coordinator'),
+    [agents],
+  );
+
   const filtered = React.useMemo(() => {
     const q = filter.trim().toLowerCase();
-    if (!q) return agents;
-    return agents.filter(
+    if (!q) return nonCoordinators;
+    return nonCoordinators.filter(
       (a) =>
         a.name.toLowerCase().includes(q) ||
         a.role?.toLowerCase().includes(q) ||
         a.description?.toLowerCase().includes(q),
     );
-  }, [agents, filter]);
+  }, [nonCoordinators, filter]);
 
   const projectNameFor = (agent: Agent): string | undefined => {
     const firstId = agent.projectIds[0];
@@ -73,7 +78,7 @@ export function AgentsListView() {
             <p className="text-sm text-muted-foreground">
               {loading
                 ? 'Loading agents…'
-                : `${agents.length} ${agents.length === 1 ? 'agent' : 'agents'}`}
+                : `${nonCoordinators.length} ${nonCoordinators.length === 1 ? 'agent' : 'agents'}`}
             </p>
           </div>
           <Button
@@ -86,7 +91,7 @@ export function AgentsListView() {
           </Button>
         </div>
 
-        {agents.length > 0 && (
+        {nonCoordinators.length > 0 && (
           <div className="relative mt-2 max-w-md">
             <HugeiconsIcon
               icon={Search01Icon}
@@ -105,7 +110,7 @@ export function AgentsListView() {
 
       <ScrollArea className="flex-1">
         <div className="px-8 pb-12">
-          {loading ? null : agents.length === 0 ? (
+          {loading ? null : nonCoordinators.length === 0 ? (
             <EmptyAgentsState />
           ) : filtered.length === 0 ? (
             <div className="flex h-40 flex-col items-center justify-center gap-1 text-center">
