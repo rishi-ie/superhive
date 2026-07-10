@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Folder01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { FolderIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -145,7 +145,7 @@ export function CreateAgentDialog() {
                 'flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent/30 px-3 py-2 text-xs text-sidebar-foreground/60'
               )}
             >
-              <HugeiconsIcon icon={Folder01Icon} className="size-3.5 flex-shrink-0" />
+              <Icon icon={FolderIcon} className="size-3.5 flex-shrink-0" />
               <span className="font-mono truncate">{fullPath}</span>
             </div>
           )}
@@ -171,7 +171,7 @@ export function CreateAgentDialog() {
               Cancel
             </Button>
             <Button type="submit" size="lg" disabled={!canSubmit}>
-              {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
+              {submitting && <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>
           </DialogFooter>
