@@ -314,6 +314,16 @@ export function useAgentSettings(agentId: string | null) {
     if (!entry) return
     if (!entry.dirty) entry.dirty = {}
     entry.dirty[key] = value
+    // When the user picks a model in the composer, keep `defaultProvider` and
+    // `defaultModel` in lockstep. The Pi runtime reads `defaultProvider` /
+    // `defaultModel` from the per-agent settings file to resolve the initial
+    // model on session start; without this sync, picking a model only updates
+    // `model` and the next restart falls through to the env-var fallback.
+    if (key === 'model' && value && typeof value === 'object') {
+      const m = value as { provider?: string; name?: string }
+      entry.dirty['defaultProvider'] = m.provider ?? ''
+      entry.dirty['defaultModel'] = m.name ?? ''
+    }
     if (entry.debounceTimer) clearTimeout(entry.debounceTimer)
     entry.debounceTimer = setTimeout(async () => {
       const e = settingsSlices.get(agentId)
