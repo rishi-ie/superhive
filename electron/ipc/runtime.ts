@@ -9,16 +9,38 @@ import { TEMPLATE_DIR } from '../install-bootstrap'
 import { settingsFilePathFor, type SettingsFile } from '../agent-settings-defaults'
 
 /**
- * Bootstrap the env-var MiniMax key from .env.local into the `providers` map.
- * Only writes if the env var is set AND `minimax` is not already configured.
- * Non-breaking: existing `.env.local`-based dev flows keep working.
+ * Bootstrap env-var API keys from process.env into the `providers` map.
+ * Scans any `*_API_KEY` env var, derives a provider name, and adds the entry
+ * to `merged` only if the provider is not already configured. Non-breaking:
+ * existing dev workflows with `.env.local` continue to work.
+ *
+ * The provider-name mapping mirrors the one in
+ * `extensions/superhive-pi-truth/provider-map.ts::envVarToProvider`. The two
+ * stay in sync manually until the next refactor.
  */
+function envVarNameToProvider(envVar: string): string | null {
+	if (!envVar.endsWith('_API_KEY')) return null
+	const stem = envVar.slice(0, -'_API_KEY'.length)
+	const lower = stem.toLowerCase()
+	const aliases: Record<string, string> = {
+		openai: 'openai',
+		anthropic: 'anthropic',
+		minimax: 'minimax',
+		gemini: 'google',
+		deepseek: 'deepseek',
+	}
+	return aliases[lower] ?? lower
+}
+
 function bootstrapEnvProviders(
 	merged: Record<string, { name?: string; baseUrl?: string | null; apiKey?: string }>,
 ): void {
-	const envKey = process.env.MINIMAX_API_KEY?.trim()
-	if (envKey && !merged.minimax) {
-		merged.minimax = { name: 'minimax', apiKey: envKey }
+	for (const [k, v] of Object.entries(process.env)) {
+		if (!v) continue
+		const provider = envVarNameToProvider(k)
+		if (!provider) continue
+		if (merged[provider]) continue
+		merged[provider] = { name: provider, apiKey: v.trim() }
 	}
 }
 
