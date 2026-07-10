@@ -71,7 +71,7 @@ export function AgentsListView() {
             <p className="text-sm text-muted-foreground">
               {loading
                 ? 'Loading agents…'
-                : `${agents.length} ${agents.length === 1 ? 'agent' : 'agents'} · digital employees`}
+                : `${agents.length} ${agents.length === 1 ? 'agent' : 'agents'}`}
             </p>
           </div>
           <div className="flex items-center gap-2">
