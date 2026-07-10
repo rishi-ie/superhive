@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Copy01Icon, Pen01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CopyIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import type { RuntimeMessage } from '@/types/electron';
 
@@ -20,10 +20,10 @@ export function UserMessage({ message }: UserMessageProps) {
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
-          <HugeiconsIcon icon={Copy01Icon} className="size-3.5" />
+          <Icon icon={CopyIcon} className="size-3.5" />
         </Button>
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
-          <HugeiconsIcon icon={Pen01Icon} className="size-3.5" />
+          <Icon icon={PencilSimpleIcon} className="size-3.5" />
         </Button>
       </div>
     </div>
