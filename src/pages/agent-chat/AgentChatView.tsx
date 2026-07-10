@@ -7,6 +7,7 @@ import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
 import { AgentError } from './components/AgentError';
 import { AgentStopped } from './components/AgentStopped';
+import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 
 export function AgentChatView() {
@@ -100,10 +101,7 @@ export function AgentChatView() {
                 </button>
               </div>
               <div className="flex items-center gap-4">
-                <button className="flex items-center gap-1 text-sm text-[#9ca3af] hover:text-white cursor-default">
-                  <span>5.5 Extra High</span>
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
-                </button>
+                <ModelPicker agentId={agentId} />
                 <button className="text-[#9ca3af] hover:text-white cursor-default">
                   <HugeiconsIcon icon={Mic01Icon} className="size-5" />
                 </button>
