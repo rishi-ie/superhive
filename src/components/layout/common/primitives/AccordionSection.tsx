@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import { cn } from '@/lib/utils';
 
 interface AccordionSectionProps {
@@ -36,7 +36,7 @@ export function AccordionSection({
         )}
       >
         <span className="truncate text-left">{label}</span>
-        <HugeiconsIcon icon={ArrowRight01Icon}
+        <Icon icon={CaretRightIcon}
           className={cn(
             'size-4 flex-shrink-0 transition-transform duration-150',
             open && 'rotate-90'
