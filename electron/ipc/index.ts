@@ -3,6 +3,7 @@ import { registerProjectIpc } from './projects';
 import { registerRuntimeIpc } from './runtime';
 import { registerAppIpc } from './app';
 import { registerChannelsIpc } from './channels';
+import { registerSettingsIpc } from './settings';
 
 export const IPC = {
   AGENTS: {
@@ -61,4 +62,5 @@ export function registerIpc(): void {
   registerRuntimeIpc();
   registerAppIpc();
   registerChannelsIpc();
+  registerSettingsIpc();
 }
