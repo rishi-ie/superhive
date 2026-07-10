@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowRight01Icon, ArrowDown01Icon, Home01Icon, LaptopIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CaretRightIcon, CaretDownIcon, HouseIcon, LaptopIcon } from "@phosphor-icons/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +16,9 @@ export function WorkspaceBreadcrumb() {
             type="button"
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
           >
-            <HugeiconsIcon icon={Home01Icon} className="size-3" />
+            <Icon icon={HouseIcon} className="size-3" />
             <span>Home</span>
-            <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+            <Icon icon={CaretDownIcon} className="size-3" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="border-border bg-card">
@@ -27,8 +27,8 @@ export function WorkspaceBreadcrumb() {
           <DropdownMenuItem>Favorites</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <HugeiconsIcon icon={ArrowRight01Icon} className="size-3 text-muted-foreground" />
-      <HugeiconsIcon icon={LaptopIcon} className="size-3 text-muted-foreground" />
+      <Icon icon={CaretRightIcon} className="size-3 text-muted-foreground" />
+      <Icon icon={LaptopIcon} className="size-3 text-muted-foreground" />
       <span className="text-foreground/80">Local</span>
     </div>
   );
