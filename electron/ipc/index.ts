@@ -43,6 +43,16 @@ export const IPC = {
     APPEND_MESSAGE: 'channels:append-message',
     READ_MESSAGES: 'channels:read-messages',
   },
+  SETTINGS: {
+    GET_PROVIDERS: 'settings:get-providers',
+    SET_PROVIDER: 'settings:set-provider',
+    DELETE_PROVIDER: 'settings:delete-provider',
+    GET_MODELS: 'settings:get-models',
+    SET_MODEL_ENABLED: 'settings:set-model-enabled',
+    ADD_MODEL: 'settings:add-model',
+    DELETE_MODEL: 'settings:delete-model',
+    GET_ENABLED_MODELS: 'settings:get-enabled-models',
+  },
 } as const;
 
 export function registerIpc(): void {
