@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowLeft01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CaretLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { SETTINGS_GROUPS } from "./sections";
 import { goBackHome } from "@/flows/navigation/go-back-home";
@@ -15,13 +15,13 @@ export function SettingsSidebar() {
           onClick={() => goBackHome(navigate)}
           className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
         >
-          <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" />
+          <Icon icon={CaretLeftIcon} className="size-4" />
           <span>Back to Home</span>
         </button>
         <button
           className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
         >
-          <HugeiconsIcon icon={Search01Icon} className="size-4" />
+          <Icon icon={MagnifyingGlassIcon} className="size-4" />
           <span>Search</span>
         </button>
       </div>
