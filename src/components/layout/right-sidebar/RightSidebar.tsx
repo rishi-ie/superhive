@@ -1,9 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useMatch } from 'react-router-dom';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { UserIcon } from "@hugeicons/core-free-icons";
 import { AgentSettingsPanel } from './AgentSettingsPanel';
 import { ProjectSettingsPanel } from './ProjectSettingsPanel';
+import { AgentsListPanel } from './AgentsListPanel';
 
 interface RightSidebarProps {
   width?: number;
@@ -11,6 +12,7 @@ interface RightSidebarProps {
 
 export function RightSidebar({ width = 280 }: RightSidebarProps) {
   const { agentId, projectId } = useParams();
+  const isAgentsList = useMatch('/agents') !== null;
 
   return (
     <Sidebar
@@ -23,6 +25,8 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
           <AgentSettingsPanel agentId={agentId} />
         ) : projectId ? (
           <ProjectSettingsPanel projectId={projectId} />
+        ) : isAgentsList ? (
+          <AgentsListPanel />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
             <HugeiconsIcon icon={UserIcon} className="size-6 text-muted-foreground/40" />
