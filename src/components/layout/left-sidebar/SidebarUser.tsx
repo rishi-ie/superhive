@@ -1,5 +1,5 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { KeyboardIcon, CustomerServiceIcon, Logout01Icon, CreditCardIcon, Settings01Icon, MoreHorizontalIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { KeyboardIcon, HeadphonesIcon, SignOutIcon, CreditCardIcon, GearIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -21,9 +21,9 @@ export function SidebarUser() {
           type="button"
           className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
         >
-          <HugeiconsIcon icon={Settings01Icon} className="size-4" />
+          <Icon icon={GearIcon} className="size-4" />
           <span className="flex-1 text-left">Settings</span>
-          <HugeiconsIcon icon={MoreHorizontalIcon} className="size-4 text-muted-foreground" />
+          <Icon icon={DotsThreeIcon} className="size-4 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -44,24 +44,24 @@ export function SidebarUser() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
         <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
-          <HugeiconsIcon icon={CreditCardIcon} className="size-4 text-muted-foreground" />
+          <Icon icon={CreditCardIcon} className="size-4 text-muted-foreground" />
           <span>Manage subscription</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
-          <HugeiconsIcon icon={KeyboardIcon} className="size-4 text-muted-foreground" />
+          <Icon icon={KeyboardIcon} className="size-4 text-muted-foreground" />
           <span>Keyboard shortcuts</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
-          <HugeiconsIcon icon={CustomerServiceIcon} className="size-4 text-muted-foreground" />
+          <Icon icon={HeadphonesIcon} className="size-4 text-muted-foreground" />
           <span>Help & support</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5" onSelect={() => goToSettings(navigate)}>
-          <HugeiconsIcon icon={Settings01Icon} className="size-4 text-muted-foreground" />
+          <Icon icon={GearIcon} className="size-4 text-muted-foreground" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
         <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5 text-destructive focus:text-destructive">
-          <HugeiconsIcon icon={Logout01Icon} className="size-4" />
+          <Icon icon={SignOutIcon} className="size-4" />
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
