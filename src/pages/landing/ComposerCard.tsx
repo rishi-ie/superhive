@@ -1,12 +1,12 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
+import { Icon } from "@/components/ui/icon";
 import {
-  PlusSignIcon,
+  PlusIcon,
   HandIcon,
-  ArrowDown01Icon,
-  Mic02Icon,
+  CaretDownIcon,
+  MicrophoneIcon,
   NotebookIcon,
-} from "@hugeicons/core-free-icons";
-import { Send } from "lucide-react";
+  PaperPlaneTiltIcon,
+} from "@phosphor-icons/react";
 import { ModelPicker } from "@/components/layout/composer/ModelPicker";
 
 export function ComposerCard() {
@@ -20,28 +20,28 @@ export function ComposerCard() {
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
             <button className="text-[#9ca3af] hover:text-white cursor-default">
-              <HugeiconsIcon icon={PlusSignIcon} className="size-5" />
+              <Icon icon={PlusIcon} className="size-5" />
             </button>
             <button className="flex items-center gap-1.5 text-sm text-[#9ca3af] hover:text-white cursor-default">
-              <HugeiconsIcon icon={HandIcon} className="size-4" />
+              <Icon icon={HandIcon} className="size-4" />
               <span>Ask for approval</span>
-              <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+              <Icon icon={CaretDownIcon} className="size-3" />
             </button>
           </div>
           <div className="flex items-center gap-4">
             <ModelPicker />
             <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
-              <HugeiconsIcon icon={Mic02Icon} className="size-5" />
+              <Icon icon={MicrophoneIcon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
-              <Send className="size-4" />
+              <Icon icon={PaperPlaneTiltIcon} className="size-4" />
             </button>
           </div>
         </div>
       </div>
       <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 z-0 w-full max-w-[690px] rounded-3xl bg-[#1c1c1c]" />
       <div className="relative z-20 flex items-center gap-2 px-4 py-3 max-w-[690px] mx-auto">
-        <HugeiconsIcon icon={NotebookIcon} className="size-4 text-white" />
+        <Icon icon={NotebookIcon} className="size-4 text-white" />
         <span className="text-sm text-white">Choose project</span>
       </div>
     </div>
