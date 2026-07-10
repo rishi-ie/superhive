@@ -3,13 +3,14 @@ import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { HugeiconsIcon } from "@/components/ui/icon";
 import { UserIcon } from "@hugeicons/core-free-icons";
 import { AgentSettingsPanel } from './AgentSettingsPanel';
+import { ProjectSettingsPanel } from './ProjectSettingsPanel';
 
 interface RightSidebarProps {
   width?: number;
 }
 
 export function RightSidebar({ width = 280 }: RightSidebarProps) {
-  const { agentId } = useParams();
+  const { agentId, projectId } = useParams();
 
   return (
     <Sidebar
@@ -20,6 +21,8 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
       <SidebarContent className="flex h-full flex-col items-stretch bg-background p-0 pt-8">
         {agentId ? (
           <AgentSettingsPanel agentId={agentId} />
+        ) : projectId ? (
+          <ProjectSettingsPanel projectId={projectId} />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
             <HugeiconsIcon icon={UserIcon} className="size-6 text-muted-foreground/40" />
