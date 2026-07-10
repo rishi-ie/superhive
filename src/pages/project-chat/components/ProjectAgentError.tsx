@@ -6,8 +6,8 @@
  * project (and its project-agent + channel) instead of just the agent.
  */
 
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Alert01Icon, RefreshIcon, Delete01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { WarningIcon, ArrowsClockwiseIcon, TrashIcon } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '@/flows/projects/crud/delete-project';
@@ -32,7 +32,7 @@ export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAg
     <div className="flex h-full w-full items-center justify-center bg-background">
       <div className="flex max-w-md flex-col items-center gap-4 px-6 text-center">
         <div className="rounded-full bg-destructive/10 p-3">
-          <HugeiconsIcon icon={Alert01Icon} className="size-6 text-destructive" />
+          <Icon icon={WarningIcon} className="size-6 text-destructive" />
         </div>
         <div className="flex flex-col gap-1">
           <h2 className="text-base font-medium text-foreground">Project agent runtime error</h2>
@@ -44,7 +44,7 @@ export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAg
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={onRestart} className="gap-1.5">
-            <HugeiconsIcon icon={RefreshIcon} className="size-3.5" />
+            <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
             Restart
           </Button>
           <Button
@@ -53,7 +53,7 @@ export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAg
             onClick={onDelete}
             className="gap-1.5 text-destructive hover:text-destructive"
           >
-            <HugeiconsIcon icon={Delete01Icon} className="size-3.5" />
+            <Icon icon={TrashIcon} className="size-3.5" />
             Delete Project
           </Button>
         </div>
