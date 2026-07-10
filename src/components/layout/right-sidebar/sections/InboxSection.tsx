@@ -1,12 +1,12 @@
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { InboxIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { TrayIcon } from "@phosphor-icons/react";
 import type { SettingsSectionProps } from "./registry";
 
 export function InboxSection({ settings }: SettingsSectionProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
-      <HugeiconsIcon
-        icon={InboxIcon}
+      <Icon
+        icon={TrayIcon}
         className="size-8 text-muted-foreground/30"
       />
       <p className="text-xs text-muted-foreground">
