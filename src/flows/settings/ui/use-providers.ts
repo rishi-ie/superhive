@@ -4,6 +4,8 @@ import type { ProviderEntry } from '@/types/electron';
 
 export interface UseProvidersResult {
   providers: Record<string, ProviderEntry>;
+  providerNames: Set<string>;
+  hasProvider: (name: string) => boolean;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -30,5 +32,15 @@ export function useProviders(): UseProvidersResult {
     void refresh();
   }, [refresh]);
 
-  return { providers, loading, error, refresh };
+  const providerNames = React.useMemo(
+    () => new Set(Object.keys(providers)),
+    [providers],
+  );
+
+  const hasProvider = React.useCallback(
+    (name: string) => providerNames.has(name),
+    [providerNames],
+  );
+
+  return { providers, providerNames, hasProvider, loading, error, refresh };
 }
