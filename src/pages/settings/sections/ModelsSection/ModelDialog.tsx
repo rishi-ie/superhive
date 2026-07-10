@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Loading01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -156,7 +156,7 @@ export function ModelDialog({ open, onOpenChange, onSaved }: ModelDialogProps) {
               Cancel
             </Button>
             <Button type="submit" size="lg" disabled={!canSubmit}>
-              {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
+              {submitting && <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>
           </DialogFooter>
