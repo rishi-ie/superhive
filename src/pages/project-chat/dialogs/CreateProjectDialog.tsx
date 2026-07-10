@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { Loading01Icon, FolderOpenIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CircleNotchIcon, FolderOpenIcon } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -114,7 +114,7 @@ export function CreateProjectDialog() {
               Project Folder
             </Label>
             <div className="relative">
-              <HugeiconsIcon
+              <Icon
                 icon={FolderOpenIcon}
                 className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-sidebar-foreground/40 pointer-events-none"
               />
@@ -165,7 +165,7 @@ export function CreateProjectDialog() {
               Cancel
             </Button>
             <Button type="submit" size="lg" disabled={!canSubmit}>
-              {submitting && <HugeiconsIcon icon={Loading01Icon} className="size-3.5 animate-spin" />}
+              {submitting && <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />}
               {buttonLabel}
             </Button>
           </DialogFooter>
