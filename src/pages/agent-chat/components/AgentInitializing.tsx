@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { CheckIcon, Loading01Icon, RefreshIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CheckIcon, CircleNotchIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { INIT_STEPS } from '@/models/runtime';
 import type { InitStep } from '@/models/runtime';
 import { cn } from '@/lib/utils';
@@ -83,9 +83,9 @@ export function AgentInitializing({ currentStep, agentName, lastError, onRestart
                   )}
                 >
                   {isDone ? (
-                    <HugeiconsIcon icon={CheckIcon} className="size-3" />
+                    <Icon icon={CheckIcon} className="size-3" />
                   ) : isActive ? (
-                    <HugeiconsIcon icon={Loading01Icon} className="size-3 animate-spin" />
+                    <Icon icon={CircleNotchIcon} className="size-3 animate-spin" />
                   ) : (
                     <span className="block size-1.5 rounded-full bg-current" />
                   )}
@@ -108,7 +108,7 @@ export function AgentInitializing({ currentStep, agentName, lastError, onRestart
         {stuck && (
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={onRestart} className="gap-1.5">
-              <HugeiconsIcon icon={RefreshIcon} className="size-3.5" />
+              <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
               Restart
             </Button>
           </div>
