@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { ArrowRight01Icon, Loading01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { CaretRightIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
@@ -103,8 +103,8 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
         <div className="flex items-center gap-1.5 whitespace-nowrap">
           <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
           {agent.status === 'initializing' ? (
-            <HugeiconsIcon
-              icon={Loading01Icon}
+            <Icon
+              icon={CircleNotchIcon}
               className="size-2.5 animate-spin shrink-0 text-yellow-500"
             />
           ) : null}
@@ -133,8 +133,8 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
       </TableCell>
 
       <TableCell className="w-10 text-right">
-        <HugeiconsIcon
-          icon={ArrowRight01Icon}
+        <Icon
+          icon={CaretRightIcon}
           className="size-3.5 text-muted-foreground/40 transition-colors group-hover:text-muted-foreground"
         />
       </TableCell>
