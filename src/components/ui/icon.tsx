@@ -1,29 +1,24 @@
-import { HugeiconsIcon as _HugeiconsIcon } from "@hugeicons/react";
-import type { IconSvgElement } from "@hugeicons/react";
+import type { Icon as PhosphorIcon, IconWeight } from "@phosphor-icons/react";
 
 type IconProps = {
   className?: string;
-  size?: number;
-  strokeWidth?: number;
+  size?: number | string;
+  weight?: IconWeight;
   color?: string;
-  altIcon?: IconSvgElement;
-  showAlt?: boolean;
-  "data-icon"?: string;
 };
 
-export function HugeiconsIcon({
-  icon,
+export function Icon({
+  icon: IconComponent,
   className,
   size = 16,
-  strokeWidth = 1.5,
+  weight = "regular",
   color = "currentColor",
   ...props
-}: IconProps & { icon: IconSvgElement }) {
+}: IconProps & { icon: PhosphorIcon }) {
   return (
-    <_HugeiconsIcon
-      icon={icon}
+    <IconComponent
       size={size}
-      strokeWidth={strokeWidth}
+      weight={weight}
       color={color}
       className={className}
       {...props}
