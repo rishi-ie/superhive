@@ -6,7 +6,6 @@ import {
   InboxIcon,
 } from "@hugeicons/core-free-icons";
 import { useAgentSettings } from "@/flows/agents/settings";
-import { useAgentRuntime } from "@/flows/agents/runtime";
 import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,
@@ -16,7 +15,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { RestartBar } from "./RestartBar";
 
 interface AgentSettingsPanelProps {
   agentId: string;
@@ -24,7 +22,6 @@ interface AgentSettingsPanelProps {
 
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const { settings, isLoading, error, reload } = useAgentSettings(agentId);
-  const { status } = useAgentRuntime(agentId);
   const autoSave = useAutoSave(agentId, reload);
 
   if (isLoading) {
@@ -103,7 +100,6 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         </TabsContent>
       </Tabs>
 
-      <RestartBar agentId={agentId} status={status} />
     </div>
   );
 }
