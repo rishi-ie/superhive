@@ -1,7 +1,7 @@
 import { useParams, useMatch } from 'react-router-dom';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
-import { HugeiconsIcon } from "@/components/ui/icon";
-import { UserIcon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { UserIcon } from "@phosphor-icons/react";
 import { AgentSettingsPanel } from './AgentSettingsPanel';
 import { ProjectSettingsPanel } from './ProjectSettingsPanel';
 import { AgentsListPanel } from './AgentsListPanel';
@@ -29,7 +29,7 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
           <AgentsListPanel />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
-            <HugeiconsIcon icon={UserIcon} className="size-6 text-muted-foreground/40" />
+            <Icon icon={UserIcon} className="size-6 text-muted-foreground/40" />
             <div className="text-center text-xs text-muted-foreground">
               Select an agent or project
             </div>
