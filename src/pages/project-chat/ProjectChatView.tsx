@@ -15,14 +15,14 @@
 
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { HugeiconsIcon } from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon';
 import {
-  PlusSignIcon,
+  PlusIcon,
   HandIcon,
-  ArrowDown01Icon,
-  ArrowUp01Icon,
-  Mic01Icon,
-} from '@hugeicons/core-free-icons';
+  CaretDownIcon,
+  CaretUpIcon,
+  MicrophoneIcon,
+} from '@phosphor-icons/react';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ProjectAgentInitializing } from './components/ProjectAgentInitializing';
@@ -179,18 +179,18 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
             <div className="flex items-center justify-between px-4 py-2">
               <div className="flex items-center gap-4">
                 <button className="text-[#9ca3af] hover:text-white cursor-default">
-                  <HugeiconsIcon icon={PlusSignIcon} className="size-5" />
+                  <Icon icon={PlusIcon} className="size-5" />
                 </button>
                 <button className="flex items-center gap-1.5 text-sm text-[#9ca3af] hover:text-white cursor-default">
-                  <HugeiconsIcon icon={HandIcon} className="size-4" />
+                  <Icon icon={HandIcon} className="size-4" />
                   <span>Ask for approval</span>
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+                  <Icon icon={CaretDownIcon} className="size-3" />
                 </button>
               </div>
               <div className="flex items-center gap-4">
                 <ModelPicker agentId={projectAgent.id} />
                 <button className="text-[#9ca3af] hover:text-white cursor-default">
-                  <HugeiconsIcon icon={Mic01Icon} className="size-5" />
+                  <Icon icon={MicrophoneIcon} className="size-5" />
                 </button>
                 <button
                   onClick={onSend}
@@ -198,7 +198,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   title={!hasModel ? 'Pick a model first' : undefined}
                   className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] disabled:bg-[#333] disabled:cursor-default cursor-default"
                 >
-                  <HugeiconsIcon icon={ArrowUp01Icon} className="size-3.5 text-[#222222]" />
+                  <Icon icon={CaretUpIcon} className="size-3.5 text-[#222222]" />
                 </button>
               </div>
             </div>
