@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { HugeiconsIcon } from '@/components/ui/icon';
-import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
+import { Icon } from '@/components/ui/icon';
+import { CaretDownIcon } from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -127,7 +127,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
           className="flex items-center gap-1 text-sm text-[#9ca3af] hover:text-white cursor-default"
         >
           <span className={cn(!selected && 'text-[#6b7280]')}>{display}</span>
-          <HugeiconsIcon icon={ArrowDown01Icon} className="size-3" />
+          <Icon icon={CaretDownIcon} className="size-3" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[220px]">
