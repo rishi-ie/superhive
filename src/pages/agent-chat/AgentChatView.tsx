@@ -111,7 +111,7 @@ export function AgentChatView() {
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
               </div>
-              <div className="flex items-center gap-stack">
+              <div className="flex items-center gap-loose">
                 <ModelPicker agentId={agentId} />
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={MicrophoneIcon} className="size-5" />
