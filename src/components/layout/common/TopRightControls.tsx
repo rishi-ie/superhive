@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { SidebarIcon } from "@phosphor-icons/react";
+import { SidebarSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -27,9 +27,9 @@ export function TopRightControls({
             onClick={onToggleRightSidebar}
           >
             {rightSidebarOpen ? (
-              <Icon icon={SidebarIcon} className="size-4" />
+              <Icon icon={SidebarSimpleIcon} className="size-4" />
             ) : (
-              <Icon icon={SidebarIcon} className="size-4" />
+              <Icon icon={SidebarSimpleIcon} className="size-4" />
             )}
           </Button>
         </TooltipTrigger>
