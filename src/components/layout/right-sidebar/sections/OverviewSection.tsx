@@ -57,9 +57,14 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       {(data.name || data.description) && (
         <div className="flex flex-col gap-0.5">
           {data.name && (
-            <span className="text-lg font-semibold text-foreground/80">
-              {data.name}
-            </span>
+            <div className="flex items-baseline gap-list-item">
+              <span className="text-lg font-semibold text-foreground/80">
+                {data.name}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                · Project Apollo
+              </span>
+            </div>
           )}
           {data.description && (
             <span className="text-sm text-muted-foreground">
