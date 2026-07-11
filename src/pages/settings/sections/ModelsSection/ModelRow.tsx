@@ -40,7 +40,7 @@ export function ModelRow({
             </span>
           )}
           {hasApiKey && model.enabled && (
-            <span className="inline-flex items-center gap-gap-tight rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[0.625rem] text-emerald-500">
+            <span className="inline-flex items-center gap-gap-tight rounded-full bg-success/10 px-1.5 py-0.5 text-[0.625rem] text-success">
               <Icon icon={CheckCircleIcon} className="size-2.5" />
               Active
             </span>

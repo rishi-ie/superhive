@@ -98,8 +98,6 @@ This is where all visual decisions live. Two blocks own everything:
 | `--success`, `--success-foreground` | Status — running | Dots, badges |
 | `--warning`, `--warning-foreground` | Status — initializing | |
 | `--info`, `--info-foreground` | Status — busy | |
-| `--surface-composer`, `--surface-composer-foreground`, `--surface-composer-muted`, `--surface-composer-placeholder` | Always-dark composer surface (chat composers) | |
-| `--surface-control`, `--surface-control-hover`, `--surface-control-disabled` | Buttons on composer surface | |
 | `--border-inverse` | Always-dark divider (used by PanelHeader) | |
 
 ### Spacing tokens

@@ -77,7 +77,7 @@ export function AgentInitializing({ currentStep, agentName, lastError, onRestart
                 <span
                   className={cn(
                     'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full',
-                    isDone && 'bg-emerald-500/15 text-emerald-400',
+                    isDone && 'bg-success/15 text-success',
                     isActive && 'bg-foreground/10 text-foreground',
                     isPending && 'bg-muted text-muted-foreground'
                   )}
