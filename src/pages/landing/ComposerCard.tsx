@@ -40,9 +40,9 @@ export function ComposerCard() {
         </div>
       </div>
       <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 z-0 w-full max-w-[690px] rounded-3xl bg-sidebar/70" />
-      <div className="relative z-20 flex items-center gap-stack px-composer py-3 max-w-[690px] mx-auto">
-        <Icon icon={NotebookIcon} className="size-4 text-foreground" />
-        <span className="text-sm text-foreground">Choose project</span>
+      <div className="relative z-20 flex items-center gap-stack rounded-b-3xl border-t border-sidebar-border bg-muted px-composer py-list-item max-w-[690px] mx-auto">
+        <Icon icon={NotebookIcon} className="size-4 text-sidebar-foreground" />
+        <span className="text-sm text-sidebar-foreground">Choose project</span>
       </div>
     </div>
   );
