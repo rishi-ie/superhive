@@ -18,8 +18,6 @@ import { useParams } from 'react-router-dom';
 import { Icon } from '@/components/ui/icon';
 import {
   PlusIcon,
-  HandIcon,
-  CaretDownIcon,
   MicrophoneIcon,
   PaperPlaneTiltIcon,
 } from '@phosphor-icons/react';
@@ -180,11 +178,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
               <div className="flex items-center gap-stack">
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
-                </button>
-                <button className="flex items-center gap-list-item text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={HandIcon} className="size-4" />
-                  <span>Ask for approval</span>
-                  <Icon icon={CaretDownIcon} className="size-3" />
                 </button>
               </div>
               <div className="flex items-center gap-stack">

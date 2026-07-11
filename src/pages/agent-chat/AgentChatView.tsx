@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, HandIcon, CaretDownIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
@@ -109,11 +109,6 @@ export function AgentChatView() {
               <div className="flex items-center gap-stack">
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
-                </button>
-                <button className="flex items-center gap-list-item text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={HandIcon} className="size-4" />
-                  <span>Ask for approval</span>
-                  <Icon icon={CaretDownIcon} className="size-3" />
                 </button>
               </div>
               <div className="flex items-center gap-stack">
