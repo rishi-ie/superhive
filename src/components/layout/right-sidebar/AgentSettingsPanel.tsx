@@ -89,7 +89,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-0 flex-1 flex-col min-h-0 p-0">
+        <TabsContent value="overview" className="mt-0 flex flex-1 flex-col min-h-0 p-0">
           <ScrollArea className="flex-1 min-h-0">
             <OverviewSection data={overviewData} />
           </ScrollArea>
