@@ -1,9 +1,11 @@
 import {
   Accordion,
+  ActivityRow,
   ChecklistRow,
+  ResponsibilitySlider,
   SessionRow,
+  type ActivityType,
 } from "../primitives";
-import { Badge } from "@/components/ui/badge";
 
 export interface OverviewPreviousTask {
   name: string;
@@ -20,9 +22,10 @@ export interface OverviewChecklist {
   items: OverviewChecklistItem[];
 }
 
-export interface OverviewCatalogItem {
-  path: string;
-  active: boolean;
+export interface OverviewRecentActivityItem {
+  type: ActivityType;
+  label: string;
+  timestamp?: string;
 }
 
 export interface OverviewData {
@@ -31,20 +34,12 @@ export interface OverviewData {
   roleSummary?: string;
   previousTasks: OverviewPreviousTask[];
   activeChecklist: OverviewChecklist | null;
-  catalog: {
-    skills: OverviewCatalogItem[];
-    extensions: OverviewCatalogItem[];
-    prompts: OverviewCatalogItem[];
-  };
+  recentActivity: OverviewRecentActivityItem[];
   responsibilityCount: number;
 }
 
 interface OverviewSectionProps {
   data: OverviewData;
-}
-
-function badgeName(item: { path?: string; name?: string }): string {
-  return item.name ?? item.path?.split("/").pop() ?? "unknown";
 }
 
 export function OverviewSection({ data }: OverviewSectionProps) {
@@ -104,47 +99,21 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       </Accordion>
 
       <Accordion
-        title="Skills"
-        badge={data.catalog.skills.length}
-        emptyText="No skills"
+        title="Recent activity"
+        badge={data.recentActivity.length}
+        emptyText="No recent activity"
       >
-        <div className="flex flex-wrap gap-gap-tight">
-          {data.catalog.skills.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-sm opacity-60">
-              {badgeName(item)}
-            </Badge>
-          ))}
-        </div>
+        {data.recentActivity.map((item, i) => (
+          <ActivityRow
+            key={i}
+            type={item.type}
+            label={item.label}
+            timestamp={item.timestamp}
+          />
+        ))}
       </Accordion>
 
-      <Accordion
-        title="Extensions"
-        badge={data.catalog.extensions.length}
-        emptyText="No extensions"
-      >
-        <div className="flex flex-wrap gap-gap-tight">
-          {data.catalog.extensions.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-sm opacity-60">
-              {badgeName(item)}
-            </Badge>
-          ))}
-        </div>
-      </Accordion>
-
-      <Accordion
-        title="Prompts"
-        badge={data.catalog.prompts.length}
-        emptyText="No prompts"
-      >
-        <div className="flex flex-wrap gap-gap-tight">
-          {data.catalog.prompts.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-sm opacity-60">
-              {badgeName(item)}
-            </Badge>
-          ))}
-        </div>
-      </Accordion>
-
+      <ResponsibilitySlider count={data.responsibilityCount} />
     </div>
   );
 }

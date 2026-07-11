@@ -7,3 +7,6 @@ export { Accordion } from './Accordion';
 export { SessionRow } from './SessionRow';
 export { ChecklistRow } from './ChecklistRow';
 export { ResponsibilitySlider } from './ResponsibilitySlider';
+export { ActivityRow } from './ActivityRow';
+export type { ActivityType } from './ActivityRow';
+export { CatalogRow } from './CatalogRow';

@@ -44,11 +44,16 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         { text: "Add error handling", done: false },
       ],
     },
-    catalog: {
-      skills: settings?.catalog?.skills ?? [],
-      extensions: settings?.catalog?.extensions ?? [],
-      prompts: settings?.catalog?.prompts ?? [],
-    },
+    recentActivity: [
+      { type: "run", label: "implement POST /orders", timestamp: "just now" },
+      { type: "edit", label: "src/api/orders.ts", timestamp: "2m ago" },
+      { type: "message", label: '"Define response types"', timestamp: "5m ago" },
+      { type: "tool", label: "npm test", timestamp: "8m ago" },
+      { type: "edit", label: "src/lib/types.ts", timestamp: "12m ago" },
+      { type: "run", label: "install pi-truth", timestamp: "1h ago" },
+      { type: "message", label: '"Pull API spec"', timestamp: "2h ago" },
+      { type: "tool", label: "git diff", timestamp: "3h ago" },
+    ],
     responsibilityCount: 8,
   }), [settings]);
 
