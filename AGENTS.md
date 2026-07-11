@@ -338,6 +338,37 @@ This project uses **Tailwind CSS v4** with CSS-first configuration. Theme is in 
 
 ---
 
+## Style Modularity (preset-first)
+
+The single source of truth for ALL visual style is [`src/styles/presets/radix-mira.css`](./src/styles/presets/radix-mira.css). Changing a token there re-skins the entire app. See [STYLING.md](./STYLING.md) for the full token catalog and the "Adding a New Token" workflow.
+
+### When adding a UI component
+
+1. **Use existing semantic tokens first** (`bg-success`, `p-card`, `gap-stack`, `rounded-button`, `h-control-md`).
+2. **No raw palette colors** — never `bg-emerald-*`, `text-red-*`, `bg-blue-500`, etc.
+3. **No hardcoded hex / rgb / hsl** in the app layer.
+4. **No `space-x-*` / `space-y-*`** — use `gap-*`.
+5. **No `style={{ color: … }}` for visual style** — only mechanical layout (sidebar widths) is allowed inline.
+6. **If the right token doesn't exist, add one to the preset first**, then use the new token in your component.
+7. **Don't modify `src/components/ui/*`** to add styling — add tokens; regenerate via `bunx shadcn@latest apply --preset <name>` if needed.
+
+### Before committing UI work — verify
+
+Run these greps from the repo root; all must return zero results:
+
+```bash
+# raw Tailwind palette colors (bypasses semantic tokens)
+rg "bg-(emerald|red|blue|green|yellow|orange|purple|pink|cyan|slate|gray|zinc|neutral|amber|lime|teal|sky|indigo|violet|fuchsia|rose)-" src -g '!src/styles/**'
+
+# hardcoded hex / rgb / hsl in app layer
+rg "#[0-9a-fA-F]{3,8}\b|rgb\(|rgba\(|hsl\(|hsla\(" src -g '!src/styles/**'
+
+# space-x / space-y violations
+rg "\bspace-[xy]-\d" src -g '!src/styles/**'
+```
+
+---
+
 ## Icon Library
 
 **Phosphor Icons** (`@phosphor-icons/react`). Use the wrapper at `@/components/ui/icon`. Import icons from `@phosphor-icons/react`, then render via `<Icon icon={IconName} className="..." />`. Default size 16px, weight `regular`, color `currentColor`.
@@ -350,10 +381,10 @@ Before completing any task:
 
 1. **Typecheck**: `bun run typecheck` must pass clean
 2. **Build**: `bun run build` must pass clean
-3. **Flow isolation grep**: `rg "@/api" src/components src/pages` returns **zero results**
-4. **All imports use `@/` alias** (not relative)
-5. **All conditional classes use `cn()`** (not ternary string concat)
-6. **No raw color values** in `className`
+3. **Flow isolation**: `rg "@/api" src/components src/pages` returns zero results
+4. **Preset isolation**: the three style greps under [Style Modularity](#style-modularity-preset-first) all return zero results
+5. **All imports use `@/` alias** (not relative)
+6. **All conditional classes use `cn()`** (not ternary string concat)
 7. **Accessibility confirmed** (titles on dialogs, fallback on avatars)
 
 ---

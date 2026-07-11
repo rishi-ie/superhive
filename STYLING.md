@@ -40,6 +40,30 @@ This produces Tailwind classes like:
 
 `tailwind-merge`'s `cn()` (see `src/lib/utils.ts`) handles deduping.
 
+## Forbidden Patterns
+
+| Pattern | Why forbidden |
+|---|---|
+| Raw palette colors (`bg-emerald-*`, `text-red-*`, …) | Use semantic tokens (`bg-success`, `text-destructive`) so dark mode + preset swaps work |
+| Hex (`#abc`) / `rgb(...)` / `hsl(...)` in app layer | Use a preset color token |
+| `space-x-*` / `space-y-*` | Use `gap-*` |
+| `style={{ color: … }}` for visual style | Use a preset className instead |
+| Arbitrary `p-[10px]` when a semantic token exists | Use the semantic token |
+
+If the right token doesn't exist — add one to the preset first (see "Adding a New Token"), then use the token in your component. Don't hardcode the value.
+
+## When Adding a New UI Component
+
+Run through this checklist before opening a PR:
+
+- [ ] Only semantic tokens used (run the three greps in AGENTS.md "Style Modularity")
+- [ ] Any new color/spacing/radius/height added as a preset token first, documented in the token reference below
+- [ ] Conditional classes use `cn()`
+- [ ] All imports are `@/...` aliases (no relative)
+- [ ] `src/components/ui/*` left untouched (or regenerated via CLI)
+- [ ] Dark mode works (all colors from tokens)
+- [ ] `bun run typecheck` and `bun run build` both clean
+
 ## What Lives Where
 
 ```
@@ -78,6 +102,23 @@ This is where all visual decisions live. Two blocks own everything:
 
 1. `:root` (light) and `.dark` (dark mode) blocks define token values.
 2. `@theme inline` registers those tokens as Tailwind utilities.
+
+## Hardcoded Values That Stay Hardcoded
+
+These are **layout mechanics**, not style. They are NOT swapped on preset change.
+
+| Pattern | Why it's hardcoded |
+|---|---|
+| `flex`, `grid`, `flex-col`, `flex-row` | Layout orientation |
+| `absolute`, `relative` | Positioning |
+| `w-full`, `w-1/2`, `w-screen`, `h-screen` | Responsive proportions |
+| `flex-1`, `shrink-0`, `grow` | Flex behavior |
+| `overflow-hidden`, `pointer-events-none` | Mechanics |
+| `min-h-0`, `max-w-*` (most) | Responsive bounds |
+| `pt-3 pb-2` etc. asymmetric paddings inside composers | Artisan composer spacing |
+| `-space-x-2` in `AvatarGroup` | Negative spacing for overlapping avatars (shadcn primitive) |
+
+If you find yourself wanting to swap a hardcoded value across the whole app on preset change, **add a token to the preset**, don't hardcode the value in component code.
 
 ## Token Reference
 
@@ -137,23 +178,6 @@ The existing `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` (from `--rad
 | `--height-control-sm` | `h-control-sm` (1.5rem) |
 | `--height-control-md` | `h-control-md` (2.25rem) |
 | `--height-control-lg` | `h-control-lg` (2.5rem) |
-
-## Hardcoded Values That Stay Hardcoded
-
-These are **layout mechanics**, not style. They are NOT swapped on preset change.
-
-| Pattern | Why it's hardcoded |
-|---|---|
-| `flex`, `grid`, `flex-col`, `flex-row` | Layout orientation |
-| `absolute`, `relative` | Positioning |
-| `w-full`, `w-1/2`, `w-screen`, `h-screen` | Responsive proportions |
-| `flex-1`, `shrink-0`, `grow` | Flex behavior |
-| `overflow-hidden`, `pointer-events-none` | Mechanics |
-| `min-h-0`, `max-w-*` (most) | Responsive bounds |
-| `pt-3 pb-2` etc. asymmetric paddings inside composers | Artisan composer spacing |
-| `-space-x-2` in `AvatarGroup` | Negative spacing for overlapping avatars (shadcn primitive) |
-
-If you find yourself wanting to swap a hardcoded value across the whole app on preset change, **add a token to the preset**, don't hardcode the value in component code.
 
 ## Adding a New Token
 
