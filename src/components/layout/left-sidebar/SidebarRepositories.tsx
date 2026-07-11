@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, MagnifyingGlassIcon, HexagonIcon, GlobeIcon, UserIcon, SwapIcon } from "@phosphor-icons/react";
+import { PlusIcon, MagnifyingGlassIcon, HexagonIcon, GlobeIcon, UserIcon, SwapIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -26,8 +26,8 @@ export function SidebarRepositories() {
               onClick={() => goBackHome(navigate)}
               className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Icon icon={PlusIcon} className="size-4" />
-              <span>New chat</span>
+              <Icon icon={PaperPlaneTiltIcon} className="size-4" />
+              <span>New Agent</span>
             </button>
           </SidebarMenuItem>
           <SidebarMenuItem>
