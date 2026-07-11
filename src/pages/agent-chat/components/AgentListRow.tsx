@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 import type { Agent } from '@/types/electron';
 
 const STATUS_DOT: Record<Agent['status'], string> = {
-  running: "bg-green-500",
-  busy: "bg-blue-500",
+  running: "bg-success",
+  busy: "bg-info",
   idle: "bg-muted-foreground/40",
-  initializing: "bg-yellow-500",
+  initializing: "bg-warning",
   stopped: "bg-muted-foreground/30",
   error: "bg-destructive",
 };
@@ -105,7 +105,7 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
           {agent.status === 'initializing' ? (
             <Icon
               icon={CircleNotchIcon}
-              className="size-2.5 animate-spin shrink-0 text-yellow-500"
+              className="size-2.5 animate-spin shrink-0 text-warning"
             />
           ) : null}
           <span className="text-xs text-muted-foreground">

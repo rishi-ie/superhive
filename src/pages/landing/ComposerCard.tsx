@@ -12,17 +12,17 @@ import { ModelPicker } from "@/components/layout/composer/ModelPicker";
 export function ComposerCard() {
   return (
     <div className="relative w-full max-w-[700px]">
-      <div className="relative z-10 rounded-3xl bg-[#2a2a2a]">
+      <div className="relative z-10 rounded-3xl bg-surface-composer">
         <textarea
           placeholder="Do anything"
-          className="min-h-[60px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="min-h-[60px] w-full resize-none border-0 bg-transparent px-4 py-4 text-sm text-surface-composer-foreground placeholder:text-surface-composer-placeholder outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-4">
-            <button className="text-[#9ca3af] hover:text-white cursor-default">
+            <button className="text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
               <Icon icon={PlusIcon} className="size-5" />
             </button>
-            <button className="flex items-center gap-1.5 text-sm text-[#9ca3af] hover:text-white cursor-default">
+            <button className="flex items-center gap-1.5 text-sm text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
               <Icon icon={HandIcon} className="size-4" />
               <span>Ask for approval</span>
               <Icon icon={CaretDownIcon} className="size-3" />
@@ -30,19 +30,19 @@ export function ComposerCard() {
           </div>
           <div className="flex items-center gap-4">
             <ModelPicker />
-            <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
+            <button className="flex size-7 items-center justify-center rounded-full text-surface-composer-muted hover:text-surface-composer-foreground hover:bg-sidebar-accent cursor-pointer transition-colors">
               <Icon icon={MicrophoneIcon} className="size-5" />
             </button>
-            <button className="flex size-7 items-center justify-center rounded-full text-[#9ca3af] hover:text-white hover:bg-sidebar-accent cursor-pointer transition-colors">
+            <button className="flex size-7 items-center justify-center rounded-full text-surface-composer-muted hover:text-surface-composer-foreground hover:bg-sidebar-accent cursor-pointer transition-colors">
               <Icon icon={PaperPlaneTiltIcon} className="size-4" />
             </button>
           </div>
         </div>
       </div>
-      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 z-0 w-full max-w-[690px] rounded-3xl bg-[#1c1c1c]" />
+      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 z-0 w-full max-w-[690px] rounded-3xl bg-surface-composer/70" />
       <div className="relative z-20 flex items-center gap-2 px-4 py-3 max-w-[690px] mx-auto">
-        <Icon icon={NotebookIcon} className="size-4 text-white" />
-        <span className="text-sm text-white">Choose project</span>
+        <Icon icon={NotebookIcon} className="size-4 text-foreground" />
+        <span className="text-sm text-foreground">Choose project</span>
       </div>
     </div>
   );

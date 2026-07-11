@@ -13,13 +13,13 @@ export function SettingsSidebar() {
       <div className="flex flex-col gap-1 px-2 pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
-          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
+          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-foreground/80"
         >
           <Icon icon={CaretLeftIcon} className="size-4" />
           <span>Back to Home</span>
         </button>
         <button
-          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-[#dedede]"
+          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-foreground/80"
         >
           <Icon icon={MagnifyingGlassIcon} className="size-4" />
           <span>Search</span>

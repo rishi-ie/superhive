@@ -31,7 +31,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
             key={p.id}
             label={p.name}
             defaultOpen={false}
-            labelClassName="text-[#9ca3af]"
+            labelClassName="text-muted-foreground"
             onClick={() => navigate(`/projects/${p.id}`)}
           >
             {assignedAgents.length > 0 ? (
@@ -40,8 +40,8 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
               ))
             ) : (
               <div className="flex items-center gap-2 px-2 py-1.5">
-                <Icon icon={FolderOpenIcon} className="size-4 flex-shrink-0 text-[#727272]" />
-                <span className="text-xs text-[#727272]">No assigned agents</span>
+                <Icon icon={FolderOpenIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">No assigned agents</span>
               </div>
             )}
           </AccordionSection>

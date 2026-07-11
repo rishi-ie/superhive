@@ -19,7 +19,7 @@ export function SidebarUser() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
         >
           <Icon icon={GearIcon} className="size-4" />
           <span className="flex-1 text-left">Settings</span>

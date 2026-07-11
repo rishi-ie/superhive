@@ -32,7 +32,7 @@ export function AccordionSection({
         onClick={handleClick}
         className={cn(
           'flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-foreground',
-          labelClassName || 'text-[#727272]'
+          labelClassName || 'text-muted-foreground'
         )}
       >
         <span className="truncate text-left">{label}</span>

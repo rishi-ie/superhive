@@ -95,7 +95,7 @@ export function AgentChatView() {
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
-          <div className="rounded-3xl bg-[#2a2a2a]">
+          <div className="rounded-3xl bg-surface-composer">
             <textarea
               ref={textareaRef}
               placeholder="Ask your digital employee…"
@@ -103,14 +103,14 @@ export function AgentChatView() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               autoFocus
-              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-4 pt-3 pb-2 text-sm text-white placeholder:text-[#6b7280] outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-4 pt-3 pb-2 text-sm text-surface-composer-foreground placeholder:text-surface-composer-placeholder outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
             <div className="flex items-center justify-between px-4 py-2">
               <div className="flex items-center gap-4">
-                <button className="text-[#9ca3af] hover:text-white cursor-default">
+                <button className="text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
-                <button className="flex items-center gap-1.5 text-sm text-[#9ca3af] hover:text-white cursor-default">
+                <button className="flex items-center gap-1.5 text-sm text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
                   <Icon icon={HandIcon} className="size-4" />
                   <span>Ask for approval</span>
                   <Icon icon={CaretDownIcon} className="size-3" />
@@ -118,16 +118,16 @@ export function AgentChatView() {
               </div>
               <div className="flex items-center gap-4">
                 <ModelPicker agentId={agentId} />
-                <button className="text-[#9ca3af] hover:text-white cursor-default">
+                <button className="text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
                   <Icon icon={MicrophoneIcon} className="size-5" />
                 </button>
                 <button
                   onClick={onSend}
                   disabled={isBusy || input.trim().length === 0 || !hasModel}
                   title={!hasModel ? 'Pick a model first' : undefined}
-                  className="flex size-7 items-center justify-center rounded-full bg-[#555555] hover:bg-[#666666] disabled:bg-[#333] disabled:cursor-default cursor-default"
+                  className="flex size-7 items-center justify-center rounded-full bg-surface-control hover:bg-surface-control-hover disabled:bg-surface-control-disabled disabled:cursor-default cursor-default"
                 >
-                  <Icon icon={CaretUpIcon} className="size-3.5 text-[#222222]" />
+                  <Icon icon={CaretUpIcon} className="size-3.5 text-surface-composer-foreground" />
                 </button>
               </div>
             </div>

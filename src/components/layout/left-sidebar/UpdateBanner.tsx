@@ -11,8 +11,7 @@ export function UpdateBanner() {
 		<button
 			type="button"
 			onClick={() => void installUpdate()}
-			className="flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-medium text-white shadow-sm ring-1 ring-black/10 transition-opacity hover:opacity-90"
-			style={{ backgroundColor: '#589ce7' }}
+			className="flex h-6 w-full cursor-pointer items-center gap-1.5 rounded-full bg-info px-3 text-xs font-medium text-info-foreground shadow-sm ring-1 ring-border transition-opacity hover:opacity-90"
 		>
 			<Icon icon={ArrowsClockwiseIcon} className="size-3" />
 			<span className="flex-1 truncate text-left">

@@ -22,11 +22,11 @@ export function CenterBreadcrumb() {
               <React.Fragment key={`${i}-${seg.label}`}>
                 <BreadcrumbItem>
                   {isLast || seg.clickable === false ? (
-                    <BreadcrumbPage className="text-sm font-medium text-[#727272]">
+                    <BreadcrumbPage className="text-sm font-medium text-muted-foreground">
                       {seg.label}
                     </BreadcrumbPage>
                   ) : (
-                    <Link to={seg.href!} className="text-sm text-[#727272] transition-colors hover:text-[#dedede]">
+                    <Link to={seg.href!} className="text-sm text-muted-foreground transition-colors hover:text-foreground/80">
                       {seg.label}
                     </Link>
                   )}

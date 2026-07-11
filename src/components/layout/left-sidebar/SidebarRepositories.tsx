@@ -24,7 +24,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => goBackHome(navigate)}
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={PaperPlaneTiltIcon} className="size-4" />
               <span>New Agent</span>
@@ -33,7 +33,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={HexagonIcon} className="size-4" />
               <span>Meta hive</span>
@@ -43,7 +43,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={GlobeIcon} className="size-4" />
               <span>Remote</span>
@@ -54,7 +54,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => navigate('/agents')}
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={UserIcon} className="size-4" />
               <span>Agents</span>
@@ -64,19 +64,19 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => setCommandOpen(true)}
-              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-[#dedede] transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={MagnifyingGlassIcon} className="size-4" />
               <span>Search</span>
             </button>
           </SidebarMenuItem>
-          <div className="group flex h-8 w-full cursor-default items-center gap-2 px-2 text-sm text-[#727272]">
+          <div className="group flex h-8 w-full cursor-default items-center gap-2 px-2 text-sm text-muted-foreground">
             <span>Projects</span>
             <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setCreateProjectOpen(true); }}
-                className="flex size-6 cursor-default items-center justify-center rounded-lg text-[#9ca3af] hover:bg-sidebar-accent hover:text-foreground"
+                className="flex size-6 cursor-default items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                 title="Add project"
               >
                 <Icon icon={PlusIcon} className="size-4" />
@@ -84,7 +84,7 @@ export function SidebarRepositories() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); }}
-                className="flex size-6 cursor-default items-center justify-center rounded-lg text-[#9ca3af] hover:bg-sidebar-accent hover:text-foreground"
+                className="flex size-6 cursor-default items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                 title="Reorder projects"
               >
                 <Icon icon={SwapIcon} className="size-4" />
