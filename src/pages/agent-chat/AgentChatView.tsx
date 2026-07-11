@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, HandIcon, CaretDownIcon, CaretUpIcon, MicrophoneIcon } from "@phosphor-icons/react";
+import { PlusIcon, HandIcon, CaretDownIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
@@ -127,7 +127,7 @@ export function AgentChatView() {
                   title={!hasModel ? 'Pick a model first' : undefined}
                   className="flex size-7 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
                 >
-                  <Icon icon={CaretUpIcon} className="size-3.5 text-sidebar-foreground" />
+                  <Icon icon={PaperPlaneTiltIcon} className="size-3.5 text-sidebar-foreground" />
                 </button>
               </div>
             </div>

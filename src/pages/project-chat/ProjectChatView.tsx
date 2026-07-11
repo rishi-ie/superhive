@@ -20,8 +20,8 @@ import {
   PlusIcon,
   HandIcon,
   CaretDownIcon,
-  CaretUpIcon,
   MicrophoneIcon,
+  PaperPlaneTiltIcon,
 } from '@phosphor-icons/react';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
@@ -198,7 +198,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   title={!hasModel ? 'Pick a model first' : undefined}
                   className="flex size-7 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
                 >
-                  <Icon icon={CaretUpIcon} className="size-3.5 text-sidebar-foreground" />
+                  <Icon icon={PaperPlaneTiltIcon} className="size-3.5 text-sidebar-foreground" />
                 </button>
               </div>
             </div>
