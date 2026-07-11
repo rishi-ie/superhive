@@ -46,9 +46,13 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
         getEnabledModels(),
         listProviders(),
       ]);
-      const names = new Set(Object.keys(providersMap));
-      // Only show models whose provider has a key configured.
-      setModels(enabledList.filter((m) => names.has(m.provider)));
+      // Only show models whose provider has a non-empty API key.
+      const keyed = new Set(
+        Object.entries(providersMap)
+          .filter(([, entry]) => entry?.apiKey && entry.apiKey.trim().length > 0)
+          .map(([name]) => name),
+      );
+      setModels(enabledList.filter((m) => keyed.has(m.provider)));
     } catch {
       setModels([]);
     }

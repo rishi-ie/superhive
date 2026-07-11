@@ -15,7 +15,7 @@ export function SettingsSectionView() {
           </h1>
           {section === "models" && (
             <p className="text-sm text-muted-foreground">
-              Configure provider API keys and choose which catalog models to enable.
+              Add your API key for each provider to enable its models in chat.
             </p>
           )}
         </header>

@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/icon';
-import { TrashIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { KeyIcon, PencilSimpleIcon, TrashSimpleIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -8,26 +8,24 @@ import type { ModelEntry } from '@/types/electron';
 
 interface ModelRowProps {
   model: ModelEntry;
-  hasProvider: boolean;
+  hasApiKey: boolean;
   onToggleEnabled: (enabled: boolean) => void;
+  onConfigure: () => void;
   onDelete?: () => void;
 }
 
 export function ModelRow({
   model,
-  hasProvider,
+  hasApiKey,
   onToggleEnabled,
+  onConfigure,
   onDelete,
 }: ModelRowProps) {
-  // A model can only be enabled when its provider has a key configured.
-  // When missing, the toggle is disabled and a tooltip explains why.
-  const tooltipText = `Add a key for "${model.provider}" in Providers above to enable`;
-
   return (
     <div
       className={cn(
         'flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3',
-        !hasProvider && 'opacity-40'
+        !hasApiKey && 'opacity-60'
       )}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -35,10 +33,8 @@ export function ModelRow({
           <span className="text-sm font-medium text-foreground truncate">
             {model.name}
           </span>
-          {!hasProvider && (
-            <span
-              className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive"
-            >
+          {!hasApiKey && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive">
               <Icon icon={WarningCircleIcon} className="size-2.5" />
               No key
             </span>
@@ -53,18 +49,42 @@ export function ModelRow({
       <div className="flex shrink-0 items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
-            {/* Span wrapper so the disabled Switch still receives pointer events for the tooltip */}
             <span>
               <Switch
                 checked={model.enabled}
-                disabled={!hasProvider}
+                disabled={!hasApiKey}
                 onCheckedChange={onToggleEnabled}
                 aria-label={`Enable ${model.name}`}
               />
             </span>
           </TooltipTrigger>
-          {!hasProvider && <TooltipContent>{tooltipText}</TooltipContent>}
+          {!hasApiKey && (
+            <TooltipContent>Add an API key to enable this model</TooltipContent>
+          )}
         </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onConfigure}
+              className="gap-1.5 cursor-default"
+              aria-label={hasApiKey ? `Edit ${model.name}` : `Add key for ${model.name}`}
+            >
+              <Icon
+                icon={hasApiKey ? PencilSimpleIcon : KeyIcon}
+                className="size-3.5"
+              />
+              {hasApiKey ? 'Edit' : 'Add key'}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {hasApiKey ? 'Edit API key & base URL' : 'Add API key'}
+          </TooltipContent>
+        </Tooltip>
+
         {onDelete && (
           <Button
             type="button"
@@ -74,7 +94,7 @@ export function ModelRow({
             aria-label={`Delete ${model.name}`}
             className="text-muted-foreground hover:text-destructive cursor-default"
           >
-            <Icon icon={TrashIcon} className="size-3.5" />
+            <Icon icon={TrashSimpleIcon} className="size-3.5" />
           </Button>
         )}
       </div>

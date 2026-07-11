@@ -41,7 +41,6 @@ export function APIKeysSection() {
             </span>
           }
           placeholder="Enter your OpenAI API Key"
-          defaultValue="sk-proj-cb1f9d3e2a8b47e5b6f0c9d1a2b3c4d5e6f7a8b9"
         />
 
         <ToggleProviderField
@@ -49,7 +48,6 @@ export function APIKeysSection() {
           description="Use a custom endpoint for OpenAI-compatible providers."
           inputPlaceholder="https://api.openai.com/v1"
           defaultEnabled={true}
-          defaultValue="https://api.openai.com/v1"
         />
 
         <ProviderKeyField
@@ -69,7 +67,6 @@ export function APIKeysSection() {
             </span>
           }
           placeholder="Enter your Anthropic API Key"
-          defaultValue="sk-ant-api03-bXkLmN2pQ7rS9tU4vW8xY1zA5bC6dE0fG2hI3jK"
         />
 
         <ProviderKeyField
@@ -89,7 +86,6 @@ export function APIKeysSection() {
             </span>
           }
           placeholder="Enter your Google AI Studio API Key"
-          defaultValue="AIzaSyD-9tQpL3mN5oR7sU1vW2xY4zA6bC8dE0fG"
         />
 
         <MultiToggleProviderField
@@ -101,13 +97,11 @@ export function APIKeysSection() {
               id: 'baseUrl',
               label: 'Base URL',
               placeholder: 'https://YOUR-RESOURCE.openai.azure.com',
-              defaultValue: 'https://YOUR-RESOURCE.openai.azure.com',
             },
             {
               id: 'deployment',
               label: 'Deployment Name',
               placeholder: 'YOUR-DEPLOYMENT',
-              defaultValue: 'gpt-4o-deploy',
             },
             {
               id: 'apiKey',
@@ -133,7 +127,6 @@ export function APIKeysSection() {
               id: 'accessKeyId',
               label: 'Access Key ID',
               placeholder: 'AKIA…',
-              defaultValue: 'AKIAIOSFODNN7EXAMPLE',
             },
             {
               id: 'secretAccessKey',
@@ -145,13 +138,11 @@ export function APIKeysSection() {
               id: 'region',
               label: 'Region',
               placeholder: 'us-east-1',
-              defaultValue: 'us-east-1',
             },
             {
               id: 'testModel',
               label: 'Test Model',
               placeholder: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
-              defaultValue: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
             },
           ]}
         />

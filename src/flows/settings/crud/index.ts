@@ -6,3 +6,5 @@ export { setModelEnabled } from './set-model-enabled';
 export { addModel } from './add-model';
 export { deleteModel } from './delete-model';
 export { getEnabledModels } from './get-enabled-models';
+export { configureCatalogModel } from './configure-catalog-model';
+export { addCustomModel } from './add-custom-model';
