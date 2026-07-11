@@ -42,7 +42,6 @@
   --spacing-stack: 0.5rem;
   --spacing-gap-tight: 0.25rem;
   --spacing-gap-loose: 0.75rem;
-  --spacing-gap-control: 1rem;
   --radius-button: 0.5rem;
   --radius-input: 0.5rem;
   --radius-card: 0.625rem;
@@ -148,7 +147,6 @@
   --spacing-stack: var(--spacing-stack);
   --spacing-gap-tight: var(--spacing-gap-tight);
   --spacing-gap-loose: var(--spacing-gap-loose);
-  --spacing-gap-control: var(--spacing-gap-control);
   --radius-button: var(--radius-button);
   --radius-input: var(--radius-input);
   --radius-card: var(--radius-card);
