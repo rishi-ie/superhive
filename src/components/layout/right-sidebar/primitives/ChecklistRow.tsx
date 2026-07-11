@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ChecklistRowProps {
   text: string;
@@ -7,20 +8,16 @@ interface ChecklistRowProps {
 
 export function ChecklistRow({ text, done }: ChecklistRowProps) {
   return (
-    <div className="flex items-start gap-list-item py-0.5">
-      <span
-        aria-hidden
-        className={cn(
-          "mt-0.5 inline-block font-mono text-xs leading-none",
-          done ? "text-muted-foreground/60" : "text-muted-foreground"
-        )}
-      >
-        {done ? "\u25A0" : "\u25A1"}
-      </span>
+    <div className="flex items-center gap-list-item py-0.5">
+      <Checkbox
+        checked={done}
+        disabled
+        className="size-3.5"
+      />
       <span
         className={cn(
           "text-xs",
-          done ? "text-muted-foreground/60 line-through" : "text-foreground"
+          done ? "text-muted-foreground/60" : "text-foreground"
         )}
       >
         {text}
