@@ -69,9 +69,9 @@ export function AgentsListView() {
 
   return (
     <div className="flex h-full w-full flex-col bg-background">
-      <header className="flex flex-col gap-1 px-8 pt-12 pb-6">
+      <header className="flex flex-col gap-gap-tight px-8 pt-12 pb-6">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-gap-tight">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Agents
             </h1>
@@ -84,7 +84,7 @@ export function AgentsListView() {
           <Button
             size="default"
             onClick={() => setCreateOpen(true)}
-            className="gap-1.5"
+            className="gap-gap-tight.5"
           >
             <Icon icon={PlusIcon} className="size-4" />
             New agent
@@ -102,7 +102,7 @@ export function AgentsListView() {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               placeholder="Search agents…"
-              className="w-full rounded-md border border-input bg-input/20 py-1.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/40"
+              className="w-full rounded-button border border-input bg-input/20 py-1.5 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-colors focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/40"
             />
           </div>
         )}
@@ -113,13 +113,13 @@ export function AgentsListView() {
           {loading ? null : nonCoordinators.length === 0 ? (
             <EmptyAgentsState />
           ) : filtered.length === 0 ? (
-            <div className="flex h-40 flex-col items-center justify-center gap-1 text-center">
+            <div className="flex h-40 flex-col items-center justify-center gap-gap-tight text-center">
               <span className="text-sm text-muted-foreground">
                 No agents match "{filter}"
               </span>
             </div>
           ) : (
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="rounded-card border border-border overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">

@@ -9,7 +9,7 @@ export function SettingsSectionView() {
   return (
     <div className="flex h-full w-full flex-col bg-background overflow-y-auto">
       <div className="flex flex-col gap-6 max-w-3xl w-full mx-auto px-6 py-8">
-        <header className="flex flex-col gap-1">
+        <header className="flex flex-col gap-gap-tight">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {def?.label ?? "Settings"}
           </h1>

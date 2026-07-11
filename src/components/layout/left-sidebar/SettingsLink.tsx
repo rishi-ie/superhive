@@ -9,7 +9,7 @@ export function SettingsLink() {
       to="/settings"
       className={({ isActive }) =>
         cn(
-          "flex h-9 w-full items-center gap-2 px-3 text-xs transition-colors",
+          "flex h-control-md w-full items-center gap-stack px-button-x text-xs transition-colors",
           "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
           isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
         )

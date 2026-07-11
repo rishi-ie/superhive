@@ -8,11 +8,11 @@ interface ProjectChatHeaderProps {
 
 export function ProjectChatHeader({ project, members }: ProjectChatHeaderProps) {
   return (
-    <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+    <div className="flex items-center gap-gap-loose border-b border-border px-composer py-3">
       <div className="flex flex-col gap-0.5">
         <h2 className="text-sm font-semibold text-foreground">{project.name}</h2>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-sidebar-primary/10 px-2 py-0.5 text-[10px] font-medium text-sidebar-primary">
+        <div className="flex items-center gap-stack">
+          <span className="rounded-full bg-sidebar-primary/10 px-row py-0.5 text-[10px] font-medium text-sidebar-primary">
             Project Agent
           </span>
           <span className="text-[11px] text-muted-foreground">

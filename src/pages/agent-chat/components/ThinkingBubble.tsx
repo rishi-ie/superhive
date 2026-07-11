@@ -6,7 +6,7 @@ interface ThinkingBubbleProps {
 
 export function ThinkingBubble({ className }: ThinkingBubbleProps) {
   return (
-    <div className={cn('flex w-full py-2', className)} role="status">
+    <div className={cn('flex w-full py-button-y', className)} role="status">
       <span className="shimmer text-sm text-muted-foreground">
         Thinking
       </span>

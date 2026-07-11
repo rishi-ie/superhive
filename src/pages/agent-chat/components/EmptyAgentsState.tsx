@@ -12,7 +12,7 @@ export function EmptyAgentsState() {
         <Icon icon={RobotIcon} className="size-6 text-muted-foreground" />
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-gap-tight">
         <h2 className="text-base font-medium text-foreground">No agents yet</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
           Create your first digital employee to get started.
@@ -22,7 +22,7 @@ export function EmptyAgentsState() {
       <Button
         size="sm"
         onClick={() => setOpen(true)}
-        className="gap-1.5"
+        className="gap-gap-tight.5"
       >
         <Icon icon={PlusIcon} className="size-3.5" />
         New agent

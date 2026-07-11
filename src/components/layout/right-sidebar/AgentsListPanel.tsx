@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AgentsListPanel() {
   return (
-    <div className="flex h-full flex-col px-3">
+    <div className="flex h-full flex-col px-button-x">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">

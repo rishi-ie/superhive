@@ -9,13 +9,13 @@ interface UserMessageProps {
 
 export function UserMessage({ message }: UserMessageProps) {
   return (
-    <div className="group relative w-full py-2">
-      <div className="w-fit ml-auto rounded-lg bg-sidebar px-3 py-2">
+    <div className="group relative w-full py-button-y">
+      <div className="w-fit ml-auto rounded-card bg-sidebar px-button-x py-button-y">
         <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
           {message.content}
         </p>
       </div>
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 mt-1 justify-end">
+      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1 justify-end">
         <span className="text-[11px] text-muted-foreground mr-1">
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>

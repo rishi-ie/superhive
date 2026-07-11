@@ -103,14 +103,14 @@ export function AgentChatView() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               autoFocus
-              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-4 pt-3 pb-2 text-sm text-surface-composer-foreground placeholder:text-surface-composer-placeholder outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-3 pb-2 text-sm text-surface-composer-foreground placeholder:text-surface-composer-placeholder outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex items-center justify-between px-composer py-button-y">
               <div className="flex items-center gap-4">
                 <button className="text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
-                <button className="flex items-center gap-1.5 text-sm text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
+                <button className="flex items-center gap-gap-tight.5 text-sm text-surface-composer-muted hover:text-surface-composer-foreground cursor-default">
                   <Icon icon={HandIcon} className="size-4" />
                   <span>Ask for approval</span>
                   <Icon icon={CaretDownIcon} className="size-3" />

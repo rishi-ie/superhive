@@ -172,7 +172,7 @@ export function ProviderKeyBlock({
   const submitting = phase !== 'idle'
 
   return (
-    <form onSubmit={onSave} className="flex flex-col gap-3 rounded-md border border-border bg-card/40 p-4">
+    <form onSubmit={onSave} className="flex flex-col gap-gap-loose rounded-button border border-border bg-card/40 p-card">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <h3 className="text-sm font-semibold text-foreground">{heading}</h3>
@@ -191,7 +191,7 @@ export function ProviderKeyBlock({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-stack">
           <span className="text-xs text-muted-foreground">Show in chat</span>
           <Switch
             checked={state.enabled}
@@ -204,7 +204,7 @@ export function ProviderKeyBlock({
 
       {shape === 'single' ? (
         <>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">API Key</label>
             <PasswordInput
               value={state.apiKey}
@@ -213,7 +213,7 @@ export function ProviderKeyBlock({
             />
           </div>
           {showBaseUrl && (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-gap-tight.5">
               <label className="text-xs text-muted-foreground">Endpoint (Base URL)</label>
               <Input
                 value={state.baseUrl}
@@ -223,7 +223,7 @@ export function ProviderKeyBlock({
               />
             </div>
           )}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">Model</label>
             <Input
               value={state.preferredModel}
@@ -238,7 +238,7 @@ export function ProviderKeyBlock({
         </>
       ) : (
         <>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">Access Key ID</label>
             <Input
               value={state.accessKeyId}
@@ -247,7 +247,7 @@ export function ProviderKeyBlock({
               className="font-mono"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">Secret Access Key</label>
             <PasswordInput
               value={state.secretAccessKey}
@@ -255,7 +255,7 @@ export function ProviderKeyBlock({
               placeholder={hasExisting ? '•••••••• (stored)' : 'Enter Secret Access Key'}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">Region</label>
             <Input
               value={state.region}
@@ -264,7 +264,7 @@ export function ProviderKeyBlock({
               className="font-mono"
             />
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-gap-tight.5">
             <label className="text-xs text-muted-foreground">Model</label>
             <Input
               value={state.preferredModel}
@@ -282,26 +282,26 @@ export function ProviderKeyBlock({
       {error && (
         <p
           role="alert"
-          className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+          className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
         >
           {error}
         </p>
       )}
 
-      <div className="flex items-center justify-end gap-2 pt-1">
+      <div className="flex items-center justify-end gap-stack pt-1">
         {hasExisting && (
           <Button
             type="button"
             variant="ghost"
             onClick={onClear}
             disabled={submitting}
-            className="text-destructive hover:text-destructive gap-1.5"
+            className="text-destructive hover:text-destructive gap-gap-tight.5"
           >
             <Icon icon={XCircleIcon} className="size-3.5" />
             Clear
           </Button>
         )}
-        <Button type="submit" disabled={submitting} className="gap-1.5">
+        <Button type="submit" disabled={submitting} className="gap-gap-tight.5">
           {submitting ? (
             <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />
           ) : (

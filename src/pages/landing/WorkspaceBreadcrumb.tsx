@@ -9,12 +9,12 @@ import {
 
 export function WorkspaceBreadcrumb() {
   return (
-    <div className="flex w-full items-center gap-1 text-xs">
+    <div className="flex w-full items-center gap-gap-tight text-xs">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-gap-tight text-muted-foreground hover:text-foreground"
           >
             <Icon icon={HouseIcon} className="size-3" />
             <span>Home</span>

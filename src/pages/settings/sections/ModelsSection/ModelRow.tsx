@@ -22,31 +22,31 @@ export function ModelRow({
   onDelete,
 }: ModelRowProps) {
   return (
-    <div className="flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3">
+    <div className="flex items-center gap-4 rounded-button border border-border bg-card px-composer py-3">
       <div
         className={cn(
           'flex min-w-0 flex-1 flex-col gap-0.5',
           !hasApiKey && 'opacity-60',
         )}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-stack">
           <span className="text-sm font-medium text-foreground truncate">
             {model.name}
           </span>
           {!hasApiKey && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive">
+            <span className="inline-flex items-center gap-gap-tight rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive">
               <Icon icon={XCircleIcon} className="size-2.5" />
               No key
             </span>
           )}
           {hasApiKey && model.enabled && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[0.625rem] text-emerald-500">
+            <span className="inline-flex items-center gap-gap-tight rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[0.625rem] text-emerald-500">
               <Icon icon={CheckCircleIcon} className="size-2.5" />
               Active
             </span>
           )}
           {model.isCustom && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground">
+            <span className="inline-flex items-center gap-gap-tight rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground">
               custom
             </span>
           )}
@@ -56,7 +56,7 @@ export function ModelRow({
         </span>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-stack">
         <Tooltip>
           <TooltipTrigger asChild>
             <span>
@@ -83,7 +83,7 @@ export function ModelRow({
                 variant="outline"
                 size="sm"
                 onClick={onConfigure}
-                className="gap-1.5 cursor-default"
+                className="gap-gap-tight.5 cursor-default"
                 aria-label={hasApiKey ? `Edit ${model.provider} key` : `Add key for ${model.provider}`}
               >
                 <Icon

@@ -47,12 +47,12 @@ export function ProjectAgentInitializing({ currentStep, agentName, lastError, on
   return (
     <div className="flex h-full w-full items-center justify-center bg-background">
       <div className="flex w-full max-w-md flex-col gap-5 px-6">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-gap-tight">
           <h2 className="text-base font-medium text-foreground">
             {agentName ? `Starting ${agentName}` : 'Initializing project agent'}
           </h2>
           {stuck ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-stack">
               <p className="text-sm text-muted-foreground">
                 This is taking longer than usual.
               </p>
@@ -69,7 +69,7 @@ export function ProjectAgentInitializing({ currentStep, agentName, lastError, on
           )}
         </div>
 
-        <ol className="flex flex-col gap-1">
+        <ol className="flex flex-col gap-gap-tight">
           {INIT_STEPS.map((step, idx) => {
             const isDone = activeIndex > idx;
             const isActive = activeIndex === idx;
@@ -78,7 +78,7 @@ export function ProjectAgentInitializing({ currentStep, agentName, lastError, on
               <li
                 key={step.id}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors',
+                  'flex items-center gap-gap-loose rounded-button px-row py-1.5 transition-colors',
                   isActive && 'bg-muted/40',
                   isPending && 'opacity-50'
                 )}
@@ -115,8 +115,8 @@ export function ProjectAgentInitializing({ currentStep, agentName, lastError, on
         </ol>
 
         {stuck && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={onRestart} className="gap-1.5">
+          <div className="flex items-center gap-stack">
+            <Button size="sm" variant="outline" onClick={onRestart} className="gap-gap-tight.5">
               <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
               Restart
             </Button>

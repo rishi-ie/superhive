@@ -85,15 +85,15 @@ export function CreateAgentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-6 gap-6">
-        <DialogHeader className="gap-2 pb-3 border-b border-sidebar-border">
+      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-card gap-6">
+        <DialogHeader className="gap-stack pb-3 border-b border-sidebar-border">
           <DialogTitle className="text-sidebar-foreground">New Agent</DialogTitle>
           <DialogDescription className="text-sidebar-foreground/60">
             Create a new agent in your local workspace.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             <Label htmlFor="agent-name" className="text-sidebar-foreground">
               Agent Name<span className="text-destructive ml-0.5">*</span>
             </Label>
@@ -108,7 +108,7 @@ export function CreateAgentDialog() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             <Label htmlFor="agent-folder" className="text-sidebar-foreground">
               Agent Folder Name<span className="text-destructive ml-0.5">*</span>
             </Label>
@@ -125,7 +125,7 @@ export function CreateAgentDialog() {
             </span>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             <Label htmlFor="agent-parent" className="text-sidebar-foreground">
               Parent Directory<span className="text-destructive ml-0.5">*</span>
             </Label>
@@ -142,7 +142,7 @@ export function CreateAgentDialog() {
           {fullPath && (
             <div
               className={cn(
-                'flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar-accent/30 px-3 py-2 text-xs text-sidebar-foreground/60'
+                'flex items-center gap-stack rounded-button border border-sidebar-border bg-sidebar-accent/30 px-button-x py-button-y text-xs text-sidebar-foreground/60'
               )}
             >
               <Icon icon={FolderIcon} className="size-3.5 flex-shrink-0" />
@@ -153,13 +153,13 @@ export function CreateAgentDialog() {
           {error && (
             <p
               role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+              className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
             >
               {error}
             </p>
           )}
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-stack">
             <Button
               type="button"
               variant="outline"

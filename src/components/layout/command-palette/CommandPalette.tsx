@@ -31,7 +31,7 @@ export function CommandPalette() {
       className="font-sans"
       overlayClassName="bg-foreground/40 supports-backdrop-filter:backdrop-blur-xs"
     >
-      <Command className="[&_[cmdk-group-heading]]:px-2.5 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
+      <Command className="[&_[cmdk-group-heading]]:px-row.5 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
         <CommandInput placeholder="Type a command or search…" autoFocus />
         <CommandList>
           <CommandEmpty>No commands found.</CommandEmpty>

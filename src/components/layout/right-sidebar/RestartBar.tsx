@@ -23,13 +23,13 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
   const canStop = STOPPABLE[status] ?? false;
 
   return (
-    <div className="flex items-center justify-between border-t border-sidebar-border py-2">
+    <div className="flex items-center justify-between border-t border-sidebar-border py-button-y">
       <span className="text-xs text-muted-foreground">Live runtime</span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-gap-tight.5">
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1.5 text-xs"
+          className="h-7 gap-gap-tight.5 text-xs"
           onClick={() => void stopAgent(agentId)}
           disabled={!canStop}
         >
@@ -39,7 +39,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-1.5 text-xs"
+          className="h-7 gap-gap-tight.5 text-xs"
           onClick={() => void restartAgent(agentId)}
           disabled={status === 'initializing'}
         >

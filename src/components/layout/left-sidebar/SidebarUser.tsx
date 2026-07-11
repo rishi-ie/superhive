@@ -19,7 +19,7 @@ export function SidebarUser() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-8 w-full items-center gap-2 rounded-lg px-2 text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+          className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
         >
           <Icon icon={GearIcon} className="size-4" />
           <span className="flex-1 text-left">Settings</span>
@@ -31,7 +31,7 @@ export function SidebarUser() {
         side="top"
         className="border-border bg-sidebar font-sans text-sm p-[6px]"
       >
-        <DropdownMenuLabel className="flex items-center gap-2 p-2 rounded-md">
+        <DropdownMenuLabel className="flex items-center gap-stack p-row rounded-button">
           <Avatar className="size-8">
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
               U
@@ -43,24 +43,24 @@ export function SidebarUser() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
-        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
+        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5">
           <Icon icon={CreditCardIcon} className="size-4 text-muted-foreground" />
           <span>Manage subscription</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
+        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5">
           <Icon icon={KeyboardIcon} className="size-4 text-muted-foreground" />
           <span>Keyboard shortcuts</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5">
+        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5">
           <Icon icon={HeadphonesIcon} className="size-4 text-muted-foreground" />
           <span>Help & support</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5" onSelect={() => goToSettings(navigate)}>
+        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5" onSelect={() => goToSettings(navigate)}>
           <Icon icon={GearIcon} className="size-4 text-muted-foreground" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
-        <DropdownMenuItem className="gap-2 min-h-8 px-2 py-1.5 text-destructive focus:text-destructive">
+        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-destructive focus:text-destructive">
           <Icon icon={SignOutIcon} className="size-4" />
           <span>Sign out</span>
         </DropdownMenuItem>

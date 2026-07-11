@@ -10,8 +10,8 @@ export function BehaviorSection({ settings, patch }: SettingsSectionProps) {
   };
 
   return (
-    <div className="flex flex-col gap-3 py-1">
-      <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-gap-loose py-1">
+      <div className="flex flex-col gap-gap-tight">
         <span className="text-xs text-muted-foreground">System Prompt</span>
         <Textarea
           className="min-h-[80px] resize-none text-sm"

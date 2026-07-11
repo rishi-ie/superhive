@@ -180,15 +180,15 @@ export function ModelEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-6 gap-6">
-        <DialogHeader className="gap-2 pb-3 border-b border-sidebar-border">
+      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-card gap-6">
+        <DialogHeader className="gap-stack pb-3 border-b border-sidebar-border">
           <DialogTitle className="text-sidebar-foreground">{heading}</DialogTitle>
           <DialogDescription className="text-sidebar-foreground/60">
             {description}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             <Label htmlFor="me-provider" className="text-sidebar-foreground">
               Provider<span className="text-destructive ml-0.5">*</span>
             </Label>
@@ -204,7 +204,7 @@ export function ModelEditorDialog({
           </div>
 
           {mode === 'custom' && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-stack">
               <Label htmlFor="me-model" className="text-sidebar-foreground">
                 Model<span className="text-destructive ml-0.5">*</span>
               </Label>
@@ -219,7 +219,7 @@ export function ModelEditorDialog({
           )}
 
           {showBaseUrl && (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-stack">
               <Label htmlFor="me-baseurl" className="text-sidebar-foreground">
                 Base URL
               </Label>
@@ -234,7 +234,7 @@ export function ModelEditorDialog({
             </div>
           )}
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             <Label htmlFor="me-key" className="text-sidebar-foreground">
               {keyLabel}<span className="text-destructive ml-0.5">*</span>
             </Label>
@@ -266,13 +266,13 @@ export function ModelEditorDialog({
           {error && (
             <p
               role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive"
+              className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
             >
               {error}
             </p>
           )}
 
-          <DialogFooter className="gap-2">
+          <DialogFooter className="gap-stack">
             {isEditing ? (
               <Button
                 type="button"

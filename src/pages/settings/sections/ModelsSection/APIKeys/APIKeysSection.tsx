@@ -67,8 +67,8 @@ export function APIKeysSection() {
   const [open, setOpen] = React.useState(true);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="flex flex-col gap-3">
-      <CollapsibleTrigger className="group flex items-center justify-between gap-2 cursor-default self-start">
+    <Collapsible open={open} onOpenChange={setOpen} className="flex flex-col gap-gap-loose">
+      <CollapsibleTrigger className="group flex items-center justify-between gap-stack cursor-default self-start">
         <h2 className="text-sm font-semibold text-foreground">API Keys</h2>
         <Icon
           icon={CaretDownIcon}
@@ -79,7 +79,7 @@ export function APIKeysSection() {
         />
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="flex flex-col gap-3">
+      <CollapsibleContent className="flex flex-col gap-gap-loose">
         <APIKeysBlocks />
       </CollapsibleContent>
     </Collapsible>
@@ -90,7 +90,7 @@ function APIKeysBlocks() {
   const { providers, refresh } = useProviders();
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-gap-loose">
       {BLOCKS.map((b) => (
         <ProviderKeyBlock
           key={b.name}

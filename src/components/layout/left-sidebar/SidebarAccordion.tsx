@@ -47,7 +47,7 @@ export function SidebarAccordion() {
   const projectItems = projects.map((p) => ({ id: p.id, name: p.name, agentIds: p.agentIds }));
 
   return (
-    <div className="flex flex-col gap-1 px-2">
+    <div className="flex flex-col gap-gap-tight px-row">
       <PinnedSection items={pinned} />
       <ProjectsSection items={projectItems} agents={agents} />
     </div>

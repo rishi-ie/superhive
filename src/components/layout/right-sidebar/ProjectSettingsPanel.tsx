@@ -13,7 +13,7 @@ interface ProjectSettingsPanelProps {
 
 export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   return (
-    <div className="flex h-full flex-col px-3">
+    <div className="flex h-full flex-col px-button-x">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
@@ -32,7 +32,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <div className="flex flex-col gap-4 py-2">
+            <div className="flex flex-col gap-4 py-button-y">
               <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-semibold text-foreground">
                   Project Overview
@@ -41,7 +41,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                   ID: {projectId}
                 </span>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-gap-tight">
                 <span className="text-xs font-medium text-muted-foreground">
                   Coming soon
                 </span>

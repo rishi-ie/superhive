@@ -70,7 +70,7 @@ export function ModelsSection() {
 
   return (
     <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-gap-loose">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Models</h2>
@@ -82,7 +82,7 @@ export function ModelsSection() {
             size="sm"
             variant="outline"
             onClick={() => setEditor({ kind: 'new' })}
-            className="gap-1.5"
+            className="gap-gap-tight.5"
           >
             <Icon icon={PlusIcon} className="size-3.5" />
             Add model
@@ -90,7 +90,7 @@ export function ModelsSection() {
         </div>
 
         {loading ? null : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-stack">
             {CATALOG.map((m) => {
               const stored = storedModels.find((s) => s.id === m.id);
               const modelHasKey = hasApiKey(m.provider);
@@ -154,7 +154,7 @@ export function ModelsSection() {
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section className="flex flex-col gap-gap-loose">
         <APIKeysSection />
       </section>
 

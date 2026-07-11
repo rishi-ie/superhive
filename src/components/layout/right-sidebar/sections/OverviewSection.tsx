@@ -15,7 +15,7 @@ export function OverviewSection({ settings }: OverviewSectionProps) {
   const catalog = settings.catalog;
 
   return (
-    <div className="flex flex-col gap-4 py-2">
+    <div className="flex flex-col gap-4 py-button-y">
       {(settings.name || settings.description) && (
         <div className="flex flex-col gap-0.5">
           {settings.name && (
@@ -31,11 +31,11 @@ export function OverviewSection({ settings }: OverviewSectionProps) {
         </div>
       )}
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-gap-tight">
         <span className="text-xs font-medium text-muted-foreground">
           Active Permissions
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-gap-loose">
           <PermissionIndicator label="Filesystem" enabled={perms.filesystem ?? true} />
           <PermissionIndicator label="Terminal" enabled={perms.terminal ?? true} />
           <PermissionIndicator label="Network" enabled={perms.network ?? true} />

@@ -17,7 +17,7 @@ export function TopRightControls({
   onToggleRightSidebar,
 }: TopRightControlsProps) {
   return (
-    <div className="absolute right-0 top-2 flex items-center gap-1 text-muted-foreground pr-3">
+    <div className="absolute right-0 top-2 flex items-center gap-gap-tight text-muted-foreground pr-3">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

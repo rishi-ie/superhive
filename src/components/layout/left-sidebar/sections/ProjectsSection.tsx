@@ -39,7 +39,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
                 <AgentRow key={a.id} name={a.name} showStatus={false} />
               ))
             ) : (
-              <div className="flex items-center gap-2 px-2 py-1.5">
+              <div className="flex items-center gap-stack px-row py-1.5">
                 <Icon icon={FolderOpenIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">No assigned agents</span>
               </div>

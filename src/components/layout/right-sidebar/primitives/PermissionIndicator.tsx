@@ -5,7 +5,7 @@ interface PermissionIndicatorProps {
 
 export function PermissionIndicator({ label, enabled }: PermissionIndicatorProps) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-gap-tight.5">
       <div
         className={`size-1.5 rounded-full flex-shrink-0 ${enabled ? "bg-success" : "bg-muted-foreground/30"}`}
       />

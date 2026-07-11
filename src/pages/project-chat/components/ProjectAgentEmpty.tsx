@@ -13,15 +13,15 @@ export function ProjectAgentEmpty() {
   const { setOpen } = useOpenCreateProject();
   return (
     <div className="flex h-full w-full items-center justify-center bg-background">
-      <div className="flex max-w-sm flex-col items-center gap-3 px-6 text-center">
-        <div className="rounded-full bg-muted/40 p-4">
+      <div className="flex max-w-sm flex-col items-center gap-gap-loose px-6 text-center">
+        <div className="rounded-full bg-muted/40 p-card">
           <Icon icon={FolderOpenIcon} className="size-7 text-muted-foreground" />
         </div>
         <h2 className="text-base font-medium text-foreground">No project selected</h2>
         <p className="text-sm text-muted-foreground">
           Pick a project from the sidebar, or create a new one to begin.
         </p>
-        <Button size="sm" onClick={() => setOpen(true)} className="mt-1 gap-1.5">
+        <Button size="sm" onClick={() => setOpen(true)} className="mt-1 gap-gap-tight.5">
           <Icon icon={PlusIcon} className="size-4" />
           New Project
         </Button>

@@ -9,7 +9,7 @@ interface FieldRowProps {
 
 export function FieldRow({ label, htmlFor, children, className }: FieldRowProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-gap-tight">
       <label htmlFor={htmlFor} className="text-xs text-muted-foreground">
         {label}
       </label>

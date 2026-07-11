@@ -31,7 +31,7 @@ export function AccordionSection({
         type="button"
         onClick={handleClick}
         className={cn(
-          'flex h-8 w-full cursor-default items-center gap-2 rounded-lg px-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-foreground',
+          'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm transition-colors hover:bg-sidebar-accent hover:text-foreground',
           labelClassName || 'text-muted-foreground'
         )}
       >

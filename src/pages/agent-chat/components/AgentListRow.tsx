@@ -79,7 +79,7 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
       className="group cursor-pointer"
     >
       <TableCell className="w-[260px">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-stack.5">
           <Avatar size="sm">
             <AvatarFallback className="bg-sidebar text-foreground font-medium text-xs">
               {initials(agent.name)}
@@ -100,7 +100,7 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
       </TableCell>
 
       <TableCell className="w-[140px">
-        <div className="flex items-center gap-1.5 whitespace-nowrap">
+        <div className="flex items-center gap-gap-tight.5 whitespace-nowrap">
           <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
           {agent.status === 'initializing' ? (
             <Icon

@@ -4,7 +4,7 @@ import type { SettingsSectionProps } from './registry';
 
 export function IdentitySection({ settings, patch }: SettingsSectionProps) {
   return (
-    <div className="flex flex-col gap-3 px-1 py-1">
+    <div className="flex flex-col gap-gap-loose px-1 py-1">
       <FieldRow label="Name" htmlFor="name">
         <Input
           id="name"

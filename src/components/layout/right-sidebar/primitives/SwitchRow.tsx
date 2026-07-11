@@ -9,7 +9,7 @@ interface SwitchRowProps {
 
 export function SwitchRow({ label, description, checked, onCheckedChange }: SwitchRowProps) {
   return (
-    <div className="flex items-center justify-between gap-3 py-0.5">
+    <div className="flex items-center justify-between gap-gap-loose py-0.5">
       <div className="flex flex-col gap-0.5">
         <span className="text-xs text-muted-foreground">{label}</span>
         {description && (

@@ -34,10 +34,10 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
 
   if (error || !settings) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
+      <div className="flex h-full flex-col items-center justify-center gap-gap-loose p-card">
         <Icon icon={WarningCircleIcon} className="size-4 text-muted-foreground" />
         <p className="text-xs text-muted-foreground">{error ?? "No settings found"}</p>
-        <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => void reload()}>
+        <Button variant="ghost" size="sm" className="h-7 gap-gap-tight.5 text-xs" onClick={() => void reload()}>
           Retry
         </Button>
       </div>
@@ -45,7 +45,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   }
 
   return (
-    <div className="flex h-full flex-col px-3">
+    <div className="flex h-full flex-col px-button-x">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
@@ -74,7 +74,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
           <ScrollArea className="h-full">
             <div className="flex flex-col gap-5">
               {MANAGE_SECTIONS.map((s) => (
-                <div key={s.id} className="flex flex-col gap-2">
+                <div key={s.id} className="flex flex-col gap-stack">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                     {s.label}
                   </span>

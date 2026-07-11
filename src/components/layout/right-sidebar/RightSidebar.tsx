@@ -28,7 +28,7 @@ export function RightSidebar({ width = 280 }: RightSidebarProps) {
         ) : isAgentsList ? (
           <AgentsListPanel />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 p-4">
+          <div className="flex h-full flex-col items-center justify-center gap-stack p-card">
             <Icon icon={UserIcon} className="size-6 text-muted-foreground/40" />
             <div className="text-center text-xs text-muted-foreground">
               Select an agent or project
