@@ -36,30 +36,31 @@ const BLOCKS: BlockSpec[] = [
     baseUrlPlaceholder: 'https://api.anthropic.com',
     docsUrl: 'https://anthropic.com',
   },
-  {
-    name: 'google',
-    heading: 'Gemini',
-    shape: 'single',
-    showBaseUrl: true,
-    baseUrlPlaceholder: 'https://generativelanguage.googleapis.com/v1beta',
-    docsUrl: 'https://aistudio.google.com/apikey',
-  },
-  {
-    name: 'azure',
-    heading: 'Azure OpenAI',
-    shape: 'single',
-    showBaseUrl: true,
-    baseUrlPlaceholder: 'https://YOUR-RESOURCE.openai.azure.com',
-    docsUrl: '',
-  },
-  {
-    name: 'aws',
-    heading: 'AWS Bedrock',
-    shape: 'aws',
-    showBaseUrl: false,
-    baseUrlPlaceholder: '',
-    docsUrl: '',
-  },
+  // V1: commented out — re-enable once thoroughly tested.
+  // {
+  //   name: 'google',
+  //   heading: 'Gemini',
+  //   shape: 'single',
+  //   showBaseUrl: true,
+  //   baseUrlPlaceholder: 'https://generativelanguage.googleapis.com/v1beta',
+  //   docsUrl: 'https://aistudio.google.com/apikey',
+  // },
+  // {
+  //   name: 'azure',
+  //   heading: 'Azure OpenAI',
+  //   shape: 'single',
+  //   showBaseUrl: true,
+  //   baseUrlPlaceholder: 'https://YOUR-RESOURCE.openai.azure.com',
+  //   docsUrl: '',
+  // },
+  // {
+  //   name: 'aws',
+  //   heading: 'AWS Bedrock',
+  //   shape: 'aws',
+  //   showBaseUrl: false,
+  //   baseUrlPlaceholder: '',
+  //   docsUrl: '',
+  // },
 ];
 
 export function APIKeysSection() {
