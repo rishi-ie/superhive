@@ -20,7 +20,9 @@
     "electron:preview": "vite build && electron .",
     "migrate:keys": "bun scripts/migrate-agent-keys.ts",
     "wipe:agents": "bun scripts/wipe-agents.ts",
-    "reset": "bun scripts/reset-superhive.ts"
+    "reset": "bun scripts/reset-superhive.ts",
+    "preset:list": "ls src/styles/presets/",
+    "preset:current": "head -3 src/styles/globals.css"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.1",
