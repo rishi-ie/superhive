@@ -15,7 +15,7 @@ export function SettingsSectionView() {
           </h1>
           {section === "models" && (
             <p className="text-sm text-muted-foreground">
-              Add your own provider keys and choose which models to enable.
+              Configure provider API keys and choose which catalog models to enable.
             </p>
           )}
         </header>
