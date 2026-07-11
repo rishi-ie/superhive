@@ -1,7 +1,6 @@
 import {
   Accordion,
   ChecklistRow,
-  ResponsibilitySlider,
   SessionRow,
 } from "../primitives";
 import { Badge } from "@/components/ui/badge";
@@ -140,7 +139,6 @@ export function OverviewSection({ data }: OverviewSectionProps) {
         </div>
       </Accordion>
 
-      <ResponsibilitySlider count={data.responsibilityCount} />
     </div>
   );
 }
