@@ -93,7 +93,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
           <ScrollArea className="flex-1 min-h-0">
             <OverviewSection data={overviewData} />
           </ScrollArea>
-          <div className="shrink-0 pb-button-y">
+          <div className="mt-auto pb-button-y">
             <ResponsibilitySlider count={overviewData.responsibilityCount} />
           </div>
         </TabsContent>
