@@ -28,7 +28,7 @@ export function Accordion({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="group flex items-center justify-between gap-gap-loose py-button-y text-left"
+        className="group flex items-center justify-between gap-gap-loose py-button-y text-left cursor-default"
       >
         <span className="flex items-center gap-list-item text-sm font-medium text-muted-foreground">
           {title}
