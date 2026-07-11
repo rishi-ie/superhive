@@ -57,7 +57,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       {(data.name || data.description) && (
         <div className="flex flex-col gap-0.5">
           {data.name && (
-            <span className="text-sm font-semibold text-foreground">
+            <span className="text-base font-semibold text-foreground/80">
               {data.name}
             </span>
           )}
