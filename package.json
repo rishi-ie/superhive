@@ -20,7 +20,6 @@
     "electron:preview": "vite build && electron .",
     "migrate:keys": "bun scripts/migrate-agent-keys.ts",
     "wipe:agents": "bun scripts/wipe-agents.ts",
-    "install:kai": "bun scripts/install-general-kai.ts",
     "reset": "bun scripts/reset-superhive.ts"
   },
   "devDependencies": {
