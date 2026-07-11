@@ -180,7 +180,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
               </div>
-              <div className="flex items-center gap-loose">
+              <div className="flex items-center gap-control">
                 <ModelPicker agentId={projectAgent.id} />
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={MicrophoneIcon} className="size-5" />
