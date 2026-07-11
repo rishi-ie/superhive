@@ -105,7 +105,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         </TabsContent>
 
         <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full" scrollbar={false}>
             <div className="flex flex-col gap-5">
               {MANAGE_SECTIONS.map((s) => (
                 <div key={s.id} className="flex flex-col gap-stack">
