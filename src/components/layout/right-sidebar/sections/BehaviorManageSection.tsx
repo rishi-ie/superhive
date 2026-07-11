@@ -1,4 +1,3 @@
-import { Textarea } from "@/components/ui/textarea";
 import { SwitchRow } from "../primitives/SwitchRow";
 import type { SettingsSectionProps } from "./registry";
 
@@ -15,15 +14,6 @@ export function BehaviorManageSection({ settings, patch }: SettingsSectionProps)
 
   return (
     <div className="flex flex-col gap-gap-loose">
-      <div className="flex flex-col gap-gap-tight">
-        <span className="text-xs text-muted-foreground">System Prompt</span>
-        <Textarea
-          className="min-h-[80px] resize-none text-sm"
-          value={settings.systemPrompt ?? ""}
-          onChange={(e) => patch("systemPrompt", e.target.value)}
-          placeholder="You are a helpful agent..."
-        />
-      </div>
       <SwitchRow
         label="Filesystem"
         description="Read and write local files"
