@@ -29,6 +29,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const overviewData = React.useMemo<OverviewData>(() => ({
     name: settings?.name ?? "Untitled agent",
     description: settings?.description ?? "",
+    roleSummary: "Autonomous coding agent that reviews pull requests, writes tests, and refactors legacy modules with minimal supervision.",
     previousTasks: [
       { name: "Audit settings page", cost: 0.31 },
       { name: "Fix nav alignment", cost: 0.04 },

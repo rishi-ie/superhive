@@ -28,6 +28,7 @@ export interface OverviewCatalogItem {
 export interface OverviewData {
   name: string;
   description: string;
+  roleSummary?: string;
   previousTasks: OverviewPreviousTask[];
   activeChecklist: OverviewChecklist | null;
   catalog: {
@@ -68,6 +69,11 @@ export function OverviewSection({ data }: OverviewSectionProps) {
           {data.description && (
             <span className="text-sm text-muted-foreground">
               {data.description}
+            </span>
+          )}
+          {data.roleSummary && (
+            <span className="text-xs text-muted-foreground/60 line-clamp-2">
+              {data.roleSummary}
             </span>
           )}
         </div>
