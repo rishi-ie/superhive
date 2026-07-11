@@ -11,9 +11,11 @@ import { addModel } from '@/flows/settings/crud/add-model';
 import {
   CATALOG,
   getProviderMeta,
+  isCatalogModel,
   type CatalogProviderMeta,
 } from './ModelsSection/catalog';
 import type { ModelEntry, ProviderEntry } from '@/types/electron';
+import { deleteModel } from '@/flows/settings/crud/delete-model';
 
 type EditorTarget =
   | { kind: 'catalog'; provider: CatalogProviderMeta; modelName: string }
@@ -35,6 +37,11 @@ export function ModelsSection() {
     [],
   );
 
+  const customModels = React.useMemo(
+    () => storedModels.filter((m) => !isCatalogModel(m.id)),
+    [storedModels],
+  );
+
   const onToggleModel = async (m: ModelEntry, enabled: boolean, modelHasKey: boolean) => {
     if (!modelHasKey) {
       const catalog = catalogById.get(m.id);
@@ -52,6 +59,11 @@ export function ModelsSection() {
     }
     await setModelEnabled(m.id, enabled);
     await refreshModels();
+  };
+
+  const onDeleteCustomModel = async (id: string) => {
+    const result = await deleteModel(id);
+    if (result.ok) await refreshModels();
   };
 
   const loading = loadingProviders || loadingModels;
@@ -90,12 +102,12 @@ export function ModelsSection() {
                     provider: m.provider,
                     name: m.name,
                     enabled: Boolean(stored?.enabled),
-                    isCustom: false,
+                    isCustom: stored?.isCustom ?? false,
                   }}
                   hasApiKey={modelHasKey}
                   onToggleEnabled={(enabled: boolean) =>
                     onToggleModel(
-                      { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: false },
+                      { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: stored?.isCustom ?? false },
                       enabled,
                       modelHasKey,
                     )
@@ -108,6 +120,33 @@ export function ModelsSection() {
                       setEditor({ kind: 'new' });
                     }
                   }}
+                />
+              );
+            })}
+            {customModels.map((m) => {
+              const modelHasKey = hasApiKey(m.provider);
+              return (
+                <ModelRow
+                  key={m.id}
+                  model={{
+                    id: m.id,
+                    provider: m.provider,
+                    name: m.name,
+                    enabled: Boolean(m.enabled),
+                    isCustom: m.isCustom ?? true,
+                  }}
+                  hasApiKey={modelHasKey}
+                  onToggleEnabled={(enabled: boolean) =>
+                    onToggleModel(
+                      { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: m.isCustom ?? true },
+                      enabled,
+                      modelHasKey,
+                    )
+                  }
+                  onConfigure={() =>
+                    setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] })
+                  }
+                  onDelete={() => onDeleteCustomModel(m.id)}
                 />
               );
             })}
