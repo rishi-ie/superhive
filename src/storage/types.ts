@@ -9,6 +9,8 @@ export type AgentStatus =
 export type AgentKind = 'standard' | 'project-coordinator'
 
 export type ChannelType = 'project' | 'agent' | 'system'
+export type SettingType = 'text' | 'textarea' | 'number' | 'boolean' | 'select' | 'multiselect' | 'json' | 'color' | 'slider' | 'file' | 'directory'
+export type OwnerType = 'workspace' | 'project' | 'agent' | 'task' | 'channel' | 'global'
 
 export interface BaseEntity {
   id: string
@@ -56,14 +58,51 @@ export interface Channel extends BaseEntity {
   chatFile?: string
 }
 
+export interface Workspace extends BaseEntity {
+  name: string
+}
+
+export type TaskStatus = 'todo' | 'running' | 'blocked' | 'completed' | 'cancelled'
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
+
+export interface Task extends BaseEntity {
+  title: string
+  description?: string
+  projectId: string
+  assignedAgentId?: string
+  status: TaskStatus
+  priority: TaskPriority
+  context?: string
+  tagIds: string[]
+}
+
+export interface Session extends BaseEntity {
+  name: string
+  agentId: string
+}
+
+export interface Setting extends BaseEntity {
+  ownerType: OwnerType
+  ownerId: string
+  key: string
+  label?: string
+  description?: string
+  type: SettingType
+  value?: unknown
+  group?: string
+  order: number
+}
+
 export interface Database {
   agents: Agent[]
   projects: Project[]
   channels: Channel[]
+  workspaces: Workspace[]
 }
 
 export const createDefaultDatabase = (): Database => ({
   agents: [],
   projects: [],
   channels: [],
+  workspaces: [],
 })

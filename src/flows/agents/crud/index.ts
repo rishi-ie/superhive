@@ -1,8 +1,6 @@
 export { listAgents } from './list-agents'
-export { loadAgent } from './load-agent'
 export { createAgent } from './create-agent'
 export { deleteAgent } from './delete-agent'
-export { selectAgent } from './select-agent'
 export { createProjectAgent } from './create-project-agent'
 export type { CreateAgentInput, CreateAgentResult } from './create-agent'
 export type { CreateProjectAgentInput, CreateProjectAgentResult } from './create-project-agent'

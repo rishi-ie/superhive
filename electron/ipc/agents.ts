@@ -11,13 +11,20 @@ import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
 import { config } from '../config'
-import { sanitizeFolderName } from '../../src/lib/sanitize-folder-name'
 import {
 	type SettingsFile,
 	DEFAULT_SETTINGS,
 	parseCounter,
 	settingsFilePathFor,
 } from '../agent-settings-defaults'
+
+function sanitizeFolderName(raw: string): string {
+	const trimmed = raw.trim()
+	if (!trimmed) return ''
+	if (trimmed === '.' || trimmed === '..') return ''
+	if (trimmed.includes('/') || trimmed.includes('\\')) return ''
+	return trimmed.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
+}
 
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'

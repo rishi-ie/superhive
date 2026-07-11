@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { SETTINGS_SECTIONS } from "./sections";
+import { SETTINGS_SECTIONS } from "./sections/registry";
 import { ModelsSection } from "./sections/ModelsSection";
 
 export function SettingsSectionView() {

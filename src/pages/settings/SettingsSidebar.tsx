@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Icon } from "@/components/ui/icon";
 import { CaretLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { SETTINGS_GROUPS } from "./sections";
+import { SETTINGS_GROUPS } from "./sections/registry";
 import { goBackHome } from "@/flows/navigation/go-back-home";
 
 export function SettingsSidebar() {

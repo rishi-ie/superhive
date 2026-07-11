@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { listModels } from '@/flows/settings/crud/list-models';
+import { settings } from '@/api/settings';
 import type { ModelEntry } from '@/types/electron';
 
 export interface UseModelsResult {
@@ -16,7 +16,7 @@ export function useModels(): UseModelsResult {
 
   const refresh = React.useCallback(async () => {
     try {
-      const list = await listModels();
+      const list = await settings.getModels();
       setModels(list);
       setError(null);
     } catch (err) {
