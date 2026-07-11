@@ -104,6 +104,17 @@ export interface ProviderEntry {
 	name?: string
 	baseUrl?: string | null
 	apiKey?: string
+	/** Master toggle on the API Keys block. Applies only to the preferred-model
+	 *  row when one is configured. Independent of `apiKey` so the toggle can
+	 *  persist after the key is cleared. */
+	enabled?: boolean
+	/** Model name typed into the API Keys block's "Model" field. Backed by a
+	 *  single `models`-group row with `isCustom: true`. */
+	preferredModel?: string
+	/** AWS Bedrock only. */
+	accessKeyId?: string
+	secretAccessKey?: string
+	region?: string
 }
 
 export interface ModelEntry {
@@ -114,10 +125,22 @@ export interface ModelEntry {
 	isCustom?: boolean
 }
 
+export interface SetProviderInput {
+	name: string
+	baseUrl?: string
+	apiKey?: string
+	enabled?: boolean
+	preferredModel?: string
+	accessKeyId?: string
+	secretAccessKey?: string
+	region?: string
+}
+
 export interface SettingsAPI {
 	getProviders: () => Promise<Record<string, ProviderEntry>>
-	setProvider: (input: { name: string; baseUrl?: string; apiKey?: string }) => Promise<void>
+	setProvider: (input: SetProviderInput) => Promise<void>
 	deleteProvider: (name: string) => Promise<void>
+	ensureProviderCatalog: (input: { provider: string; apiKeyIsFresh?: boolean }) => Promise<{ inserted: number }>
 	getModels: () => Promise<ModelEntry[]>
 	setModelEnabled: (id: string, enabled: boolean) => Promise<void>
 	addModel: (input: { provider: string; name: string }) => Promise<void>

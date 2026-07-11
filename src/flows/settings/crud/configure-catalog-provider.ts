@@ -1,25 +1,27 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
+import { setModelEnabled } from '@/flows/settings/crud/set-model-enabled';
 
-export interface ConfigureCatalogModelInput {
+export interface ConfigureCatalogProviderInput {
   provider: string;
-  modelName: string;
   baseUrl?: string;
   apiKey: string;
+  modelName: string;
 }
 
-export interface ConfigureCatalogModelResult {
+export interface ConfigureCatalogProviderResult {
   ok: boolean;
   error?: string;
 }
 
 /**
- * Save a key + optional base URL for a known catalog model.
- * The model itself is enabled on success so it shows in the chat picker.
+ * Save a key for one of the 5 curated catalog providers, plus flip that
+ * specific curated model row to enabled. No preferred-model concept here —
+ * the API Keys section handles that separately.
  */
-export async function configureCatalogModel(
-  input: ConfigureCatalogModelInput,
-): Promise<ConfigureCatalogModelResult> {
+export async function configureCatalogProvider(
+  input: ConfigureCatalogProviderInput,
+): Promise<ConfigureCatalogProviderResult> {
   const provider = input.provider?.trim();
   const modelName = input.modelName?.trim();
   const apiKey = input.apiKey?.trim();
@@ -43,8 +45,8 @@ export async function configureCatalogModel(
       baseUrl: input.baseUrl?.trim() || undefined,
       apiKey,
     });
-    await settings.setModelEnabled(`${provider}:${modelName}`, true);
-    toast.success(`Saved key for ${modelName}`);
+    await setModelEnabled(`${provider}:${modelName}`, true);
+    toast.success(`Saved key for ${provider}`);
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to save key';

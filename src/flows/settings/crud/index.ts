@@ -1,10 +1,12 @@
 export { listProviders } from './list-providers';
 export { setProvider } from './set-provider';
 export { deleteProvider } from './delete-provider';
+export { ensureProviderCatalog } from './ensure-provider-catalog';
+export { configureCatalogProvider } from './configure-catalog-provider';
+export { saveProviderBlock } from './save-provider-block';
 export { listModels } from './list-models';
 export { setModelEnabled } from './set-model-enabled';
 export { addModel } from './add-model';
 export { deleteModel } from './delete-model';
 export { getEnabledModels } from './get-enabled-models';
-export { configureCatalogModel } from './configure-catalog-model';
 export { addCustomModel } from './add-custom-model';

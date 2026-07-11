@@ -1,14 +1,17 @@
-import type { ProviderEntry, ModelEntry } from '@/types/electron'
+import type { ProviderEntry, ModelEntry, SetProviderInput } from '@/types/electron'
 
 export const settings = {
   getProviders: (): Promise<Record<string, ProviderEntry>> =>
     window.api.settings.getProviders(),
 
-  setProvider: (input: { name: string; baseUrl?: string; apiKey?: string }): Promise<void> =>
+  setProvider: (input: SetProviderInput): Promise<void> =>
     window.api.settings.setProvider(input),
 
   deleteProvider: (name: string): Promise<void> =>
     window.api.settings.deleteProvider(name),
+
+  ensureProviderCatalog: (input: { provider: string; apiKeyIsFresh?: boolean }): Promise<{ inserted: number }> =>
+    window.api.settings.ensureProviderCatalog(input),
 
   getModels: (): Promise<ModelEntry[]> =>
     window.api.settings.getModels(),

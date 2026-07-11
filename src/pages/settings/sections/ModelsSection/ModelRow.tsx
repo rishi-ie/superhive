@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/icon';
-import { KeyIcon, PencilSimpleIcon, TrashSimpleIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { CheckCircleIcon, KeyIcon, PencilSimpleIcon, TrashSimpleIcon, XCircleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -35,14 +35,24 @@ export function ModelRow({
           </span>
           {!hasApiKey && (
             <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive">
-              <Icon icon={WarningCircleIcon} className="size-2.5" />
+              <Icon icon={XCircleIcon} className="size-2.5" />
               No key
+            </span>
+          )}
+          {hasApiKey && model.enabled && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[0.625rem] text-emerald-500">
+              <Icon icon={CheckCircleIcon} className="size-2.5" />
+              Active
+            </span>
+          )}
+          {model.isCustom && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground">
+              custom
             </span>
           )}
         </div>
         <span className="text-xs text-muted-foreground truncate font-mono">
           {model.provider}
-          {model.isCustom ? ' · custom' : ''}
         </span>
       </div>
 
@@ -59,33 +69,37 @@ export function ModelRow({
             </span>
           </TooltipTrigger>
           {!hasApiKey && (
-            <TooltipContent>Add an API key to enable this model</TooltipContent>
+            <TooltipContent>
+              Add a key for {model.provider} to enable this model
+            </TooltipContent>
           )}
         </Tooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onConfigure}
-              className="gap-1.5 cursor-default"
-              aria-label={hasApiKey ? `Edit ${model.name}` : `Add key for ${model.name}`}
-            >
-              <Icon
-                icon={hasApiKey ? PencilSimpleIcon : KeyIcon}
-                className="size-3.5"
-              />
-              {hasApiKey ? 'Edit' : 'Add key'}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {hasApiKey ? 'Edit API key & base URL' : 'Add API key'}
-          </TooltipContent>
-        </Tooltip>
+        {!model.isCustom && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={onConfigure}
+                className="gap-1.5 cursor-default"
+                aria-label={hasApiKey ? `Edit ${model.provider} key` : `Add key for ${model.provider}`}
+              >
+                <Icon
+                  icon={hasApiKey ? PencilSimpleIcon : KeyIcon}
+                  className="size-3.5"
+                />
+                {hasApiKey ? 'Edit key' : 'Add key'}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {hasApiKey ? 'Edit API key & base URL' : 'Add API key'}
+            </TooltipContent>
+          </Tooltip>
+        )}
 
-        {onDelete && (
+        {model.isCustom && onDelete && (
           <Button
             type="button"
             variant="ghost"

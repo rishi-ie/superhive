@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/common/PasswordInput';
-import { configureCatalogModel } from '@/flows/settings/crud/configure-catalog-model';
+import { configureCatalogProvider } from '@/flows/settings/crud/configure-catalog-provider';
 import { addCustomModel } from '@/flows/settings/crud/add-custom-model';
 import { deleteProvider } from '@/flows/settings/crud/delete-provider';
 import { deleteModel } from '@/flows/settings/crud/delete-model';
-import type { CatalogModel } from './catalog';
+import type { CatalogProviderMeta } from './catalog';
 import type { ModelEntry, ProviderEntry } from '@/types/electron';
 
 type Mode = 'catalog' | 'custom';
@@ -26,7 +26,9 @@ interface ModelEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
-  catalogEntry?: CatalogModel;
+  catalogProvider?: CatalogProviderMeta;
+  /** Curated model name to enable when the user saves in catalog mode. */
+  catalogModelName?: string;
   existingModel?: ModelEntry;
   existingProvider?: ProviderEntry;
 }
@@ -35,24 +37,25 @@ export function ModelEditorDialog({
   open,
   onOpenChange,
   onSaved,
-  catalogEntry,
+  catalogProvider,
+  catalogModelName,
   existingModel,
   existingProvider,
 }: ModelEditorDialogProps) {
-  const mode: Mode = catalogEntry ? 'catalog' : 'custom';
+  const mode: Mode = catalogProvider ? 'catalog' : 'custom';
   const showBaseUrl = mode === 'catalog'
-    ? catalogEntry!.showBaseUrl
+    ? catalogProvider!.showBaseUrl
     : true;
 
   const initialProvider = mode === 'catalog'
-    ? catalogEntry!.provider
+    ? catalogProvider!.name
     : (existingModel?.provider ?? '');
-  const initialModelName = mode === 'catalog'
-    ? catalogEntry!.name
-    : (existingModel?.name ?? '');
   const initialBaseUrl = existingProvider?.baseUrl
-    ?? (mode === 'catalog' ? catalogEntry!.baseUrl : 'https://');
+    ?? (mode === 'catalog' ? catalogProvider!.baseUrl : 'https://');
   const initialKey = existingProvider?.apiKey ?? '';
+  const initialModelName = mode === 'custom'
+    ? (existingModel?.name ?? '')
+    : '';
 
   const [provider, setProvider] = React.useState(initialProvider);
   const [modelName, setModelName] = React.useState(initialModelName);
@@ -71,13 +74,16 @@ export function ModelEditorDialog({
     setError(null);
   }, [open, initialProvider, initialModelName, initialBaseUrl, initialKey]);
 
-  const isEditing = Boolean(existingModel) || Boolean(existingProvider);
+  const hasExisting = mode === 'catalog'
+    ? Boolean(existingProvider?.apiKey?.trim())
+    : Boolean(existingModel);
+  const isEditing = hasExisting;
 
   const canSubmit =
     phase === 'idle' &&
     provider.trim().length > 0 &&
-    modelName.trim().length > 0 &&
-    apiKey.trim().length > 0;
+    apiKey.trim().length > 0 &&
+    (mode === 'catalog' || modelName.trim().length > 0);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,16 +91,34 @@ export function ModelEditorDialog({
     setError(null);
     setPhase('saving');
 
-    const input = {
-      provider: provider.trim(),
-      modelName: modelName.trim(),
-      baseUrl: showBaseUrl ? baseUrl.trim() : undefined,
-      apiKey: apiKey.trim(),
-    };
+    const trimmedProvider = provider.trim();
+    const trimmedBaseUrl = showBaseUrl ? baseUrl.trim() : undefined;
+    const trimmedKey = apiKey.trim();
+    const trimmedModel = modelName.trim();
+    const targetModel = (mode === 'catalog' ? (catalogModelName ?? '').trim() : trimmedModel);
 
-    const result = mode === 'catalog'
-      ? await configureCatalogModel(input)
-      : await addCustomModel(input);
+    if (mode === 'catalog' && !targetModel) {
+      setPhase('idle');
+      setError('Model is required');
+      return;
+    }
+
+    let result;
+    if (mode === 'catalog') {
+      result = await configureCatalogProvider({
+        provider: trimmedProvider,
+        baseUrl: trimmedBaseUrl,
+        apiKey: trimmedKey,
+        modelName: targetModel,
+      });
+    } else {
+      result = await addCustomModel({
+        provider: trimmedProvider,
+        modelName: trimmedModel,
+        baseUrl: trimmedBaseUrl,
+        apiKey: trimmedKey,
+      });
+    }
 
     if (result.ok) {
       onSaved?.();
@@ -111,7 +135,7 @@ export function ModelEditorDialog({
     setError(null);
 
     try {
-      if (existingModel && !catalogEntry && existingModel.isCustom) {
+      if (mode === 'custom' && existingModel?.isCustom) {
         await deleteModel(existingModel.id);
       }
       await deleteProvider(provider.trim());
@@ -128,23 +152,30 @@ export function ModelEditorDialog({
   const submitLabel = (() => {
     if (phase === 'saving') return isEditing ? 'Saving…' : 'Adding…';
     if (phase === 'removing') return 'Removing…';
+    if (mode === 'catalog') return isEditing ? 'Save changes' : 'Add key';
     return isEditing ? 'Save changes' : 'Add model';
   })();
 
-  const heading = mode === 'catalog'
-    ? catalogEntry!.name
-    : isEditing
-      ? 'Edit model'
-      : 'Add model';
+  const heading = (() => {
+    if (mode === 'catalog') {
+      const target = (catalogModelName ?? catalogProvider!.name).trim();
+      return `${target} API key`;
+    }
+    if (isEditing) return 'Edit model';
+    return 'Add model';
+  })();
 
-  const description = mode === 'catalog'
-    ? `Save the API key for ${catalogEntry!.provider} to enable this model in chat.`
-    : isEditing
-      ? 'Update or remove this model.'
-      : 'Add a custom model not in the default catalog.';
+  const description = (() => {
+    if (mode === 'catalog') {
+      const target = (catalogModelName ?? catalogProvider!.name).trim();
+      return `Save the API key for ${catalogProvider!.name} to enable ${target} in chat.`;
+    }
+    if (isEditing) return 'Update or remove this model.';
+    return 'Add a custom model not in the default catalog.';
+  })();
 
-  const keyLabel = mode === 'catalog'
-    ? `${catalogEntry!.provider} ${catalogEntry!.keyLabel}`
+  const keyLabel = mode === 'catalog' && catalogProvider
+    ? catalogProvider.keyLabel || 'API Key'
     : 'API Key';
 
   return (
@@ -172,19 +203,20 @@ export function ModelEditorDialog({
             />
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="me-model" className="text-sidebar-foreground">
-              Model<span className="text-destructive ml-0.5">*</span>
-            </Label>
-            <Input
-              id="me-model"
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-              disabled={mode === 'catalog'}
-              required
-              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
-            />
-          </div>
+          {mode === 'custom' && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="me-model" className="text-sidebar-foreground">
+                Model<span className="text-destructive ml-0.5">*</span>
+              </Label>
+              <Input
+                id="me-model"
+                value={modelName}
+                onChange={(e) => setModelName(e.target.value)}
+                required
+                className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+              />
+            </div>
+          )}
 
           {showBaseUrl && (
             <div className="flex flex-col gap-2">
@@ -195,7 +227,8 @@ export function ModelEditorDialog({
                 id="me-baseurl"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder="https://api.example.com/v1"
+                placeholder={mode === 'catalog' && catalogProvider && catalogProvider.baseUrl ? catalogProvider.baseUrl : 'https://api.example.com/v1'}
+                disabled={false}
                 className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
               />
             </div>
@@ -214,6 +247,21 @@ export function ModelEditorDialog({
               className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
           </div>
+
+          {mode === 'catalog' && catalogProvider?.docsUrl && (
+            <p className="text-xs text-sidebar-foreground/60">
+              Get a key from{' '}
+              <a
+                href={catalogProvider.docsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sidebar-foreground underline underline-offset-2 hover:text-primary"
+              >
+                {safeHostname(catalogProvider.docsUrl)}
+              </a>
+              .
+            </p>
+          )}
 
           {error && (
             <p
@@ -257,4 +305,12 @@ export function ModelEditorDialog({
       </DialogContent>
     </Dialog>
   );
+}
+
+function safeHostname(url: string): string {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return url
+  }
 }

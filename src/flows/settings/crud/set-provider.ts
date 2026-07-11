@@ -1,11 +1,11 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
+import type { SetProviderInput } from '@/types/electron';
 
-export interface SetProviderInput {
-  name: string;
-  baseUrl?: string;
-  apiKey?: string;
-}
+export type {
+  SetProviderInput,
+  ProviderEntry,
+} from '@/types/electron';
 
 export interface SetProviderResult {
   ok: boolean;
@@ -23,6 +23,11 @@ export async function setProvider(input: SetProviderInput): Promise<SetProviderR
       name,
       baseUrl: input.baseUrl?.trim() || undefined,
       apiKey: input.apiKey?.trim() || undefined,
+      enabled: input.enabled,
+      preferredModel: input.preferredModel?.trim() || undefined,
+      accessKeyId: input.accessKeyId?.trim() || undefined,
+      secretAccessKey: input.secretAccessKey ?? undefined,
+      region: input.region?.trim() || undefined,
     });
     toast.success(`Provider "${name}" saved`);
     return { ok: true };

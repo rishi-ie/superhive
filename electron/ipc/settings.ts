@@ -9,10 +9,26 @@ const GLOBAL_OWNER_ID = 'global' as const
 const GROUP_PROVIDERS = 'providers' as const
 const GROUP_MODELS = 'models' as const
 
+interface SetProviderInput {
+	name?: string
+	baseUrl?: string | null
+	apiKey?: string
+	enabled?: boolean
+	preferredModel?: string
+	accessKeyId?: string
+	secretAccessKey?: string
+	region?: string
+}
+
 interface ProviderEntry {
 	name?: string
 	baseUrl?: string | null
 	apiKey?: string
+	enabled?: boolean
+	preferredModel?: string
+	accessKeyId?: string
+	secretAccessKey?: string
+	region?: string
 }
 
 interface ModelEntry {
@@ -38,12 +54,69 @@ async function reSeedAllAgents(): Promise<void> {
 	}
 }
 
+/**
+ * Sync the preferred-model row for a provider block.
+ *
+ * Behavior contract:
+ * - If `preferredModel` is non-empty: ensure row `${name}:${preferredModel}` exists
+ *   in `models` group with `enabled = !!enabled` and `isCustom: true`. Update
+ *   enabled if the row already exists.
+ * - If `preferredModel` is empty: delete any prior preferred-model row
+ *   belonging to this provider (rows with `isCustom: true` whose id matches
+ *   the previously stored preferred-model name, or whose name matches the
+ *   preferred-model slot for this provider).
+ */
+async function syncPreferredModelRow(
+	providerName: string,
+	preferredModel: string | undefined,
+	enabled: boolean,
+	previousPreferredModel: string | undefined,
+): Promise<void> {
+	const newName = preferredModel?.trim() ?? ''
+	if (newName) {
+		const id = `${providerName}:${newName}`
+		await SettingsRepository.setSetting(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			id,
+			{ id, provider: providerName, name: newName, enabled, isCustom: true },
+			'json',
+			newName,
+			undefined,
+			GROUP_MODELS,
+		)
+		return
+	}
+
+	// Empty preferred model — remove previously stored preferred-model row.
+	const candidates = new Set<string>()
+	if (previousPreferredModel && previousPreferredModel.trim()) {
+		candidates.add(`${providerName}:${previousPreferredModel}`)
+	}
+	// Defensive: also clean any old preferred-model rows for this provider
+	// that have no other curated equivalent.
+	const modelRows = await SettingsRepository.getByOwnerAndGroup(
+		GLOBAL_OWNER_TYPE,
+		GLOBAL_OWNER_ID,
+		GROUP_MODELS,
+	)
+	for (const row of modelRows) {
+		const entry = row.value as ModelEntry
+		if (entry?.provider === providerName && entry?.isCustom) {
+			candidates.add(row.key)
+		}
+	}
+	for (const key of candidates) {
+		await SettingsRepository.removeSetting(GLOBAL_OWNER_TYPE, GLOBAL_OWNER_ID, key)
+	}
+}
+
 export function registerSettingsIpc(): void {
 	ipcMain.handle(IPC.SETTINGS.GET_PROVIDERS, async () => {
 		const rows = await SettingsRepository.getByOwnerAndGroup(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			GROUP_PROVIDERS
+			GROUP_PROVIDERS,
 		)
 		const out: Record<string, ProviderEntry> = {}
 		for (const row of rows) {
@@ -54,14 +127,33 @@ export function registerSettingsIpc(): void {
 
 	ipcMain.handle(
 		IPC.SETTINGS.SET_PROVIDER,
-		async (_e, input: { name: string; baseUrl?: string; apiKey?: string }) => {
+		async (_e, input: SetProviderInput) => {
 			const name = input.name?.trim()
 			if (!name) throw new Error('Provider name is required')
+
+			const existingRow = await SettingsRepository.getSetting(
+				GLOBAL_OWNER_TYPE,
+				GLOBAL_OWNER_ID,
+				name,
+			)
+			const previous = (existingRow?.value as ProviderEntry | undefined) ?? {}
+			const previousHadKey = Boolean(previous.apiKey?.trim())
+			const newHasKey = Boolean(input.apiKey?.trim())
+			const keyBeingCleared = previousHadKey && !newHasKey
+
 			const value: ProviderEntry = {
 				name,
 				baseUrl: input.baseUrl ?? null,
 				apiKey: input.apiKey,
+				enabled: keyBeingCleared ? false : Boolean(input.enabled),
+				preferredModel: keyBeingCleared
+					? undefined
+					: (input.preferredModel ?? previous.preferredModel),
+				accessKeyId: input.accessKeyId ?? previous.accessKeyId,
+				secretAccessKey: input.secretAccessKey ?? previous.secretAccessKey,
+				region: input.region ?? previous.region,
 			}
+
 			await SettingsRepository.setSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
@@ -70,18 +162,48 @@ export function registerSettingsIpc(): void {
 				'json',
 				name,
 				undefined,
-				GROUP_PROVIDERS
+				GROUP_PROVIDERS,
 			)
-			// Re-seed every agent so the new key reaches running sessions.
+
+			await syncPreferredModelRow(
+				name,
+				value.preferredModel,
+				value.enabled === true,
+				previous.preferredModel,
+			)
+
+			if (keyBeingCleared) {
+				// Disable any enabled rows for this provider (curated + custom).
+				const modelRows = await SettingsRepository.getByOwnerAndGroup(
+					GLOBAL_OWNER_TYPE,
+					GLOBAL_OWNER_ID,
+					GROUP_MODELS,
+				)
+				for (const row of modelRows) {
+					const entry = row.value as ModelEntry
+					if (entry?.provider !== name || !entry.enabled) continue
+					await SettingsRepository.setSetting(
+						GLOBAL_OWNER_TYPE,
+						GLOBAL_OWNER_ID,
+						row.key,
+						{ ...entry, enabled: false },
+						'json',
+						entry.name,
+						undefined,
+						GROUP_MODELS,
+					)
+				}
+			}
+
 			await reSeedAllAgents()
-		}
+		},
 	)
 
 	ipcMain.handle(IPC.SETTINGS.DELETE_PROVIDER, async (_e, name: string) => {
 		await SettingsRepository.removeSetting(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			name
+			name,
 		)
 		// Cascade: disable every model that referenced this provider so the
 		// ModelPicker no longer shows stale entries. We don't delete the
@@ -90,11 +212,11 @@ export function registerSettingsIpc(): void {
 		const modelRows = await SettingsRepository.getByOwnerAndGroup(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			GROUP_MODELS
+			GROUP_MODELS,
 		)
 		for (const row of modelRows) {
 			const entry = row.value as ModelEntry
-			if (entry.provider !== name || !entry.enabled) continue
+			if (entry?.provider !== name || !entry.enabled) continue
 			await SettingsRepository.setSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
@@ -103,18 +225,27 @@ export function registerSettingsIpc(): void {
 				'json',
 				entry.name,
 				undefined,
-				GROUP_MODELS
+				GROUP_MODELS,
 			)
 		}
 		// Re-seed every agent so a removed key is no longer registered.
 		await reSeedAllAgents()
 	})
 
+	ipcMain.handle(
+		IPC.SETTINGS.ENSURE_PROVIDER_CATALOG,
+		async (_e, input: { provider: string; apiKeyIsFresh?: boolean }) => {
+			const providerName = input?.provider?.trim()
+			if (!providerName) throw new Error('Provider name is required')
+			return { inserted: 0 }
+		},
+	)
+
 	ipcMain.handle(IPC.SETTINGS.GET_MODELS, async () => {
 		const rows = await SettingsRepository.getByOwnerAndGroup(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			GROUP_MODELS
+			GROUP_MODELS,
 		)
 		return rows.map((row) => row.value as ModelEntry)
 	})
@@ -125,7 +256,7 @@ export function registerSettingsIpc(): void {
 			const existing = await SettingsRepository.getSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
-				id
+				id,
 			)
 			if (!existing) throw new Error(`Model not found: ${id}`)
 			const current = existing.value as ModelEntry
@@ -137,9 +268,9 @@ export function registerSettingsIpc(): void {
 				'json',
 				current.name,
 				undefined,
-				GROUP_MODELS
+				GROUP_MODELS,
 			)
-		}
+		},
 	)
 
 	ipcMain.handle(
@@ -158,16 +289,16 @@ export function registerSettingsIpc(): void {
 				'json',
 				name,
 				undefined,
-				GROUP_MODELS
+				GROUP_MODELS,
 			)
-		}
+		},
 	)
 
 	ipcMain.handle(IPC.SETTINGS.DELETE_MODEL, async (_e, id: string) => {
 		await SettingsRepository.removeSetting(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			id
+			id,
 		)
 	})
 
@@ -175,7 +306,7 @@ export function registerSettingsIpc(): void {
 		const rows = await SettingsRepository.getByOwnerAndGroup(
 			GLOBAL_OWNER_TYPE,
 			GLOBAL_OWNER_ID,
-			GROUP_MODELS
+			GROUP_MODELS,
 		)
 		return rows
 			.map((row) => row.value as ModelEntry)
