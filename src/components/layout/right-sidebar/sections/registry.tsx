@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 import type { AgentSettingsState } from "@/flows/agents/settings";
 import { OverviewSection } from "./OverviewSection";
 import { ContextSection } from "./ContextSection";
-import { OccupationSection } from "./OccupationSection";
 import { HistorySection } from "./HistorySection";
 import { PermissionsSection } from "./PermissionsSection";
 import { CatalogManageSection } from "./CatalogManageSection";
@@ -18,7 +17,6 @@ export interface SettingsSectionProps {
 
 export { OverviewSection };
 export { ContextSection };
-export { OccupationSection };
 export { HistorySection };
 export { PermissionsSection };
 export { CatalogManageSection };
@@ -33,7 +31,6 @@ export interface ManageSectionDef {
 
 export const MANAGE_SECTIONS: ManageSectionDef[] = [
   { id: "context", label: "Context", Component: ContextSection },
-  { id: "occupation", label: "Occupation", Component: OccupationSection },
   { id: "history", label: "History", Component: HistorySection },
   { id: "permissions", label: "Permissions", Component: PermissionsSection },
   { id: "catalog", label: "Catalog", Component: CatalogManageSection },
