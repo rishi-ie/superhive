@@ -61,13 +61,14 @@
   -webkit-app-region: no-drag;
 }
 
-/* Scrollbar suppression */
+/* Scrollbar suppression — keeps scroll functional, hides the visual bar */
 .no-scrollbar {
   scrollbar-width: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none;
+  width: 0;
+  height: 0;
 }
 
 /* Font scale — controlled by data-font-scale on <html> */
