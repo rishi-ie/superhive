@@ -5,7 +5,9 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { execSync } from 'node:child_process'
 
-const APP_SUPPORT = join(homedir(), 'Library/Application Support', 'Superhive')
+// 'superhive' (lowercase) matches Electron's app.getPath('userData') on macOS,
+// which derives from package.json#name — NOT from electron-builder.yml#productName.
+const APP_SUPPORT = join(homedir(), 'Library/Application Support', 'superhive')
 const AGENTS_DB   = join(APP_SUPPORT, 'db.agents.json')
 const AGENTS_DIR  = join(homedir(), '.superhive', 'agents')
 

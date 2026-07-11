@@ -93,6 +93,7 @@ app.whenReady().then(async () => {
   log.info('App ready');
 
   setUserDataPath(app.getPath('userData'));
+  log.info(`[main] userData = ${app.getPath('userData')}`);
 
   if (!isGeneralKaiReady()) {
     log.warn(
