@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { Icon } from "@/components/ui/icon";
-import { GearIcon } from "@phosphor-icons/react";
+import { GearSixIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function SettingsLink() {
@@ -15,7 +15,7 @@ export function SettingsLink() {
         )
       }
     >
-      <Icon icon={GearIcon} className="size-4" />
+      <Icon icon={GearSixIcon} className="size-4" />
       <span>Settings</span>
     </NavLink>
   );

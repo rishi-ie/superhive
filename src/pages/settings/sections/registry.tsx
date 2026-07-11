@@ -1,6 +1,6 @@
 import { Icon } from "@/components/ui/icon";
 import {
-  GearIcon,
+  GearSixIcon,
   UserIcon,
   PaintBrushIcon,
   BrainIcon,
@@ -38,7 +38,7 @@ export interface SettingsSectionGroup {
 export const SETTINGS_GROUPS: SettingsSectionGroup[] = [
   {
     sections: [
-      { id: "general", label: "General", icon: makeIcon(GearIcon) },
+      { id: "general", label: "General", icon: makeIcon(GearSixIcon) },
       { id: "account", label: "Account", icon: makeIcon(UserIcon) },
       { id: "appearance", label: "Appearance", icon: makeIcon(PaintBrushIcon) },
     ],

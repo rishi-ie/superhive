@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { KeyboardIcon, HeadphonesIcon, SignOutIcon, CreditCardIcon, GearIcon, DotsThreeIcon } from "@phosphor-icons/react";
+import { KeyboardIcon, HeadphonesIcon, SignOutIcon, CreditCardIcon, GearSixIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -21,7 +21,7 @@ export function SidebarUser() {
           type="button"
           className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
         >
-          <Icon icon={GearIcon} className="size-4" />
+          <Icon icon={GearSixIcon} className="size-4" />
           <span className="flex-1 text-left">Settings</span>
           <Icon icon={DotsThreeIcon} className="size-4 text-muted-foreground" />
         </button>
@@ -56,7 +56,7 @@ export function SidebarUser() {
           <span>Help & support</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-modal-foreground" onSelect={() => goToSettings(navigate)}>
-          <Icon icon={GearIcon} className="size-4 text-modal-foreground/60" />
+          <Icon icon={GearSixIcon} className="size-4 text-modal-foreground/60" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />

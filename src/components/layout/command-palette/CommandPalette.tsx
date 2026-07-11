@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/icon";
-import { ChatCircleDotsIcon, UserIcon, FolderPlusIcon, GearIcon, HexagonIcon } from "@phosphor-icons/react";
+import { ChatCircleDotsIcon, UserIcon, FolderPlusIcon, GearSixIcon, HexagonIcon } from "@phosphor-icons/react";
 import {
   Command,
   CommandDialog,
@@ -55,7 +55,7 @@ export function CommandPalette() {
 
           <CommandGroup heading="Navigate">
             <CommandItem onSelect={run(() => goToSettings(navigate))}>
-              <Icon icon={GearIcon} />
+              <Icon icon={GearSixIcon} />
               Settings
             </CommandItem>
             <CommandItem onSelect={run(() => navigate("/hive"))}>

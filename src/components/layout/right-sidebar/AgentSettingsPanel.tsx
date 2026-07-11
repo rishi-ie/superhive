@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import {
   WarningCircleIcon,
   SquaresFourIcon,
-  GearIcon,
+  GearSixIcon,
   TrayIcon,
 } from "@phosphor-icons/react";
 import { useAgentSettings } from "@/flows/agents/settings";
@@ -86,7 +86,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
             Overview
           </TabsTrigger>
           <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <Icon icon={GearIcon} className="size-3.5" />
+            <Icon icon={GearSixIcon} className="size-3.5" />
             Manage
           </TabsTrigger>
           <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">

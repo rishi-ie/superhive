@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/icon";
 import {
   SquaresFourIcon,
-  GearIcon,
+  GearSixIcon,
   TrayIcon,
 } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +21,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
             Overview
           </TabsTrigger>
           <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <Icon icon={GearIcon} className="size-3.5" />
+            <Icon icon={GearSixIcon} className="size-3.5" />
             Manage
           </TabsTrigger>
           <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
