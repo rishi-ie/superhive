@@ -1,0 +1,83 @@
+/* App-only structural concerns. No colors, no fonts — those come from the preset. */
+
+#root {
+  height: 100vh;
+  width: 100vw;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: oklch(0.708 0 0 / 0.3);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.708 0 0 / 0.5);
+}
+
+@layer base {
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  html,
+  body {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+    overflow: hidden;
+    user-select: none;
+    scroll-behavior: smooth;
+  }
+  app {
+    display: block;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* Scrollbar suppression */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Font scale — controlled by data-font-scale on <html> */
+:root[data-font-scale] {
+  font-size: 1rem;
+}
+
+/* Reduce motion — kills all transitions and animations */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  transition: none !important;
+  animation: none !important;
+}
