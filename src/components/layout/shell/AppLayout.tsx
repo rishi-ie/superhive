@@ -16,7 +16,7 @@ const MAX_WIDTH = 480;
 const DEFAULT_WIDTH = 280;
 const MIN_RIGHT_WIDTH = 200;
 const MAX_RIGHT_WIDTH = 480;
-const DEFAULT_RIGHT_WIDTH = 330;
+const DEFAULT_RIGHT_WIDTH = 370;
 
 export function AppLayout() {
   return (

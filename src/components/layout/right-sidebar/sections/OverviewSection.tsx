@@ -1,62 +1,141 @@
-import type { AgentSettingsState } from "@/flows/agents/settings";
-import { PermissionIndicator } from "../primitives/PermissionIndicator";
-import { BadgeList } from "../primitives/BadgeList";
+import {
+  Accordion,
+  ChecklistRow,
+  ResponsibilitySlider,
+  SessionRow,
+} from "../primitives";
+import { Badge } from "@/components/ui/badge";
 
-interface OverviewSectionProps {
-  settings: AgentSettingsState;
+export interface OverviewPreviousTask {
+  name: string;
+  cost: number;
 }
 
-export function OverviewSection({ settings }: OverviewSectionProps) {
-  const perms = settings.permissions ?? {
-    filesystem: true,
-    terminal: true,
-    network: true,
+export interface OverviewChecklistItem {
+  text: string;
+  done: boolean;
+}
+
+export interface OverviewChecklist {
+  taskName: string;
+  items: OverviewChecklistItem[];
+}
+
+export interface OverviewCatalogItem {
+  path: string;
+  active: boolean;
+}
+
+export interface OverviewData {
+  name: string;
+  description: string;
+  previousTasks: OverviewPreviousTask[];
+  activeChecklist: OverviewChecklist | null;
+  catalog: {
+    skills: OverviewCatalogItem[];
+    extensions: OverviewCatalogItem[];
+    prompts: OverviewCatalogItem[];
   };
-  const catalog = settings.catalog;
+  responsibilityCount: number;
+}
+
+interface OverviewSectionProps {
+  data: OverviewData;
+}
+
+function badgeName(item: { path?: string; name?: string }): string {
+  return item.name ?? item.path?.split("/").pop() ?? "unknown";
+}
+
+export function OverviewSection({ data }: OverviewSectionProps) {
+  const checklistBadge = data.activeChecklist
+    ? `${data.activeChecklist.items.filter((i) => i.done).length}/${data.activeChecklist.items.length}`
+    : 0;
 
   return (
-    <div className="flex flex-col gap-4 py-button-y">
-      {(settings.name || settings.description) && (
+    <div className="flex flex-col gap-stack py-button-y">
+      {(data.name || data.description) && (
         <div className="flex flex-col gap-0.5">
-          {settings.name && (
+          {data.name && (
             <span className="text-sm font-semibold text-foreground">
-              {settings.name}
+              {data.name}
             </span>
           )}
-          {settings.description && (
+          {data.description && (
             <span className="text-xs text-muted-foreground">
-              {settings.description}
+              {data.description}
             </span>
           )}
         </div>
       )}
 
-      <div className="flex flex-col gap-gap-tight">
-        <span className="text-xs font-medium text-muted-foreground">
-          Active Permissions
-        </span>
-        <div className="flex items-center gap-gap-loose">
-          <PermissionIndicator label="Filesystem" enabled={perms.filesystem ?? true} />
-          <PermissionIndicator label="Terminal" enabled={perms.terminal ?? true} />
-          <PermissionIndicator label="Network" enabled={perms.network ?? true} />
-        </div>
-      </div>
+      <Accordion title="Previous tasks" badge={data.previousTasks.length} emptyText="No previous tasks">
+        {data.previousTasks.map((task, i) => (
+          <SessionRow key={i} name={task.name} cost={task.cost} />
+        ))}
+      </Accordion>
 
-      <BadgeList
+      <Accordion
+        title="Active checklist"
+        badge={checklistBadge}
+        defaultOpen={data.activeChecklist !== null}
+        emptyText="No active task"
+      >
+        {data.activeChecklist && (
+          <>
+            <span className="text-[10px] text-muted-foreground/60">
+              {data.activeChecklist.taskName}
+            </span>
+            {data.activeChecklist.items.map((item, i) => (
+              <ChecklistRow key={i} text={item.text} done={item.done} />
+            ))}
+          </>
+        )}
+      </Accordion>
+
+      <Accordion
         title="Skills"
-        items={catalog?.skills ?? []}
+        badge={data.catalog.skills.length}
         emptyText="No skills"
-      />
-      <BadgeList
+      >
+        <div className="flex flex-wrap gap-gap-tight">
+          {data.catalog.skills.map((item, i) => (
+            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+              {badgeName(item)}
+            </Badge>
+          ))}
+        </div>
+      </Accordion>
+
+      <Accordion
         title="Extensions"
-        items={catalog?.extensions ?? []}
+        badge={data.catalog.extensions.length}
         emptyText="No extensions"
-      />
-      <BadgeList
+      >
+        <div className="flex flex-wrap gap-gap-tight">
+          {data.catalog.extensions.map((item, i) => (
+            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+              {badgeName(item)}
+            </Badge>
+          ))}
+        </div>
+      </Accordion>
+
+      <Accordion
         title="Prompts"
-        items={catalog?.prompts ?? []}
+        badge={data.catalog.prompts.length}
         emptyText="No prompts"
-      />
+      >
+        <div className="flex flex-wrap gap-gap-tight">
+          {data.catalog.prompts.map((item, i) => (
+            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+              {badgeName(item)}
+            </Badge>
+          ))}
+        </div>
+      </Accordion>
+
+      <ResponsibilitySlider count={data.responsibilityCount} />
     </div>
   );
 }

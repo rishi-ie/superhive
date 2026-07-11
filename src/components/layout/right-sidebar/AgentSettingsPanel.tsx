@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Icon } from "@/components/ui/icon";
 import {
   WarningCircleIcon,
@@ -9,9 +10,9 @@ import { useAgentSettings } from "@/flows/agents/settings";
 import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,
-  OverviewSection,
   InboxSection,
 } from "./sections/registry";
+import { OverviewSection, type OverviewData } from "./sections/OverviewSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,31 @@ interface AgentSettingsPanelProps {
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const { settings, isLoading, error, reload } = useAgentSettings(agentId);
   const autoSave = useAutoSave(agentId, reload);
+
+  const overviewData = React.useMemo<OverviewData>(() => ({
+    name: settings?.name ?? "Untitled agent",
+    description: settings?.description ?? "",
+    previousTasks: [
+      { name: "Audit settings page", cost: 0.31 },
+      { name: "Fix nav alignment", cost: 0.04 },
+      { name: "Refactor onboarding flow", cost: 0.12 },
+    ],
+    activeChecklist: {
+      taskName: "Building API integration",
+      items: [
+        { text: "Pull API spec", done: false },
+        { text: "Define response types", done: true },
+        { text: "Implement POST /orders", done: false },
+        { text: "Add error handling", done: false },
+      ],
+    },
+    catalog: {
+      skills: settings?.catalog?.skills ?? [],
+      extensions: settings?.catalog?.extensions ?? [],
+      prompts: settings?.catalog?.prompts ?? [],
+    },
+    responsibilityCount: 8,
+  }), [settings]);
 
   if (isLoading) {
     return (
@@ -65,7 +91,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
             <div>
-              <OverviewSection settings={settings} />
+              <OverviewSection data={overviewData} />
             </div>
           </ScrollArea>
         </TabsContent>

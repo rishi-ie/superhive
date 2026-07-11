@@ -3,3 +3,7 @@ export { SwitchRow } from './SwitchRow';
 export { BadgeList } from './BadgeList';
 export { PermissionIndicator } from './PermissionIndicator';
 export { Segmented } from './Segmented';
+export { Accordion } from './Accordion';
+export { SessionRow } from './SessionRow';
+export { ChecklistRow } from './ChecklistRow';
+export { ResponsibilitySlider } from './ResponsibilitySlider';
