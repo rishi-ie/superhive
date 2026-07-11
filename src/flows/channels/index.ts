@@ -1,2 +1,1 @@
-export * from './crud';
-export * from './ui';
+export { createChannel } from './crud/create-channel';

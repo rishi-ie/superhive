@@ -1,5 +1,5 @@
 import { loadDb } from '../database'
-import type { Project, Agent, Task, Channel } from '../types'
+import type { Project, Agent } from '../types'
 
 let _db: Awaited<ReturnType<typeof loadDb<Project[]>>> | null = null
 
@@ -82,14 +82,6 @@ export const ProjectRepository = {
     })
     await agentDb.write()
 
-    const channelDb = await loadDb<Channel[]>('db.channels.json', [])
-    channelDb.data = channelDb.data.filter((c: Channel) => c.projectId !== id)
-    await channelDb.write()
-
-    const taskDb = await loadDb<Task[]>('db.tasks.json', [])
-    taskDb.data = taskDb.data.filter((t: Task) => t.projectId !== id)
-    await taskDb.write()
-
     return true
   },
 
@@ -98,20 +90,6 @@ export const ProjectRepository = {
     if (!project) return []
     const agentDb = await loadDb<Agent[]>('db.agents.json', [])
     return agentDb.data.filter((a: Agent) => project.agentIds.includes(a.id))
-  },
-
-  async getTasks(projectId: string): Promise<Task[]> {
-    const project = await this.getById(projectId)
-    if (!project) return []
-    const taskDb = await loadDb<Task[]>('db.tasks.json', [])
-    return taskDb.data.filter((t: Task) => project.taskIds.includes(t.id))
-  },
-
-  async getChannels(projectId: string): Promise<Channel[]> {
-    const project = await this.getById(projectId)
-    if (!project) return []
-    const channelDb = await loadDb<Channel[]>('db.channels.json', [])
-    return channelDb.data.filter((c: Channel) => project.channelIds.includes(c.id))
   },
 
   async addAgent(projectId: string, agentId: string): Promise<void> {
@@ -148,26 +126,6 @@ export const ProjectRepository = {
     }
     await db.write()
     await agentDb.write()
-  },
-
-  async addTask(projectId: string, taskId: string): Promise<void> {
-    const db = await getDb()
-    const project = db.data.find((p: Project) => p.id === projectId)
-    if (project && !project.taskIds.includes(taskId)) {
-      project.taskIds.push(taskId)
-      project.updatedAt = Date.now()
-      await db.write()
-    }
-  },
-
-  async removeTask(projectId: string, taskId: string): Promise<void> {
-    const db = await getDb()
-    const project = db.data.find((p: Project) => p.id === projectId)
-    if (project) {
-      project.taskIds = project.taskIds.filter((id: string) => id !== taskId)
-      project.updatedAt = Date.now()
-      await db.write()
-    }
   },
 
   async addChannel(projectId: string, channelId: string): Promise<void> {

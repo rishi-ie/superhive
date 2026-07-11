@@ -1,8 +1,3 @@
-export { WorkspaceRepository } from './WorkspaceRepository'
 export { AgentRepository } from './AgentRepository'
 export { ProjectRepository } from './ProjectRepository'
-export { TaskRepository } from './TaskRepository'
-export { ChannelRepository } from './ChannelRepository'
-export { SessionRepository } from './SessionRepository'
 export { SettingsRepository } from './SettingsRepository'
-export { TagRepository } from './TagRepository'

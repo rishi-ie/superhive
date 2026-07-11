@@ -11,21 +11,10 @@ import {
   RawTextAdapter,
 } from './pi-protocol'
 import type { AgentStatus } from '../src/storage/types'
-import type { RuntimeStatusPayload } from '../src/types/electron'
+import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { parseCounter } from './agent-settings-defaults'
-
-/**
- * A single message in an in-memory agent conversation.
- * Note: conversations are ephemeral — not persisted to disk or database.
- */
-export interface RuntimeMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  ts: number
-}
 
 /**
  * Live runtime state for one agent instance.
