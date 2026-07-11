@@ -1,7 +1,7 @@
 import { SwitchRow } from "../primitives/SwitchRow";
 import type { SettingsSectionProps } from "./registry";
 
-export function BehaviorManageSection({ settings, patch }: SettingsSectionProps) {
+export function PermissionsSection({ settings, patch }: SettingsSectionProps) {
   const perms = settings.permissions ?? {
     filesystem: true,
     terminal: true,
@@ -9,11 +9,11 @@ export function BehaviorManageSection({ settings, patch }: SettingsSectionProps)
   };
 
   const setPerm = (key: "filesystem" | "terminal" | "network", value: boolean) => {
-    patch("permissions", { ...perms, [key]: value });
+    patch?.("permissions", { ...perms, [key]: value });
   };
 
   return (
-    <div className="flex flex-col gap-gap-loose">
+    <div className="flex flex-col">
       <SwitchRow
         label="Filesystem"
         description="Read and write local files"

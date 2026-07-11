@@ -10,7 +10,7 @@ export function IdentitySection({ settings, patch }: SettingsSectionProps) {
           id="name"
           className="h-7 text-sm"
           value={settings.name ?? ''}
-          onChange={e => patch('name', e.target.value)}
+          onChange={e => patch?.('name', e.target.value)}
           placeholder="Agent name"
         />
       </FieldRow>
@@ -19,7 +19,7 @@ export function IdentitySection({ settings, patch }: SettingsSectionProps) {
           id="description"
           className="h-7 text-sm"
           value={settings.description ?? ''}
-          onChange={e => patch('description', e.target.value)}
+          onChange={e => patch?.('description', e.target.value)}
           placeholder="Brief description"
         />
       </FieldRow>

@@ -1,7 +1,10 @@
 import type { ComponentType } from "react";
 import type { AgentSettingsState } from "@/flows/agents/settings";
 import { OverviewSection } from "./OverviewSection";
-import { BehaviorManageSection } from "./BehaviorManageSection";
+import { ContextSection } from "./ContextSection";
+import { OccupationSection } from "./OccupationSection";
+import { HistorySection } from "./HistorySection";
+import { PermissionsSection } from "./PermissionsSection";
 import { CatalogManageSection } from "./CatalogManageSection";
 import { InboxSection } from "./InboxSection";
 import { SkillsSection } from "./SkillsSection";
@@ -9,12 +12,15 @@ import { SkillsSection } from "./SkillsSection";
 export interface SettingsSectionProps {
   settings: AgentSettingsState;
   agentId: string;
-  patch: (key: string, value: unknown) => void;
-  flush: (p: Record<string, unknown>) => Promise<void>;
+  patch?: (key: string, value: unknown) => void;
+  flush?: (p: Record<string, unknown>) => Promise<void>;
 }
 
 export { OverviewSection };
-export { BehaviorManageSection };
+export { ContextSection };
+export { OccupationSection };
+export { HistorySection };
+export { PermissionsSection };
 export { CatalogManageSection };
 export { SkillsSection };
 export { InboxSection };
@@ -26,6 +32,9 @@ export interface ManageSectionDef {
 }
 
 export const MANAGE_SECTIONS: ManageSectionDef[] = [
-  { id: "behavior", label: "Behavior", Component: BehaviorManageSection },
+  { id: "context", label: "Context", Component: ContextSection },
+  { id: "occupation", label: "Occupation", Component: OccupationSection },
+  { id: "history", label: "History", Component: HistorySection },
+  { id: "permissions", label: "Permissions", Component: PermissionsSection },
   { id: "catalog", label: "Catalog", Component: CatalogManageSection },
 ];

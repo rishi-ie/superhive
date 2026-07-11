@@ -23,7 +23,7 @@ export function CatalogManageSection({ settings, patch }: SettingsSectionProps) 
     const next = list.map((item, i) =>
       i === index ? { ...item, active: !item.active } : item,
     );
-    patch(`catalog.${key}`, next);
+    patch?.(`catalog.${key}`, next);
   };
 
   return (

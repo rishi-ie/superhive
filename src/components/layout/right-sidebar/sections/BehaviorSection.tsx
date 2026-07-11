@@ -6,7 +6,7 @@ export function BehaviorSection({ settings, patch }: SettingsSectionProps) {
   const perms = settings.permissions ?? { filesystem: true, terminal: true, network: true };
 
   const setPerm = (key: 'filesystem' | 'terminal' | 'network', value: boolean) => {
-    patch('permissions', { ...perms, [key]: value });
+    patch?.('permissions', { ...perms, [key]: value });
   };
 
   return (
@@ -16,7 +16,7 @@ export function BehaviorSection({ settings, patch }: SettingsSectionProps) {
         <Textarea
           className="min-h-[80px] resize-none text-sm"
           value={settings.systemPrompt ?? ''}
-          onChange={e => patch('systemPrompt', e.target.value)}
+          onChange={e => patch?.('systemPrompt', e.target.value)}
           placeholder="You are a helpful agent..."
         />
       </div>
