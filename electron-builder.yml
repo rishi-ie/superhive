@@ -8,9 +8,6 @@ files:
   - dist-electron
 asar: true
 afterPack: build/after-pack.cjs
-extraResources:
-  - from: extensions
-    to: extensions
 mac:
   target:
     - dmg

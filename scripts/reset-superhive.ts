@@ -21,4 +21,4 @@ console.log('[reset] wiping agent data...')
 nuke(join(root, 'agents'))
 nuke(join(root, 'db'))
 
-console.log('[reset] done — run bun run install:pi to reinstall the template')
+console.log('[reset] done — run bun run install:kai to reinstall the template')

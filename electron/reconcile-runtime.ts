@@ -1,6 +1,6 @@
 import log from 'electron-log/main'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
-import { runtime } from './manifest-pi-runtime'
+import { runtime } from './general-kai-runtime'
 import type { AgentStatus } from '../src/storage/types'
 
 const LIVE_STATUSES: AgentStatus[] = ['idle', 'initializing', 'running', 'busy']

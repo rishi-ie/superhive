@@ -35,11 +35,11 @@ async function main() {
     console.log('▸ db.agents.json: not found, skipping')
   }
 
-  // 2. Wipe per-agent folders (preserve manifest-pi-template/ + .superhive/)
+  // 2. Wipe per-agent folders (preserve general-kai-template/ + .superhive/)
   if (existsSync(AGENTS_DIR)) {
     const entries = await import('node:fs').then(fs => fs.readdirSync(AGENTS_DIR))
     for (const e of entries) {
-      if (e === 'manifest-pi-template') {
+      if (e === 'general-kai-template') {
         console.log(`▸   keep ${e}/`)
         continue
       }

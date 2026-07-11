@@ -1,15 +1,17 @@
 /**
  * Canonical settings defaults and helpers for Superhive-pi-{folder}.json.
  *
- * The DEFAULT_SETTINGS value comes from the extension's settings-schema so both
- * the electron main process and the pi subprocess share the exact same defaults.
+ * The DEFAULT_SETTINGS value comes from the superhive-pi-truth extension's
+ * settings-schema so both the electron main process and the pi subprocess
+ * share the exact same defaults.
  *
- * Vite bundles this file at build time, inlining DEFAULT_SETTINGS into the
- * electron bundle. No runtime path to extensions/ is needed.
+ * Bun installs `superhive-pi-truth` from GitHub (see package.json). Vite
+ * bundles this file at build time, inlining DEFAULT_SETTINGS into the
+ * electron bundle.
  */
 
 import { basename, join } from 'node:path'
-import { DEFAULT_SETTINGS, type SettingsFile } from 'extensions/superhive-pi-truth/settings-schema'
+import { DEFAULT_SETTINGS, type SettingsFile } from 'superhive-pi-truth/settings-schema'
 
 export type { SettingsFile }
 export { DEFAULT_SETTINGS }

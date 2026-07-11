@@ -6,10 +6,10 @@ import { autoUpdater } from 'electron-updater';
 import { setUserDataPath } from '../src/storage/database';
 import { seedWorkspace } from '../src/storage/seed';
 import { registerIpc } from './ipc';
-import { runtime } from './manifest-pi-runtime';
+import { runtime } from './general-kai-runtime';
 import { reconcileAgents } from './reconcile-agents';
 import { reconcileRuntime } from './reconcile-runtime';
-import { isManifestPiTemplateReady } from './install-bootstrap';
+import { isGeneralKaiReady } from './install-general-kai';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -94,10 +94,10 @@ app.whenReady().then(async () => {
 
   setUserDataPath(app.getPath('userData'));
 
-  if (!isManifestPiTemplateReady()) {
+  if (!isGeneralKaiReady()) {
     log.warn(
-      '[main] manifest-pi template not found at ~/.superhive/manifest-pi-template/\n' +
-      '[main] Agent creation will fail until you run: bun run install:pi',
+      '[main] general-kai template not found at ~/.superhive/general-kai-template/\n' +
+      '[main] Agent creation will fail until you run: bun run install:kai',
     )
   }
 

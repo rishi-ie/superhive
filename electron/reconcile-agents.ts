@@ -46,7 +46,7 @@ export async function reconcileAgents(): Promise<void> {
 				(d) =>
 					d.isDirectory() &&
 					!d.name.startsWith('.') &&
-					d.name !== 'manifest-pi-template',
+					d.name !== 'general-kai-template',
 			)
 			.map((d) => d.name)
 

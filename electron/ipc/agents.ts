@@ -4,12 +4,12 @@ import { existsSync, symlinkSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import log from 'electron-log/main'
-import { runtime } from '../manifest-pi-runtime'
-import { getBundledExtensionPath, hasBundledExtension, BUNDLED_EXTENSION_NAME } from '../extension-source'
+import { runtime } from '../general-kai-runtime'
+import { ensureExtension } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
-import { TEMPLATE_DIR, ensureManifestPiTemplate } from '../install-bootstrap'
+import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
 import { config } from '../config'
 import { sanitizeFolderName } from '../../src/lib/sanitize-folder-name'
 import {
@@ -18,6 +18,9 @@ import {
 	parseCounter,
 	settingsFilePathFor,
 } from '../agent-settings-defaults'
+
+const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
+const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 
 interface CreateAgentInput {
 	name: string
@@ -42,7 +45,7 @@ export function registerAgentIpc(): void {
 			if (!data.folderName?.trim()) throw new Error('Agent folder name is required')
 			if (!data.parentDir?.trim()) throw new Error('Parent directory is required')
 
-			ensureManifestPiTemplate()
+			ensureGeneralKai()
 
 			const rawFolderName = data.folderName.trim()
 			const folderName = sanitizeFolderName(rawFolderName)
@@ -65,20 +68,15 @@ export function registerAgentIpc(): void {
 			await mkdir(join(agentDir, 'extensions'), { recursive: true })
 
 			// Copy agent.sh from the pre-installed template
-			await cp(join(TEMPLATE_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
+			await cp(join(GENERAL_KAI_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
 			await chmod(join(agentDir, 'agent.sh'), 0o755)
 
-			// Symlink the bundled extension (zero copy, always fresh)
-			if (hasBundledExtension()) {
-				const extLink = join(agentDir, 'extensions', BUNDLED_EXTENSION_NAME)
-				symlinkSync(getBundledExtensionPath(), extLink, 'dir')
-				log.info(`[agents:create] symlinked bundled extension`)
-			} else {
-				log.error(
-					`[agents:create] bundled extension missing at ${getBundledExtensionPath()} — ` +
-					`settings flow unavailable. Rebuild: bun run build`,
-				)
-			}
+			// Ensure the extension is cloned to its canonical location, then symlink
+			// it into the agent's extensions folder (zero copy, always fresh).
+			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, SUPERHIVE_PI_TRUTH_URL)
+			const extLink = join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME)
+			symlinkSync(extensionSource, extLink, 'dir')
+			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TRUTH_NAME} from canonical clone`)
 
 			const agent = await AgentRepository.create({
 				name: data.name.trim(),

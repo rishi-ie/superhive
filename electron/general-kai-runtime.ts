@@ -60,7 +60,7 @@ const READY_SILENCE_MS = 2000
  * Manages live Pi runtime processes for all agents.
  * Single-threaded JS: all `entries` map mutations are safe without locks.
  */
-class ManifestPiRuntime {
+class GeneralKaiRuntime {
   private entries = new Map<string, RuntimeEntry>()
   private adapterFactories = new Map<string, () => PiProtocolAdapter>()
   private silenceTimers = new Map<string, NodeJS.Timeout>()
@@ -576,4 +576,4 @@ class ManifestPiRuntime {
   }
 }
 
-export const runtime = new ManifestPiRuntime()
+export const runtime = new GeneralKaiRuntime()

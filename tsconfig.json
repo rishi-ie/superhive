@@ -22,8 +22,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "extensions/*": ["extensions/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["src", "electron", "vite.config.ts"]

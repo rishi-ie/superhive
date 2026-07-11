@@ -1,11 +1,11 @@
 import { ipcMain } from 'electron'
 import { existsSync } from 'node:fs'
 import { readFile, writeFile, rename } from 'node:fs/promises'
-import { runtime } from '../manifest-pi-runtime'
+import { runtime } from '../general-kai-runtime'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { SettingsRepository } from '../../src/storage/repositories'
 import { IPC } from './index'
-import { TEMPLATE_DIR } from '../install-bootstrap'
+import { GENERAL_KAI_DIR } from '../install-general-kai'
 import { settingsFilePathFor, type SettingsFile } from '../agent-settings-defaults'
 
 /**
@@ -15,8 +15,9 @@ import { settingsFilePathFor, type SettingsFile } from '../agent-settings-defaul
  * existing dev workflows with `.env.local` continue to work.
  *
  * The provider-name mapping mirrors the one in
- * `extensions/superhive-pi-truth/provider-map.ts::envVarToProvider`. The two
- * stay in sync manually until the next refactor.
+ * `superhive-pi-truth/provider-map.ts::envVarToProvider` (consumed from the
+ * superhive-pi-truth GitHub dependency). The two stay in sync manually until
+ * the next refactor.
  */
 function envVarNameToProvider(envVar: string): string | null {
 	if (!envVar.endsWith('_API_KEY')) return null
@@ -118,7 +119,7 @@ export function registerRuntimeIpc(): void {
 		if (!agent) throw new Error(`Agent not found: ${agentId}`)
 		if (!agent.localPath) throw new Error(`Agent has no localPath: ${agentId}`)
 		await autoSeedProviders(agentId, agent.localPath)
-		runtime.start(agentId, agent.localPath, TEMPLATE_DIR)
+		runtime.start(agentId, agent.localPath, GENERAL_KAI_DIR)
 		await AgentRepository.update(agentId, { status: 'initializing', lastError: undefined })
 		return { ok: true }
 	})
