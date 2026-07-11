@@ -74,12 +74,6 @@ export function OverviewSection({ data }: OverviewSectionProps) {
         </div>
       )}
 
-      <Accordion title="Previous tasks" badge={data.previousTasks.length} emptyText="No previous tasks">
-        {data.previousTasks.map((task, i) => (
-          <SessionRow key={i} name={task.name} cost={task.cost} />
-        ))}
-      </Accordion>
-
       <Accordion
         title="Active checklist"
         badge={checklistBadge}
@@ -96,6 +90,12 @@ export function OverviewSection({ data }: OverviewSectionProps) {
             ))}
           </>
         )}
+      </Accordion>
+
+      <Accordion title="Previous tasks" badge={data.previousTasks.length} emptyText="No previous tasks">
+        {data.previousTasks.map((task, i) => (
+          <SessionRow key={i} name={task.name} cost={task.cost} />
+        ))}
       </Accordion>
 
       <Accordion
