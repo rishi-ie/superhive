@@ -43,7 +43,7 @@ export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAg
           )}
         </div>
         <div className="flex items-center gap-stack">
-          <Button variant="outline" size="sm" onClick={onRestart} className="gap-gap-tight.5">
+          <Button variant="outline" size="sm" onClick={onRestart} className="gap-list-item">
             <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
             Restart
           </Button>
@@ -51,7 +51,7 @@ export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAg
             variant="outline"
             size="sm"
             onClick={onDelete}
-            className="gap-gap-tight.5 text-destructive hover:text-destructive"
+            className="gap-list-item text-destructive hover:text-destructive"
           >
             <Icon icon={TrashIcon} className="size-3.5" />
             Delete Project

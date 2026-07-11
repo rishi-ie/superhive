@@ -82,7 +82,7 @@ export function ModelsSection() {
             size="sm"
             variant="outline"
             onClick={() => setEditor({ kind: 'new' })}
-            className="gap-gap-tight.5"
+            className="gap-list-item"
           >
             <Icon icon={PlusIcon} className="size-3.5" />
             Add model

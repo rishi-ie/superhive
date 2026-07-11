@@ -25,7 +25,7 @@ export function ProjectAgentStopped({ onStart }: ProjectAgentStoppedProps) {
         <p className="text-sm text-muted-foreground">
           The project coordinator's runtime is not running. Start it to resume chatting.
         </p>
-        <Button size="sm" onClick={onStart} className="mt-1 gap-gap-tight.5">
+        <Button size="sm" onClick={onStart} className="mt-1 gap-list-item">
           <Icon icon={PlayIcon} className="size-3.5" />
           Start Runtime
         </Button>

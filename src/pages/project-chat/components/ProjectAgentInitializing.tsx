@@ -116,7 +116,7 @@ export function ProjectAgentInitializing({ currentStep, agentName, lastError, on
 
         {stuck && (
           <div className="flex items-center gap-stack">
-            <Button size="sm" variant="outline" onClick={onRestart} className="gap-gap-tight.5">
+            <Button size="sm" variant="outline" onClick={onRestart} className="gap-list-item">
               <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
               Restart
             </Button>

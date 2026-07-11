@@ -83,7 +83,7 @@ export function ModelRow({
                 variant="outline"
                 size="sm"
                 onClick={onConfigure}
-                className="gap-gap-tight.5 cursor-default"
+                className="gap-list-item cursor-default"
                 aria-label={hasApiKey ? `Edit ${model.provider} key` : `Add key for ${model.provider}`}
               >
                 <Icon

@@ -118,7 +118,7 @@ function AppLayoutShell() {
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
 
         <div className="no-drag absolute top-3.5 left-[92px] z-[80]">
-          <div className="flex items-center gap-gap-tight.5 rounded-full bg-transparent px-row py-0.5">
+          <div className="flex items-center gap-list-item rounded-full bg-transparent px-row py-0.5">
             <span className="text-[10px] font-semibold tracking-tight text-sidebar-foreground/60 uppercase tracking-wider">{APP_META.name}</span>
             <span className="flex items-center rounded-full px-1.5 py-px">
               <span className="text-[9px] font-medium tabular-nums text-sidebar-foreground/40">v{APP_META.version}</span>

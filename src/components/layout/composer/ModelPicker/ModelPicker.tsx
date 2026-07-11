@@ -128,9 +128,9 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-gap-tight text-sm text-surface-composer-muted hover:text-surface-composer-foreground cursor-default"
+          className="flex items-center gap-gap-tight text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default"
         >
-          <span className={cn(!selected && 'text-surface-composer-placeholder')}>{display}</span>
+          <span className={cn(!selected && 'text-muted-foreground')}>{display}</span>
           <Icon icon={CaretDownIcon} className="size-3" />
         </button>
       </DropdownMenuTrigger>

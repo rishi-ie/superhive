@@ -9,7 +9,7 @@ interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export function FormField({ label, error, id, ...props }: FormFieldProps) {
   return (
-    <div className="flex flex-col gap-gap-tight.5">
+    <div className="flex flex-col gap-list-item">
       <Label htmlFor={id}>
         {label}
         {props.required && <span className="text-destructive ml-0.5">*</span>}

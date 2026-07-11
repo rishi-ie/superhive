@@ -84,7 +84,7 @@ export function AgentsListView() {
           <Button
             size="default"
             onClick={() => setCreateOpen(true)}
-            className="gap-gap-tight.5"
+            className="gap-list-item"
           >
             <Icon icon={PlusIcon} className="size-4" />
             New agent

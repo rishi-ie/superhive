@@ -34,7 +34,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, currentActi
           <span className="flex-1 truncate text-left">{name}</span>
           <AgentActions />
         </div>
-        <div className="flex h-8 flex-shrink-0 items-center gap-gap-tight.5 pl-6">
+        <div className="flex h-8 flex-shrink-0 items-center gap-list-item pl-6">
           <div className="size-3 rounded-full border border-border border-t-foreground/80 animate-spin" />
           <span className="truncate text-xs text-muted-foreground">{currentAction}</span>
         </div>

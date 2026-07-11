@@ -21,7 +21,7 @@ export function ProjectAgentEmpty() {
         <p className="text-sm text-muted-foreground">
           Pick a project from the sidebar, or create a new one to begin.
         </p>
-        <Button size="sm" onClick={() => setOpen(true)} className="mt-1 gap-gap-tight.5">
+        <Button size="sm" onClick={() => setOpen(true)} className="mt-1 gap-list-item">
           <Icon icon={PlusIcon} className="size-4" />
           New Project
         </Button>

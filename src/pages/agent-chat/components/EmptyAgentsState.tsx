@@ -22,7 +22,7 @@ export function EmptyAgentsState() {
       <Button
         size="sm"
         onClick={() => setOpen(true)}
-        className="gap-gap-tight.5"
+        className="gap-list-item"
       >
         <Icon icon={PlusIcon} className="size-3.5" />
         New agent

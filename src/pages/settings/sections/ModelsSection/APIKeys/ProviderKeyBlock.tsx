@@ -204,7 +204,7 @@ export function ProviderKeyBlock({
 
       {shape === 'single' ? (
         <>
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">API Key</label>
             <PasswordInput
               value={state.apiKey}
@@ -213,7 +213,7 @@ export function ProviderKeyBlock({
             />
           </div>
           {showBaseUrl && (
-            <div className="flex flex-col gap-gap-tight.5">
+            <div className="flex flex-col gap-list-item">
               <label className="text-xs text-muted-foreground">Endpoint (Base URL)</label>
               <Input
                 value={state.baseUrl}
@@ -223,7 +223,7 @@ export function ProviderKeyBlock({
               />
             </div>
           )}
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">Model</label>
             <Input
               value={state.preferredModel}
@@ -238,7 +238,7 @@ export function ProviderKeyBlock({
         </>
       ) : (
         <>
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">Access Key ID</label>
             <Input
               value={state.accessKeyId}
@@ -247,7 +247,7 @@ export function ProviderKeyBlock({
               className="font-mono"
             />
           </div>
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">Secret Access Key</label>
             <PasswordInput
               value={state.secretAccessKey}
@@ -255,7 +255,7 @@ export function ProviderKeyBlock({
               placeholder={hasExisting ? '•••••••• (stored)' : 'Enter Secret Access Key'}
             />
           </div>
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">Region</label>
             <Input
               value={state.region}
@@ -264,7 +264,7 @@ export function ProviderKeyBlock({
               className="font-mono"
             />
           </div>
-          <div className="flex flex-col gap-gap-tight.5">
+          <div className="flex flex-col gap-list-item">
             <label className="text-xs text-muted-foreground">Model</label>
             <Input
               value={state.preferredModel}
@@ -295,13 +295,13 @@ export function ProviderKeyBlock({
             variant="ghost"
             onClick={onClear}
             disabled={submitting}
-            className="text-destructive hover:text-destructive gap-gap-tight.5"
+            className="text-destructive hover:text-destructive gap-list-item"
           >
             <Icon icon={XCircleIcon} className="size-3.5" />
             Clear
           </Button>
         )}
-        <Button type="submit" disabled={submitting} className="gap-gap-tight.5">
+        <Button type="submit" disabled={submitting} className="gap-list-item">
           {submitting ? (
             <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />
           ) : (

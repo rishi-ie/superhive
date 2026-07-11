@@ -37,7 +37,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
       <div className="flex h-full flex-col items-center justify-center gap-gap-loose p-card">
         <Icon icon={WarningCircleIcon} className="size-4 text-muted-foreground" />
         <p className="text-xs text-muted-foreground">{error ?? "No settings found"}</p>
-        <Button variant="ghost" size="sm" className="h-7 gap-gap-tight.5 text-xs" onClick={() => void reload()}>
+        <Button variant="ghost" size="sm" className="h-7 gap-list-item text-xs" onClick={() => void reload()}>
           Retry
         </Button>
       </div>

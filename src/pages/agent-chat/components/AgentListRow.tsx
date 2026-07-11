@@ -100,7 +100,7 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
       </TableCell>
 
       <TableCell className="w-[140px">
-        <div className="flex items-center gap-gap-tight.5 whitespace-nowrap">
+        <div className="flex items-center gap-list-item whitespace-nowrap">
           <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
           {agent.status === 'initializing' ? (
             <Icon

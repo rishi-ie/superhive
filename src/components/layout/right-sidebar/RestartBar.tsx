@@ -25,11 +25,11 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
   return (
     <div className="flex items-center justify-between border-t border-sidebar-border py-button-y">
       <span className="text-xs text-muted-foreground">Live runtime</span>
-      <div className="flex items-center gap-gap-tight.5">
+      <div className="flex items-center gap-list-item">
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-gap-tight.5 text-xs"
+          className="h-7 gap-list-item text-xs"
           onClick={() => void stopAgent(agentId)}
           disabled={!canStop}
         >
@@ -39,7 +39,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="h-7 gap-gap-tight.5 text-xs"
+          className="h-7 gap-list-item text-xs"
           onClick={() => void restartAgent(agentId)}
           disabled={status === 'initializing'}
         >
