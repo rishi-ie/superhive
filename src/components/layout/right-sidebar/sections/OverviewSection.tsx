@@ -61,7 +61,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
               <span className="text-lg font-semibold text-foreground/80">
                 {data.name}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="ml-auto text-xs text-muted-foreground">
                 Apollo
               </span>
             </div>
