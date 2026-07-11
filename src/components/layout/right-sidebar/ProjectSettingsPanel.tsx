@@ -1,6 +1,6 @@
 import { Icon } from "@/components/ui/icon";
 import {
-  SquaresFourIcon,
+  TreeViewIcon,
   GearSixIcon,
   TrayIcon,
 } from "@phosphor-icons/react";
@@ -17,7 +17,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
         <TabsList className="w-full h-8 justify-center bg-transparent p-0">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
-            <Icon icon={SquaresFourIcon} className="size-3.5" />
+            <Icon icon={TreeViewIcon} className="size-3.5" />
             Overview
           </TabsTrigger>
           <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
