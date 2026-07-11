@@ -314,6 +314,13 @@ export function useAgentSettings(agentId: string | null) {
     if (!entry) return
     if (!entry.dirty) entry.dirty = {}
     entry.dirty[key] = value
+    // Optimistically apply the patch to the slice state so the UI (chat
+    // composer dropdown, picker, `hasModel` gate) reflects the new value
+    // immediately. The debounced IPC write below will reconcile against the
+    // server truth on its way back.
+    if (entry.settings) {
+      entry.settings = { ...entry.settings, [key]: value }
+    }
     // When the user picks a model in the composer, keep `defaultProvider` and
     // `defaultModel` in lockstep. The Pi runtime reads `defaultProvider` /
     // `defaultModel` from the per-agent settings file to resolve the initial
@@ -325,11 +332,22 @@ export function useAgentSettings(agentId: string | null) {
       const m = value as { provider?: string; name?: string }
       entry.dirty['defaultProvider'] = m.provider ?? ''
       entry.dirty['defaultModel'] = m.name ?? ''
+      if (entry.settings) {
+        entry.settings = {
+          ...entry.settings,
+          defaultProvider: m.provider ?? '',
+          defaultModel: m.name ?? '',
+        }
+      }
       if (m.provider && m.name) {
         const pickedId = `${m.provider}:${m.name}`
         const current = (entry.settings?.enabledModels ?? []) as string[]
         if (!current.includes(pickedId)) {
-          entry.dirty['enabledModels'] = [...current, pickedId]
+          const nextEnabled = [...current, pickedId]
+          entry.dirty['enabledModels'] = nextEnabled
+          if (entry.settings) {
+            entry.settings = { ...entry.settings, enabledModels: nextEnabled }
+          }
         }
       }
     }
@@ -340,7 +358,11 @@ export function useAgentSettings(agentId: string | null) {
       const p = e.dirty
       e.dirty = null
       e.debounceTimer = null
-      await updateAgentSettings({ agentId, patch: p })
+      const result = await updateAgentSettings({ agentId, patch: p })
+      if (result.ok && result.settings) {
+        const cur = settingsSlices.get(agentId)
+        if (cur) cur.settings = result.settings
+      }
     }, AUTO_SAVE_DEBOUNCE_MS)
   }, [agentId])
 
@@ -354,7 +376,11 @@ export function useAgentSettings(agentId: string | null) {
     }
     entry.dirty = null
     if (Object.keys(p).length === 0) return
-    await updateAgentSettings({ agentId, patch: p })
+    const result = await updateAgentSettings({ agentId, patch: p })
+    if (result.ok && result.settings) {
+      const cur = settingsSlices.get(agentId)
+      if (cur) cur.settings = result.settings
+    }
   }, [agentId])
 
   const reload = React.useCallback(async () => {
