@@ -21,10 +21,10 @@ export function WorkspaceBreadcrumb() {
             <Icon icon={CaretDownIcon} className="size-3" />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="border-border bg-card">
-          <DropdownMenuItem>Home</DropdownMenuItem>
-          <DropdownMenuItem>Recent</DropdownMenuItem>
-          <DropdownMenuItem>Favorites</DropdownMenuItem>
+        <DropdownMenuContent align="start" className="border-border bg-modal text-modal-foreground">
+          <DropdownMenuItem className="text-modal-foreground">Home</DropdownMenuItem>
+          <DropdownMenuItem className="text-modal-foreground">Recent</DropdownMenuItem>
+          <DropdownMenuItem className="text-modal-foreground">Favorites</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Icon icon={CaretRightIcon} className="size-3 text-muted-foreground" />

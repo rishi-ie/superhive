@@ -134,11 +134,11 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
           <Icon icon={CaretDownIcon} className="size-3" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[220px]">
+      <DropdownMenuContent align="end" className="min-w-[220px] bg-modal text-modal-foreground">
         {loading ? (
-          <DropdownMenuItem disabled>Loading…</DropdownMenuItem>
+          <DropdownMenuItem disabled className="text-modal-foreground/60">Loading…</DropdownMenuItem>
         ) : models.length === 0 ? (
-          <DropdownMenuItem disabled>Add a key in Settings → Models</DropdownMenuItem>
+          <DropdownMenuItem disabled className="text-modal-foreground/60">Add a key in Settings → Models</DropdownMenuItem>
         ) : (
           models.map((m) => (
             <DropdownMenuItem
@@ -146,8 +146,8 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
               onSelect={() => onSelect(m)}
               className="flex flex-col items-start gap-0"
             >
-              <span className="text-sm">{m.name}</span>
-              <span className="text-[0.625rem] text-muted-foreground">
+              <span className="text-sm text-modal-foreground">{m.name}</span>
+              <span className="text-[0.625rem] text-modal-foreground/60">
                 {m.provider}
               </span>
             </DropdownMenuItem>
