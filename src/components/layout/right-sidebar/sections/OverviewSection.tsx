@@ -2,7 +2,6 @@ import {
   Accordion,
   ActivityRow,
   ChecklistRow,
-  ResponsibilitySlider,
   SessionRow,
   type ActivityType,
 } from "../primitives";
@@ -112,8 +111,6 @@ export function OverviewSection({ data }: OverviewSectionProps) {
           />
         ))}
       </Accordion>
-
-      <ResponsibilitySlider count={data.responsibilityCount} />
     </div>
   );
 }
