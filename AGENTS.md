@@ -238,8 +238,8 @@ src/
 │   │   ├── runtime/                 # use-agent-runtime, start-agent-runtime
 │   │   └── ui/                     # open-create-agent
 │   ├── projects/
-│   ├── navigation/                  # go-back-home, go-to-settings, go-to-settings-section
-│   ├── ui/                         # use-command-palette, use-center-breadcrumb
+│   ├── navigation/                  # go-back-home, go-to-settings
+│   ├── ui/                         # use-command-palette, use-center-breadcrumb, use-app-update
 │   └── index.ts                    # top-level barrel
 │
 ├── pages/                            # Route targets — one folder per feature
@@ -252,23 +252,20 @@ src/
 │   ├── meta-hive/
 │   ├── remote/
 │   ├── settings/                    # SettingsLayout + SettingsSidebar + SettingsSectionView
-│   └── *_Legacy.tsx               # Orphan re-exports (no longer used — keep, don't delete)
 │
 ├── components/                      # All UI
-│   ├── ui/                         # shadcn primitives (24 components, 7 unused)
-│   ├── common/                     # EmptyState, Spinner, PanelHeader, FormField (unused)
+│   ├── ui/                         # shadcn primitives (26 components, 4 unused)
+│   ├── common/                     # PasswordInput (EmptyState, Spinner, PanelHeader, FormField deleted)
 │   └── layout/                     # Shell layer (see 3-Panel Architecture)
 │       ├── shell/                  # AppLayout, Workspace
 │       ├── command-palette/        # CommandPalette
 │       ├── left-sidebar/            # AppSidebar, SidebarAccordion, SidebarRepositories,
 │       │                            # SidebarUser, sections/, primitives/
 │       ├── right-sidebar/
-│       └── common/                # CenterBreadcrumb, TopHandle (unused), TopRightControls
+│       └── common/                # CenterBreadcrumb, TopRightControls (TopHandle deleted)
 │
 ├── models/                          # Domain shapes for renderer/UI (not storage or IPC)
-│   ├── runtime.ts                  # RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload
-│   ├── boot-step.ts               # InitStep, AdapterEvent, INIT_STEPS
-│   ├── template.ts                # EnsureTemplateResult
+│   ├── runtime.ts                  # RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload, InitStep, AdapterEvent, INIT_STEPS
 │   └── index.ts
 │
 ├── styles/
@@ -278,18 +275,18 @@ src/
 │   ├── database.ts
 │   ├── seed.ts
 │   ├── types.ts
-│   └── repositories/               # Agent, Project, Task, Session, Channel, Workspace, Tag, Settings
+│   └── repositories/               # Agent, Project, Settings (3 of 8 wired — Task/Session/Tag/Workspace/Channel deleted)
 │
 ├── api/                             # window.api IPC wrappers
 │   ├── agents.ts
-│   ├── manifest-pi.ts
-│   └── projects.ts
+│   ├── channels.ts
+│   ├── projects.ts
+│   └── settings.ts
 │
 ├── hooks/                           # Generic React hooks (no business logic)
 ├── lib/                             # cn() utilities
 ├── types/                           # IPC contract declarations
-│   ├── electron.d.ts               # window.api.* + runtime type re-exports
-│   └── init-steps.ts              # INIT_STEPS (legacy)
+│   └── electron.d.ts               # window.api.* + runtime type re-exports
 │
 ├── App.tsx                         # TooltipProvider + Routes
 ├── main.tsx                        # renderer entry
@@ -317,7 +314,9 @@ Routes config lives at `src/pages/routes.tsx`. Page components are imported dire
 
 ## Data Layer (LowDB)
 
-8 repositories, 82 methods total. Per-entity JSON files in Electron `userData` directory. All repo methods async. Cascade deletes handled by repository helpers (no UI-side cascades).
+3 repositories (Agent, Project, Settings). Per-entity JSON files in Electron `userData` directory. All repo methods async. Cascade deletes handled by repository helpers (no UI-side cascades).
+
+Channel storage uses raw JSONL files in `~/.superhive/channels/` (not LowDB).
 
 See `storage.md` for full repository reference.
 
@@ -325,7 +324,7 @@ See `storage.md` for full repository reference.
 
 ## Sidebar Pattern
 
-`src/components/layout/left-sidebar/sections/` contains per-entity section files (`PinnedSection.tsx`, `AgentsSection.tsx`, `ProjectsSection.tsx`, `ChannelsSection.tsx`). Each:
+`src/components/layout/left-sidebar/sections/` contains per-entity section files (`PinnedSection.tsx`, `ProjectsSection.tsx`). Each:
 - Holds local state via `useState`
 - Loads via `useEffect(() => flow().then(setState), [])` — flows only
 - Renders either an `AccordionRow` per item OR an `EmptyCtaButton` when empty
