@@ -22,13 +22,13 @@ export function ModelRow({
   onDelete,
 }: ModelRowProps) {
   return (
-    <div
-      className={cn(
-        'flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3',
-        !hasApiKey && 'opacity-60'
-      )}
-    >
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+    <div className="flex items-center gap-4 rounded-md border border-border bg-card px-4 py-3">
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col gap-0.5',
+          !hasApiKey && 'opacity-60',
+        )}
+      >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground truncate">
             {model.name}

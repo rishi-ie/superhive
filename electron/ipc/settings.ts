@@ -258,15 +258,33 @@ export function registerSettingsIpc(): void {
 				GLOBAL_OWNER_ID,
 				id,
 			)
-			if (!existing) throw new Error(`Model not found: ${id}`)
-			const current = existing.value as ModelEntry
+			if (existing) {
+				const current = existing.value as ModelEntry
+				await SettingsRepository.setSetting(
+					GLOBAL_OWNER_TYPE,
+					GLOBAL_OWNER_ID,
+					id,
+					{ ...current, enabled },
+					'json',
+					current.name,
+					undefined,
+					GROUP_MODELS,
+				)
+				return
+			}
+			// Curated row that doesn't exist yet — derive provider + name from id
+			// (`provider:modelName` convention) and insert as a non-custom row.
+			const colon = id.indexOf(':')
+			if (colon <= 0) throw new Error(`Invalid model id: ${id}`)
+			const provider = id.slice(0, colon)
+			const name = id.slice(colon + 1)
 			await SettingsRepository.setSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
 				id,
-				{ ...current, enabled },
+				{ id, provider, name, enabled, isCustom: false },
 				'json',
-				current.name,
+				name,
 				undefined,
 				GROUP_MODELS,
 			)

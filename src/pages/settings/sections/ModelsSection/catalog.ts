@@ -33,7 +33,7 @@ export const PROVIDERS: CatalogProviderMeta[] = [
   {
     name: 'anthropic',
     baseUrl: '',
-    showBaseUrl: false,
+    showBaseUrl: true,
     keyLabel: 'API Key',
     docsUrl: 'https://anthropic.com',
     hasApiKeysBlock: true,
@@ -42,7 +42,7 @@ export const PROVIDERS: CatalogProviderMeta[] = [
   {
     name: 'google',
     baseUrl: '',
-    showBaseUrl: false,
+    showBaseUrl: true,
     keyLabel: 'API Key',
     docsUrl: 'https://aistudio.google.com/apikey',
     hasApiKeysBlock: true,

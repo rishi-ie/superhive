@@ -90,7 +90,7 @@ export function ModelsSection() {
                     provider: m.provider,
                     name: m.name,
                     enabled: Boolean(stored?.enabled),
-                    isCustom: stored?.isCustom ?? false,
+                    isCustom: false,
                   }}
                   hasApiKey={modelHasKey}
                   onToggleEnabled={(enabled: boolean) =>
@@ -104,6 +104,8 @@ export function ModelsSection() {
                     const providerMeta = getProviderMeta(m.provider);
                     if (providerMeta) {
                       setEditor({ kind: 'catalog', provider: providerMeta, modelName: m.name });
+                    } else {
+                      setEditor({ kind: 'new' });
                     }
                   }}
                 />
