@@ -31,8 +31,8 @@ export function ResponsibilitySlider({
   return (
     <div className="flex flex-col gap-gap-tight">
       <div className="flex items-center justify-between gap-gap-loose">
-        <span className="text-xs text-muted-foreground">Responsibility</span>
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="text-sm text-muted-foreground">Responsibility</span>
+        <span className="text-sm tabular-nums text-muted-foreground">
           {count}/{max}
         </span>
       </div>

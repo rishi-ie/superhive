@@ -62,7 +62,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
             </span>
           )}
           {data.description && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               {data.description}
             </span>
           )}
@@ -100,7 +100,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       >
         <div className="flex flex-wrap gap-gap-tight">
           {data.catalog.skills.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+            <Badge key={i} variant="secondary" className="text-sm opacity-60">
               {badgeName(item)}
             </Badge>
           ))}
@@ -114,7 +114,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       >
         <div className="flex flex-wrap gap-gap-tight">
           {data.catalog.extensions.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+            <Badge key={i} variant="secondary" className="text-sm opacity-60">
               {badgeName(item)}
             </Badge>
           ))}
@@ -128,7 +128,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
       >
         <div className="flex flex-wrap gap-gap-tight">
           {data.catalog.prompts.map((item, i) => (
-            <Badge key={i} variant="secondary" className="text-xs opacity-60">
+            <Badge key={i} variant="secondary" className="text-sm opacity-60">
               {badgeName(item)}
             </Badge>
           ))}

@@ -30,7 +30,7 @@ export function Accordion({
         aria-expanded={open}
         className="group flex items-center justify-between gap-gap-loose py-button-y text-left transition-colors hover:text-foreground"
       >
-        <span className="flex items-center gap-list-item text-xs font-medium text-muted-foreground group-hover:text-foreground">
+        <span className="flex items-center gap-list-item text-sm font-medium text-muted-foreground group-hover:text-foreground">
           {title}
           {badge !== undefined && (
             <span className="rounded-button bg-muted px-1.5 py-px text-[10px] tabular-nums text-muted-foreground">

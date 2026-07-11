@@ -16,7 +16,7 @@ export function ChecklistRow({ text, done }: ChecklistRowProps) {
       />
       <span
         className={cn(
-          "text-xs",
+          "text-sm",
           done ? "text-muted-foreground/60" : "text-foreground"
         )}
       >
