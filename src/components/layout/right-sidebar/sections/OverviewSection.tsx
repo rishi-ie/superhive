@@ -62,7 +62,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
                 {data.name}
               </span>
               <span className="text-xs text-muted-foreground">
-                · Project Apollo
+                Project Apollo
               </span>
             </div>
           )}
