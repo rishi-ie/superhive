@@ -72,7 +72,7 @@ export function OverviewSection({ data }: OverviewSectionProps) {
             </span>
           )}
           {data.roleSummary && (
-            <span className="text-xs text-muted-foreground/60 line-clamp-2">
+            <span className="mt-gap-tight text-xs text-muted-foreground/60 line-clamp-2">
               {data.roleSummary}
             </span>
           )}
