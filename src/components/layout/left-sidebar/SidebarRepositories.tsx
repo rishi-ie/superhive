@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, MagnifyingGlassIcon, HexagonIcon, GlobeIcon, UserIcon, SwapIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { PlusIcon, MagnifyingGlassIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -87,7 +87,7 @@ export function SidebarRepositories() {
                 className="flex size-6 cursor-default items-center justify-center rounded-card text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                 title="Reorder projects"
               >
-                <Icon icon={SwapIcon} className="size-4" />
+                <Icon icon={ArrowsDownUpIcon} className="size-4" />
               </button>
             </div>
           </div>
