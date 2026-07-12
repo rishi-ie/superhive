@@ -61,10 +61,12 @@ export function AgentsListView() {
     );
   }, [nonCoordinators, filter]);
 
-  const projectNameFor = (agent: Agent): string | undefined => {
+  const projectFor = (agent: Agent): { id: string; name: string } | null => {
     const firstId = agent.projectIds[0];
-    if (!firstId) return undefined;
-    return projectsById[firstId]?.name;
+    if (!firstId) return null;
+    const p = projectsById[firstId];
+    if (!p) return null;
+    return { id: p.id, name: p.name };
   };
 
   return (
@@ -137,7 +139,7 @@ export function AgentsListView() {
                     <AgentListRow
                       key={agent.id}
                       agent={agent}
-                      projectName={projectNameFor(agent)}
+                      project={projectFor(agent)}
                     />
                   ))}
                 </TableBody>
