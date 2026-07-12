@@ -48,6 +48,12 @@ export function ProjectMembersList(props: ProjectMembersListProps) {
 					</Button>
 				</div>
 			))}
+			{props.members.length === 0 && props.coordinator && (
+				<span className="text-xs text-muted-foreground">No additional agents assigned.</span>
+			)}
+			{props.members.length === 0 && !props.coordinator && (
+				<span className="text-xs text-muted-foreground">No agents yet</span>
+			)}
 		</div>
 	);
 }
