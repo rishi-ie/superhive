@@ -124,7 +124,7 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
           <Link
             to={`/projects/${project.id}`}
             onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center rounded-button bg-sidebar-primary/10 px-row py-0.5 text-[11px] font-medium text-sidebar-primary hover:bg-sidebar-primary/20"
+            className="text-sm text-muted-foreground"
           >
             {project.name}
           </Link>
