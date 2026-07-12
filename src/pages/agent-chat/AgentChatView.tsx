@@ -8,6 +8,7 @@ import { AgentInitializing } from './components/AgentInitializing';
 import { AgentError } from './components/AgentError';
 import { AgentStopped } from './components/AgentStopped';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
+import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { toast } from 'sonner';
@@ -110,6 +111,7 @@ export function AgentChatView() {
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
+                <ContextUsageRing percent={0} />
               </div>
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={agentId} />

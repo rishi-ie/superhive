@@ -23,6 +23,7 @@ import {
 } from '@phosphor-icons/react';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
+import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { ProjectAgentInitializing } from './components/ProjectAgentInitializing';
 import { ProjectAgentError } from './components/ProjectAgentError';
 import { ProjectAgentStopped } from './components/ProjectAgentStopped';
@@ -179,6 +180,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
+                <ContextUsageRing percent={0} />
               </div>
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={projectAgent.id} />
