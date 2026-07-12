@@ -6,6 +6,7 @@ import type {
   AdapterEvent,
   AgentStatus,
   InitStep,
+  UsageSnapshot,
 } from '@/types/electron'
 import type { AgentSettingsState } from './settings'
 import { updateAgentSettings } from './settings/update-agent-settings'
@@ -21,6 +22,7 @@ interface RuntimeSlice {
   messages: RuntimeMessage[]
   lastError?: string
   bootStep?: InitStep
+  usage?: UsageSnapshot
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -72,6 +74,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     messages: [],
     lastError: undefined,
     bootStep: undefined,
+    usage: undefined,
     loading: true,
     initialized: false,
     unsubs,
@@ -87,6 +90,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.status = s.status
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
+      entry.usage = s.usage
     }
     entry.loading = false
   })
@@ -105,6 +109,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.status = s.status
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
+      entry.usage = s.usage
     })
   )
 
@@ -234,6 +239,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [messages, setMessages] = React.useState<RuntimeMessage[]>([])
   const [lastError, setLastError] = React.useState<string | undefined>(undefined)
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
+  const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -251,6 +257,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setMessages([...sliceRef.current.messages])
       setLastError(sliceRef.current.lastError)
       setBootStep(sliceRef.current.bootStep)
+      setUsage(sliceRef.current.usage)
       setLoading(sliceRef.current.loading)
     }
 
@@ -272,7 +279,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     void restartAgent(agentId)
   }, [agentId])
 
-  return { agent, status, messages, lastError, bootStep, loading, send, restart }
+  return { agent, status, messages, lastError, bootStep, usage, loading, send, restart }
 }
 
 export function useAgentSettings(agentId: string | null) {
