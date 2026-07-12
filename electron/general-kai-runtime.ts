@@ -10,16 +10,9 @@ import {
   type InitStep,
   type UsageSnapshot,
   type ContextSnapshot,
+  type ModelInfo,
   RawTextAdapter,
 } from './pi-protocol'
-
-interface ModelInfo {
-  provider: string
-  id: string
-  name: string
-  contextWindow: number
-  maxTokens: number
-}
 import { TelemetryTailer } from './pi-protocol/telemetry-tailer'
 import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
@@ -113,6 +106,7 @@ class GeneralKaiRuntime {
       bootStep: entry.bootStep,
       usage: entry.usage,
       contextUsage: entry.contextUsage,
+      availableModels: entry.availableModels,
     }
   }
 
@@ -378,6 +372,11 @@ class GeneralKaiRuntime {
       }
       return
     }
+    if (event.type === 'models' && Array.isArray(event.models)) {
+      entry.availableModels = event.models as ModelInfo[]
+      this.emitStatus(agentId)
+      return
+    }
     // 'lifecycle' events are recorded but do not change UI state.
   }
 
@@ -602,6 +601,7 @@ class GeneralKaiRuntime {
       bootStep: entry.bootStep,
       usage: entry.usage,
       contextUsage: entry.contextUsage,
+      availableModels: entry.availableModels,
     })
   }
 

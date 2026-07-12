@@ -1,5 +1,5 @@
-import type { InitStep, UsageSnapshot, ContextSnapshot } from '../../electron/pi-protocol/types'
-export type { InitStep, UsageSnapshot, ContextSnapshot } from '../../electron/pi-protocol/types'
+import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
+export type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
 export { INIT_STEPS } from '../../electron/pi-protocol/types'
 
 export interface RuntimeMessage {
@@ -19,6 +19,7 @@ export interface RuntimeStatusPayload {
   bootStep?: InitStep
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
+  availableModels?: ModelInfo[]
 }
 
 export interface RuntimeExitPayload {

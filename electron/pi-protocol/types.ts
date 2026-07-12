@@ -21,6 +21,14 @@ export interface ContextSnapshot {
   percent: number | null
 }
 
+export interface ModelInfo {
+  provider: string
+  id: string
+  name: string
+  contextWindow: number
+  maxTokens: number
+}
+
 export type AdapterEvent =
   | { type: 'text-delta'; messageId: string; delta: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
