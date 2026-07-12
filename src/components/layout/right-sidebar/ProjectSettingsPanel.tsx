@@ -76,7 +76,19 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
               coordinator={team.coordinator}
               members={team.members}
               onAssignClick={() => setAssignOpen(true)}
-              onRemove={() => undefined}
+              onRemove={async (agent) => {
+                const { removeAgentFromProject } = await import(
+                  "@/flows/projects/crud/remove-agent-from-project"
+                );
+                const r = await removeAgentFromProject({
+                  projectId,
+                  agentId: agent.id,
+                });
+                if (r.ok) {
+                  const t = await loadProjectTeam(projectId);
+                  setTeam({ coordinator: t.coordinator, members: t.members });
+                }
+              }}
             />
           </ScrollArea>
         </TabsContent>

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, XIcon } from '@phosphor-icons/react';
 import { Icon } from '@/components/ui/icon';
 import type { Agent } from '@/storage/types';
+import { UnassignAgentDialog } from './UnassignAgentDialog';
 
 interface ProjectMembersListProps {
 	projectId: string;
@@ -12,6 +14,8 @@ interface ProjectMembersListProps {
 }
 
 export function ProjectMembersList(props: ProjectMembersListProps) {
+	const [pendingRemove, setPendingRemove] = useState<Agent | null>(null);
+
 	return (
 		<div className="flex flex-col gap-stack p-card">
 			<div className="flex items-center justify-between">
@@ -41,7 +45,13 @@ export function ProjectMembersList(props: ProjectMembersListProps) {
 					<Button
 						size="icon"
 						variant="ghost"
-						onClick={() => props.onRemove(a)}
+						onClick={() => {
+							if (a.status === 'initializing' || a.status === 'running' || a.status === 'busy') {
+								setPendingRemove(a);
+							} else {
+								props.onRemove(a);
+							}
+						}}
 						aria-label={`Remove ${a.name}`}
 					>
 						<Icon icon={XIcon} className="size-3.5" />
@@ -54,6 +64,15 @@ export function ProjectMembersList(props: ProjectMembersListProps) {
 			{props.members.length === 0 && !props.coordinator && (
 				<span className="text-xs text-muted-foreground">No agents yet</span>
 			)}
+			<UnassignAgentDialog
+				open={!!pendingRemove}
+				agentName={pendingRemove?.name ?? null}
+				onConfirm={() => {
+					if (pendingRemove) props.onRemove(pendingRemove);
+					setPendingRemove(null);
+				}}
+				onCancel={() => setPendingRemove(null)}
+			/>
 		</div>
 	);
 }
