@@ -509,6 +509,21 @@ class GeneralKaiRuntime {
         if (entry.stderrLog.length > STDERR_LOG_LIMIT) {
           entry.stderrLog.shift()
         }
+        // Promote any extension-load failure lines to warn level so
+        // they show up in main.log without requiring debug logging.
+        // Pi's loader catches extension exceptions and returns them in
+        // LoadExtensionsResult.errors, but the agent harness swallows
+        // that — extension authors write to stderr (or stdout) instead,
+        // and we want those visible.
+        if (
+          /Failed to load extension/i.test(trimmed) ||
+          /Cannot find module/i.test(trimmed) ||
+          /SyntaxError|TypeError|TSError/.test(trimmed) ||
+          /\b(superhive-pi-truth|superhive-pi-telemetry)\b/.test(trimmed) &&
+            /failed|error|missing/i.test(trimmed)
+        ) {
+          log.warn(`[runtime.extension-load-error] agent=${agentId} ${trimmed}`)
+        }
       }
       const preview = text.length > 200 ? text.slice(0, 200) + '...' : text
       log.debug(`[runtime.stderr] agent=${agentId} len=${chunk.length} preview=${JSON.stringify(preview)}`)
