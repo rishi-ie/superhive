@@ -18,4 +18,7 @@ export const projects = {
 
   addAgent: (projectId: string, agentId: string): Promise<void> =>
     window.api.projects.addAgent(projectId, agentId),
+
+  removeAgent: (projectId: string, agentId: string): Promise<void> =>
+    window.api.projects.removeAgent(projectId, agentId),
 };
