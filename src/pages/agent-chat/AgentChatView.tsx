@@ -13,7 +13,7 @@ import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { toast } from 'sonner';
 
-const CONTEXT_WINDOW = 200000;
+const CONTEXT_WINDOW_FALLBACK = 200000;
 
 export function AgentChatView() {
   const { agentId } = useParams();
@@ -24,10 +24,12 @@ export function AgentChatView() {
     lastError,
     bootStep,
     usage,
+    contextUsage,
     loading,
     send,
     restart,
   } = useAgentRuntime(agentId);
+  const contextWindow = contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
 
   // Read the current model selection so we can gate the send button.
   // The composer dropdown is the only picker; if no model is chosen, chat is disabled.
@@ -115,9 +117,9 @@ export function AgentChatView() {
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
                 <ContextUsageRing
-                  percent={usage ? Math.min(100, (usage.input / CONTEXT_WINDOW) * 100) : 0}
+                  percent={usage ? Math.min(100, (usage.input / contextWindow) * 100) : 0}
                   usedTokens={usage?.input}
-                  maxTokens={CONTEXT_WINDOW}
+                  maxTokens={contextWindow}
                 />
               </div>
               <div className="flex items-center gap-5">

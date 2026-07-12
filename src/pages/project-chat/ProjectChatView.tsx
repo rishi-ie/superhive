@@ -36,7 +36,7 @@ import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
-const CONTEXT_WINDOW = 200000;
+const CONTEXT_WINDOW_FALLBACK = 200000;
 
 export function ProjectChatView() {
   const { projectId } = useParams();
@@ -100,7 +100,8 @@ export function ProjectChatView() {
 }
 
 function ProjectChatContent({ project, projectAgent }: { project: Project; projectAgent: Agent }) {
-  const { status, messages, lastError, bootStep, usage, loading, send, restart } = useAgentRuntime(projectAgent.id);
+  const { status, messages, lastError, bootStep, usage, contextUsage, loading, send, restart } = useAgentRuntime(projectAgent.id);
+  const contextWindow = contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
   // Read the current model selection so we can gate the send button.
   // Mirrors the guard in AgentChatView: chat is disabled when no model is chosen.
   const agentSettings = useAgentSettings(projectAgent.id);
@@ -183,9 +184,9 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
                 <ContextUsageRing
-                  percent={usage ? Math.min(100, (usage.input / CONTEXT_WINDOW) * 100) : 0}
+                  percent={usage ? Math.min(100, (usage.input / contextWindow) * 100) : 0}
                   usedTokens={usage?.input}
-                  maxTokens={CONTEXT_WINDOW}
+                  maxTokens={contextWindow}
                 />
               </div>
               <div className="flex items-center gap-5">
