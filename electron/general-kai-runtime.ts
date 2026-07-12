@@ -8,6 +8,7 @@ import {
   type AdapterEvent,
   type PiProtocolAdapter,
   type InitStep,
+  type UsageSnapshot,
   RawTextAdapter,
 } from './pi-protocol'
 import type { AgentStatus } from '../src/storage/types'
@@ -38,6 +39,8 @@ export interface RuntimeEntry {
   status: AgentStatus
   bootStep?: InitStep
   lastError?: string
+  // usage
+  usage?: UsageSnapshot
   // adapter
   adapter: PiProtocolAdapter
 }
@@ -82,6 +85,7 @@ class GeneralKaiRuntime {
       endedAt: entry.endedAt,
       lastError: entry.lastError,
       bootStep: entry.bootStep,
+      usage: entry.usage,
     }
   }
 
@@ -124,6 +128,7 @@ class GeneralKaiRuntime {
     entry.endedAt = undefined
     entry.lastError = undefined
     entry.bootStep = undefined
+    entry.usage = undefined
     entry.stderrLog = []
     adapter.reset()
 
@@ -477,6 +482,12 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'usage') {
+      entry.usage = event.usage
+      this.emitStatus(agentId)
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
@@ -506,6 +517,7 @@ class GeneralKaiRuntime {
       endedAt: entry.endedAt,
       lastError: entry.lastError,
       bootStep: entry.bootStep,
+      usage: entry.usage,
     })
   }
 
