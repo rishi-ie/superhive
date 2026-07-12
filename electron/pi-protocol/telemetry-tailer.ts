@@ -1,4 +1,13 @@
-import { closeSync, existsSync, openSync, readSync, statSync, watch, type FSWatcher } from 'node:fs'
+import {
+  closeSync,
+  existsSync,
+  openSync,
+  readSync,
+  statSync,
+  watch,
+  type FSWatcher,
+} from 'node:fs'
+import { dirname } from 'node:path'
 import log from 'electron-log/main'
 
 export class TelemetryTailer {
@@ -14,16 +23,11 @@ export class TelemetryTailer {
   ) {}
 
   start(): void {
-    if (!existsSync(this.journalPath)) {
-      log.debug(`[telemetry-tailer] no journal yet at ${this.journalPath}; will tail when file appears`)
-    }
-    try {
-      this.watcher = watch(this.journalPath, () => this.scheduleRead())
-    } catch (err) {
-      log.warn(`[telemetry-tailer] failed to watch ${this.journalPath}:`, err)
+    if (existsSync(this.journalPath)) {
+      this.watchFile()
       return
     }
-    this.scheduleRead()
+    this.watchDir()
   }
 
   stop(): void {
@@ -35,6 +39,39 @@ export class TelemetryTailer {
       this.watcher.close()
       this.watcher = null
     }
+  }
+
+  private watchFile(): void {
+    try {
+      this.watcher = watch(this.journalPath, () => this.scheduleRead())
+    } catch (err) {
+      log.warn(`[telemetry-tailer] failed to watch ${this.journalPath}; falling back to dir watch:`, err)
+      this.watchDir()
+      return
+    }
+    log.debug(`[telemetry-tailer] watching ${this.journalPath}`)
+    this.scheduleRead()
+  }
+
+  private watchDir(): void {
+    const dir = dirname(this.journalPath)
+    try {
+      this.watcher = watch(dir, () => this.promoteIfFileExists())
+    } catch (err) {
+      log.warn(`[telemetry-tailer] failed to watch dir ${dir}:`, err)
+      return
+    }
+    log.debug(`[telemetry-tailer] journal missing; watching parent dir ${dir} for it to appear`)
+  }
+
+  private promoteIfFileExists(): void {
+    if (!existsSync(this.journalPath)) return
+    if (this.watcher) {
+      this.watcher.close()
+      this.watcher = null
+    }
+    log.debug(`[telemetry-tailer] journal appeared at ${this.journalPath}; promoting to file watch`)
+    this.watchFile()
   }
 
   private scheduleRead(): void {
