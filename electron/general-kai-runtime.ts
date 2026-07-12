@@ -358,7 +358,9 @@ class GeneralKaiRuntime {
     const entry = this.entries.get(agentId)
     if (!entry) return
     if (event.type === 'usage' && event.usage && typeof event.usage === 'object') {
-      entry.usage = event.usage as UsageSnapshot
+      const next = event.usage as UsageSnapshot
+      if (this.usageEquals(entry.usage, next)) return
+      entry.usage = next
       this.emitStatus(agentId)
       return
     }
@@ -366,18 +368,61 @@ class GeneralKaiRuntime {
       const tokens = typeof event.tokens === 'number' ? event.tokens : null
       const contextWindow = typeof event.contextWindow === 'number' ? event.contextWindow : 0
       const percent = typeof event.percent === 'number' ? event.percent : null
-      if (contextWindow > 0) {
-        entry.contextUsage = { tokens, contextWindow, percent }
-        this.emitStatus(agentId)
-      }
+      if (contextWindow <= 0) return
+      const next: ContextSnapshot = { tokens, contextWindow, percent }
+      if (this.contextUsageEquals(entry.contextUsage, next)) return
+      entry.contextUsage = next
+      this.emitStatus(agentId)
       return
     }
     if (event.type === 'models' && Array.isArray(event.models)) {
-      entry.availableModels = event.models as ModelInfo[]
+      const next = event.models as ModelInfo[]
+      if (this.modelsEqual(entry.availableModels, next)) return
+      entry.availableModels = next
       this.emitStatus(agentId)
       return
     }
     // 'lifecycle' events are recorded but do not change UI state.
+  }
+
+  private usageEquals(a: UsageSnapshot | undefined, b: UsageSnapshot): boolean {
+    if (!a) return false
+    return (
+      a.input === b.input &&
+      a.output === b.output &&
+      a.cacheRead === b.cacheRead &&
+      a.cacheWrite === b.cacheWrite &&
+      a.totalTokens === b.totalTokens
+    )
+  }
+
+  private contextUsageEquals(a: ContextSnapshot | undefined, b: ContextSnapshot): boolean {
+    if (!a) return false
+    return (
+      a.tokens === b.tokens &&
+      a.contextWindow === b.contextWindow &&
+      a.percent === b.percent
+    )
+  }
+
+  private modelsEqual(a: ModelInfo[] | undefined, b: ModelInfo[]): boolean {
+    if (!a) return false
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      const x = a[i]
+      const y = b[i]
+      if (!x || !y) return false
+      if (
+        x.provider !== y.provider ||
+        x.id !== y.id ||
+        x.name !== y.name ||
+        x.contextWindow !== y.contextWindow ||
+        x.maxTokens !== y.maxTokens
+      ) {
+        return false
+      }
+    }
+    return true
   }
 
   // ============================================================
