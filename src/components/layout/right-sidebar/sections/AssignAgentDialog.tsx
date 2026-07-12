@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
 	Dialog,
 	DialogContent,
@@ -22,13 +23,26 @@ interface AssignAgentDialogProps {
 	onSelect: (agentId: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
+interface Candidate {
+	id: string;
+	name: string;
+}
+
 export function AssignAgentDialog(props: AssignAgentDialogProps) {
+	const [candidates, setCandidates] = useState<Candidate[]>([]);
+
+	useEffect(() => {
+		if (props.open) {
+			props.loadCandidates().then(setCandidates);
+		}
+	}, [props.open, props.loadCandidates]);
+
 	return (
 		<Dialog open={props.open} onOpenChange={props.onOpenChange}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Assign agent</DialogTitle>
-					<DialogDescription>Only standard agents with no project are shown.</DialogDescription>
+					<DialogDescription>Only standard agents with no project are shown. ({candidates.length} found)</DialogDescription>
 				</DialogHeader>
 				<Command>
 					<CommandInput placeholder="Search agents…" />
