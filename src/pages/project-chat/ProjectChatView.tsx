@@ -100,14 +100,21 @@ export function ProjectChatView() {
 }
 
 function ProjectChatContent({ project, projectAgent }: { project: Project; projectAgent: Agent }) {
-  const { status, messages, lastError, bootStep, usage, contextUsage, loading, send, restart } = useAgentRuntime(projectAgent.id);
-  const contextWindow = contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
+  const { status, messages, lastError, bootStep, usage, contextUsage, availableModels, loading, send, restart } = useAgentRuntime(projectAgent.id);
   // Read the current model selection so we can gate the send button.
   // Mirrors the guard in AgentChatView: chat is disabled when no model is chosen.
   const agentSettings = useAgentSettings(projectAgent.id);
   const hasModel = Boolean(
     agentSettings.settings?.model?.provider && agentSettings.settings?.model?.name,
   );
+  const selectedContextWindow = React.useMemo(() => {
+    const provider = agentSettings.settings?.model?.provider;
+    const name = agentSettings.settings?.model?.name;
+    if (!provider || !name || !availableModels) return undefined;
+    return availableModels.find((m) => m.provider === provider && m.id === name)?.contextWindow;
+  }, [agentSettings.settings?.model?.provider, agentSettings.settings?.model?.name, availableModels]);
+  const contextWindow =
+    selectedContextWindow ?? contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
