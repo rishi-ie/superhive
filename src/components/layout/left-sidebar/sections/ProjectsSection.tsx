@@ -36,7 +36,12 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
           >
             {assignedAgents.length > 0 ? (
               assignedAgents.map((a) => (
-                <AgentRow key={a.id} name={a.name} showStatus={false} />
+                <AgentRow
+                  key={a.id}
+                  name={a.name}
+                  showStatus={false}
+                  onClick={() => navigate(`/agents/${a.id}`)}
+                />
               ))
             ) : (
               <div className="flex items-center gap-stack px-row py-1.5">
