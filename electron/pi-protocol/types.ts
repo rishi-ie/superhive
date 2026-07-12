@@ -7,6 +7,14 @@ export type InitStep =
   | 'connecting-chat'
   | 'ready'
 
+export interface UsageSnapshot {
+  input: number
+  output: number
+  cacheRead: number
+  cacheWrite: number
+  totalTokens: number
+}
+
 export type AdapterEvent =
   | { type: 'text-delta'; messageId: string; delta: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
@@ -15,6 +23,7 @@ export type AdapterEvent =
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
   | { type: 'error'; message: string; recoverable: boolean }
+  | { type: 'usage'; usage: UsageSnapshot }
 
 /**
  * Contract for a Pi protocol I/O adapter.

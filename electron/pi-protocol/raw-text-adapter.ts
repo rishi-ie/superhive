@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import type { AdapterEvent, PiProtocolAdapter } from './types'
+import type { AdapterEvent, PiProtocolAdapter, UsageSnapshot } from './types'
 import { matchBootStep } from './types'
 
 export class RawTextAdapter implements PiProtocolAdapter {
@@ -24,19 +24,20 @@ export class RawTextAdapter implements PiProtocolAdapter {
 
       if (parsed && typeof parsed === 'object') {
         const obj = parsed as Record<string, unknown>
-        if (
-          obj.type === 'message_update' &&
-          (obj.assistantMessageEvent as Record<string, unknown> | undefined)?.type === 'text_delta'
-        ) {
-          if (!this.currentMessageId) {
-            this.currentMessageId = randomUUID()
-            emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
+        if (obj.type === 'message_update') {
+          const ev = obj.assistantMessageEvent as Record<string, unknown> | undefined
+          if (ev?.type === 'text_delta') {
+            if (!this.currentMessageId) {
+              this.currentMessageId = randomUUID()
+              emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
+            }
+            emit({
+              type: 'text-delta',
+              messageId: this.currentMessageId,
+              delta: (ev.delta as string) ?? '',
+            })
           }
-          emit({
-            type: 'text-delta',
-            messageId: this.currentMessageId,
-            delta: ((obj.assistantMessageEvent as Record<string, unknown>)?.delta as string) ?? '',
-          })
+          this.maybeEmitUsage(ev, emit)
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
@@ -70,5 +71,25 @@ export class RawTextAdapter implements PiProtocolAdapter {
   reset(): void {
     this.lineBuffer = ''
     this.currentMessageId = null
+  }
+
+  private maybeEmitUsage(
+    ev: Record<string, unknown> | undefined,
+    emit: (event: AdapterEvent) => void,
+  ): void {
+    const partial = ev?.partial as Record<string, unknown> | undefined
+    const u = partial?.usage as Record<string, unknown> | undefined
+    if (!u) return
+    const input = typeof u.input === 'number' ? u.input : 0
+    const total = typeof u.totalTokens === 'number' ? u.totalTokens : 0
+    if (input <= 0 && total <= 0) return
+    const usage: UsageSnapshot = {
+      input,
+      output: typeof u.output === 'number' ? u.output : 0,
+      cacheRead: typeof u.cacheRead === 'number' ? u.cacheRead : 0,
+      cacheWrite: typeof u.cacheWrite === 'number' ? u.cacheWrite : 0,
+      totalTokens: total,
+    }
+    emit({ type: 'usage', usage })
   }
 }
