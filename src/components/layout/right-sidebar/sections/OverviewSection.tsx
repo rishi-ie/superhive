@@ -61,12 +61,12 @@ export function OverviewSection({ data }: OverviewSectionProps) {
               {data.projects[0] ? (
                 <Link
                   to={`/projects/${data.projects[0].id}`}
-                  className="ml-auto rounded-button bg-sidebar-primary/10 px-row py-0.5 text-[10px] font-medium text-sidebar-primary hover:bg-sidebar-primary/20"
+                  className="ml-auto text-xs text-muted-foreground"
                 >
                   {data.projects[0].name}
                 </Link>
               ) : (
-                <span className="ml-auto text-[10px] text-muted-foreground">
+                <span className="ml-auto text-xs text-muted-foreground">
                   No project
                 </span>
               )}
