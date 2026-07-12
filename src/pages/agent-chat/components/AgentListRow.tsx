@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon, CircleNotchIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,9 +25,14 @@ const STATUS_LABEL: Record<Agent['status'], string> = {
   error: "Error",
 };
 
+interface ProjectRef {
+  id: string;
+  name: string;
+}
+
 interface AgentListRowProps {
   agent: Agent;
-  projectName?: string;
+  project?: ProjectRef | null;
 }
 
 function initials(name?: string) {
@@ -50,7 +55,7 @@ function relativeTime(timestamp?: number): string | null {
   return `${mon}mo ago`;
 }
 
-export function AgentListRow({ agent, projectName }: AgentListRowProps) {
+export function AgentListRow({ agent, project }: AgentListRowProps) {
   const navigate = useNavigate();
   const updated = relativeTime(agent.updatedAt);
 
@@ -115,9 +120,17 @@ export function AgentListRow({ agent, projectName }: AgentListRowProps) {
       </TableCell>
 
       <TableCell className="w-[180px">
-        <span className="truncate text-sm text-muted-foreground">
-          {projectName ?? 'No project'}
-        </span>
+        {project ? (
+          <Link
+            to={`/projects/${project.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center rounded-button bg-sidebar-primary/10 px-row py-0.5 text-[11px] font-medium text-sidebar-primary hover:bg-sidebar-primary/20"
+          >
+            {project.name}
+          </Link>
+        ) : (
+          <span className="text-sm text-muted-foreground">No project</span>
+        )}
       </TableCell>
 
       <TableCell className="w-[160px">
