@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('api', {
     restart:  (id) => ipcRenderer.invoke('agents:restart', id),
     send:     (id, message) => ipcRenderer.invoke('agents:send', id, message),
     getRuntimeState: (id) => ipcRenderer.invoke('agents:getRuntimeState', id),
+    getProjects:   (id) => ipcRenderer.invoke('agents:getProjects', id),
     readSettings:  (id) => ipcRenderer.invoke('agents:readSettings', id),
     writeSettings: (id, patch) => ipcRenderer.invoke('agents:writeSettings', id, patch),
 
