@@ -6,12 +6,29 @@ import {
 } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useState } from "react";
+import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
+import type { Agent } from "@/storage/types";
+import { ProjectMembersList } from "./sections/ProjectMembersList";
 
 interface ProjectSettingsPanelProps {
   projectId: string;
 }
 
+interface TeamState {
+  coordinator: Agent | null;
+  members: Agent[];
+}
+
 export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
+  const [team, setTeam] = useState<TeamState>({ coordinator: null, members: [] });
+
+  useEffect(() => {
+    loadProjectTeam(projectId).then((t) =>
+      setTeam({ coordinator: t.coordinator, members: t.members }),
+    );
+  }, [projectId]);
+
   return (
     <div className="flex h-full flex-col px-button-x">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
@@ -52,9 +69,13 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <div className="flex h-full items-center justify-center">
-              <span className="text-xs text-muted-foreground">Coming soon</span>
-            </div>
+            <ProjectMembersList
+              projectId={projectId}
+              coordinator={team.coordinator}
+              members={team.members}
+              onAssignClick={() => undefined}
+              onRemove={() => undefined}
+            />
           </ScrollArea>
         </TabsContent>
 
