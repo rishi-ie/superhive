@@ -48,11 +48,13 @@ export function AssignAgentDialog(props: AssignAgentDialogProps) {
 					<CommandInput placeholder="Search agents…" />
 					<CommandList>
 						<CommandEmpty>No unassigned agents</CommandEmpty>
-						<CommandGroup heading="Available">
-							<CommandItem value="placeholder" onSelect={() => undefined}>
-								Placeholder
-							</CommandItem>
-						</CommandGroup>
+<CommandGroup heading="Available">
+	{candidates.map((c) => (
+		<CommandItem key={c.id} value={c.name} onSelect={() => undefined}>
+			{c.name}
+		</CommandItem>
+	))}
+</CommandGroup>
 					</CommandList>
 				</Command>
 			</DialogContent>
