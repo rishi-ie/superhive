@@ -40,6 +40,7 @@ contextBridge.exposeInMainWorld('api', {
     update: (id, data) => ipcRenderer.invoke('projects:update', id, data),
     delete: (id) => ipcRenderer.invoke('projects:delete', id),
     addAgent: (projectId, agentId) => ipcRenderer.invoke('projects:addAgent', projectId, agentId),
+    removeAgent: (projectId, agentId) => ipcRenderer.invoke('projects:removeAgent', projectId, agentId),
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:get-version'),
