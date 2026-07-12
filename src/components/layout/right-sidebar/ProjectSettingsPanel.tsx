@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
 import type { Agent } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
+import { AssignAgentDialog } from "./sections/AssignAgentDialog";
 
 interface ProjectSettingsPanelProps {
   projectId: string;
@@ -22,6 +23,7 @@ interface TeamState {
 
 export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   const [team, setTeam] = useState<TeamState>({ coordinator: null, members: [] });
+  const [assignOpen, setAssignOpen] = useState(false);
 
   useEffect(() => {
     loadProjectTeam(projectId).then((t) =>
@@ -73,7 +75,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
               projectId={projectId}
               coordinator={team.coordinator}
               members={team.members}
-              onAssignClick={() => undefined}
+              onAssignClick={() => setAssignOpen(true)}
               onRemove={() => undefined}
             />
           </ScrollArea>
@@ -87,6 +89,24 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           </ScrollArea>
         </TabsContent>
       </Tabs>
+      <AssignAgentDialog
+        open={assignOpen}
+        onOpenChange={setAssignOpen}
+        onAssigned={() =>
+          loadProjectTeam(projectId).then((t) =>
+            setTeam({ coordinator: t.coordinator, members: t.members }),
+          )
+        }
+        loadCandidates={async () => {
+          const { loadUnassignedAgents } = await import("@/flows/projects/crud/load-project-team");
+          const list = await loadUnassignedAgents();
+          return list.map((a) => ({ id: a.id, name: a.name }));
+        }}
+        onSelect={async (agentId) => {
+          const { assignAgentToProject } = await import("@/flows/projects/crud/assign-agent-to-project");
+          return assignAgentToProject({ projectId, agentId });
+        }}
+      />
     </div>
   );
 }
