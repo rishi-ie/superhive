@@ -47,6 +47,7 @@ export interface ProjectsAPI {
 	update: (id: string, data: ProjectUpdateInput) => Promise<Project | null>
 	delete: (id: string) => Promise<boolean>
 	addAgent: (projectId: string, agentId: string) => Promise<void>
+	removeAgent: (projectId: string, agentId: string) => Promise<void>
 }
 
 export type ProjectCreateInput = {
