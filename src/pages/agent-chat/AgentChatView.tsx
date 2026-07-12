@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
 import { PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { ConversationArea } from './components/ConversationArea';
@@ -10,7 +10,9 @@ import { AgentStopped } from './components/AgentStopped';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
+import { loadAgentProjects } from '@/flows/agents/crud/load-agent-projects';
 import { toast } from 'sonner';
+import type { Project } from '@/types/electron';
 
 export function AgentChatView() {
   const { agentId } = useParams();
@@ -34,6 +36,13 @@ export function AgentChatView() {
 
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const [projects, setProjects] = React.useState<Project[]>([]);
+
+  React.useEffect(() => {
+    if (agentId) {
+      loadAgentProjects(agentId).then(setProjects);
+    }
+  }, [agentId]);
 
   if (!agentId) return <AgentEmpty />;
 
@@ -92,6 +101,16 @@ export function AgentChatView() {
 
   return (
     <div className="flex flex-col h-full">
+      {projects[0] && (
+        <div className="flex items-center gap-stack px-composer pt-3">
+          <Link
+            to={`/projects/${projects[0].id}`}
+            className="inline-flex items-center rounded-button bg-sidebar-primary/10 px-row py-0.5 text-[11px] font-medium text-sidebar-primary hover:bg-sidebar-primary/20"
+          >
+            {projects[0].name}
+          </Link>
+        </div>
+      )}
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
