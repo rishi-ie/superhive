@@ -9,8 +9,10 @@ import {
   type PiProtocolAdapter,
   type InitStep,
   type UsageSnapshot,
+  type ContextSnapshot,
   RawTextAdapter,
 } from './pi-protocol'
+import { TelemetryTailer } from './pi-protocol/telemetry-tailer'
 import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
 import { IPC } from './ipc/index'
@@ -41,12 +43,23 @@ export interface RuntimeEntry {
   lastError?: string
   // usage
   usage?: UsageSnapshot
+  contextUsage?: ContextSnapshot
   // adapter
   adapter: PiProtocolAdapter
 }
 
 const STDERR_LOG_LIMIT = 500
 const READY_SILENCE_MS = 2000
+
+type TelemetryWireEvent = {
+  type: string
+  usage?: UsageSnapshot
+  tokens?: number | null
+  contextWindow?: number
+  percent?: number | null
+  event?: string
+  [k: string]: unknown
+}
 
 /**
  * Manages live Pi runtime processes for all agents.
@@ -58,6 +71,7 @@ class GeneralKaiRuntime {
   private silenceTimers = new Map<string, NodeJS.Timeout>()
   private readyEmitted = new Set<string>()
   private settingsWatchers = new Map<string, FSWatcher>()
+  private telemetryTailers = new Map<string, TelemetryTailer>()
   private lastSeenCounter = new Map<string, number>()
 
   /**
@@ -86,6 +100,7 @@ class GeneralKaiRuntime {
       lastError: entry.lastError,
       bootStep: entry.bootStep,
       usage: entry.usage,
+      contextUsage: entry.contextUsage,
     }
   }
 
@@ -129,12 +144,14 @@ class GeneralKaiRuntime {
     entry.lastError = undefined
     entry.bootStep = undefined
     entry.usage = undefined
+    entry.contextUsage = undefined
     entry.stderrLog = []
     adapter.reset()
 
     this.entries.set(agentId, entry)
     this.emitStatus(agentId)
     this.spawnProcess(entry)
+    this.startTelemetryTailer(entry)
   }
 
   /** Send SIGABRT + SIGTERM to the process. Sets status to 'stopped'. */
@@ -195,6 +212,9 @@ class GeneralKaiRuntime {
       this.clearSilenceTimer(agentId)
     }
     this.readyEmitted.clear()
+    for (const agentId of Array.from(this.telemetryTailers.keys())) {
+      this.stopTelemetryTailer(agentId)
+    }
     for (const [, entry] of this.entries) {
       if (entry.process) {
         this.terminateProcess(entry.process)
@@ -265,6 +285,7 @@ class GeneralKaiRuntime {
     this.clearSilenceTimer(agentId)
     this.readyEmitted.delete(agentId)
     this.closeSettingsWatcher(agentId)
+    this.stopTelemetryTailer(agentId)
     this.lastSeenCounter.delete(agentId)
     this.stop(agentId)
     this.entries.delete(agentId)
@@ -291,12 +312,55 @@ class GeneralKaiRuntime {
         this.clearSilenceTimer(id)
         this.readyEmitted.delete(id)
         this.lastSeenCounter.delete(id)
+        this.stopTelemetryTailer(id)
         if (entry.process) {
           try { entry.process.kill('SIGTERM') } catch { /* ignore */ }
         }
         this.entries.delete(id)
       }
     }
+  }
+
+  // ============================================================
+  // TELEMETRY (extension → renderer via per-agent JSONL journal)
+  // ============================================================
+
+  private startTelemetryTailer(entry: RuntimeEntry): void {
+    if (this.telemetryTailers.has(entry.agentId)) return
+    const journalPath = join(entry.agentDir, 'telemetry.jsonl')
+    const tailer = new TelemetryTailer(journalPath, (ev) =>
+      this.handleTelemetryEvent(entry.agentId, ev as TelemetryWireEvent),
+    )
+    tailer.start()
+    this.telemetryTailers.set(entry.agentId, tailer)
+  }
+
+  private stopTelemetryTailer(agentId: string): void {
+    const tailer = this.telemetryTailers.get(agentId)
+    if (!tailer) return
+    tailer.stop()
+    this.telemetryTailers.delete(agentId)
+  }
+
+  private handleTelemetryEvent(agentId: string, event: TelemetryWireEvent): void {
+    const entry = this.entries.get(agentId)
+    if (!entry) return
+    if (event.type === 'usage' && event.usage && typeof event.usage === 'object') {
+      entry.usage = event.usage as UsageSnapshot
+      this.emitStatus(agentId)
+      return
+    }
+    if (event.type === 'context') {
+      const tokens = typeof event.tokens === 'number' ? event.tokens : null
+      const contextWindow = typeof event.contextWindow === 'number' ? event.contextWindow : 0
+      const percent = typeof event.percent === 'number' ? event.percent : null
+      if (contextWindow > 0) {
+        entry.contextUsage = { tokens, contextWindow, percent }
+        this.emitStatus(agentId)
+      }
+      return
+    }
+    // 'lifecycle' events are recorded but do not change UI state.
   }
 
   // ============================================================
@@ -518,6 +582,7 @@ class GeneralKaiRuntime {
       lastError: entry.lastError,
       bootStep: entry.bootStep,
       usage: entry.usage,
+      contextUsage: entry.contextUsage,
     })
   }
 

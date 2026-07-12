@@ -15,6 +15,12 @@ export interface UsageSnapshot {
   totalTokens: number
 }
 
+export interface ContextSnapshot {
+  tokens: number | null
+  contextWindow: number
+  percent: number | null
+}
+
 export type AdapterEvent =
   | { type: 'text-delta'; messageId: string; delta: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
