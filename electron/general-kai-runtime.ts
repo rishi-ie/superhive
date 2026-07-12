@@ -12,6 +12,14 @@ import {
   type ContextSnapshot,
   RawTextAdapter,
 } from './pi-protocol'
+
+interface ModelInfo {
+  provider: string
+  id: string
+  name: string
+  contextWindow: number
+  maxTokens: number
+}
 import { TelemetryTailer } from './pi-protocol/telemetry-tailer'
 import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
@@ -44,6 +52,10 @@ export interface RuntimeEntry {
   // usage
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
+  // telemetry extension: true = extension present, journal tailer is sole writer
+  // for usage; false = legacy agent, stdout adapter fallback drives usage
+  extensionLoaded: boolean
+  availableModels?: ModelInfo[]
   // adapter
   adapter: PiProtocolAdapter
 }
@@ -133,6 +145,10 @@ class GeneralKaiRuntime {
       messages: [],
       stderrLog: [],
       adapter,
+      usage: undefined,
+      contextUsage: undefined,
+      extensionLoaded: false,
+      availableModels: undefined,
     }
 
     entry.adapter = adapter
@@ -145,6 +161,8 @@ class GeneralKaiRuntime {
     entry.bootStep = undefined
     entry.usage = undefined
     entry.contextUsage = undefined
+    entry.extensionLoaded = existsSync(join(agentDir, 'extensions', 'superhive-pi-telemetry'))
+    entry.availableModels = undefined
     entry.stderrLog = []
     adapter.reset()
 
@@ -547,6 +565,7 @@ class GeneralKaiRuntime {
     }
 
     if (event.type === 'usage') {
+      if (entry.extensionLoaded) return
       entry.usage = event.usage
       this.emitStatus(agentId)
       return
