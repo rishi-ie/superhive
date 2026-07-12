@@ -24,5 +24,5 @@ export async function loadProjectTeam(projectId: string): Promise<ProjectTeam> {
 
 export async function loadUnassignedAgents(): Promise<Agent[]> {
 	const agents = await listAgents();
-	return agents.filter((a) => a.agentKind === 'standard' && a.projectIds.length === 0);
+	return agents.filter((a) => a.agentKind !== 'project-coordinator' && a.projectIds.length === 0);
 }
