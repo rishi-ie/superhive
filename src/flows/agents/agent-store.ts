@@ -7,6 +7,7 @@ import type {
   AgentStatus,
   InitStep,
   UsageSnapshot,
+  ContextSnapshot,
 } from '@/types/electron'
 import type { AgentSettingsState } from './settings'
 import { updateAgentSettings } from './settings/update-agent-settings'
@@ -23,6 +24,7 @@ interface RuntimeSlice {
   lastError?: string
   bootStep?: InitStep
   usage?: UsageSnapshot
+  contextUsage?: ContextSnapshot
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -75,6 +77,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     lastError: undefined,
     bootStep: undefined,
     usage: undefined,
+    contextUsage: undefined,
     loading: true,
     initialized: false,
     unsubs,
@@ -91,6 +94,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
       entry.usage = s.usage
+      entry.contextUsage = s.contextUsage
     }
     entry.loading = false
   })
@@ -110,6 +114,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
       entry.usage = s.usage
+      entry.contextUsage = s.contextUsage
     })
   )
 
@@ -240,6 +245,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [lastError, setLastError] = React.useState<string | undefined>(undefined)
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
   const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
+  const [contextUsage, setContextUsage] = React.useState<ContextSnapshot | undefined>(undefined)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -258,6 +264,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setLastError(sliceRef.current.lastError)
       setBootStep(sliceRef.current.bootStep)
       setUsage(sliceRef.current.usage)
+      setContextUsage(sliceRef.current.contextUsage)
       setLoading(sliceRef.current.loading)
     }
 
@@ -279,7 +286,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     void restartAgent(agentId)
   }, [agentId])
 
-  return { agent, status, messages, lastError, bootStep, usage, loading, send, restart }
+  return { agent, status, messages, lastError, bootStep, usage, contextUsage, loading, send, restart }
 }
 
 export function useAgentSettings(agentId: string | null) {
