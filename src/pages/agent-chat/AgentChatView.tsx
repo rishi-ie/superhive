@@ -13,8 +13,6 @@ import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { toast } from 'sonner';
 
-const CONTEXT_WINDOW_FALLBACK = 200000;
-
 export function AgentChatView() {
   const { agentId } = useParams();
   const {
@@ -26,6 +24,7 @@ export function AgentChatView() {
     usage,
     contextUsage,
     availableModels,
+    activeModelContextWindow,
     loading,
     send,
     restart,
@@ -40,11 +39,15 @@ export function AgentChatView() {
     if (!provider || !name || !availableModels) return undefined;
     return availableModels.find((m) => m.provider === provider && m.id === name)?.contextWindow;
   }, [agentSettings.settings?.model?.provider, agentSettings.settings?.model?.name, availableModels]);
-  const contextWindow =
-    selectedContextWindow ?? contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
+  const contextWindow = React.useMemo(() => {
+    if (selectedContextWindow) return selectedContextWindow;
+    if (activeModelContextWindow && activeModelContextWindow > 0) return activeModelContextWindow;
+    if (contextUsage?.contextWindow && contextUsage.contextWindow > 0) return contextUsage.contextWindow;
+    return undefined;
+  }, [selectedContextWindow, activeModelContextWindow, contextUsage?.contextWindow]);
   const contextUsedTokens = contextUsage?.tokens ?? usage?.input ?? 0;
   const contextPercent =
-    contextWindow > 0 && contextUsedTokens > 0
+    contextWindow != null && contextWindow > 0 && contextUsedTokens > 0
       ? Math.min(100, (contextUsedTokens / contextWindow) * 100)
       : 0;
 

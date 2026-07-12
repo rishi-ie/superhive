@@ -27,6 +27,8 @@ interface RuntimeSlice {
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
   availableModels?: ModelInfo[]
+  activeModelContextWindow?: number
+  activeModelName?: string
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -81,6 +83,8 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     usage: undefined,
     contextUsage: undefined,
     availableModels: undefined,
+    activeModelContextWindow: undefined,
+    activeModelName: undefined,
     loading: true,
     initialized: false,
     unsubs,
@@ -99,6 +103,8 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
       entry.availableModels = s.availableModels
+      entry.activeModelContextWindow = s.activeModelContextWindow
+      entry.activeModelName = s.activeModelName
     }
     entry.loading = false
   })
@@ -120,6 +126,8 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
       entry.availableModels = s.availableModels
+      entry.activeModelContextWindow = s.activeModelContextWindow
+      entry.activeModelName = s.activeModelName
     })
   )
 
@@ -252,6 +260,9 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
   const [contextUsage, setContextUsage] = React.useState<ContextSnapshot | undefined>(undefined)
   const [availableModels, setAvailableModels] = React.useState<ModelInfo[] | undefined>(undefined)
+  const [activeModelContextWindow, setActiveModelContextWindow] =
+    React.useState<number | undefined>(undefined)
+  const [activeModelName, setActiveModelName] = React.useState<string | undefined>(undefined)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -272,6 +283,8 @@ export function useAgentRuntime(agentId: string | undefined) {
       setUsage(sliceRef.current.usage)
       setContextUsage(sliceRef.current.contextUsage)
       setAvailableModels(sliceRef.current.availableModels)
+      setActiveModelContextWindow(sliceRef.current.activeModelContextWindow)
+      setActiveModelName(sliceRef.current.activeModelName)
       setLoading(sliceRef.current.loading)
     }
 
@@ -293,7 +306,21 @@ export function useAgentRuntime(agentId: string | undefined) {
     void restartAgent(agentId)
   }, [agentId])
 
-  return { agent, status, messages, lastError, bootStep, usage, contextUsage, availableModels, loading, send, restart }
+  return {
+    agent,
+    status,
+    messages,
+    lastError,
+    bootStep,
+    usage,
+    contextUsage,
+    availableModels,
+    activeModelContextWindow,
+    activeModelName,
+    loading,
+    send,
+    restart,
+  }
 }
 
 export function useAgentSettings(agentId: string | null) {
