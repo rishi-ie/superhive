@@ -48,4 +48,8 @@ export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.ADD_AGENT, async (_e, projectId: string, agentId: string) => {
     await ProjectRepository.addAgent(projectId, agentId);
   });
+
+  ipcMain.handle(IPC.PROJECTS.REMOVE_AGENT, async (_e, projectId: string, agentId: string) => {
+    await ProjectRepository.removeAgent(projectId, agentId);
+  });
 }
