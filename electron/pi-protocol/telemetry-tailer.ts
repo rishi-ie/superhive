@@ -10,12 +10,17 @@ import {
 import { dirname } from 'node:path'
 import log from 'electron-log/main'
 
+const POLL_INTERVAL_MS = 500
+const POLL_TIMEOUT_MS = 30_000
+
 export class TelemetryTailer {
   private watcher: FSWatcher | null = null
   private offset = 0
   private lineBuffer = ''
   private debounceTimer: NodeJS.Timeout | null = null
   private lineCount = 0
+  private pollTimer: NodeJS.Timeout | null = null
+  private pollStartedAt = 0
 
   constructor(
     private readonly journalPath: string,
@@ -35,6 +40,10 @@ export class TelemetryTailer {
       clearTimeout(this.debounceTimer)
       this.debounceTimer = null
     }
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer)
+      this.pollTimer = null
+    }
     if (this.watcher) {
       this.watcher.close()
       this.watcher = null
@@ -45,7 +54,10 @@ export class TelemetryTailer {
     try {
       this.watcher = watch(this.journalPath, () => this.scheduleRead())
     } catch (err) {
-      log.warn(`[telemetry-tailer] failed to watch ${this.journalPath}; falling back to dir watch:`, err)
+      // node:fs.watch on a missing or unwritable file throws ENOENT.
+      // That surfaces as the file appearing later than the watch call,
+      // which is exactly the case the dir + poll fallback exists for.
+      log.warn(`[telemetry-tailer] watch failed for ${this.journalPath}; switching to dir+poll:`, err)
       this.watchDir()
       return
     }
@@ -55,13 +67,52 @@ export class TelemetryTailer {
 
   private watchDir(): void {
     const dir = dirname(this.journalPath)
+    let dirWatchFailed = false
     try {
       this.watcher = watch(dir, () => this.promoteIfFileExists())
     } catch (err) {
-      log.warn(`[telemetry-tailer] failed to watch dir ${dir}:`, err)
-      return
+      log.warn(`[telemetry-tailer] dir watch failed for ${dir}; relying on poll only:`, err)
+      // No watcher attached — poll fallback will carry the load.
+      this.watcher = null
+      dirWatchFailed = true
     }
-    log.debug(`[telemetry-tailer] journal missing; watching parent dir ${dir} for it to appear`)
+    if (!dirWatchFailed) {
+      log.debug(`[telemetry-tailer] journal missing; watching parent dir ${dir} for it to appear`)
+    }
+    // Always arm the poll. macOS kqueue directory watches coalesce
+    // create-then-write sequences and can miss the journal's first
+    // appearance entirely; the poll is the bulletproof fallback.
+    this.startPoll()
+  }
+
+  private startPoll(): void {
+    if (this.pollTimer) return
+    this.pollStartedAt = Date.now()
+    const tick = () => {
+      if (!this.pollTimer) return
+      if (existsSync(this.journalPath)) {
+        log.debug(`[telemetry-tailer] journal appeared at ${this.journalPath} (poll found it)`)
+        this.stopPoll()
+        this.promoteIfFileExists()
+        return
+      }
+      if (Date.now() - this.pollStartedAt >= POLL_TIMEOUT_MS) {
+        log.warn(
+          `[telemetry-tailer] poll timed out after ${POLL_TIMEOUT_MS}ms — journal never appeared at ${this.journalPath}`,
+        )
+        this.stopPoll()
+        return
+      }
+      this.pollTimer = setTimeout(tick, POLL_INTERVAL_MS)
+    }
+    this.pollTimer = setTimeout(tick, POLL_INTERVAL_MS)
+  }
+
+  private stopPoll(): void {
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer)
+      this.pollTimer = null
+    }
   }
 
   private promoteIfFileExists(): void {
