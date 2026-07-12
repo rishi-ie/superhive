@@ -49,6 +49,12 @@ export interface RuntimeEntry {
   // for usage; false = legacy agent, stdout adapter fallback drives usage
   extensionLoaded: boolean
   availableModels?: ModelInfo[]
+  // Active model reported by Pi on model_select. The SDK sends the new
+  // model's full Model object (including contextWindow) — we keep just the
+  // fields the composer needs, so a custom provider whose value Pi tracks
+  // internally (rather than via the registry) still flows through.
+  activeModelContextWindow?: number
+  activeModelName?: string
   // adapter
   adapter: PiProtocolAdapter
 }
@@ -63,6 +69,9 @@ type TelemetryWireEvent = {
   contextWindow?: number
   percent?: number | null
   event?: string
+  provider?: string
+  id?: string
+  name?: string
   [k: string]: unknown
 }
 
@@ -107,6 +116,8 @@ class GeneralKaiRuntime {
       usage: entry.usage,
       contextUsage: entry.contextUsage,
       availableModels: entry.availableModels,
+      activeModelContextWindow: entry.activeModelContextWindow,
+      activeModelName: entry.activeModelName,
     }
   }
 
@@ -157,6 +168,8 @@ class GeneralKaiRuntime {
     entry.contextUsage = undefined
     entry.extensionLoaded = existsSync(join(agentDir, 'extensions', 'superhive-pi-telemetry'))
     entry.availableModels = undefined
+    entry.activeModelContextWindow = undefined
+    entry.activeModelName = undefined
     entry.stderrLog = []
     adapter.reset()
 
@@ -366,9 +379,12 @@ class GeneralKaiRuntime {
     }
     if (event.type === 'context') {
       const tokens = typeof event.tokens === 'number' ? event.tokens : null
+      // Pi may legitimately return contextWindow = 0 for a freshly-loaded
+      // model whose registry entry is missing or unknown. Don't drop the
+      // snapshot — the renderer falls back through selectedContextWindow →
+      // activeModelContextWindow → contextUsage.contextWindow.
       const contextWindow = typeof event.contextWindow === 'number' ? event.contextWindow : 0
       const percent = typeof event.percent === 'number' ? event.percent : null
-      if (contextWindow <= 0) return
       const next: ContextSnapshot = { tokens, contextWindow, percent }
       if (this.contextUsageEquals(entry.contextUsage, next)) return
       entry.contextUsage = next
@@ -379,6 +395,18 @@ class GeneralKaiRuntime {
       const next = event.models as ModelInfo[]
       if (this.modelsEqual(entry.availableModels, next)) return
       entry.availableModels = next
+      this.emitStatus(agentId)
+      return
+    }
+    if (event.type === 'model') {
+      const contextWindow =
+        typeof event.contextWindow === 'number' && event.contextWindow > 0
+          ? event.contextWindow
+          : undefined
+      const name = typeof event.name === 'string' ? event.name : undefined
+      if (entry.activeModelContextWindow === contextWindow && entry.activeModelName === name) return
+      entry.activeModelContextWindow = contextWindow
+      entry.activeModelName = name
       this.emitStatus(agentId)
       return
     }

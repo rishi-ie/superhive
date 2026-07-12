@@ -20,6 +20,8 @@ export interface RuntimeStatusPayload {
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
   availableModels?: ModelInfo[]
+  activeModelContextWindow?: number
+  activeModelName?: string
 }
 
 export interface RuntimeExitPayload {
