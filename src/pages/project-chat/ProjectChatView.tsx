@@ -115,6 +115,11 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   }, [agentSettings.settings?.model?.provider, agentSettings.settings?.model?.name, availableModels]);
   const contextWindow =
     selectedContextWindow ?? contextUsage?.contextWindow ?? CONTEXT_WINDOW_FALLBACK;
+  const contextUsedTokens = contextUsage?.tokens ?? usage?.input ?? 0;
+  const contextPercent =
+    contextWindow > 0 && contextUsedTokens > 0
+      ? Math.min(100, (contextUsedTokens / contextWindow) * 100)
+      : 0;
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
@@ -191,8 +196,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
                 <ContextUsageRing
-                  percent={usage ? Math.min(100, (usage.input / contextWindow) * 100) : 0}
-                  usedTokens={usage?.input}
+                  percent={contextPercent}
+                  usedTokens={contextUsedTokens}
                   maxTokens={contextWindow}
                 />
               </div>
