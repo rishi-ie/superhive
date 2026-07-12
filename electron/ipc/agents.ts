@@ -28,6 +28,8 @@ function sanitizeFolderName(raw: string): string {
 
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
+const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
+const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
 
 interface CreateAgentInput {
 	name: string
@@ -85,6 +87,11 @@ export function registerAgentIpc(): void {
 			symlinkSync(extensionSource, extLink, 'dir')
 			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TRUTH_NAME} from canonical clone`)
 
+			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, SUPERHIVE_PI_TELEMETRY_URL)
+			const telemetryLink = join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME)
+			symlinkSync(telemetrySource, telemetryLink, 'dir')
+			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TELEMETRY_NAME} from canonical clone`)
+
 			const agent = await AgentRepository.create({
 				name: data.name.trim(),
 				role: data.role?.trim() || undefined,
@@ -101,7 +108,10 @@ export function registerAgentIpc(): void {
 					superhiveId: agent.id,
 					version: 1,
 					workspace: './workspace',
-					extensions: ['./extensions/superhive-pi-truth'],
+					extensions: [
+						'./extensions/superhive-pi-truth',
+						'./extensions/superhive-pi-telemetry',
+					],
 					environment: {
 						MINIMAX_API_KEY: config.minimaxApiKey,
 					},
