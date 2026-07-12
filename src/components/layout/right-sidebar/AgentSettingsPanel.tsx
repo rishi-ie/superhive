@@ -80,16 +80,16 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   return (
     <div className="flex h-full flex-col px-button-x">
       <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
-        <TabsList className="w-full h-8 justify-center">
-          <TabsTrigger value="overview" className="cursor-default justify-center">
+        <TabsList className="w-full h-8 justify-center bg-transparent p-0">
+          <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
             <Icon icon={BookOpenTextIcon} className="size-3.5" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="manage" className="cursor-default justify-center">
+          <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
             <Icon icon={TreeViewIcon} className="size-3.5" />
             Manage
           </TabsTrigger>
-          <TabsTrigger value="inbox" className="cursor-default justify-center">
+          <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-accent data-[state=active]:text-foreground">
             <Icon icon={TrayIcon} className="size-3.5" />
             Inbox
           </TabsTrigger>
