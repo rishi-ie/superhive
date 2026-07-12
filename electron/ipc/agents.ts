@@ -158,6 +158,10 @@ export function registerAgentIpc(): void {
 		return true
 	})
 
+	ipcMain.handle(IPC.AGENTS.GET_PROJECTS, async (_e, agentId: string) => {
+		return AgentRepository.getProjects(agentId)
+	})
+
 	ipcMain.handle(IPC.AGENTS.READ_SETTINGS, async (_e, agentId: string) => {
 		const agent = await AgentRepository.getById(agentId)
 		if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
