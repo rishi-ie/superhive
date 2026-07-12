@@ -1,4 +1,5 @@
 export { listAgents } from './list-agents'
+export { loadAgentProjects } from './load-agent-projects'
 export { createAgent } from './create-agent'
 export { deleteAgent } from './delete-agent'
 export { createProjectAgent } from './create-project-agent'
