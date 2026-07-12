@@ -2,6 +2,7 @@ import type {
   Agent,
   AgentStatus,
   AgentCreateInput,
+  Project,
   RuntimeMessage,
   RuntimeStatusPayload,
   RuntimeExitPayload,
@@ -22,6 +23,7 @@ export const agents = {
   send: (id: string, message: string): Promise<{ ok: boolean }> => window.api.agents.send(id, message),
   getRuntimeState: (id: string): Promise<RuntimeStatusPayload | null> =>
     window.api.agents.getRuntimeState(id),
+  getProjects: (id: string): Promise<Project[]> => window.api.agents.getProjects(id),
 
   readSettings: (id: string): Promise<Record<string, unknown> | null> =>
     window.api.agents.readSettings(id),
