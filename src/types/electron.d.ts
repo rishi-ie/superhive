@@ -120,11 +120,12 @@ export interface ProviderEntry {
 }
 
 export interface ModelEntry {
-	id: string
-	provider: string
-	name: string
-	enabled: boolean
-	isCustom?: boolean
+  id: string
+  provider: string
+  name: string
+  enabled: boolean
+  isCustom?: boolean
+  contextWindow?: number
 }
 
 export interface SetProviderInput {

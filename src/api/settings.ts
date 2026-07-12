@@ -19,12 +19,12 @@ export const settings = {
   setModelEnabled: (id: string, enabled: boolean): Promise<void> =>
     window.api.settings.setModelEnabled(id, enabled),
 
-  addModel: (input: { provider: string; name: string }): Promise<void> =>
+  addModel: (input: { provider: string; name: string; contextWindow?: number }): Promise<void> =>
     window.api.settings.addModel(input),
 
   deleteModel: (id: string): Promise<void> =>
     window.api.settings.deleteModel(id),
 
-  getEnabledModels: (): Promise<Array<{ id: string; provider: string; name: string }>> =>
+  getEnabledModels: (): Promise<Array<{ id: string; provider: string; name: string; contextWindow?: number }>> =>
     window.api.settings.getEnabledModels(),
 }

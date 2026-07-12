@@ -61,6 +61,9 @@ export function ModelEditorDialog({
   const [modelName, setModelName] = React.useState(initialModelName);
   const [baseUrl, setBaseUrl] = React.useState(initialBaseUrl);
   const [apiKey, setApiKey] = React.useState(initialKey);
+  const [contextWindow, setContextWindow] = React.useState(
+    existingModel?.contextWindow?.toString() ?? '',
+  );
   const [phase, setPhase] = React.useState<'idle' | 'saving' | 'removing'>('idle');
   const [error, setError] = React.useState<string | null>(null);
 
@@ -70,9 +73,10 @@ export function ModelEditorDialog({
     setModelName(initialModelName);
     setBaseUrl(initialBaseUrl);
     setApiKey(initialKey);
+    setContextWindow(existingModel?.contextWindow?.toString() ?? '');
     setPhase('idle');
     setError(null);
-  }, [open, initialProvider, initialModelName, initialBaseUrl, initialKey]);
+  }, [open, initialProvider, initialModelName, initialBaseUrl, initialKey, existingModel?.contextWindow]);
 
   const hasExisting = mode === 'catalog'
     ? Boolean(existingProvider?.apiKey?.trim())
@@ -112,12 +116,19 @@ export function ModelEditorDialog({
         modelName: targetModel,
       });
     } else {
+      const trimmedContext = contextWindow.trim()
+      const parsedContext =
+        trimmedContext.length > 0 ? Number.parseInt(trimmedContext, 10) : undefined
       result = await addCustomModel({
         provider: trimmedProvider,
         modelName: trimmedModel,
         baseUrl: trimmedBaseUrl,
         apiKey: trimmedKey,
-      });
+        contextWindow:
+          typeof parsedContext === 'number' && Number.isFinite(parsedContext) && parsedContext > 0
+            ? parsedContext
+            : undefined,
+      })
     }
 
     if (result.ok) {
@@ -213,6 +224,24 @@ export function ModelEditorDialog({
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
                 required
+                className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+              />
+            </div>
+          )}
+
+          {mode === 'custom' && (
+            <div className="flex flex-col gap-stack">
+              <Label htmlFor="me-context" className="text-sidebar-foreground">
+                Context window (tokens)
+              </Label>
+              <Input
+                id="me-context"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={contextWindow}
+                onChange={(e) => setContextWindow(e.target.value)}
+                placeholder="e.g. 200000"
                 className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
               />
             </div>

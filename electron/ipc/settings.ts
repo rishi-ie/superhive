@@ -37,6 +37,7 @@ interface ModelEntry {
 	name: string
 	enabled: boolean
 	isCustom?: boolean
+	contextWindow?: number
 }
 
 /**
@@ -293,17 +294,21 @@ export function registerSettingsIpc(): void {
 
 	ipcMain.handle(
 		IPC.SETTINGS.ADD_MODEL,
-		async (_e, input: { provider: string; name: string }) => {
+		async (_e, input: { provider: string; name: string; contextWindow?: number }) => {
 			const provider = input.provider?.trim()
 			const name = input.name?.trim()
 			if (!provider) throw new Error('Provider is required')
 			if (!name) throw new Error('Model name is required')
 			const id = `${provider}:${name}`
+			const contextWindow =
+				typeof input.contextWindow === 'number' && input.contextWindow > 0
+					? Math.floor(input.contextWindow)
+					: undefined
 			await SettingsRepository.setSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
 				id,
-				{ id, provider, name, enabled: true, isCustom: true },
+				{ id, provider, name, enabled: true, isCustom: true, contextWindow },
 				'json',
 				name,
 				undefined,
@@ -329,6 +334,6 @@ export function registerSettingsIpc(): void {
 		return rows
 			.map((row) => row.value as ModelEntry)
 			.filter((m) => m.enabled)
-			.map((m) => ({ id: m.id, provider: m.provider, name: m.name }))
+			.map((m) => ({ id: m.id, provider: m.provider, name: m.name, contextWindow: m.contextWindow }))
 	})
 }

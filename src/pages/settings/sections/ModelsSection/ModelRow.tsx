@@ -6,6 +6,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import type { ModelEntry } from '@/types/electron';
 
+function formatContextWindow(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}M ctx`
+  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K ctx`
+  return `${tokens} ctx`
+}
+
 interface ModelRowProps {
   model: ModelEntry;
   hasApiKey: boolean;
@@ -50,6 +56,11 @@ export function ModelRow({
               custom
             </span>
           )}
+          {model.contextWindow ? (
+            <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground font-mono">
+              {formatContextWindow(model.contextWindow)}
+            </span>
+          ) : null}
         </div>
         <span className="text-xs text-muted-foreground truncate font-mono">
           {model.provider}

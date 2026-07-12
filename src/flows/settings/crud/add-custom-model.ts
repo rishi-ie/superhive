@@ -6,6 +6,7 @@ export interface AddCustomModelInput {
   modelName: string;
   baseUrl?: string;
   apiKey: string;
+  contextWindow?: number;
 }
 
 export interface AddCustomModelResult {
@@ -39,7 +40,11 @@ export async function addCustomModel(
       baseUrl: input.baseUrl?.trim() || undefined,
       apiKey,
     });
-    await settings.addModel({ provider, name: modelName });
+    await settings.addModel({
+      provider,
+      name: modelName,
+      contextWindow: input.contextWindow,
+    });
     toast.success(`Added ${provider}:${modelName}`);
     return { ok: true };
   } catch (err) {

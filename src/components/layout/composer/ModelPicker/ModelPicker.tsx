@@ -16,6 +16,13 @@ interface EnabledModel {
   id: string;
   provider: string;
   name: string;
+  contextWindow?: number;
+}
+
+function formatContextWindow(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}M tokens`
+  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K tokens`
+  return `${tokens} tokens`
 }
 
 interface ModelPickerProps {
@@ -149,6 +156,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
               <span className="text-sm text-modal-foreground">{m.name}</span>
               <span className="text-[0.625rem] text-modal-foreground/60">
                 {m.provider}
+                {m.contextWindow ? ` · ${formatContextWindow(m.contextWindow)}` : ''}
               </span>
             </DropdownMenuItem>
           ))

@@ -4,6 +4,7 @@ import { settings } from '@/api/settings';
 export interface AddModelInput {
   provider: string;
   name: string;
+  contextWindow?: number;
 }
 
 export interface AddModelResult {
@@ -23,7 +24,11 @@ export async function addModel(input: AddModelInput): Promise<AddModelResult> {
     return { ok: false, error: 'Model name is required' };
   }
   try {
-    await settings.addModel({ provider, name });
+    await settings.addModel({
+      provider,
+      name,
+      contextWindow: input.contextWindow,
+    });
     toast.success(`Model "${name}" added`);
     return { ok: true };
   } catch (err) {
