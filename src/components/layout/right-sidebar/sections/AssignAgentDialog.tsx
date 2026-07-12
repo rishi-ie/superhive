@@ -49,11 +49,21 @@ export function AssignAgentDialog(props: AssignAgentDialogProps) {
 					<CommandList>
 						<CommandEmpty>No unassigned agents</CommandEmpty>
 <CommandGroup heading="Available">
-	{candidates.map((c) => (
-		<CommandItem key={c.id} value={c.name} onSelect={() => undefined}>
-			{c.name}
-		</CommandItem>
-	))}
+{candidates.map((c) => (
+	<CommandItem
+		key={c.id}
+		value={c.name}
+		onSelect={async () => {
+			const result = await props.onSelect(c.id);
+			if (result.ok) {
+				props.onAssigned();
+				props.onOpenChange(false);
+			}
+		}}
+	>
+		{c.name}
+	</CommandItem>
+))}
 </CommandGroup>
 					</CommandList>
 				</Command>
