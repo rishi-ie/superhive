@@ -8,6 +8,7 @@ import type {
   InitStep,
   UsageSnapshot,
   ContextSnapshot,
+  ModelInfo,
 } from '@/types/electron'
 import type { AgentSettingsState } from './settings'
 import { updateAgentSettings } from './settings/update-agent-settings'
@@ -25,6 +26,7 @@ interface RuntimeSlice {
   bootStep?: InitStep
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
+  availableModels?: ModelInfo[]
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -78,6 +80,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     bootStep: undefined,
     usage: undefined,
     contextUsage: undefined,
+    availableModels: undefined,
     loading: true,
     initialized: false,
     unsubs,
@@ -95,6 +98,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.lastError = s.lastError
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
+      entry.availableModels = s.availableModels
     }
     entry.loading = false
   })
@@ -115,6 +119,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.lastError = s.lastError
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
+      entry.availableModels = s.availableModels
     })
   )
 
@@ -246,6 +251,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
   const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
   const [contextUsage, setContextUsage] = React.useState<ContextSnapshot | undefined>(undefined)
+  const [availableModels, setAvailableModels] = React.useState<ModelInfo[] | undefined>(undefined)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -265,6 +271,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setBootStep(sliceRef.current.bootStep)
       setUsage(sliceRef.current.usage)
       setContextUsage(sliceRef.current.contextUsage)
+      setAvailableModels(sliceRef.current.availableModels)
       setLoading(sliceRef.current.loading)
     }
 
@@ -286,7 +293,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     void restartAgent(agentId)
   }, [agentId])
 
-  return { agent, status, messages, lastError, bootStep, usage, contextUsage, loading, send, restart }
+  return { agent, status, messages, lastError, bootStep, usage, contextUsage, availableModels, loading, send, restart }
 }
 
 export function useAgentSettings(agentId: string | null) {
