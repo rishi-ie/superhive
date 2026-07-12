@@ -472,6 +472,12 @@ class GeneralKaiRuntime {
         env: {
           ...process.env,
           PI_DIR: piDir,
+          AGENT_DIR: agentDir,
+          PI_AGENT_DIR: agentDir,
+          // Diagnostic knob: when set, the telemetry extension writes
+          // every handler route + journal-path decision to stderr.
+          SUPERHIVE_TELEMETRY_DEBUG:
+            process.env.SUPERHIVE_TELEMETRY_DEBUG ?? '0',
         },
       })
     } catch (err) {
