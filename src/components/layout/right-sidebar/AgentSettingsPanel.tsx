@@ -7,6 +7,7 @@ import {
   TrayIcon,
 } from "@phosphor-icons/react";
 import { useAgentSettings } from "@/flows/agents/settings";
+import { loadAgentProjects } from "@/flows/agents/crud/load-agent-projects";
 import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,
@@ -17,6 +18,7 @@ import { ResponsibilitySlider } from "./primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import type { Project } from "@/storage/types";
 
 interface AgentSettingsPanelProps {
   agentId: string;
@@ -25,6 +27,11 @@ interface AgentSettingsPanelProps {
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const { settings, isLoading, error, reload } = useAgentSettings(agentId);
   const autoSave = useAutoSave(agentId, reload);
+
+  const [projects, setProjects] = React.useState<Project[]>([]);
+  React.useEffect(() => {
+    loadAgentProjects(agentId).then(setProjects);
+  }, [agentId]);
 
   const overviewData = React.useMemo<OverviewData>(() => ({
     name: settings?.name ?? "Untitled agent",
@@ -55,7 +62,8 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
       { type: "tool", label: "git diff", timestamp: "3h ago" },
     ],
     responsibilityCount: 8,
-  }), [settings]);
+    projects,
+  }), [settings, projects]);
 
   if (isLoading) {
     return (

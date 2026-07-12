@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import type { Project } from "@/storage/types";
 import {
   Accordion,
   ActivityRow,
@@ -35,6 +37,7 @@ export interface OverviewData {
   activeChecklist: OverviewChecklist | null;
   recentActivity: OverviewRecentActivityItem[];
   responsibilityCount: number;
+  projects: Project[];
 }
 
 interface OverviewSectionProps {
@@ -55,9 +58,18 @@ export function OverviewSection({ data }: OverviewSectionProps) {
               <span className="text-lg font-semibold text-foreground/80">
                 {data.name}
               </span>
-              <span className="ml-auto text-xs text-muted-foreground">
-                Apollo
-              </span>
+              {data.projects[0] ? (
+                <Link
+                  to={`/projects/${data.projects[0].id}`}
+                  className="ml-auto rounded-button bg-sidebar-primary/10 px-row py-0.5 text-[10px] font-medium text-sidebar-primary hover:bg-sidebar-primary/20"
+                >
+                  {data.projects[0].name}
+                </Link>
+              ) : (
+                <span className="ml-auto text-[10px] text-muted-foreground">
+                  No project
+                </span>
+              )}
             </div>
           )}
           {data.description && (
