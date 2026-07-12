@@ -9,5 +9,15 @@ export interface ProjectTeam {
 }
 
 export async function loadProjectTeam(projectId: string): Promise<ProjectTeam> {
-	return { project: null, coordinator: null, members: [] };
+	const [project, agents] = await Promise.all([
+		loadProject(projectId),
+		listAgents(),
+	]);
+	if (!project) return { project: null, coordinator: null, members: [] };
+	const inProject = agents.filter((a) => project.agentIds.includes(a.id));
+	return {
+		project,
+		coordinator: inProject.find((a) => a.agentKind === 'project-coordinator') ?? null,
+		members: inProject.filter((a) => a.agentKind !== 'project-coordinator'),
+	};
 }
