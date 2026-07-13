@@ -230,9 +230,9 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   onClick={onSend}
                   disabled={isBusy || input.trim().length === 0 || !hasModel}
                   title={!hasModel ? 'Pick a model first' : undefined}
-                  className="flex size-7 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
+                  className="flex size-5 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
                 >
-                    <Icon icon={ArrowUpIcon} className="size-3.5 text-sidebar-foreground" />
+                    <Icon icon={ArrowUpIcon} className="size-5 text-sidebar-foreground" />
                 </button>
               </div>
             </div>
