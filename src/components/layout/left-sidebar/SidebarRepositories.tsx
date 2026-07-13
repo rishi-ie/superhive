@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { PlusIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -56,6 +56,15 @@ export function SidebarRepositories() {
             >
               <Icon icon={UserIcon} className="size-4" />
               <span>Agents</span>
+            </button>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <button
+              type="button"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+            >
+              <Icon icon={PuzzlePieceIcon} className="size-4" />
+              <span>Plugins</span>
             </button>
           </SidebarMenuItem>
           <div className="group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm text-muted-foreground">
