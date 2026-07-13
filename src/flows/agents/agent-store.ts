@@ -335,6 +335,12 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           e.retry = s.retry
           e.notify?.()
         })
+      } else if (ev.type === 'image-attachment') {
+        appendPart(entry, ev.messageId, {
+          type: 'image',
+          data: ev.data,
+          mimeType: ev.mimeType,
+        })
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
