@@ -15,7 +15,19 @@ export function ReadToolCard({ part, result }: ToolCallCardBaseProps) {
   return (
     <ToolCallCard
       slots={{
-        header: <span className="font-semibold">read {path}</span>,
+        header: (
+          <span className="font-semibold flex items-baseline gap-1.5">
+            read{' '}
+            <a
+              href={`file://${path}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs text-primary underline underline-offset-2 hover:text-primary/80 truncate"
+            >
+              {path}
+            </a>
+          </span>
+        ),
         body: (
           <pre className="font-mono text-xs whitespace-pre-wrap">
             {result ? resultText(result.result) : ''}
