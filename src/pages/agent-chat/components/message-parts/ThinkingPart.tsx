@@ -19,7 +19,9 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
         <span>{isStreaming ? 'Thinking…' : `Thought for ${Math.max(1, Math.round(text.length / 200))}s`}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="text-sm">{text}</div>
+        <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap mt-2">
+          {text}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   )
