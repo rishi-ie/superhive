@@ -931,6 +931,52 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'tool-execution-end') {
+      const finalized = entry._inFlightTools.get(event.toolCallId)
+      const finalPart: import('../src/models/runtime').ContentPart = finalized
+        ? {
+            ...finalized,
+            result: normalizeToolResult(event.result),
+            isError: event.isError,
+            state: 'complete',
+          }
+        : {
+            type: 'tool-result',
+            id: event.toolCallId,
+            name: '',
+            result: normalizeToolResult(event.result),
+            isError: event.isError,
+            state: 'complete',
+          }
+      entry._inFlightTools.delete(event.toolCallId)
+
+      // Link the tool-result to the message that owns the matching tool-call.
+      // If we can't find a matching tool-call (e.g. the assistantMessageEvent
+      // stream lagged), append the result to the last assistant message.
+      let linked = false
+      for (const msg of entry.messages) {
+        const idx = msg.parts.findIndex(
+          (p) => p.type === 'tool-call' && p.id === event.toolCallId,
+        )
+        if (idx === -1) continue
+        msg.parts = [...msg.parts.slice(0, idx + 1), finalPart, ...msg.parts.slice(idx + 1)]
+        this.emitEvent(agentId, event)
+        linked = true
+        break
+      }
+      if (!linked) {
+        for (let i = entry.messages.length - 1; i >= 0; i--) {
+          const m = entry.messages[i]!
+          if (m.role === 'assistant') {
+            m.parts = [...m.parts, finalPart]
+            this.emitEvent(agentId, event)
+            break
+          }
+        }
+      }
+      return
+    }
+
     if (event.type === 'log') {
       const preview = event.line.length > 200 ? event.line.slice(0, 200) + '...' : event.line
       log.debug(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`)
