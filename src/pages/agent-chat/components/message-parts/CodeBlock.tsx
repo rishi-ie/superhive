@@ -22,7 +22,7 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
 
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg">
-      <div className="flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
         <span className="text-[11px] text-muted-foreground font-mono uppercase tracking-wide">
           {lang}
         </span>
@@ -36,7 +36,7 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
           <HugeIcon icon={Copy01Icon} size={12} className="size-3" />
         </Button>
       </div>
-      <pre className="px-3 py-2 text-xs font-mono overflow-x-auto">
+      <pre className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono">
         <code>
           {lines.map((line, i) => (
             <span key={i} className="block">
