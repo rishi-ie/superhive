@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { ToolCallCard, type ToolCallCardBaseProps } from './ToolCallCard'
 
 /**
@@ -33,6 +34,22 @@ interface GrepRow {
 }
 
 /**
+ * Build a RegExp from the user's grep pattern. Strings that fail to compile
+ * (e.g. literal `[abc` not closed) fall back to `null`, signalling the
+ * renderer to skip substring highlighting for that tool call.
+ */
+function usePatternRegex(pattern: string | undefined): RegExp | null {
+  return React.useMemo(() => {
+    if (!pattern) return null
+    try {
+      return new RegExp(pattern, 'gi')
+    } catch {
+      return null
+    }
+  }, [pattern])
+}
+
+/**
  * Parse each match line of the form `path:lineNo:matched-text` into a
  * clickable row. Lines that don't fit the format fall through to the
  * plain-text fallback below.
@@ -51,7 +68,13 @@ function parseGrepRows(text: string): GrepRow[] {
   return rows
 }
 
-function GrepResults({ text }: { text: string }) {
+function GrepResults({
+  text,
+  patternRe,
+}: {
+  text: string
+  patternRe: RegExp | null
+}) {
   const rows = parseGrepRows(text)
   if (rows.length === 0) {
     return <pre className="font-mono text-xs whitespace-pre-wrap">{text}</pre>
@@ -70,12 +93,32 @@ function GrepResults({ text }: { text: string }) {
             {row.lineNo != null ? (
               <span className="text-muted-foreground">:{row.lineNo}</span>
             ) : null}
-            <span className="text-foreground">:{row.match}</span>
+            <span className="text-foreground">:</span>
+            {patternRe ? highlightMatch(row.match, patternRe) : row.match}
           </a>
         </li>
       ))}
     </ul>
   )
+}
+
+function highlightMatch(text: string, re: RegExp) {
+  const out: React.ReactNode[] = []
+  let lastIndex = 0
+  let m: RegExpExecArray | null
+  re.lastIndex = 0
+  while ((m = re.exec(text)) != null) {
+    if (m.index > lastIndex) out.push(text.slice(lastIndex, m.index))
+    out.push(
+      <span key={m.index} className="font-semibold text-foreground">
+        {m[0]}
+      </span>,
+    )
+    lastIndex = m.index + m[0].length
+    if (m[0].length === 0) re.lastIndex++
+  }
+  if (lastIndex < text.length) out.push(text.slice(lastIndex))
+  return out
 }
 
 function argsFromToolCall(args: unknown): {
@@ -99,6 +142,7 @@ function argsFromToolCall(args: unknown): {
 
 export function GrepToolCard({ part, result }: ToolCallCardBaseProps) {
   const { pattern, path } = argsFromToolCall(part.args)
+  const patternRe = usePatternRegex(pattern)
   return (
     <ToolCallCard
       slots={{
@@ -123,7 +167,7 @@ export function GrepToolCard({ part, result }: ToolCallCardBaseProps) {
                 {matchCount(result.result)} matches
               </span>
             ) : null}
-            <GrepResults text={resultText(result.result)} />
+            <GrepResults text={resultText(result.result)} patternRe={patternRe} />
           </div>
         ) : null,
       }}
