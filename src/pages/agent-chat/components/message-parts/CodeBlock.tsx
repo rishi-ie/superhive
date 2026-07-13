@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { toast } from 'sonner'
+import { getHighlighter } from '@/lib/shiki'
 
 interface CodeBlockProps {
   lang: string
@@ -11,6 +12,7 @@ interface CodeBlockProps {
 
 export function CodeBlock({ lang, code }: CodeBlockProps) {
   const [expanded, setExpanded] = React.useState(false)
+  const [highlighted, setHighlighted] = React.useState<string | null>(null)
   const handleCopy = React.useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return
     navigator.clipboard
@@ -23,6 +25,24 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
   const COLLAPSE_THRESHOLD = 50
   const isLong = lines.length > COLLAPSE_THRESHOLD
   const visibleLines = !isLong || expanded ? lines : lines.slice(0, COLLAPSE_THRESHOLD)
+
+  React.useEffect(() => {
+    let cancelled = false
+    getHighlighter()
+      .then((h) => {
+        if (cancelled) return
+        const loaded = h.getLoadedLanguages()
+        const resolved = loaded.includes(lang as never) ? lang : 'text'
+        setHighlighted(h.codeToHtml(code, { lang: resolved, theme: 'github-light' }))
+      })
+      .catch(() => {
+        if (cancelled) return
+        setHighlighted(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [code, lang])
 
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg">
@@ -40,19 +60,26 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
           <HugeIcon icon={Copy01Icon} size={12} className="size-3" />
         </Button>
       </div>
-      <pre className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono">
-        <code>
-          {visibleLines.map((line, i) => (
-            <span key={i} className="block">
-              <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
-                {i + 1}
+      {highlighted ? (
+        <div
+          className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono [&_pre]:!bg-transparent [&_code]:!bg-transparent"
+          dangerouslySetInnerHTML={{ __html: highlighted }}
+        />
+      ) : (
+        <pre className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono">
+          <code>
+            {visibleLines.map((line, i) => (
+              <span key={i} className="block">
+                <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+                  {i + 1}
+                </span>
+                {line}
+                {'\n'}
               </span>
-              {line}
-              {'\n'}
-            </span>
-          ))}
-        </code>
-      </pre>
+            ))}
+          </code>
+        </pre>
+      )}
       {isLong && !expanded ? (
         <button
           type="button"
