@@ -375,6 +375,18 @@ rg "\bspace-[xy]-\d" src -g '!src/styles/**'
 
 ---
 
+## End-of-Day Modularity Audit
+
+After a long day of adding features, point an agent at [`modularity-check.md`](./modularity-check.md). The agent walks the 15 steps, runs the greps, and writes a `modularity-report.md` next to it with Pass / Warn / Fail per step and `file:line` references for every violation.
+
+Use it when:
+
+- You have added features across multiple files and want a shape-and-boundary check.
+- A refactor is in flight and you want to know which boundaries drifted.
+- You want a written report to review before merging.
+
+The audit covers `superhive/` only. External repos (`superhive-pi-truth`, `superhive-pi-telemetry`, `general-kai`) are black-box deps and are not graded.
+
 ## Validating Your Work
 
 Before completing any task:
@@ -386,6 +398,7 @@ Before completing any task:
 5. **All imports use `@/` alias** (not relative)
 6. **All conditional classes use `cn()`** (not ternary string concat)
 7. **Accessibility confirmed** (titles on dialogs, fallback on avatars)
+8. **End-of-day audit**: read [`modularity-check.md`](./modularity-check.md) and produce a `modularity-report.md`
 
 ---
 
@@ -402,6 +415,7 @@ Superhive-specific conventions (3-panel layout, sidebar section pattern, etc.):
 
 - **shadcn Skill**: `.ai/skills/shadcn.md`
 - **Local UI Skill**: `.ai/skills/local-ui.md`
+- **Modularity audit**: [`modularity-check.md`](./modularity-check.md)
 - **shadcn docs**: `npx shadcn@latest docs <component>`
 - **shadcn search**: `npx shadcn@latest search`
 - **Storage reference**: `storage.md`
