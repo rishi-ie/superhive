@@ -71,6 +71,24 @@
   height: 0;
 }
 
+/* Bottom opacity fade for the chat scroll viewport.
+   Messages gracefully fade into the page background at the bottom of
+   the visible area, instead of clipping at a hard edge above the composer. */
+.chat-fade-bottom {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 64px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black calc(100% - 64px),
+    transparent 100%
+  );
+}
+
 /* Font scale — controlled by data-font-scale on <html> */
 :root[data-font-scale] {
   font-size: 1rem;

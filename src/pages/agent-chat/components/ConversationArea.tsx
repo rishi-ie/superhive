@@ -64,7 +64,7 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
     <div
       ref={viewportRef}
       onScroll={onViewportScroll}
-      className="flex-1 h-full min-h-0 overflow-y-auto no-scrollbar"
+      className="flex-1 h-full min-h-0 overflow-y-auto no-scrollbar chat-fade-bottom"
     >
       <div className="mx-auto max-w-4xl px-14 py-8 flex flex-col gap-6">
         {messages.map((message) =>
