@@ -20,6 +20,7 @@ import {
   PlusIcon,
   MicrophoneIcon,
   ArrowUpIcon,
+  LaptopIcon,
 } from '@phosphor-icons/react';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
@@ -194,7 +195,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
-          <div className="rounded-3xl bg-sidebar">
+          <div className="flex items-start">
+            <div className="flex-1 rounded-3xl bg-sidebar">
             <textarea
               ref={textareaRef}
               placeholder="Message the project agent..."
@@ -205,7 +207,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
               className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-4 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
             <div className="flex items-center justify-between px-composer py-button-y">
-              <div className="flex items-center gap-stack">
+              <div className="flex items-center gap-3">
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
@@ -214,6 +216,10 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   usedTokens={contextUsedTokens}
                   maxTokens={contextWindow}
                 />
+                <div className="flex items-center gap-1 text-sidebar-foreground/70">
+                  <Icon icon={LaptopIcon} className="size-4" />
+                  <span className="text-xs">Local</span>
+                </div>
               </div>
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={projectAgent.id} />
@@ -229,6 +235,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                     <Icon icon={ArrowUpIcon} className="size-3.5 text-sidebar-foreground" />
                 </button>
               </div>
+            </div>
             </div>
           </div>
         </div>
