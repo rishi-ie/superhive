@@ -35,6 +35,21 @@ export interface AgentsAPI {
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 
+	/**
+	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated
+	 * union flows through this single channel; consumers narrow on `event.type`.
+	 *
+	 * Forwarded event types include:
+	 *   - Lifecycle: boot-step, ready, error, usage
+	 *   - Message I/O: message-start, text-delta, message-end
+	 *   - Thinking: thinking-start, thinking-delta, thinking-end
+	 *   - Tool calls (assistant-side): tool-call-start, tool-call-delta, tool-call-end
+	 *   - Tool execution (host-side): tool-execution-start, tool-execution-update, tool-execution-end
+	 *   - Compaction: compaction-start, compaction-end
+	 *   - Retry: auto-retry-start, auto-retry-end
+	 *   - Attachments: image-attachment, branch-summary
+	 *   - Diagnostics: log
+	 */
 	onEvent: (id: string, cb: (event: AdapterEvent) => void) => () => void
 	onStatus: (id: string, cb: (status: RuntimeStatusPayload) => void) => () => void
 	onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void) => () => void
