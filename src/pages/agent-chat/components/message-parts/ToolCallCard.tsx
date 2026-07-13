@@ -3,6 +3,7 @@ import type { ContentPart } from '@/models/runtime'
 
 export interface ToolCallCardBaseProps {
   part: Extract<ContentPart, { type: 'tool-call' }>
+  result?: Extract<ContentPart, { type: 'tool-result' }>
 }
 
 /** Header is rendered by each tool-specific subclass. Body content goes
@@ -59,6 +60,38 @@ interface ToolCallCardProps {
   slots: ToolCallCardSlots
   state: 'pending' | 'streaming-args' | 'running' | 'complete'
   isError?: boolean
+}
+
+/**
+ * Renders an unknown / extension-registered tool call. Shows the raw JSON for
+ * `args` and the result so the user can still inspect what the agent did.
+ */
+export function renderGenericToolBody(
+  args: unknown,
+  result?: Extract<ContentPart, { type: 'tool-result' }>,
+): React.ReactNode {
+  return (
+    <div className="flex flex-col gap-2">
+      <details>
+        <summary className="text-[11px] text-muted-foreground cursor-pointer">
+          args
+        </summary>
+        <pre className="font-mono text-[11px] bg-background/50 rounded-sm p-2 overflow-x-auto">
+          {JSON.stringify(args, null, 2)}
+        </pre>
+      </details>
+      {result ? (
+        <details>
+          <summary className="text-[11px] text-muted-foreground cursor-pointer">
+            result
+          </summary>
+          <pre className="font-mono text-[11px] bg-background/50 rounded-sm p-2 overflow-x-auto max-h-[300px] overflow-y-auto">
+            {JSON.stringify(result.result, null, 2)}
+          </pre>
+        </details>
+      ) : null}
+    </div>
+  )
 }
 
 export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProps) {
