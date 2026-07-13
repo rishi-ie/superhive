@@ -29,6 +29,16 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
                 />
               </div>
             ) : null}
+            {result && resultMeta(result.result).cancelled ? (
+              <span className="text-[10px] text-chat-status-warning ml-1.5">
+                (cancelled)
+              </span>
+            ) : null}
+            {result && resultMeta(result.result).timedOut ? (
+              <span className="text-[10px] text-chat-status-warning ml-1.5">
+                (timed out)
+              </span>
+            ) : null}
           </div>
         ),
       }}
@@ -57,9 +67,15 @@ function resultMeta(
 ): BashResultMeta {
   for (const r of result) {
     if (r.type !== 'text') continue
+    const cancelled = /\bcancelled\b|\baborted\b/i.test(r.text)
+    const timedOut = /\btimed?\s*out\b|\btimeout\b/i.test(r.text)
     const m = /\bexit(?:_|\s)?code[:= ](\d+)/.exec(r.text)
-    if (m && m[1]) {
-      return { exitCode: Number(m[1]) }
+    if (cancelled || timedOut || m?.[1]) {
+      return {
+        exitCode: m && m[1] ? Number(m[1]) : undefined,
+        cancelled: cancelled || undefined,
+        timedOut: timedOut || undefined,
+      }
     }
   }
   return {}
