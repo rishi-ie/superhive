@@ -9,7 +9,6 @@ import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
-import { APP_META } from "@/lib/app-meta";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -116,16 +115,6 @@ function AppLayoutShell() {
     <>
       <div className="flex h-screen w-screen overflow-hidden bg-background">
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
-
-        <div className="no-drag absolute top-3.5 left-[92px] z-[80]">
-          <div className="flex items-center gap-list-item rounded-full bg-transparent px-row py-0.5">
-            <span className="text-[10px] font-semibold tracking-tight text-sidebar-foreground/60 uppercase tracking-wider">{APP_META.name}</span>
-            <span className="flex items-center rounded-full px-1.5 py-px">
-              <span className="text-[9px] font-medium tabular-nums text-sidebar-foreground/40">v{APP_META.version}</span>
-              <span className="ml-1 text-[9px] font-medium text-sidebar-foreground/40">{APP_META.channel}</span>
-            </span>
-          </div>
-        </div>
 
         {leftSidebarOpen && (
           <div
