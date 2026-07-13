@@ -32,7 +32,10 @@ function useElapsedSeconds(running: boolean): number {
 export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
   const elapsed = useElapsedSeconds(isStreaming)
   return (
-    <Collapsible>
+    // Streaming: stay expanded so the user can read the trace as it streams.
+    // Done: collapse to a one-line "Thought for Xs" header until the user
+    // explicitly opens the block to inspect what the agent was thinking.
+    <Collapsible defaultOpen={isStreaming}>
       <div className="bg-chat-bubble-thinking-bg rounded-card p-3">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
           {isStreaming ? (
