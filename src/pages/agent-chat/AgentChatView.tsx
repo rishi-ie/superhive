@@ -114,45 +114,45 @@ export function AgentChatView() {
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
-          <div className="rounded-3xl bg-sidebar">
-            <div className="flex pt-3 pl-4">
-              <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                <Icon icon={LaptopIcon} className="size-4" />
-              </button>
-            </div>
-            <textarea
-              ref={textareaRef}
-              placeholder="Ask your digital employee…"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              autoFocus
-              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-1 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-            <div className="flex items-center justify-between px-composer py-button-y">
-              <div className="flex items-center gap-stack">
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={PlusIcon} className="size-5" />
-                </button>
-                <ContextUsageRing
-                  percent={contextPercent}
-                  usedTokens={contextUsedTokens}
-                  maxTokens={contextWindow}
-                />
-              </div>
-              <div className="flex items-center gap-5">
-                <ModelPicker agentId={agentId} />
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={MicrophoneIcon} className="size-5" />
-                </button>
-                <button
-                  onClick={onSend}
-                  disabled={isBusy || input.trim().length === 0 || !hasModel}
-                  title={!hasModel ? 'Pick a model first' : undefined}
-                  className="flex size-7 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
-                >
-                  <Icon icon={PaperPlaneTiltIcon} className="size-3.5 text-sidebar-foreground" />
-                </button>
+          <div className="flex items-start">
+            <button className="mt-[22px] mr-2 text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+              <Icon icon={LaptopIcon} className="size-4" />
+            </button>
+            <div className="flex-1 rounded-3xl bg-sidebar">
+              <textarea
+                ref={textareaRef}
+                placeholder="Ask your digital employee…"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                autoFocus
+                className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-1 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <div className="flex items-center justify-between px-composer py-button-y">
+                <div className="flex items-center gap-stack">
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                    <Icon icon={PlusIcon} className="size-5" />
+                  </button>
+                  <ContextUsageRing
+                    percent={contextPercent}
+                    usedTokens={contextUsedTokens}
+                    maxTokens={contextWindow}
+                  />
+                </div>
+                <div className="flex items-center gap-5">
+                  <ModelPicker agentId={agentId} />
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                    <Icon icon={MicrophoneIcon} className="size-5" />
+                  </button>
+                  <button
+                    onClick={onSend}
+                    disabled={isBusy || input.trim().length === 0 || !hasModel}
+                    title={!hasModel ? 'Pick a model first' : undefined}
+                    className="flex size-7 items-center justify-center rounded-full bg-secondary hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
+                  >
+                    <Icon icon={PaperPlaneTiltIcon} className="size-3.5 text-sidebar-foreground" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
