@@ -48,6 +48,7 @@
 
   /* Diff renderer colors (Phase 2.2.1+). */
   --chat-bubble-diff-added-bg: color-mix(in oklch, var(--success) 18%, transparent);
+  --chat-bubble-diff-removed-bg: color-mix(in oklch, var(--destructive) 18%, transparent);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -132,6 +133,7 @@
   --chat-bubble-tool-bg-running: color-mix(in oklch, var(--info) 8%, transparent);
 
   --chat-bubble-diff-added-bg: color-mix(in oklch, var(--success) 22%, transparent);
+  --chat-bubble-diff-removed-bg: color-mix(in oklch, var(--destructive) 22%, transparent);
 }
 
 * {
@@ -206,6 +208,7 @@
   --color-chat-bubble-tool-bg-error: var(--chat-bubble-tool-bg-error);
   --color-chat-bubble-tool-bg-running: var(--chat-bubble-tool-bg-running);
   --color-chat-bubble-diff-added-bg: var(--chat-bubble-diff-added-bg);
+  --color-chat-bubble-diff-removed-bg: var(--chat-bubble-diff-removed-bg);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
