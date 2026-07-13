@@ -28,6 +28,9 @@ const components: Components = {
   h6: ({ children }) => (
     <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h6>
   ),
+  p: ({ children }) => (
+    <p className="text-sm leading-relaxed my-1.5">{children}</p>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
