@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, MagnifyingGlassIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { PlusIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -9,12 +9,10 @@ import {
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
 import { goBackHome } from "@/flows/navigation";
-import { useCommandPalette } from "@/flows/ui/use-command-palette";
 import { useOpenCreateProject } from "@/flows/projects/ui/open-create-project";
 
 export function SidebarRepositories() {
   const navigate = useNavigate();
-  const { setOpen: setCommandOpen } = useCommandPalette();
   const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   return (
     <SidebarGroup>
@@ -58,16 +56,6 @@ export function SidebarRepositories() {
             >
               <Icon icon={UserIcon} className="size-4" />
               <span>Agents</span>
-            </button>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <button
-              type="button"
-              onClick={() => setCommandOpen(true)}
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
-            >
-              <Icon icon={MagnifyingGlassIcon} className="size-4" />
-              <span>Search</span>
             </button>
           </SidebarMenuItem>
           <div className="group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm text-muted-foreground">
