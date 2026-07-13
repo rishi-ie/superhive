@@ -9,7 +9,11 @@ interface MarkdownPartProps {
  *  the assistant chat its typographic identity (sizing, weights, links,
  *  tables, code). Until then each entry is a no-op passthrough, set so the
  *  structure is in place when the first renderer lands. */
-const components: Components = {}
+const components: Components = {
+  h1: ({ children }) => (
+    <h1 className="text-base font-semibold tracking-tight">{children}</h1>
+  ),
+}
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
   return (
