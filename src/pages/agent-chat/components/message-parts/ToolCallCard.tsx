@@ -22,6 +22,17 @@ function stateBackgroundClass(
   return 'bg-chat-bubble-tool-bg-pending'
 }
 
+/** Status dot color: maps state to a semantic fg token. */
+function statusDotClass(
+  state: 'pending' | 'streaming-args' | 'running' | 'complete',
+  isError: boolean,
+): string {
+  if (isError) return 'bg-chat-status-error'
+  if (state === 'complete') return 'bg-chat-status-success'
+  if (state === 'running' || state === 'streaming-args') return 'bg-chat-status-running'
+  return 'bg-muted-foreground/60'
+}
+
 interface ToolCallCardProps {
   slots: ToolCallCardSlots
   state: 'pending' | 'streaming-args' | 'running' | 'complete'
@@ -30,9 +41,11 @@ interface ToolCallCardProps {
 
 export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProps) {
   const bg = stateBackgroundClass(state, isError)
+  const dotFg = statusDotClass(state, isError)
   return (
     <div className={`rounded-chat-tool-card border border-border overflow-hidden ${bg}`}>
       <div className="flex items-center gap-2 px-3 py-2 text-xs">
+        <span className={`size-1.5 rounded-full ${dotFg}`} aria-hidden />
         {slots.header}
       </div>
       <div className="px-3 py-2 text-xs">{slots.body}</div>
