@@ -46,6 +46,9 @@ const components: Components = {
   ol: ({ children }) => (
     <ol className="list-decimal list-inside my-1.5 space-y-1">{children}</ol>
   ),
+  li: ({ children }) => (
+    <li className="text-sm leading-relaxed">{children}</li>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
