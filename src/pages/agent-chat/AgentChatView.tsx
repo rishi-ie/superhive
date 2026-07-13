@@ -116,11 +116,6 @@ export function AgentChatView() {
         <div className="max-w-[800px] mx-auto px-14 py-4">
           <div className="flex items-start">
             <div className="flex-1 rounded-3xl bg-sidebar">
-              <div className="flex pt-3 pl-4">
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={LaptopIcon} className="size-4" />
-                </button>
-              </div>
               <textarea
                 ref={textareaRef}
                 placeholder="Ask your digital employee…"
@@ -140,6 +135,9 @@ export function AgentChatView() {
                     usedTokens={contextUsedTokens}
                     maxTokens={contextWindow}
                   />
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                    <Icon icon={LaptopIcon} className="size-4" />
+                  </button>
                 </div>
                 <div className="flex items-center gap-5">
                   <ModelPicker agentId={agentId} />
