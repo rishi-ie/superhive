@@ -57,6 +57,12 @@ export type AdapterEvent =
       delayMs: number
       errorMessage: string
     }
+  | {
+      type: 'auto-retry-end'
+      success: boolean
+      attempt: number
+      finalError?: string
+    }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
