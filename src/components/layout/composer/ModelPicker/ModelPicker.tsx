@@ -138,7 +138,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
           <Icon icon={CaretDownIcon} className="size-5" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[220px] bg-modal text-modal-foreground">
+      <DropdownMenuContent align="end" className="min-w-[160px] bg-modal text-modal-foreground">
         {loading ? (
           <DropdownMenuItem disabled className="text-modal-foreground/60">Loading…</DropdownMenuItem>
         ) : models.length === 0 ? (
@@ -149,7 +149,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
               <DropdownMenuItem
                 key={m.id}
                 onSelect={() => onSelect(m)}
-                className="flex flex-col items-start gap-0"
+                className="flex items-center gap-2 py-2"
               >
                 <span className="text-sm text-modal-foreground">{m.name}</span>
               </DropdownMenuItem>
@@ -157,7 +157,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
             <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1 h-px" />
             <DropdownMenuItem
               onSelect={() => navigate('/settings')}
-              className="flex items-center gap-1.5 cursor-pointer"
+              className="flex items-center gap-1.5 py-2 cursor-pointer"
             >
               <Icon icon={PlusIcon} className="size-3.5 text-modal-foreground/60" />
               <span className="text-sm text-modal-foreground/70">Add API keys</span>
