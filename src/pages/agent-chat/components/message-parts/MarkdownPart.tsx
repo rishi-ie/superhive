@@ -58,6 +58,22 @@ const components: Components = {
       <Checkbox checked={!!checked} disabled className="align-middle mr-1.5" />
     )
   },
+  // Inline code: detect via absence of `className` (shiki-marked blocks have
+  // `className` starting with `language-`). Fall through to the default
+  // renderer for fenced blocks so they keep flow through `<pre>` below.
+  code: ({ children, className }) => {
+    const isBlock = typeof className === 'string' && className.startsWith('language-')
+    if (isBlock) {
+      // P3.9 will replace this with `<CodeBlock lang code>`; until then,
+      // pass through to the default renderer so fenced blocks still render.
+      return <code className={className}>{children}</code>
+    }
+    return (
+      <code className="bg-muted rounded-sm px-1 py-0.5 font-mono text-[0.85em]">
+        {children}
+      </code>
+    )
+  },
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
