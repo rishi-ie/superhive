@@ -35,6 +35,9 @@ const components: Components = {
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
   em: ({ children }) => <em className="italic">{children}</em>,
+  del: ({ children }) => (
+    <del className="line-through text-muted-foreground">{children}</del>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
