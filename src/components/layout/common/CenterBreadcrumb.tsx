@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -10,10 +10,12 @@ import {
 import { useCenterBreadcrumb } from "@/flows/ui/use-center-breadcrumb";
 
 export function CenterBreadcrumb() {
+  const location = useLocation();
   const segments = useCenterBreadcrumb();
+  const isAgentChat = location.pathname.startsWith('/agents');
   if (!segments) return null;
   return (
-    <div className="flex items-center px-composer pt-3 pb-2">
+    <div className={isAgentChat ? "flex items-center px-composer pt-3 pb-3 border-b border-border" : "flex items-center px-composer pt-3 pb-2"}>
       <Breadcrumb className="flex-1 font-sans">
         <BreadcrumbList>
           {segments.map((seg, i) => {
