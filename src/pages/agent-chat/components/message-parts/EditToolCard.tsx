@@ -35,6 +35,11 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
                 {successMessage(resultText(result.result))}
               </span>
             ) : null}
+            {result && errorMessage(resultText(result.result)) ? (
+              <span className="text-chat-status-error text-xs">
+                {errorMessage(resultText(result.result))}
+              </span>
+            ) : null}
             {result ? resultText(result.result) || '(no output)' : ''}
             <DiffViewPlaceholder path={path} />
           </div>
@@ -44,6 +49,20 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
       isError={result?.isError}
     />
   )
+}
+
+/**
+ * Detect Pi's edit error phrases so we can render a destructive callout
+ * instead of a green success pill. Pi's tool emits one of these:
+ *   "Could not find the text to replace"
+ *   "Multiple matches found; please provide more context"
+ *   "Old text overlaps with another replacement"
+ */
+function errorMessage(text: string): string | null {
+  if (/could not find the text/i.test(text)) return 'Could not find text'
+  if (/multiple matches|multiple occurrences/i.test(text)) return 'Multiple matches'
+  if (/overlap/i.test(text)) return 'Overlapping edits'
+  return null
 }
 
 /**
