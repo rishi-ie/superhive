@@ -307,3 +307,20 @@
 .slide-out-to-bottom { --tw-exit-translate-y: 100%; }
 .slide-out-to-left { --tw-exit-translate-x: -100%; }
 .slide-out-to-right { --tw-exit-translate-x: 100%; }
+
+/* Shimmer (Phase 2.7.1) — animated background-mask used during streaming
+ * placeholders. The keyframes are defined at 2.7.2; reduce-motion override
+ * lives in src/styles/base.css. */
+.shimmer {
+  background-image: linear-gradient(
+    to right,
+    transparent 0%,
+    color-mix(in oklch, var(--foreground) 15%, transparent) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shimmer 1.6s linear infinite;
+}
