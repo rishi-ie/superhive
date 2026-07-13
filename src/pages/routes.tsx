@@ -5,6 +5,7 @@ import { AgentChatView, AgentsListView } from "@/pages/agent-chat";
 import { ProjectChatView } from "@/pages/project-chat";
 import { MetaHiveView } from "@/pages/meta-hive";
 import { RemoteView } from "@/pages/remote";
+import { PluginsView } from "@/pages/plugins";
 import { SettingsLayout, SettingsSectionView } from "@/pages/settings";
 
 export const router = createHashRouter([
@@ -37,6 +38,10 @@ export const router = createHashRouter([
       {
         path: "remote",
         element: <RemoteView />,
+      },
+      {
+        path: "plugins",
+        element: <PluginsView />,
       },
     ],
   },

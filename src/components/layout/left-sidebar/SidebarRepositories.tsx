@@ -61,6 +61,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
+              onClick={() => navigate('/plugins')}
               className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={PuzzlePieceIcon} className="size-4" />
