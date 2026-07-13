@@ -215,6 +215,25 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         if (!updated) {
           appendPart(entry, ev.messageId, { type: 'text', text: ev.delta, state: 'streaming' })
         }
+      } else if (ev.type === 'thinking-start') {
+        appendPart(entry, ev.messageId, { type: 'thinking', text: '', state: 'streaming' })
+      } else if (ev.type === 'thinking-delta') {
+        const updated = updateLastPart(entry, ev.messageId, (last) => {
+          if (last.type === 'thinking') {
+            return { ...last, text: last.text + ev.delta, state: 'streaming' }
+          }
+          return null
+        })
+        if (!updated) {
+          appendPart(entry, ev.messageId, { type: 'thinking', text: ev.delta, state: 'streaming' })
+        }
+      } else if (ev.type === 'thinking-end') {
+        updateLastPart(entry, ev.messageId, (last) => {
+          if (last.type === 'thinking') {
+            return { ...last, text: ev.content || last.text, state: 'complete' }
+          }
+          return null
+        })
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
