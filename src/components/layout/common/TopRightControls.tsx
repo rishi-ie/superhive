@@ -1,5 +1,7 @@
 import { Icon } from "@/components/ui/icon";
-import { SidebarSimpleIcon, GearIcon } from "@phosphor-icons/react";
+import { GearIcon } from "@phosphor-icons/react";
+import { HugeIcon } from "@/components/ui/huge-icon";
+import { LayoutAlignLeftIcon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -67,9 +69,9 @@ export function TopRightControls({
             onClick={onToggleRightSidebar}
           >
             {rightSidebarOpen ? (
-              <Icon icon={SidebarSimpleIcon} className="size-4" />
+              <HugeIcon icon={LayoutAlignLeftIcon} size={16} className="size-4 text-muted-foreground" />
             ) : (
-              <Icon icon={SidebarSimpleIcon} className="size-4" />
+              <HugeIcon icon={LayoutAlignRightIcon} size={16} className="size-4 text-muted-foreground" />
             )}
           </Button>
         </TooltipTrigger>
