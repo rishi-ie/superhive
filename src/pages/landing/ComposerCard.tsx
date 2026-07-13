@@ -4,7 +4,7 @@ import {
   HandIcon,
   CaretDownIcon,
   MicrophoneIcon,
-  PaperPlaneTiltIcon,
+  ArrowUpIcon,
 } from "@phosphor-icons/react";
 import { ModelPicker } from "@/components/layout/composer/ModelPicker";
 
@@ -33,7 +33,7 @@ export function ComposerCard() {
               <Icon icon={MicrophoneIcon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer transition-colors">
-              <Icon icon={PaperPlaneTiltIcon} className="size-4" />
+                <Icon icon={ArrowUpIcon} className="size-4" />
             </button>
           </div>
         </div>
