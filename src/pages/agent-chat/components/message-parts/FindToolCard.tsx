@@ -30,11 +30,18 @@ export function FindToolCard({ part, result }: ToolCallCardBaseProps) {
           </span>
         ),
         body: result ? (
-          <FindResults
-            text={result
-              .result.map((r) => (r.type === 'text' ? r.text : ''))
-              .join('')}
-          />
+          <div className="flex flex-col gap-1.5">
+            <FindResults
+              text={result
+                .result.map((r) => (r.type === 'text' ? r.text : ''))
+                .join('')}
+            />
+            {truncationNotice(result.result) ? (
+              <div className="text-[11px] text-chat-status-warning">
+                {truncationNotice(result.result)}
+              </div>
+            ) : null}
+          </div>
         ) : null,
       }}
       state={part.state}
@@ -71,4 +78,20 @@ function FindResults({ text }: { text: string }) {
       ))}
     </ul>
   )
+}
+
+/**
+ * Detect Pi's "Truncated: …" footer. Shows a warning so the user can
+ * tighten the search scope instead of getting a partial result.
+ */
+function truncationNotice(
+  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
+): string | null {
+  for (const r of result) {
+    if (r.type !== 'text') continue
+    const m = /truncated.*?limit.*?(\d+)/i.exec(r.text)
+    if (m && m[1]) return `Truncated: limit ${m[1]}`
+    if (/truncated/i.test(r.text)) return 'Truncated'
+  }
+  return null
 }
