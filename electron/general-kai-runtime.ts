@@ -74,6 +74,63 @@ const STDERR_LOG_LIMIT = 500
 const READY_SILENCE_MS = 2000
 const TAILER_AUTO_STOP_MS = 30_000
 
+/**
+ * Convert whatever shape the runtime emitted for a partial / final tool result
+ * into the discriminated `ToolResultContent[]` shape persisted on the message.
+ * Defaults to a single text entry — adequate for the common string result
+ * shape and until Phase 6 (diff view) replaces it with a real diff parser.
+ */
+function normalizeToolResult(raw: unknown): import('../src/models/runtime').ToolResultContent[] {
+  if (raw == null) return [{ type: 'text', text: '' }]
+  if (typeof raw === 'string') return [{ type: 'text', text: raw }]
+  if (Array.isArray(raw)) {
+    const out: import('../src/models/runtime').ToolResultContent[] = []
+    for (const item of raw) {
+      out.push(...normalizeToolResult(item))
+    }
+    return out
+  }
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>
+    // Pi already-shape payloads: { type: 'diff', path, oldText, newText }
+    if (obj.type === 'diff' && typeof obj.path === 'string') {
+      return [
+        {
+          type: 'diff',
+          path: obj.path,
+          oldText: typeof obj.oldText === 'string' ? obj.oldText : '',
+          newText: typeof obj.newText === 'string' ? obj.newText : '',
+        },
+      ]
+    }
+    // { type: 'truncation', path, reason, totalLines, shownLines }
+    if (obj.type === 'truncation' && typeof obj.path === 'string') {
+      const reason = obj.reason === 'lineLimit' || obj.reason === 'byteLimit' || obj.reason === 'binary'
+        ? obj.reason
+        : 'lineLimit'
+      return [
+        {
+          type: 'truncation',
+          path: obj.path,
+          reason,
+          totalLines: typeof obj.totalLines === 'number' ? obj.totalLines : 0,
+          shownLines: typeof obj.shownLines === 'number' ? obj.shownLines : 0,
+        },
+      ]
+    }
+    // { text }
+    if (typeof obj.text === 'string') return [{ type: 'text', text: obj.text }]
+    // { content: string | string[] }
+    if (typeof obj.content === 'string') return [{ type: 'text', text: obj.content }]
+    if (Array.isArray(obj.content)) {
+      const out: import('../src/models/runtime').ToolResultContent[] = []
+      for (const item of obj.content) out.push(...normalizeToolResult(item))
+      return out
+    }
+  }
+  return [{ type: 'text', text: String(raw) }]
+}
+
 type TelemetryWireEvent = {
   type: string
   usage?: UsageSnapshot
@@ -854,6 +911,23 @@ class GeneralKaiRuntime {
         state: 'streaming',
       })
       this.emitEvent(agentId, event)
+      return
+    }
+
+    if (event.type === 'tool-execution-update') {
+      // Partial result snapshots replace whatever we have buffered. The host
+      // (Pi) sends the full snapshot on every update, not a delta. Keeping a
+      // single tool-result part in the in-flight map lets the renderer show
+      // a streaming body until the next update arrives.
+      const cur = entry._inFlightTools.get(event.toolCallId)
+      if (cur) {
+        entry._inFlightTools.set(event.toolCallId, {
+          ...cur,
+          result: normalizeToolResult(event.partialResult),
+          state: 'streaming',
+        })
+        this.emitEvent(agentId, event)
+      }
       return
     }
 
