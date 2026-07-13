@@ -18,9 +18,8 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
         ),
         body: (
           <div>
-            <pre className="font-mono text-xs whitespace-pre-wrap">$ {command}</pre>
             {result ? (
-              <pre className="font-mono text-xs whitespace-pre-wrap mt-2">
+              <pre className="font-mono text-xs whitespace-pre-wrap mt-0 max-h-[300px] overflow-y-auto">
                 {resultText(result.result)}
               </pre>
             ) : null}
