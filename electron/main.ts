@@ -15,6 +15,8 @@ const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+app.setName('Superhive');
+
 log.initialize();
 log.info('Superhive starting...');
 
