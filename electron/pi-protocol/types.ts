@@ -36,6 +36,7 @@ export type AdapterEvent =
   | { type: 'thinking-start'; messageId: string; contentIndex: number }
   | { type: 'thinking-delta'; messageId: string; contentIndex: number; delta: string }
   | { type: 'thinking-end'; messageId: string; contentIndex: number; content: string }
+  | { type: 'tool-call-start'; messageId: string; toolCallId: string; name: string; contentIndex: number }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
