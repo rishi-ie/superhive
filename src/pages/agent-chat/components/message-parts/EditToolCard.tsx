@@ -30,6 +30,11 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
         ),
         body: (
           <div className="flex flex-col gap-1.5">
+            {result && successMessage(resultText(result.result)) ? (
+              <span className="text-chat-status-success text-xs">
+                {successMessage(resultText(result.result))}
+              </span>
+            ) : null}
             {result ? resultText(result.result) || '(no output)' : ''}
             <DiffViewPlaceholder path={path} />
           </div>
@@ -39,6 +44,17 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
       isError={result?.isError}
     />
   )
+}
+
+/**
+ * Extract Pi's edit success summary text, e.g. "Successfully replaced N
+ * block(s)". Used to render a green confirmation pill under the diff.
+ */
+function successMessage(text: string): string | null {
+  const m = /successfully replaced\s+(\d+)\s+block/i.exec(text)
+  if (m) return `Successfully replaced ${m[1]} block${m[1] === '1' ? '' : 's'}`
+  if (/edit applied/i.test(text)) return 'Edit applied'
+  return null
 }
 
 function resultText(
