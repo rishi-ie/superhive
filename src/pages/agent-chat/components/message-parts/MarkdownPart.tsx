@@ -19,6 +19,15 @@ const components: Components = {
   h3: ({ children }) => (
     <h3 className="text-sm font-medium mt-3 mb-1">{children}</h3>
   ),
+  h4: ({ children }) => (
+    <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h4>
+  ),
+  h5: ({ children }) => (
+    <h5 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h5>
+  ),
+  h6: ({ children }) => (
+    <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h6>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
