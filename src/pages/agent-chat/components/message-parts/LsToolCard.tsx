@@ -2,6 +2,21 @@ import { HugeIcon } from '@/components/ui/huge-icon'
 import { FolderIcon, File01Icon } from '@hugeicons/core-free-icons'
 import { ToolCallCard, type ToolCallCardBaseProps } from './ToolCallCard'
 
+/** Detect Pi's "Truncated: …" footer. */
+function lsTruncation(
+  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
+): string | null {
+  for (const r of result) {
+    if (r.type !== 'text') continue
+    if (/truncated/i.test(r.text)) {
+      const m = /truncated.*?(\d+)\s+(?:entries|files|items)/i.exec(r.text)
+      if (m && m[1]) return `Truncated: ${m[1]} entries shown`
+      return 'Truncated'
+    }
+  }
+  return null
+}
+
 function pathFromArgs(args: unknown): string {
   if (!args || typeof args !== 'object') return ''
   const obj = args as { path?: unknown }
@@ -22,26 +37,33 @@ export function LsToolCard({ part, result }: ToolCallCardBaseProps) {
           </span>
         ),
         body: result ? (
-          <ul className="flex flex-col gap-0.5">
-            {result.result
-              .map((r) => (r.type === 'text' ? r.text : ''))
-              .join('')
-              .split('\n')
-              .map((l) => l.trim())
-              .filter((l) => l)
-              .map((line, i) => (
-                <li
-                  key={i}
-                  className="font-mono text-xs flex items-center gap-1.5"
-                >
-                  <HugeIcon
-                    icon={line.endsWith('/') ? FolderIcon : File01Icon}
-                    className="size-3.5 text-muted-foreground"
-                  />
-                  <span>{line}</span>
-                </li>
-              ))}
-          </ul>
+          <div className="flex flex-col gap-1.5">
+            <ul className="flex flex-col gap-0.5">
+              {result.result
+                .map((r) => (r.type === 'text' ? r.text : ''))
+                .join('')
+                .split('\n')
+                .map((l) => l.trim())
+                .filter((l) => l)
+                .map((line, i) => (
+                  <li
+                    key={i}
+                    className="font-mono text-xs flex items-center gap-1.5"
+                  >
+                    <HugeIcon
+                      icon={line.endsWith('/') ? FolderIcon : File01Icon}
+                      className="size-3.5 text-muted-foreground"
+                    />
+                    <span>{line}</span>
+                  </li>
+                ))}
+            </ul>
+            {lsTruncation(result.result) ? (
+              <div className="text-[11px] text-chat-status-warning">
+                {lsTruncation(result.result)}
+              </div>
+            ) : null}
+          </div>
         ) : null,
       }}
       state={part.state}
