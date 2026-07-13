@@ -101,3 +101,13 @@
   transition: none !important;
   animation: none !important;
 }
+
+/* P2.7.3 — also kill the streaming shimmer (its animation lives outside
+ * Tailwind's transition shorthand, so the wildcard above isn't enough on
+ * some engines — the explicit override guarantees the gradient freezes). */
+[data-reduce-motion="true"] .shimmer {
+  animation: none !important;
+  color: var(--muted-foreground);
+  background: none;
+  -webkit-background-clip: border-box;
+}
