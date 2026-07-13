@@ -27,6 +27,25 @@ function resultText(
     .join('')
 }
 
+/**
+ * Grep truncation footer — emitted when Pi hits its match-count limit. We
+ * surface it as a small warning pill so the user can request a narrower
+ * search without being confused by missing results.
+ */
+function truncationNotice(
+  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
+): string | null {
+  for (const r of result) {
+    if (r.type !== 'text') continue
+    const m = /truncated.*?(\d+)\s+match.*?limit.*?(\d+)/i.exec(r.text)
+    if (m && m[1] && m[2]) {
+      return `Truncated: ${m[1]} matches, limit ${m[2]}`
+    }
+    if (/truncated/i.test(r.text)) return 'Truncated'
+  }
+  return null
+}
+
 interface GrepRow {
   path: string
   lineNo: number | null
@@ -168,6 +187,11 @@ export function GrepToolCard({ part, result }: ToolCallCardBaseProps) {
               </span>
             ) : null}
             <GrepResults text={resultText(result.result)} patternRe={patternRe} />
+            {truncationNotice(result.result) ? (
+              <div className="text-[11px] text-chat-status-warning mt-1">
+                {truncationNotice(result.result)}
+              </div>
+            ) : null}
           </div>
         ) : null,
       }}
