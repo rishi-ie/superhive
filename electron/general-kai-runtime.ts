@@ -19,6 +19,7 @@ import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { parseCounter } from './agent-settings-defaults'
+import { appendBatch } from './agent-chat-store'
 
 /**
  * Live runtime state for one agent instance.
@@ -57,6 +58,9 @@ export interface RuntimeEntry {
   activeModelName?: string
   // adapter
   adapter: PiProtocolAdapter
+  // chat persistence
+  _chatPending: Set<string>
+  _chatDebounceTimer: NodeJS.Timeout | null
 }
 
 const STDERR_LOG_LIMIT = 500
@@ -155,6 +159,8 @@ class GeneralKaiRuntime {
       contextUsage: undefined,
       extensionLoaded: false,
       availableModels: undefined,
+      _chatPending: new Set(),
+      _chatDebounceTimer: null,
     }
 
     entry.adapter = adapter
@@ -172,6 +178,8 @@ class GeneralKaiRuntime {
     entry.activeModelContextWindow = undefined
     entry.activeModelName = undefined
     entry.stderrLog = []
+    entry._chatPending = new Set()
+    entry._chatDebounceTimer = null
     adapter.reset()
 
     this.entries.set(agentId, entry)
@@ -217,6 +225,8 @@ class GeneralKaiRuntime {
       ts: Date.now(),
     }
     entry.messages.push(userMsg)
+    entry._chatPending.add(userMsg.id)
+    this.scheduleChatPersist(entry)
     this.transitionStatus(entry, 'busy')
     this.emitMessages(agentId)
     log.debug(`[runtime.send] agent=${agentId} wire=${entry.adapter.serializeInput(text).replace(/\n$/, '')}`)
@@ -258,6 +268,45 @@ class GeneralKaiRuntime {
         }
       }
     }, 3000)
+  }
+
+  // ============================================================
+  // CHAT PERSISTENCE
+  // ============================================================
+
+  private scheduleChatPersist(entry: RuntimeEntry): void {
+    if (entry._chatDebounceTimer) {
+      clearTimeout(entry._chatDebounceTimer)
+    }
+    entry._chatDebounceTimer = setTimeout(() => {
+      this.flushChatEntry(entry)
+    }, 1000)
+  }
+
+  private flushChatEntry(entry: RuntimeEntry): void {
+    entry._chatDebounceTimer = null
+    if (entry._chatPending.size === 0) return
+    const msgs: RuntimeMessage[] = []
+    for (const id of entry._chatPending) {
+      const msg = entry.messages.find((m) => m.id === id)
+      if (msg) msgs.push(msg)
+    }
+    entry._chatPending.clear()
+    if (msgs.length > 0) {
+      appendBatch(entry.agentId, msgs).catch((err) =>
+        log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err),
+      )
+    }
+  }
+
+  flushAllChats(): void {
+    for (const [, entry] of this.entries) {
+      if (entry._chatDebounceTimer) {
+        clearTimeout(entry._chatDebounceTimer)
+        entry._chatDebounceTimer = null
+      }
+      this.flushChatEntry(entry)
+    }
   }
 
   ensureSettingsWatcher(agentId: string, settingsPath: string): void {
@@ -623,6 +672,8 @@ class GeneralKaiRuntime {
         ts: Date.now(),
       }
       entry.messages.push(msg)
+      entry._chatPending.add(msg.id)
+      this.scheduleChatPersist(entry)
       this.transitionStatus(entry, 'busy')
       log.debug(`[runtime.event] agent=${agentId} type=message-start role=${event.role}`)
       this.emitMessages(agentId)
@@ -633,6 +684,7 @@ class GeneralKaiRuntime {
       const msg = entry.messages.find((m) => m.id === event.messageId)
       if (msg) {
         msg.content += event.delta
+        this.scheduleChatPersist(entry)
         const preview = event.delta.length > 100 ? event.delta.slice(0, 100) + '...' : event.delta
         log.debug(`[runtime.event] agent=${agentId} type=text-delta delta=${JSON.stringify(preview)}`)
         this.emitEvent(agentId, event)
