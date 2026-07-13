@@ -33,6 +33,7 @@ export type AdapterEvent =
   | { type: 'text-delta'; messageId: string; delta: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
   | { type: 'message-end'; messageId: string }
+  | { type: 'thinking-start'; messageId: string; contentIndex: number }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
