@@ -64,6 +64,10 @@ export interface RuntimeEntry {
   // live status envelopes (set by 1.2 handlers, read by getStatusPayload/emitStatus)
   compaction?: import('../src/models/runtime').CompactionStatus
   retry?: import('../src/models/runtime').RetryStatus
+  // in-flight tool executions, keyed on toolCallId. The adapter's parallel
+  // tool_execution_* events arrive independently of assistantMessageEvent, so
+  // we keep this map on the RuntimeEntry rather than on a specific message.
+  _inFlightTools: Map<string, import('../src/models/runtime').ContentPart & { type: 'tool-result' }>
 }
 
 const STDERR_LOG_LIMIT = 500
@@ -166,6 +170,7 @@ class GeneralKaiRuntime {
       availableModels: undefined,
       _chatPending: new Set(),
       _chatDebounceTimer: null,
+      _inFlightTools: new Map(),
     }
 
     entry.adapter = adapter
@@ -182,9 +187,12 @@ class GeneralKaiRuntime {
     entry.availableModels = undefined
     entry.activeModelContextWindow = undefined
     entry.activeModelName = undefined
+    entry.compaction = undefined
+    entry.retry = undefined
     entry.stderrLog = []
     entry._chatPending = new Set()
     entry._chatDebounceTimer = null
+    entry._inFlightTools = new Map()
     adapter.reset()
 
     this.entries.set(agentId, entry)
@@ -833,6 +841,19 @@ class GeneralKaiRuntime {
         this.emitEvent(agentId, event)
         break
       }
+      return
+    }
+
+    if (event.type === 'tool-execution-start') {
+      entry._inFlightTools.set(event.toolCallId, {
+        type: 'tool-result',
+        id: event.toolCallId,
+        name: event.name,
+        result: [{ type: 'text', text: '' }],
+        isError: false,
+        state: 'streaming',
+      })
+      this.emitEvent(agentId, event)
       return
     }
 
