@@ -42,6 +42,7 @@ export type AdapterEvent =
   | { type: 'tool-execution-start'; toolCallId: string; name: string; args: unknown }
   | { type: 'tool-execution-update'; toolCallId: string; partialResult: unknown }
   | { type: 'tool-execution-end'; toolCallId: string; result: unknown; isError: boolean }
+  | { type: 'compaction-start'; reason: 'manual' | 'threshold' | 'overflow' }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
