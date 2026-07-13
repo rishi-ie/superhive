@@ -13,9 +13,10 @@ export function CenterBreadcrumb() {
   const location = useLocation();
   const segments = useCenterBreadcrumb();
   const isAgentChat = location.pathname.startsWith('/agents');
+  const isProjectChat = location.pathname.startsWith('/projects');
   if (!segments) return null;
   return (
-    <div className={isAgentChat ? "flex items-center px-composer pt-3 pb-3 border-b border-border" : "flex items-center px-composer pt-3 pb-2"}>
+    <div className={isAgentChat || isProjectChat ? "flex items-center px-composer pt-3 pb-3 border-b border-border" : "flex items-center px-composer pt-3 pb-2"}>
       <Breadcrumb className="flex-1 font-sans">
         <BreadcrumbList>
           {segments.map((seg, i) => {
