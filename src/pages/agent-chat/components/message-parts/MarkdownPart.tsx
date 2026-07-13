@@ -1,5 +1,6 @@
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Separator } from '@/components/ui/separator'
 
 interface MarkdownPartProps {
   source: string
@@ -38,6 +39,7 @@ const components: Components = {
   del: ({ children }) => (
     <del className="line-through text-muted-foreground">{children}</del>
   ),
+  hr: () => <Separator className="my-3" />,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
