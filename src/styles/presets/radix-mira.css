@@ -57,6 +57,9 @@
   --chat-bubble-code-bg: color-mix(in oklch, var(--muted) 70%, transparent);
   --chat-bubble-code-header-bg: color-mix(in oklch, var(--muted) 90%, transparent);
   --chat-bubble-code-fg: var(--foreground);
+
+  /* Thinking-block surfaces (Phase 2.4.1+). */
+  --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 40%, transparent);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -149,6 +152,8 @@
   --chat-bubble-code-bg: color-mix(in oklch, var(--muted) 50%, transparent);
   --chat-bubble-code-header-bg: color-mix(in oklch, var(--muted) 70%, transparent);
   --chat-bubble-code-fg: var(--foreground);
+
+  --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 30%, transparent);
 }
 
 * {
@@ -230,6 +235,7 @@
   --color-chat-bubble-code-bg: var(--chat-bubble-code-bg);
   --color-chat-bubble-code-header-bg: var(--chat-bubble-code-header-bg);
   --color-chat-bubble-code-fg: var(--chat-bubble-code-fg);
+  --color-chat-bubble-thinking-bg: var(--chat-bubble-thinking-bg);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
