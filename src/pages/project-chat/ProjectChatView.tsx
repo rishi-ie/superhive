@@ -233,7 +233,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   title={!hasModel ? 'Pick a model first' : undefined}
                   className="flex size-5 items-center justify-center rounded-full bg-[rgb(66,120,200)] hover:bg-accent disabled:bg-muted disabled:cursor-default cursor-default"
                 >
-                    <Icon icon={ArrowUpIcon} className="size-5 text-white" />
+                    <Icon icon={ArrowUpIcon} className="size-4 text-white" />
                 </button>
               </div>
             </div>
