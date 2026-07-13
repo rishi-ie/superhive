@@ -1,6 +1,7 @@
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Separator } from '@/components/ui/separator'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface MarkdownPartProps {
   source: string
@@ -49,6 +50,14 @@ const components: Components = {
   li: ({ children }) => (
     <li className="text-sm leading-relaxed">{children}</li>
   ),
+  // GFM task list items render as `<li>` with a leading `<input type=checkbox">`.
+  // react-markdown delegates to the `input` renderer for the checkbox itself.
+  input: ({ checked, type }) => {
+    if (type !== 'checkbox') return null
+    return (
+      <Checkbox checked={!!checked} disabled className="align-middle mr-1.5" />
+    )
+  },
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
