@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, HexagonIcon, GlobeIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
+import { PlusIcon, HexagonIcon, MagnifyingGlassIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -10,10 +10,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { goBackHome } from "@/flows/navigation";
 import { useOpenCreateProject } from "@/flows/projects/ui/open-create-project";
+import { useCommandPalette } from "@/flows/ui/use-command-palette";
 
 export function SidebarRepositories() {
   const navigate = useNavigate();
   const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
+  const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   return (
     <SidebarGroup>
       <SidebarGroupContent>
@@ -41,11 +43,11 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
+              onClick={() => setCommandPaletteOpen(true)}
               className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
-              <Icon icon={GlobeIcon} className="size-4" />
-              <span>Remote</span>
-              <Badge variant="secondary" className="ml-auto text-[0.625rem] opacity-60">Coming soon</Badge>
+              <Icon icon={MagnifyingGlassIcon} className="size-4" />
+              <span>Search</span>
             </button>
           </SidebarMenuItem>
           <SidebarMenuItem>
