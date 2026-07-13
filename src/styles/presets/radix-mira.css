@@ -60,6 +60,7 @@
 
   /* Thinking-block surfaces (Phase 2.4.1+). */
   --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 40%, transparent);
+  --chat-bubble-thinking-fg: var(--muted-foreground);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -154,6 +155,7 @@
   --chat-bubble-code-fg: var(--foreground);
 
   --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 30%, transparent);
+  --chat-bubble-thinking-fg: var(--muted-foreground);
 }
 
 * {
@@ -236,6 +238,7 @@
   --color-chat-bubble-code-header-bg: var(--chat-bubble-code-header-bg);
   --color-chat-bubble-code-fg: var(--chat-bubble-code-fg);
   --color-chat-bubble-thinking-bg: var(--chat-bubble-thinking-bg);
+  --color-chat-bubble-thinking-fg: var(--chat-bubble-thinking-fg);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
