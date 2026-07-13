@@ -77,6 +77,7 @@ function ReadBody({
     .map((r) => (r.type === 'text' ? r.text : ''))
     .join('')
   const [highlighted, setHighlighted] = React.useState<string | null>(null)
+  const [expanded, setExpanded] = React.useState(false)
 
   React.useEffect(() => {
     let cancelled = false
@@ -96,18 +97,31 @@ function ReadBody({
     }
   }, [text, lang])
 
-  if (highlighted) {
-    return (
-      <div className="font-mono text-xs">
-        <CodeBlock lang={lang} code={text} />
-      </div>
-    )
-  }
-  // Plain text fallback (shiki not ready / lang unsupported)
+  const lines = text.split('\n')
+  const COLLAPSE = 50
+  const isLong = lines.length > COLLAPSE
+  const visible = expanded ? lines : lines.slice(0, COLLAPSE)
+  const preview = visible.join('\n')
+
   return (
-    <pre className="font-mono text-xs whitespace-pre">
-      {lineNumbered(text)}
-    </pre>
+    <div>
+      {highlighted ? (
+        <CodeBlock lang={lang} code={preview} />
+      ) : (
+        <pre className="font-mono text-xs whitespace-pre">
+          {lineNumbered(preview)}
+        </pre>
+      )}
+      {isLong && !expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="block w-full text-center text-[11px] text-muted-foreground hover:text-foreground py-1 border-t border-border cursor-pointer"
+        >
+          Showing 1-{COLLAPSE} of {lines.length} lines
+        </button>
+      ) : null}
+    </div>
   )
 }
 
