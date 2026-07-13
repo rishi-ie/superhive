@@ -794,6 +794,29 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'tool-call-delta') {
+      // Args deltas are JSON-string deltas; we accumulate them per tool-call
+      // id. We don't try to parse partial JSON — the renderer shows a
+      // streaming caret and only attempts to render after tool-call-end.
+      for (const msg of entry.messages) {
+        const idx = msg.parts.findIndex(
+          (p) => p.type === 'tool-call' && p.id === event.toolCallId,
+        )
+        if (idx === -1) continue
+        const cur = msg.parts[idx]!
+        if (cur.type !== 'tool-call') continue
+        const prevArgs = typeof cur.args === 'string' ? cur.args : ''
+        msg.parts = [
+          ...msg.parts.slice(0, idx),
+          { ...cur, args: prevArgs + event.delta, state: 'streaming-args' },
+          ...msg.parts.slice(idx + 1),
+        ]
+        this.emitEvent(agentId, event)
+        break
+      }
+      return
+    }
+
     if (event.type === 'log') {
       const preview = event.line.length > 200 ? event.line.slice(0, 200) + '...' : event.line
       log.debug(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`)
