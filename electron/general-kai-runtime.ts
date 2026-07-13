@@ -1065,6 +1065,30 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'branch-summary') {
+      // Branch-summary events arrive without a messageId; attach to the most
+      // recent assistant message (or create one if none). The renderer treats
+      // this as an in-band context-restored card.
+      let msg = entry.messages[entry.messages.length - 1]
+      if (!msg || msg.role !== 'assistant') {
+        msg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          parts: [],
+          ts: Date.now(),
+        }
+        entry.messages.push(msg)
+      }
+      msg.parts = [
+        ...msg.parts,
+        // branch-summary has no messageId; emit a synthetic compaction-summary
+        // so the renderer can show a single UI card type.
+        { type: 'compaction-summary', tokensBefore: 0, summary: event.summary },
+      ]
+      this.emitEvent(agentId, event)
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
