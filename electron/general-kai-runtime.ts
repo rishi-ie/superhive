@@ -1006,6 +1006,33 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'compaction-end') {
+      entry.compaction = undefined
+      // Attach the summary as a branch-summary-style part on the most recent
+      // assistant message so the renderer can render a "Context compacted"
+      // card. If no assistant message exists yet, push onto the running
+      // message-start (handled in Phase 4 — for now we drop silently).
+      if (typeof event.result === 'string' && event.result.trim().length > 0) {
+        const summary = event.result
+        for (let i = entry.messages.length - 1; i >= 0; i--) {
+          const m = entry.messages[i]!
+          if (m.role !== 'assistant') continue
+          m.parts = [
+            ...m.parts,
+            {
+              type: 'compaction-summary',
+              tokensBefore: 0,
+              summary,
+            },
+          ]
+          break
+        }
+      }
+      this.emitStatus(agentId)
+      this.emitEvent(agentId, event)
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
