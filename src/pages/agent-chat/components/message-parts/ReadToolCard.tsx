@@ -36,6 +36,11 @@ function pathFromArgs(args: unknown): string {
       : ''
 }
 
+/** Image extension detector — image reads render a thumbnail instead. */
+function isImagePath(path: string): boolean {
+  return /\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(path)
+}
+
 export function ReadToolCard({ part, result }: ToolCallCardBaseProps) {
   const path = pathFromArgs(part.args)
   const lang = langFromPath(path)
@@ -57,7 +62,7 @@ export function ReadToolCard({ part, result }: ToolCallCardBaseProps) {
         ),
         body: result ? (
           isImagePath(path) ? (
-            <ImagePreviewPlaceholder path={path} />
+            <ImagePreviewWithWarning result={result} path={path} />
           ) : (
             <ReadBody result={result} lang={lang} />
           )
@@ -131,25 +136,7 @@ function ReadBody({
   )
 }
 
-/**
- * Detect image MIME types from the file extension. Image reads should render
- * a thumbnail instead of dump the binary as text.
- */
-function isImagePath(path: string): boolean {
-  return /\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(path)
-}
-
-/** Stub image renderer that callers can replace once `<ImagePart>` lands
- *  in Phase 7. Renders the path + mime hint so the layout is correct. */
-function ImagePreviewPlaceholder({ path }: { path: string }) {
-  return (
-    <div className="rounded-card border border-border p-3 text-xs text-muted-foreground flex items-center gap-2">
-      <span className="font-mono">{path}</span>
-      <span className="text-[10px]">(image preview — Phase 7 wires the real viewer)</span>
-    </div>
-  )
-}
-
+/** Right-aligned line numbers in a muted gutter. */
 function lineNumbered(text: string): React.ReactNode {
   const lines = text.split('\n')
   return lines.map((line, i) => (
@@ -161,4 +148,36 @@ function lineNumbered(text: string): React.ReactNode {
       {'\n'}
     </span>
   ))
+}
+
+/** Image reads: detect Pi's "[model does not support images]" footer and
+ *  show a callout so the user knows why the read came back empty. */
+function ImagePreviewWithWarning({
+  result,
+  path,
+}: {
+  result: Extract<
+    import('@/models/runtime').ContentPart,
+    { type: 'tool-result' }
+  >
+  path: string
+}) {
+  const text = result.result
+    .map((r) => (r.type === 'text' ? r.text : ''))
+    .join('')
+  const nonVision = /current model does not support images/i.test(text)
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="rounded-card border border-border p-3 text-xs text-muted-foreground flex items-center gap-2">
+        <span className="font-mono">{path}</span>
+        <span className="text-[10px]">(image preview — Phase 7 wires the real viewer)</span>
+      </div>
+      {nonVision ? (
+        <div className="rounded-sm bg-chat-status-warning/15 border border-chat-status-warning/40 px-2 py-1 text-[11px] text-chat-status-warning">
+          Current model does not support images — the read returned a text
+          placeholder. Switch to a vision-capable model to view this file.
+        </div>
+      ) : null}
+    </div>
+  )
 }
