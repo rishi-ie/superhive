@@ -1,39 +1,119 @@
-import { Icon } from "@/components/ui/icon";
-import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
-import { HugeIcon } from "@/components/ui/huge-icon";
-import { Copy01Icon } from "@hugeicons/core-free-icons";
-import { Button } from '@/components/ui/button';
-import { getMessageText } from '@/models/runtime';
-import { ThinkingPart } from './message-parts/ThinkingPart';
-import type { RuntimeMessage } from '@/types/electron';
+import { Icon } from '@/components/ui/icon'
+import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
+import { HugeIcon } from '@/components/ui/huge-icon'
+import { Copy01Icon } from '@hugeicons/core-free-icons'
+import { Button } from '@/components/ui/button'
+import { ThinkingPart } from './message-parts/ThinkingPart'
+import { ToolCallPart } from './message-parts/ToolCallPart'
+import { ToolResultPart } from './message-parts/ToolResultPart'
+import { MarkdownPart } from './message-parts/MarkdownPart'
+import type { ContentPart } from '@/models/runtime'
+import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
-  message: RuntimeMessage;
+  message: RuntimeMessage
 }
 
+const COLLAPSE_AFTER_PARTS = 1
+
 export function AssistantMessage({ message }: AssistantMessageProps) {
-  const text = getMessageText(message);
-  const last = message.parts[message.parts.length - 1];
-  const isStreaming = !!last && last.type === 'text' && last.state === 'streaming';
-  const thinkingParts = message.parts.filter((p) => p.type === 'thinking');
+  // Map every `tool-call` to its matching `tool-result`, if present. The
+  // parts list keeps insertion order, so a `tool-result` immediately after
+  // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
+  // linkup at ingest time).
+  const toolCalls = message.parts.filter((p): p is Extract<ContentPart, { type: 'tool-call' }> => p.type === 'tool-call')
+  const toolResultsById = new Map<string, Extract<ContentPart, { type: 'tool-result' }>>()
+  for (const part of message.parts) {
+    if (part.type === 'tool-result') toolResultsById.set(part.id, part)
+  }
+
+  // Group all non-tool-call-and-result parts into "prose" sections for
+  // markdown rendering. We split by tool-call/result boundaries so a tool
+  // execution that lands mid-message renders inline.
+  const proseSections: ContentPart[][] = []
+  let current: ContentPart[] = []
+  for (const part of message.parts) {
+    if (part.type === 'tool-call' || part.type === 'tool-result') {
+      if (current.length > 0) {
+        proseSections.push(current)
+        current = []
+      }
+    } else {
+      current.push(part)
+    }
+  }
+  if (current.length > 0) proseSections.push(current)
+
+  const lastPart = message.parts[message.parts.length - 1]
+  const isStreamingText =
+    !!lastPart && lastPart.type === 'text' && lastPart.state === 'streaming'
+
   return (
     <div className="group relative w-full py-button-y flex flex-col gap-2">
-      {thinkingParts.map((part, i) => {
-        if (part.type !== 'thinking') return null
-        const isLast = i === thinkingParts.length - 1
-        const streamingNow = isLast && part.state === 'streaming'
-        return (
-          <ThinkingPart
-            key={`thinking-${i}`}
-            text={part.text}
-            isStreaming={streamingNow}
-          />
-        )
+      {message.parts.map((part, i) => {
+        if (part.type === 'thinking') {
+          const isLast = i === message.parts.length - 1
+          return (
+            <ThinkingPart
+              key={`thinking-${i}`}
+              text={part.text}
+              isStreaming={isLast && part.state === 'streaming'}
+            />
+          )
+        }
+        if (part.type === 'image') {
+          return (
+            <img
+              key={`image-${i}`}
+              src={`data:${part.mimeType};base64,${part.data}`}
+              alt={part.mimeType}
+              className="max-h-[400px] rounded-card border border-border"
+              loading="lazy"
+            />
+          )
+        }
+        if (part.type === 'compaction-summary') {
+          return (
+            <div
+              key={`compaction-${i}`}
+              className="text-xs rounded-card border border-border bg-muted/30 p-2 text-muted-foreground"
+            >
+              Context compacted · {part.summary}
+            </div>
+          )
+        }
+        return null
       })}
-      <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
-        {text}
-        {isStreaming && <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-foreground/70 animate-pulse" />}
-      </p>
+
+      {proseSections.map((section, i) => (
+        <ProseSection key={`prose-${i}`} parts={section} index={i} />
+      ))}
+
+      {toolCalls.map((call, i) => (
+        <ToolCallPart
+          key={`tool-${call.id}-${i}`}
+          part={call}
+          result={toolResultsById.get(call.id)}
+        />
+      ))}
+
+      {/* Orphan tool-results: persisted JSONL where the call was pruned. */}
+      {message.parts
+        .filter((p) => p.type === 'tool-result')
+        .map((part) => {
+          // Already rendered above as part of its matching tool-call, skip
+          if (Array.from(toolResultsById.values()).includes(part) === false) return null
+          const match = toolCalls.find((c) => c.id === part.id)
+          if (match) return null
+          return (
+            <ToolResultPart key={`orphan-${(part as { id: string }).id}`} part={part} />
+          )
+        })}
+
+      {isStreamingText ? (
+        <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-foreground/70 animate-pulse" />
+      ) : null}
+
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
           <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
@@ -46,5 +126,29 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         </span>
       </div>
     </div>
-  );
+  )
+}
+
+/**
+ * Render a stretch of `text` parts (with markdown support) inline. The
+ * `index === 0` short-circuit avoids empty-zero rendering for messages that
+ * start straight into tool calls.
+ */
+function ProseSection({
+  parts,
+  index,
+}: {
+  parts: ContentPart[]
+  index: number
+}) {
+  const text = parts
+    .filter((p) => p.type === 'text')
+    .map((p) => (p.type === 'text' ? p.text : ''))
+    .join('')
+  if (!text.trim()) return null
+  return (
+    <div className={index >= COLLAPSE_AFTER_PARTS ? '' : ''}>
+      <MarkdownPart source={text} />
+    </div>
+  )
 }
