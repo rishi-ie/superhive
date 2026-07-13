@@ -31,6 +31,9 @@ const components: Components = {
   p: ({ children }) => (
     <p className="text-sm leading-relaxed my-1.5">{children}</p>
   ),
+  strong: ({ children }) => (
+    <strong className="font-semibold text-foreground">{children}</strong>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
