@@ -40,6 +40,9 @@ const components: Components = {
     <del className="line-through text-muted-foreground">{children}</del>
   ),
   hr: () => <Separator className="my-3" />,
+  ul: ({ children }) => (
+    <ul className="list-disc list-inside my-1.5 space-y-1">{children}</ul>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
