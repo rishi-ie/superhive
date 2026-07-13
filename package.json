@@ -55,6 +55,8 @@
     "dotenv": "^16.4.5",
     "electron-log": "^5.4.4",
     "electron-updater": "^6.6.2",
+    "@hugeicons/react": "^1.1.9",
+    "@hugeicons/core-free-icons": "^4.2.2",
     "lowdb": "^7.0.1",
     "radix-ui": "^1.6.1",
     "react": "^19.2.7",

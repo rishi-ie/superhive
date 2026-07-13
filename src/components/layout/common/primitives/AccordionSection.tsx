@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { cn } from '@/lib/utils';
@@ -9,6 +10,7 @@ interface AccordionSectionProps {
   children?: React.ReactNode;
   onClick?: () => void;
   labelClassName?: string;
+  leadingIcon?: ReactNode;
 }
 
 export function AccordionSection({
@@ -17,6 +19,7 @@ export function AccordionSection({
   children,
   onClick,
   labelClassName,
+  leadingIcon,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -35,6 +38,7 @@ export function AccordionSection({
           labelClassName || 'text-muted-foreground'
         )}
       >
+        {leadingIcon}
         <span className="truncate text-left">{label}</span>
         <Icon icon={CaretRightIcon}
           className={cn(
