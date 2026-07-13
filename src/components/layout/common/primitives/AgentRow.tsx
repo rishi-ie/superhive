@@ -1,6 +1,6 @@
 import type { MouseEventHandler } from 'react';
 import { Icon } from "@/components/ui/icon";
-import { UserIcon, DotsThreeIcon, PushPinIcon } from "@phosphor-icons/react";
+import { UserIcon } from "@phosphor-icons/react";
 
 interface AgentRowProps {
   name: string;
@@ -10,17 +10,6 @@ interface AgentRowProps {
   currentAction?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
-
-const AgentActions = () => (
-  <span className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
-    <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground/80">
-      <Icon icon={PushPinIcon} className="size-3.5" />
-    </div>
-    <div className="flex size-5 cursor-default items-center justify-center rounded-sm text-muted-foreground hover:bg-sidebar-accent hover:text-foreground/80">
-      <Icon icon={DotsThreeIcon} className="size-3.5" />
-    </div>
-  </span>
-);
 
 export function AgentRow({ name, status = 'idle', showStatus = true, compact = false, currentAction = "Working…", onClick }: AgentRowProps) {
   if (showStatus && status === 'active') {
@@ -33,7 +22,6 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
         <div className="flex h-8 flex-shrink-0 items-center gap-stack">
           <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
           <span className="flex-1 truncate text-left">{name}</span>
-          <AgentActions />
         </div>
         <div className="flex h-8 flex-shrink-0 items-center gap-list-item pl-6">
           <div className="size-3 rounded-full border border-border border-t-foreground/80 animate-spin" />
@@ -53,7 +41,6 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
         <div className="size-2 rounded-full bg-success flex-shrink-0" />
         <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
         <span className="flex-1 truncate text-left">{name}</span>
-        <AgentActions />
       </button>
     );
   }
@@ -69,7 +56,6 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
     >
       <Icon icon={UserIcon} className={compact ? "size-3.5 flex-shrink-0" : "size-4 flex-shrink-0"} />
       <span className="flex-1 truncate text-left">{name}</span>
-      <AgentActions />
     </button>
   );
 }
