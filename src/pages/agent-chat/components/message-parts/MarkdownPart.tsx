@@ -78,6 +78,16 @@ const components: Components = {
   // the child `<code>` inherit. Phase 3.9 will replace this with a wrapper
   // that pulls out `lang` and forwards to `<CodeBlock>`.
   pre: ({ children }) => <pre className="my-2 not-prose">{children}</pre>,
+  a: ({ children, href }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary underline underline-offset-2 hover:text-primary/80"
+    >
+      {children}
+    </a>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
