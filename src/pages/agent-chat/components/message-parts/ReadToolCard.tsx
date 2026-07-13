@@ -46,14 +46,6 @@ export function ReadToolCard({ part, result }: ToolCallCardBaseProps) {
   )
 }
 
-function resultText(
-  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
-): string {
-  return result
-    .map((r) => (r.type === 'text' ? r.text : ''))
-    .join('')
-}
-
 /**
  * Render text with right-aligned line numbers in a muted gutter. The 6-char
  * gutter fits files up to 99999 lines; longer reads wrap.
