@@ -74,6 +74,10 @@ const components: Components = {
       </code>
     )
   },
+  // Strip the default `<pre>` chrome (background, padding, scroll) and let
+  // the child `<code>` inherit. Phase 3.9 will replace this with a wrapper
+  // that pulls out `lang` and forwards to `<CodeBlock>`.
+  pre: ({ children }) => <pre className="my-2 not-prose">{children}</pre>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
