@@ -100,6 +100,7 @@ const components: Components = {
   ),
   thead: ({ children }) => <thead className="bg-muted/40">{children}</thead>,
   tbody: ({ children }) => <tbody>{children}</tbody>,
+  tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
