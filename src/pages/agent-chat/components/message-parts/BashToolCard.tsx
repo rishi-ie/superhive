@@ -1,3 +1,5 @@
+import { HugeIcon } from '@/components/ui/huge-icon'
+import { Loading03Icon } from '@hugeicons/core-free-icons'
 import { ToolCallCard, type ToolCallCardBaseProps } from './ToolCallCard'
 
 /**
@@ -14,7 +16,16 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
     <ToolCallCard
       slots={{
         header: (
-          <span className="font-semibold font-mono">$ {command}</span>
+          <span className="font-semibold font-mono flex items-center gap-1.5">
+            {part.state === 'streaming-args' ||
+            (result && result.state !== 'complete') ? (
+              <HugeIcon
+                icon={Loading03Icon}
+                className="size-3.5 animate-spin text-chat-status-running"
+              />
+            ) : null}
+            $ {command}
+          </span>
         ),
         body: (
           <div>
