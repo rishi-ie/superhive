@@ -12,15 +12,26 @@ export interface ToolCallCardSlots {
   body: React.ReactNode
 }
 
+function stateBackgroundClass(
+  state: 'pending' | 'streaming-args' | 'running' | 'complete',
+  isError: boolean,
+): string {
+  if (isError) return 'bg-chat-bubble-tool-bg-error'
+  if (state === 'complete') return 'bg-chat-bubble-tool-bg-success'
+  if (state === 'running' || state === 'streaming-args') return 'bg-chat-bubble-tool-bg-running'
+  return 'bg-chat-bubble-tool-bg-pending'
+}
+
 interface ToolCallCardProps {
   slots: ToolCallCardSlots
   state: 'pending' | 'streaming-args' | 'running' | 'complete'
   isError?: boolean
 }
 
-export function ToolCallCard({ slots, state, isError }: ToolCallCardProps) {
+export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProps) {
+  const bg = stateBackgroundClass(state, isError)
   return (
-    <div className="rounded-chat-tool-card border border-border overflow-hidden">
+    <div className={`rounded-chat-tool-card border border-border overflow-hidden ${bg}`}>
       <div className="flex items-center gap-2 px-3 py-2 text-xs">
         {slots.header}
       </div>
