@@ -242,7 +242,7 @@ class GeneralKaiRuntime {
     }
   }
 
-  shutdownAll(): void {
+  async shutdownAll(): Promise<void> {
     this.closeAllSettingsWatchers()
     for (const agentId of Array.from(this.silenceTimers.keys())) {
       this.clearSilenceTimer(agentId)
@@ -268,6 +268,7 @@ class GeneralKaiRuntime {
         }
       }
     }, 3000)
+    await this.flushAllChats()
   }
 
   // ============================================================
@@ -283,7 +284,7 @@ class GeneralKaiRuntime {
     }, 1000)
   }
 
-  private flushChatEntry(entry: RuntimeEntry): void {
+  private async flushChatEntry(entry: RuntimeEntry): Promise<void> {
     entry._chatDebounceTimer = null
     if (entry._chatPending.size === 0) return
     const msgs: RuntimeMessage[] = []
@@ -292,21 +293,30 @@ class GeneralKaiRuntime {
       if (msg) msgs.push(msg)
     }
     entry._chatPending.clear()
-    if (msgs.length > 0) {
-      appendBatch(entry.agentId, msgs).catch((err) =>
-        log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err),
-      )
+    if (msgs.length === 0) return
+    try {
+      await appendBatch(entry.agentId, msgs)
+      if (entry.messages.length > 5000) {
+        const { trimTo } = await import('./agent-chat-store')
+        trimTo(entry.agentId, 5000).catch((err) =>
+          log.warn(`[runtime] chat trim failed for ${entry.agentId}:`, err),
+        )
+      }
+    } catch (err) {
+      log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err)
     }
   }
 
-  flushAllChats(): void {
-    for (const [, entry] of this.entries) {
-      if (entry._chatDebounceTimer) {
-        clearTimeout(entry._chatDebounceTimer)
-        entry._chatDebounceTimer = null
-      }
-      this.flushChatEntry(entry)
-    }
+  async flushAllChats(): Promise<void> {
+    await Promise.all(
+      Array.from(this.entries.values()).map((entry) => {
+        if (entry._chatDebounceTimer) {
+          clearTimeout(entry._chatDebounceTimer)
+          entry._chatDebounceTimer = null
+        }
+        return this.flushChatEntry(entry)
+      }),
+    )
   }
 
   ensureSettingsWatcher(agentId: string, settingsPath: string): void {

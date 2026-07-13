@@ -127,9 +127,9 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
   log.info('Shutting down agent runtimes...');
-  runtime.shutdownAll();
+  await runtime.shutdownAll();
 });
 
 process.on('uncaughtException', (error) => {
