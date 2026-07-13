@@ -93,6 +93,11 @@ const components: Components = {
       {children}
     </blockquote>
   ),
+  table: ({ children }) => (
+    <div className="my-2 overflow-x-auto rounded-card border border-border">
+      <table className="w-full border-collapse">{children}</table>
+    </div>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
