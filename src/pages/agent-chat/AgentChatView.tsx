@@ -110,7 +110,7 @@ export function AgentChatView() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-1 min-h-0 flex-col">
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
