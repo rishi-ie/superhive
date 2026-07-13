@@ -29,8 +29,9 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
           </span>
         ),
         body: (
-          <div className="text-xs text-muted-foreground">
+          <div className="flex flex-col gap-1.5">
             {result ? resultText(result.result) || '(no output)' : ''}
+            <DiffViewPlaceholder path={path} />
           </div>
         ),
       }}
@@ -46,4 +47,17 @@ function resultText(
   return result
     .map((r) => (r.type === 'text' ? r.text : ''))
     .join('')
+}
+
+/**
+ * Stand-in until Phase 6 wires the real `<DiffView>`. Renders a card-shaped
+ * placeholder so the layout reserves the right amount of vertical space.
+ */
+function DiffViewPlaceholder({ path }: { path: string }) {
+  return (
+    <div className="rounded-card border border-border p-3 text-xs text-muted-foreground flex items-center gap-2">
+      <span className="font-mono">{path}</span>
+      <span className="text-[10px]">(diff — wired in Phase 6)</span>
+    </div>
+  )
 }
