@@ -721,10 +721,28 @@ class GeneralKaiRuntime {
     if (event.type === 'message-end') {
       const msg = entry.messages.find((m) => m.id === event.messageId)
       if (msg) {
+        // Mark any trailing text/thinking parts complete so the renderer
+        // stops streaming the caret.
+        const parts = msg.parts.map((p, i) => {
+          if (i !== msg.parts.length - 1) return p
+          if (p.type === 'text') return { ...p, state: 'complete' as const }
+          if (p.type === 'thinking') return { ...p, state: 'complete' as const }
+          return p
+        })
+        msg.parts = parts
         this.emitEvent(agentId, event)
       }
       this.transitionStatus(entry, 'running')
       log.debug(`[runtime.event] agent=${agentId} type=message-end`)
+      return
+    }
+
+    if (event.type === 'thinking-start') {
+      const msg = entry.messages.find((m) => m.id === event.messageId)
+      if (msg) {
+        msg.parts = [...msg.parts, { type: 'thinking', text: '', state: 'streaming' }]
+        this.emitEvent(agentId, event)
+      }
       return
     }
 
