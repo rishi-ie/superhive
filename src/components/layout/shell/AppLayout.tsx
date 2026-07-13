@@ -9,6 +9,9 @@ import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
+import { Icon } from "@/components/ui/icon";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { useCommandPalette } from "@/flows/ui/use-command-palette";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -28,6 +31,7 @@ export function AppLayout() {
 function AppLayoutShell() {
   const { open: leftSidebarOpen } = useSidebar();
   const location = useLocation();
+  const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
@@ -122,6 +126,15 @@ function AppLayoutShell() {
             className="relative flex h-full flex-shrink-0"
             style={{ width: `${leftSidebarWidth}px` }}
           >
+            <div className="no-drag absolute top-3.5 left-[92px] z-[80]">
+              <button
+                type="button"
+                onClick={() => setCommandPaletteOpen(true)}
+                className="flex items-center gap-1 rounded-full bg-transparent px-row py-0.5 text-muted-foreground hover:text-sidebar-foreground/80 cursor-default"
+              >
+                <Icon icon={MagnifyingGlassIcon} className="size-3.5" />
+              </button>
+            </div>
             <AppSidebar width={leftSidebarWidth} />
             <div
               onMouseDown={startResizingLeft}
