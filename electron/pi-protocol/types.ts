@@ -64,6 +64,7 @@ export type AdapterEvent =
       finalError?: string
     }
   | { type: 'image-attachment'; messageId: string; data: string; mimeType: string }
+  | { type: 'branch-summary'; summary: string; fromId: string }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
