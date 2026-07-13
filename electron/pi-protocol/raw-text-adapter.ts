@@ -143,6 +143,21 @@ export class RawTextAdapter implements PiProtocolAdapter {
             aborted: obj.aborted === true,
             willRetry: obj.willRetry === true,
           })
+        } else if (obj.type === 'auto_retry_start') {
+          emit({
+            type: 'auto-retry-start',
+            attempt: typeof obj.attempt === 'number' ? obj.attempt : 1,
+            maxAttempts: typeof obj.maxAttempts === 'number' ? obj.maxAttempts : 1,
+            delayMs: typeof obj.delayMs === 'number' ? obj.delayMs : 0,
+            errorMessage: (obj.errorMessage as string) ?? '',
+          })
+        } else if (obj.type === 'auto_retry_end') {
+          emit({
+            type: 'auto-retry-end',
+            success: obj.success === true,
+            attempt: typeof obj.attempt === 'number' ? obj.attempt : 1,
+            finalError: typeof obj.finalError === 'string' ? obj.finalError : undefined,
+          })
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
