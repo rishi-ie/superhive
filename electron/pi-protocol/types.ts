@@ -40,6 +40,7 @@ export type AdapterEvent =
   | { type: 'tool-call-delta'; messageId: string; toolCallId: string; delta: string }
   | { type: 'tool-call-end'; messageId: string; toolCallId: string; name: string; args: unknown }
   | { type: 'tool-execution-start'; toolCallId: string; name: string; args: unknown }
+  | { type: 'tool-execution-update'; toolCallId: string; partialResult: unknown }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
