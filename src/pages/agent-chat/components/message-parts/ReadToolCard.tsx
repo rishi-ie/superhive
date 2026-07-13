@@ -55,7 +55,13 @@ export function ReadToolCard({ part, result }: ToolCallCardBaseProps) {
             </a>
           </span>
         ),
-        body: result ? <ReadBody result={result} lang={lang} /> : null,
+        body: result ? (
+          isImagePath(path) ? (
+            <ImagePreviewPlaceholder path={path} />
+          ) : (
+            <ReadBody result={result} lang={lang} />
+          )
+        ) : null,
       }}
       state={part.state}
       isError={result?.isError}
@@ -126,9 +132,24 @@ function ReadBody({
 }
 
 /**
- * Render text with right-aligned line numbers in a muted gutter. The 6-char
- * gutter fits files up to 99999 lines; longer reads wrap.
+ * Detect image MIME types from the file extension. Image reads should render
+ * a thumbnail instead of dump the binary as text.
  */
+function isImagePath(path: string): boolean {
+  return /\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(path)
+}
+
+/** Stub image renderer that callers can replace once `<ImagePart>` lands
+ *  in Phase 7. Renders the path + mime hint so the layout is correct. */
+function ImagePreviewPlaceholder({ path }: { path: string }) {
+  return (
+    <div className="rounded-card border border-border p-3 text-xs text-muted-foreground flex items-center gap-2">
+      <span className="font-mono">{path}</span>
+      <span className="text-[10px]">(image preview — Phase 7 wires the real viewer)</span>
+    </div>
+  )
+}
+
 function lineNumbered(text: string): React.ReactNode {
   const lines = text.split('\n')
   return lines.map((line, i) => (
