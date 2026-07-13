@@ -1,5 +1,7 @@
 import { Icon } from "@/components/ui/icon";
-import { CopyIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import { HugeIcon } from "@/components/ui/huge-icon";
+import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import type { RuntimeMessage } from '@/types/electron';
 
@@ -17,7 +19,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
       </p>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
-          <Icon icon={CopyIcon} className="size-3.5" />
+          <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
         </Button>
         <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
