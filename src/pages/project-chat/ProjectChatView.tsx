@@ -18,10 +18,11 @@ import { useParams } from 'react-router-dom';
 import { Icon } from '@/components/ui/icon';
 import {
   PlusIcon,
-  MicrophoneIcon,
   ArrowUpIcon,
   LaptopIcon,
 } from '@phosphor-icons/react';
+import { HugeIcon } from "@/components/ui/huge-icon";
+import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
@@ -224,7 +225,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={projectAgent.id} />
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                  <Icon icon={MicrophoneIcon} className="size-5" />
+                  <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                 </button>
                 <button
                   onClick={onSend}
