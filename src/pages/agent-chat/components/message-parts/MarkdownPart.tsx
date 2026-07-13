@@ -43,6 +43,9 @@ const components: Components = {
   ul: ({ children }) => (
     <ul className="list-disc list-inside my-1.5 space-y-1">{children}</ul>
   ),
+  ol: ({ children }) => (
+    <ol className="list-decimal list-inside my-1.5 space-y-1">{children}</ol>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
