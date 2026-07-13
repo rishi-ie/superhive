@@ -135,9 +135,10 @@ export function AgentChatView() {
                     usedTokens={contextUsedTokens}
                     maxTokens={contextWindow}
                   />
-                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                  <div className="flex items-center gap-1 text-sidebar-foreground/70">
                     <Icon icon={LaptopIcon} className="size-4" />
-                  </button>
+                    <span className="text-xs">Local</span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-5">
                   <ModelPicker agentId={agentId} />
