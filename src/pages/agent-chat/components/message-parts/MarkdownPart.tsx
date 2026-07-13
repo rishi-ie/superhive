@@ -99,6 +99,7 @@ const components: Components = {
     </div>
   ),
   thead: ({ children }) => <thead className="bg-muted/40">{children}</thead>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
