@@ -57,11 +57,24 @@ export type ToolResultContent =
       shownLines: number
     }
 
+/** Per-turn usage snapshot the assistant reports on `message_end`. Optional
+ *  because not every model/extension emits it. */
+export interface MessageUsage {
+  input: number
+  output: number
+  cacheRead: number
+  cacheWrite: number
+  totalTokens: number
+  /** Cost in USD, when the provider reports it. */
+  cost?: number
+}
+
 export interface RuntimeMessage {
   id: string
   role: 'user' | 'assistant'
   parts: ContentPart[]
   ts: number
+  usage?: MessageUsage
 }
 
 /**
