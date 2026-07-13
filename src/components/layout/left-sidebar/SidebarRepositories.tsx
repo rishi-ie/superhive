@@ -70,7 +70,7 @@ export function SidebarRepositories() {
               <span>Plugins</span>
             </button>
           </SidebarMenuItem>
-          <div className="group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm text-muted-foreground">
+          <div className="mt-2 group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm text-muted-foreground">
             <span>Projects</span>
             <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
