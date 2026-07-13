@@ -61,6 +61,7 @@ export interface RuntimeEntry {
 
 const STDERR_LOG_LIMIT = 500
 const READY_SILENCE_MS = 2000
+const TAILER_AUTO_STOP_MS = 30_000
 
 type TelemetryWireEvent = {
   type: string
@@ -358,6 +359,13 @@ class GeneralKaiRuntime {
     )
     tailer.start()
     this.telemetryTailers.set(entry.agentId, tailer)
+    setTimeout(() => {
+      const t = this.telemetryTailers.get(entry.agentId)
+      if (t === tailer) {
+        log.info(`[runtime] telemetry journal never appeared for ${entry.agentId}; stopping tailer`)
+        this.stopTelemetryTailer(entry.agentId)
+      }
+    }, TAILER_AUTO_STOP_MS)
   }
 
   private stopTelemetryTailer(agentId: string): void {
