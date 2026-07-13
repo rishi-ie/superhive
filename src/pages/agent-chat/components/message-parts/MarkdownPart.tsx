@@ -88,6 +88,11 @@ const components: Components = {
       {children}
     </a>
   ),
+  blockquote: ({ children }) => (
+    <blockquote className="border-l-2 border-border pl-3 italic text-muted-foreground">
+      {children}
+    </blockquote>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
