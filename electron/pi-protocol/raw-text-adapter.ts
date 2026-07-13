@@ -125,6 +125,12 @@ export class RawTextAdapter implements PiProtocolAdapter {
             result: obj.result,
             isError: obj.isError === true,
           })
+        } else if (obj.type === 'compaction_start') {
+          const reason: 'manual' | 'threshold' | 'overflow' =
+            obj.reason === 'manual' || obj.reason === 'threshold' || obj.reason === 'overflow'
+              ? obj.reason
+              : 'threshold'
+          emit({ type: 'compaction-start', reason })
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
