@@ -13,7 +13,9 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
   return (
     <ToolCallCard
       slots={{
-        header: <span>bash</span>,
+        header: (
+          <span className="font-semibold font-mono">$ {command}</span>
+        ),
         body: (
           <div>
             <pre className="font-mono text-xs whitespace-pre-wrap">$ {command}</pre>
