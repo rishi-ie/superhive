@@ -34,6 +34,14 @@
   /* Chat bubble surfaces (Phase 2.1.1). User = sidebar tint; assistant = page. */
   --chat-bubble-user: var(--sidebar);
   --chat-bubble-assistant: var(--background);
+
+  /* Tool card backgrounds (Phase 2.1.2–2.1.5).
+   * pending  — tool-call received, args still streaming (info/10)
+   * running  — host-side execution in flight (info/5)
+   * success  — execution finished without error (success/10)
+   * error    — tool reported isError=true (destructive/10)
+   */
+  --chat-bubble-tool-bg-pending: color-mix(in oklch, var(--info) 10%, transparent);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -111,6 +119,8 @@
   /* Chat bubble surfaces (dark variant). User = deeper sidebar tint; assistant = page. */
   --chat-bubble-user: var(--sidebar);
   --chat-bubble-assistant: var(--background);
+
+  --chat-bubble-tool-bg-pending: color-mix(in oklch, var(--info) 14%, transparent);
 }
 
 * {
@@ -180,6 +190,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-chat-bubble-user: var(--chat-bubble-user);
   --color-chat-bubble-assistant: var(--chat-bubble-assistant);
+  --color-chat-bubble-tool-bg-pending: var(--chat-bubble-tool-bg-pending);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
