@@ -311,6 +311,11 @@
 /* Shimmer (Phase 2.7.1) — animated background-mask used during streaming
  * placeholders. The keyframes are defined at 2.7.2; reduce-motion override
  * lives in src/styles/base.css. */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
 .shimmer {
   background-image: linear-gradient(
     to right,
