@@ -14,6 +14,8 @@ export function CenterBreadcrumb() {
   const segments = useCenterBreadcrumb();
   const isAgentChat = location.pathname.startsWith('/agents');
   const isProjectChat = location.pathname.startsWith('/projects');
+  const isPlugins = location.pathname === '/plugins';
+  if (isPlugins) return null;
   if (!segments) return null;
   return (
     <div className={isAgentChat || isProjectChat ? "flex items-center px-composer pt-3 pb-3 border-b border-border" : "flex items-center px-composer pt-3 pb-2"}>
