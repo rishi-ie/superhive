@@ -10,6 +10,7 @@ import type {
   ContextSnapshot,
   ModelInfo,
 } from '@/types/electron'
+import type { ContentPart } from '@/models/runtime'
 import type { AgentSettingsState } from './settings'
 import { updateAgentSettings } from './settings/update-agent-settings'
 import { restartAgent } from './runtime/restart-agent'
@@ -49,6 +50,53 @@ interface SettingsSlice {
 const runtimeSlices = new Map<string, RuntimeSlice>()
 const settingsSlices = new Map<string, SettingsSlice>()
 const trimmedMessageAgents = new Set<string>()
+
+/**
+ * Append a new content part to a message in the renderer's mirror slice.
+ * Returns true if the message was found and updated. Used by the per-event
+ * handlers below to apply incremental parts in lockstep with the main process
+ * state that lives in the electron runtime.
+ */
+function appendPart(
+  slice: RuntimeSlice,
+  messageId: string,
+  part: ContentPart,
+): boolean {
+  const idx = slice.messages.findIndex((m) => m.id === messageId)
+  if (idx === -1) return false
+  const cur = slice.messages[idx]!
+  slice.messages = [
+    ...slice.messages.slice(0, idx),
+    { ...cur, parts: [...cur.parts, part] },
+    ...slice.messages.slice(idx + 1),
+  ]
+  return true
+}
+
+/**
+ * Replace the last content part of a message with the result of `fn`. Returns
+ * true if the message and trailing part were found. Used by stream deltas
+ * (text-delta, thinking-delta, tool-call-delta, tool-execution-update).
+ */
+function updateLastPart(
+  slice: RuntimeSlice,
+  messageId: string,
+  fn: (last: ContentPart) => ContentPart | null,
+): boolean {
+  const idx = slice.messages.findIndex((m) => m.id === messageId)
+  if (idx === -1) return false
+  const cur = slice.messages[idx]!
+  const last = cur.parts[cur.parts.length - 1]
+  if (!last) return false
+  const next = fn(last)
+  if (!next) return false
+  slice.messages = [
+    ...slice.messages.slice(0, idx),
+    { ...cur, parts: [...cur.parts.slice(0, -1), next] },
+    ...slice.messages.slice(idx + 1),
+  ]
+  return true
+}
 
 function disposeRuntimeSliceNow(agentId: string): void {
   const slice = runtimeSlices.get(agentId)
@@ -158,22 +206,14 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
       if (ev.type === 'text-delta') {
-        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
-        if (idx !== -1) {
-          const cur = entry.messages[idx]!
-          const last = cur.parts[cur.parts.length - 1]
-          const nextParts =
-            last && last.type === 'text'
-              ? [
-                  ...cur.parts.slice(0, -1),
-                  { ...last, text: last.text + ev.delta, state: 'streaming' as const },
-                ]
-              : [...cur.parts, { type: 'text' as const, text: ev.delta, state: 'streaming' as const }]
-          entry.messages = [
-            ...entry.messages.slice(0, idx),
-            { ...cur, parts: nextParts },
-            ...entry.messages.slice(idx + 1),
-          ]
+        const updated = updateLastPart(entry, ev.messageId, (last) => {
+          if (last.type === 'text') {
+            return { ...last, text: last.text + ev.delta, state: 'streaming' }
+          }
+          return { type: 'text', text: ev.delta, state: 'streaming' }
+        })
+        if (!updated) {
+          appendPart(entry, ev.messageId, { type: 'text', text: ev.delta, state: 'streaming' })
         }
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
