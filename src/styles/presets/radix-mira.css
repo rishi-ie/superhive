@@ -65,6 +65,7 @@
   /* Status indicator foregrounds (Phase 2.5.1+). Used by retry banners,
    * running-tool spinners, and live status pills. */
   --chat-status-running: var(--info);
+  --chat-status-success: var(--success);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -162,6 +163,7 @@
   --chat-bubble-thinking-fg: var(--muted-foreground);
 
   --chat-status-running: var(--info);
+  --chat-status-success: var(--success);
 }
 
 * {
@@ -246,6 +248,7 @@
   --color-chat-bubble-thinking-bg: var(--chat-bubble-thinking-bg);
   --color-chat-bubble-thinking-fg: var(--chat-bubble-thinking-fg);
   --color-chat-status-running: var(--chat-status-running);
+  --color-chat-status-success: var(--chat-status-success);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
