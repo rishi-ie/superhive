@@ -11,6 +11,7 @@ import type {
   ModelInfo,
 } from '@/types/electron'
 import type { ContentPart } from '@/models/runtime'
+import type { CompactionStatus, RetryStatus } from '@/models/runtime'
 import type { AgentSettingsState } from './settings'
 import { updateAgentSettings } from './settings/update-agent-settings'
 import { restartAgent } from './runtime/restart-agent'
@@ -30,6 +31,8 @@ interface RuntimeSlice {
   availableModels?: ModelInfo[]
   activeModelContextWindow?: number
   activeModelName?: string
+  compaction?: CompactionStatus
+  retry?: RetryStatus
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -179,6 +182,8 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.availableModels = s.availableModels
       entry.activeModelContextWindow = s.activeModelContextWindow
       entry.activeModelName = s.activeModelName
+      entry.compaction = s.compaction
+      entry.retry = s.retry
       entry.notify?.()
     })
   )
@@ -298,6 +303,29 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           const e = runtimeSlices.get(agentId)
           if (!e) return
           e.messages = msgs
+          e.notify?.()
+        })
+      } else if (ev.type === 'compaction-start') {
+        // Re-fetch status to capture compaction envelope + the parts main
+        // may have appended during compaction-end. (Status is also broadcast
+        // via onStatus, but the message-level mutation needs getMessages.)
+        agents.getRuntimeState(agentId).then((s) => {
+          const e = runtimeSlices.get(agentId)
+          if (!e || !s) return
+          e.compaction = s.compaction
+          e.notify?.()
+        })
+      } else if (ev.type === 'compaction-end') {
+        agents.getMessages(agentId).then((msgs) => {
+          const e = runtimeSlices.get(agentId)
+          if (!e) return
+          e.messages = msgs
+          e.notify?.()
+        })
+        agents.getRuntimeState(agentId).then((s) => {
+          const e = runtimeSlices.get(agentId)
+          if (!e || !s) return
+          e.compaction = s.compaction
           e.notify?.()
         })
       } else if (ev.type === 'message-start') {
