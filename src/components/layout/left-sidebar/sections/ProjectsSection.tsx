@@ -20,7 +20,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
   const navigate = useNavigate();
 
   return (
-    <div className="pl-2">
+    <div>
       {items.map((p) => {
         const assignedAgents = agents.filter(
           (a) => p.agentIds.includes(a.id) && a.agentKind !== 'project-coordinator'
