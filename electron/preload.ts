@@ -29,6 +29,17 @@ contextBridge.exposeInMainWorld('api', {
     readSettings:  (id) => ipcRenderer.invoke('agents:readSettings', id),
     writeSettings: (id, patch) => ipcRenderer.invoke('agents:writeSettings', id, patch),
 
+    // `agent:${id}:event` forwards every `AdapterEvent` variant. The full
+    // discriminated union now spans (per implementation.md Phase 1.1):
+    //   - Lifecycle: boot-step, ready, error, usage
+    //   - Message I/O: message-start, text-delta, message-end
+    //   - Thinking: thinking-start, thinking-delta, thinking-end
+    //   - Tool calls (assistant-side): tool-call-start, tool-call-delta, tool-call-end
+    //   - Tool execution (host-side): tool-execution-start, tool-execution-update, tool-execution-end
+    //   - Compaction: compaction-start, compaction-end
+    //   - Retry: auto-retry-start, auto-retry-end
+    //   - Attachments: image-attachment, branch-summary
+    //   - Diagnostics: log
     onEvent:    (id, cb) => subscribe(`agent:${id}:event`,    cb),
     onStatus:   (id, cb) => subscribe(`agent:${id}:status`,   cb),
     onMessages: (id, cb) => subscribe(`agent:${id}:messages`, cb),
