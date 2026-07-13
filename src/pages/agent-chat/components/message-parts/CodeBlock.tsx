@@ -10,9 +10,31 @@ interface CodeBlockProps {
   code: string
 }
 
+/**
+ * Track the current theme by listening to the `.dark` class on `document.documentElement`.
+ * Re-runs when the class flips via the settings store.
+ */
+function useResolvedTheme(): 'github-light' | 'github-dark' {
+  const [theme, setTheme] = React.useState<'github-light' | 'github-dark'>(() => {
+    if (typeof document === 'undefined') return 'github-light'
+    return document.documentElement.classList.contains('dark') ? 'github-dark' : 'github-light'
+  })
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return
+    const root = document.documentElement
+    const observer = new MutationObserver(() => {
+      setTheme(root.classList.contains('dark') ? 'github-dark' : 'github-light')
+    })
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return theme
+}
+
 export function CodeBlock({ lang, code }: CodeBlockProps) {
   const [expanded, setExpanded] = React.useState(false)
   const [highlighted, setHighlighted] = React.useState<string | null>(null)
+  const theme = useResolvedTheme()
   const handleCopy = React.useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return
     navigator.clipboard
@@ -33,7 +55,7 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
         if (cancelled) return
         const loaded = h.getLoadedLanguages()
         const resolved = loaded.includes(lang as never) ? lang : 'text'
-        setHighlighted(h.codeToHtml(code, { lang: resolved, theme: 'github-light' }))
+        setHighlighted(h.codeToHtml(code, { lang: resolved, theme }))
       })
       .catch(() => {
         if (cancelled) return
@@ -42,7 +64,7 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
     return () => {
       cancelled = true
     }
-  }, [code, lang])
+  }, [code, lang, theme])
 
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg">
