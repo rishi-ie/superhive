@@ -328,6 +328,13 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           e.compaction = s.compaction
           e.notify?.()
         })
+      } else if (ev.type === 'auto-retry-start' || ev.type === 'auto-retry-end') {
+        agents.getRuntimeState(agentId).then((s) => {
+          const e = runtimeSlices.get(agentId)
+          if (!e || !s) return
+          e.retry = s.retry
+          e.notify?.()
+        })
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
