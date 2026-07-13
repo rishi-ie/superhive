@@ -10,8 +10,10 @@ interface ConversationAreaProps {
 }
 
 export function ConversationArea({ messages, busy = false }: ConversationAreaProps) {
+  const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = React.useRef(true);
+  const lastTailRef = React.useRef('');
 
   const onViewportScroll = React.useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
@@ -19,11 +21,32 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
     stickToBottomRef.current = distanceFromBottom < 80;
   }, []);
 
+  const followEnd = React.useCallback(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+    });
+  }, []);
+
   React.useEffect(() => {
-    if (!bottomRef.current) return;
+    if (messages.length === 0) {
+      lastTailRef.current = '';
+      return;
+    }
+    const last = messages[messages.length - 1];
+    const tail = `${last?.id ?? ''}:${last?.content?.length ?? 0}:${messages.length}`;
+    if (tail === lastTailRef.current) return;
+    lastTailRef.current = tail;
     if (!stickToBottomRef.current) return;
-    bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [messages, busy]);
+    followEnd();
+  }, [messages, followEnd]);
+
+  React.useEffect(() => {
+    if (!stickToBottomRef.current) return;
+    followEnd();
+  }, [busy, followEnd]);
 
   const showThinking =
     busy &&
@@ -39,6 +62,7 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
 
   return (
     <div
+      ref={viewportRef}
       onScroll={onViewportScroll}
       className="flex-1 h-full min-h-0 overflow-y-auto no-scrollbar"
     >
