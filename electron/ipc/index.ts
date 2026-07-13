@@ -18,6 +18,7 @@ export const IPC = {
     SEND: 'agents:send',
     GET_RUNTIME_STATE: 'agents:getRuntimeState',
     GET_PROJECTS: 'agents:getProjects',
+    GET_MESSAGES: 'agents:get-messages',
     READ_SETTINGS: 'agents:readSettings',
     WRITE_SETTINGS: 'agents:writeSettings',
     ON_EVENT:    (id: string) => `agent:${id}:event`,

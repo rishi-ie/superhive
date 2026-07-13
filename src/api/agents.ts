@@ -24,6 +24,7 @@ export const agents = {
   getRuntimeState: (id: string): Promise<RuntimeStatusPayload | null> =>
     window.api.agents.getRuntimeState(id),
   getProjects: (id: string): Promise<Project[]> => window.api.agents.getProjects(id),
+  getMessages: (id: string): Promise<RuntimeMessage[]> => window.api.agents.getMessages(id),
 
   readSettings: (id: string): Promise<Record<string, unknown> | null> =>
     window.api.agents.readSettings(id),

@@ -302,6 +302,21 @@ export function useAgentRuntime(agentId: string | undefined) {
     }
   }, [slice])
 
+  React.useEffect(() => {
+    if (!agentId) return
+    const timeout = setTimeout(async () => {
+      const entry = runtimeSlices.get(agentId)
+      if (!entry || entry.messages.length > 0) return
+      const persisted = await agents.getMessages(agentId)
+      if (persisted.length === 0) return
+      const current = runtimeSlices.get(agentId)
+      if (!current || current.messages.length > 0) return
+      current.messages = persisted
+      current.notify?.()
+    }, 1500)
+    return () => clearTimeout(timeout)
+  }, [agentId])
+
   const send = React.useCallback((text: string) => {
     if (!agentId) return
     agents.send(agentId, text).catch(() => {})

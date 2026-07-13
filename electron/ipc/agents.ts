@@ -11,6 +11,7 @@ import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
 import { config } from '../config'
+import { readAll as getAgentChatMessages } from '../agent-chat-store'
 import {
 	type SettingsFile,
 	DEFAULT_SETTINGS,
@@ -217,4 +218,8 @@ export function registerAgentIpc(): void {
 			throw new Error('WRITE_SETTINGS: exceeded max retries (3)')
 		},
 	)
+
+	ipcMain.handle(IPC.AGENTS.GET_MESSAGES, async (_e, agentId: string) => {
+		return getAgentChatMessages(agentId)
+	})
 }
