@@ -61,6 +61,10 @@
   /* Thinking-block surfaces (Phase 2.4.1+). */
   --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 40%, transparent);
   --chat-bubble-thinking-fg: var(--muted-foreground);
+
+  /* Status indicator foregrounds (Phase 2.5.1+). Used by retry banners,
+   * running-tool spinners, and live status pills. */
+  --chat-status-running: var(--info);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -156,6 +160,8 @@
 
   --chat-bubble-thinking-bg: color-mix(in oklch, var(--muted) 30%, transparent);
   --chat-bubble-thinking-fg: var(--muted-foreground);
+
+  --chat-status-running: var(--info);
 }
 
 * {
@@ -239,6 +245,7 @@
   --color-chat-bubble-code-fg: var(--chat-bubble-code-fg);
   --color-chat-bubble-thinking-bg: var(--chat-bubble-thinking-bg);
   --color-chat-bubble-thinking-fg: var(--chat-bubble-thinking-fg);
+  --color-chat-status-running: var(--chat-status-running);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
