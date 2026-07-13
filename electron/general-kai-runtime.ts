@@ -746,6 +746,21 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'thinking-delta') {
+      const msg = entry.messages.find((m) => m.id === event.messageId)
+      if (msg) {
+        const last = msg.parts[msg.parts.length - 1]
+        if (last && last.type === 'thinking') {
+          msg.parts = [
+            ...msg.parts.slice(0, -1),
+            { ...last, text: last.text + event.delta, state: 'streaming' },
+          ]
+        }
+        this.emitEvent(agentId, event)
+      }
+      return
+    }
+
     if (event.type === 'log') {
       const preview = event.line.length > 200 ? event.line.slice(0, 200) + '...' : event.line
       log.debug(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`)
