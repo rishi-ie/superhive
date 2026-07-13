@@ -18,6 +18,66 @@ function matchCount(
   return null
 }
 
+function resultText(
+  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
+): string {
+  return result
+    .map((r) => (r.type === 'text' ? r.text : ''))
+    .join('')
+}
+
+interface GrepRow {
+  path: string
+  lineNo: number | null
+  match: string
+}
+
+/**
+ * Parse each match line of the form `path:lineNo:matched-text` into a
+ * clickable row. Lines that don't fit the format fall through to the
+ * plain-text fallback below.
+ */
+function parseGrepRows(text: string): GrepRow[] {
+  const rows: GrepRow[] = []
+  for (const line of text.split('\n')) {
+    const m = /^([^:]+):(\d+):(.*)$/.exec(line)
+    if (!m) continue
+    rows.push({
+      path: m[1] ?? '',
+      lineNo: m[2] ? Number(m[2]) : null,
+      match: m[3] ?? '',
+    })
+  }
+  return rows
+}
+
+function GrepResults({ text }: { text: string }) {
+  const rows = parseGrepRows(text)
+  if (rows.length === 0) {
+    return <pre className="font-mono text-xs whitespace-pre-wrap">{text}</pre>
+  }
+  return (
+    <ul className="flex flex-col gap-0.5">
+      {rows.map((row, i) => (
+        <li key={i}>
+          <a
+            href={row.lineNo != null ? `file://${row.path}:${row.lineNo}` : `file://${row.path}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block font-mono text-xs rounded-sm px-1.5 py-0.5 hover:bg-muted/50"
+          >
+            <span className="text-muted-foreground">{row.path}</span>
+            {row.lineNo != null ? (
+              <span className="text-muted-foreground">:{row.lineNo}</span>
+            ) : null}
+            <span className="text-foreground">:{row.match}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function argsFromToolCall(args: unknown): {
   pattern?: string
   path?: string
@@ -63,11 +123,7 @@ export function GrepToolCard({ part, result }: ToolCallCardBaseProps) {
                 {matchCount(result.result)} matches
               </span>
             ) : null}
-            <pre className="font-mono text-xs whitespace-pre-wrap">
-              {result
-                .result.map((r) => (r.type === 'text' ? r.text : ''))
-                .join('')}
-            </pre>
+            <GrepResults text={resultText(result.result)} />
           </div>
         ) : null,
       }}
