@@ -10,6 +10,7 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({ lang, code }: CodeBlockProps) {
+  const [expanded, setExpanded] = React.useState(false)
   const handleCopy = React.useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.clipboard) return
     navigator.clipboard
@@ -19,6 +20,9 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
   }, [code])
 
   const lines = React.useMemo(() => code.split('\n'), [code])
+  const COLLAPSE_THRESHOLD = 50
+  const isLong = lines.length > COLLAPSE_THRESHOLD
+  const visibleLines = !isLong || expanded ? lines : lines.slice(0, COLLAPSE_THRESHOLD)
 
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg">
@@ -38,7 +42,7 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
       </div>
       <pre className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono">
         <code>
-          {lines.map((line, i) => (
+          {visibleLines.map((line, i) => (
             <span key={i} className="block">
               <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
                 {i + 1}
@@ -49,6 +53,15 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
           ))}
         </code>
       </pre>
+      {isLong && !expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="block w-full text-center text-xs text-muted-foreground hover:text-foreground py-1.5 bg-chat-bubble-code-header-bg border-t border-border cursor-pointer"
+        >
+          Show all {lines.length} lines
+        </button>
+      ) : null}
     </div>
   )
 }
