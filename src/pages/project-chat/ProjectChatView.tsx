@@ -217,8 +217,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   maxTokens={contextWindow}
                 />
                 <div className="flex items-center gap-1 text-sidebar-foreground/70">
-                  <Icon icon={LaptopIcon} className="size-4" />
-                  <span className="text-xs">Local</span>
+                  <Icon icon={LaptopIcon} className="size-5" />
+                  <span className="text-sm">Local</span>
                 </div>
               </div>
               <div className="flex items-center gap-5">
