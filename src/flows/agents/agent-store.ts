@@ -289,6 +289,17 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           },
           ...entry.messages.slice(idx + 1),
         ]
+      } else if (ev.type === 'tool-execution-end') {
+        // Main has already linked the tool-result part onto the message that
+        // owns the tool-call. Re-fetch via getMessages so the canonical state
+        // is mirrored. Fallback: append to last assistant message if the
+        // subscription arrives before main's emitMessages has had a chance.
+        agents.getMessages(agentId).then((msgs) => {
+          const e = runtimeSlices.get(agentId)
+          if (!e) return
+          e.messages = msgs
+          e.notify?.()
+        })
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
