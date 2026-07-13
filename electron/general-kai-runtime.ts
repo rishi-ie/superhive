@@ -1046,6 +1046,13 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'auto-retry-end') {
+      entry.retry = undefined
+      this.emitStatus(agentId)
+      this.emitEvent(agentId, event)
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
