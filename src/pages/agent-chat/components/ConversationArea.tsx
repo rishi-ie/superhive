@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { UserMessage } from './UserMessage';
 import { AssistantMessage } from './AssistantMessage';
-import { ThinkingBubble } from './ThinkingBubble';
 import { getMessageTailFingerprint } from '@/models/runtime';
 import type { RuntimeMessage } from '@/types/electron';
 
@@ -49,11 +48,14 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
     followEnd();
   }, [busy, followEnd]);
 
-  const showThinking =
-    busy &&
-    (messages.length === 0 || messages[messages.length - 1]?.role === 'user');
+  // The legacy ThinkingBubble was a global indicator that lived outside any
+  // message. Phase 4.3.3 moves the streaming-thinking affordance inside
+  // AssistantMessage (one `<ThinkingPart>` per part), so we no longer need
+  // a top-level bubble. P4.3.2 keeps the `busy` flag and scroll listener
+  // intact so the empty state still updates as soon as the first message
+  // arrives.
 
-  if (messages.length === 0 && !showThinking) {
+  if (messages.length === 0 && !busy) {
     return (
       <div className="flex-1 h-full flex items-center justify-center">
         <p className="text-sm text-muted-foreground">Send a message to start the conversation.</p>
@@ -75,7 +77,6 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
             <AssistantMessage key={message.id} message={message} />
           )
         )}
-        {showThinking && <ThinkingBubble />}
         <div ref={bottomRef} />
       </div>
     </div>
