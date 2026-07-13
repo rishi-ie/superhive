@@ -999,6 +999,13 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'compaction-start') {
+      entry.compaction = { reason: event.reason, startedAt: Date.now() }
+      this.emitStatus(agentId)
+      this.emitEvent(agentId, event)
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
