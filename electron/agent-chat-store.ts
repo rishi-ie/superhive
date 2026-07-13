@@ -1,9 +1,42 @@
 import { promises as fs } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { queueWrite } from '../src/storage/queue-write'
-import type { RuntimeMessage } from '../src/models/runtime'
+import type { ContentPart, RuntimeMessage } from '../src/models/runtime'
 
 export const AGENTS_CHAT_DIR = join(process.env.HOME ?? '', '.superhive', 'agents')
+
+/**
+ * Migration shim: chat rows persisted before Phase 1.4.3 (when the schema
+ * changed from `content: string` to `parts: ContentPart[]`) only have a
+ * `content` field. Bring them up to the new shape without losing data.
+ *
+ * The renderer treats `content` as deprecated — it still exists on user
+ * messages built in code paths that haven't been migrated, but everything
+ * coming through the runtime writes through `parts` instead.
+ */
+export function migratePersistedMessage(raw: unknown): RuntimeMessage | null {
+  if (!raw || typeof raw !== 'object') return null
+  const obj = raw as Record<string, unknown>
+  const id = typeof obj.id === 'string' ? obj.id : null
+  if (!id) return null
+  const role: 'user' | 'assistant' = obj.role === 'assistant' ? 'assistant' : 'user'
+  const ts = typeof obj.ts === 'number' ? obj.ts : Date.now()
+
+  let parts: ContentPart[]
+  if (Array.isArray(obj.parts)) {
+    parts = obj.parts as ContentPart[]
+  } else if (typeof obj.content === 'string') {
+    parts = [{ type: 'text', text: obj.content, state: 'complete' }]
+  } else {
+    parts = []
+  }
+
+  const out: RuntimeMessage = { id, role, parts, ts }
+  if (obj.usage && typeof obj.usage === 'object') {
+    out.usage = obj.usage as RuntimeMessage['usage']
+  }
+  return out
+}
 
 function chatPath(agentId: string): string {
 	return join(AGENTS_CHAT_DIR, agentId, 'chat.jsonl')
@@ -39,7 +72,8 @@ export async function readAll(agentId: string): Promise<RuntimeMessage[]> {
 		const messages: RuntimeMessage[] = []
 		for (const line of lines) {
 			try {
-				messages.push(JSON.parse(line) as RuntimeMessage)
+				const migrated = migratePersistedMessage(JSON.parse(line))
+				if (migrated) messages.push(migrated)
 			} catch {
 				// Corrupt line — skip
 			}
