@@ -103,6 +103,21 @@ export function getMessageTailFingerprint(message: RuntimeMessage): string {
   return `__${last.type}`
 }
 
+/** Active compaction metadata — emitted on `compaction-start`, cleared on `compaction-end`. */
+export interface CompactionStatus {
+  reason: 'manual' | 'threshold' | 'overflow'
+  startedAt: number
+}
+
+/** Active auto-retry metadata — emitted on `auto-retry-start`, cleared on `auto-retry-end`. */
+export interface RetryStatus {
+  attempt: number
+  maxAttempts: number
+  delayMs: number
+  errorMessage: string
+  startedAt: number
+}
+
 export interface RuntimeStatusPayload {
   agentId: string
   status: 'initializing' | 'running' | 'busy' | 'idle' | 'stopped' | 'error'
@@ -116,6 +131,10 @@ export interface RuntimeStatusPayload {
   availableModels?: ModelInfo[]
   activeModelContextWindow?: number
   activeModelName?: string
+  /** Live compaction state; absent unless compaction is currently active. */
+  compaction?: CompactionStatus
+  /** Live auto-retry state; absent unless retry is currently in flight. */
+  retry?: RetryStatus
 }
 
 export interface RuntimeExitPayload {

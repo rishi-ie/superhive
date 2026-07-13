@@ -61,6 +61,9 @@ export interface RuntimeEntry {
   // chat persistence
   _chatPending: Set<string>
   _chatDebounceTimer: NodeJS.Timeout | null
+  // live status envelopes (set by 1.2 handlers, read by getStatusPayload/emitStatus)
+  compaction?: import('../src/models/runtime').CompactionStatus
+  retry?: import('../src/models/runtime').RetryStatus
 }
 
 const STDERR_LOG_LIMIT = 500
@@ -123,6 +126,8 @@ class GeneralKaiRuntime {
       availableModels: entry.availableModels,
       activeModelContextWindow: entry.activeModelContextWindow,
       activeModelName: entry.activeModelName,
+      compaction: entry.compaction,
+      retry: entry.retry,
     }
   }
 
@@ -777,6 +782,8 @@ class GeneralKaiRuntime {
       usage: entry.usage,
       contextUsage: entry.contextUsage,
       availableModels: entry.availableModels,
+      compaction: entry.compaction,
+      retry: entry.retry,
     })
   }
 
