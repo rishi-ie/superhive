@@ -234,6 +234,61 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           }
           return null
         })
+      } else if (ev.type === 'tool-call-start') {
+        appendPart(entry, ev.messageId, {
+          type: 'tool-call',
+          id: ev.toolCallId,
+          name: ev.name,
+          args: undefined,
+          state: 'pending',
+        })
+      } else if (ev.type === 'tool-call-delta') {
+        // Args deltas are JSON-string deltas. We append to whichever text
+        // state the tool-call part currently uses — main's logic mirrors
+        // this exactly in handleAdapterEvent. The renderer will only parse
+        // args once tool-call-end arrives.
+        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
+        if (idx === -1) return
+        const cur = entry.messages[idx]!
+        const partIdx = cur.parts.findIndex(
+          (p) => p.type === 'tool-call' && p.id === ev.toolCallId,
+        )
+        if (partIdx === -1) return
+        const part = cur.parts[partIdx]!
+        if (part.type !== 'tool-call') return
+        const prevArgs = typeof part.args === 'string' ? part.args : ''
+        const nextParts = [
+          ...cur.parts.slice(0, partIdx),
+          { ...part, args: prevArgs + ev.delta, state: 'streaming-args' as const },
+          ...cur.parts.slice(partIdx + 1),
+        ]
+        entry.messages = [
+          ...entry.messages.slice(0, idx),
+          { ...cur, parts: nextParts },
+          ...entry.messages.slice(idx + 1),
+        ]
+      } else if (ev.type === 'tool-call-end') {
+        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
+        if (idx === -1) return
+        const cur = entry.messages[idx]!
+        const partIdx = cur.parts.findIndex(
+          (p) => p.type === 'tool-call' && p.id === ev.toolCallId,
+        )
+        if (partIdx === -1) return
+        const part = cur.parts[partIdx]!
+        if (part.type !== 'tool-call') return
+        entry.messages = [
+          ...entry.messages.slice(0, idx),
+          {
+            ...cur,
+            parts: [
+              ...cur.parts.slice(0, partIdx),
+              { ...part, args: ev.args, state: 'complete' as const },
+              ...cur.parts.slice(partIdx + 1),
+            ],
+          },
+          ...entry.messages.slice(idx + 1),
+        ]
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
