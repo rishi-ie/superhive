@@ -65,6 +65,11 @@ function WritePreview({
         {visible.join('\n')}
         {isLong && !expanded ? '\n…' : ''}
       </pre>
+      {successMessage(text) ? (
+        <div className="text-[11px] text-chat-status-success mt-1">
+          {successMessage(text)}
+        </div>
+      ) : null}
       {isLong ? (
         <div className="text-[11px] text-muted-foreground mt-1">
           {expanded
@@ -81,4 +86,16 @@ function WritePreview({
       ) : null}
     </div>
   )
+}
+
+/**
+ * Detect Pi's "Successfully wrote N bytes to {path}" message and render it
+ * as a confirmation pill above the preview. Falls back to the cheaper
+ * "File created" pattern when the host omits a byte count.
+ */
+function successMessage(text: string): string | null {
+  const m = /successfully wrote\s+(\d+)\s+bytes/i.exec(text)
+  if (m) return `Successfully wrote ${m[1]} bytes`
+  if (/(file created|wrote file)/i.test(text)) return 'File created'
+  return null
 }
