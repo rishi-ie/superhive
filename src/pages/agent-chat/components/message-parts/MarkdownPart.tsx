@@ -104,6 +104,7 @@ const components: Components = {
   th: ({ children }) => (
     <th className="text-left text-xs font-medium p-2">{children}</th>
   ),
+  td: ({ children }) => <td className="text-xs p-2">{children}</td>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
