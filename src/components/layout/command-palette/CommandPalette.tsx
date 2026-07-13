@@ -29,7 +29,7 @@ export function CommandPalette() {
       open={open}
       onOpenChange={setOpen}
       className="font-sans"
-      overlayClassName="bg-background/90 supports-backdrop-filter:backdrop-blur-xs"
+      overlayClassName="bg-background supports-backdrop-filter:backdrop-blur-xs"
     >
       <Command className="[&_[cmdk-group-heading]]:px-row.5 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground">
         <CommandInput placeholder="Type a command or search…" autoFocus />
