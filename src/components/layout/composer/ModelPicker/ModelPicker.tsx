@@ -1,10 +1,12 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/ui/icon';
-import { CaretDownIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, PlusIcon } from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { getEnabledModels } from '@/flows/settings/crud/get-enabled-models';
@@ -19,12 +21,6 @@ interface EnabledModel {
   contextWindow?: number;
 }
 
-function formatContextWindow(tokens: number): string {
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}M tokens`
-  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}K tokens`
-  return `${tokens} tokens`
-}
-
 interface ModelPickerProps {
   agentId?: string;
 }
@@ -36,6 +32,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
   const [models, setModels] = React.useState<EnabledModel[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [localSelection, setLocalSelection] = React.useState<EnabledModel | null>(null);
+  const navigate = useNavigate();
 
   const agentSettings = useAgentSettings(agentId ?? null);
   const persistedSelection: EnabledModel | null = React.useMemo(() => {
@@ -147,19 +144,25 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
         ) : models.length === 0 ? (
           <DropdownMenuItem disabled className="text-modal-foreground/60">Add a key in Settings → Models</DropdownMenuItem>
         ) : (
-          models.map((m) => (
+          <>
+            {models.map((m) => (
+              <DropdownMenuItem
+                key={m.id}
+                onSelect={() => onSelect(m)}
+                className="flex flex-col items-start gap-0"
+              >
+                <span className="text-sm text-modal-foreground">{m.name}</span>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1 h-px" />
             <DropdownMenuItem
-              key={m.id}
-              onSelect={() => onSelect(m)}
-              className="flex flex-col items-start gap-0"
+              onSelect={() => navigate('/settings')}
+              className="flex items-center gap-1.5 cursor-pointer"
             >
-              <span className="text-sm text-modal-foreground">{m.name}</span>
-              <span className="text-[0.625rem] text-modal-foreground/60">
-                {m.provider}
-                {m.contextWindow ? ` · ${formatContextWindow(m.contextWindow)}` : ''}
-              </span>
+              <Icon icon={PlusIcon} className="size-3.5 text-modal-foreground/60" />
+              <span className="text-sm text-modal-foreground/70">Add API keys</span>
             </DropdownMenuItem>
-          ))
+          </>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
