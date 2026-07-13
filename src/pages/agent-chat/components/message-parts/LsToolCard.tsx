@@ -1,3 +1,5 @@
+import { HugeIcon } from '@/components/ui/huge-icon'
+import { FolderIcon, File01Icon } from '@hugeicons/core-free-icons'
 import { ToolCallCard, type ToolCallCardBaseProps } from './ToolCallCard'
 
 function pathFromArgs(args: unknown): string {
@@ -20,11 +22,26 @@ export function LsToolCard({ part, result }: ToolCallCardBaseProps) {
           </span>
         ),
         body: result ? (
-          <pre className="font-mono text-xs whitespace-pre-wrap">
-            {result
-              .result.map((r) => (r.type === 'text' ? r.text : ''))
-              .join('')}
-          </pre>
+          <ul className="flex flex-col gap-0.5">
+            {result.result
+              .map((r) => (r.type === 'text' ? r.text : ''))
+              .join('')
+              .split('\n')
+              .map((l) => l.trim())
+              .filter((l) => l)
+              .map((line, i) => (
+                <li
+                  key={i}
+                  className="font-mono text-xs flex items-center gap-1.5"
+                >
+                  <HugeIcon
+                    icon={line.endsWith('/') ? FolderIcon : File01Icon}
+                    className="size-3.5 text-muted-foreground"
+                  />
+                  <span>{line}</span>
+                </li>
+              ))}
+          </ul>
         ) : null,
       }}
       state={part.state}
