@@ -221,7 +221,7 @@ class GeneralKaiRuntime {
     const userMsg: RuntimeMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      content: text,
+      parts: [{ type: 'text', text, state: 'complete' }],
       ts: Date.now(),
     }
     entry.messages.push(userMsg)
@@ -678,7 +678,7 @@ class GeneralKaiRuntime {
       const msg: RuntimeMessage = {
         id: event.messageId,
         role: event.role,
-        content: '',
+        parts: [],
         ts: Date.now(),
       }
       entry.messages.push(msg)
@@ -693,7 +693,18 @@ class GeneralKaiRuntime {
     if (event.type === 'text-delta') {
       const msg = entry.messages.find((m) => m.id === event.messageId)
       if (msg) {
-        msg.content += event.delta
+        const last = msg.parts[msg.parts.length - 1]
+        if (last && last.type === 'text') {
+          msg.parts = [
+            ...msg.parts.slice(0, -1),
+            { ...last, text: last.text + event.delta, state: 'streaming' },
+          ]
+        } else {
+          msg.parts = [
+            ...msg.parts,
+            { type: 'text', text: event.delta, state: 'streaming' },
+          ]
+        }
         this.scheduleChatPersist(entry)
         const preview = event.delta.length > 100 ? event.delta.slice(0, 100) + '...' : event.delta
         log.debug(`[runtime.event] agent=${agentId} type=text-delta delta=${JSON.stringify(preview)}`)

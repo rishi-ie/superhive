@@ -160,13 +160,26 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       if (ev.type === 'text-delta') {
         const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
         if (idx !== -1) {
-          entry.messages[idx] = { ...entry.messages[idx]!, content: entry.messages[idx]!.content + ev.delta }
+          const cur = entry.messages[idx]!
+          const last = cur.parts[cur.parts.length - 1]
+          const nextParts =
+            last && last.type === 'text'
+              ? [
+                  ...cur.parts.slice(0, -1),
+                  { ...last, text: last.text + ev.delta, state: 'streaming' as const },
+                ]
+              : [...cur.parts, { type: 'text' as const, text: ev.delta, state: 'streaming' as const }]
+          entry.messages = [
+            ...entry.messages.slice(0, idx),
+            { ...cur, parts: nextParts },
+            ...entry.messages.slice(idx + 1),
+          ]
         }
       } else if (ev.type === 'message-start') {
         if (!entry.messages.some((m) => m.id === ev.messageId)) {
           entry.messages = [
             ...entry.messages,
-            { id: ev.messageId, role: ev.role, content: '', ts: Date.now() },
+            { id: ev.messageId, role: ev.role, parts: [], ts: Date.now() },
           ]
         }
       } else if (ev.type === 'error') {

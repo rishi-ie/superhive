@@ -2,6 +2,7 @@ import * as React from 'react';
 import { UserMessage } from './UserMessage';
 import { AssistantMessage } from './AssistantMessage';
 import { ThinkingBubble } from './ThinkingBubble';
+import { getMessageTailFingerprint } from '@/models/runtime';
 import type { RuntimeMessage } from '@/types/electron';
 
 interface ConversationAreaProps {
@@ -36,7 +37,7 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
       return;
     }
     const last = messages[messages.length - 1];
-    const tail = `${last?.id ?? ''}:${last?.content?.length ?? 0}:${messages.length}`;
+    const tail = `${last?.id ?? ''}:${getMessageTailFingerprint(last!) ?? ''}:${messages.length}`;
     if (tail === lastTailRef.current) return;
     lastTailRef.current = tail;
     if (!stickToBottomRef.current) return;

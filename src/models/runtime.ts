@@ -60,8 +60,34 @@ export type ToolResultContent =
 export interface RuntimeMessage {
   id: string
   role: 'user' | 'assistant'
-  content: string
+  parts: ContentPart[]
   ts: number
+}
+
+/**
+ * Concatenate every text part of a message in order, separated by `\n\n`.
+ * This is the cheap display path: a user message is always one text part, so
+ * `getMessageText(msg)` returns the user's literal text; an assistant message
+ * returns the prose-only view (thinking/tool calls/results excluded) for
+ * backward-compatible rendering until Phase 4 ships per-part cards.
+ */
+export function getMessageText(message: RuntimeMessage): string {
+  const out: string[] = []
+  for (const part of message.parts) {
+    if (part.type === 'text' || part.type === 'thinking') {
+      out.push(part.text)
+    }
+  }
+  return out.join('\n\n')
+}
+
+/** Cheap, monotonically-changing string used to detect a streaming tail.
+ *  Reads the last part's text (or empty) — incrementing on every delta. */
+export function getMessageTailFingerprint(message: RuntimeMessage): string {
+  const last = message.parts[message.parts.length - 1]
+  if (!last) return ''
+  if (last.type === 'text' || last.type === 'thinking') return last.text
+  return `__${last.type}`
 }
 
 export interface RuntimeStatusPayload {

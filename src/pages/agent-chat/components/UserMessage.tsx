@@ -3,6 +3,7 @@ import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
+import { getMessageText } from '@/models/runtime';
 import type { RuntimeMessage } from '@/types/electron';
 
 interface UserMessageProps {
@@ -14,7 +15,7 @@ export function UserMessage({ message }: UserMessageProps) {
     <div className="group relative w-full py-button-y">
       <div className="w-fit ml-auto rounded-card bg-sidebar px-button-x py-button-y">
         <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
-          {message.content}
+          {getMessageText(message)}
         </p>
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1 justify-end">
