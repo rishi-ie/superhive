@@ -776,6 +776,24 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'tool-call-start') {
+      const msg = entry.messages.find((m) => m.id === event.messageId)
+      if (msg) {
+        msg.parts = [
+          ...msg.parts,
+          {
+            type: 'tool-call',
+            id: event.toolCallId,
+            name: event.name,
+            args: undefined,
+            state: 'pending',
+          },
+        ]
+        this.emitEvent(agentId, event)
+      }
+      return
+    }
+
     if (event.type === 'log') {
       const preview = event.line.length > 200 ? event.line.slice(0, 200) + '...' : event.line
       log.debug(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`)
