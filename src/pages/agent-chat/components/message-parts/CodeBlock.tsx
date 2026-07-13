@@ -18,6 +18,8 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
       .catch(() => toast.error('Copy failed'))
   }, [code])
 
+  const lines = React.useMemo(() => code.split('\n'), [code])
+
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg">
       <div className="flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
@@ -35,7 +37,17 @@ export function CodeBlock({ lang, code }: CodeBlockProps) {
         </Button>
       </div>
       <pre className="px-3 py-2 text-xs font-mono overflow-x-auto">
-        <code>{code}</code>
+        <code>
+          {lines.map((line, i) => (
+            <span key={i} className="block">
+              <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+                {i + 1}
+              </span>
+              {line}
+              {'\n'}
+            </span>
+          ))}
+        </code>
       </pre>
     </div>
   )
