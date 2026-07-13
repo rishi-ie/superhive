@@ -13,6 +13,9 @@ const components: Components = {
   h1: ({ children }) => (
     <h1 className="text-base font-semibold tracking-tight">{children}</h1>
   ),
+  h2: ({ children }) => (
+    <h2 className="text-sm font-semibold mt-3 mb-1.5">{children}</h2>
+  ),
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
