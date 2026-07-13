@@ -209,7 +209,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
             />
             <div className="flex items-center justify-between px-composer py-button-y">
               <div className="flex items-center gap-3">
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
                   <Icon icon={PlusIcon} className="size-5" />
                 </button>
                 <ContextUsageRing
@@ -224,7 +224,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
               </div>
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={projectAgent.id} />
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
                   <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                 </button>
                 <button

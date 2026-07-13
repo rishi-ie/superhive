@@ -129,7 +129,7 @@ export function AgentChatView() {
               />
               <div className="flex items-center justify-between px-composer py-button-y">
                 <div className="flex items-center gap-3">
-                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
                     <Icon icon={PlusIcon} className="size-5" />
                   </button>
                   <ContextUsageRing
@@ -144,8 +144,8 @@ export function AgentChatView() {
                 </div>
                 <div className="flex items-center gap-5">
                   <ModelPicker agentId={agentId} />
-                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-                    <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
+<button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
+                  <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                   </button>
                   <button
                     onClick={onSend}
