@@ -40,6 +40,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
                   key={a.id}
                   name={a.name}
                   showStatus={false}
+                  compact={true}
                   onClick={() => navigate(`/agents/${a.id}`)}
                 />
               ))

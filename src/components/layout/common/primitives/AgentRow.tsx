@@ -6,6 +6,7 @@ interface AgentRowProps {
   name: string;
   status?: 'idle' | 'active';
   showStatus?: boolean;
+  compact?: boolean;
   currentAction?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
@@ -21,7 +22,7 @@ const AgentActions = () => (
   </span>
 );
 
-export function AgentRow({ name, status = 'idle', showStatus = true, currentAction = "Working…", onClick }: AgentRowProps) {
+export function AgentRow({ name, status = 'idle', showStatus = true, compact = false, currentAction = "Working…", onClick }: AgentRowProps) {
   if (showStatus && status === 'active') {
     return (
       <button
@@ -61,9 +62,12 @@ export function AgentRow({ name, status = 'idle', showStatus = true, currentActi
     <button
       type="button"
       onClick={onClick}
-      className="group flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
+      className={compact
+        ? "group flex h-6 w-full cursor-default items-center gap-1 rounded-card px-1.5 text-xs text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        : "group flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
+      }
     >
-      <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
+      <Icon icon={UserIcon} className={compact ? "size-3.5 flex-shrink-0" : "size-4 flex-shrink-0"} />
       <span className="flex-1 truncate text-left">{name}</span>
       <AgentActions />
     </button>
