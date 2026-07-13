@@ -34,6 +34,7 @@ const components: Components = {
   strong: ({ children }) => (
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
+  em: ({ children }) => <em className="italic">{children}</em>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
