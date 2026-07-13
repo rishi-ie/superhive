@@ -56,9 +56,13 @@ export async function append(agentId: string, message: RuntimeMessage): Promise<
 
 export async function appendBatch(agentId: string, messages: RuntimeMessage[]): Promise<void> {
 	if (messages.length === 0) return
+	// Sanity check: every message must carry `parts`. Callers that pre-date
+	// the migration (Phase 1.4.3) may still pass `{ content: string, … }`
+	// shapes — convert them up-front so on-disk rows are uniform.
+	const normalized = messages.map((m) => migratePersistedMessage(m) ?? m)
 	await ensureAgentDir(agentId)
 	const path = chatPath(agentId)
-	const lines = messages.map((m) => JSON.stringify(m)).join('\n') + '\n'
+	const lines = normalized.map((m) => JSON.stringify(m)).join('\n') + '\n'
 	await queueWrite(path, async () => {
 		await fs.appendFile(path, lines, 'utf8')
 	})
