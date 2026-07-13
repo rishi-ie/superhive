@@ -50,6 +50,13 @@ export type AdapterEvent =
       aborted: boolean
       willRetry: boolean
     }
+  | {
+      type: 'auto-retry-start'
+      attempt: number
+      maxAttempts: number
+      delayMs: number
+      errorMessage: string
+    }
   | { type: 'boot-step'; step: InitStep }
   | { type: 'ready' }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string }
