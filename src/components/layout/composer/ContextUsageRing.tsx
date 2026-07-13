@@ -10,7 +10,7 @@ interface ContextUsageRingProps {
 }
 
 const DEFAULT_SIZE = 20;
-const RADIUS = 8;
+const RADIUS = 9;
 const STROKE = 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
