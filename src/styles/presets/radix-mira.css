@@ -43,6 +43,7 @@
    */
   --chat-bubble-tool-bg-pending: color-mix(in oklch, var(--info) 10%, transparent);
   --chat-bubble-tool-bg-success: color-mix(in oklch, var(--success) 10%, transparent);
+  --chat-bubble-tool-bg-error: color-mix(in oklch, var(--destructive) 10%, transparent);
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -123,6 +124,7 @@
 
   --chat-bubble-tool-bg-pending: color-mix(in oklch, var(--info) 14%, transparent);
   --chat-bubble-tool-bg-success: color-mix(in oklch, var(--success) 14%, transparent);
+  --chat-bubble-tool-bg-error: color-mix(in oklch, var(--destructive) 14%, transparent);
 }
 
 * {
@@ -194,6 +196,7 @@
   --color-chat-bubble-assistant: var(--chat-bubble-assistant);
   --color-chat-bubble-tool-bg-pending: var(--chat-bubble-tool-bg-pending);
   --color-chat-bubble-tool-bg-success: var(--chat-bubble-tool-bg-success);
+  --color-chat-bubble-tool-bg-error: var(--chat-bubble-tool-bg-error);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
