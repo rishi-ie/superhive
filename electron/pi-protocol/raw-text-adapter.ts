@@ -48,6 +48,18 @@ export class RawTextAdapter implements PiProtocolAdapter {
               contentIndex: typeof ev.contentIndex === 'number' ? ev.contentIndex : 0,
             })
           }
+          if (ev?.type === 'thinking_delta') {
+            if (!this.currentMessageId) {
+              this.currentMessageId = randomUUID()
+              emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
+            }
+            emit({
+              type: 'thinking-delta',
+              messageId: this.currentMessageId,
+              contentIndex: typeof ev.contentIndex === 'number' ? ev.contentIndex : 0,
+              delta: (ev.delta as string) ?? '',
+            })
+          }
           this.maybeEmitUsage(ev, emit)
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
