@@ -126,7 +126,7 @@ export function AgentChatView() {
                 className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-1 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <div className="flex items-center justify-between px-composer py-button-y">
-                <div className="flex items-center gap-stack">
+                <div className="flex items-center gap-2">
                   <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
                     <Icon icon={PlusIcon} className="size-5" />
                   </button>
