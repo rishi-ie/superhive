@@ -66,19 +66,24 @@ export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProp
   const dotFg = statusDotClass(state, isError)
   const running = state === 'running' || state === 'streaming-args'
   const elapsed = useElapsedSeconds(running)
+  // Running: keep the body open so the user can watch the trace.
+  // Done: collapse to a one-line header so the conversation stays compact.
   return (
-    <div className={`rounded-chat-tool-card border border-border overflow-hidden ${bg}`}>
-      <div className="flex items-center gap-2 px-3 py-2 text-xs">
+    <details
+      open={running}
+      className={`rounded-chat-tool-card border border-border overflow-hidden ${bg}`}
+    >
+      <summary className="flex items-center gap-2 px-3 py-2 text-xs cursor-pointer list-none">
         <span className={`size-1.5 rounded-full ${dotFg}`} aria-hidden />
         {slots.header}
         <span className="ml-auto text-[10px] text-muted-foreground">
-          {running ? `${elapsed}s` : elapsed > 0 ? `${elapsed}s` : ''}
+          {elapsed > 0 ? `${elapsed}s` : ''}
         </span>
-      </div>
+      </summary>
       <div className="px-3 py-2 text-xs">{slots.body}</div>
       <div className="px-3 pb-2 text-[10px] text-muted-foreground">
         state={state} {isError ? '· error' : ''}
       </div>
-    </div>
+    </details>
   )
 }
