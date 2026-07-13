@@ -33,6 +33,7 @@ interface RuntimeSlice {
   initialized: boolean
   unsubs: Array<() => void>
   refcount: number
+  notify?: () => void
 }
 
 interface SettingsSlice {
@@ -107,6 +108,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.activeModelName = s.activeModelName
     }
     entry.loading = false
+    entry.notify?.()
   })
 
   agents.get(agentId).then((a) => {
@@ -114,6 +116,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     if (!entry || !a) return
     entry.agent = a
     if (a.lastError) entry.lastError = a.lastError
+    entry.notify?.()
   })
 
   unsubs.push(
@@ -128,6 +131,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.availableModels = s.availableModels
       entry.activeModelContextWindow = s.activeModelContextWindow
       entry.activeModelName = s.activeModelName
+      entry.notify?.()
     })
   )
 
@@ -145,6 +149,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         }
       }
       entry.messages = msgs
+      entry.notify?.()
     })
   )
 
@@ -168,6 +173,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         toast.error(ev.message, { duration: Infinity })
         entry.lastError = ev.message
       }
+      entry.notify?.()
     })
   )
 
@@ -178,6 +184,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         if (!entry || !s) return
         entry.status = s.status
         entry.lastError = s.lastError
+        entry.notify?.()
       })
     })
   )
@@ -289,10 +296,9 @@ export function useAgentRuntime(agentId: string | undefined) {
     }
 
     sync()
-
-    const id = setInterval(sync, 50)
+    sliceRef.current!.notify = sync
     return () => {
-      clearInterval(id)
+      if (sliceRef.current) sliceRef.current.notify = undefined
     }
   }, [slice])
 
