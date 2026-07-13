@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon, CircleNotchIcon } from "@phosphor-icons/react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -33,11 +32,6 @@ interface ProjectRef {
 interface AgentListRowProps {
   agent: Agent;
   project?: ProjectRef | null;
-}
-
-function initials(name?: string) {
-  if (!name) return "?";
-  return name.trim().charAt(0).toUpperCase();
 }
 
 function relativeTime(timestamp?: number): string | null {
@@ -83,17 +77,10 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
       role="button"
       className="group cursor-pointer"
     >
-      <TableCell className="w-[260px">
-        <div className="flex items-center gap-stack.5">
-          <Avatar size="sm">
-            <AvatarFallback className="bg-sidebar text-foreground font-medium text-xs">
-              {initials(agent.name)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="truncate font-medium text-foreground text-sm">
-            {agent.name}
-          </span>
-        </div>
+      <TableCell className="w-[260px]">
+        <span className="truncate font-medium text-foreground text-sm">
+          {agent.name}
+        </span>
       </TableCell>
 
       <TableCell>
