@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { HouseIcon, PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
@@ -113,6 +113,11 @@ export function AgentChatView() {
     <div className="flex flex-col h-full">
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
+        <div className="max-w-[800px] mx-auto px-14 py-1">
+          <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+            <Icon icon={HouseIcon} className="size-4" />
+          </button>
+        </div>
         <div className="max-w-[800px] mx-auto px-14 py-4">
           <div className="rounded-3xl bg-sidebar">
             <textarea
