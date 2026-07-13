@@ -131,6 +131,18 @@ export class RawTextAdapter implements PiProtocolAdapter {
               ? obj.reason
               : 'threshold'
           emit({ type: 'compaction-start', reason })
+        } else if (obj.type === 'compaction_end') {
+          const reason: 'manual' | 'threshold' | 'overflow' =
+            obj.reason === 'manual' || obj.reason === 'threshold' || obj.reason === 'overflow'
+              ? obj.reason
+              : 'threshold'
+          emit({
+            type: 'compaction-end',
+            reason,
+            result: obj.result,
+            aborted: obj.aborted === true,
+            willRetry: obj.willRetry === true,
+          })
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
