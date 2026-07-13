@@ -98,6 +98,7 @@ const components: Components = {
       <table className="w-full border-collapse">{children}</table>
     </div>
   ),
+  thead: ({ children }) => <thead className="bg-muted/40">{children}</thead>,
 }
 
 export function MarkdownPart({ source }: MarkdownPartProps) {
