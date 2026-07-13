@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserMessage } from './UserMessage';
 import { AssistantMessage } from './AssistantMessage';
 import { ThinkingBubble } from './ThinkingBubble';
@@ -11,7 +10,6 @@ interface ConversationAreaProps {
 }
 
 export function ConversationArea({ messages, busy = false }: ConversationAreaProps) {
-  const rootRef = React.useRef<HTMLDivElement | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = React.useRef(true);
 
@@ -40,23 +38,21 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
   }
 
   return (
-    <div ref={rootRef} className="flex-1 h-full min-h-0">
-      <ScrollArea className="h-full">
-        <div
-          onScroll={onViewportScroll}
-          className="mx-auto max-w-4xl px-14 py-8 flex flex-col gap-6"
-        >
-          {messages.map((message) =>
-            message.role === 'user' ? (
-              <UserMessage key={message.id} message={message} />
-            ) : (
-              <AssistantMessage key={message.id} message={message} />
-            )
-          )}
-          {showThinking && <ThinkingBubble />}
-          <div ref={bottomRef} />
-        </div>
-      </ScrollArea>
+    <div
+      onScroll={onViewportScroll}
+      className="flex-1 h-full min-h-0 overflow-y-auto no-scrollbar"
+    >
+      <div className="mx-auto max-w-4xl px-14 py-8 flex flex-col gap-6">
+        {messages.map((message) =>
+          message.role === 'user' ? (
+            <UserMessage key={message.id} message={message} />
+          ) : (
+            <AssistantMessage key={message.id} message={message} />
+          )
+        )}
+        {showThinking && <ThinkingBubble />}
+        <div ref={bottomRef} />
+      </div>
     </div>
   );
 }
