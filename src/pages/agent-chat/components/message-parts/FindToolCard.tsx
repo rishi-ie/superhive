@@ -30,15 +30,45 @@ export function FindToolCard({ part, result }: ToolCallCardBaseProps) {
           </span>
         ),
         body: result ? (
-          <pre className="font-mono text-xs whitespace-pre-wrap">
-            {result
+          <FindResults
+            text={result
               .result.map((r) => (r.type === 'text' ? r.text : ''))
               .join('')}
-          </pre>
+          />
         ) : null,
       }}
       state={part.state}
       isError={result?.isError}
     />
+  )
+}
+
+/**
+ * Render each path on its own line. Pi's `-type d` results end with `/`; we
+ * forward that visually so the user can scan for directories at a glance.
+ */
+function FindResults({ text }: { text: string }) {
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l && !/^Found\s+\d+/i.test(l))
+  if (lines.length === 0) {
+    return <pre className="font-mono text-xs whitespace-pre-wrap">{text}</pre>
+  }
+  return (
+    <ul className="flex flex-col gap-0.5">
+      {lines.map((line, i) => (
+        <li key={i}>
+          <a
+            href={`file://${line}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block font-mono text-xs rounded-sm px-1.5 py-0.5 hover:bg-muted/50"
+          >
+            {line}
+          </a>
+        </li>
+      ))}
+    </ul>
   )
 }
