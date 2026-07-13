@@ -19,9 +19,15 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
         body: (
           <div>
             {result ? (
-              <pre className="font-mono text-xs whitespace-pre-wrap mt-0 max-h-[300px] overflow-y-auto">
-                {resultText(result.result)}
-              </pre>
+              <div className="flex items-start gap-2">
+                <pre className="font-mono text-xs whitespace-pre-wrap mt-0 max-h-[300px] overflow-y-auto flex-1">
+                  {resultText(result.result)}
+                </pre>
+                <BashExitBadge
+                  exitCode={resultMeta(result.result).exitCode}
+                  isError={result.isError}
+                />
+              </div>
             ) : null}
           </div>
         ),
@@ -38,4 +44,45 @@ function resultText(
   return result
     .map((r) => (r.type === 'text' ? r.text : ''))
     .join('')
+}
+
+interface BashResultMeta {
+  exitCode?: number
+  cancelled?: boolean
+  timedOut?: boolean
+}
+
+function resultMeta(
+  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
+): BashResultMeta {
+  for (const r of result) {
+    if (r.type !== 'text') continue
+    const m = /\bexit(?:_|\s)?code[:= ](\d+)/.exec(r.text)
+    if (m && m[1]) {
+      return { exitCode: Number(m[1]) }
+    }
+  }
+  return {}
+}
+
+function BashExitBadge({ exitCode, isError }: { exitCode?: number; isError?: boolean }) {
+  if (typeof exitCode === 'number' && exitCode !== 0) {
+    return (
+      <span className="bg-destructive text-destructive-foreground rounded-sm px-1.5 text-[10px] font-mono">
+        exit {exitCode}
+      </span>
+    )
+  }
+  if (isError) {
+    return (
+      <span className="bg-destructive text-destructive-foreground rounded-sm px-1.5 text-[10px]">
+        failed
+      </span>
+    )
+  }
+  return (
+    <span className="bg-success/30 text-success-foreground rounded-sm px-1.5 text-[10px]">
+      ok
+    </span>
+  )
 }
