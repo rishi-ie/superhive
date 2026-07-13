@@ -1,3 +1,5 @@
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+
 interface ThinkingPartProps {
   text: string
   isStreaming: boolean
@@ -5,8 +7,13 @@ interface ThinkingPartProps {
 
 export function ThinkingPart({ text }: ThinkingPartProps) {
   return (
-    <div className="text-sm">
-      {text}
-    </div>
+    <Collapsible>
+      <CollapsibleTrigger className="cursor-pointer">
+        trigger
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="text-sm">{text}</div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
