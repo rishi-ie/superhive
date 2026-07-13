@@ -68,6 +68,9 @@
   --chat-status-success: var(--success);
   --chat-status-error: var(--destructive);
   --chat-status-warning: var(--warning);
+
+  /* Chat-specific radii (Phase 2.6.1+). Tool cards / code blocks / images. */
+  --chat-radius-tool-card: 0.5rem;
   --spacing-card: 1.5rem;
   --spacing-row: 0.5rem;
   --spacing-panel: 0.75rem;
@@ -168,6 +171,8 @@
   --chat-status-success: var(--success);
   --chat-status-error: var(--destructive);
   --chat-status-warning: var(--warning);
+
+  --chat-radius-tool-card: 0.5rem;
 }
 
 * {
@@ -216,6 +221,7 @@
   --radius-input: var(--radius-input);
   --radius-card: var(--radius-card);
   --radius-popover: var(--radius-popover);
+  --radius-chat-tool-card: var(--chat-radius-tool-card);
   --height-control-sm: var(--height-control-sm);
   --height-control-md: var(--height-control-md);
   --height-control-lg: var(--height-control-lg);
