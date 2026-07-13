@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { HouseIcon, PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { LaptopIcon, PlusIcon, MicrophoneIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
 import { AgentInitializing } from './components/AgentInitializing';
@@ -113,13 +113,13 @@ export function AgentChatView() {
     <div className="flex flex-col h-full">
       <ConversationArea messages={messages} busy={isBusy} />
       <div className="shrink-0">
-        <div className="max-w-[800px] mx-auto px-14 py-1">
-          <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-            <Icon icon={HouseIcon} className="size-4" />
-          </button>
-        </div>
         <div className="max-w-[800px] mx-auto px-14 py-4">
           <div className="rounded-3xl bg-sidebar">
+            <div className="flex pt-3 pl-4">
+              <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+                <Icon icon={LaptopIcon} className="size-4" />
+              </button>
+            </div>
             <textarea
               ref={textareaRef}
               placeholder="Ask your digital employee…"
@@ -127,7 +127,7 @@ export function AgentChatView() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               autoFocus
-              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-3 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-1 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
             <div className="flex items-center justify-between px-composer py-button-y">
               <div className="flex items-center gap-stack">
