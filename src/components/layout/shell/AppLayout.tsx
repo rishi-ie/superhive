@@ -37,7 +37,7 @@ function AppLayoutShell() {
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    setRightSidebarOpen(location.pathname !== "/");
+    setRightSidebarOpen(location.pathname !== "/" && location.pathname !== "/plugins");
   }, [location.pathname]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
