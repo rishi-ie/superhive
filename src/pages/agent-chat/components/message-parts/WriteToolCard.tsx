@@ -82,11 +82,3 @@ function WritePreview({
     </div>
   )
 }
-
-function resultText(
-  result: ReadonlyArray<import('@/models/runtime').ToolResultContent>,
-): string {
-  return result
-    .map((r) => (r.type === 'text' ? r.text : ''))
-    .join('')
-}
