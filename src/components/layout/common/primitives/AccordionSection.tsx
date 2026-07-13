@@ -11,6 +11,7 @@ interface AccordionSectionProps {
   onClick?: () => void;
   labelClassName?: string;
   leadingIcon?: ReactNode;
+  swapLeadingOnHover?: boolean;
 }
 
 export function AccordionSection({
@@ -20,8 +21,10 @@ export function AccordionSection({
   onClick,
   labelClassName,
   leadingIcon,
+  swapLeadingOnHover = false,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const [hovered, setHovered] = useState(false);
 
   const handleClick = () => {
     if (onClick) onClick();
@@ -33,19 +36,43 @@ export function AccordionSection({
       <button
         type="button"
         onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         className={cn(
           'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm transition-colors hover:bg-sidebar-accent hover:text-foreground',
           labelClassName || 'text-muted-foreground'
         )}
       >
-        {leadingIcon}
-        <span className="truncate text-left">{label}</span>
-        <Icon icon={CaretRightIcon}
-          className={cn(
-            'size-4 flex-shrink-0 transition-transform duration-150',
-            open && 'rotate-90'
-          )}
-        />
+        {swapLeadingOnHover ? (
+          <>
+            <div className="size-4 flex-shrink-0">
+              {hovered ? (
+                <Icon
+                  icon={CaretRightIcon}
+                  className={cn(
+                    'size-4 transition-transform duration-150',
+                    open && 'rotate-90'
+                  )}
+                />
+              ) : (
+                leadingIcon
+              )}
+            </div>
+            <span className="truncate text-left">{label}</span>
+          </>
+        ) : (
+          <>
+            {leadingIcon}
+            <span className="truncate text-left">{label}</span>
+            <Icon
+              icon={CaretRightIcon}
+              className={cn(
+                'size-4 flex-shrink-0 transition-transform duration-150',
+                open && 'rotate-90'
+              )}
+            />
+          </>
+        )}
       </button>
 
       <div

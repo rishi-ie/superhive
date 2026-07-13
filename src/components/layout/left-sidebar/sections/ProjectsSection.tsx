@@ -35,6 +35,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
               defaultOpen={false}
               labelClassName="text-muted-foreground"
               leadingIcon={<HugeIcon icon={Folder01Icon} size={16} className="size-4 flex-shrink-0 text-muted-foreground" />}
+              swapLeadingOnHover={true}
               onClick={() => navigate(`/projects/${p.id}`)}
             >
             {assignedAgents.length > 0 ? (
