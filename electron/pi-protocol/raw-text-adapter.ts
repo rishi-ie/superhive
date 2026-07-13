@@ -105,6 +105,13 @@ export class RawTextAdapter implements PiProtocolAdapter {
             })
           }
           this.maybeEmitUsage(ev, emit)
+        } else if (obj.type === 'tool_execution_start') {
+          emit({
+            type: 'tool-execution-start',
+            toolCallId: (obj.toolCallId as string) ?? randomUUID(),
+            name: (obj.name as string) ?? '',
+            args: obj.args,
+          })
         } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
