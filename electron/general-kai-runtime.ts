@@ -1053,6 +1053,18 @@ class GeneralKaiRuntime {
       return
     }
 
+    if (event.type === 'image-attachment') {
+      const msg = entry.messages.find((m) => m.id === event.messageId)
+      if (msg) {
+        msg.parts = [
+          ...msg.parts,
+          { type: 'image', data: event.data, mimeType: event.mimeType },
+        ]
+        this.emitEvent(agentId, event)
+      }
+      return
+    }
+
     const payload = JSON.stringify(event)
     const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
     log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
