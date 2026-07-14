@@ -7,7 +7,6 @@ import log from 'electron-log/main'
 import {
   type AdapterEvent,
   type PiProtocolAdapter,
-  type InitStep,
   type UsageSnapshot,
   type ContextSnapshot,
   type ModelInfo,
@@ -20,55 +19,18 @@ import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { parseCounter } from './agent-settings-defaults'
 import { appendBatch, replaceAll, trimTo } from './agent-chat-store'
+import { buildStatusPayload } from './runtime-status'
 
 /**
  * Live runtime state for one agent instance.
  * Single-threaded JS: all mutations are safe without locks.
+ *
+ * Canonical type lives in `./runtime-status` so it can be referenced from
+ * unit tests without booting Electron. This module imports the type and
+ * re-exports it for any external consumer.
  */
-export interface RuntimeEntry {
-  // config
-  agentId: string
-  agentDir: string
-  manifestPiSource: string
-  // process
-  process: ChildProcess | null
-  pid?: number
-  startedAt?: number
-  endedAt?: number
-  // conversation
-  messages: RuntimeMessage[]
-  // debug
-  stderrLog: string[]
-  // boot
-  status: AgentStatus
-  bootStep?: InitStep
-  lastError?: string
-  // usage
-  usage?: UsageSnapshot
-  contextUsage?: ContextSnapshot
-  // telemetry extension: true = extension present, journal tailer is sole writer
-  // for usage; false = legacy agent, stdout adapter fallback drives usage
-  extensionLoaded: boolean
-  availableModels?: ModelInfo[]
-  // Active model reported by Pi on model_select. The SDK sends the new
-  // model's full Model object (including contextWindow) — we keep just the
-  // fields the composer needs, so a custom provider whose value Pi tracks
-  // internally (rather than via the registry) still flows through.
-  activeModelContextWindow?: number
-  activeModelName?: string
-  // adapter
-  adapter: PiProtocolAdapter
-  // chat persistence
-  _chatPending: Set<string>
-  _chatDebounceTimer: NodeJS.Timeout | null
-  // live status envelopes (set by 1.2 handlers, read by getStatusPayload/emitStatus)
-  compaction?: import('../src/models/runtime').CompactionStatus
-  retry?: import('../src/models/runtime').RetryStatus
-  // in-flight tool executions, keyed on toolCallId. The adapter's parallel
-  // tool_execution_* events arrive independently of assistantMessageEvent, so
-  // we keep this map on the RuntimeEntry rather than on a specific message.
-  _inFlightTools: Map<string, import('../src/models/runtime').ContentPart & { type: 'tool-result' }>
-}
+export type { RuntimeEntry } from './runtime-status'
+import type { RuntimeEntry } from './runtime-status'
 
 const STDERR_LOG_LIMIT = 500
 const READY_SILENCE_MS = 2000
@@ -1218,20 +1180,7 @@ class GeneralKaiRuntime {
     if (!win || win.isDestroyed()) return
     const entry = this.entries.get(agentId)
     if (!entry) return
-    win.webContents.send(IPC.AGENTS.ON_STATUS(agentId), {
-      agentId,
-      status: entry.status,
-      pid: entry.pid,
-      startedAt: entry.startedAt,
-      endedAt: entry.endedAt,
-      lastError: entry.lastError,
-      bootStep: entry.bootStep,
-      usage: entry.usage,
-      contextUsage: entry.contextUsage,
-      availableModels: entry.availableModels,
-      compaction: entry.compaction,
-      retry: entry.retry,
-    })
+    win.webContents.send(IPC.AGENTS.ON_STATUS(agentId), buildStatusPayload(entry, agentId))
   }
 
   private emitMessages(agentId: string): void {

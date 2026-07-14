@@ -131,7 +131,14 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     const provider = agentSettings.settings?.model?.provider;
     const name = agentSettings.settings?.model?.name;
     if (!provider || !name || !availableModels) return undefined;
-    return availableModels.find((m) => m.provider === provider && m.id === name)?.contextWindow;
+    // Case-insensitive on provider: settings file carries "Minimax" but Pi's
+    // registry catalogs the same provider as "minimax". Without this the
+    // lookup fails and the ring falls through to contextUsage.contextWindow
+    // (204800 default for unknown models), masking the real 1M cap.
+    const providerLc = provider.toLowerCase();
+    return availableModels.find(
+      (m) => m.provider.toLowerCase() === providerLc && m.id === name,
+    )?.contextWindow;
   }, [agentSettings.settings?.model?.provider, agentSettings.settings?.model?.name, availableModels]);
   const contextWindow = React.useMemo(() => {
     if (selectedContextWindow) return selectedContextWindow;

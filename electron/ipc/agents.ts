@@ -128,7 +128,14 @@ export function registerAgentIpc(): void {
 			symlinkSync('manifest.json', join(agentDir, 'agent.json'))
 			log.info(`[agents:create] symlinked agent.json → manifest.json`)
 
-			// Seed the settings JSON so the extension sees it on first launch
+			// Seed the settings JSON so the extension sees it on first launch.
+			// Pin both extensions into the active manifest so Pi's loadExtensions
+			// takes the deterministic "explicit paths" branch — without this,
+			// `extensions: []` ships in the seed, agent.sh picks the settings file
+			// as the manifest on the first boot, and Pi loads NO extensions
+			// (including truth itself), leaving telemetry dead and the
+			// context-window ring showing "?" forever.
+			// Mirrors superhive-pi-truth/index.ts::buildInitialSettings.
 			const settingsPath = settingsFilePathFor(agentDir)
 			const seed: SettingsFile = {
 				...DEFAULT_SETTINGS,
@@ -136,6 +143,10 @@ export function registerAgentIpc(): void {
 				description: data.description?.trim() ?? '',
 				managedBy: 'superhive-pi-truth@1#0',
 				lastModified: new Date().toISOString(),
+				extensions: [
+					'./extensions/superhive-pi-truth',
+					'./extensions/superhive-pi-telemetry',
+				],
 			}
 			await writeFile(settingsPath, JSON.stringify(seed, null, '\t') + '\n', 'utf8')
 

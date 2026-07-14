@@ -6,7 +6,7 @@ import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { SettingsRepository } from '../../src/storage/repositories'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR } from '../install-general-kai'
-import { settingsFilePathFor, type SettingsFile } from '../agent-settings-defaults'
+import { settingsFilePathFor, type SettingsFile, parseCounter } from '../agent-settings-defaults'
 
 /**
  * Bootstrap env-var API keys from process.env into the `providers` map.
@@ -86,10 +86,16 @@ export async function reSeedProviders(agentId: string): Promise<void> {
 
 	if (Object.keys(merged).length === 0) return
 
+	// Bump the writer counter instead of resetting to #0. Resetting to #0
+	// every start/restart breaks the watcher's self-write guard — any future
+	// legitimate write (truth or user) gets a counter that the runtime has
+	// already seen the latest of (the previous truth session), so the
+	// "settings changed" broadcast never fires.
+	const nextCounter = parseCounter(current.managedBy as string | undefined) + 1
 	const next: SettingsFile = {
 		...current,
 		providers: merged,
-		managedBy: 'superhive-pi-truth@1#0',
+		managedBy: `superhive-pi-truth@1#${nextCounter}`,
 		lastModified: new Date().toISOString(),
 	}
 
