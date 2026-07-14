@@ -322,6 +322,37 @@ See `storage.md` for full repository reference.
 
 ---
 
+## Agent Chat UI — Per-Part Renderers
+
+The agent-chat conversation surface renders structured `ContentPart[]` (text / thinking / tool-call / tool-result / image / compaction-summary) via one renderer per part type. All renderers live together under `src/pages/agent-chat/components/message-parts/`:
+
+| File | Part type |
+|---|---|
+| `MarkdownPart.tsx` | text — `react-markdown` + `remarkGfm` + `remarkMath` + `rehypeKatex` |
+| `CodeBlock.tsx` | inline `<code>` fenced blocks — shiki |
+| `MermaidBlock.tsx` | `language-mermaid` fenced blocks — mermaid 11 |
+| `ThinkingPart.tsx` | thinking — collapsible, elapsed timer, `.shimmer` |
+| `ImagePart.tsx` + `ImageLightbox.tsx` | image — lightbox dialog |
+| `CompactionCard.tsx` | compaction-summary — collapsible divider |
+| `ToolCallCard.tsx` (base) + `*ToolCard.tsx` (bash / read / edit / write / grep / find / ls / unknown) | tool-call + tool-result |
+| `DiffView.tsx` | unified-diff blocks (edit / write tools) |
+| `ActiveStateBanners.tsx` | top-of-conversation banners (compaction / retry) |
+
+The dispatcher (`AssistantMessage.tsx`) walks `message.parts` in order, renders thinking / image / compaction-summary inline, groups prose into `<MarkdownPart>` sections by tool-call boundary, and dispatches tool-call parts to `<ToolCallPart>` (with linked `<ToolResultPart>` lookup).
+
+The conversation list itself is a `<Virtuoso>` virtual scroller (Phase 11) under `ConversationArea.tsx`.
+
+## Testing
+
+Unit tests live next to the code they cover: `*.test.ts`. Run via `bun test` (uses Bun's built-in test runner; no extra config required).
+
+```
+bun test                          # all suites under electron/ and src/
+bun test electron/agent-chat-store.test.ts   # one file
+```
+
+---
+
 ## Sidebar Pattern
 
 `src/components/layout/left-sidebar/sections/` contains per-entity section files (`PinnedSection.tsx`, `ProjectsSection.tsx`). Each:
