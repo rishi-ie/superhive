@@ -142,7 +142,7 @@ export function ConversationArea({
 
   return (
     <div
-      className="relative flex-1 h-full min-h-0"
+      className="relative flex-1 h-full min-h-0 max-w-[800px] mx-auto px-14"
       aria-busy={busy}
       aria-live="polite"
       aria-relevant="additions text"
