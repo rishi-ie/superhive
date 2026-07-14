@@ -1,7 +1,5 @@
 import * as React from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { HugeIcon } from '@/components/ui/huge-icon'
-import { Loading03Icon } from '@hugeicons/core-free-icons'
 
 interface ThinkingPartProps {
   text: string
@@ -40,9 +38,6 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
     <Collapsible open={open} onOpenChange={setOpen}>
       <div className="rounded-card px-3 py-3 pl-0">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
-          {isStreaming ? (
-            <HugeIcon icon={Loading03Icon} className="size-3.5 animate-spin text-chat-status-running" />
-          ) : null}
           <span>
             {isStreaming
               ? `Thinking… (${elapsed}s)`
