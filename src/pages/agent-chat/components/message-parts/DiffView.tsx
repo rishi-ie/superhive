@@ -176,14 +176,31 @@ function highlightAdjacent(
   return out
 }
 
+const COLLAPSE_THRESHOLD = 100
+
 export function DiffView({ diff }: DiffViewProps) {
   const rows = parseDiff(diff)
+  const [expanded, setExpanded] = React.useState(false)
   if (rows.length === 0) {
     return <pre className="font-mono text-xs whitespace-pre">{diff}</pre>
   }
+  const isLong = rows.length > COLLAPSE_THRESHOLD
+  const visible = !isLong || expanded ? rows : rows.slice(0, COLLAPSE_THRESHOLD)
+  const hidden = isLong && !expanded ? rows.length - COLLAPSE_THRESHOLD : 0
   return (
-    <pre className="font-mono text-xs whitespace-pre overflow-x-auto">
-      {highlightAdjacent(rows, (_row, _additions) => null)}
-    </pre>
+    <div>
+      <pre className="font-mono text-xs whitespace-pre overflow-x-auto">
+        {highlightAdjacent(visible, (_row, _additions) => null)}
+      </pre>
+      {isLong && !expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          className="block w-full text-center text-[11px] text-muted-foreground hover:text-foreground py-1 border-t border-border cursor-pointer"
+        >
+          Show all ({hidden} more lines)
+        </button>
+      ) : null}
+    </div>
   )
 }
