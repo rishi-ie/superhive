@@ -69,6 +69,14 @@
   --chat-status-error: var(--destructive);
   --chat-status-warning: var(--warning);
 
+  /* Composer primary affordances — used by the send/stop button pair in the
+   * chat composer (Phase 9.5). The send button is the info-tinted call to
+   * action; the stop button is the destructive variant when busy. */
+  --chat-composer-send-bg: var(--info);
+  --chat-composer-send-hover: color-mix(in oklch, var(--info) 88%, transparent);
+  --chat-composer-stop-bg: var(--destructive);
+  --chat-composer-stop-hover: color-mix(in oklch, var(--destructive) 88%, transparent);
+
   /* Chat-specific radii (Phase 2.6.1+). Tool cards / code blocks / images. */
   --chat-radius-tool-card: 0.5rem;
   --chat-radius-code-block: 0.625rem;
@@ -174,6 +182,12 @@
   --chat-status-error: var(--destructive);
   --chat-status-warning: var(--warning);
 
+  --chat-composer-send-bg: var(--info);
+  --chat-composer-send-hover: color-mix(in oklch, var(--info) 88%, transparent);
+  --chat-composer-stop-bg: var(--destructive);
+  --chat-composer-stop-hover: color-mix(in oklch, var(--destructive) 88%, transparent);
+
+  /* Chat-specific radii (Phase 2.6.1+). Tool cards / code blocks / images. */
   --chat-radius-tool-card: 0.5rem;
   --chat-radius-code-block: 0.625rem;
   --chat-radius-image: 0.5rem;
@@ -267,6 +281,10 @@
   --color-chat-status-success: var(--chat-status-success);
   --color-chat-status-error: var(--chat-status-error);
   --color-chat-status-warning: var(--chat-status-warning);
+  --color-chat-composer-send-bg: var(--chat-composer-send-bg);
+  --color-chat-composer-send-hover: var(--chat-composer-send-hover);
+  --color-chat-composer-stop-bg: var(--chat-composer-stop-bg);
+  --color-chat-composer-stop-hover: var(--chat-composer-stop-hover);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

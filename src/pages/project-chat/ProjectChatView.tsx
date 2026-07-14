@@ -280,8 +280,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   className={
                     'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
                     (isBusy
-                      ? 'bg-[rgb(220,80,80)] hover:opacity-90'
-                      : 'bg-[rgb(66,120,200)] hover:opacity-90 disabled:bg-muted disabled:cursor-not-allowed')
+                      ? 'bg-chat-composer-stop-bg hover:bg-chat-composer-stop-hover'
+                      : 'bg-chat-composer-send-bg hover:bg-chat-composer-send-hover disabled:bg-muted disabled:cursor-not-allowed')
                   }
                 >
                     <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-4 text-white" />
