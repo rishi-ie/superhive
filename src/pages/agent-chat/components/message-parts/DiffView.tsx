@@ -75,7 +75,17 @@ export function DiffView({ diff }: DiffViewProps) {
   return (
     <pre className="font-mono text-xs whitespace-pre">
       {rows.map((row, i) => (
-        <span key={i} className="block">
+        <span
+          key={i}
+          className={
+            'block ' +
+            (row.type === 'add'
+              ? 'bg-chat-bubble-diff-added-bg'
+              : row.type === 'remove'
+                ? 'bg-chat-bubble-diff-removed-bg'
+                : '')
+          }
+        >
           <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
             {row.oldLine ?? ''}
           </span>
