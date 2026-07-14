@@ -141,7 +141,7 @@ function AppLayoutShell() {
         </Workspace>
         <div
           className={cn(
-            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-300 ease-out",
+            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-200 ease-out",
             rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
           )}
           style={{ width: rightSidebarOpen ? `${rightSidebarWidth}px` : 0 }}
