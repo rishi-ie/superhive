@@ -141,7 +141,12 @@ export function ConversationArea({
   void lastTailRef;
 
   return (
-    <div className="relative flex-1 h-full min-h-0">
+    <div
+      className="relative flex-1 h-full min-h-0"
+      aria-busy={busy}
+      aria-live="polite"
+      aria-relevant="additions text"
+    >
       <Virtuoso
         ref={virtuosoRef}
         style={{ height: '100%' }}
