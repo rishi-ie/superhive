@@ -6,6 +6,7 @@ import { HugeIcon } from '@/components/ui/huge-icon';
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { cn } from '@/lib/utils';
 import { ActiveStateBanners } from './ActiveStateBanners';
+import { ChatEmptyState } from './SuggestedPrompts';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import type { RuntimeMessage } from '@/types/electron';
 
@@ -16,6 +17,8 @@ interface ConversationAreaProps {
   retry?: import('@/models/runtime').RetryStatus;
   onCancel?: () => void;
   agentId?: string;
+  agentName?: string;
+  onPromptSelect?: (prompt: string) => void;
 }
 
 export function ConversationArea({
@@ -25,6 +28,8 @@ export function ConversationArea({
   retry,
   onCancel,
   agentId,
+  agentName,
+  onPromptSelect,
 }: ConversationAreaProps) {
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null);
   const [atBottom, setAtBottom] = React.useState(true);
@@ -119,11 +124,7 @@ export function ConversationArea({
   }, [busy, messages])
 
   if (messages.length === 0 && !busy) {
-    return (
-      <div className="flex-1 h-full flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Send a message to start the conversation.</p>
-      </div>
-    );
+    return <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />;
   }
 
   // P11.2.4 — wrap the Virtuoso scroll container in a Scroller that keeps
