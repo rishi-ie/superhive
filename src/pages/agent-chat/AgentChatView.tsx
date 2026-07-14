@@ -27,6 +27,8 @@ export function AgentChatView() {
     contextUsage,
     availableModels,
     activeModelContextWindow,
+    compaction,
+    retry,
     loading,
     send,
     stop,
@@ -114,7 +116,7 @@ export function AgentChatView() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col">
-      <ConversationArea messages={messages} busy={isBusy} />
+      <ConversationArea messages={messages} busy={isBusy} compaction={compaction} retry={retry} onCancel={stop} />
       <div className="shrink-0">
         <div className="max-w-[800px] mx-auto px-14 py-4">
           <div className="flex items-start">

@@ -5,14 +5,24 @@ import { getMessageTailFingerprint } from '@/models/runtime';
 import { HugeIcon } from '@/components/ui/huge-icon';
 import { ArrowDown01Icon } from '@hugeicons/core-free-icons';
 import { cn } from '@/lib/utils';
+import { ActiveStateBanners } from './ActiveStateBanners';
 import type { RuntimeMessage } from '@/types/electron';
 
 interface ConversationAreaProps {
   messages: RuntimeMessage[];
   busy?: boolean;
+  compaction?: import('@/models/runtime').CompactionStatus;
+  retry?: import('@/models/runtime').RetryStatus;
+  onCancel?: () => void;
 }
 
-export function ConversationArea({ messages, busy = false }: ConversationAreaProps) {
+export function ConversationArea({
+  messages,
+  busy = false,
+  compaction,
+  retry,
+  onCancel,
+}: ConversationAreaProps) {
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = React.useRef(true);
@@ -107,6 +117,9 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
         className="absolute inset-0 overflow-y-auto no-scrollbar chat-fade-bottom"
       >
         <div className="mx-auto max-w-4xl px-14 py-8 flex flex-col gap-6">
+          {compaction || retry ? (
+            <ActiveStateBanners compaction={compaction} retry={retry} onCancel={onCancel ?? (() => {})} />
+          ) : null}
           {messages.map((message) =>
             message.role === 'user' ? (
               <UserMessage key={message.id} message={message} />
