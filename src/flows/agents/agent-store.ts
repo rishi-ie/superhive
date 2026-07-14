@@ -33,6 +33,7 @@ interface RuntimeSlice {
   activeModelName?: string
   compaction?: CompactionStatus
   retry?: RetryStatus
+  inFlightToolCount: number
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
@@ -139,6 +140,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     activeModelName: undefined,
     loading: true,
     initialized: false,
+    inFlightToolCount: 0,
     unsubs,
     refcount: 1,
   }
@@ -239,6 +241,9 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           }
           return null
         })
+      } else if (ev.type === 'tool-execution-start') {
+        entry.inFlightToolCount += 1
+        entry.notify?.()
       } else if (ev.type === 'tool-call-start') {
         appendPart(entry, ev.messageId, {
           type: 'tool-call',
@@ -299,6 +304,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         // owns the tool-call. Re-fetch via getMessages so the canonical state
         // is mirrored. Fallback: append to last assistant message if the
         // subscription arrives before main's emitMessages has had a chance.
+        if (entry.inFlightToolCount > 0) entry.inFlightToolCount -= 1
         agents.getMessages(agentId).then((msgs) => {
           const e = runtimeSlices.get(agentId)
           if (!e) return
@@ -449,6 +455,9 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [activeModelContextWindow, setActiveModelContextWindow] =
     React.useState<number | undefined>(undefined)
   const [activeModelName, setActiveModelName] = React.useState<string | undefined>(undefined)
+  const [compaction, setCompaction] = React.useState<CompactionStatus | undefined>(undefined)
+  const [retry, setRetry] = React.useState<RetryStatus | undefined>(undefined)
+  const [inFlightToolCount, setInFlightToolCount] = React.useState(0)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -471,6 +480,9 @@ export function useAgentRuntime(agentId: string | undefined) {
       setAvailableModels(sliceRef.current.availableModels)
       setActiveModelContextWindow(sliceRef.current.activeModelContextWindow)
       setActiveModelName(sliceRef.current.activeModelName)
+      setCompaction(sliceRef.current.compaction)
+      setRetry(sliceRef.current.retry)
+      setInFlightToolCount(sliceRef.current.inFlightToolCount)
       setLoading(sliceRef.current.loading)
     }
 
@@ -501,6 +513,11 @@ export function useAgentRuntime(agentId: string | undefined) {
     agents.send(agentId, text).catch(() => {})
   }, [agentId])
 
+  const stop = React.useCallback(() => {
+    if (!agentId) return
+    agents.stop(agentId).catch(() => {})
+  }, [agentId])
+
   const restart = React.useCallback(() => {
     if (!agentId) return
     void restartAgent(agentId)
@@ -517,8 +534,12 @@ export function useAgentRuntime(agentId: string | undefined) {
     availableModels,
     activeModelContextWindow,
     activeModelName,
+    compaction,
+    retry,
+    inFlightToolCount,
     loading,
     send,
+    stop,
     restart,
   }
 }
