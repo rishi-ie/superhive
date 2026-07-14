@@ -144,9 +144,11 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
         <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-foreground/70 animate-pulse" />
       ) : null}
 
-      <div className="flex items-center gap-gap-tight mt-1">
-        {message.usage ? <UsageFooter usage={message.usage} /> : null}
-      </div>
+      {message.usage ? (
+        <div className="flex items-center gap-gap-tight mt-1">
+          <UsageFooter usage={message.usage} />
+        </div>
+      ) : null}
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button
           size="icon-sm"
