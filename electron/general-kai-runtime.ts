@@ -19,7 +19,7 @@ import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { parseCounter } from './agent-settings-defaults'
-import { appendBatch } from './agent-chat-store'
+import { appendBatch, replaceAll, trimTo } from './agent-chat-store'
 
 /**
  * Live runtime state for one agent instance.
@@ -414,9 +414,9 @@ class GeneralKaiRuntime {
    * appends new ids — those paths drop rows, so we rewrite the whole file).
    */
   private persistChatImmediate(entry: RuntimeEntry): void {
-    void import('./agent-chat-store')
-      .then((mod) => mod.replaceAll(entry.agentId, entry.messages))
-      .catch((err) => log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err))
+    replaceAll(entry.agentId, entry.messages).catch((err) =>
+      log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err),
+    )
   }
 
   async shutdownAll(): Promise<void> {
@@ -474,7 +474,6 @@ class GeneralKaiRuntime {
     try {
       await appendBatch(entry.agentId, msgs)
       if (entry.messages.length > 5000) {
-        const { trimTo } = await import('./agent-chat-store')
         trimTo(entry.agentId, 5000).catch((err) =>
           log.warn(`[runtime] chat trim failed for ${entry.agentId}:`, err),
         )
