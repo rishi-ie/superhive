@@ -17,7 +17,7 @@ import { updateAgentSettings } from './settings/update-agent-settings'
 import { restartAgent } from './runtime/restart-agent'
 import { toast } from 'sonner'
 
-const MAX_MESSAGES = 500
+const MAX_MESSAGES = 5000
 const AUTO_SAVE_DEBOUNCE_MS = 500
 
 interface RuntimeSlice {
@@ -53,7 +53,6 @@ interface SettingsSlice {
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 const settingsSlices = new Map<string, SettingsSlice>()
-const trimmedMessageAgents = new Set<string>()
 
 /**
  * Append a new content part to a message in the renderer's mirror slice.
@@ -108,7 +107,6 @@ function disposeRuntimeSliceNow(agentId: string): void {
   slice.unsubs.forEach((u) => u())
   slice.unsubs = []
   runtimeSlices.delete(agentId)
-  trimmedMessageAgents.delete(agentId)
 }
 
 function disposeSettingsSliceNow(agentId: string): void {
@@ -194,16 +192,14 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.onMessages(agentId, (msgs) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      const total = entry.messages.length + msgs.length
-      if (total > MAX_MESSAGES) {
-        const excess = total - MAX_MESSAGES
-        entry.messages = entry.messages.slice(excess)
-        if (!trimmedMessageAgents.has(agentId)) {
-          trimmedMessageAgents.add(agentId)
-          toast.info('Older messages trimmed for performance')
-        }
-      }
       entry.messages = msgs
+      // Renderer cap matches disk trim (5000). Drop the oldest rows that
+      // aren't in the just-arrived snapshot. Skip silently — the user
+      // shouldn't see a toast (P11.3.2); the chat-fade-bottom + scrolled
+      // further-up affordance is enough indication.
+      if (entry.messages.length > MAX_MESSAGES) {
+        entry.messages = entry.messages.slice(-MAX_MESSAGES)
+      }
       entry.notify?.()
     })
   )
