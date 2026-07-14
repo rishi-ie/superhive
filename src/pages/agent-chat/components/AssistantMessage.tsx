@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/icon'
-import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
+import { ArrowsClockwiseIcon, TrashIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon, Loading03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
@@ -10,17 +10,20 @@ import { ToolResultPart } from './message-parts/ToolResultPart'
 import { MarkdownPart } from './message-parts/MarkdownPart'
 import { ImagePart } from './message-parts/ImagePart'
 import { CompactionCard } from './message-parts/CompactionCard'
+import { copyToClipboard } from '@/lib/clipboard'
 import type { ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
   message: RuntimeMessage
   className?: string
+  onRegenerate?: (messageId: string) => void
+  onDelete?: (messageId: string) => void
 }
 
 const COLLAPSE_AFTER_PARTS = 1
 
-export function AssistantMessage({ message, className }: AssistantMessageProps) {
+export function AssistantMessage({ message, className, onRegenerate, onDelete }: AssistantMessageProps) {
   // Map every `tool-call` to its matching `tool-result`, if present. The
   // parts list keeps insertion order, so a `tool-result` immediately after
   // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
@@ -51,6 +54,11 @@ export function AssistantMessage({ message, className }: AssistantMessageProps) 
   const lastPart = message.parts[message.parts.length - 1]
   const isStreamingText =
     !!lastPart && lastPart.type === 'text' && lastPart.state === 'streaming'
+
+  const copyText = message.parts
+    .filter((p) => p.type === 'text' || p.type === 'thinking')
+    .map((p) => (p.type === 'text' || p.type === 'thinking' ? p.text : ''))
+    .join('\n\n')
 
   return (
     <div className={`group relative w-full py-button-y flex flex-col gap-2${className ? ` ${className}` : ''}`}>
@@ -135,11 +143,34 @@ export function AssistantMessage({ message, className }: AssistantMessageProps) 
       ) : null}
 
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
-        <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
+          onClick={() => copyToClipboard(copyText)}
+          aria-label="Copy message"
+        >
           <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
         </Button>
-        <Button size="icon-sm" variant="ghost" className="text-muted-foreground hover:text-foreground h-7 w-7 border-0">
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
+          onClick={() => onRegenerate?.(message.id)}
+          aria-label="Regenerate response"
+          disabled={!onRegenerate}
+        >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
+        </Button>
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
+          onClick={() => onDelete?.(message.id)}
+          aria-label="Delete message"
+          disabled={!onDelete}
+        >
+          <Icon icon={TrashIcon} className="size-3.5" />
         </Button>
         <span className="text-[11px] text-muted-foreground ml-1">
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
