@@ -156,8 +156,8 @@ export function ConversationArea({
         atBottomStateChange={onAtBottomChange}
         initialTopMostItemIndex={Math.max(0, messages.length - 1)}
         components={{ Scroller }}
-        itemContent={(_, message) => (
-          <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+        itemContent={(index, message) => (
+          <div className={index === messages.length - 1 ? 'mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2 pb-20' : 'mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2'}>
             {message.role === 'user' ? (
               <UserMessage key={message.id} message={message} agentId={agentId ?? ''} />
             ) : (
