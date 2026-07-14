@@ -142,7 +142,7 @@ export function ConversationArea({
 
   return (
     <div
-      className="relative flex-1 h-full min-h-0 max-w-[800px] mx-auto px-14"
+      className="relative flex-1 h-full min-h-0"
       aria-busy={busy}
       aria-live="polite"
       aria-relevant="additions text"
@@ -156,18 +156,20 @@ export function ConversationArea({
         atBottomStateChange={onAtBottomChange}
         initialTopMostItemIndex={Math.max(0, messages.length - 1)}
         components={{ Scroller }}
-        itemContent={(_, message) =>
-          message.role === 'user' ? (
-            <UserMessage key={message.id} message={message} agentId={agentId ?? ''} />
-          ) : (
-            <AssistantMessage
-              key={message.id}
-              message={message}
-              agentId={agentId ?? ''}
-              className={freshIds.has(message.id) ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200' : undefined}
-            />
-          )
-        }
+        itemContent={(_, message) => (
+          <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+            {message.role === 'user' ? (
+              <UserMessage key={message.id} message={message} agentId={agentId ?? ''} />
+            ) : (
+              <AssistantMessage
+                key={message.id}
+                message={message}
+                agentId={agentId ?? ''}
+                className={freshIds.has(message.id) ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200' : undefined}
+              />
+            )}
+          </div>
+        )}
       />
       {compaction || retry ? (
         <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-4xl px-14">
