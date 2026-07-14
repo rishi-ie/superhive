@@ -99,7 +99,7 @@ export function UserMessage({ message, agentId }: UserMessageProps) {
     <div className="group relative w-full py-button-y flex flex-col items-end">
       <div
         className={cn(
-          'w-fit max-w-[80%] rounded-2xl bg-sidebar-accent p-3 shadow-sm/5',
+          'w-fit max-w-[80%] rounded-xl bg-sidebar-accent p-3 shadow-sm/5',
         )}
       >
         {isLong && !expanded ? (
