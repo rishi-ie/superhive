@@ -8,6 +8,7 @@ import { ToolCallPart } from './message-parts/ToolCallPart'
 import { ToolResultPart } from './message-parts/ToolResultPart'
 import { MarkdownPart } from './message-parts/MarkdownPart'
 import { ImagePart } from './message-parts/ImagePart'
+import { CompactionCard } from './message-parts/CompactionCard'
 import type { ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -74,12 +75,11 @@ export function AssistantMessage({ message, className }: AssistantMessageProps) 
         }
         if (part.type === 'compaction-summary') {
           return (
-            <div
+            <CompactionCard
               key={`compaction-${i}`}
-              className="text-xs rounded-card border border-border bg-muted/30 p-2 text-muted-foreground"
-            >
-              Context compacted · {part.summary}
-            </div>
+              tokensBefore={part.tokensBefore}
+              summary={part.summary}
+            />
           )
         }
         return null
