@@ -100,6 +100,8 @@
 [data-reduce-motion="true"] *::after {
   transition: none !important;
   animation: none !important;
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
 }
 
 /* P2.7.3 — also kill the streaming shimmer (its animation lives outside
