@@ -11,19 +11,21 @@ import { MarkdownPart } from './message-parts/MarkdownPart'
 import { ImagePart } from './message-parts/ImagePart'
 import { CompactionCard } from './message-parts/CompactionCard'
 import { copyToClipboard } from '@/lib/clipboard'
+import { regenerate, deleteMessage } from '@/flows/agents/crud'
 import type { ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
   message: RuntimeMessage
   className?: string
+  agentId: string
   onRegenerate?: (messageId: string) => void
   onDelete?: (messageId: string) => void
 }
 
 const COLLAPSE_AFTER_PARTS = 1
 
-export function AssistantMessage({ message, className, onRegenerate, onDelete }: AssistantMessageProps) {
+export function AssistantMessage({ message, className, agentId, onRegenerate, onDelete }: AssistantMessageProps) {
   // Map every `tool-call` to its matching `tool-result`, if present. The
   // parts list keeps insertion order, so a `tool-result` immediately after
   // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
@@ -156,9 +158,11 @@ export function AssistantMessage({ message, className, onRegenerate, onDelete }:
           size="icon-sm"
           variant="ghost"
           className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => onRegenerate?.(message.id)}
+          onClick={() => {
+            if (typeof onRegenerate === 'function') onRegenerate(message.id)
+            else void regenerate({ agentId, fromMessageId: message.id })
+          }}
           aria-label="Regenerate response"
-          disabled={!onRegenerate}
         >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
         </Button>
@@ -166,9 +170,11 @@ export function AssistantMessage({ message, className, onRegenerate, onDelete }:
           size="icon-sm"
           variant="ghost"
           className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => onDelete?.(message.id)}
+          onClick={() => {
+            if (typeof onDelete === 'function') onDelete(message.id)
+            else void deleteMessage({ agentId, messageId: message.id })
+          }}
           aria-label="Delete message"
-          disabled={!onDelete}
         >
           <Icon icon={TrashIcon} className="size-3.5" />
         </Button>

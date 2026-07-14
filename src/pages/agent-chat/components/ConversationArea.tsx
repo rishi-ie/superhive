@@ -129,6 +129,7 @@ export function ConversationArea({
               <AssistantMessage
                 key={message.id}
                 message={message}
+                agentId={agentId ?? ''}
                 className={freshIds.has(message.id) ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200' : undefined}
               />
             )
