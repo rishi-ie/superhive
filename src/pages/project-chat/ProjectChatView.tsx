@@ -36,10 +36,10 @@ import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
-import { regenerate as regenerateFlow } from '@/flows/agents/crud';
-import { copyToClipboard } from '@/lib/clipboard';
+import { sendMessage } from '@/flows/ui/send-message';
+import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
+import { shortcutRegenerateLast } from '@/flows/ui/shortcut-regenerate-last';
 import { getMessageText } from '@/models/runtime';
-import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
@@ -178,18 +178,11 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   const isBusy = status === 'busy';
 
   const onSend = () => {
-    const text = input.trim();
-    if (!text || !isLive) return;
-    // Guard: chat is disabled when no model is selected.
-    // The send button is also disabled in this state, but a defensive guard
-    // is kept in case the user reaches onSend via keyboard (Enter).
-    if (!hasModel) {
-      toast.error('Pick a model first');
-      return;
+    const result = sendMessage({ text: input, hasModel, isLive, send })
+    if (result.ok) {
+      setInput('');
+      requestAnimationFrame(() => textareaRef.current?.focus());
     }
-    send(text);
-    setInput('');
-    requestAnimationFrame(() => textareaRef.current?.focus());
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -210,14 +203,10 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
 
   useChatShortcuts({
     onCopyLast: () => {
-      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-      if (!lastAssistant) return;
-      void copyToClipboard(getMessageText(lastAssistant), 'Copied last assistant message');
+      void shortcutCopyLastAssistant({ messages });
     },
     onRegenerate: () => {
-      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-      if (!lastAssistant) return;
-      void regenerateFlow({ agentId: projectAgent.id, fromMessageId: lastAssistant.id });
+      void shortcutRegenerateLast({ messages, agentId: projectAgent.id });
     },
     onStop: () => {
       if (status === 'busy' || status === 'running') void stop();

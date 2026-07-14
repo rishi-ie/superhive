@@ -14,10 +14,10 @@ import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing'
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
-import { regenerate as regenerateFlow } from '@/flows/agents/crud';
-import { copyToClipboard } from '@/lib/clipboard';
+import { sendMessage } from '@/flows/ui/send-message';
+import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
+import { shortcutRegenerateLast } from '@/flows/ui/shortcut-regenerate-last';
 import { getMessageText } from '@/models/runtime';
-import { toast } from 'sonner';
 
 export function AgentChatView() {
   const { agentId } = useParams();
@@ -97,18 +97,11 @@ export function AgentChatView() {
   const isBusy = status === 'busy';
 
   const onSend = () => {
-    const text = input.trim();
-    if (!text || !isLive) return;
-    // Guard: chat is disabled when no model is selected.
-    // The send button is also disabled in this state, but a defensive guard
-    // is kept in case the user reaches onSend via keyboard (Enter).
-    if (!hasModel) {
-      toast.error('Pick a model first');
-      return;
+    const result = sendMessage({ text: input, hasModel, isLive, send })
+    if (result.ok) {
+      setInput('');
+      requestAnimationFrame(() => textareaRef.current?.focus());
     }
-    send(text);
-    setInput('');
-    requestAnimationFrame(() => textareaRef.current?.focus());
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -129,15 +122,11 @@ export function AgentChatView() {
 
   useChatShortcuts({
     onCopyLast: () => {
-      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-      if (!lastAssistant) return;
-      void copyToClipboard(getMessageText(lastAssistant), 'Copied last assistant message');
+      void shortcutCopyLastAssistant({ messages });
     },
     onRegenerate: () => {
-      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-      if (!lastAssistant) return;
       if (!agentId) return;
-      void regenerateFlow({ agentId, fromMessageId: lastAssistant.id });
+      void shortcutRegenerateLast({ messages, agentId });
     },
     onStop: () => {
       if (status === 'busy' || status === 'running') void stop();
@@ -190,8 +179,8 @@ export function AgentChatView() {
                 </div>
                 <div className="flex items-center gap-5">
                   <ModelPicker agentId={agentId} />
-<button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
-                  <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
+                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
+                    <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                   </button>
                   <button
                     onClick={isBusy ? stop : onSend}
