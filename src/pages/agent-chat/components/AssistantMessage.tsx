@@ -144,6 +144,14 @@ export function AssistantMessage({ message, className, agentId, onRegenerate, on
         <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-foreground/70 animate-pulse" />
       ) : null}
 
+      <div className="flex items-center gap-gap-tight mt-1">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70">
+          Assistant
+        </span>
+        <span className="text-[11px] text-muted-foreground">
+          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      </div>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button
           size="icon-sm"
@@ -178,9 +186,6 @@ export function AssistantMessage({ message, className, agentId, onRegenerate, on
         >
           <Icon icon={TrashIcon} className="size-3.5" />
         </Button>
-        <span className="text-[11px] text-muted-foreground ml-1">
-          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
       </div>
     </div>
   )
