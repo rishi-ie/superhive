@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "../left-sidebar/AppSidebar";
 import { RightSidebar } from "../right-sidebar/RightSidebar";
+import { cn } from "@/lib/utils";
 import { Workspace } from "./Workspace";
 import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
 import { TopRightControls } from "@/components/layout/common/TopRightControls";
@@ -138,15 +139,24 @@ function AppLayoutShell() {
           />
           <Outlet />
         </Workspace>
-        {rightSidebarOpen && (
-          <div className="relative flex h-full flex-shrink-0" style={{ width: `${rightSidebarWidth}px` }}>
+        <div
+          className={cn(
+            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-300 ease-out",
+            rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
+          )}
+          style={{ width: rightSidebarOpen ? `${rightSidebarWidth}px` : 0 }}
+        >
+          <div
+            className="relative flex h-full"
+            style={{ width: `${rightSidebarWidth}px`, flexShrink: 0 }}
+          >
             <div
               onMouseDown={startResizingRight}
               className="no-drag absolute left-0 top-0 z-[60] h-full w-1 cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
             />
             <RightSidebar width={rightSidebarWidth} />
           </div>
-        )}
+        </div>
       </div>
       <CommandPalette />
       <CreateAgentDialog />
