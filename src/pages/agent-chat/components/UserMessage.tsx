@@ -96,10 +96,10 @@ export function UserMessage({ message, agentId }: UserMessageProps) {
   }
 
   return (
-    <div className="group relative w-full py-button-y">
+    <div className="group relative w-full py-button-y flex flex-col items-end">
       <div
         className={cn(
-          'ml-auto max-w-[80%] rounded-[--chat-bubble-user-radius] border border-[--chat-bubble-user-border] bg-[--chat-bubble-user-bg] p-3',
+          'w-fit max-w-[80%] rounded-2xl bg-sidebar-accent p-3 shadow-sm/5',
         )}
       >
         {isLong && !expanded ? (
@@ -117,7 +117,7 @@ export function UserMessage({ message, agentId }: UserMessageProps) {
           </p>
         )}
       </div>
-      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1 justify-end">
+      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <span className="text-[11px] text-muted-foreground mr-1">
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
