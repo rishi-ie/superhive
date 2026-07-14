@@ -3,6 +3,9 @@ import { diffWords } from 'diff'
 
 interface DiffViewProps {
   diff: string
+  /** Optional path labels for the `--- a/{path}` / `+++ b/{path}` header. */
+  oldPath?: string
+  newPath?: string
 }
 
 type DiffRow = {
@@ -178,7 +181,7 @@ function highlightAdjacent(
 
 const COLLAPSE_THRESHOLD = 100
 
-export function DiffView({ diff }: DiffViewProps) {
+export function DiffView({ diff, oldPath, newPath }: DiffViewProps) {
   const rows = parseDiff(diff)
   const [expanded, setExpanded] = React.useState(false)
   if (rows.length === 0) {
@@ -188,7 +191,17 @@ export function DiffView({ diff }: DiffViewProps) {
   const visible = !isLong || expanded ? rows : rows.slice(0, COLLAPSE_THRESHOLD)
   const hidden = isLong && !expanded ? rows.length - COLLAPSE_THRESHOLD : 0
   return (
-    <div>
+    <div className="rounded-card border border-border overflow-hidden">
+      {oldPath || newPath ? (
+        <div className="font-mono text-[11px] bg-muted/40 px-2 py-1 flex flex-wrap gap-3 border-b border-border">
+          {oldPath ? (
+            <span className="text-muted-foreground">--- a/{oldPath}</span>
+          ) : null}
+          {newPath ? (
+            <span className="text-foreground">+++ b/{newPath}</span>
+          ) : null}
+        </div>
+      ) : null}
       <pre className="font-mono text-xs whitespace-pre overflow-x-auto">
         {highlightAdjacent(visible, (_row, _additions) => null)}
       </pre>
