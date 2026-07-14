@@ -8,3 +8,4 @@
 
 @import "./presets/radix-mira.css";
 @import "./base.css";
+@import "katex/dist/katex.min.css";
