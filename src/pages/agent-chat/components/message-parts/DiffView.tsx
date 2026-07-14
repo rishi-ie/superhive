@@ -74,7 +74,18 @@ export function DiffView({ diff }: DiffViewProps) {
   }
   return (
     <pre className="font-mono text-xs whitespace-pre">
-      {rows.map((row) => `${row.content}\n`).join('')}
+      {rows.map((row, i) => (
+        <span key={i} className="block">
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+            {row.oldLine ?? ''}
+          </span>
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+            {row.newLine ?? ''}
+          </span>
+          {row.content}
+          {'\n'}
+        </span>
+      ))}
     </pre>
   )
 }
