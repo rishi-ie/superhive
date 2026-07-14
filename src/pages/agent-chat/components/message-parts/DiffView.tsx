@@ -92,6 +92,18 @@ export function DiffView({ diff }: DiffViewProps) {
           <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
             {row.newLine ?? ''}
           </span>
+          <span
+            className={
+              'inline-block w-3 text-center select-none ' +
+              (row.type === 'add'
+                ? 'text-chat-bubble-diff-added-fg'
+                : row.type === 'remove'
+                  ? 'text-chat-bubble-diff-removed-fg'
+                  : 'text-muted-foreground')
+            }
+          >
+            {row.type === 'add' ? '+' : row.type === 'remove' ? '-' : ' '}
+          </span>
           {row.content}
           {'\n'}
         </span>
