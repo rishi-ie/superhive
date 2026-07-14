@@ -145,12 +145,6 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
       ) : null}
 
       <div className="flex items-center gap-gap-tight mt-1">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/70">
-          Assistant
-        </span>
-        <span className="text-[11px] text-muted-foreground">
-          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
         {message.usage ? <UsageFooter usage={message.usage} /> : null}
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
@@ -175,6 +169,9 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
         >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
         </Button>
+        <span className="text-[11px] text-muted-foreground ml-1">
+          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
       </div>
     </div>
   )
