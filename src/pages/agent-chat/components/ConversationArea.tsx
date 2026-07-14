@@ -14,6 +14,8 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
   const stickToBottomRef = React.useRef(true);
   const lastTailRef = React.useRef('');
+  const seenIdsRef = React.useRef<Set<string>>(new Set());
+  const [freshIds, setFreshIds] = React.useState<Set<string>>(new Set());
 
   const onViewportScroll = React.useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
@@ -33,6 +35,8 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
   React.useEffect(() => {
     if (messages.length === 0) {
       lastTailRef.current = '';
+      seenIdsRef.current = new Set();
+      setFreshIds(new Set());
       return;
     }
     const last = messages[messages.length - 1];
@@ -47,6 +51,36 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
     if (!stickToBottomRef.current) return;
     followEnd();
   }, [busy, followEnd]);
+
+  /**
+   * Compute the set of message ids that didn't exist in the previous render.
+   * Those messages get the `animate-in fade-in-0 slide-in-from-bottom-2`
+   * class for a one-time fade-up. Tailwind's `animate-in` only runs on mount,
+   * so we also need to ensure the DOM nodes are freshly mounted — which they
+   * are, because each message carries a unique key.
+   */
+  React.useEffect(() => {
+    const currentIds = new Set(messages.map((m) => m.id));
+    const next = new Set<string>();
+    for (const id of currentIds) {
+      if (!seenIdsRef.current.has(id)) next.add(id);
+    }
+    seenIdsRef.current = currentIds;
+    if (next.size === 0) return;
+    setFreshIds((prev) => {
+      const merged = new Set(prev);
+      for (const id of next) merged.add(id);
+      return merged;
+    });
+    const t = setTimeout(() => {
+      setFreshIds((prev) => {
+        const trimmed = new Set(prev);
+        for (const id of next) trimmed.delete(id);
+        return trimmed;
+      });
+    }, 400);
+    return () => clearTimeout(t);
+  }, [messages]);
 
   // The legacy ThinkingBubble was a global indicator that lived outside any
   // message. Phase 4.3.3 moves the streaming-thinking affordance inside
@@ -74,7 +108,11 @@ export function ConversationArea({ messages, busy = false }: ConversationAreaPro
           message.role === 'user' ? (
             <UserMessage key={message.id} message={message} />
           ) : (
-            <AssistantMessage key={message.id} message={message} />
+            <AssistantMessage
+              key={message.id}
+              message={message}
+              className={freshIds.has(message.id) ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200' : undefined}
+            />
           )
         )}
         <div ref={bottomRef} />

@@ -13,11 +13,12 @@ import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
   message: RuntimeMessage
+  className?: string
 }
 
 const COLLAPSE_AFTER_PARTS = 1
 
-export function AssistantMessage({ message }: AssistantMessageProps) {
+export function AssistantMessage({ message, className }: AssistantMessageProps) {
   // Map every `tool-call` to its matching `tool-result`, if present. The
   // parts list keeps insertion order, so a `tool-result` immediately after
   // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
@@ -50,7 +51,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
     !!lastPart && lastPart.type === 'text' && lastPart.state === 'streaming'
 
   return (
-    <div className="group relative w-full py-button-y flex flex-col gap-2">
+    <div className={`group relative w-full py-button-y flex flex-col gap-2${className ? ` ${className}` : ''}`}>
       {message.parts.map((part, i) => {
         if (part.type === 'thinking') {
           const isLast = i === message.parts.length - 1
