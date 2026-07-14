@@ -53,10 +53,6 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
   }
   if (current.length > 0) proseSections.push(current)
 
-  const lastPart = message.parts[message.parts.length - 1]
-  const isStreamingText =
-    !!lastPart && lastPart.type === 'text' && lastPart.state === 'streaming'
-
   const copyText = message.parts
     .filter((p) => p.type === 'text' || p.type === 'thinking')
     .map((p) => (p.type === 'text' || p.type === 'thinking' ? p.text : ''))
@@ -139,10 +135,6 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
             <ToolResultPart key={`orphan-${(part as { id: string }).id}`} part={part} />
           )
         })}
-
-      {isStreamingText ? (
-        <span className="inline-block w-1.5 h-4 ml-0.5 align-middle bg-foreground/70 animate-pulse" />
-      ) : null}
 
       {message.usage ? (
         <div className="flex items-center gap-gap-tight mt-1">
