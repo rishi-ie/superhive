@@ -4,17 +4,89 @@ import { HugeIcon } from "@/components/ui/huge-icon";
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard';
+import { editMessage, deleteMessage } from '@/flows/agents/crud';
 import { getMessageText } from '@/models/runtime';
+import * as React from 'react';
 import type { RuntimeMessage } from '@/types/electron';
 
 interface UserMessageProps {
   message: RuntimeMessage;
-  onEdit?: (messageId: string, newText: string) => void;
+  agentId: string;
   onDelete?: (messageId: string) => void;
 }
 
-export function UserMessage({ message, onEdit, onDelete }: UserMessageProps) {
+export function UserMessage({ message, agentId, onDelete }: UserMessageProps) {
   const text = getMessageText(message);
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState(text);
+  const draftRef = React.useRef<HTMLTextAreaElement | null>(null);
+
+  React.useEffect(() => {
+    if (editing) {
+      draftRef.current?.focus()
+      draftRef.current?.setSelectionRange(draft.length, draft.length)
+    }
+  }, [editing, draft.length]);
+
+  const onSave = async () => {
+    const next = draft.trim();
+    if (!next || next === text) {
+      setEditing(false);
+      setDraft(text);
+      return;
+    }
+    const result = await editMessage({ agentId, messageId: message.id, newText: next });
+    if (result.ok) setEditing(false);
+  };
+
+  const onCancel = () => {
+    setEditing(false);
+    setDraft(text);
+  };
+
+  const onDeleteClick = async () => {
+    if (typeof onDelete === 'function') onDelete(message.id);
+    else await deleteMessage({ agentId, messageId: message.id });
+  };
+
+  if (editing) {
+    return (
+      <div className="group relative w-full py-button-y">
+        <div className="ml-auto flex flex-col gap-1.5 rounded-card border border-primary/50 bg-sidebar p-2 max-w-[80%]">
+          <textarea
+            ref={draftRef}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                void onSave();
+              } else if (e.key === 'Escape') {
+                e.preventDefault();
+                onCancel();
+              }
+            }}
+            rows={3}
+            className="w-full resize-y bg-transparent text-[14px] leading-relaxed text-foreground outline-none"
+          />
+          <div className="flex items-center justify-end gap-2">
+            <Button size="sm" variant="ghost" onClick={onCancel} className="h-7">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => void onSave()}
+              disabled={!draft.trim() || draft.trim() === text}
+              className="h-7"
+            >
+              Save &amp; resend
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="group relative w-full py-button-y">
       <div className="w-fit ml-auto rounded-card bg-sidebar px-button-x py-button-y">
@@ -39,9 +111,8 @@ export function UserMessage({ message, onEdit, onDelete }: UserMessageProps) {
           size="icon-sm"
           variant="ghost"
           className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => onEdit?.(message.id, text)}
+          onClick={() => setEditing(true)}
           aria-label="Edit message"
-          disabled={!onEdit}
         >
           <Icon icon={PencilSimpleIcon} className="size-3.5" />
         </Button>
@@ -49,9 +120,8 @@ export function UserMessage({ message, onEdit, onDelete }: UserMessageProps) {
           size="icon-sm"
           variant="ghost"
           className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => onDelete?.(message.id)}
+          onClick={() => void onDeleteClick()}
           aria-label="Delete message"
-          disabled={!onDelete}
         >
           <Icon icon={TrashIcon} className="size-3.5" />
         </Button>

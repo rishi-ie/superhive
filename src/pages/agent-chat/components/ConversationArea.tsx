@@ -14,6 +14,7 @@ interface ConversationAreaProps {
   compaction?: import('@/models/runtime').CompactionStatus;
   retry?: import('@/models/runtime').RetryStatus;
   onCancel?: () => void;
+  agentId?: string;
 }
 
 export function ConversationArea({
@@ -22,6 +23,7 @@ export function ConversationArea({
   compaction,
   retry,
   onCancel,
+  agentId,
 }: ConversationAreaProps) {
   const viewportRef = React.useRef<HTMLDivElement | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
@@ -122,7 +124,7 @@ export function ConversationArea({
           ) : null}
           {messages.map((message) =>
             message.role === 'user' ? (
-              <UserMessage key={message.id} message={message} />
+              <UserMessage key={message.id} message={message} agentId={agentId ?? ''} />
             ) : (
               <AssistantMessage
                 key={message.id}
