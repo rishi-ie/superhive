@@ -7,6 +7,7 @@ import { ThinkingPart } from './message-parts/ThinkingPart'
 import { ToolCallPart } from './message-parts/ToolCallPart'
 import { ToolResultPart } from './message-parts/ToolResultPart'
 import { MarkdownPart } from './message-parts/MarkdownPart'
+import { ImagePart } from './message-parts/ImagePart'
 import type { ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -63,12 +64,10 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         }
         if (part.type === 'image') {
           return (
-            <img
+            <ImagePart
               key={`image-${i}`}
-              src={`data:${part.mimeType};base64,${part.data}`}
-              alt={part.mimeType}
-              className="max-h-[400px] rounded-card border border-border"
-              loading="lazy"
+              data={part.data}
+              mimeType={part.mimeType}
             />
           )
         }

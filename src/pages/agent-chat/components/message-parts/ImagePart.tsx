@@ -15,11 +15,13 @@ import {
 interface ImagePartProps {
   data: string
   mimeType: string
+  alt?: string
 }
 
-export function ImagePart({ data, mimeType }: ImagePartProps) {
+export function ImagePart({ data, mimeType, alt }: ImagePartProps) {
   const [open, setOpen] = React.useState(false)
   const src = `data:${mimeType};base64,${data}`
+  const label = alt ?? mimeType
   return (
     <>
       <button
@@ -29,6 +31,7 @@ export function ImagePart({ data, mimeType }: ImagePartProps) {
       >
         <img
           src={src}
+          alt={label}
           loading="lazy"
           className="max-h-[400px] rounded-card border border-border"
         />
@@ -39,7 +42,7 @@ export function ImagePart({ data, mimeType }: ImagePartProps) {
           className="max-w-[90vw] max-h-[90vh] bg-transparent border-0 shadow-none p-0"
           overlayClassName="bg-black/80"
         >
-          <img src={src} className="max-w-[90vw] max-h-[90vh] object-contain" />
+          <img src={src} alt={label} className="max-w-[90vw] max-h-[90vh] object-contain" />
         </DialogContent>
       </Dialog>
     </>
