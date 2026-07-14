@@ -123,10 +123,6 @@ export function ConversationArea({
     })
   }, [busy, messages])
 
-  if (messages.length === 0 && !busy) {
-    return <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />;
-  }
-
   // P11.2.4 — wrap the Virtuoso scroll container in a Scroller that keeps
   // the project's `chat-fade-bottom` mask intact (Phase 2.7 token).
   const Scroller = React.useCallback(
@@ -135,6 +131,10 @@ export function ConversationArea({
     ),
     [],
   )
+
+  if (messages.length === 0 && !busy) {
+    return <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />;
+  }
 
   // Mark touched messages so fingerprint stays referenced even if unused.
   void getMessageTailFingerprint;
