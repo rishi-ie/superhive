@@ -231,12 +231,23 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           appendPart(entry, ev.messageId, { type: 'thinking', text: ev.delta, state: 'streaming' })
         }
       } else if (ev.type === 'thinking-end') {
-        updateLastPart(entry, ev.messageId, (last) => {
-          if (last.type === 'thinking') {
-            return { ...last, text: ev.content || last.text, state: 'complete' }
-          }
-          return null
-        })
+        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
+        if (idx !== -1) {
+          const msg = entry.messages[idx]!
+          let flipped = false
+          entry.messages = [
+            ...entry.messages.slice(0, idx),
+            {
+              ...msg,
+              parts: msg.parts.map((p) => {
+                if (flipped || p.type !== 'thinking' || p.state === 'complete') return p
+                flipped = true
+                return { ...p, text: ev.content || p.text, state: 'complete' as const }
+              }),
+            },
+            ...entry.messages.slice(idx + 1),
+          ]
+        }
       } else if (ev.type === 'tool-execution-start') {
         entry.inFlightToolCount += 1
         entry.notify?.()

@@ -31,11 +31,13 @@ function useElapsedSeconds(running: boolean): number {
 
 export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
   const elapsed = useElapsedSeconds(isStreaming)
+  const [open, setOpen] = React.useState(isStreaming)
+  React.useEffect(() => {
+    if (isStreaming) setOpen(true)
+    else setOpen(false)
+  }, [isStreaming])
   return (
-    // Streaming: stay expanded so the user can read the trace as it streams.
-    // Done: collapse to a one-line "Thought for Xs" header until the user
-    // explicitly opens the block to inspect what the agent was thinking.
-    <Collapsible defaultOpen={isStreaming}>
+    <Collapsible open={open} onOpenChange={setOpen}>
       <div className="rounded-card px-3 py-3 pl-0">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
           {isStreaming ? (

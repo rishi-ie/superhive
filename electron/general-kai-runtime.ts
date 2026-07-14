@@ -896,16 +896,15 @@ class GeneralKaiRuntime {
     if (event.type === 'message-end') {
       const msg = entry.messages.find((m) => m.id === event.messageId)
       if (msg) {
-        // Mark any trailing text/thinking parts complete so the renderer
-        // stops streaming the caret.
-        const parts = msg.parts.map((p, i) => {
-          if (i !== msg.parts.length - 1) return p
-          if (p.type === 'text') return { ...p, state: 'complete' as const }
-          if (p.type === 'thinking') return { ...p, state: 'complete' as const }
+        msg.parts = msg.parts.map((p) => {
+          if (p.type === 'text' && p.state !== 'complete')
+            return { ...p, state: 'complete' as const }
+          if (p.type === 'thinking' && p.state !== 'complete')
+            return { ...p, state: 'complete' as const }
           return p
         })
-        msg.parts = parts
         this.emitEvent(agentId, event)
+        this.emitMessages(agentId)
       }
       this.transitionStatus(entry, 'running')
       log.debug(`[runtime.event] agent=${agentId} type=message-end`)
@@ -939,13 +938,12 @@ class GeneralKaiRuntime {
     if (event.type === 'thinking-end') {
       const msg = entry.messages.find((m) => m.id === event.messageId)
       if (msg) {
-        const last = msg.parts[msg.parts.length - 1]
-        if (last && last.type === 'thinking') {
-          msg.parts = [
-            ...msg.parts.slice(0, -1),
-            { ...last, text: event.content || last.text, state: 'complete' },
-          ]
-        }
+        let flipped = false
+        msg.parts = msg.parts.map((p) => {
+          if (flipped || p.type !== 'thinking' || p.state === 'complete') return p
+          flipped = true
+          return { ...p, text: event.content || p.text, state: 'complete' as const }
+        })
         this.emitEvent(agentId, event)
       }
       return
