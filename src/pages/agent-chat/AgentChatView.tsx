@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { LaptopIcon, PlusIcon, ArrowUpIcon } from "@phosphor-icons/react";
+import { LaptopIcon, PlusIcon, ArrowUpIcon, Stop } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
@@ -29,6 +29,7 @@ export function AgentChatView() {
     activeModelContextWindow,
     loading,
     send,
+    stop,
     restart,
   } = useAgentRuntime(agentId);
   const agentSettings = useAgentSettings(agentId ?? null);
@@ -148,12 +149,17 @@ export function AgentChatView() {
                   <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                   </button>
                   <button
-                    onClick={onSend}
-                    disabled={isBusy || input.trim().length === 0 || !hasModel}
+                    onClick={isBusy ? stop : onSend}
+                    disabled={!isBusy && (input.trim().length === 0 || !hasModel)}
                     title={!hasModel ? 'Pick a model first' : undefined}
-                    className="flex size-5 items-center justify-center rounded-full bg-[rgb(66,120,200)] hover:opacity-90 disabled:bg-muted disabled:cursor-not-allowed cursor-pointer"
+                    className={
+                      'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
+                      (isBusy
+                        ? 'bg-[rgb(220,80,80)] hover:opacity-90'
+                        : 'bg-[rgb(66,120,200)] hover:opacity-90 disabled:bg-muted disabled:cursor-not-allowed')
+                    }
                   >
-                    <Icon icon={ArrowUpIcon} className="size-4 text-white" />
+                    <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-4 text-white" />
                   </button>
                 </div>
               </div>
