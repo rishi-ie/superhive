@@ -36,7 +36,7 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
     // Done: collapse to a one-line "Thought for Xs" header until the user
     // explicitly opens the block to inspect what the agent was thinking.
     <Collapsible defaultOpen={isStreaming}>
-      <div className="bg-chat-bubble-thinking-bg rounded-card p-3">
+      <div className="rounded-card p-3">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
           {isStreaming ? (
             <HugeIcon icon={Loading03Icon} className="size-3.5 animate-spin text-chat-status-running" />
