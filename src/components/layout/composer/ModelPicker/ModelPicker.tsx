@@ -135,7 +135,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
           className="flex items-center gap-gap-tight text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default"
         >
           <span className={cn(!selected && 'text-muted-foreground')}>{display}</span>
-          <Icon icon={CaretDownIcon} className="size-4" />
+          <Icon icon={CaretDownIcon} className="size-3" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[160px] bg-modal text-modal-foreground">
