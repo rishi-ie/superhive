@@ -1,4 +1,5 @@
 import { ToolCallCard, type ToolCallCardBaseProps } from './ToolCallCard'
+import { DiffView } from './DiffView'
 
 function pathFromArgs(args: unknown): string {
   if (!args || typeof args !== 'object') return ''
@@ -28,27 +29,42 @@ export function EditToolCard({ part, result }: ToolCallCardBaseProps) {
             </a>
           </span>
         ),
-        body: (
-          <div className="flex flex-col gap-1.5">
-            {result && successMessage(resultText(result.result)) ? (
-              <span className="text-chat-status-success text-xs">
-                {successMessage(resultText(result.result))}
-              </span>
-            ) : null}
-            {result && errorMessage(resultText(result.result)) ? (
-              <span className="text-chat-status-error text-xs">
-                {errorMessage(resultText(result.result))}
-              </span>
-            ) : null}
-            {result ? resultText(result.result) || '(no output)' : ''}
-            <DiffViewPlaceholder path={path} />
-          </div>
-        ),
+        body: result ? <EditBody path={path} text={resultText(result.result)} /> : null,
       }}
       state={part.state}
       isError={result?.isError}
     />
   )
+}
+
+function EditBody({ path, text }: { path: string; text: string }) {
+  const isDiff = looksLikeDiff(text)
+  return (
+    <div className="flex flex-col gap-1.5">
+      {successMessage(text) ? (
+        <span className="text-chat-status-success text-xs">{successMessage(text)}</span>
+      ) : null}
+      {errorMessage(text) ? (
+        <span className="text-chat-status-error text-xs">{errorMessage(text)}</span>
+      ) : null}
+      {isDiff ? (
+        <DiffView diff={text} oldPath={path} newPath={path} />
+      ) : text ? (
+        <pre className="text-xs text-muted-foreground whitespace-pre-wrap font-mono">{text}</pre>
+      ) : (
+        <span className="text-xs text-muted-foreground">(no output)</span>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Detect Pi's unified-diff output so we route to `<DiffView>` instead of a
+ * raw `<pre>`. The `--- a/{path}` header followed by a `+++ b/{path}` line
+ * is the unambiguous signal.
+ */
+function looksLikeDiff(text: string): boolean {
+  return /^--- a\/[^\n]*\n\+\+\+ b\/[^\n]*\n/m.test(text)
 }
 
 /**
@@ -82,17 +98,4 @@ function resultText(
   return result
     .map((r) => (r.type === 'text' ? r.text : ''))
     .join('')
-}
-
-/**
- * Stand-in until Phase 6 wires the real `<DiffView>`. Renders a card-shaped
- * placeholder so the layout reserves the right amount of vertical space.
- */
-function DiffViewPlaceholder({ path }: { path: string }) {
-  return (
-    <div className="rounded-card border border-border p-3 text-xs text-muted-foreground flex items-center gap-2">
-      <span className="font-mono">{path}</span>
-      <span className="text-[10px]">(diff — wired in Phase 6)</span>
-    </div>
-  )
 }
