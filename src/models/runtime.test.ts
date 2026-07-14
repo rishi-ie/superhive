@@ -87,9 +87,9 @@ describe('parseDiff', () => {
     )
     // 3 rows: context "unchanged", remove "old", add "new"
     expect(rows).toHaveLength(3)
-    expect(rows[0].type).toBe('context')
-    expect(rows[1].type).toBe('remove')
-    expect(rows[2].type).toBe('add')
+    expect(rows[0]!.type).toBe('context')
+    expect(rows[1]!.type).toBe('remove')
+    expect(rows[2]!.type).toBe('add')
   })
 
   test('parses abbreviated diffs without --- / +++ headers', async () => {
@@ -104,7 +104,7 @@ describe('parseDiff', () => {
     // Both rows should have null line numbers (no preceding hunk anchors
     // beyond the @@ -10 +10 — but the parser doesn't decrement after
     // the hunk; the add row does carry newLine).
-    expect(rows[1].newLine).toBe(10)
+    expect(rows[1]!.newLine).toBe(10)
   })
 
   test('returns one empty context row for an empty input', async () => {
@@ -116,8 +116,8 @@ describe('parseDiff', () => {
     // specifically for non-diff text, which we test below.
     const rows = parseDiff('')
     expect(rows).toHaveLength(1)
-    expect(rows[0].type).toBe('context')
-    expect(rows[0].content).toBe('')
+    expect(rows[0]!.type).toBe('context')
+    expect(rows[0]!.content).toBe('')
   })
 
   test('treats prose lines as context rows (graceful fallback)', async () => {

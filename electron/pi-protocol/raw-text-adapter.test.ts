@@ -43,7 +43,7 @@ describe('RawTextAdapter.onStdout', () => {
     const types = out.map((e) => e.type)
     expect(types).toContain('message-start')
     expect(types.filter((t) => t === 'text-delta')).toHaveLength(2)
-    expect(types[types.length - 1]).toBe('message-end')
+    expect(types[types.length - 1]!).toBe('message-end')
   })
 
   test('emits thinking-start / thinking-delta / thinking-end', () => {
@@ -85,7 +85,7 @@ describe('RawTextAdapter.onStdout', () => {
     const out: AdapterEvent[] = []
     adapter.onStdout('not-json\n', (ev) => out.push(ev))
     expect(out).toHaveLength(1)
-    expect(out[0].type).toBe('log')
+    expect(out[0]!.type).toBe('log')
   })
 
   test('handles chunked JSONL across multiple stdout writes', () => {
