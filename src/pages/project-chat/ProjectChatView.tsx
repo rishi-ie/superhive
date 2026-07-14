@@ -35,6 +35,10 @@ import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/agent-store';
+import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
+import { regenerate as regenerateFlow } from '@/flows/agents/crud';
+import { copyToClipboard } from '@/lib/clipboard';
+import { getMessageText } from '@/models/runtime';
 import { toast } from 'sonner';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
@@ -192,8 +196,34 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       onSend();
+      return;
+    }
+    if (e.key === 'ArrowUp' && !input && messages.length > 0) {
+      const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+      if (lastUser) {
+        e.preventDefault();
+        setInput(getMessageText(lastUser));
+        requestAnimationFrame(() => textareaRef.current?.focus());
+      }
     }
   };
+
+  useChatShortcuts({
+    onCopyLast: () => {
+      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+      if (!lastAssistant) return;
+      void copyToClipboard(getMessageText(lastAssistant), 'Copied last assistant message');
+    },
+    onRegenerate: () => {
+      const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+      if (!lastAssistant) return;
+      void regenerateFlow({ agentId: projectAgent.id, fromMessageId: lastAssistant.id });
+    },
+    onStop: () => {
+      if (status === 'busy' || status === 'running') void stop();
+    },
+    enabled: !!projectAgent,
+  });
 
   return (
     <div className="flex flex-1 min-h-0 flex-col">
