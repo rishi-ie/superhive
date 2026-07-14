@@ -99,10 +99,29 @@ export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProp
   const dotFg = statusDotClass(state, isError)
   const running = state === 'running' || state === 'streaming-args'
   const elapsed = useElapsedSeconds(running)
-  // Running: keep the body open so the user can watch the trace.
-  // Done: collapse to a one-line header so the conversation stays compact.
+  const detailsRef = React.useRef<HTMLDetailsElement | null>(null)
+
+  // Auto-expand running, auto-collapse completed after 2s (P14.3.1/2).
+  // The user can re-open manually after the auto-collapse; we don't force
+  // anything beyond the post-completion 2s window.
+  React.useEffect(() => {
+    const el = detailsRef.current
+    if (!el) return
+    if (running) {
+      el.open = true
+      return
+    }
+    if (state === 'complete' || isError) {
+      const t = setTimeout(() => {
+        if (detailsRef.current) detailsRef.current.open = false
+      }, 2000)
+      return () => clearTimeout(t)
+    }
+  }, [running, state, isError])
+
   return (
     <details
+      ref={detailsRef}
       open={running}
       className={`rounded-chat-tool-card border border-border overflow-hidden ${bg}`}
     >
