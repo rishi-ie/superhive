@@ -2,6 +2,7 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
+import { MermaidBlock } from './MermaidBlock'
 
 interface MarkdownPartProps {
   source: string
@@ -64,8 +65,11 @@ const components: Components = {
   code: ({ children, className }) => {
     const isBlock = typeof className === 'string' && className.startsWith('language-')
     if (isBlock) {
-      // P3.9 will replace this with `<CodeBlock lang code>`; until then,
-      // pass through to the default renderer so fenced blocks still render.
+      const lang = className.replace(/^language-/, '')
+      const text = String(children).replace(/\n$/, '')
+      if (lang === 'mermaid') {
+        return <MermaidBlock source={text} />
+      }
       return <code className={className}>{children}</code>
     }
     return (
