@@ -255,7 +255,11 @@ class GeneralKaiRuntime {
     this.entries.set(agentId, entry)
     this.emitStatus(agentId)
     this.spawnProcess(entry)
-    this.startTelemetryTailer(entry)
+    if (entry.extensionLoaded) {
+      this.startTelemetryTailer(entry)
+    } else {
+      log.debug(`[runtime] telemetry extension missing for ${agentId}; skipping tailer`)
+    }
   }
 
   /** Send SIGABRT + SIGTERM to the process. Sets status to 'stopped'. */
