@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { Icon } from '@/components/ui/icon'
 import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
@@ -6,20 +5,13 @@ import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ThinkingPart } from './message-parts/ThinkingPart'
-import { ToolCallPart } from './message-parts/ToolCallPart'
-import { ToolResultPart } from './message-parts/ToolResultPart'
-import { MarkdownPart } from './message-parts/MarkdownPart'
-import { ImagePart } from './message-parts/ImagePart'
-import { CompactionCard } from './message-parts/CompactionCard'
 import { TurnFoldRow } from './TurnFoldRow'
+import { UsageFooter } from './UsageFooter'
+import { PartRenderer } from './message-parts/PartRenderer'
+import { ToolResultPart } from './message-parts/ToolResultPart'
 import { copyToClipboard } from '@/lib/clipboard'
 import { regenerate } from '@/flows/agents/crud'
-import {
-  isMessageInFlight,
-  type ContentPart,
-  type MessageUsage,
-} from '@/models/runtime'
+import { isMessageInFlight, type ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
@@ -191,75 +183,4 @@ export function AssistantMessage({
       </div>
     </div>
   )
-}
-
-function PartRenderer({
-  part,
-  toolResultsById,
-}: {
-  part: ContentPart
-  toolResultsById: Map<string, Extract<ContentPart, { type: 'tool-result' }>>
-}) {
-  if (part.type === 'thinking') {
-    return (
-      <ThinkingPart text={part.text} isStreaming={part.state === 'streaming'} />
-    )
-  }
-  if (part.type === 'image') {
-    return <ImagePart data={part.data} mimeType={part.mimeType} />
-  }
-  if (part.type === 'compaction-summary') {
-    return (
-      <CompactionCard
-        tokensBefore={part.tokensBefore}
-        summary={part.summary}
-      />
-    )
-  }
-  if (part.type === 'text' && part.text.trim()) {
-    return <MarkdownPart source={part.text} />
-  }
-  if (part.type === 'tool-call') {
-    return (
-      <ToolCallPart
-        part={part}
-        result={toolResultsById.get(part.id)}
-      />
-    )
-  }
-  return null
-}
-
-function usageFooter({ usage }: { usage: MessageUsage }) {
-  const [open, setOpen] = React.useState(false)
-  const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n))
-  const cost = usage.cost
-  return (
-    <div className="ml-auto flex items-center gap-2 text-[11px] text-muted-foreground">
-      <span className="font-mono">
-        ↑{fmt(usage.input)} ↓{fmt(usage.output)}
-        {usage.cacheRead ? ` R${fmt(usage.cacheRead)}` : ''}
-      </span>
-      {cost != null ? <span className="font-mono">${cost.toFixed(2)}</span> : null}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="text-muted-foreground hover:text-foreground cursor-pointer"
-        aria-expanded={open}
-        aria-label="Toggle usage details"
-      >
-        {open ? '−' : '+'}
-      </button>
-      {open ? (
-        <span className="font-mono text-[10px] text-muted-foreground/80">
-          total {fmt(usage.totalTokens)}
-          {usage.cacheWrite ? ` · W${fmt(usage.cacheWrite)}` : ''}
-        </span>
-      ) : null}
-    </div>
-  )
-}
-
-function UsageFooter(props: { usage: MessageUsage }) {
-  return usageFooter(props)
 }
