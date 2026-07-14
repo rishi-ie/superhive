@@ -161,7 +161,7 @@ export function AgentChatView() {
         }}
       />
       <div className="shrink-0">
-        <div className="max-w-[800px] mx-auto px-14 py-4">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-start">
             <div className="flex-1 rounded-3xl bg-sidebar">
               <textarea

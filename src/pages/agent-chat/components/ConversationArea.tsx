@@ -172,7 +172,7 @@ export function ConversationArea({
         )}
       />
       {compaction || retry ? (
-        <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-4xl px-14">
+        <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-3xl px-4 sm:px-6">
           <ActiveStateBanners compaction={compaction} retry={retry} onCancel={onCancel ?? (() => {})} />
         </div>
       ) : null}
