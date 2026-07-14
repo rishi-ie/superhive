@@ -29,6 +29,7 @@ export function ImagePart({ data, mimeType }: ImagePartProps) {
       >
         <img
           src={src}
+          loading="lazy"
           className="max-h-[400px] rounded-card border border-border"
         />
       </button>
