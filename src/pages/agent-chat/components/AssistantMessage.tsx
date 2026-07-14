@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Icon } from '@/components/ui/icon'
 import { ArrowsClockwiseIcon, TrashIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
@@ -12,7 +13,7 @@ import { ImagePart } from './message-parts/ImagePart'
 import { CompactionCard } from './message-parts/CompactionCard'
 import { copyToClipboard } from '@/lib/clipboard'
 import { regenerate, deleteMessage } from '@/flows/agents/crud'
-import type { ContentPart } from '@/models/runtime'
+import type { ContentPart, MessageUsage } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
@@ -151,6 +152,7 @@ export function AssistantMessage({ message, className, agentId, onRegenerate, on
         <span className="text-[11px] text-muted-foreground">
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
+        {message.usage ? <UsageFooter usage={message.usage} /> : null}
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button
@@ -196,6 +198,35 @@ export function AssistantMessage({ message, className, agentId, onRegenerate, on
  * `index === 0` short-circuit avoids empty-zero rendering for messages that
  * start straight into tool calls.
  */
+function UsageFooter({ usage }: { usage: MessageUsage }) {
+  const [open, setOpen] = React.useState(false)
+  const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n))
+  const cost = usage.cost
+  return (
+    <div className="ml-auto flex items-center gap-2 text-[11px] text-muted-foreground">
+      <span className="font-mono">
+        ↑{fmt(usage.input)} ↓{fmt(usage.output)}
+        {usage.cacheRead ? ` R${fmt(usage.cacheRead)}` : ''}
+      </span>
+      {cost != null ? <span className="font-mono">${cost.toFixed(2)}</span> : null}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="text-muted-foreground hover:text-foreground cursor-pointer"
+        aria-expanded={open}
+        aria-label="Toggle usage details"
+      >
+        {open ? '−' : '+'}
+      </button>
+      {open ? (
+        <span className="font-mono text-[10px] text-muted-foreground/80">
+          total {fmt(usage.totalTokens)}
+          {usage.cacheWrite ? ` · W${fmt(usage.cacheWrite)}` : ''}
+        </span>
+      ) : null}
+    </div>
+  )
+}
 function ProseSection({
   parts,
   index,
