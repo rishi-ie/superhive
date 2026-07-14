@@ -2,18 +2,24 @@ import * as React from 'react'
 import { Icon } from '@/components/ui/icon'
 import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
-import { Copy01Icon, Loading03Icon } from '@hugeicons/core-free-icons'
+import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ThinkingPart } from './message-parts/ThinkingPart'
 import { ToolCallPart } from './message-parts/ToolCallPart'
 import { ToolResultPart } from './message-parts/ToolResultPart'
 import { MarkdownPart } from './message-parts/MarkdownPart'
 import { ImagePart } from './message-parts/ImagePart'
 import { CompactionCard } from './message-parts/CompactionCard'
+import { TurnFoldRow } from './TurnFoldRow'
 import { copyToClipboard } from '@/lib/clipboard'
 import { regenerate } from '@/flows/agents/crud'
-import type { ContentPart, MessageUsage } from '@/models/runtime'
+import {
+  isMessageInFlight,
+  type ContentPart,
+  type MessageUsage,
+} from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
@@ -23,111 +29,111 @@ interface AssistantMessageProps {
   onRegenerate?: (messageId: string) => void
 }
 
-const COLLAPSE_AFTER_PARTS = 1
+export function AssistantMessage({
+  message,
+  className,
+  agentId,
+  onRegenerate,
+}: AssistantMessageProps) {
+  const inFlight = isMessageInFlight(message)
 
-export function AssistantMessage({ message, className, agentId, onRegenerate }: AssistantMessageProps) {
-  // Map every `tool-call` to its matching `tool-result`, if present. The
-  // parts list keeps insertion order, so a `tool-result` immediately after
-  // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
-  // linkup at ingest time).
-  const toolCalls = message.parts.filter((p): p is Extract<ContentPart, { type: 'tool-call' }> => p.type === 'tool-call')
-  const toolResultsById = new Map<string, Extract<ContentPart, { type: 'tool-result' }>>()
+  const toolResultsById = new Map<
+    string,
+    Extract<ContentPart, { type: 'tool-result' }>
+  >()
   for (const part of message.parts) {
     if (part.type === 'tool-result') toolResultsById.set(part.id, part)
   }
-
-  // Group all non-tool-call-and-result parts into "prose" sections for
-  // markdown rendering. We split by tool-call/result boundaries so a tool
-  // execution that lands mid-message renders inline.
-  const proseSections: ContentPart[][] = []
-  let current: ContentPart[] = []
-  for (const part of message.parts) {
-    if (part.type === 'tool-call' || part.type === 'tool-result') {
-      if (current.length > 0) {
-        proseSections.push(current)
-        current = []
-      }
-    } else {
-      current.push(part)
-    }
-  }
-  if (current.length > 0) proseSections.push(current)
 
   const copyText = message.parts
     .filter((p) => p.type === 'text' || p.type === 'thinking')
     .map((p) => (p.type === 'text' || p.type === 'thinking' ? p.text : ''))
     .join('\n\n')
 
+  if (inFlight) return null
+
+  const toolCalls = message.parts.filter(
+    (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
+      p.type === 'tool-call',
+  )
+
+  const shouldFold =
+    toolCalls.length >= 2 ||
+    message.parts.some(
+      (p) =>
+        p.type !== 'text' &&
+        p.type !== 'thinking' &&
+        p.type !== 'tool-call' &&
+        p.type !== 'tool-result',
+    )
+
+  const lastToolCallIndex = message.parts
+    .map((p, i) => (p.type === 'tool-call' ? i : -1))
+    .filter((i) => i !== -1)
+    .at(-1)
+
+  const nonFoldContent: ContentPart[] =
+    lastToolCallIndex !== undefined
+      ? message.parts.slice(lastToolCallIndex + 1)
+      : []
+
+  const foldContent: ContentPart[] =
+    lastToolCallIndex !== undefined
+      ? message.parts.slice(0, lastToolCallIndex + 1)
+      : message.parts
+
   return (
-    <div className={`group relative w-full py-button-y flex flex-col gap-2${className ? ` ${className}` : ''}`}>
-      {message.parts.map((part, i) => {
-        if (part.type === 'thinking') {
-          const isLast = i === message.parts.length - 1
-          return (
-            <ThinkingPart
-              key={`thinking-${i}`}
-              text={part.text}
-              isStreaming={isLast && part.state === 'streaming'}
-            />
-          )
-        }
-        if (part.type === 'image') {
-          return (
-            <ImagePart
-              key={`image-${i}`}
-              data={part.data}
-              mimeType={part.mimeType}
-            />
-          )
-        }
-        if (part.type === 'compaction-summary') {
-          return (
-            <CompactionCard
-              key={`compaction-${i}`}
-              tokensBefore={part.tokensBefore}
-              summary={part.summary}
-            />
-          )
-        }
-        return null
-      })}
-
-      {proseSections.map((section, i) => (
-        <ProseSection key={`prose-${i}`} parts={section} index={i} />
-      ))}
-
-      {toolCalls.length === 0 ? null : (
-        <div
-          className={cn(
-            'flex flex-col gap-1.5 rounded-card p-1',
-            toolCalls.length > 1 && 'bg-muted/30 border border-border',
-          )}
+    <div
+      className={cn(
+        'group relative w-full py-button-y flex flex-col gap-2',
+        className ?? '',
+      )}
+    >
+      {shouldFold && toolCalls.length >= 2 ? (
+        <TurnFoldRow
+          startedAt={message.ts}
+          endedAt={message.ts + 1}
+          toolCount={toolCalls.length}
+          totalNonTextParts={
+            foldContent.filter(
+              (p) =>
+                p.type !== 'text' && p.type !== 'thinking' && p.type !== 'compaction-summary',
+            ).length
+          }
+          defaultCollapsed={true}
         >
-          {toolCalls.length > 1 ? (
-            <div className="flex items-center gap-1.5 px-2 py-1 text-[11px] text-muted-foreground">
-              <HugeIcon
-                icon={Loading03Icon}
-                size={12}
-                className="size-3 animate-spin text-chat-status-running"
-              />
-              <span>Running {toolCalls.length} tools…</span>
-            </div>
-          ) : null}
-          {toolCalls.map((call, i) => (
-            <ToolCallPart
-              key={`tool-${call.id}-${i}`}
-              part={call}
-              result={toolResultsById.get(call.id)}
+          {foldContent.map((part, i) => (
+            <PartRenderer
+              key={`fold-${i}`}
+              part={part}
+              toolResultsById={toolResultsById}
             />
           ))}
-        </div>
+        </TurnFoldRow>
+      ) : (
+        message.parts.map((part, i) => (
+          <PartRenderer
+            key={`part-${i}`}
+            part={part}
+            toolResultsById={toolResultsById}
+          />
+        ))
       )}
+
+      {shouldFold && nonFoldContent.length > 0 ? (
+        nonFoldContent.map((part, i) => (
+          <PartRenderer
+            key={`post-fold-${i}`}
+            part={part}
+            toolResultsById={toolResultsById}
+          />
+        ))
+      ) : null}
 
       {/* Orphan tool-results: persisted JSONL where the call was pruned. */}
       {message.parts
         .filter((p) => p.type === 'tool-result')
         .map((part) => {
-          // Already rendered above as part of its matching tool-call, skip
           if (Array.from(toolResultsById.values()).includes(part) === false) return null
           const match = toolCalls.find((c) => c.id === part.id)
           if (match) return null
@@ -136,12 +142,7 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
           )
         })}
 
-      {message.usage ? (
-        <div className="flex items-center gap-gap-tight">
-          <UsageFooter usage={message.usage} />
-        </div>
-      ) : null}
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-gap-tight">
+      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <Button
           size="icon-sm"
           variant="ghost"
@@ -163,20 +164,73 @@ export function AssistantMessage({ message, className, agentId, onRegenerate }: 
         >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
         </Button>
-        <span className="text-[11px] text-muted-foreground ml-1">
-          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-[11px] text-muted-foreground ml-1 cursor-default">
+              {new Date(message.ts).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {new Date(message.ts).toLocaleString([], {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })}
+          </TooltipContent>
+        </Tooltip>
+        {message.usage ? (
+          <div className="ml-auto">
+            <UsageFooter usage={message.usage} />
+          </div>
+        ) : null}
       </div>
     </div>
   )
 }
 
-/**
- * Render a stretch of `text` parts (with markdown support) inline. The
- * `index === 0` short-circuit avoids empty-zero rendering for messages that
- * start straight into tool calls.
- */
-function UsageFooter({ usage }: { usage: MessageUsage }) {
+function PartRenderer({
+  part,
+  toolResultsById,
+}: {
+  part: ContentPart
+  toolResultsById: Map<string, Extract<ContentPart, { type: 'tool-result' }>>
+}) {
+  if (part.type === 'thinking') {
+    return (
+      <ThinkingPart text={part.text} isStreaming={part.state === 'streaming'} />
+    )
+  }
+  if (part.type === 'image') {
+    return <ImagePart data={part.data} mimeType={part.mimeType} />
+  }
+  if (part.type === 'compaction-summary') {
+    return (
+      <CompactionCard
+        tokensBefore={part.tokensBefore}
+        summary={part.summary}
+      />
+    )
+  }
+  if (part.type === 'text' && part.text.trim()) {
+    return <MarkdownPart source={part.text} />
+  }
+  if (part.type === 'tool-call') {
+    return (
+      <ToolCallPart
+        part={part}
+        result={toolResultsById.get(part.id)}
+      />
+    )
+  }
+  return null
+}
+
+function usageFooter({ usage }: { usage: MessageUsage }) {
   const [open, setOpen] = React.useState(false)
   const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n))
   const cost = usage.cost
@@ -205,21 +259,7 @@ function UsageFooter({ usage }: { usage: MessageUsage }) {
     </div>
   )
 }
-function ProseSection({
-  parts,
-  index,
-}: {
-  parts: ContentPart[]
-  index: number
-}) {
-  const text = parts
-    .filter((p) => p.type === 'text')
-    .map((p) => (p.type === 'text' ? p.text : ''))
-    .join('')
-  if (!text.trim()) return null
-  return (
-    <div className={index >= COLLAPSE_AFTER_PARTS ? '' : ''}>
-      <MarkdownPart source={text} />
-    </div>
-  )
+
+function UsageFooter(props: { usage: MessageUsage }) {
+  return usageFooter(props)
 }

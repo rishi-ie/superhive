@@ -4,6 +4,9 @@ import type { ContentPart } from '@/models/runtime'
 export interface ToolCallCardBaseProps {
   part: Extract<ContentPart, { type: 'tool-call' }>
   result?: Extract<ContentPart, { type: 'tool-result' }>
+  /** When true, the card treats itself as actively running — shows the elapsed timer
+   *  and keeps itself expanded. Derived from: part.state !== 'complete' || result?.state !== 'complete'. */
+  running?: boolean
 }
 
 /** Header is rendered by each tool-specific subclass. Body content goes
@@ -59,6 +62,7 @@ function statusDotClass(
 interface ToolCallCardProps {
   slots: ToolCallCardSlots
   state: 'pending' | 'streaming-args' | 'running' | 'complete'
+  running?: boolean
   isError?: boolean
 }
 
@@ -94,10 +98,15 @@ export function renderGenericToolBody(
   )
 }
 
-export function ToolCallCard({ slots, state, isError = false }: ToolCallCardProps) {
+export function ToolCallCard({
+  slots,
+  state,
+  running: runningProp,
+  isError = false,
+}: ToolCallCardProps) {
   const bg = stateBackgroundClass(state, isError)
   const dotFg = statusDotClass(state, isError)
-  const running = state === 'running' || state === 'streaming-args'
+  const running = runningProp ?? (state === 'running' || state === 'streaming-args')
   const elapsed = useElapsedSeconds(running)
   const detailsRef = React.useRef<HTMLDetailsElement | null>(null)
 

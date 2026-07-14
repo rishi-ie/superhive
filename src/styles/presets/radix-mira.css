@@ -35,6 +35,11 @@
   --chat-bubble-user: var(--sidebar);
   --chat-bubble-assistant: var(--background);
 
+  /* User message bubble (Phase 4). */
+  --chat-bubble-user-bg: var(--secondary);
+  --chat-bubble-user-border: var(--border);
+  --chat-bubble-user-radius: 1rem;
+
   /* Tool card backgrounds (Phase 2.1.2–2.1.5).
    * pending  — tool-call received, args still streaming (info/10)
    * running  — host-side execution in flight (info/5)

@@ -103,6 +103,55 @@ export function getMessageTailFingerprint(message: RuntimeMessage): string {
   return `__${last.type}`
 }
 
+/**
+ * Returns true when the message is still being constructed — any part is in a
+ * streaming/pending state, or a tool call has been dispatched but its result
+ * has not yet arrived.
+ */
+export function isMessageInFlight(message: RuntimeMessage): boolean {
+  for (const part of message.parts) {
+    if (part.type === 'text' || part.type === 'thinking') {
+      if (part.state === 'streaming') return true
+    }
+    if (part.type === 'tool-call') {
+      if (part.state !== 'complete') return true
+      // Args complete — check if the matching result has arrived and is complete
+      const hasResult = message.parts.some(
+        (p) =>
+          p.type === 'tool-result' &&
+          p.id === part.id &&
+          p.state === 'complete',
+      )
+      if (!hasResult) return true
+    }
+    if (part.type === 'tool-result') {
+      if (part.state === 'pending' || part.state === 'streaming') return true
+    }
+  }
+  return false
+}
+
+/**
+ * Returns the timestamp (ms epoch) at which this message started arriving.
+ * Falls back to message.ts if no per-part startedAt is tracked.
+ */
+export function getMessageStartedAt(message: RuntimeMessage): number {
+  return message.ts
+}
+
+/**
+ * Returns a human-readable summary of in-flight tool calls, e.g. "Running 3 tools…"
+ * or null when no tools are currently executing.
+ */
+export function getActiveToolSummary(message: RuntimeMessage): string | null {
+  const inFlight = message.parts.filter(
+    (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
+      p.type === 'tool-call' && p.state !== 'complete',
+  )
+  if (inFlight.length === 0) return null
+  return `Running ${inFlight.length} tool${inFlight.length === 1 ? '' : 's'}…`
+}
+
 /** Active compaction metadata — emitted on `compaction-start`, cleared on `compaction-end`. */
 export interface CompactionStatus {
   reason: 'manual' | 'threshold' | 'overflow'

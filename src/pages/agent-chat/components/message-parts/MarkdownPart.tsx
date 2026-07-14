@@ -1,3 +1,4 @@
+import React, { Children, isValidElement } from 'react'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -5,15 +6,68 @@ import rehypeKatex from 'rehype-katex'
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { MermaidBlock } from './MermaidBlock'
+import { CodeBlock } from './CodeBlock'
+import { MarkdownTable } from './MarkdownTable'
 
 interface MarkdownPartProps {
   source: string
+  cwd?: string
 }
 
-/** Custom renderer map. Populated incrementally across Phase 3.3+ to give
- *  the assistant chat its typographic identity (sizing, weights, links,
- *  tables, code). Until then each entry is a no-op passthrough, set so the
- *  structure is in place when the first renderer lands. */
+function nodeToPlainText(node: React.ReactNode): string {
+  if (typeof node === 'string' || typeof node === 'number') return String(node)
+  if (Array.isArray(node)) return node.map(nodeToPlainText).join('')
+  if (isValidElement<{ children?: React.ReactNode }>(node))
+    return nodeToPlainText(node.props.children)
+  return ''
+}
+
+function extractFenceLanguage(className: string | undefined): string {
+  if (typeof className !== 'string') return 'text'
+  const match = className.match(/(?:^|\s)language-(\S+)/)
+  return match?.[1] ?? 'text'
+}
+
+function extractCodeFromPre(
+  children: React.ReactNode,
+): { className: string | undefined; code: string } | null {
+  const childNodes = Children.toArray(children)
+  if (childNodes.length !== 1) return null
+  const onlyChild = childNodes[0]
+  if (
+    !isValidElement<{ className?: string; children?: React.ReactNode }>(onlyChild) ||
+    onlyChild.type !== 'code'
+  )
+    return null
+  return {
+    className: onlyChild.props.className,
+    code: nodeToPlainText(onlyChild.props.children),
+  }
+}
+
+function hasShikiClass(children: React.ReactNode): boolean {
+  const childNodes = Children.toArray(children)
+  if (childNodes.length === 0) return false
+  const first = childNodes[0]
+  return (
+    isValidElement<{ className?: string }>(first) &&
+    typeof first.props.className === 'string' &&
+    first.props.className.includes('shiki')
+  )
+}
+
+function getShikiHtml(children: React.ReactNode): string {
+  const parts: string[] = []
+  Children.forEach(children, (child) => {
+    if (isValidElement<{ __html?: string }>(child)) {
+      parts.push(String(child.props.__html ?? ''))
+    } else if (typeof child === 'string') {
+      parts.push(child)
+    }
+  })
+  return parts.join('')
+}
+
 const components: Components = {
   h1: ({ children }) => (
     <h1 className="text-base font-semibold tracking-tight">{children}</h1>
@@ -45,45 +99,57 @@ const components: Components = {
   ),
   hr: () => <Separator className="my-3" />,
   ul: ({ children }) => (
-    <ul className="list-disc list-inside my-1.5 space-y-1">{children}</ul>
+    <ul className="list-disc list-inside my-1.5 gap-1">{children}</ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal list-inside my-1.5 space-y-1">{children}</ol>
+    <ol className="list-decimal list-inside my-1.5 gap-1">{children}</ol>
   ),
   li: ({ children }) => (
     <li className="text-sm leading-relaxed">{children}</li>
   ),
-  // GFM task list items render as `<li>` with a leading `<input type=checkbox">`.
-  // react-markdown delegates to the `input` renderer for the checkbox itself.
   input: ({ checked, type }) => {
     if (type !== 'checkbox') return null
-    return (
-      <Checkbox checked={!!checked} disabled className="align-middle mr-1.5" />
-    )
+    return <Checkbox checked={!!checked} disabled className="align-middle mr-1.5" />
   },
-  // Inline code: detect via absence of `className` (shiki-marked blocks have
-  // `className` starting with `language-`). Fall through to the default
-  // renderer for fenced blocks so they keep flow through `<pre>` below.
   code: ({ children, className }) => {
-    const isBlock = typeof className === 'string' && className.startsWith('language-')
+    const isBlock =
+      typeof className === 'string' && className.startsWith('language-')
     if (isBlock) {
       const lang = className.replace(/^language-/, '')
-      const text = String(children).replace(/\n$/, '')
+      const text = nodeToPlainText(children).replace(/\n$/, '')
       if (lang === 'mermaid') {
         return <MermaidBlock source={text} />
       }
-      return <code className={className}>{children}</code>
     }
     return (
-      <code className="bg-muted rounded-sm px-1 py-0.5 font-mono text-[0.85em]">
+      <code className={className ?? 'bg-muted rounded-sm px-1 py-0.5 font-mono text-[0.85em]'}>
         {children}
       </code>
     )
   },
-  // Strip the default `<pre>` chrome (background, padding, scroll) and let
-  // the child `<code>` inherit. Phase 3.9 will replace this with a wrapper
-  // that pulls out `lang` and forwards to `<CodeBlock>`.
-  pre: ({ children }) => <pre className="my-2 not-prose">{children}</pre>,
+  pre: ({ children }) => {
+    const shiki = hasShikiClass(children)
+    if (shiki) {
+      const html = getShikiHtml(children)
+      return (
+        <div
+          className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg my-2"
+        >
+          <div
+            className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono [&_.shiki]:!bg-transparent"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
+      )
+    }
+    const extracted = extractCodeFromPre(children)
+    if (!extracted) return <pre>{children}</pre>
+    const lang = extractFenceLanguage(extracted.className)
+    if (lang === 'mermaid') {
+      return <MermaidBlock source={extracted.code} />
+    }
+    return <CodeBlock lang={lang} code={extracted.code} />
+  },
   a: ({ children, href }) => (
     <a
       href={href}
@@ -99,11 +165,7 @@ const components: Components = {
       {children}
     </blockquote>
   ),
-  table: ({ children }) => (
-    <div className="my-2 overflow-x-auto rounded-card border border-border">
-      <table className="w-full border-collapse">{children}</table>
-    </div>
-  ),
+  table: ({ children }) => <MarkdownTable>{children}</MarkdownTable>,
   thead: ({ children }) => <thead className="bg-muted/40">{children}</thead>,
   tbody: ({ children }) => <tbody>{children}</tbody>,
   tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,

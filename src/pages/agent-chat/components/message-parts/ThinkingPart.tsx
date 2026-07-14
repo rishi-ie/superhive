@@ -1,30 +1,10 @@
 import * as React from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useElapsedSeconds } from '@/hooks/use-elapsed-seconds'
 
 interface ThinkingPartProps {
   text: string
   isStreaming: boolean
-}
-
-/**
- * Track elapsed seconds since the part first appeared in the renderer.
- * Stops counting once `isStreaming` flips to false so the header reads
- * "Thought for Xs" rather than continuing to tick up.
- */
-function useElapsedSeconds(running: boolean): number {
-  const [seconds, setSeconds] = React.useState(0)
-  const startedAt = React.useRef<number | null>(null)
-  React.useEffect(() => {
-    if (!running) return
-    if (startedAt.current == null) startedAt.current = Date.now()
-    const id = setInterval(() => {
-      if (startedAt.current != null) {
-        setSeconds(Math.round((Date.now() - startedAt.current) / 1000))
-      }
-    }, 1000)
-    return () => clearInterval(id)
-  }, [running])
-  return seconds
 }
 
 export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
