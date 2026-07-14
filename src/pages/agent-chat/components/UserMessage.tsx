@@ -1,10 +1,10 @@
 import { Icon } from "@/components/ui/icon";
-import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Copy01Icon } from "@hugeicons/core-free-icons";
 import { Button } from '@/components/ui/button';
 import { copyToClipboard } from '@/lib/clipboard';
-import { editMessage, deleteMessage } from '@/flows/agents/crud';
+import { editMessage } from '@/flows/agents/crud';
 import { getMessageText } from '@/models/runtime';
 import * as React from 'react';
 import type { RuntimeMessage } from '@/types/electron';
@@ -12,10 +12,9 @@ import type { RuntimeMessage } from '@/types/electron';
 interface UserMessageProps {
   message: RuntimeMessage;
   agentId: string;
-  onDelete?: (messageId: string) => void;
 }
 
-export function UserMessage({ message, agentId, onDelete }: UserMessageProps) {
+export function UserMessage({ message, agentId }: UserMessageProps) {
   const text = getMessageText(message);
   const [editing, setEditing] = React.useState(false);
   const [draft, setDraft] = React.useState(text);
@@ -42,11 +41,6 @@ export function UserMessage({ message, agentId, onDelete }: UserMessageProps) {
   const onCancel = () => {
     setEditing(false);
     setDraft(text);
-  };
-
-  const onDeleteClick = async () => {
-    if (typeof onDelete === 'function') onDelete(message.id);
-    else await deleteMessage({ agentId, messageId: message.id });
   };
 
   if (editing) {
@@ -115,15 +109,6 @@ export function UserMessage({ message, agentId, onDelete }: UserMessageProps) {
           aria-label="Edit message"
         >
           <Icon icon={PencilSimpleIcon} className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => void onDeleteClick()}
-          aria-label="Delete message"
-        >
-          <Icon icon={TrashIcon} className="size-3.5" />
         </Button>
       </div>
     </div>
