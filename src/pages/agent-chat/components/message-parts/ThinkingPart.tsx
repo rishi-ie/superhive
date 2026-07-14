@@ -36,7 +36,7 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
   }, [isStreaming])
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <div className="rounded-card px-3 py-3 pl-0">
+      <div className="rounded-card px-3 py-2 pl-0">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
           <span>
             {isStreaming
