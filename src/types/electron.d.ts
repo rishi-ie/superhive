@@ -32,6 +32,9 @@ export interface AgentsAPI {
 	getRuntimeState: (id: string) => Promise<RuntimeStatusPayload | null>
 	getProjects: (id: string) => Promise<Project[]>
 	getMessages: (id: string) => Promise<RuntimeMessage[]>
+	editMessage: (id: string, messageId: string, text: string) => Promise<{ ok: boolean }>
+	regenerate: (id: string, fromMessageId: string) => Promise<{ ok: boolean }>
+	deleteMessage: (id: string, messageId: string) => Promise<{ ok: boolean }>
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 
