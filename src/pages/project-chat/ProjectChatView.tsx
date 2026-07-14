@@ -20,6 +20,7 @@ import {
   PlusIcon,
   ArrowUpIcon,
   LaptopIcon,
+  Stop,
 } from '@phosphor-icons/react';
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
@@ -111,6 +112,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     activeModelContextWindow,
     loading,
     send,
+    stop,
     restart,
   } = useAgentRuntime(projectAgent.id);
   // Read the current model selection so we can gate the send button.
@@ -228,12 +230,17 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
                 </button>
                 <button
-                  onClick={onSend}
-                  disabled={isBusy || input.trim().length === 0 || !hasModel}
+                  onClick={isBusy ? stop : onSend}
+                  disabled={!isBusy && (input.trim().length === 0 || !hasModel)}
                   title={!hasModel ? 'Pick a model first' : undefined}
-                  className="flex size-5 items-center justify-center rounded-full bg-[rgb(66,120,200)] hover:opacity-90 disabled:bg-muted disabled:cursor-not-allowed cursor-pointer"
+                  className={
+                    'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
+                    (isBusy
+                      ? 'bg-[rgb(220,80,80)] hover:opacity-90'
+                      : 'bg-[rgb(66,120,200)] hover:opacity-90 disabled:bg-muted disabled:cursor-not-allowed')
+                  }
                 >
-                    <Icon icon={ArrowUpIcon} className="size-4 text-white" />
+                    <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-4 text-white" />
                 </button>
               </div>
             </div>
