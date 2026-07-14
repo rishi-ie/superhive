@@ -1,3 +1,6 @@
+import * as React from 'react'
+import { diffWords } from 'diff'
+
 interface DiffViewProps {
   diff: string
 }
@@ -67,47 +70,120 @@ export function parseDiff(diff: string): DiffRow[] {
   return rows
 }
 
+/**
+ * Walk adjacent remove/add rows and run `diffWords` over each pair, so the
+ * changed words get inverse-video treatment. Standalone add/remove rows
+ * keep the full-line highlight.
+ */
+function highlightAdjacent(
+  rows: DiffRow[],
+  renderContent: (
+    row: DiffRow,
+    additions: { value: string; bold: boolean }[],
+  ) => React.ReactNode,
+): React.ReactNode[] {
+  const out: React.ReactNode[] = []
+  for (let i = 0; i < rows.length; i++) {
+    const cur = rows[i]!
+    const next = rows[i + 1]
+    if (cur.type === 'remove' && next && next.type === 'add') {
+      const parts = diffWords(cur.content, next.content)
+      out.push(
+        <span
+          key={`r${i}`}
+          className="block bg-chat-bubble-diff-removed-bg"
+        >
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+            {cur.oldLine ?? ''}
+          </span>
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none" />
+          <span className="inline-block w-3 text-center select-none text-chat-bubble-diff-removed-fg">
+            -
+          </span>
+          {parts
+            .filter((p) => p.removed || !p.added)
+            .map((p, k) => (
+              <span
+                key={k}
+                className={p.removed ? 'font-bold' : ''}
+              >
+                {p.value}
+              </span>
+            ))}
+          {'\n'}
+        </span>,
+      )
+      out.push(
+        <span
+          key={`a${i}`}
+          className="block bg-chat-bubble-diff-added-bg"
+        >
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none" />
+          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+            {next.newLine ?? ''}
+          </span>
+          <span className="inline-block w-3 text-center select-none text-chat-bubble-diff-added-fg">
+            +
+          </span>
+          {parts
+            .filter((p) => p.added || !p.removed)
+            .map((p, k) => (
+              <span key={k} className={p.added ? 'font-bold' : ''}>
+                {p.value}
+              </span>
+            ))}
+          {'\n'}
+        </span>,
+      )
+      i++ // Skip next (consumed as part of pair)
+      continue
+    }
+    out.push(
+      <span
+        key={`l${i}`}
+        className={
+          'block ' +
+          (cur.type === 'add'
+            ? 'bg-chat-bubble-diff-added-bg'
+            : cur.type === 'remove'
+              ? 'bg-chat-bubble-diff-removed-bg'
+              : '')
+        }
+      >
+        <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+          {cur.oldLine ?? ''}
+        </span>
+        <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
+          {cur.newLine ?? ''}
+        </span>
+        <span
+          className={
+            'inline-block w-3 text-center select-none ' +
+            (cur.type === 'add'
+              ? 'text-chat-bubble-diff-added-fg'
+              : cur.type === 'remove'
+                ? 'text-chat-bubble-diff-removed-fg'
+                : 'text-muted-foreground')
+          }
+        >
+          {cur.type === 'add' ? '+' : cur.type === 'remove' ? '-' : ' '}
+        </span>
+        {renderContent(cur, [])}
+        {'\n'}
+      </span>,
+    )
+  }
+  return out
+}
+
 export function DiffView({ diff }: DiffViewProps) {
   const rows = parseDiff(diff)
   if (rows.length === 0) {
     return <pre className="font-mono text-xs whitespace-pre">{diff}</pre>
   }
   return (
-    <pre className="font-mono text-xs whitespace-pre">
-      {rows.map((row, i) => (
-        <span
-          key={i}
-          className={
-            'block ' +
-            (row.type === 'add'
-              ? 'bg-chat-bubble-diff-added-bg'
-              : row.type === 'remove'
-                ? 'bg-chat-bubble-diff-removed-bg'
-                : '')
-          }
-        >
-          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
-            {row.oldLine ?? ''}
-          </span>
-          <span className="inline-block w-7 text-right pr-2 text-muted-foreground/60 select-none">
-            {row.newLine ?? ''}
-          </span>
-          <span
-            className={
-              'inline-block w-3 text-center select-none ' +
-              (row.type === 'add'
-                ? 'text-chat-bubble-diff-added-fg'
-                : row.type === 'remove'
-                  ? 'text-chat-bubble-diff-removed-fg'
-                  : 'text-muted-foreground')
-            }
-          >
-            {row.type === 'add' ? '+' : row.type === 'remove' ? '-' : ' '}
-          </span>
-          {row.content}
-          {'\n'}
-        </span>
-      ))}
+    <pre className="font-mono text-xs whitespace-pre overflow-x-auto">
+      {highlightAdjacent(rows, (_row, _additions) => null)}
     </pre>
   )
 }
