@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Icon } from '@/components/ui/icon'
-import { ArrowsClockwiseIcon, TrashIcon } from '@phosphor-icons/react'
+import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon, Loading03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import { MarkdownPart } from './message-parts/MarkdownPart'
 import { ImagePart } from './message-parts/ImagePart'
 import { CompactionCard } from './message-parts/CompactionCard'
 import { copyToClipboard } from '@/lib/clipboard'
-import { regenerate, deleteMessage } from '@/flows/agents/crud'
+import { regenerate } from '@/flows/agents/crud'
 import type { ContentPart, MessageUsage } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -21,12 +21,11 @@ interface AssistantMessageProps {
   className?: string
   agentId: string
   onRegenerate?: (messageId: string) => void
-  onDelete?: (messageId: string) => void
 }
 
 const COLLAPSE_AFTER_PARTS = 1
 
-export function AssistantMessage({ message, className, agentId, onRegenerate, onDelete }: AssistantMessageProps) {
+export function AssistantMessage({ message, className, agentId, onRegenerate }: AssistantMessageProps) {
   // Map every `tool-call` to its matching `tool-result`, if present. The
   // parts list keeps insertion order, so a `tool-result` immediately after
   // a `tool-call` belongs to that call (Phase 1.2 runtime handles this
@@ -175,18 +174,6 @@ export function AssistantMessage({ message, className, agentId, onRegenerate, on
           aria-label="Regenerate response"
         >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => {
-            if (typeof onDelete === 'function') onDelete(message.id)
-            else void deleteMessage({ agentId, messageId: message.id })
-          }}
-          aria-label="Delete message"
-        >
-          <Icon icon={TrashIcon} className="size-3.5" />
         </Button>
       </div>
     </div>
