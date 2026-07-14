@@ -376,3 +376,29 @@ codesign --verify --deep --strict /Applications/Superhive.app
 | Sidebar pill wrong version | `src/lib/app-meta.ts` not bumped with `package.json` | Always bump both files in lockstep |
 | Auto-update silently dead | `app.isPackaged` gate blocks in dev; missing `repository` field in `package.json`; `latest-mac.yml#path:` typo | Check `latest-mac.yml` path matches ZIP filename exactly (case-sensitive) |
 | After-pack doesn't re-sign | `CSC_LINK`/`CSC_KEY_PASSWORD` env vars set (even empty) → skip fires | Use `CSC_IDENTITY_AUTO_DISCOVERY=false` (doesn't trigger skip); unset the vars |
+
+---
+
+## 11. New runtime dependencies (per release)
+
+When new packages land in `package.json`, record them here so the next
+release audit has a one-line summary. Pattern:
+
+```
+<version>: <comma-separated list of new deps with one-line reason each>
+```
+
+Latest:
+
+```
+v0.2.0 (Phase 1-15 feature delivery):
+  - shiki 4.3.1 + @shikijs/rehype 4.3.1 — syntax highlighting for
+    fenced code blocks in <CodeBlock>.
+  - diff 9.0.0 + @types/diff 8.0.0 — word-level diff for <DiffView>.
+  - react-virtuoso 4.18.10 — virtualized message scroll region, smooth
+    at thousands of messages.
+  - mermaid 11.16.0 — diagram renderer for ```mermaid fenced blocks.
+  - remark-math 6.0.0 + rehype-katex 7.0.1 + katex 0.17.0 — math
+    rendering for $...$ and $$...$$ blocks in <MarkdownPart>.
+```
+
