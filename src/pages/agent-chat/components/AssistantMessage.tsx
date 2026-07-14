@@ -1,8 +1,9 @@
 import { Icon } from '@/components/ui/icon'
 import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
-import { Copy01Icon } from '@hugeicons/core-free-icons'
+import { Copy01Icon, Loading03Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { ThinkingPart } from './message-parts/ThinkingPart'
 import { ToolCallPart } from './message-parts/ToolCallPart'
 import { ToolResultPart } from './message-parts/ToolResultPart'
@@ -89,13 +90,32 @@ export function AssistantMessage({ message, className }: AssistantMessageProps) 
         <ProseSection key={`prose-${i}`} parts={section} index={i} />
       ))}
 
-      {toolCalls.map((call, i) => (
-        <ToolCallPart
-          key={`tool-${call.id}-${i}`}
-          part={call}
-          result={toolResultsById.get(call.id)}
-        />
-      ))}
+      {toolCalls.length === 0 ? null : (
+        <div
+          className={cn(
+            'flex flex-col gap-1.5 rounded-card p-1',
+            toolCalls.length > 1 && 'bg-muted/30 border border-border',
+          )}
+        >
+          {toolCalls.length > 1 ? (
+            <div className="flex items-center gap-1.5 px-2 py-1 text-[11px] text-muted-foreground">
+              <HugeIcon
+                icon={Loading03Icon}
+                size={12}
+                className="size-3 animate-spin text-chat-status-running"
+              />
+              <span>Running {toolCalls.length} tools…</span>
+            </div>
+          ) : null}
+          {toolCalls.map((call, i) => (
+            <ToolCallPart
+              key={`tool-${call.id}-${i}`}
+              part={call}
+              result={toolResultsById.get(call.id)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Orphan tool-results: persisted JSONL where the call was pruned. */}
       {message.parts
