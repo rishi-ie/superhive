@@ -385,8 +385,26 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.getRuntimeState(agentId).then((s) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      if (s && s.status !== 'stopped' && s.status !== 'error') return
-      agents.start(agentId).catch(() => {})
+      // Start the runtime if it is stopped or errored — this also hydrates
+      // entry.messages from disk and emits via onMessages.
+      if (!s || s.status === 'stopped' || s.status === 'error') {
+        agents.start(agentId).catch(() => {})
+      }
+    })
+    // Always fetch messages from disk on slice init. When the runtime is
+    // already running (e.g. Cmd+W close-window reopen on macOS) the init
+    // above returns early and no emitMessages fires, so the slice would
+    // otherwise start with messages:[]. The onMessages subscription (set up
+    // below) catches the emitMessages from runtime.start for the start case;
+    // for the already-running case this getMessages call populates the slice.
+    agents.getMessages(agentId).then((msgs) => {
+      const entry = runtimeSlices.get(agentId)
+      if (!entry) return
+      entry.messages = msgs
+      if (entry.messages.length > MAX_MESSAGES) {
+        entry.messages = entry.messages.slice(-MAX_MESSAGES)
+      }
+      entry.notify?.()
     })
     slice.initialized = true
   }

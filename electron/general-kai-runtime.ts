@@ -916,6 +916,11 @@ class GeneralKaiRuntime {
             return { ...p, state: 'complete' as const }
           return p
         })
+        // Re-arm the persist timer so the now-complete state lands on disk.
+        // An earlier flush may have raced message-end and written 'streaming'
+        // state; this guarantees a follow-up flush with the correct state.
+        entry._chatPending.add(msg.id)
+        this.scheduleChatPersist(entry)
         this.emitEvent(agentId, event)
         this.emitMessages(agentId)
       }

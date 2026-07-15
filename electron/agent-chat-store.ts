@@ -13,6 +13,12 @@ export const AGENTS_CHAT_DIR = join(process.env.HOME ?? '', '.superhive', 'agent
  * The renderer treats `content` as deprecated — it still exists on user
  * messages built in code paths that haven't been migrated, but everything
  * coming through the runtime writes through `parts` instead.
+ *
+ * Self-heal: any part persisted with a non-'complete' state (e.g. 'streaming'
+ * from a flush that raced message-end, or 'pending' from a tool-call-start
+ * flush that raced tool-call-end) is treated as 'complete'. A message only
+ * reaches chat.jsonl when the runtime decides to flush it, so a
+ * streaming/pending state on disk is always a stale partial write.
  */
 export function migratePersistedMessage(raw: unknown): RuntimeMessage | null {
   if (!raw || typeof raw !== 'object') return null
@@ -30,6 +36,26 @@ export function migratePersistedMessage(raw: unknown): RuntimeMessage | null {
   } else {
     parts = []
   }
+
+  // Self-heal: normalize any non-complete part state to 'complete'.
+  // chat.jsonl is the source of truth for completed turns; any streaming or
+  // pending state on disk is a race artifact and must not survive a reload.
+  parts = parts.map((p) => {
+    switch (p.type) {
+      case 'text':
+      case 'thinking':
+        if (p.state !== 'complete') return { ...p, state: 'complete' as const }
+        return p
+      case 'tool-call':
+        if (p.state !== 'complete') return { ...p, state: 'complete' as const }
+        return p
+      case 'tool-result':
+        if (p.state !== 'complete') return { ...p, state: 'complete' as const }
+        return p
+      default:
+        return p
+    }
+  })
 
   const out: RuntimeMessage = { id, role, parts, ts }
   if (obj.usage && typeof obj.usage === 'object') {
