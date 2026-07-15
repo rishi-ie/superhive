@@ -1,5 +1,6 @@
 import * as React from 'react'
 import type { ContentPart } from '@/models/runtime'
+import { useElapsedSeconds } from '@/hooks/use-elapsed-seconds'
 
 export interface ToolCallCardBaseProps {
   part: Extract<ContentPart, { type: 'tool-call' }>
@@ -15,27 +16,6 @@ export interface ToolCallCardBaseProps {
 export interface ToolCallCardSlots {
   header: React.ReactNode
   body: React.ReactNode
-}
-
-/**
- * Track elapsed seconds since the tool call started. Stops counting once
- * `running` flips to false so the displayed duration freezes at the
- * completion moment. Used by every tool-specific header.
- */
-export function useElapsedSeconds(running: boolean): number {
-  const [seconds, setSeconds] = React.useState(0)
-  const startedAt = React.useRef<number | null>(null)
-  React.useEffect(() => {
-    if (!running) return
-    if (startedAt.current == null) startedAt.current = Date.now()
-    const id = setInterval(() => {
-      if (startedAt.current != null) {
-        setSeconds(Math.max(1, Math.round((Date.now() - startedAt.current) / 1000)))
-      }
-    }, 1000)
-    return () => clearInterval(id)
-  }, [running])
-  return seconds
 }
 
 function stateBackgroundClass(

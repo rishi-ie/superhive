@@ -21,7 +21,7 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
           <span>
             {isStreaming
               ? `Thinking… (${elapsed}s)`
-              : `Thought for ${Math.max(1, elapsed)}s`}
+              : 'Thought'}
           </span>
         </CollapsibleTrigger>
         <CollapsibleContent>
