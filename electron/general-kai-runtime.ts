@@ -222,6 +222,7 @@ class GeneralKaiRuntime {
     }
 
     this.emitStatus(agentId)
+    this.emitMessages(agentId)
     this.spawnProcess(entry)
     if (entry.extensionLoaded) {
       this.startTelemetryTailer(entry)

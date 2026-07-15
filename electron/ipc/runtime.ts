@@ -125,7 +125,7 @@ export function registerRuntimeIpc(): void {
 		if (!agent) throw new Error(`Agent not found: ${agentId}`)
 		if (!agent.localPath) throw new Error(`Agent has no localPath: ${agentId}`)
 		await autoSeedProviders(agentId, agent.localPath)
-		runtime.start(agentId, agent.localPath, GENERAL_KAI_DIR)
+		await runtime.start(agentId, agent.localPath, GENERAL_KAI_DIR)
 		await AgentRepository.update(agentId, { status: 'initializing', lastError: undefined })
 		return { ok: true }
 	})
