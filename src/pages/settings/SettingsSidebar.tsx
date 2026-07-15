@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { Icon } from "@/components/ui/icon";
-import { CaretLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { CaretLeftIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { SETTINGS_GROUPS } from "./sections/registry";
 import { goBackHome } from "@/flows/navigation/go-back-home";
@@ -17,12 +17,6 @@ export function SettingsSidebar() {
         >
           <Icon icon={CaretLeftIcon} className="size-4" />
           <span>Back to Home</span>
-        </button>
-        <button
-          className="flex h-8 items-center gap-stack rounded-card px-row text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-foreground/80"
-        >
-          <Icon icon={MagnifyingGlassIcon} className="size-4" />
-          <span>Search</span>
         </button>
       </div>
       <nav className="flex flex-col gap-4 px-row pt-4">
