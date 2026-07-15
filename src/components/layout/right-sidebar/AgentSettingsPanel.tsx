@@ -5,6 +5,8 @@ import {
   BookOpenTextIcon,
   TreeViewIcon,
   TrayIcon,
+  MagnifyingGlassIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import { useAgentSettings } from "@/flows/agents/settings";
 import { loadAgentProjects } from "@/flows/agents/crud/load-agent-projects";
@@ -12,16 +14,38 @@ import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,
   InboxSection,
+  type ManageSectionDef,
 } from "./sections/registry";
 import { OverviewSection, type OverviewData } from "./sections/OverviewSection";
 import { ResponsibilitySlider } from "./primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import type { Project } from "@/storage/types";
 
 interface AgentSettingsPanelProps {
   agentId: string;
+}
+
+function scoreAtom(label: string, description: string | undefined, tokens: string[]): number {
+  let s = 0;
+  for (const t of tokens) {
+    if (label.toLowerCase().includes(t)) {
+      s += 10;
+    } else if ((description ?? "").toLowerCase().includes(t)) {
+      s += 5;
+    } else {
+      return 0;
+    }
+  }
+  return s;
+}
+
+function sectionMatchesLabel(sec: ManageSectionDef, tokens: string[]): boolean {
+  const haystack = `${sec.label} ${sec.description ?? ""}`.toLowerCase();
+  return tokens.every((t) => haystack.includes(t));
 }
 
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
@@ -32,6 +56,8 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   React.useEffect(() => {
     loadAgentProjects(agentId).then(setProjects);
   }, [agentId]);
+
+  const [query, setQuery] = React.useState("");
 
   const overviewData = React.useMemo<OverviewData>(() => ({
     name: settings?.name ?? "Untitled agent",
@@ -65,6 +91,31 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
     projects,
   }), [settings, projects]);
 
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+  const rankedSections = React.useMemo(() => {
+    if (!settings) return [];
+
+    return MANAGE_SECTIONS
+      .map((s) => {
+        const labelMatch = tokens.length > 0 && sectionMatchesLabel(s, tokens);
+        const atoms = s.getSearchableAtoms(settings);
+        const atomScore = atoms.length > 0
+          ? Math.max(...atoms.map((a) => scoreAtom(a.label, a.description, tokens)))
+          : 0;
+        const labelScore = labelMatch ? 10 : 0;
+        const score = Math.max(labelScore, atomScore);
+        const effectiveQuery = labelMatch ? "" : query;
+        return { s, score, labelMatch, effectiveQuery };
+      })
+      .filter((r) => r.score > 0 || tokens.length === 0)
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          MANAGE_SECTIONS.indexOf(a.s) - MANAGE_SECTIONS.indexOf(b.s),
+      );
+  }, [settings, query, tokens.join(" ")]);
+
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -87,7 +138,11 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
 
   return (
     <div className="flex h-full flex-col px-button-x">
-      <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
+      <Tabs
+        defaultValue="overview"
+        onValueChange={(v) => { if (v !== "manage") setQuery(""); }}
+        className="flex flex-1 min-h-0 flex-col"
+      >
         <TabsList className="w-full h-8 justify-center bg-white dark:bg-[#1a1a1a] px-0.5">
           <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
             <Icon icon={BookOpenTextIcon} className="size-3.5" />
@@ -114,20 +169,56 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
 
         <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full" scrollbar={false}>
-            <div className="flex flex-col gap-5">
-              {MANAGE_SECTIONS.map((s) => (
-                <div key={s.id} className="flex flex-col gap-stack">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    {s.label}
-                  </span>
-                  <s.Component
-                    settings={settings}
-                    agentId={agentId}
-                    patch={autoSave.patch}
-                    flush={autoSave.flush}
+              <div className="flex flex-col gap-5">
+              <div className="relative">
+                <Icon
+                  icon={MagnifyingGlassIcon}
+                  className="size-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                />
+                  <Input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Filter settings"
+                    className="h-7 pl-7 pr-7 text-sm focus-visible:ring-0 focus-visible:border-transparent"
                   />
-                </div>
-              ))}
+                {query.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-default"
+                  >
+                    <Icon icon={XIcon} className="size-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {rankedSections.length === 0 && tokens.length > 0 ? (
+                <Empty>
+                  <Icon icon={MagnifyingGlassIcon} className="size-8 text-muted-foreground/30" />
+                  <EmptyTitle>No settings match</EmptyTitle>
+                  <EmptyDescription>
+                    Try keywords like &ldquo;filesystem&rdquo;, &ldquo;skills&rdquo;, or &ldquo;network&rdquo;.
+                  </EmptyDescription>
+                  <Button variant="ghost" size="sm" className="h-7 mt-2" onClick={() => setQuery("")}>
+                    Clear search
+                  </Button>
+                </Empty>
+              ) : (
+                rankedSections.map(({ s, effectiveQuery }) => (
+                  <div key={s.id} className="flex flex-col gap-stack">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      {s.label}
+                    </span>
+                    <s.Component
+                      settings={settings}
+                      agentId={agentId}
+                      query={effectiveQuery}
+                      patch={autoSave.patch}
+                      flush={autoSave.flush}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </ScrollArea>
         </TabsContent>
@@ -141,7 +232,6 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
           />
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }

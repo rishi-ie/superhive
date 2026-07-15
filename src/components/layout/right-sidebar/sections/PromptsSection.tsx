@@ -29,24 +29,24 @@ function filterItems(
     );
 }
 
-export function getSkillsAtoms(settings: SettingsSectionProps["settings"]) {
-  return (settings.catalog?.skills ?? []).map((item) => ({
+export function getPromptsAtoms(settings: SettingsSectionProps["settings"]) {
+  return (settings.catalog?.prompts ?? []).map((item) => ({
     id: item.path,
     label: nameOf(item),
     description: item.path,
   }));
 }
 
-export function SkillsSection({ settings, patch, query }: SettingsSectionProps) {
-  const skills = settings.catalog?.skills ?? [];
+export function PromptsSection({ settings, patch, query }: SettingsSectionProps) {
+  const prompts = settings.catalog?.prompts ?? [];
   const tokens = (query ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean);
-  const filtered = filterItems(skills, tokens);
+  const filtered = filterItems(prompts, tokens);
 
   const toggle = (originalIndex: number) => {
-    const next = skills.map((item, i) =>
+    const next = prompts.map((item, i) =>
       i === originalIndex ? { ...item, active: !item.active } : item,
     );
-    patch?.("catalog.skills", next);
+    patch?.("catalog.prompts", next);
   };
 
   if (tokens.length > 0 && filtered.length === 0) return null;
