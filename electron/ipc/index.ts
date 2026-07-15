@@ -31,6 +31,7 @@ export const IPC = {
     ON_MESSAGES: (id: string) => `agent:${id}:messages`,
     ON_EXIT:     (id: string) => `agent:${id}:exit`,
     ON_SETTINGS_CHANGED: (settings: string) => `settings:${settings}:changed`,
+    ON_CREATED: (id: string) => `agent:${id}:created`,
   },
   PROJECTS: {
     LIST: 'projects:list',

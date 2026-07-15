@@ -50,6 +50,8 @@ export const agents = {
   onExit:     (id: string, cb: (payload: RuntimeExitPayload) => void): (() => void) => window.api.agents.onExit(id, cb),
   onSettingsChanged: (id: string, cb: (agentId: string) => void): (() => void) =>
     window.api.agents.onSettingsChanged(id, cb),
+  onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void): (() => void) =>
+    window.api.agents.onCreated(id, cb),
 }
 
 /**

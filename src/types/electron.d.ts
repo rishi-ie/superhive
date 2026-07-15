@@ -67,6 +67,7 @@ export interface AgentsAPI {
 	onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void) => () => void
 	onExit: (id: string, cb: (payload: RuntimeExitPayload) => void) => () => void
 	onSettingsChanged: (id: string, cb: (agentId: string) => void) => () => void
+	onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void) => () => void
 }
 
 export interface ProjectsAPI {

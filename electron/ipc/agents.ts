@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { mkdir, cp, writeFile, chmod, rename, readFile } from 'node:fs/promises'
 import { existsSync, symlinkSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
@@ -7,6 +7,7 @@ import log from 'electron-log/main'
 import { runtime } from '../general-kai-runtime'
 import { ensureExtension } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
+import { SettingsRepository } from '../../src/storage/repositories/SettingsRepository'
 import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
@@ -20,6 +21,35 @@ import {
 } from '../agent-settings-defaults'
 import { revealInFinder } from './reveal-in-finder'
 import { forkAgentFromSettings } from './fork-agent'
+
+const CANON_CATALOG = [
+	'minimax:MiniMax-Text-01',
+	'anthropic:claude-sonnet-4-5',
+	'openai:gpt-4o',
+	'google:gemini-2-5-pro',
+	'deepseek:deepseek-v3',
+] as const
+
+async function getTopEnabledCatalogModel(): Promise<{ id: string; provider: string; name: string } | null> {
+	const rows = await SettingsRepository.getByOwnerAndGroup('global', 'global', 'models')
+	const enabledKeys = new Set(
+		rows
+			.filter((r) => {
+				const v = r.value as { enabled?: boolean }
+				return v?.enabled === true
+			})
+			.map((r) => r.key),
+	)
+	for (const id of CANON_CATALOG) {
+		if (enabledKeys.has(id)) {
+			const colonIdx = id.indexOf(':')
+			const provider = id.slice(0, colonIdx)
+			const name = id.slice(colonIdx + 1)
+			return { id, provider, name }
+		}
+	}
+	return null
+}
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -138,6 +168,7 @@ export function registerAgentIpc(): void {
 			// (including truth itself), leaving telemetry dead and the
 			// context-window ring showing "?" forever.
 			// Mirrors superhive-pi-truth/index.ts::buildInitialSettings.
+			const topModel = await getTopEnabledCatalogModel()
 			const settingsPath = settingsFilePathFor(agentDir)
 			const seed: SettingsFile = {
 				...DEFAULT_SETTINGS,
@@ -149,8 +180,21 @@ export function registerAgentIpc(): void {
 					'./extensions/superhive-pi-truth',
 					'./extensions/superhive-pi-telemetry',
 				],
+				...(topModel && {
+					model: { provider: topModel.provider, name: topModel.name },
+					defaultProvider: topModel.provider,
+					defaultModel: topModel.name,
+					enabledModels: [topModel.id],
+				}),
 			}
 			await writeFile(settingsPath, JSON.stringify(seed, null, '\t') + '\n', 'utf8')
+
+			const win = BrowserWindow.getAllWindows()[0]
+			if (win && !win.isDestroyed()) {
+				win.webContents.send(IPC.AGENTS.ON_CREATED(agent.id), {
+					defaultModel: topModel?.id ?? null,
+				})
+			}
 
 			return agent
 		},

@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld('api', {
     onMessages: (id, cb) => subscribe(`agent:${id}:messages`, cb),
     onExit:     (id, cb) => subscribe(`agent:${id}:exit`,     cb),
     onSettingsChanged: (id, cb) => subscribe(`settings:${id}:changed`, cb),
+    onCreated: (id, cb) => subscribe(`agent:${id}:created`, cb),
   },
   projects: {
     list:   () => ipcRenderer.invoke('projects:list'),

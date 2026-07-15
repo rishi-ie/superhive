@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
 import { createAgent } from '@/flows/agents/crud/create-agent';
+import { agents } from '@/api/agents';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { slugify } from '@/lib/slugify';
 
@@ -73,6 +75,15 @@ export function CreateAgentDialog() {
     );
     if (result.ok) {
       setOpen(false);
+      if (result.agent) {
+        const unsub = agents.onCreated(result.agent.id, (info) => {
+          unsub();
+          if (info.defaultModel === null) {
+            toast('No model enabled — open Settings → Models to pick one');
+          }
+        });
+        setTimeout(unsub, 5000);
+      }
     } else {
       setPhase('idle');
       setError(result.error ?? 'Failed to create agent');
