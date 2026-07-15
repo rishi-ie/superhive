@@ -5,6 +5,22 @@ import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { Agent } from '@/types/electron';
+import { AgentRowContextMenu } from './AgentRowContextMenu';
+
+interface ProjectRef {
+	id: string;
+	name: string;
+}
+
+interface AgentListRowProps {
+	agent: Agent;
+	project?: ProjectRef | null;
+	parentDir: string;
+	onOpenAssignProject: (agentId: string) => void;
+	onOpenRemoveProject: (agentId: string, projectIdHint?: string | null) => void;
+	onOpenDelete: (agentId: string) => void;
+	onForked?: (id: string) => void;
+}
 
 const STATUS_DOT: Record<Agent['status'], string> = {
   running: "bg-success",
@@ -24,16 +40,6 @@ const STATUS_LABEL: Record<Agent['status'], string> = {
   error: "Error",
 };
 
-interface ProjectRef {
-  id: string;
-  name: string;
-}
-
-interface AgentListRowProps {
-  agent: Agent;
-  project?: ProjectRef | null;
-}
-
 function relativeTime(timestamp?: number): string | null {
   if (!timestamp) return null;
   const diff = Date.now() - timestamp;
@@ -49,7 +55,15 @@ function relativeTime(timestamp?: number): string | null {
   return `${mon}mo ago`;
 }
 
-export function AgentListRow({ agent, project }: AgentListRowProps) {
+export function AgentListRow({
+  agent,
+  project,
+  parentDir,
+  onOpenAssignProject,
+  onOpenRemoveProject,
+  onOpenDelete,
+  onForked,
+}: AgentListRowProps) {
   const navigate = useNavigate();
   const updated = relativeTime(agent.updatedAt);
 
@@ -69,7 +83,7 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
     }
   };
 
-  return (
+  const row = (
     <TableRow
       onClick={() => navigate(`/agents/${agent.id}`)}
       onKeyDown={handleKeyDown}
@@ -91,7 +105,7 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
         )}
       </TableCell>
 
-      <TableCell className="w-[140px">
+      <TableCell className="w-[140px]">
         <div className="flex items-center gap-list-item whitespace-nowrap">
           <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
           {agent.status === 'initializing' ? (
@@ -106,7 +120,7 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
         </div>
       </TableCell>
 
-      <TableCell className="w-[180px">
+      <TableCell className="w-[180px]">
         {project ? (
           <Link
             to={`/projects/${project.id}`}
@@ -120,7 +134,7 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
         )}
       </TableCell>
 
-      <TableCell className="w-[160px">
+      <TableCell className="w-[160px]">
         <span className="whitespace-nowrap text-sm text-muted-foreground">
           {activityText}
         </span>
@@ -140,4 +154,17 @@ export function AgentListRow({ agent, project }: AgentListRowProps) {
       </TableCell>
     </TableRow>
   );
+
+	return (
+		<AgentRowContextMenu
+			agent={agent}
+			parentDir={parentDir}
+			onOpenAssignProject={() => onOpenAssignProject(agent.id)}
+			onOpenRemoveProject={() => onOpenRemoveProject(agent.id, project?.id)}
+			onOpenDelete={() => onOpenDelete(agent.id)}
+			onForked={onForked}
+		>
+			{row}
+		</AgentRowContextMenu>
+	);
 }
