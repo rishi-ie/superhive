@@ -300,15 +300,16 @@ export function registerSettingsIpc(): void {
 			if (!provider) throw new Error('Provider is required')
 			if (!name) throw new Error('Model name is required')
 			const id = `${provider}:${name}`
-			const contextWindow =
-				typeof input.contextWindow === 'number' && input.contextWindow > 0
-					? Math.floor(input.contextWindow)
-					: undefined
+			// TODO: contextWindow in input is deprecated and ignored — kept on the
+			// IPC signature for backward compatibility. New flows leave it unset and
+			// the main process fills it in from superhive-pi-telemetry's `model`
+			// event (resolved via Pi's modelRegistry + HARDCODED_CONTEXT_WINDOWS
+			// fallback) the first time the model is selected.
 			await SettingsRepository.setSetting(
 				GLOBAL_OWNER_TYPE,
 				GLOBAL_OWNER_ID,
 				id,
-				{ id, provider, name, enabled: true, isCustom: true, contextWindow },
+				{ id, provider, name, enabled: true, isCustom: true, contextWindow: undefined },
 				'json',
 				name,
 				undefined,

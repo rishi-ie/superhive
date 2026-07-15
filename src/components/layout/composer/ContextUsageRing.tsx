@@ -35,11 +35,34 @@ export function ContextUsageRing({
     typeof maxTokens === 'number' &&
     maxTokens > 0;
   const unknownWindow = !hasTokens;
+  const hasUsageOnly =
+    !hasTokens && typeof usedTokens === 'number' && usedTokens > 0;
   const clamped = unknownWindow ? 0 : clampPercent(percent);
   const offset = CIRCUMFERENCE * (1 - clamped / 100);
   const tooltipText = unknownWindow
-    ? 'Context window unknown — register the provider or pick a model with a known size'
+    ? typeof usedTokens === 'number' && usedTokens > 0
+      ? `Context: ${formatTokens(usedTokens)} tokens consumed — window size unknown`
+      : 'Context consumption unknown'
     : `Context: ${Math.round(clamped)}% (${formatTokens(usedTokens!)} / ${formatTokens(maxTokens!)} tokens)`;
+
+  // Unknown window: don't render the SVG ring. Show only the consumed
+  // tokens count as plain text — no "?", no percentage, no cap.
+  if (unknownWindow) {
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          aria-label={tooltipText}
+          className={cn(
+            'inline-flex items-center text-[10px] font-mono text-sidebar-foreground/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-button px-1 cursor-default',
+            className,
+          )}
+        >
+          {hasUsageOnly ? `${formatTokens(usedTokens!)} tok` : '—'}
+        </TooltipTrigger>
+        <TooltipContent>{tooltipText}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
     <Tooltip>
@@ -47,7 +70,6 @@ export function ContextUsageRing({
         aria-label={tooltipText}
         className={cn(
           'relative inline-flex items-center justify-center text-sidebar-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-full',
-          unknownWindow && 'opacity-60',
           className,
         )}
       >
@@ -67,29 +89,19 @@ export function ContextUsageRing({
             strokeOpacity="0.18"
             strokeWidth={STROKE}
           />
-          {!unknownWindow && (
-            <circle
-              cx="10"
-              cy="10"
-              r={RADIUS}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={STROKE}
-              strokeLinecap="round"
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={offset}
-              transform="rotate(-90 10 10)"
-            />
-          )}
+          <circle
+            cx="10"
+            cy="10"
+            r={RADIUS}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={STROKE}
+            strokeLinecap="round"
+            strokeDasharray={CIRCUMFERENCE}
+            strokeDashoffset={offset}
+            transform="rotate(-90 10 10)"
+          />
         </svg>
-        {unknownWindow && (
-          <span
-            aria-hidden
-            className="absolute inset-0 flex items-center justify-center text-[10px] leading-none text-sidebar-foreground/70"
-          >
-            ?
-          </span>
-        )}
       </TooltipTrigger>
       <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>

@@ -168,6 +168,13 @@ export interface SettingsAPI {
 	addModel: (input: { provider: string; name: string }) => Promise<void>
 	deleteModel: (id: string) => Promise<void>
 	getEnabledModels: () => Promise<Array<{ id: string; provider: string; name: string }>>
+	/**
+	 * Subscribe to `settings:model-updated` IPC events. Fired by the main
+	 * process when a ModelEntry's contextWindow is auto-filled from
+	 * superhive-pi-telemetry (Pi's model registry → HARDCODED_CONTEXT_WINDOWS
+	 * fallback). Only emitted when the previous contextWindow was undefined.
+	 */
+	onModelUpdated: (cb: (update: { id: string; provider: string; name: string; contextWindow: number }) => void) => () => void
 }
 
 declare global {

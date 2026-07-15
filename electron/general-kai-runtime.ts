@@ -17,6 +17,7 @@ import type { AgentStatus } from '../src/storage/types'
 import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
+import { SettingsRepository } from '../src/storage/repositories/SettingsRepository'
 import { parseCounter } from './agent-settings-defaults'
 import { appendBatch, readAll, replaceAll, trimTo } from './agent-chat-store'
 import { buildStatusPayload } from './runtime-status'
@@ -624,9 +625,52 @@ class GeneralKaiRuntime {
       entry.activeModelContextWindow = contextWindow
       entry.activeModelName = name
       this.emitStatus(agentId)
+      // Auto-write-back: if there's a custom ModelEntry row for this
+      // provider+name with contextWindow still undefined, fill it in. This
+      // is how the Add Model dialog's "no context window prompt" works —
+      // Pi knows the window (registry or HARDCODED_CONTEXT_WINDOWS
+      // fallback), telemetry surfaces it, main writes it back.
+      if (typeof event.provider === 'string' && name && typeof contextWindow === 'number') {
+        this.persistModelContextWindow(event.provider, name, contextWindow)
+      }
       return
     }
     // 'lifecycle' events are recorded but do not change UI state.
+  }
+
+  /**
+   * Fill in contextWindow on the matching ModelEntry row if it's still
+   * undefined. Existing user-typed values are preserved.
+   */
+  private async persistModelContextWindow(
+    provider: string,
+    name: string,
+    contextWindow: number,
+  ): Promise<void> {
+    try {
+      const id = `${provider}:${name}`
+      const row = await SettingsRepository.getSetting('global', 'global', id)
+      if (!row) return
+      const value = row.value as { contextWindow?: number } | undefined
+      if (typeof value?.contextWindow === 'number' && value.contextWindow > 0) return
+      await SettingsRepository.setSetting(
+        'global',
+        'global',
+        id,
+        { ...(value ?? {}), id, provider, name, enabled: true, isCustom: true, contextWindow },
+        'json',
+        name,
+        undefined,
+        'models',
+      )
+      const win = this.getWindow()
+      if (win && !win.isDestroyed()) {
+        win.webContents.send(IPC.SETTINGS.ON_MODEL_UPDATED, { id, provider, name, contextWindow })
+      }
+      log.info(`[runtime] auto-resolved contextWindow for ${id} = ${contextWindow}`)
+    } catch (err) {
+      log.warn(`[runtime] failed to persist model contextWindow for ${provider}:${name}:`, err)
+    }
   }
 
   private usageEquals(a: UsageSnapshot | undefined, b: UsageSnapshot): boolean {

@@ -60,6 +60,7 @@ export const IPC = {
     ADD_MODEL: 'settings:add-model',
     DELETE_MODEL: 'settings:delete-model',
     GET_ENABLED_MODELS: 'settings:get-enabled-models',
+    ON_MODEL_UPDATED: 'settings:model-updated',
   },
 } as const;
 

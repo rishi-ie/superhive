@@ -84,5 +84,11 @@ contextBridge.exposeInMainWorld('api', {
     addModel: (input) => ipcRenderer.invoke('settings:add-model', input),
     deleteModel: (id) => ipcRenderer.invoke('settings:delete-model', id),
     getEnabledModels: () => ipcRenderer.invoke('settings:get-enabled-models'),
+
+    // `settings:model-updated` fires when the main process auto-fills a
+    // ModelEntry's contextWindow from superhive-pi-telemetry (Pi's model
+    // registry → HARDCODED_CONTEXT_WINDOWS fallback). Only emitted when the
+    // row's previous contextWindow was undefined.
+    onModelUpdated: (cb) => subscribe('settings:model-updated', cb),
   },
 });

@@ -32,6 +32,17 @@ export function ModelsSection() {
     await Promise.all([refreshProviders(), refreshModels()]);
   }, [refreshProviders, refreshModels]);
 
+  // Auto-fill contextWindow via Pi telemetry. When the main process writes
+  // back a previously-undefined ModelEntry.contextWindow, refresh the list
+  // so the chip on the row re-renders.
+  React.useEffect(() => {
+    if (!window.api?.settings?.onModelUpdated) return;
+    const unsub = window.api.settings.onModelUpdated(() => {
+      void refreshModels();
+    });
+    return unsub;
+  }, [refreshModels]);
+
   const catalogById = React.useMemo(
     () => new Map(CATALOG.map((m) => [m.id, m])),
     [],
@@ -134,6 +145,7 @@ export function ModelsSection() {
                     name: m.name,
                     enabled: Boolean(m.enabled),
                     isCustom: m.isCustom ?? true,
+                    contextWindow: m.contextWindow,
                   }}
                   hasApiKey={modelHasKey}
                   onToggleEnabled={(enabled: boolean) =>

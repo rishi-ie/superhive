@@ -6,7 +6,6 @@ export interface AddCustomModelInput {
   modelName: string;
   baseUrl?: string;
   apiKey: string;
-  contextWindow?: number;
 }
 
 export interface AddCustomModelResult {
@@ -40,10 +39,13 @@ export async function addCustomModel(
       baseUrl: input.baseUrl?.trim() || undefined,
       apiKey,
     });
+    // contextWindow is intentionally not passed — it is auto-resolved
+    // from Pi's model registry (or the HARDCODED_CONTEXT_WINDOWS fallback)
+    // via the superhive-pi-telemetry extension on the next model_select,
+    // and written back to this row by the main process.
     await settings.addModel({
       provider,
       name: modelName,
-      contextWindow: input.contextWindow,
     });
     toast.success(`Added ${provider}:${modelName}`);
     return { ok: true };
