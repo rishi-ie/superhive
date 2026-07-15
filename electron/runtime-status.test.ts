@@ -53,11 +53,12 @@ describe('buildStatusPayload', () => {
     expect(payload.activeModelName).toBe('claude-sonnet-4-5')
   })
 
-  test('passes activeModelContextWindow through even when it is a hardcoded-only value (1M)', () => {
-    // The exact case that motivated this fix: superhive-pi-telemetry's
-    // HARDCODED_CONTEXT_WINDOWS table for minimax:MiniMax-M3 is 1_000_000.
-    // Pi's own registry returns 0 for these models; the hardcoded value is
-    // what makes the ring render the real window instead of "?".
+  test('passes activeModelContextWindow through even for very large values (1M)', () => {
+    // Pass-through sanity: whatever the active model reports as its
+    // contextWindow — including large values like 1M — must reach the
+    // renderer verbatim. The hardcoded fallback that previously fed this
+    // case lives in superhive-pi-truth (applier.ts), not in the
+    // telemetry journal; the runtime here just forwards what it gets.
     const payload = buildStatusPayload(
       makeEntry({
         activeModelContextWindow: 1_000_000,

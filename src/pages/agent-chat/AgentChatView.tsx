@@ -27,7 +27,6 @@ export function AgentChatView() {
     messages,
     lastError,
     bootStep,
-    usage,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -46,22 +45,37 @@ export function AgentChatView() {
     const provider = agentSettings.settings?.model?.provider;
     const name = agentSettings.settings?.model?.name;
     if (!provider || !name || !availableModels) return undefined;
-    // Case-insensitive on provider: settings file carries "Minimax" but Pi's
-    // registry catalogs the same provider as "minimax". Without this the
-    // lookup fails and the ring falls through to contextUsage.contextWindow
-    // (204800 default for unknown models), masking the real 1M cap.
+    // Case-insensitive on both fields: settings files often carry display
+    // casing that differs from Pi's registry keys (e.g. provider "Minimax"
+    // vs catalog "minimax"; model id "Minimax-M3" vs catalog "MiniMax-M3").
+    // Without the lowercase, the lookup misses and the ring falls through
+    // to the unknown-window state — or, worse, to contextUsage.contextWindow
+    // which can be a stale or wrong value from a partial applyModel.
     const providerLc = provider.toLowerCase();
+    const nameLc = name.toLowerCase();
     return availableModels.find(
-      (m) => m.provider.toLowerCase() === providerLc && m.id === name,
+      (m) => m.provider.toLowerCase() === providerLc && m.id.toLowerCase() === nameLc,
     )?.contextWindow;
   }, [agentSettings.settings?.model?.provider, agentSettings.settings?.model?.name, availableModels]);
   const contextWindow = React.useMemo(() => {
+    // 1. Pi's catalog — always authoritative for the canonical model
+    //    context window. The catalog comes from modelRegistry.getAvailable()
+    //    via the `models` telemetry event.
     if (selectedContextWindow) return selectedContextWindow;
-    if (activeModelContextWindow && activeModelContextWindow > 0) return activeModelContextWindow;
+    // 2. Pi's getContextUsage() — the live session model's window.
+    //    Available once a context telemetry event has fired.
     if (contextUsage?.contextWindow && contextUsage.contextWindow > 0) return contextUsage.contextWindow;
+    // 3. Last resort: the value reported on model_select.
+    if (activeModelContextWindow && activeModelContextWindow > 0) return activeModelContextWindow;
     return undefined;
-  }, [selectedContextWindow, activeModelContextWindow, contextUsage?.contextWindow]);
-  const contextUsedTokens = contextUsage?.tokens ?? usage?.input ?? 0;
+  }, [selectedContextWindow, contextUsage?.contextWindow, activeModelContextWindow]);
+  // Tokens come from Pi's getContextUsage() only. usage.input updates on every
+  // message_update during streaming and approximates the re-sent context window
+  // size — using it here causes the ring to drift mid-response, which is the
+  // timer-like behaviour we want to avoid. The ring now moves only when Pi
+  // reports a new context snapshot (session_start, agent_end, input,
+  // model_select, session_compact).
+  const contextUsedTokens = contextUsage?.tokens ?? 0;
   const contextPercent =
     contextWindow != null && contextWindow > 0 && contextUsedTokens > 0
       ? Math.min(100, (contextUsedTokens / contextWindow) * 100)
