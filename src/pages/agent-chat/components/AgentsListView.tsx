@@ -35,12 +35,15 @@ type DialogKind =
 	| { kind: 'remove'; agentId: string; projectId: string; agentName: string; live: boolean }
 	| { kind: 'delete'; agentId: string; agentName: string };
 
+const EXIT_ANIMATION_MS = 250;
+
 export function AgentsListView() {
 	const [agents, setAgents] = React.useState<Agent[]>([]);
 	const [projectsById, setProjectsById] = React.useState<Record<string, Project>>({});
 	const [loading, setLoading] = React.useState(true);
 	const [filter, setFilter] = React.useState('');
 	const [dialog, setDialog] = React.useState<DialogKind>({ kind: 'closed' });
+	const [visibleDialog, setVisibleDialog] = React.useState<DialogKind>({ kind: 'closed' });
 	const { setOpen: setCreateOpen } = useOpenCreateAgent();
 
 	const reload = React.useCallback(async () => {
@@ -61,6 +64,15 @@ export function AgentsListView() {
 			.finally(() => { if (!cancelled) setLoading(false); });
 		return () => { cancelled = true; };
 	}, [reload]);
+
+	React.useEffect(() => {
+		if (dialog.kind !== 'closed') {
+			setVisibleDialog(dialog);
+		} else {
+			const t = setTimeout(() => setVisibleDialog({ kind: 'closed' }), EXIT_ANIMATION_MS);
+			return () => clearTimeout(t);
+		}
+	}, [dialog]);
 
 	const nonCoordinators = React.useMemo(
 		() => agents.filter((a) => a.agentKind !== 'project-coordinator'),
@@ -91,8 +103,8 @@ export function AgentsListView() {
 	const liveStatuses = new Set<Agent['status']>(['initializing', 'running', 'busy']);
 
 	const dialogAgent =
-		dialog.kind === 'assign' || dialog.kind === 'delete'
-			? agents.find((a) => a.id === dialog.agentId) ?? null
+		visibleDialog.kind === 'assign' || visibleDialog.kind === 'delete'
+			? agents.find((a) => a.id === visibleDialog.agentId) ?? null
 			: null;
 
 	return (
@@ -207,11 +219,11 @@ export function AgentsListView() {
 				</div>
 			</ScrollArea>
 
-			{dialog.kind === 'assign' && dialogAgent ? (
+			{visibleDialog.kind === 'assign' && dialogAgent ? (
 				<AgentAssignToProjectDialog
-					open
+					open={dialog.kind === 'assign'}
 					agentId={dialogAgent.id}
-					onOpenChange={() => setDialog({ kind: 'closed' })}
+					onOpenChange={(o) => { if (!o) setDialog({ kind: 'closed' }); }}
 					excludeProjectIds={dialogAgent.projectIds}
 					loadProjects={async () => {
 						const list = await listProjects().catch(() => [] as Project[]);
@@ -232,15 +244,15 @@ export function AgentsListView() {
 				/>
 			) : null}
 
-			{dialog.kind === 'remove' ? (
+			{visibleDialog.kind === 'remove' ? (
 				<UnassignAgentDialog
-					open
-					agentName={dialog.agentName}
+					open={dialog.kind === 'remove'}
+					agentName={visibleDialog.agentName}
 					onCancel={() => setDialog({ kind: 'closed' })}
 					onConfirm={async () => {
 						const result = await removeAgentFromProject({
-							projectId: dialog.projectId,
-							agentId: dialog.agentId,
+							projectId: visibleDialog.projectId,
+							agentId: visibleDialog.agentId,
 						});
 						setDialog({ kind: 'closed' });
 						if (result.ok) {
@@ -250,9 +262,9 @@ export function AgentsListView() {
 				/>
 			) : null}
 
-			{dialog.kind === 'delete' && dialogAgent ? (
+			{visibleDialog.kind === 'delete' && dialogAgent ? (
 				<DeleteAgentDialog
-					open
+					open={dialog.kind === 'delete'}
 					agentName={dialogAgent.name}
 					onCancel={() => setDialog({ kind: 'closed' })}
 					onConfirm={async () => {
