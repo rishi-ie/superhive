@@ -32,6 +32,8 @@ contextBridge.exposeInMainWorld('api', {
     readSettings:  (id) => ipcRenderer.invoke('agents:readSettings', id),
     writeSettings: (id, patch) => ipcRenderer.invoke('agents:writeSettings', id, patch),
     reveal:        (id) => ipcRenderer.invoke('agents:reveal', id),
+    forkFromSettings: (sourceAgentId, data) =>
+      ipcRenderer.invoke('agents:forkFromSettings', sourceAgentId, data),
 
     // `agent:${id}:event` forwards every `AdapterEvent` variant. The full
     // discriminated union now spans (per implementation.md Phase 1.1):

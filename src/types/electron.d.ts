@@ -18,6 +18,13 @@ export interface AgentCreateInput {
 	agentKind?: string
 }
 
+export interface AgentForkInput {
+	name: string
+	folderName: string
+	parentDir: string
+	agentKind?: string
+}
+
 export interface AgentsAPI {
 	list: () => Promise<Agent[]>
 	get: (id: string) => Promise<Agent | null>
@@ -38,6 +45,7 @@ export interface AgentsAPI {
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 	reveal: (id: string) => Promise<{ ok: boolean }>
+	forkFromSettings: (sourceAgentId: string, data: AgentForkInput) => Promise<Agent>
 
 	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated

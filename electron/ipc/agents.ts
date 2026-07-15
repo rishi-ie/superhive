@@ -19,6 +19,7 @@ import {
 	settingsFilePathFor,
 } from '../agent-settings-defaults'
 import { revealInFinder } from './reveal-in-finder'
+import { forkAgentFromSettings } from './fork-agent'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -237,5 +238,19 @@ export function registerAgentIpc(): void {
 
 	ipcMain.handle(IPC.AGENTS.REVEAL, async (_e, agentId: string) => {
 		return revealInFinder(agentId)
+	})
+
+	ipcMain.handle(IPC.AGENTS.FORK_FROM_SETTINGS, async (
+		_e: unknown,
+		sourceAgentId: string,
+		data: { name: string; folderName: string; parentDir: string; agentKind?: string },
+	): Promise<Agent> => {
+		return forkAgentFromSettings({
+			sourceAgentId,
+			name: data.name,
+			folderName: data.folderName,
+			parentDir: data.parentDir,
+			agentKind: data.agentKind as AgentKind | undefined,
+		})
 	})
 }

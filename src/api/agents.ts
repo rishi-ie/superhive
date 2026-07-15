@@ -2,6 +2,7 @@ import type {
   Agent,
   AgentStatus,
   AgentCreateInput,
+  AgentForkInput,
   Project,
   RuntimeMessage,
   RuntimeStatusPayload,
@@ -40,6 +41,8 @@ export const agents = {
   writeSettings: (id: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> =>
     window.api.agents.writeSettings(id, patch),
   reveal: (id: string): Promise<{ ok: boolean }> => window.api.agents.reveal(id),
+  forkFromSettings: (sourceAgentId: string, data: AgentForkInput): Promise<Agent> =>
+    window.api.agents.forkFromSettings(sourceAgentId, data),
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),
