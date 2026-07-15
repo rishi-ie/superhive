@@ -192,11 +192,11 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.onMessages(agentId, (msgs) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      entry.messages = msgs
-      // Renderer cap matches disk trim (5000). Drop the oldest rows that
-      // aren't in the just-arrived snapshot. Skip silently — the user
-      // shouldn't see a toast (P11.3.2); the chat-fade-bottom + scrolled
-      // further-up affordance is enough indication.
+      for (const m of msgs) {
+        if (!entry.messages.some((x) => x.id === m.id)) {
+          entry.messages.push(m)
+        }
+      }
       if (entry.messages.length > MAX_MESSAGES) {
         entry.messages = entry.messages.slice(-MAX_MESSAGES)
       }
@@ -499,21 +499,6 @@ export function useAgentRuntime(agentId: string | undefined) {
       if (sliceRef.current) sliceRef.current.notify = undefined
     }
   }, [slice])
-
-  React.useEffect(() => {
-    if (!agentId) return
-    const timeout = setTimeout(async () => {
-      const entry = runtimeSlices.get(agentId)
-      if (!entry || entry.messages.length > 0) return
-      const persisted = await agents.getMessages(agentId)
-      if (persisted.length === 0) return
-      const current = runtimeSlices.get(agentId)
-      if (!current || current.messages.length > 0) return
-      current.messages = persisted
-      current.notify?.()
-    }, 1500)
-    return () => clearTimeout(timeout)
-  }, [agentId])
 
   const send = React.useCallback((text: string) => {
     if (!agentId) return

@@ -18,7 +18,7 @@ import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { parseCounter } from './agent-settings-defaults'
-import { appendBatch, replaceAll, trimTo } from './agent-chat-store'
+import { appendBatch, readAll, replaceAll, trimTo } from './agent-chat-store'
 import { buildStatusPayload } from './runtime-status'
 
 /**
@@ -164,7 +164,7 @@ class GeneralKaiRuntime {
   }
 
   /** Spawn a new Pi process for an agent. Idempotent — ignored if already running. */
-  start(agentId: string, agentDir: string, manifestPiSource: string): void {
+  async start(agentId: string, agentDir: string, manifestPiSource: string): Promise<void> {
     if (this.isRunning(agentId)) {
       log.info(`[runtime] agent ${agentId} already running, ignoring start`)
       return
@@ -215,6 +215,12 @@ class GeneralKaiRuntime {
     adapter.reset()
 
     this.entries.set(agentId, entry)
+
+    const persisted = await readAll(agentId)
+    if (entry.messages.length === 0 && persisted.length > 0) {
+      entry.messages = persisted
+    }
+
     this.emitStatus(agentId)
     this.spawnProcess(entry)
     if (entry.extensionLoaded) {
