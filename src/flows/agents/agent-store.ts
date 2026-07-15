@@ -192,11 +192,11 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.onMessages(agentId, (msgs) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      for (const m of msgs) {
-        if (!entry.messages.some((x) => x.id === m.id)) {
-          entry.messages.push(m)
-        }
-      }
+      entry.messages = msgs
+      // Renderer cap matches disk trim (5000). Drop the oldest rows that
+      // aren't in the just-arrived snapshot. Skip silently — the user
+      // shouldn't see a toast (P11.3.2); the chat-fade-bottom + scrolled
+      // further-up affordance is enough indication.
       if (entry.messages.length > MAX_MESSAGES) {
         entry.messages = entry.messages.slice(-MAX_MESSAGES)
       }
