@@ -24,6 +24,7 @@ export const IPC = {
     DELETE_MESSAGE: 'agents:delete-message',
     READ_SETTINGS: 'agents:readSettings',
     WRITE_SETTINGS: 'agents:writeSettings',
+    REVEAL: 'agents:reveal',
     ON_EVENT:    (id: string) => `agent:${id}:event`,
     ON_STATUS:   (id: string) => `agent:${id}:status`,
     ON_MESSAGES: (id: string) => `agent:${id}:messages`,

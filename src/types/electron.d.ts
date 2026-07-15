@@ -37,6 +37,7 @@ export interface AgentsAPI {
 	deleteMessage: (id: string, messageId: string) => Promise<{ ok: boolean }>
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
+	reveal: (id: string) => Promise<{ ok: boolean }>
 
 	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated

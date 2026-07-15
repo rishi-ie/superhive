@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld('api', {
     deleteMessage: (id, messageId) => ipcRenderer.invoke('agents:delete-message', id, messageId),
     readSettings:  (id) => ipcRenderer.invoke('agents:readSettings', id),
     writeSettings: (id, patch) => ipcRenderer.invoke('agents:writeSettings', id, patch),
+    reveal:        (id) => ipcRenderer.invoke('agents:reveal', id),
 
     // `agent:${id}:event` forwards every `AdapterEvent` variant. The full
     // discriminated union now spans (per implementation.md Phase 1.1):

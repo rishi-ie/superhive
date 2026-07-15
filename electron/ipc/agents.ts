@@ -18,6 +18,7 @@ import {
 	parseCounter,
 	settingsFilePathFor,
 } from '../agent-settings-defaults'
+import { revealInFinder } from './reveal-in-finder'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -232,5 +233,9 @@ export function registerAgentIpc(): void {
 
 	ipcMain.handle(IPC.AGENTS.GET_MESSAGES, async (_e, agentId: string) => {
 		return getAgentChatMessages(agentId)
+	})
+
+	ipcMain.handle(IPC.AGENTS.REVEAL, async (_e, agentId: string) => {
+		return revealInFinder(agentId)
 	})
 }
