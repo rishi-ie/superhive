@@ -82,15 +82,36 @@ export async function append(agentId: string, message: RuntimeMessage): Promise<
 
 export async function appendBatch(agentId: string, messages: RuntimeMessage[]): Promise<void> {
 	if (messages.length === 0) return
-	// Sanity check: every message must carry `parts`. Callers that pre-date
-	// the migration (Phase 1.4.3) may still pass `{ content: string, … }`
-	// shapes — convert them up-front so on-disk rows are uniform.
 	const normalized = messages.map((m) => migratePersistedMessage(m) ?? m)
 	await ensureAgentDir(agentId)
 	const path = chatPath(agentId)
-	const lines = normalized.map((m) => JSON.stringify(m)).join('\n') + '\n'
+	// Merge with existing file: replace any entry with the same id, append new.
+	// Without this, message-end re-flushing the same message (after the fix that
+	// re-arms persist on message-end) would append a duplicate line for that
+	// id, causing the same message to appear twice in chat.jsonl.
 	await queueWrite(path, async () => {
-		await fs.appendFile(path, lines, 'utf8')
+		const existing: RuntimeMessage[] = []
+		try {
+			const raw = await fs.readFile(path, 'utf8')
+			for (const line of raw.split('\n')) {
+				if (!line.trim()) continue
+				try {
+					const m = migratePersistedMessage(JSON.parse(line))
+					if (m) existing.push(m)
+				} catch {
+					// Corrupt line — skip
+				}
+			}
+		} catch {
+			// File doesn't exist yet
+		}
+		const byId = new Map<string, RuntimeMessage>()
+		for (const m of existing) byId.set(m.id, m)
+		for (const m of normalized) byId.set(m.id, m)
+		const merged = Array.from(byId.values())
+		const body =
+			merged.length === 0 ? '' : merged.map((m) => JSON.stringify(m)).join('\n') + '\n'
+		await fs.writeFile(path, body, 'utf8')
 	})
 }
 
@@ -99,16 +120,19 @@ export async function readAll(agentId: string): Promise<RuntimeMessage[]> {
 	try {
 		const raw = await fs.readFile(path, 'utf8')
 		const lines = raw.split('\n').filter((l) => l.trim())
-		const messages: RuntimeMessage[] = []
+		// Dedupe by id: if the same message id appears multiple times (from a
+		// race where the same message was flushed and re-flushed before this fix,
+		// or from concurrent writes), keep only the last entry. Last write wins.
+		const byId = new Map<string, RuntimeMessage>()
 		for (const line of lines) {
 			try {
 				const migrated = migratePersistedMessage(JSON.parse(line))
-				if (migrated) messages.push(migrated)
+				if (migrated) byId.set(migrated.id, migrated)
 			} catch {
 				// Corrupt line — skip
 			}
 		}
-		return messages
+		return Array.from(byId.values())
 	} catch {
 		return []
 	}
@@ -117,6 +141,7 @@ export async function readAll(agentId: string): Promise<RuntimeMessage[]> {
 export async function trimTo(agentId: string, maxMessages: number): Promise<void> {
 	const messages = await readAll(agentId)
 	if (messages.length <= maxMessages) return
+	// Keep the newest maxMessages entries (last N by timestamp order in file).
 	const toKeep = messages.slice(-maxMessages)
 	const path = chatPath(agentId)
 	await queueWrite(path, async () => {
