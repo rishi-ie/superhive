@@ -1,5 +1,5 @@
-import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
-export type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
+import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo, AdapterEvent } from '../../electron/pi-protocol/types'
+export type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo, AdapterEvent } from '../../electron/pi-protocol/types'
 import type { AgentStatus } from '../storage/types'
 export type { AgentStatus } from '../storage/types'
 
