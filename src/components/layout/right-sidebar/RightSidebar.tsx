@@ -1,4 +1,4 @@
-import { useParams, useMatch } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 import { Sidebar, SidebarContent } from '@/components/ui/sidebar';
 import { Icon } from "@/components/ui/icon";
 import { UserIcon } from "@phosphor-icons/react";
@@ -11,8 +11,14 @@ interface RightSidebarProps {
 }
 
 export function RightSidebar({ width = 280 }: RightSidebarProps) {
-  const { agentId, projectId } = useParams();
+  // RightSidebar is mounted by AppLayout (the parent route) and therefore
+  // can't read child route params via useParams(). Match against the child
+  // route patterns instead to extract agentId / projectId.
+  const agentMatch = useMatch('/agents/:agentId');
+  const projectMatch = useMatch('/projects/:projectId');
   const isAgentsList = useMatch('/agents') !== null;
+  const agentId = agentMatch?.params.agentId;
+  const projectId = projectMatch?.params.projectId;
 
   return (
     <Sidebar
