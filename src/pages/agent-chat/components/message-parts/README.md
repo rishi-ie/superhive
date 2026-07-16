@@ -30,7 +30,8 @@ tool call is always visible.
 - **`CodeBlock`** — shiki highlighting via `getHighlighter()`, language header bar, wrap toggle,
   copy-check feedback (1.2s). Falls back to plain `<pre><code>` before highlighter loads.
 - **`MarkdownTable`** — overflow-x-auto, fade mask, expand/collapse for >8 rows,
-  copy-as-Markdown / copy-as-CSV via `DropdownMenu`. Serializers live in `src/lib/table-serialize.ts`.
+  copy-as-Markdown / copy-as-CSV via `DropdownMenu`. Serializers are defined
+  locally in `MarkdownTable.tsx` (they walk React children, not unist nodes).
 
 ## Files
 
