@@ -4,7 +4,7 @@ import { CaretRightIcon } from "@phosphor-icons/react";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
 import { AgentStatusBadge } from '@/components/common';
-import type { Agent } from '@/types/electron';
+import type { Agent, InitStep, AgentStatus } from '@/types/electron';
 import { AgentRowContextMenu } from './AgentRowContextMenu';
 
 interface ProjectRef {
@@ -16,6 +16,9 @@ interface AgentListRowProps {
 	agent: Agent;
 	project?: ProjectRef | null;
 	parentDir: string;
+	/** Live runtime status + bootStep, used to overlay the DB snapshot. */
+	liveStatus?: AgentStatus;
+	liveBootStep?: InitStep;
 	onOpenAssignProject: (agentId: string) => void;
 	onOpenRemoveProject: (agentId: string, projectIdHint?: string | null) => void;
 	onOpenDelete: (agentId: string) => void;
@@ -41,6 +44,8 @@ export function AgentListRow({
   agent,
   project,
   parentDir,
+  liveStatus,
+  liveBootStep,
   onOpenAssignProject,
   onOpenRemoveProject,
   onOpenDelete,
@@ -48,6 +53,10 @@ export function AgentListRow({
 }: AgentListRowProps) {
   const navigate = useNavigate();
   const updated = relativeTime(agent.updatedAt);
+
+  const status: AgentStatus = liveStatus ?? agent.status;
+  const booting =
+    status === 'active' && liveBootStep !== undefined && liveBootStep !== 'ready';
 
   const activityParts: string[] = [];
   if (agent.taskIds.length > 0) {
@@ -89,8 +98,9 @@ export function AgentListRow({
 
       <TableCell className="w-[140px]">
         <AgentStatusBadge
-          status={agent.status}
+          status={status}
           error={Boolean(agent.lastError)}
+          booting={booting}
         />
       </TableCell>
 

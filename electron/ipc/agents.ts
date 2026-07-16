@@ -130,7 +130,7 @@ export function registerAgentIpc(): void {
 				role: data.role?.trim() || undefined,
 				description: data.description?.trim() || undefined,
 				localPath: agentDir,
-				status: 'active',
+				status: 'idle',
 				agentKind: data.agentKind as AgentKind | undefined,
 			})
 

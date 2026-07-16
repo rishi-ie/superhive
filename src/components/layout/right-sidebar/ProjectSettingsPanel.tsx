@@ -38,19 +38,19 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     for (const m of team.members) ids.push(m.id)
     return ids
   }, [team.coordinator, team.members])
-  const liveStatuses = useAllAgentStatuses(liveIds, liveIds.length > 0)
+  const liveStates = useAllAgentStatuses(liveIds, liveIds.length > 0)
 
   const mergedTeam = useMemo<TeamState>(() => {
     const apply = (a: Agent | null): Agent | null => {
       if (!a) return null
-      const live = liveStatuses.get(a.id)
-      return live ? { ...a, status: live } : a
+      const live = liveStates.get(a.id)
+      return live ? { ...a, status: live.status } : a
     }
     return {
       coordinator: apply(team.coordinator),
       members: team.members.map((m) => apply(m) ?? m),
     }
-  }, [team, liveStatuses])
+  }, [team, liveStates])
 
   return (
     <div className="flex h-full flex-col px-button-x">

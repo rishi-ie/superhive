@@ -80,7 +80,7 @@ export function AgentsListView() {
 		[agents],
 	);
 
-	const liveStatusesMap = useAllAgentStatuses(
+	const liveStatesMap = useAllAgentStatuses(
 		nonCoordinators.map((a) => a.id),
 		nonCoordinators.length > 0,
 	);
@@ -88,10 +88,10 @@ export function AgentsListView() {
 	const agentsWithLiveStatus = React.useMemo(
 		() =>
 			nonCoordinators.map((a) => {
-				const live = liveStatusesMap.get(a.id)
-				return live ? { ...a, status: live } : a
+				const live = liveStatesMap.get(a.id)
+				return live ? { ...a, status: live.status } : a
 			}),
-		[nonCoordinators, liveStatusesMap],
+		[nonCoordinators, liveStatesMap],
 	);
 
 	const filtered = React.useMemo(() => {
@@ -197,16 +197,20 @@ export function AgentsListView() {
 										<TableHead className="w-10" />
 									</TableRow>
 								</TableHeader>
-								<TableBody>
-									{filtered.map((agent) => (
-										<AgentListRow
-											key={agent.id}
-											agent={agent}
-											project={projectFor(agent)}
-											parentDir={parentDir}
-											onOpenAssignProject={(agentId) =>
-												setDialog({ kind: 'assign', agentId })
-											}
+<TableBody>
+								{filtered.map((agent) => {
+									const live = liveStatesMap.get(agent.id)
+									return (
+									<AgentListRow
+										key={agent.id}
+										agent={agent}
+										project={projectFor(agent)}
+										parentDir={parentDir}
+										liveStatus={live?.status}
+										liveBootStep={live?.bootStep}
+										onOpenAssignProject={(agentId) =>
+											setDialog({ kind: 'assign', agentId })
+										}
 											onOpenRemoveProject={(agentId, projectIdHint) => {
 												const projectId = projectIdHint ?? agent.projectIds[0] ?? '';
 												if (!projectId) return;
@@ -222,12 +226,13 @@ export function AgentsListView() {
 											onOpenDelete={(agentId) =>
 												setDialog({ kind: 'delete', agentId, agentName: agent.name })
 											}
-											onForked={() => {
-												reload();
-											}}
-										/>
-									))}
-								</TableBody>
+onForked={() => {
+											reload();
+										}}
+									/>
+									)
+								})}
+							</TableBody>
 							</Table>
 						</div>
 					)}

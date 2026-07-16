@@ -463,14 +463,24 @@ export function disposeSlice(agentId: string): void {
   disposeSettingsSliceNow(agentId)
 }
 
+export interface AgentLiveState {
+  status: AgentStatus
+  bootStep?: InitStep
+}
+
 interface AggregatorSlice {
-  statuses: Map<string, AgentStatus>
+  states: Map<string, AgentLiveState>
   refcount: number
   unsubs: Map<string, () => void>
   notify?: () => void
 }
 
 const aggregatorSlices = new Map<string, AggregatorSlice>()
+
+function captureState(s: { status: AgentStatus; bootStep?: InitStep } | null | undefined): AgentLiveState | null {
+  if (!s) return null
+  return { status: s.status, bootStep: s.bootStep }
+}
 
 function initAggregatorSlice(agentId: string): AggregatorSlice {
   const existing = aggregatorSlices.get(agentId)
@@ -479,7 +489,7 @@ function initAggregatorSlice(agentId: string): AggregatorSlice {
     return existing
   }
   const slice: AggregatorSlice = {
-    statuses: new Map(),
+    states: new Map(),
     refcount: 1,
     unsubs: new Map(),
   }
@@ -487,15 +497,16 @@ function initAggregatorSlice(agentId: string): AggregatorSlice {
 
   agents.getRuntimeState(agentId).then((s) => {
     const entry = aggregatorSlices.get(agentId)
-    if (!entry || !s) return
-    entry.statuses.set(agentId, s.status)
+    if (!entry) return
+    const captured = captureState(s)
+    if (captured) entry.states.set(agentId, captured)
     entry.notify?.()
   })
 
   const unsub = agents.onStatus(agentId, (s) => {
     const entry = aggregatorSlices.get(agentId)
     if (!entry) return
-    entry.statuses.set(agentId, s.status)
+    entry.states.set(agentId, { status: s.status, bootStep: s.bootStep })
     entry.notify?.()
   })
   slice.unsubs.set(agentId, unsub)
@@ -515,9 +526,13 @@ function disposeAggregatorSlice(agentId: string): void {
 
 /**
  * Subscribe to live `onStatus` events for a list of agent IDs. Returns a
- * `Map<agentId, AgentStatus>` that callers merge over their DB-snapshot list
- * so the agents table + project sidebar reflect runtime status changes
+ * `Map<agentId, AgentLiveState>` that callers merge over their DB-snapshot
+ * list so the agents table + project sidebar reflect runtime status changes
  * without waiting for the next page reload.
+ *
+ * The `bootStep` field lets surfaces render the boot spinner overlay; it's
+ * surfaced here rather than re-fetched per-row so the table can render
+ * accurate boot progress without N parallel `getRuntimeState` calls.
  *
  * Refcounted: multiple consumers for the same id share one subscription.
  * Pass `enabled = false` to skip wiring (useful when no agents exist).
@@ -525,7 +540,7 @@ function disposeAggregatorSlice(agentId: string): void {
 export function useAllAgentStatuses(
   agentIds: string[],
   enabled: boolean = true,
-): Map<string, AgentStatus> {
+): Map<string, AgentLiveState> {
   const stableIds = React.useMemo(() => {
     const seen = new Set<string>()
     const out: string[] = []
@@ -560,7 +575,7 @@ export function useAllAgentStatuses(
     }
   }, [stableIds, enabled])
 
-  const [snapshot, setSnapshot] = React.useState<Map<string, AgentStatus>>(
+  const [snapshot, setSnapshot] = React.useState<Map<string, AgentLiveState>>(
     () => new Map(),
   )
 
@@ -568,10 +583,10 @@ export function useAllAgentStatuses(
     if (!enabled) return
     const local = sliceRef.current!
     const sync = () => {
-      const next = new Map<string, AgentStatus>()
+      const next = new Map<string, AgentLiveState>()
       for (const id of stableIds) {
         const slice = local.get(id)
-        const s = slice?.statuses.get(id)
+        const s = slice?.states.get(id)
         if (s) next.set(id, s)
       }
       setSnapshot(next)

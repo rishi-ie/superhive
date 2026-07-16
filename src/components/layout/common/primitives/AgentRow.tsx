@@ -1,18 +1,24 @@
 import type { MouseEventHandler } from 'react';
 import { Icon } from "@/components/ui/icon";
 import { UserIcon } from "@phosphor-icons/react";
+import { useAgentStatusPresentation } from '@/components/common/AgentStatusBadge';
+import type { AgentStatus } from '@/storage/types';
 
 interface AgentRowProps {
   name: string;
-  status?: 'idle' | 'active';
+  status?: AgentStatus;
   showStatus?: boolean;
   compact?: boolean;
   currentAction?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
+const WORKING_STATUSES: ReadonlySet<AgentStatus> = new Set<AgentStatus>(['active', 'busy', 'waiting'])
+
 export function AgentRow({ name, status = 'idle', showStatus = true, compact = false, currentAction = "Working…", onClick }: AgentRowProps) {
-  if (showStatus && status === 'active') {
+  const presentation = useAgentStatusPresentation(status)
+
+  if (showStatus && WORKING_STATUSES.has(status)) {
     return (
       <button
         type="button"
@@ -38,7 +44,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
         onClick={onClick}
         className="group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
       >
-        <div className="size-2 rounded-full bg-success flex-shrink-0" />
+        <div className={presentation.dotClass + " size-2 rounded-full flex-shrink-0"} />
         <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
         <span className="flex-1 truncate text-left">{name}</span>
       </button>
