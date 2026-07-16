@@ -233,15 +233,6 @@ export function registerSettingsIpc(): void {
 		await reSeedAllAgents()
 	})
 
-	ipcMain.handle(
-		IPC.SETTINGS.ENSURE_PROVIDER_CATALOG,
-		async (_e, input: { provider: string; apiKeyIsFresh?: boolean }) => {
-			const providerName = input?.provider?.trim()
-			if (!providerName) throw new Error('Provider name is required')
-			return { inserted: 0 }
-		},
-	)
-
 	ipcMain.handle(IPC.SETTINGS.GET_MODELS, async () => {
 		const rows = await SettingsRepository.getByOwnerAndGroup(
 			GLOBAL_OWNER_TYPE,

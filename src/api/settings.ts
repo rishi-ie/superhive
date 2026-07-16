@@ -10,9 +10,6 @@ export const settings = {
   deleteProvider: (name: string): Promise<void> =>
     window.api.settings.deleteProvider(name),
 
-  ensureProviderCatalog: (input: { provider: string; apiKeyIsFresh?: boolean }): Promise<{ inserted: number }> =>
-    window.api.settings.ensureProviderCatalog(input),
-
   getModels: (): Promise<ModelEntry[]> =>
     window.api.settings.getModels(),
 

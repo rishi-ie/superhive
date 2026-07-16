@@ -80,8 +80,6 @@ contextBridge.exposeInMainWorld('api', {
     getProviders: () => ipcRenderer.invoke('settings:get-providers'),
     setProvider: (input) => ipcRenderer.invoke('settings:set-provider', input),
     deleteProvider: (name) => ipcRenderer.invoke('settings:delete-provider', name),
-    ensureProviderCatalog: (input) =>
-      ipcRenderer.invoke('settings:ensure-provider-catalog', input),
     getModels: () => ipcRenderer.invoke('settings:get-models'),
     setModelEnabled: (id, enabled) =>
       ipcRenderer.invoke('settings:set-model-enabled', id, enabled),

@@ -1,6 +1,5 @@
 export { listProviders } from './list-providers';
 export { deleteProvider } from './delete-provider';
-export { ensureProviderCatalog } from './ensure-provider-catalog';
 export { configureCatalogProvider } from './configure-catalog-provider';
 export { saveProviderBlock } from './save-provider-block';
 export { setModelEnabled } from './set-model-enabled';

@@ -170,7 +170,6 @@ export interface SettingsAPI {
 	getProviders: () => Promise<Record<string, ProviderEntry>>
 	setProvider: (input: SetProviderInput) => Promise<void>
 	deleteProvider: (name: string) => Promise<void>
-	ensureProviderCatalog: (input: { provider: string; apiKeyIsFresh?: boolean }) => Promise<{ inserted: number }>
 	getModels: () => Promise<ModelEntry[]>
 	setModelEnabled: (id: string, enabled: boolean) => Promise<void>
 	addModel: (input: { provider: string; name: string }) => Promise<void>

@@ -57,7 +57,6 @@ export const IPC = {
     GET_PROVIDERS: 'settings:get-providers',
     SET_PROVIDER: 'settings:set-provider',
     DELETE_PROVIDER: 'settings:delete-provider',
-    ENSURE_PROVIDER_CATALOG: 'settings:ensure-provider-catalog',
     GET_MODELS: 'settings:get-models',
     SET_MODEL_ENABLED: 'settings:set-model-enabled',
     ADD_MODEL: 'settings:add-model',
