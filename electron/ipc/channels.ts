@@ -16,10 +16,6 @@ function getChannelPath(channelId: string): string {
 	return path.join(CHANNELS_DIR, `${channelId}.json`);
 }
 
-function getChatFilePath(channelId: string): string {
-	return path.join(CHANNELS_DIR, `${channelId}.jsonl`);
-}
-
 export function registerChannelsIpc(): void {
 	ipcMain.handle(IPC.CHANNELS.CREATE, async (_, raw: CreateChannelInput) => {
 		await ensureChannelsDir();
@@ -31,11 +27,10 @@ export function registerChannelsIpc(): void {
 			projectId: raw.projectId,
 			participantAgentIds: raw.participantAgentIds,
 			startedAt: now,
-			chatFile: getChatFilePath('').replace('_.jsonl', `${randomUUID()}.jsonl`).replace(CHANNELS_DIR, CHANNELS_DIR),
+			chatFile: path.join(CHANNELS_DIR, `${randomUUID()}.jsonl`),
 			createdAt: now,
 			updatedAt: now,
 		};
-		channel.chatFile = path.join(CHANNELS_DIR, `${channel.id}.jsonl`);
 		const channelPath = getChannelPath(channel.id);
 		await fs.writeFile(channelPath, JSON.stringify(channel, null, 2), 'utf-8');
 		return channel;
