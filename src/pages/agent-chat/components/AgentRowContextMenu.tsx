@@ -38,9 +38,9 @@ interface AgentRowContextMenuProps {
 	children: ReactNode;
 }
 
-const STOPPABLE = new Set<Agent['status']>(['running', 'busy']);
-const STARTABLE = new Set<Agent['status']>(['stopped', 'idle', 'error']);
-const RESTART_SKIPPED = new Set<Agent['status']>(['initializing']);
+const STOPPABLE = new Set<Agent['status']>(['active', 'busy']);
+const STARTABLE = new Set<Agent['status']>(['idle']);
+const RESTART_SKIPPED: ReadonlySet<Agent['status']> = new Set();
 
 export function AgentRowContextMenu(props: AgentRowContextMenuProps) {
 	const navigate = useNavigate();

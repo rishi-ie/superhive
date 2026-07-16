@@ -3,7 +3,7 @@ import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { runtime } from './general-kai-runtime'
 import type { AgentStatus } from '../src/storage/types'
 
-const LIVE_STATUSES: AgentStatus[] = ['idle', 'initializing', 'running', 'busy']
+const LIVE_STATUSES: AgentStatus[] = ['active', 'busy', 'waiting']
 
 export async function reconcileRuntime(): Promise<void> {
   log.info('[reconcile-runtime] starting')
@@ -19,11 +19,11 @@ export async function reconcileRuntime(): Promise<void> {
 
     if (!isLive && LIVE_STATUSES.includes(agent.status)) {
       await AgentRepository.update(agent.id, {
-        status: 'stopped',
+        status: 'idle',
         lastError: undefined,
       })
       reconciled++
-      log.info(`[reconcile-runtime] ${agent.name} (${agent.id}): ${agent.status} → stopped (no runtime entry)`)
+      log.info(`[reconcile-runtime] ${agent.name} (${agent.id}): ${agent.status} → idle (no runtime entry)`)
     }
   }
 

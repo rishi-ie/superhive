@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { CaretRightIcon, CircleNotchIcon } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { AgentStatusBadge } from '@/components/common';
 import type { Agent } from '@/types/electron';
 import { AgentRowContextMenu } from './AgentRowContextMenu';
 
@@ -21,24 +21,6 @@ interface AgentListRowProps {
 	onOpenDelete: (agentId: string) => void;
 	onForked?: (id: string) => void;
 }
-
-const STATUS_DOT: Record<Agent['status'], string> = {
-  running: "bg-success",
-  busy: "bg-info",
-  idle: "bg-muted-foreground/40",
-  initializing: "bg-warning",
-  stopped: "bg-muted-foreground/30",
-  error: "bg-destructive",
-};
-
-const STATUS_LABEL: Record<Agent['status'], string> = {
-  running: "Running",
-  busy: "Busy",
-  idle: "Idle",
-  initializing: "Initializing",
-  stopped: "Stopped",
-  error: "Error",
-};
 
 function relativeTime(timestamp?: number): string | null {
   if (!timestamp) return null;
@@ -106,18 +88,10 @@ export function AgentListRow({
       </TableCell>
 
       <TableCell className="w-[140px]">
-        <div className="flex items-center gap-list-item whitespace-nowrap">
-          <div className={cn("size-1.5 rounded-full shrink-0", STATUS_DOT[agent.status])} />
-          {agent.status === 'initializing' ? (
-            <Icon
-              icon={CircleNotchIcon}
-              className="size-2.5 animate-spin shrink-0 text-warning"
-            />
-          ) : null}
-          <span className="text-xs text-muted-foreground">
-            {STATUS_LABEL[agent.status]}
-          </span>
-        </div>
+        <AgentStatusBadge
+          status={agent.status}
+          error={Boolean(agent.lastError)}
+        />
       </TableCell>
 
       <TableCell className="w-[180px]">

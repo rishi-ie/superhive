@@ -161,7 +161,7 @@ class GeneralKaiRuntime {
 
   isRunning(agentId: string): boolean {
     const entry = this.entries.get(agentId)
-    return !!entry?.process && entry.status !== 'stopped' && entry.status !== 'error'
+    return !!entry?.process && entry.status !== 'idle'
   }
 
   /** Spawn a new Pi process for an agent. Idempotent — ignored if already running. */
@@ -180,7 +180,7 @@ class GeneralKaiRuntime {
       agentDir,
       manifestPiSource,
       process: null,
-      status: 'initializing',
+      status: 'active',
       messages: [],
       stderrLog: [],
       adapter,
@@ -196,7 +196,7 @@ class GeneralKaiRuntime {
     entry.adapter = adapter
     entry.agentDir = agentDir
     entry.manifestPiSource = manifestPiSource
-    entry.status = 'initializing'
+    entry.status = 'active'
     entry.startedAt = Date.now()
     entry.endedAt = undefined
     entry.lastError = undefined
@@ -232,14 +232,14 @@ class GeneralKaiRuntime {
     }
   }
 
-  /** Send SIGABRT + SIGTERM to the process. Sets status to 'stopped'. */
+  /** Send SIGABRT + SIGTERM to the process. Sets status to 'idle'. */
   stop(agentId: string): void {
     this.clearSilenceTimer(agentId)
     this.readyEmitted.delete(agentId)
     const entry = this.entries.get(agentId)
     if (!entry?.process) {
       if (entry) {
-        this.transitionStatus(entry, 'stopped')
+        this.transitionStatus(entry, 'idle')
       }
       return
     }
@@ -281,7 +281,7 @@ class GeneralKaiRuntime {
     } catch (err) {
       log.error(`[runtime] send failed for ${agentId}:`, err)
       entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'error')
+      this.transitionStatus(entry, 'idle')
       return false
     }
   }
@@ -322,7 +322,7 @@ class GeneralKaiRuntime {
     } catch (err) {
       log.error(`[runtime] editMessage failed for ${agentId}:`, err)
       entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'error')
+      this.transitionStatus(entry, 'idle')
       return false
     }
   }
@@ -360,7 +360,7 @@ class GeneralKaiRuntime {
     } catch (err) {
       log.error(`[runtime] regenerate failed for ${agentId}:`, err)
       entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'error')
+      this.transitionStatus(entry, 'idle')
       return false
     }
   }
@@ -405,7 +405,7 @@ class GeneralKaiRuntime {
     for (const [, entry] of this.entries) {
       if (entry.process) {
         this.terminateProcess(entry.process)
-        entry.status = 'stopped'
+        entry.status = 'idle'
         log.info(`[runtime] shutdown agent ${entry.agentId}`)
       }
     }
@@ -743,7 +743,7 @@ class GeneralKaiRuntime {
     } catch (err) {
       log.error(`[runtime] spawn failed for ${agentId}:`, err)
       entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'error')
+      this.transitionStatus(entry, 'idle')
       return
     }
 
@@ -798,10 +798,10 @@ class GeneralKaiRuntime {
       entry.pid = undefined
       entry.endedAt = Date.now()
       if (code === 0 || signal === 'SIGTERM' || signal === 'SIGKILL') {
-        this.transitionStatus(entry, 'stopped')
+        this.transitionStatus(entry, 'idle')
       } else {
         entry.lastError = entry.stderrLog.slice(-3).join(' | ') || `Process exited with code ${code}`
-        this.transitionStatus(entry, 'error')
+        this.transitionStatus(entry, 'idle')
       }
       this.emitStatus(agentId)
       this.sendExitEvent(agentId, code, signal)
@@ -810,7 +810,7 @@ class GeneralKaiRuntime {
     proc.on('error', (err) => {
       log.error(`[runtime] agent ${agentId} error:`, err)
       entry.lastError = err.message
-      this.transitionStatus(entry, 'error')
+      this.transitionStatus(entry, 'idle')
     })
   }
 
@@ -862,7 +862,7 @@ class GeneralKaiRuntime {
     }
 
     if (event.type === 'ready') {
-      this.transitionStatus(entry, 'running')
+      this.transitionStatus(entry, 'active')
       log.debug(`[runtime.event] agent=${agentId} type=ready`)
       return
     }
@@ -924,7 +924,7 @@ class GeneralKaiRuntime {
         this.emitEvent(agentId, event)
         this.emitMessages(agentId)
       }
-      this.transitionStatus(entry, 'running')
+      this.transitionStatus(entry, 'active')
       log.debug(`[runtime.event] agent=${agentId} type=message-end`)
       return
     }
@@ -1113,7 +1113,7 @@ class GeneralKaiRuntime {
     if (event.type === 'error') {
       log.debug(`[runtime.event] agent=${agentId} type=error message=${JSON.stringify(event.message)} recoverable=${event.recoverable}`)
       entry.lastError = event.message
-      this.transitionStatus(entry, 'running')
+      this.transitionStatus(entry, 'active')
       this.emitEvent(agentId, event)
       return
     }
@@ -1255,7 +1255,7 @@ class GeneralKaiRuntime {
       agentId,
       code,
       signal,
-      status: entry?.status ?? 'stopped',
+      status: entry?.status ?? 'idle',
     })
   }
 
@@ -1284,10 +1284,13 @@ class GeneralKaiRuntime {
     if (this.readyEmitted.has(agentId)) return
     const entry = this.entries.get(agentId)
     if (!entry || !entry.process) return
-    if (entry.status === 'error' || entry.status === 'stopped') return
+    if (entry.status === 'idle') return
     this.readyEmitted.add(agentId)
+    // Route through transitionStatus so the DB row catches up. Without this
+    // the DB agent stayed at `initializing` (pre-rewrite) while the live
+    // runtime reported `running`, leaving the agents table visually stuck.
     entry.bootStep = 'ready'
-    entry.status = 'running'
+    this.transitionStatus(entry, 'active')
     log.info(`[runtime] agent ${agentId} ready (silence-based)`)
     this.emitStatus(agentId)
     this.emitEvent(agentId, { type: 'boot-step', step: 'ready' })

@@ -30,7 +30,7 @@ function makeEntry(overrides: Partial<RuntimeEntry> = {}): RuntimeEntry {
     process: null,
     messages: [],
     stderrLog: [],
-    status: 'running',
+    status: 'active',
     extensionLoaded: true,
     _chatPending: new Set(),
     _chatDebounceTimer: null,

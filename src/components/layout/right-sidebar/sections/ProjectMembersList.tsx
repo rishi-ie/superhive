@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, XIcon } from '@phosphor-icons/react';
 import { Icon } from '@/components/ui/icon';
+import { AgentStatusBadge } from '@/components/common';
 import type { Agent } from '@/storage/types';
 import { UnassignAgentDialog } from './UnassignAgentDialog';
 
@@ -40,13 +41,17 @@ export function ProjectMembersList(props: ProjectMembersListProps) {
 				>
 					<div className="flex flex-col gap-0.5">
 						<span className="text-sm">{a.name}</span>
-						<span className="text-[11px] text-muted-foreground">{a.status}</span>
+						<AgentStatusBadge
+							status={a.status}
+							error={Boolean(a.lastError)}
+							compact
+						/>
 					</div>
 					<Button
 						size="icon"
 						variant="ghost"
 						onClick={() => {
-							if (a.status === 'initializing' || a.status === 'running' || a.status === 'busy') {
+							if (a.status === 'active' || a.status === 'busy' || a.status === 'waiting') {
 								setPendingRemove(a);
 							} else {
 								props.onRemove(a);

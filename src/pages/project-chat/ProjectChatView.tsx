@@ -27,9 +27,10 @@ import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
-import { ProjectAgentInitializing } from './components/ProjectAgentInitializing';
+import { ProjectAgentBooting } from './components/ProjectAgentBooting';
 import { ProjectAgentError } from './components/ProjectAgentError';
 import { ProjectAgentStopped } from './components/ProjectAgentStopped';
+import { ProjectAgentWaiting } from './components/ProjectAgentWaiting';
 import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
@@ -109,6 +110,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     status,
     messages,
     lastError,
+    bootStep,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -175,9 +177,13 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     );
   }
 
-  if (status === 'initializing') {
+  if (status === 'waiting') {
+    return <ProjectAgentWaiting agentName={projectAgent.name} />;
+  }
+
+  if (bootStep !== undefined && bootStep !== 'ready') {
     return (
-      <ProjectAgentInitializing
+      <ProjectAgentBooting
         agentName={projectAgent.name}
         lastError={lastError}
         onRestart={restart}
@@ -185,15 +191,15 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     );
   }
 
-  if (status === 'error') {
+  if (status === 'idle' && lastError) {
     return <ProjectAgentError lastError={lastError} onRestart={restart} projectId={project.id} />;
   }
 
-  if (status === 'stopped') {
+  if (status === 'idle') {
     return <ProjectAgentStopped onStart={restart} />;
   }
 
-  const isLive = status === 'running' || status === 'busy';
+  const isLive = status === 'active' || status === 'busy';
   const isBusy = status === 'busy';
 
   const onSend = () => {
@@ -228,7 +234,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
       void shortcutRegenerateLast({ messages, agentId: projectAgent.id });
     },
     onStop: () => {
-      if (status === 'busy' || status === 'running') void stop();
+      if (status === 'busy' || status === 'active') void stop();
     },
     enabled: !!projectAgent,
   });

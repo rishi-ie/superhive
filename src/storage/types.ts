@@ -1,10 +1,4 @@
-export type AgentStatus =
-  | 'initializing'
-  | 'running'
-  | 'busy'
-  | 'idle'
-  | 'stopped'
-  | 'error'
+export type AgentStatus = 'idle' | 'active' | 'busy' | 'waiting'
 
 export type AgentKind = 'standard' | 'project-coordinator'
 

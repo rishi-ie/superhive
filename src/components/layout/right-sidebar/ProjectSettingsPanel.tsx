@@ -6,8 +6,9 @@ import {
 } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
+import { useAllAgentStatuses } from "@/flows/agents/agent-store";
 import type { Agent } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
@@ -30,6 +31,26 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
       setTeam({ coordinator: t.coordinator, members: t.members }),
     );
   }, [projectId]);
+
+  const liveIds = useMemo(() => {
+    const ids: string[] = []
+    if (team.coordinator) ids.push(team.coordinator.id)
+    for (const m of team.members) ids.push(m.id)
+    return ids
+  }, [team.coordinator, team.members])
+  const liveStatuses = useAllAgentStatuses(liveIds, liveIds.length > 0)
+
+  const mergedTeam = useMemo<TeamState>(() => {
+    const apply = (a: Agent | null): Agent | null => {
+      if (!a) return null
+      const live = liveStatuses.get(a.id)
+      return live ? { ...a, status: live } : a
+    }
+    return {
+      coordinator: apply(team.coordinator),
+      members: team.members.map((m) => apply(m) ?? m),
+    }
+  }, [team, liveStatuses])
 
   return (
     <div className="flex h-full flex-col px-button-x">
@@ -73,8 +94,8 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           <ScrollArea className="h-full">
             <ProjectMembersList
               projectId={projectId}
-              coordinator={team.coordinator}
-              members={team.members}
+              coordinator={mergedTeam.coordinator}
+              members={mergedTeam.members}
               onAssignClick={() => setAssignOpen(true)}
               onRemove={async (agent) => {
                 const { removeAgentFromProject } = await import(

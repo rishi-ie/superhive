@@ -27,6 +27,7 @@ import {
 	removeAgentFromProject,
 } from '@/flows/projects/crud';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
+import { useAllAgentStatuses } from '@/flows/agents/agent-store';
 import type { Agent, Project } from '@/types/electron';
 
 type DialogKind =
@@ -79,16 +80,30 @@ export function AgentsListView() {
 		[agents],
 	);
 
+	const liveStatusesMap = useAllAgentStatuses(
+		nonCoordinators.map((a) => a.id),
+		nonCoordinators.length > 0,
+	);
+
+	const agentsWithLiveStatus = React.useMemo(
+		() =>
+			nonCoordinators.map((a) => {
+				const live = liveStatusesMap.get(a.id)
+				return live ? { ...a, status: live } : a
+			}),
+		[nonCoordinators, liveStatusesMap],
+	);
+
 	const filtered = React.useMemo(() => {
 		const q = filter.trim().toLowerCase();
-		if (!q) return nonCoordinators;
-		return nonCoordinators.filter(
+		if (!q) return agentsWithLiveStatus;
+		return agentsWithLiveStatus.filter(
 			(a) =>
 				a.name.toLowerCase().includes(q) ||
 				a.role?.toLowerCase().includes(q) ||
 				a.description?.toLowerCase().includes(q),
 		);
-	}, [nonCoordinators, filter]);
+	}, [agentsWithLiveStatus, filter]);
 
 	const projectFor = (agent: Agent): { id: string; name: string } | null => {
 		const firstId = agent.projectIds[0];
@@ -100,7 +115,7 @@ export function AgentsListView() {
 
 	const parentDir = `~/.superhive/agents`;
 
-	const liveStatuses = new Set<Agent['status']>(['initializing', 'running', 'busy']);
+	const liveStatuses = new Set<Agent['status']>(['active', 'busy', 'waiting']);
 
 	const dialogAgent =
 		visibleDialog.kind === 'assign' || visibleDialog.kind === 'delete'

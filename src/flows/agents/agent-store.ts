@@ -127,7 +127,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
 
   const slice: RuntimeSlice = {
     agent: null,
-    status: 'stopped',
+    status: 'idle',
     messages: [],
     lastError: undefined,
     bootStep: undefined,
@@ -385,9 +385,9 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.getRuntimeState(agentId).then((s) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      // Start the runtime if it is stopped or errored — this also hydrates
+      // Start the runtime if it isn't live yet — this also hydrates
       // entry.messages from disk and emits via onMessages.
-      if (!s || s.status === 'stopped' || s.status === 'error') {
+      if (!s || s.status === 'idle') {
         agents.start(agentId).catch(() => {})
       }
     })
@@ -463,6 +463,135 @@ export function disposeSlice(agentId: string): void {
   disposeSettingsSliceNow(agentId)
 }
 
+interface AggregatorSlice {
+  statuses: Map<string, AgentStatus>
+  refcount: number
+  unsubs: Map<string, () => void>
+  notify?: () => void
+}
+
+const aggregatorSlices = new Map<string, AggregatorSlice>()
+
+function initAggregatorSlice(agentId: string): AggregatorSlice {
+  const existing = aggregatorSlices.get(agentId)
+  if (existing) {
+    existing.refcount++
+    return existing
+  }
+  const slice: AggregatorSlice = {
+    statuses: new Map(),
+    refcount: 1,
+    unsubs: new Map(),
+  }
+  aggregatorSlices.set(agentId, slice)
+
+  agents.getRuntimeState(agentId).then((s) => {
+    const entry = aggregatorSlices.get(agentId)
+    if (!entry || !s) return
+    entry.statuses.set(agentId, s.status)
+    entry.notify?.()
+  })
+
+  const unsub = agents.onStatus(agentId, (s) => {
+    const entry = aggregatorSlices.get(agentId)
+    if (!entry) return
+    entry.statuses.set(agentId, s.status)
+    entry.notify?.()
+  })
+  slice.unsubs.set(agentId, unsub)
+
+  return slice
+}
+
+function disposeAggregatorSlice(agentId: string): void {
+  const slice = aggregatorSlices.get(agentId)
+  if (!slice) return
+  slice.refcount -= 1
+  if (slice.refcount > 0) return
+  for (const u of slice.unsubs.values()) u()
+  slice.unsubs.clear()
+  aggregatorSlices.delete(agentId)
+}
+
+/**
+ * Subscribe to live `onStatus` events for a list of agent IDs. Returns a
+ * `Map<agentId, AgentStatus>` that callers merge over their DB-snapshot list
+ * so the agents table + project sidebar reflect runtime status changes
+ * without waiting for the next page reload.
+ *
+ * Refcounted: multiple consumers for the same id share one subscription.
+ * Pass `enabled = false` to skip wiring (useful when no agents exist).
+ */
+export function useAllAgentStatuses(
+  agentIds: string[],
+  enabled: boolean = true,
+): Map<string, AgentStatus> {
+  const stableIds = React.useMemo(() => {
+    const seen = new Set<string>()
+    const out: string[] = []
+    for (const id of agentIds) {
+      if (typeof id === 'string' && id.length > 0 && !seen.has(id)) {
+        seen.add(id)
+        out.push(id)
+      }
+    }
+    return out
+  }, [agentIds])
+
+  const sliceRef = React.useRef<Map<string, AggregatorSlice> | null>(null)
+  if (sliceRef.current === null) sliceRef.current = new Map()
+
+  React.useEffect(() => {
+    if (!enabled) return
+    const local = sliceRef.current!
+    for (const id of stableIds) {
+      const slice = initAggregatorSlice(id)
+      local.set(id, slice)
+    }
+    return () => {
+      for (const id of stableIds) {
+        const slice = local.get(id)
+        if (slice) {
+          if (slice.notify !== undefined) slice.notify = undefined
+          disposeAggregatorSlice(id)
+        }
+        local.delete(id)
+      }
+    }
+  }, [stableIds, enabled])
+
+  const [snapshot, setSnapshot] = React.useState<Map<string, AgentStatus>>(
+    () => new Map(),
+  )
+
+  React.useEffect(() => {
+    if (!enabled) return
+    const local = sliceRef.current!
+    const sync = () => {
+      const next = new Map<string, AgentStatus>()
+      for (const id of stableIds) {
+        const slice = local.get(id)
+        const s = slice?.statuses.get(id)
+        if (s) next.set(id, s)
+      }
+      setSnapshot(next)
+    }
+    sync()
+    for (const id of stableIds) {
+      const slice = local.get(id)
+      if (slice) slice.notify = sync
+    }
+    return () => {
+      for (const id of stableIds) {
+        const slice = local.get(id)
+        if (slice) slice.notify = undefined
+      }
+    }
+  }, [stableIds, enabled])
+
+  return snapshot
+}
+
 export function useAgentRuntime(agentId: string | undefined) {
   const slice = React.useMemo(() => {
     if (!agentId) return null
@@ -470,7 +599,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   }, [agentId])
 
   const [agent, setAgent] = React.useState<Agent | null>(null)
-  const [status, setStatus] = React.useState<AgentStatus>('stopped')
+  const [status, setStatus] = React.useState<AgentStatus>('idle')
   const [messages, setMessages] = React.useState<RuntimeMessage[]>([])
   const [lastError, setLastError] = React.useState<string | undefined>(undefined)
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)

@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 
-interface ProjectAgentInitializingProps {
+interface ProjectAgentBootingProps {
   agentName?: string;
   lastError?: string;
   onRestart: () => void;
@@ -11,7 +11,12 @@ interface ProjectAgentInitializingProps {
 
 const STUCK_THRESHOLD_MS = 90_000;
 
-export function ProjectAgentInitializing({ agentName, lastError, onRestart }: ProjectAgentInitializingProps) {
+/**
+ * Project-side counterpart of `AgentBooting`. Driven by `bootStep` from the
+ * live runtime payload. Copy stays "project agent" so the chat view keeps
+ * its project-scoped framing.
+ */
+export function ProjectAgentBooting({ agentName, lastError, onRestart }: ProjectAgentBootingProps) {
   const [stuck, setStuck] = useState(false);
 
   useEffect(() => {

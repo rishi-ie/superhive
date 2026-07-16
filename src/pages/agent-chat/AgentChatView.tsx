@@ -6,9 +6,10 @@ import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
-import { AgentInitializing } from './components/AgentInitializing';
+import { AgentBooting } from './components/AgentBooting';
 import { AgentError } from './components/AgentError';
 import { AgentStopped } from './components/AgentStopped';
+import { AgentWaiting } from './components/AgentWaiting';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { useAgentRuntime } from '@/flows/agents/runtime';
@@ -26,6 +27,7 @@ export function AgentChatView() {
     status,
     messages,
     lastError,
+    bootStep,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -101,19 +103,23 @@ export function AgentChatView() {
     );
   }
 
-  if (status === 'initializing') {
-    return <AgentInitializing agentName={agent.name} lastError={lastError} onRestart={restart} />;
+  if (status === 'waiting') {
+    return <AgentWaiting agentName={agent.name} />;
   }
 
-  if (status === 'error') {
+  if (bootStep !== undefined && bootStep !== 'ready') {
+    return <AgentBooting agentName={agent.name} lastError={lastError} onRestart={restart} />;
+  }
+
+  if (status === 'idle' && lastError) {
     return <AgentError lastError={lastError} onRestart={restart} agentId={agent.id} />;
   }
 
-  if (status === 'stopped') {
+  if (status === 'idle') {
     return <AgentStopped onStart={restart} />;
   }
 
-  const isLive = status === 'running' || status === 'busy';
+  const isLive = status === 'active' || status === 'busy';
   const isBusy = status === 'busy';
 
   const onSend = () => {
@@ -149,7 +155,7 @@ export function AgentChatView() {
       void shortcutRegenerateLast({ messages, agentId });
     },
     onStop: () => {
-      if (status === 'busy' || status === 'running') void stop();
+      if (status === 'busy' || status === 'active') void stop();
     },
     enabled: !!agentId && !!agent,
   });

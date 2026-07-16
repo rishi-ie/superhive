@@ -11,12 +11,10 @@ interface RestartBarProps {
 }
 
 const STOPPABLE: Record<AgentStatus, boolean> = {
-  running: true,
+  active: true,
   busy: true,
-  initializing: false,
   idle: false,
-  stopped: false,
-  error: false,
+  waiting: false,
 };
 
 export function RestartBar({ agentId, status }: RestartBarProps) {
@@ -41,7 +39,7 @@ export function RestartBar({ agentId, status }: RestartBarProps) {
           size="sm"
           className="h-7 gap-list-item text-xs"
           onClick={() => void restartAgent(agentId)}
-          disabled={status === 'initializing'}
+          disabled={false}
         >
           <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
           Restart

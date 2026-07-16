@@ -130,7 +130,7 @@ export function registerAgentIpc(): void {
 				role: data.role?.trim() || undefined,
 				description: data.description?.trim() || undefined,
 				localPath: agentDir,
-				status: 'initializing',
+				status: 'active',
 				agentKind: data.agentKind as AgentKind | undefined,
 			})
 
@@ -212,7 +212,7 @@ export function registerAgentIpc(): void {
 		if (!agent) return false
 
 		const status = runtime.getStatusPayload(id)
-		if (status && status.status !== 'stopped' && status.status !== 'idle') {
+		if (status && status.status !== 'idle') {
 			await runtime.stop(id)
 		}
 

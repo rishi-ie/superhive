@@ -126,20 +126,20 @@ export function registerRuntimeIpc(): void {
 		if (!agent.localPath) throw new Error(`Agent has no localPath: ${agentId}`)
 		await autoSeedProviders(agentId, agent.localPath)
 		await runtime.start(agentId, agent.localPath, GENERAL_KAI_DIR)
-		await AgentRepository.update(agentId, { status: 'initializing', lastError: undefined })
+		await AgentRepository.update(agentId, { status: 'active', lastError: undefined })
 		return { ok: true }
 	})
 
 	ipcMain.handle(IPC.AGENTS.STOP, async (_e, agentId: string) => {
 		runtime.stop(agentId)
-		await AgentRepository.update(agentId, { status: 'stopped' })
+		await AgentRepository.update(agentId, { status: 'idle' })
 		return { ok: true }
 	})
 
 	ipcMain.handle(IPC.AGENTS.RESTART, async (_e, agentId: string) => {
 		await autoSeedProviders(agentId, (await AgentRepository.getById(agentId))?.localPath ?? '')
 		runtime.restart(agentId)
-		await AgentRepository.update(agentId, { status: 'initializing', lastError: undefined })
+		await AgentRepository.update(agentId, { status: 'active', lastError: undefined })
 		return { ok: true }
 	})
 

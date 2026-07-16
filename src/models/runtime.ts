@@ -1,5 +1,7 @@
 import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
 export type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
+import type { AgentStatus } from '../storage/types'
+export type { AgentStatus } from '../storage/types'
 
 /**
  * One structured piece of an assistant message. A message is a sequence of
@@ -168,7 +170,7 @@ export interface RetryStatus {
 
 export interface RuntimeStatusPayload {
   agentId: string
-  status: 'initializing' | 'running' | 'busy' | 'idle' | 'stopped' | 'error'
+  status: AgentStatus
   pid?: number
   startedAt?: number
   endedAt?: number
@@ -189,5 +191,6 @@ export interface RuntimeExitPayload {
   agentId: string
   code: number | null
   signal: string | null
-  status: 'stopped' | 'idle' | 'error'
+  /** Exits only happen when there is no live runtime, so the agent lands in `idle`. */
+  status: 'idle'
 }

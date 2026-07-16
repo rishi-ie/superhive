@@ -92,7 +92,7 @@ export async function forkAgentFromSettings(input: ForkInput): Promise<Agent> {
 		role: source.role,
 		description: source.description,
 		localPath: join(parentDir, folderName),
-		status: 'initializing',
+		status: 'active',
 		agentKind: input.agentKind,
 	})
 

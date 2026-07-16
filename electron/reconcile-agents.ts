@@ -6,7 +6,8 @@
  *   but no corresponding DB row is adopted into the DB with status 'idle'.
  *
  * Pass 2 — Missing folders:
- *   Any DB row whose localPath no longer exists on disk is marked 'error'.
+ *   Any DB row whose localPath no longer exists on disk is marked 'idle'
+ *   with `lastError` set so the UI surfaces the problem on the agent row.
  */
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
@@ -93,7 +94,7 @@ export async function reconcileAgents(): Promise<void> {
 		if (existsSync(agent.localPath)) continue
 
 		await AgentRepository.update(agent.id, {
-			status: 'error',
+			status: 'idle',
 			lastError: `Agent folder missing: ${agent.localPath}`,
 		})
 		missing++

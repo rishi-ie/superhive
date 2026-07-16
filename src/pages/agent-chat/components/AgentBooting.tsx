@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { ArrowsClockwiseIcon } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 
-interface AgentInitializingProps {
+interface AgentBootingProps {
   agentName?: string;
   lastError?: string;
   onRestart: () => void;
@@ -11,7 +11,13 @@ interface AgentInitializingProps {
 
 const STUCK_THRESHOLD_MS = 90_000;
 
-export function AgentInitializing({ agentName, lastError, onRestart }: AgentInitializingProps) {
+/**
+ * Shown while the agent's runtime is up (`status === 'active'`) but the boot
+ * checklist has not reached `ready` yet. Driven by `bootStep` from the live
+ * runtime payload — the chat view passes us in whenever
+ * `bootStep !== undefined && bootStep !== 'ready'`.
+ */
+export function AgentBooting({ agentName, lastError, onRestart }: AgentBootingProps) {
   const [stuck, setStuck] = useState(false);
 
   useEffect(() => {

@@ -12,7 +12,7 @@ interface AgentsSectionProps {
 }
 
 function isAgentActive(status: Agent['status']): boolean {
-  return status === 'running' || status === 'busy';
+  return status === 'active' || status === 'busy' || status === 'waiting';
 }
 
 export function AgentsSection({ items }: AgentsSectionProps) {
