@@ -402,7 +402,39 @@ rg "\bspace-[xy]-\d" src -g '!src/styles/**'
 
 ## Icon Library
 
-**Phosphor Icons** (`@phosphor-icons/react`). Use the wrapper at `@/components/ui/icon`. Import icons from `@phosphor-icons/react`, then render via `<Icon icon={IconName} className="..." />`. Default size 16px, weight `regular`, color `currentColor`.
+Superhive uses **two parallel icon systems** by deliberate choice — both are
+supported, neither is being consolidated.
+
+### Phosphor (preferred for new code)
+
+`@phosphor-icons/react`. Use the wrapper at `@/components/ui/icon`. Import
+the icon, then render via `<Icon icon={IconName} className="..." />`.
+Default size 16px, weight `regular`, color `currentColor`.
+
+```tsx
+import { HouseIcon } from '@phosphor-icons/react'
+import { Icon } from '@/components/ui/icon'
+
+<Icon icon={HouseIcon} className="size-4" />
+```
+
+### Hugeicons (legacy surfaces)
+
+`@hugeicons/core-free-icons`. Use the wrapper at `@/components/ui/huge-icon`.
+Same wrapper contract as Phosphor.
+
+```tsx
+import { Home01Icon } from '@hugeicons/core-free-icons'
+import { HugeIcon } from '@/components/ui/huge-icon'
+
+<HugeIcon icon={Home01Icon} className="size-4" />
+```
+
+Hugeicons currently drives the AppSidebar, TopRightControls, BashToolCard's
+spinner, and a handful of other layout / message-part surfaces. Don't migrate
+those call sites to Phosphor without coordinating with the icon-library owner;
+both wrappers live in `src/components/ui/` because shadcn-registry primitives
+sit alongside them there.
 
 ---
 
