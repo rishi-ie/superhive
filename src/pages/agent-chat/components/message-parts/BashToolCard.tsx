@@ -51,14 +51,9 @@ export function BashToolCard({ part, result }: ToolCallCardBaseProps) {
               </span>
             ) : null}
             {result && resultText(result.result).length > 1500 ? (
-              <a
-                href={`file://${process.env.HOME ?? '~'}/.superhive/agents/${part.id.split(':')[0] ?? ''}/tool-output/${part.id}.txt`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[10px] text-muted-foreground hover:text-foreground underline ml-1.5"
-              >
-                Full output
-              </a>
+              <span className="text-[10px] text-muted-foreground ml-1.5">
+                Output truncated. Full text was not persisted.
+              </span>
             ) : null}
           </div>
         ),
