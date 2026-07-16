@@ -133,8 +133,35 @@ export class TelemetryTailer {
     }, 30)
   }
 
+  /**
+   * Drop the file watcher and switch to the dir-watch + poll fallback.
+   * Used when the file disappears (e.g. the rename half of a rotation
+   * lands before the recreate half) so we don't miss the next event.
+   */
+  private fallbackToDirWatch(reason: string): void {
+    if (this.watcher) {
+      try {
+        this.watcher.close()
+      } catch {
+        /* ignore */
+      }
+      this.watcher = null
+    }
+    log.debug(`[telemetry-tailer] file gone (${reason}); switching to dir+poll`)
+    this.watchDir()
+  }
+
   private readNew(): void {
-    if (!existsSync(this.journalPath)) return
+    // Rotation handling: the telemetry extension rotates telemetry.jsonl
+    // on every session_start (rename to .1, then create a new empty file
+    // at the original path). After the rename the watcher is bound to
+    // the rotated-away inode — writes to the new file go unseen until
+    // the watcher is re-armed on the current path. A truncated read is
+    // the only signal that a rotation just happened.
+    if (!existsSync(this.journalPath)) {
+      this.fallbackToDirWatch('missing between rename and recreate')
+      return
+    }
     let size: number
     try {
       size = statSync(this.journalPath).size
@@ -142,9 +169,34 @@ export class TelemetryTailer {
       return
     }
     if (size < this.offset) {
-      log.debug(`[telemetry-tailer] journal truncated (size=${size} < offset=${this.offset}); resetting`)
+      log.debug(
+        `[telemetry-tailer] journal truncated (size=${size} < offset=${this.offset}); resetting + re-arming watcher`,
+      )
       this.offset = 0
       this.lineBuffer = ''
+      // Close the existing watcher (bound to the rotated inode) and
+      // re-establish on the current path. Schedule an immediate read
+      // so the tail of the new file is consumed right away.
+      if (this.watcher) {
+        try {
+          this.watcher.close()
+        } catch {
+          /* ignore */
+        }
+        this.watcher = null
+      }
+      try {
+        this.watcher = watch(this.journalPath, () => this.scheduleRead())
+        this.scheduleRead()
+      } catch (err) {
+        log.warn(
+          `[telemetry-tailer] watch re-arm failed for ${this.journalPath}; switching to dir+poll:`,
+          err,
+        )
+        this.watcher = null
+        this.watchDir()
+      }
+      return
     }
     if (size <= this.offset) return
 
