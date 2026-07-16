@@ -541,70 +541,93 @@ export function useAllAgentStatuses(
   agentIds: string[],
   enabled: boolean = true,
 ): Map<string, AgentLiveState> {
-  const stableIds = React.useMemo(() => {
-    const seen = new Set<string>()
-    const out: string[] = []
-    for (const id of agentIds) {
-      if (typeof id === 'string' && id.length > 0 && !seen.has(id)) {
-        seen.add(id)
-        out.push(id)
-      }
-    }
-    return out
-  }, [agentIds])
-
-  const sliceRef = React.useRef<Map<string, AggregatorSlice> | null>(null)
-  if (sliceRef.current === null) sliceRef.current = new Map()
-
-  React.useEffect(() => {
-    if (!enabled) return
-    const local = sliceRef.current!
-    for (const id of stableIds) {
-      const slice = initAggregatorSlice(id)
-      local.set(id, slice)
-    }
-    return () => {
-      for (const id of stableIds) {
-        const slice = local.get(id)
-        if (slice) {
-          if (slice.notify !== undefined) slice.notify = undefined
-          disposeAggregatorSlice(id)
-        }
-        local.delete(id)
-      }
-    }
-  }, [stableIds, enabled])
-
   const [snapshot, setSnapshot] = React.useState<Map<string, AgentLiveState>>(
     () => new Map(),
   )
 
+  // The id list driving the effect must be content-stable, not reference-
+  // stable. `agentIds` is `nonCoordinators.map((a) => a.id)` — a new array
+  // reference on every parent render — so a `useMemo` dep would always see
+  // a change and rebuild the aggregator subscription on every render,
+  // driving an infinite render loop. Track the last deduped+sorted id
+  // list in a ref and skip the effect when its contents are unchanged.
+  const lastIdsRef = React.useRef<string[]>([])
+  const lastEnabledRef = React.useRef<boolean>(enabled)
+
   React.useEffect(() => {
+    const nextIds = Array.from(
+      new Set(
+        agentIds.filter(
+          (id): id is string => typeof id === 'string' && id.length > 0,
+        ),
+      ),
+    ).sort()
+
+    const prevIds = lastIdsRef.current
+    const idsUnchanged =
+      prevIds.length === nextIds.length &&
+      prevIds.every((id, i) => id === nextIds[i])
+    const enabledUnchanged = lastEnabledRef.current === enabled
+
+    if (idsUnchanged && enabledUnchanged) return
+
+    lastIdsRef.current = nextIds
+    lastEnabledRef.current = enabled
+
     if (!enabled) return
-    const local = sliceRef.current!
-    const sync = () => {
-      const next = new Map<string, AgentLiveState>()
-      for (const id of stableIds) {
-        const slice = local.get(id)
-        const s = slice?.states.get(id)
-        if (s) next.set(id, s)
-      }
-      setSnapshot(next)
+
+    for (const id of nextIds) {
+      initAggregatorSlice(id)
     }
-    sync()
-    for (const id of stableIds) {
-      const slice = local.get(id)
+
+    const sync = () => {
+      setSnapshot((prev) => {
+        const next = new Map<string, AgentLiveState>()
+        for (const id of nextIds) {
+          const slice = aggregatorSlices.get(id)
+          const s = slice?.states.get(id)
+          if (s) next.set(id, s)
+        }
+        if (agentLiveStatesEqual(prev, next)) return prev
+        return next
+      })
+    }
+
+    for (const id of nextIds) {
+      const slice = aggregatorSlices.get(id)
       if (slice) slice.notify = sync
     }
+
     return () => {
-      for (const id of stableIds) {
-        const slice = local.get(id)
-        if (slice) slice.notify = undefined
+      for (const id of nextIds) {
+        const slice = aggregatorSlices.get(id)
+        if (slice) {
+          if (slice.notify !== undefined) slice.notify = undefined
+          disposeAggregatorSlice(id)
+        }
       }
     }
-  }, [stableIds, enabled])
+    // `agentIds` reference changes every parent render by design; the
+    // content-stability check above short-circuits no-op runs so this
+    // effect only re-subscribes when the actual id list changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentIds, enabled])
 
   return snapshot
+}
+
+function agentLiveStatesEqual(
+  a: Map<string, AgentLiveState>,
+  b: Map<string, AgentLiveState>,
+): boolean {
+  if (a.size !== b.size) return false
+  for (const [id, next] of b) {
+    const prev = a.get(id)
+    if (!prev) return false
+    if (prev.status !== next.status) return false
+    if (prev.bootStep !== next.bootStep) return false
+  }
+  return true
 }
 
 export function useAgentRuntime(agentId: string | undefined) {
