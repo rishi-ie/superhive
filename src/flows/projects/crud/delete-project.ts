@@ -15,7 +15,7 @@ import { projects } from '@/api/projects';
 import { agents } from '@/api/agents';
 import { toast } from 'sonner';
 import { listAgents } from '@/flows/agents/crud/list-agents';
-import { disposeSlice } from '@/flows/agents/agent-store';
+import { disposeSlice } from '@/stores/agent';
 
 export interface DeleteProjectResult {
   ok: boolean;

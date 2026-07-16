@@ -1,6 +1,6 @@
 import { toast } from 'sonner';
 import { agents } from '@/api/agents';
-import { disposeSlice } from '../agent-store';
+import { disposeSlice } from '@/stores/agent';
 
 export interface DeleteAgentResult {
   ok: boolean;

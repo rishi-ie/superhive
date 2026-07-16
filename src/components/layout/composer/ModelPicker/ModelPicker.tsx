@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getEnabledModels } from '@/flows/settings/crud/get-enabled-models';
 import { listProviders } from '@/flows/settings/crud/list-providers';
-import { useAgentSettings } from '@/flows/agents/agent-store';
+import { useAgentSettings } from '@/stores/agent';
 import { cn } from '@/lib/utils';
 
 interface EnabledModel {

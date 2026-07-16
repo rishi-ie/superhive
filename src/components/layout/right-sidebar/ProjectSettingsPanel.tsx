@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
-import { useAllAgentStatuses } from "@/flows/agents/agent-store";
+import { useAllAgentStatuses } from "@/stores/agent";
 import type { Agent } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";

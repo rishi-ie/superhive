@@ -35,7 +35,7 @@ import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
-import { useAgentSettings } from '@/flows/agents/agent-store';
+import { useAgentSettings } from '@/stores/agent';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';

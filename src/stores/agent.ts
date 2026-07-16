@@ -10,15 +10,13 @@ import type {
   ContextSnapshot,
   ModelInfo,
 } from '@/types/electron'
-import type { ContentPart } from '@/models/runtime'
-import type { CompactionStatus, RetryStatus } from '@/models/runtime'
-import type { AgentSettingsState } from './settings'
-import { updateAgentSettings } from './settings/update-agent-settings'
-import { restartAgent } from './runtime/restart-agent'
+import type { ContentPart, CompactionStatus, RetryStatus } from '@/models/runtime'
 import { toast } from 'sonner'
 
 const MAX_MESSAGES = 5000
 const AUTO_SAVE_DEBOUNCE_MS = 500
+
+type NotifyFn = () => void
 
 interface RuntimeSlice {
   agent: Agent | null
@@ -37,8 +35,7 @@ interface RuntimeSlice {
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
-  refcount: number
-  notify?: () => void
+  notify?: NotifyFn
 }
 
 interface SettingsSlice {
@@ -47,24 +44,32 @@ interface SettingsSlice {
   error: string | null
   dirty: Record<string, unknown> | null
   unsub: (() => void) | null
-  debounceTimer: NodeJS.Timeout | null
-  refcount: number
+  debounceTimer: ReturnType<typeof setTimeout> | null
+  notify?: NotifyFn
+}
+
+export interface AgentSettingsState {
+  name?: string
+  description?: string
+  model?: { provider: string; name: string }
+  systemPrompt?: string
+  permissions?: { filesystem?: boolean; terminal?: boolean; network?: boolean }
+  runtime?: { thinkingLevel?: string; activeTools?: string[] }
+  catalog?: {
+    skills?: Array<{ path: string; active: boolean }>
+    extensions?: Array<{ path: string; active: boolean }>
+    prompts?: Array<{ path: string; active: boolean }>
+  }
+  sessionsIndex?: {
+    sessions: Array<{ id: string; name?: string; messageCount: number; cost: number; path: string }>
+  }
+  [k: string]: unknown
 }
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 const settingsSlices = new Map<string, SettingsSlice>()
 
-/**
- * Append a new content part to a message in the renderer's mirror slice.
- * Returns true if the message was found and updated. Used by the per-event
- * handlers below to apply incremental parts in lockstep with the main process
- * state that lives in the electron runtime.
- */
-function appendPart(
-  slice: RuntimeSlice,
-  messageId: string,
-  part: ContentPart,
-): boolean {
+function appendPart(slice: RuntimeSlice, messageId: string, part: ContentPart): boolean {
   const idx = slice.messages.findIndex((m) => m.id === messageId)
   if (idx === -1) return false
   const cur = slice.messages[idx]!
@@ -76,11 +81,6 @@ function appendPart(
   return true
 }
 
-/**
- * Replace the last content part of a message with the result of `fn`. Returns
- * true if the message and trailing part were found. Used by stream deltas
- * (text-delta, thinking-delta, tool-call-delta, tool-execution-update).
- */
 function updateLastPart(
   slice: RuntimeSlice,
   messageId: string,
@@ -118,10 +118,8 @@ function disposeSettingsSliceNow(agentId: string): void {
 }
 
 function initRuntimeSlice(agentId: string): RuntimeSlice {
-  if (runtimeSlices.has(agentId)) {
-    runtimeSlices.get(agentId)!.refcount++
-    return runtimeSlices.get(agentId)!
-  }
+  const existing = runtimeSlices.get(agentId)
+  if (existing) return existing
 
   const unsubs: Array<() => void> = []
 
@@ -140,7 +138,6 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     initialized: false,
     inFlightToolCount: 0,
     unsubs,
-    refcount: 1,
   }
 
   runtimeSlices.set(agentId, slice)
@@ -185,7 +182,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.compaction = s.compaction
       entry.retry = s.retry
       entry.notify?.()
-    })
+    }),
   )
 
   unsubs.push(
@@ -195,13 +192,13 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.messages = msgs
       // Renderer cap matches disk trim (5000). Drop the oldest rows that
       // aren't in the just-arrived snapshot. Skip silently — the user
-      // shouldn't see a toast (P11.3.2); the chat-fade-bottom + scrolled
-      // further-up affordance is enough indication.
+      // shouldn't see a toast; the chat-fade-bottom + scrolled further-up
+      // affordance is enough indication.
       if (entry.messages.length > MAX_MESSAGES) {
         entry.messages = entry.messages.slice(-MAX_MESSAGES)
       }
       entry.notify?.()
-    })
+    }),
   )
 
   unsubs.push(
@@ -309,8 +306,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       } else if (ev.type === 'tool-execution-end') {
         // Main has already linked the tool-result part onto the message that
         // owns the tool-call. Re-fetch via getMessages so the canonical state
-        // is mirrored. Fallback: append to last assistant message if the
-        // subscription arrives before main's emitMessages has had a chance.
+        // is mirrored.
         if (entry.inFlightToolCount > 0) entry.inFlightToolCount -= 1
         agents.getMessages(agentId).then((msgs) => {
           const e = runtimeSlices.get(agentId)
@@ -366,7 +362,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         entry.lastError = ev.message
       }
       entry.notify?.()
-    })
+    }),
   )
 
   unsubs.push(
@@ -378,7 +374,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         entry.lastError = s.lastError
         entry.notify?.()
       })
-    })
+    }),
   )
 
   if (!slice.initialized) {
@@ -388,7 +384,9 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       // Start the runtime if it isn't live yet — this also hydrates
       // entry.messages from disk and emits via onMessages.
       if (!s || s.status === 'idle') {
-        agents.start(agentId).catch(() => {})
+        agents.start(agentId).catch((err: unknown) => {
+          toast.error(err instanceof Error ? err.message : 'Failed to start agent')
+        })
       }
     })
     // Always fetch messages from disk on slice init. When the runtime is
@@ -412,11 +410,32 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
   return slice
 }
 
-function initSettingsSlice(agentId: string): SettingsSlice {
-  if (settingsSlices.has(agentId)) {
-    settingsSlices.get(agentId)!.refcount++
-    return settingsSlices.get(agentId)!
+async function reloadSettings(agentId: string): Promise<void> {
+  const entry = settingsSlices.get(agentId)
+  if (!entry) return
+  entry.isLoading = true
+  entry.error = null
+  try {
+    const result = (await agents.readSettings(agentId)) as AgentSettingsState | null
+    const e = settingsSlices.get(agentId)
+    if (!e) return
+    e.settings = result
+  } catch (err) {
+    const e = settingsSlices.get(agentId)
+    if (!e) return
+    e.error = err instanceof Error ? err.message : 'Failed to load settings'
+    toast.error(e.error)
+  } finally {
+    const e = settingsSlices.get(agentId)
+    if (!e) return
+    e.isLoading = false
+    e.notify?.()
   }
+}
+
+function initSettingsSlice(agentId: string): SettingsSlice {
+  const existing = settingsSlices.get(agentId)
+  if (existing) return existing
 
   const slice: SettingsSlice = {
     settings: null,
@@ -425,35 +444,15 @@ function initSettingsSlice(agentId: string): SettingsSlice {
     dirty: null,
     unsub: null,
     debounceTimer: null,
-    refcount: 1,
   }
 
   settingsSlices.set(agentId, slice)
 
-  const reload = async () => {
-    const entry = settingsSlices.get(agentId)
-    if (!entry) return
-    entry.isLoading = true
-    entry.error = null
-    try {
-      const result = (await agents.readSettings(agentId)) as AgentSettingsState | null
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.settings = result
-    } catch (err) {
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.error = err instanceof Error ? err.message : 'Failed to load settings'
-    } finally {
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.isLoading = false
-    }
-  }
+  void reloadSettings(agentId)
 
-  reload()
-
-  slice.unsub = agents.onSettingsChanged(agentId, () => { void reload() })
+  slice.unsub = agents.onSettingsChanged(agentId, () => {
+    void reloadSettings(agentId)
+  })
 
   return slice
 }
@@ -472,12 +471,14 @@ interface AggregatorSlice {
   states: Map<string, AgentLiveState>
   refcount: number
   unsubs: Map<string, () => void>
-  notify?: () => void
+  notify?: NotifyFn
 }
 
 const aggregatorSlices = new Map<string, AggregatorSlice>()
 
-function captureState(s: { status: AgentStatus; bootStep?: InitStep } | null | undefined): AgentLiveState | null {
+function captureState(
+  s: { status: AgentStatus; bootStep?: InitStep } | null | undefined,
+): AgentLiveState | null {
   if (!s) return null
   return { status: s.status, bootStep: s.bootStep }
 }
@@ -524,19 +525,6 @@ function disposeAggregatorSlice(agentId: string): void {
   aggregatorSlices.delete(agentId)
 }
 
-/**
- * Subscribe to live `onStatus` events for a list of agent IDs. Returns a
- * `Map<agentId, AgentLiveState>` that callers merge over their DB-snapshot
- * list so the agents table + project sidebar reflect runtime status changes
- * without waiting for the next page reload.
- *
- * The `bootStep` field lets surfaces render the boot spinner overlay; it's
- * surfaced here rather than re-fetched per-row so the table can render
- * accurate boot progress without N parallel `getRuntimeState` calls.
- *
- * Refcounted: multiple consumers for the same id share one subscription.
- * Pass `enabled = false` to skip wiring (useful when no agents exist).
- */
 export function useAllAgentStatuses(
   agentIds: string[],
   enabled: boolean = true,
@@ -687,17 +675,32 @@ export function useAgentRuntime(agentId: string | undefined) {
 
   const send = React.useCallback((text: string) => {
     if (!agentId) return
-    agents.send(agentId, text).catch(() => {})
+    agents
+      .send(agentId, text)
+      .catch((err: unknown) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to send message')
+      })
   }, [agentId])
 
   const stop = React.useCallback(() => {
     if (!agentId) return
-    agents.stop(agentId).catch(() => {})
+    agents
+      .stop(agentId)
+      .catch((err: unknown) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to stop agent')
+      })
   }, [agentId])
 
   const restart = React.useCallback(() => {
     if (!agentId) return
-    void restartAgent(agentId)
+    void agents
+      .restart(agentId)
+      .then((result) => {
+        if (!result.ok) toast.error('Failed to restart agent')
+      })
+      .catch((err: unknown) => {
+        toast.error(err instanceof Error ? err.message : 'Failed to restart agent')
+      })
   }, [agentId])
 
   return {
@@ -747,10 +750,9 @@ export function useAgentSettings(agentId: string | null) {
     }
 
     sync()
-
-    const id = setInterval(sync, 50)
+    sliceRef.current!.notify = sync
     return () => {
-      clearInterval(id)
+      if (sliceRef.current) sliceRef.current.notify = undefined
     }
   }, [slice])
 
@@ -804,12 +806,18 @@ export function useAgentSettings(agentId: string | null) {
       const p = e.dirty
       e.dirty = null
       e.debounceTimer = null
-      const result = await updateAgentSettings({ agentId, patch: p })
-      if (result.ok && result.settings) {
+      try {
+        const result = await agents.writeSettings(agentId, p)
         const cur = settingsSlices.get(agentId)
-        if (cur) cur.settings = result.settings
+        if (cur) {
+          cur.settings = result as AgentSettingsState
+          cur.notify?.()
+        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to save settings')
       }
     }, AUTO_SAVE_DEBOUNCE_MS)
+    entry.notify?.()
   }, [agentId])
 
   const flush = React.useCallback(async (p: Record<string, unknown>) => {
@@ -822,33 +830,21 @@ export function useAgentSettings(agentId: string | null) {
     }
     entry.dirty = null
     if (Object.keys(p).length === 0) return
-    const result = await updateAgentSettings({ agentId, patch: p })
-    if (result.ok && result.settings) {
+    try {
+      const result = await agents.writeSettings(agentId, p)
       const cur = settingsSlices.get(agentId)
-      if (cur) cur.settings = result.settings
+      if (cur) {
+        cur.settings = result as AgentSettingsState
+        cur.notify?.()
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save settings')
     }
   }, [agentId])
 
   const reload = React.useCallback(async () => {
     if (!agentId) return
-    const entry = settingsSlices.get(agentId)
-    if (!entry) return
-    entry.isLoading = true
-    entry.error = null
-    try {
-      const result = (await agents.readSettings(agentId)) as AgentSettingsState | null
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.settings = result
-    } catch (err) {
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.error = err instanceof Error ? err.message : 'Failed to load settings'
-    } finally {
-      const e = settingsSlices.get(agentId)
-      if (!e) return
-      e.isLoading = false
-    }
+    await reloadSettings(agentId)
   }, [agentId])
 
   return { settings, isLoading, error, patch, flush, reload }

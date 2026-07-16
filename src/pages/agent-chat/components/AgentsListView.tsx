@@ -28,7 +28,7 @@ import {
 	removeAgentFromProject,
 } from '@/flows/projects/crud';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
-import { useAllAgentStatuses } from '@/flows/agents/agent-store';
+import { useAllAgentStatuses } from '@/stores/agent';
 import type { Agent, Project } from '@/types/electron';
 
 type DialogKind =
