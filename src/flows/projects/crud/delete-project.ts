@@ -30,9 +30,13 @@ export async function deleteProject(projectId: string): Promise<DeleteProjectRes
       return { ok: false, error: 'Project not found' };
     }
 
-    // Find the project-agent (project-coordinator kind)
+    // Find this project's coordinator (project-coordinator kind)
     const allAgents = await listAgents();
-    const projectAgent = allAgents.find((a) => a.agentKind === 'project-coordinator');
+    const projectAgent = allAgents.find(
+      (a) =>
+        a.agentKind === 'project-coordinator' &&
+        (a.projectIds?.includes(projectId) ?? false),
+    );
 
     // Delete the project row first
     const ok = await projects.delete(projectId);
