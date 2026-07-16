@@ -58,7 +58,7 @@ Each entity folder must have a top-level `index.ts` barrel.
 
 Cross-entity folders (`navigation/`, `ui/`) do not need the 3-tier — they are not entities.
 
-A missing subfolder, a missing barrel, or a stray file at the entity root (other than `index.ts` and the documented `agent-store.ts` for the agents entity) is a **Fail**.
+A missing subfolder, a missing barrel, or a stray file at the entity root (other than `index.ts`) is a **Fail**. Stores no longer live under `src/flows/<entity>/`; they live under `src/stores/` and are exempt from the "stray file" rule.
 
 ---
 
@@ -216,7 +216,7 @@ Files in `src/flows/` follow a verb-first pattern.
 | CRUD flow | `<verb>-<entity>.ts` | `create-agent.ts`, `list-agents.ts` |
 | Runtime hook | `use-<entity>-runtime.ts` or `start-<entity>-runtime.ts` | `use-agent-runtime.ts` |
 | UI flow | `open-<thing>.ts`, `close-<thing>.ts`, `toggle-<thing>.ts` | `open-create-agent.ts` |
-| Zustand slice | `agent-store.ts` (only one per entity, named `<entity>-store.ts`) | `agent-store.ts` |
+| Store (renderer mirror) | `src/stores/<entity>.ts` | `src/stores/agent.ts` |
 | Barrel | `index.ts` | `index.ts` |
 
 Wrong casing, wrong order, wrong form is a **Warn**. The fix is to rename. The barrel must be `index.ts`.
@@ -234,7 +234,6 @@ rg "200_?000|contextWindow.*=.*[0-9]|setInterval\(.*[0-9]+\)" src electron
 Examples of magic numbers today:
 
 - `CONTEXT_WINDOW_FALLBACK = 200_000` (lives in two composers)
-- `setInterval(sync, 50)` (in `agent-store.ts`)
 - `fs.watch` debounce values
 - IPC timeout values
 
@@ -291,7 +290,9 @@ Checks:
 - Every folder listed under `src/` in AGENTS.md must exist on disk. `ls` each one.
 - Every file mentioned by name in AGENTS.md must exist. `find` for it.
 - The folder counts AGENTS.md cites must match the disk:
-  - "26 components, 4 unused" in `src/components/ui/` → `ls src/components/ui | wc -l` should be 30.
+  - "26 components, 4 unused" in `src/components/ui/` → `ls src/components/ui | wc -l` should be 30 (today: 28, after dropping `icon.tsx` / `huge-icon.tsx` to `src/components/common/` would land at 26; documented target is the 28 currently on disk until the icon-library move lands).
+  - "3 of 8 wired" in `src/storage/repositories/` → must be rewritten (Step 9).
+  - `src/components/common/` lists `(EmptyState, Spinner, PanelHeader, FormField deleted)` → confirm those four are absent from disk.
   - "3 of 8 wired" in `src/storage/repositories/` → must be rewritten (Step 9).
   - "54 unit tests" outside this repo — out of scope, do not check.
 
