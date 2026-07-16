@@ -50,7 +50,7 @@ function sectionMatchesLabel(sec: ManageSectionDef, tokens: string[]): boolean {
 
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const { settings, isLoading, error, reload } = useAgentSettings(agentId);
-  const autoSave = useAutoSave(agentId, reload);
+  const autoSave = useAutoSave(agentId);
 
   const [projects, setProjects] = React.useState<Project[]>([]);
   React.useEffect(() => {
