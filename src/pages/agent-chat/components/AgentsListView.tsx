@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
 import {
 	PlusIcon,
@@ -46,6 +47,32 @@ export function AgentsListView() {
 	const [dialog, setDialog] = React.useState<DialogKind>({ kind: 'closed' });
 	const [visibleDialog, setVisibleDialog] = React.useState<DialogKind>({ kind: 'closed' });
 	const { setOpen: setCreateOpen } = useOpenCreateAgent();
+	const navigate = useNavigate();
+
+	/**
+	 * Row click handler — delegated to <TableBody> rather than attached to
+	 * the <tr> itself. The row is wrapped in <ContextMenuTrigger asChild>
+	 * (Radix Slot), which merges aria-haspopup="menu" + data-state onto the
+	 * same <tr>. Combined with role="button" + onClick, Chromium silently
+	 * swallows the left-click activation on a non-button slot target
+	 * (and <tr> isn't in Radix's allowed slot-target list at all).
+	 * Delegating to the body sidesteps the slot entirely.
+	 *
+	 * The Project column's <Link> already calls e.stopPropagation(), so a
+	 * click on the project name resolves at the Link and never bubbles
+	 * here; the closest('a') check below is defensive in depth.
+	 */
+	const handleRowClick = React.useCallback(
+		(e: React.MouseEvent<HTMLTableSectionElement>) => {
+			const target = e.target as HTMLElement
+			if (target.closest('a')) return
+			const row = target.closest<HTMLElement>('[data-agent-row]')
+			const id = row?.dataset.agentRow
+			if (!id) return
+			navigate(`/agents/${id}`)
+		},
+		[navigate],
+	)
 
 	const reload = React.useCallback(async () => {
 		const [agentList, projectList] = await Promise.all([
@@ -197,7 +224,7 @@ export function AgentsListView() {
 										<TableHead className="w-10" />
 									</TableRow>
 								</TableHeader>
-<TableBody>
+<TableBody onClick={handleRowClick}>
 								{filtered.map((agent) => {
 									const live = liveStatesMap.get(agent.id)
 									return (
@@ -208,6 +235,7 @@ export function AgentsListView() {
 										parentDir={parentDir}
 										liveStatus={live?.status}
 										liveBootStep={live?.bootStep}
+										onRowNavigate={(id) => navigate(`/agents/${id}`)}
 										onOpenAssignProject={(agentId) =>
 											setDialog({ kind: 'assign', agentId })
 										}

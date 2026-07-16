@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { TableRow } from "@/components/ui/table";
@@ -19,6 +19,7 @@ interface AgentListRowProps {
 	/** Live runtime status + bootStep, used to overlay the DB snapshot. */
 	liveStatus?: AgentStatus;
 	liveBootStep?: InitStep;
+	onRowNavigate: (agentId: string) => void;
 	onOpenAssignProject: (agentId: string) => void;
 	onOpenRemoveProject: (agentId: string, projectIdHint?: string | null) => void;
 	onOpenDelete: (agentId: string) => void;
@@ -46,12 +47,12 @@ export function AgentListRow({
   parentDir,
   liveStatus,
   liveBootStep,
+  onRowNavigate,
   onOpenAssignProject,
   onOpenRemoveProject,
   onOpenDelete,
   onForked,
 }: AgentListRowProps) {
-  const navigate = useNavigate();
   const updated = relativeTime(agent.updatedAt);
 
   const status: AgentStatus = liveStatus ?? agent.status;
@@ -70,16 +71,17 @@ export function AgentListRow({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      navigate(`/agents/${agent.id}`);
+      onRowNavigate(agent.id);
     }
   };
 
   const row = (
     <TableRow
-      onClick={() => navigate(`/agents/${agent.id}`)}
+      data-agent-row={agent.id}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       role="button"
+      aria-label={`Open ${agent.name}`}
       className="group cursor-pointer"
     >
       <TableCell className="w-[260px]">
@@ -124,7 +126,7 @@ export function AgentListRow({
         </span>
       </TableCell>
 
-      <TableCell className="w-[100px text-right">
+      <TableCell className="w-[100px] text-right">
         <span className="whitespace-nowrap text-xs text-muted-foreground">
           {updated ?? '—'}
         </span>
