@@ -109,7 +109,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     status,
     messages,
     lastError,
-    bootStep,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -179,7 +178,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   if (status === 'initializing') {
     return (
       <ProjectAgentInitializing
-        currentStep={bootStep}
         agentName={projectAgent.name}
         lastError={lastError}
         onRestart={restart}

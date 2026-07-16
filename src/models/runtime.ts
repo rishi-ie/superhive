@@ -1,6 +1,5 @@
 import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
 export type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
-export { INIT_STEPS } from '../../electron/pi-protocol/types'
 
 /**
  * One structured piece of an assistant message. A message is a sequence of
