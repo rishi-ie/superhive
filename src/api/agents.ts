@@ -9,9 +9,6 @@ import type {
   RuntimeExitPayload,
   AdapterEvent,
 } from '@/types/electron'
-import type {
-  ExtractAdapterEvent,
-} from '@/types/adapter-event'
 
 export const agents = {
   list: (): Promise<Agent[]> => window.api.agents.list(),
@@ -52,22 +49,4 @@ export const agents = {
     window.api.agents.onSettingsChanged(id, cb),
   onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void): (() => void) =>
     window.api.agents.onCreated(id, cb),
-}
-
-/**
- * Subscribe to a single `AdapterEvent` variant by `event.type`. Wraps the
- * generic `onEvent` channel and applies a runtime + compile-time type guard
- * so callers receive the narrowed variant. Returns the same unsubscribe
- * handle `onEvent` does.
- *
- * Usage: agents.onEventVariant(id, 'thinking-end', ev => { … })
- */
-export function onEventVariant<T extends AdapterEvent['type']>(
-  id: string,
-  type: T,
-  cb: (event: ExtractAdapterEvent<T>) => void,
-): () => void {
-  return agents.onEvent(id, (ev) => {
-    if (ev.type === type) cb(ev as ExtractAdapterEvent<T>)
-  })
 }
