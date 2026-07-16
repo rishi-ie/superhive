@@ -247,7 +247,7 @@ export function registerAgentIpc(): void {
 			if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
 			const settingsPath = settingsFilePathFor(agent.localPath)
 
-			for (let attempt = 0; attempt < 3; attempt++) {
+			const writeAttempt = async (): Promise<Record<string, unknown>> => {
 				const raw = await readFile(settingsPath, 'utf8').catch(() =>
 					JSON.stringify(DEFAULT_SETTINGS, null, '\t'),
 				)
@@ -259,14 +259,25 @@ export function registerAgentIpc(): void {
 					managedBy: `superhive-pi-truth@1#${myCounter}`,
 					lastModified: new Date().toISOString(),
 				}
+				return merged
+			}
+
+			let merged: Record<string, unknown> = {}
+			for (let attempt = 0; attempt < 3; attempt++) {
+				merged = await writeAttempt()
+				const serialized = JSON.stringify(merged, null, '\t') + '\n'
 				const tmp = `${settingsPath}.${process.pid}.${Date.now()}.${attempt}.tmp`
-				await writeFile(tmp, JSON.stringify(merged, null, '\t') + '\n', 'utf8')
+				await writeFile(tmp, serialized, 'utf8')
 				await rename(tmp, settingsPath)
 				const verify = JSON.parse(
 					await readFile(settingsPath, 'utf8'),
 				) as Record<string, unknown>
-				if (parseCounter(verify.managedBy as string | undefined) <= myCounter) {
-					runtime.markSelfWrite(agentId, myCounter)
+				// Verify our exact content landed. Counter-only check races when
+				// two writers compute the same counter from the same base; the
+				// last write wins silently. Re-stringify the verify and check
+				// byte-for-byte equality with what we wrote.
+				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
+					runtime.markSelfWrite(agentId, parseCounter(verify.managedBy as string | undefined))
 					return merged
 				}
 				// Raced — re-read and retry
