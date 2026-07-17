@@ -1,16 +1,18 @@
 /**
  * prepareStandaloneAgent — creates a new standalone agent, seeds its
- * settings with the top enabled catalog model, starts its runtime, and
- * waits until the runtime is fully ready for sending messages.
+ * settings, starts its runtime, and waits until the runtime is ready.
  *
  * Returns once the agent can be safely navigated to:
- *   - Settings file has a model selected (composer send button will be enabled)
- *   - Runtime bootStep is `ready` (composer is rendered, not the Booting state)
+ *   - Runtime bootStep is `ready`
+ *
+ * The settings file may or may not have a model selected — if not, the
+ * user picks one from the agent's settings panel after landing.
  *
  * On failure, distinguishes:
  *   - 'create-failed' — the IPC create call rejected
  *   - 'start-failed' — runtime start rejected
- *   - 'timeout' / 'no-model' — runtime is up but the agent has no model
+ *   - 'timeout' / detail 'runtime' — runtime never reached ready
+ *   - 'error' — poll/settings read rejected
  *
  * Caller (the CreateAgentDialog) owns the navigation decision and the
  * PreparingToast lifecycle. This flow is side-effect-only.
@@ -31,7 +33,7 @@ export interface PrepareStandaloneAgentInput {
 export type PrepareStandaloneAgentFailure =
   | { ok: false; reason: 'create-failed'; message: string }
   | { ok: false; reason: 'start-failed'; message: string }
-  | { ok: false; reason: 'timeout'; detail: 'model' | 'runtime'; message?: string }
+  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
   | { ok: false; reason: 'error'; message: string }
 
 export type PrepareStandaloneAgentResult =

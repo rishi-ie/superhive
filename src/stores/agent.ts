@@ -35,7 +35,7 @@ interface RuntimeSlice {
   loading: boolean
   initialized: boolean
   unsubs: Array<() => void>
-  notify?: NotifyFn
+  listeners: Set<NotifyFn>
 }
 
 interface SettingsSlice {
@@ -45,7 +45,7 @@ interface SettingsSlice {
   dirty: Record<string, unknown> | null
   unsub: (() => void) | null
   debounceTimer: ReturnType<typeof setTimeout> | null
-  notify?: NotifyFn
+  listeners: Set<NotifyFn>
 }
 
 export interface AgentSettingsState {
@@ -138,6 +138,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     initialized: false,
     inFlightToolCount: 0,
     unsubs,
+    listeners: new Set(),
   }
 
   runtimeSlices.set(agentId, slice)
@@ -156,7 +157,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.activeModelName = s.activeModelName
     }
     entry.loading = false
-    entry.notify?.()
+    entry.listeners.forEach((l) => l())
   })
 
   agents.get(agentId).then((a) => {
@@ -164,7 +165,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     if (!entry || !a) return
     entry.agent = a
     if (a.lastError) entry.lastError = a.lastError
-    entry.notify?.()
+    entry.listeners.forEach((l) => l())
   })
 
   unsubs.push(
@@ -181,7 +182,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.activeModelName = s.activeModelName
       entry.compaction = s.compaction
       entry.retry = s.retry
-      entry.notify?.()
+      entry.listeners.forEach((l) => l())
     }),
   )
 
@@ -197,7 +198,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       if (entry.messages.length > MAX_MESSAGES) {
         entry.messages = entry.messages.slice(-MAX_MESSAGES)
       }
-      entry.notify?.()
+      entry.listeners.forEach((l) => l())
     }),
   )
 
@@ -247,7 +248,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         }
       } else if (ev.type === 'tool-execution-start') {
         entry.inFlightToolCount += 1
-        entry.notify?.()
+        entry.listeners.forEach((l) => l())
       } else if (ev.type === 'tool-call-start') {
         appendPart(entry, ev.messageId, {
           type: 'tool-call',
@@ -312,7 +313,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           const e = runtimeSlices.get(agentId)
           if (!e) return
           e.messages = msgs
-          e.notify?.()
+          e.listeners.forEach((l) => l())
         })
       } else if (ev.type === 'compaction-start') {
         // Re-fetch status to capture compaction envelope + the parts main
@@ -322,27 +323,27 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
           const e = runtimeSlices.get(agentId)
           if (!e || !s) return
           e.compaction = s.compaction
-          e.notify?.()
+          e.listeners.forEach((l) => l())
         })
       } else if (ev.type === 'compaction-end') {
         agents.getMessages(agentId).then((msgs) => {
           const e = runtimeSlices.get(agentId)
           if (!e) return
           e.messages = msgs
-          e.notify?.()
+          e.listeners.forEach((l) => l())
         })
         agents.getRuntimeState(agentId).then((s) => {
           const e = runtimeSlices.get(agentId)
           if (!e || !s) return
           e.compaction = s.compaction
-          e.notify?.()
+          e.listeners.forEach((l) => l())
         })
       } else if (ev.type === 'auto-retry-start' || ev.type === 'auto-retry-end') {
         agents.getRuntimeState(agentId).then((s) => {
           const e = runtimeSlices.get(agentId)
           if (!e || !s) return
           e.retry = s.retry
-          e.notify?.()
+          e.listeners.forEach((l) => l())
         })
       } else if (ev.type === 'image-attachment') {
         appendPart(entry, ev.messageId, {
@@ -361,7 +362,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         toast.error(ev.message, { duration: Infinity })
         entry.lastError = ev.message
       }
-      entry.notify?.()
+      entry.listeners.forEach((l) => l())
     }),
   )
 
@@ -372,7 +373,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         if (!entry || !s) return
         entry.status = s.status
         entry.lastError = s.lastError
-        entry.notify?.()
+        entry.listeners.forEach((l) => l())
       })
     }),
   )
@@ -402,7 +403,7 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
       if (entry.messages.length > MAX_MESSAGES) {
         entry.messages = entry.messages.slice(-MAX_MESSAGES)
       }
-      entry.notify?.()
+      entry.listeners.forEach((l) => l())
     })
     slice.initialized = true
   }
@@ -429,7 +430,7 @@ async function reloadSettings(agentId: string): Promise<void> {
     const e = settingsSlices.get(agentId)
     if (!e) return
     e.isLoading = false
-    e.notify?.()
+    e.listeners.forEach((l) => l())
   }
 }
 
@@ -444,6 +445,7 @@ function initSettingsSlice(agentId: string): SettingsSlice {
     dirty: null,
     unsub: null,
     debounceTimer: null,
+    listeners: new Set(),
   }
 
   settingsSlices.set(agentId, slice)
@@ -504,7 +506,7 @@ interface AggregatorSlice {
   states: Map<string, AgentLiveState>
   refcount: number
   unsubs: Map<string, () => void>
-  notify?: NotifyFn
+  listeners: Set<NotifyFn>
 }
 
 const aggregatorSlices = new Map<string, AggregatorSlice>()
@@ -526,6 +528,7 @@ function initAggregatorSlice(agentId: string): AggregatorSlice {
     states: new Map(),
     refcount: 1,
     unsubs: new Map(),
+    listeners: new Set(),
   }
   aggregatorSlices.set(agentId, slice)
 
@@ -534,14 +537,14 @@ function initAggregatorSlice(agentId: string): AggregatorSlice {
     if (!entry) return
     const captured = captureState(s)
     if (captured) entry.states.set(agentId, captured)
-    entry.notify?.()
+    entry.listeners.forEach((l) => l())
   })
 
   const unsub = agents.onStatus(agentId, (s) => {
     const entry = aggregatorSlices.get(agentId)
     if (!entry) return
     entry.states.set(agentId, { status: s.status, bootStep: s.bootStep })
-    entry.notify?.()
+    entry.listeners.forEach((l) => l())
   })
   slice.unsubs.set(agentId, unsub)
 
@@ -616,14 +619,14 @@ export function useAllAgentStatuses(
 
     for (const id of nextIds) {
       const slice = aggregatorSlices.get(id)
-      if (slice) slice.notify = sync
+      if (slice) slice.listeners.add(sync)
     }
 
     return () => {
       for (const id of nextIds) {
         const slice = aggregatorSlices.get(id)
         if (slice) {
-          if (slice.notify !== undefined) slice.notify = undefined
+          slice.listeners.delete(sync)
           disposeAggregatorSlice(id)
         }
       }
@@ -700,9 +703,9 @@ export function useAgentRuntime(agentId: string | undefined) {
     }
 
     sync()
-    sliceRef.current!.notify = sync
+    entry.listeners.add(sync)
     return () => {
-      if (sliceRef.current) sliceRef.current.notify = undefined
+      entry.listeners.delete(sync)
     }
   }, [slice])
 
@@ -783,9 +786,9 @@ export function useAgentSettings(agentId: string | null) {
     }
 
     sync()
-    sliceRef.current!.notify = sync
+    entry.listeners.add(sync)
     return () => {
-      if (sliceRef.current) sliceRef.current.notify = undefined
+      entry.listeners.delete(sync)
     }
   }, [slice])
 
@@ -844,13 +847,13 @@ export function useAgentSettings(agentId: string | null) {
         const cur = settingsSlices.get(agentId)
         if (cur) {
           cur.settings = result as AgentSettingsState
-          cur.notify?.()
+          cur.listeners.forEach((l) => l())
         }
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to save settings')
       }
     }, AUTO_SAVE_DEBOUNCE_MS)
-    entry.notify?.()
+    entry.listeners.forEach((l) => l())
   }, [agentId])
 
   const flush = React.useCallback(async (p: Record<string, unknown>) => {
@@ -868,7 +871,7 @@ export function useAgentSettings(agentId: string | null) {
       const cur = settingsSlices.get(agentId)
       if (cur) {
         cur.settings = result as AgentSettingsState
-        cur.notify?.()
+        cur.listeners.forEach((l) => l())
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save settings')

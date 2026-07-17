@@ -20,7 +20,7 @@ export interface PrepareProjectAgentInput {
 export type PrepareProjectAgentFailure =
   | { ok: false; reason: 'create-failed'; message: string }
   | { ok: false; reason: 'start-failed'; message: string }
-  | { ok: false; reason: 'timeout'; detail: 'model' | 'runtime'; message?: string }
+  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
   | { ok: false; reason: 'error'; message: string }
 
 export type PrepareProjectAgentResult =

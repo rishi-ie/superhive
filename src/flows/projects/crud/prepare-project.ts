@@ -27,7 +27,7 @@ export type PrepareProjectFailure =
   | { ok: false; reason: 'create-failed'; message: string }
   | { ok: false; reason: 'coordinator-create-failed'; message: string }
   | { ok: false; reason: 'coordinator-start-failed'; message: string }
-  | { ok: false; reason: 'coordinator-timeout'; detail: 'model' | 'runtime'; message?: string }
+  | { ok: false; reason: 'coordinator-timeout'; detail: 'runtime'; message?: string }
   | { ok: false; reason: 'coordinator-error'; message: string }
   | { ok: false; reason: 'link-failed'; message: string }
 

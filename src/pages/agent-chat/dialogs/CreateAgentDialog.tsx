@@ -106,20 +106,6 @@ export function CreateAgentDialog() {
 
     setPhase('idle')
 
-    if (result.reason === 'timeout' && result.detail === 'model') {
-      toast.update(toastId, {
-        variant: 'error',
-        title: `Couldn't prepare "${trimmedName}"`,
-        description: 'No model is enabled. Open Settings → Models and enable one, then retry.',
-        actions: [
-          { label: 'Open Settings', onClick: () => navigate('/settings/models') },
-          { label: 'Retry', onClick: () => { void onSubmit() } },
-          { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
-        ],
-      })
-      return
-    }
-
     if (result.reason === 'timeout' && result.detail === 'runtime') {
       toast.update(toastId, {
         variant: 'error',

@@ -1,23 +1,22 @@
 /**
  * waitForAgentReady — poll the main process until an agent's runtime is
- * fully ready for sending messages. "Ready" means:
+ * ready for sending messages. "Ready" means:
  *   - status is `active` or `busy`
  *   - bootStep is `ready` (silence-based signal from Pi)
- *   - settings file has a selected model (provider + name)
  *
  * Resolves to one of:
- *   - `{ ok: true, settings }` once all three conditions hold
- *   - `{ ok: false, reason: 'timeout' | 'no-model' | 'error' }` after the
- *     deadline. Distinguishes "runtime came up but no model selected"
- *     from "runtime never reached ready" so callers can surface the right
- *     next-step CTA.
+ *   - `{ ok: true, settings }` once both conditions hold (regardless of
+ *     whether the settings file has a model — the user can pick one later)
+ *   - `{ ok: false, reason: 'timeout', detail: 'runtime' }` after the
+ *     deadline if the runtime never reached ready
+ *   - `{ ok: false, reason: 'error' }` if a poll or settings read rejected
  */
 
 import { agents } from '@/api/agents'
 import type { AgentSettingsState } from '@/stores/agent'
 
 export type WaitForReadyFailure =
-  | { ok: false; reason: 'timeout'; detail: 'model' | 'runtime'; message?: string }
+  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
   | { ok: false; reason: 'error'; message: string }
 
 export type WaitForReadyResult =
@@ -83,16 +82,6 @@ export async function waitForAgentReady(
       ok: false,
       reason: 'error',
       message: err instanceof Error ? err.message : 'Failed to read settings',
-    }
-  }
-
-  const model = settings?.model as { provider?: string; name?: string } | undefined
-  if (!model?.provider || !model?.name) {
-    return {
-      ok: false,
-      reason: 'timeout',
-      detail: 'model',
-      message: 'No model selected',
     }
   }
 

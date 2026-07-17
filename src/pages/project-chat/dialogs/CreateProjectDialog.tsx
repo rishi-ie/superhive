@@ -98,20 +98,6 @@ export function CreateProjectDialog() {
 
     setPhase('idle')
 
-    if (result.reason === 'coordinator-timeout' && result.detail === 'model') {
-      toast.update(toastId, {
-        variant: 'error',
-        title: `Couldn't prepare "${trimmedName}"`,
-        description: 'The project coordinator has no model selected. Open Settings → Models and enable one, then retry.',
-        actions: [
-          { label: 'Open Settings', onClick: () => navigate('/settings/models') },
-          { label: 'Retry', onClick: () => { void onSubmit() } },
-          { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
-        ],
-      })
-      return
-    }
-
     if (result.reason === 'coordinator-timeout' && result.detail === 'runtime') {
       toast.update(toastId, {
         variant: 'error',
