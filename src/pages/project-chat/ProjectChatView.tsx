@@ -35,7 +35,7 @@ import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
-import { useAgentSettings } from '@/stores/agent';
+import { useAgentSettings, useAgentsListVersion } from '@/stores/agent';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
@@ -49,6 +49,9 @@ export function ProjectChatView() {
   const [project, setProject] = React.useState<Project | null>(null);
   const [projectAgent, setProjectAgent] = React.useState<Agent | null>(null);
   const [projectResolved, setProjectResolved] = React.useState(false);
+  // Re-resolve the project coordinator when the agents table changes (e.g.
+  // the coordinator's folder was deleted and the watcher evicted the row).
+  const agentsVersion = useAgentsListVersion();
 
   React.useEffect(() => {
     if (!projectId) return;
@@ -74,7 +77,7 @@ export function ProjectChatView() {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, agentsVersion]);
 
   if (!projectId) return <ProjectAgentEmpty />;
 

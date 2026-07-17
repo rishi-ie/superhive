@@ -28,7 +28,7 @@ import {
 	removeAgentFromProject,
 } from '@/flows/projects/crud';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
-import { useAllAgentStatuses } from '@/stores/agent';
+import { useAgentsListVersion, useAllAgentStatuses } from '@/stores/agent';
 import type { Agent, Project } from '@/types/electron';
 
 type DialogKind =
@@ -48,6 +48,9 @@ export function AgentsListView() {
 	const [visibleDialog, setVisibleDialog] = React.useState<DialogKind>({ kind: 'closed' });
 	const { setOpen: setCreateOpen } = useOpenCreateAgent();
 	const navigate = useNavigate();
+	// Bumps whenever db.agents.json is updated by the fs watcher — drives
+	// re-fetch on adoption/eviction so the table reflects filesystem state.
+	const agentsVersion = useAgentsListVersion();
 
 	/**
 	 * Row click handler — delegated to <TableBody> rather than attached to
@@ -91,7 +94,7 @@ export function AgentsListView() {
 			.catch(() => { if (!cancelled) setAgents([]); })
 			.finally(() => { if (!cancelled) setLoading(false); });
 		return () => { cancelled = true; };
-	}, [reload]);
+	}, [reload, agentsVersion]);
 
 	React.useEffect(() => {
 		if (dialog.kind !== 'closed') {

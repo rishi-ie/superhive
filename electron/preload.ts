@@ -52,6 +52,11 @@ contextBridge.exposeInMainWorld('api', {
     onExit:     (id, cb) => subscribe(`agent:${id}:exit`,     cb),
     onSettingsChanged: (id, cb) => subscribe(`settings:${id}:changed`, cb),
     onCreated: (id, cb) => subscribe(`agent:${id}:created`, cb),
+    // `agents:changed` is broadcast by `agents-fs-watcher` after every
+    // reconcile pass (boot + every debounced fs event). Consumers re-fetch
+    // via `agents.list()` to pull the current state of `db.agents.json`,
+    // which the watcher keeps in sync with the filesystem.
+    onChanged: (cb) => subscribe('agents:changed', cb),
   },
   projects: {
     list:   () => ipcRenderer.invoke('projects:list'),

@@ -10,6 +10,7 @@ import { runtime } from './general-kai-runtime';
 import { reconcileAgents } from './reconcile-agents';
 import { reconcileRuntime } from './reconcile-runtime';
 import { isGeneralKaiReady } from './install-general-kai';
+import { agentsFsWatcher } from './agents-fs-watcher';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -110,6 +111,14 @@ app.whenReady().then(async () => {
   await reconcileRuntime();
   registerIpc();
 
+  // After IPC is wired, start the fs watcher. It will keep db.agents.json
+  // in sync with the filesystem for the lifetime of the process. The boot
+  // reconcile above already evicted any rows whose folders are gone, so a
+  // notification here pushes the just-loaded renderer to re-fetch the
+  // (now-canonical) list.
+  agentsFsWatcher.start();
+  agentsFsWatcher.notifyChanged();
+
   createWindow();
   if (mainWindow) setupAutoUpdater(mainWindow);
 
@@ -129,6 +138,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', async () => {
   log.info('Shutting down agent runtimes...');
+  agentsFsWatcher.stop();
   await runtime.shutdownAll();
 });
 

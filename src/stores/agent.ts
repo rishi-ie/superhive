@@ -462,6 +462,39 @@ export function disposeSlice(agentId: string): void {
   disposeSettingsSliceNow(agentId)
 }
 
+// --- Agents-list invalidation -------------------------------------------
+//
+// The DB is a write-through cache of the filesystem, kept in sync by
+// `electron/agents-fs-watcher.ts`. Whenever the watcher reconciles (boot,
+// debounced fs event, soft-delete eviction) it broadcasts `agents:changed`
+// on the IPC bus. Components that render the agents list subscribe here
+// and re-fetch via `listAgents()` whenever the version bumps.
+
+let agentsListVersion = 0
+const agentsListListeners = new Set<() => void>()
+
+/**
+ * Returns a monotonic version counter that bumps on every `agents:changed`
+ * event. Components include `version` in their effect deps to re-fetch
+ * the agents list on every DB change without polling.
+ */
+export function useAgentsListVersion(): number {
+  const [version, setVersion] = React.useState(agentsListVersion)
+  React.useEffect(() => {
+    const off = agents.onChanged(() => {
+      agentsListVersion += 1
+      agentsListListeners.forEach((l) => l())
+    })
+    const listener = () => setVersion(agentsListVersion)
+    agentsListListeners.add(listener)
+    return () => {
+      agentsListListeners.delete(listener)
+      off()
+    }
+  }, [])
+  return version
+}
+
 export interface AgentLiveState {
   status: AgentStatus
   bootStep?: InitStep

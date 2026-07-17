@@ -49,4 +49,6 @@ export const agents = {
     window.api.agents.onSettingsChanged(id, cb),
   onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void): (() => void) =>
     window.api.agents.onCreated(id, cb),
+
+  onChanged: (cb: () => void): (() => void) => window.api.agents.onChanged(cb),
 }

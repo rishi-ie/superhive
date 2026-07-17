@@ -66,6 +66,13 @@ export interface AgentsAPI {
 	onExit: (id: string, cb: (payload: RuntimeExitPayload) => void) => () => void
 	onSettingsChanged: (id: string, cb: (agentId: string) => void) => () => void
 	onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void) => () => void
+	/**
+	 * Subscribe to `agents:changed` IPC events. Broadcast by the main process
+	 * after every reconcile pass — boot, every debounced fs event from the
+	 * agents-fs-watcher, and every soft-delete eviction. Consumers re-fetch
+	 * `list()` to pull the current state of `db.agents.json`.
+	 */
+	onChanged: (cb: () => void) => () => void
 }
 
 export interface ProjectsAPI {
