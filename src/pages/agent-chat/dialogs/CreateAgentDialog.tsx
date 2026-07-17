@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { FolderIcon, CircleNotchIcon } from "@phosphor-icons/react";
+import { CircleNotchIcon, FolderIcon } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -14,25 +14,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
-import { createAgent } from '@/flows/agents/crud/create-agent';
-import { agents } from '@/api/agents';
-import { toast } from 'sonner';
+import { prepareStandaloneAgent } from '@/flows/agents/crud/prepare-standalone-agent';
+import { usePreparingToast } from '@/components/common/PreparingToast';
 import { cn } from '@/lib/utils';
 import { slugify } from '@/lib/slugify';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/agents';
 
-type SubmitPhase = 'idle' | 'creating';
+type SubmitPhase = 'idle' | 'preparing';
 
 export function CreateAgentDialog() {
   const { open, setOpen } = useOpenCreateAgent();
   const navigate = useNavigate();
+  const toast = usePreparingToast();
 
   const [name, setName] = React.useState('');
   const [folderName, setFolderName] = React.useState('');
   const [parentDir, setParentDir] = React.useState(DEFAULT_PARENT_DIR);
   const [phase, setPhase] = React.useState<SubmitPhase>('idle');
-  const [error, setError] = React.useState<string | null>(null);
+  const [validationError, setValidationError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!open) {
@@ -40,7 +40,7 @@ export function CreateAgentDialog() {
       setFolderName('');
       setParentDir(DEFAULT_PARENT_DIR);
       setPhase('idle');
-      setError(null);
+      setValidationError(null);
     }
   }, [open]);
 
@@ -60,42 +60,101 @@ export function CreateAgentDialog() {
     /^[a-z0-9][a-z0-9-]*$/.test(folderName) &&
     parentDir.trim().length > 0;
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    setError(null);
-    setPhase('creating');
-    const result = await createAgent(
-      {
-        name: name.trim(),
-        folderName: folderName.trim(),
-        parentDir: parentDir.trim(),
-      },
-      navigate,
-    );
-    if (result.ok) {
-      setOpen(false);
-      if (result.agent) {
-        const unsub = agents.onCreated(result.agent.id, (info) => {
-          unsub();
-          if (info.defaultModel === null) {
-            toast('No model enabled — open Settings → Models to pick one');
-          }
-        });
-        setTimeout(unsub, 5000);
-      }
-    } else {
-      setPhase('idle');
-      setError(result.error ?? 'Failed to create agent');
+  const onSubmit = React.useCallback(async () => {
+    if (phase !== 'idle') return
+    const trimmedName = name.trim()
+    const trimmedFolder = folderName.trim()
+    const trimmedParent = parentDir.trim()
+
+    if (!trimmedName) {
+      setValidationError('Agent name is required')
+      return
     }
-  };
+    if (!trimmedFolder) {
+      setValidationError('Agent folder name is required')
+      return
+    }
+    if (!/^[a-z0-9][a-z0-9-]*$/.test(trimmedFolder)) {
+      setValidationError('Folder name must be lowercase letters, digits, and hyphens')
+      return
+    }
+    if (!trimmedParent) {
+      setValidationError('Parent directory is required')
+      return
+    }
+
+    setValidationError(null)
+    setPhase('preparing')
+
+    const toastId = toast.show({
+      title: `Preparing "${trimmedName}"…`,
+    })
+
+    const result = await prepareStandaloneAgent({
+      name: trimmedName,
+      folderName: trimmedFolder,
+      parentDir: trimmedParent,
+    })
+
+    if (result.ok) {
+      toast.dismiss(toastId)
+      setPhase('idle')
+      setOpen(false)
+      navigate(`/agents/${result.agent.id}`)
+      return
+    }
+
+    setPhase('idle')
+
+    if (result.reason === 'timeout' && result.detail === 'model') {
+      toast.update(toastId, {
+        variant: 'error',
+        title: `Couldn't prepare "${trimmedName}"`,
+        description: 'No model is enabled. Open Settings → Models and enable one, then retry.',
+        actions: [
+          { label: 'Open Settings', onClick: () => navigate('/settings/models') },
+          { label: 'Retry', onClick: () => { void onSubmit() } },
+          { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
+        ],
+      })
+      return
+    }
+
+    if (result.reason === 'timeout' && result.detail === 'runtime') {
+      toast.update(toastId, {
+        variant: 'error',
+        title: `Couldn't prepare "${trimmedName}"`,
+        description: result.message ?? 'The agent runtime did not finish booting in time.',
+        actions: [
+          { label: 'Retry', onClick: () => { void onSubmit() } },
+          { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
+        ],
+      })
+      return
+    }
+
+    toast.update(toastId, {
+      variant: 'error',
+      title: `Couldn't prepare "${trimmedName}"`,
+      description: result.message,
+      actions: [
+        { label: 'Retry', onClick: () => { void onSubmit() } },
+        { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
+      ],
+    })
+  }, [phase, name, folderName, parentDir, toast, setOpen, navigate])
 
   const submitting = phase !== 'idle';
   const buttonLabel =
-    phase === 'creating' ? 'Creating Agent…' : 'Create Agent';
+    phase === 'preparing' ? 'Preparing Agent…' : 'Create Agent';
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(next) => {
+      // Don't allow closing while a prepare is in-flight — the toast
+      // already covers progress and the user can retry from there.
+      if (submitting) return
+      setOpen(next)
+    }}>
       <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-card gap-6">
         <DialogHeader className="gap-stack pb-3 border-b border-sidebar-border">
           <DialogTitle className="text-sidebar-foreground">New Agent</DialogTitle>
@@ -103,7 +162,13 @@ export function CreateAgentDialog() {
             Create a new agent in your local workspace.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            void onSubmit()
+          }}
+          className="flex flex-col gap-6"
+        >
           <div className="flex flex-col gap-stack">
             <Label htmlFor="agent-name" className="text-sidebar-foreground">
               Agent Name<span className="text-destructive ml-0.5">*</span>
@@ -115,6 +180,7 @@ export function CreateAgentDialog() {
               onChange={(e) => setName(e.target.value)}
               autoFocus
               required
+              disabled={submitting}
               className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
             />
           </div>
@@ -129,6 +195,7 @@ export function CreateAgentDialog() {
               value={folderName}
               onChange={(e) => setFolderName(e.target.value.toLowerCase())}
               required
+              disabled={submitting}
               className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
             <span className="text-xs text-sidebar-foreground/50">
@@ -146,6 +213,7 @@ export function CreateAgentDialog() {
               value={parentDir}
               onChange={(e) => setParentDir(e.target.value)}
               required
+              disabled={submitting}
               className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
             />
           </div>
@@ -161,12 +229,12 @@ export function CreateAgentDialog() {
             </div>
           )}
 
-          {error && (
+          {validationError && (
             <p
               role="alert"
               className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
             >
-              {error}
+              {validationError}
             </p>
           )}
 
