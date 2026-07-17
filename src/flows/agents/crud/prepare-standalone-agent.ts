@@ -61,6 +61,7 @@ export async function prepareStandaloneAgent(
   try {
     const startResult = await agents.start(agent.id)
     if (!startResult.ok) {
+      await agents.delete(agent.id).catch(() => {})
       return {
         ok: false,
         reason: 'start-failed',
@@ -68,6 +69,7 @@ export async function prepareStandaloneAgent(
       }
     }
   } catch (err) {
+    await agents.delete(agent.id).catch(() => {})
     return {
       ok: false,
       reason: 'start-failed',
@@ -75,8 +77,9 @@ export async function prepareStandaloneAgent(
     }
   }
 
-  return waitForAgentReady(agent.id).then((result) => {
+  return waitForAgentReady(agent.id).then(async (result) => {
     if (result.ok) return { ok: true as const, agent }
+    await agents.delete(agent.id).catch(() => {})
     if (result.reason === 'error') {
       return { ok: false as const, reason: 'error' as const, message: result.message }
     }
