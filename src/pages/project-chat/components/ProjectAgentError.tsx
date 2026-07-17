@@ -3,7 +3,7 @@
  *
  * Project-agent runtimes are intentionally forked from agent runtimes
  * so they can evolve independently. The Delete action cascades to the
- * project (and its project-agent + channel) instead of just the agent.
+ * project and its project-agent instead of just the agent.
  */
 
 import { Icon } from "@/components/ui/icon";

@@ -1,12 +1,10 @@
 /**
- * deleteProject — cascades deletion of a project, its project-agent,
- * and (best-effort) its channel.
+ * deleteProject — cascades deletion of a project and its project-agent.
  *
  * Order:
  *   1. Resolve the project + its project-agent (kind: project-coordinator)
  *   2. Delete the project row first (so agent-side cleanup sees no project link)
  *   3. Stop the project-agent runtime + delete the agent row + dispose its store slice
- *   4. TODO: clean up channel JSONL when we add channels.delete IPC
  *
  * Used by `ProjectAgentError`'s "Delete Project" button.
  */
@@ -50,11 +48,6 @@ export async function deleteProject(projectId: string): Promise<DeleteProjectRes
       await agents.stop(projectAgent.id).catch(() => {});
       await agents.delete(projectAgent.id).catch(() => {});
       disposeSlice(projectAgent.id);
-    }
-
-    // TODO: delete channel + JSONL file when channels.delete IPC lands
-    if (project.channelId) {
-      // fire-and-forget; no IPC yet
     }
 
     toast.success(`Project "${project.name}" deleted`);

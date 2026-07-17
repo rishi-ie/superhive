@@ -1,8 +1,8 @@
 /**
- * prepareProject — creates a project + its coordinator agent + the project
- * channel, then waits for the coordinator runtime to be ready before
- * resolving. The caller (CreateProjectDialog) owns the navigation decision
- * and the PreparingToast lifecycle.
+ * prepareProject — creates a project + its coordinator agent, then waits for
+ * the coordinator runtime to be ready before resolving. The caller
+ * (CreateProjectDialog) owns the navigation decision and the
+ * PreparingToast lifecycle.
  *
  * Rollback semantics:
  *   - If project creation fails: nothing to roll back.
@@ -10,12 +10,10 @@
  *   - If coordinator never reaches ready: keep the project + agent so the
  *     user can retry from /projects/:id (settings file is on disk, the
  *     runtime can be restarted).
- *   - If channel creation/link fails: delete project + coordinator.
  */
 
 import { projects } from '@/api/projects'
 import { agents } from '@/api/agents'
-import { createChannel } from '@/flows/channels/crud/create-channel'
 import { prepareProjectAgent } from '@/flows/agents/crud/prepare-project-agent'
 import type { Project } from '@/types/electron'
 
@@ -32,7 +30,6 @@ export type PrepareProjectFailure =
   | { ok: false; reason: 'coordinator-timeout'; detail: 'model' | 'runtime'; message?: string }
   | { ok: false; reason: 'coordinator-error'; message: string }
   | { ok: false; reason: 'link-failed'; message: string }
-  | { ok: false; reason: 'channel-failed'; message: string }
 
 export type PrepareProjectResult =
   | { ok: true; project: Project }
@@ -87,31 +84,6 @@ export async function prepareProject(
       reason: 'link-failed',
       message: err instanceof Error ? err.message : 'Failed to link project agent',
     }
-  }
-
-  const channelResult = await createChannel({
-    name: `${name} coordination`,
-    type: 'project',
-    projectId: project.id,
-    participantAgentIds: [coordinatorAgent.id],
-  })
-  if (!channelResult.ok || !channelResult.channel) {
-    await projects.delete(project.id).catch(() => {})
-    await agents.delete(coordinatorAgent.id).catch(() => {})
-    return {
-      ok: false,
-      reason: 'channel-failed',
-      message: channelResult.error ?? 'Failed to create channel',
-    }
-  }
-
-  try {
-    await projects.update(project.id, { channelId: channelResult.channel.id })
-  } catch (err) {
-    // Non-fatal — channel exists independently of the project's channelId link.
-    // Surface as a separate failure reason only if the caller treats it as fatal;
-    // currently the project + coordinator are usable without this back-link.
-    void err
   }
 
   return { ok: true, project }

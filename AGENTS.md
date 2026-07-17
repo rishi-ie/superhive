@@ -40,7 +40,7 @@ The application is a **single-page 3-region layout**:
 └─────────────┴───────────────────────────┴─────────────┘
 ```
 
-- **LeftSidebar** (`w-64` to `w-80`): Navigation (repositories, accordion sections: Pinned / Agents / Projects / Channels), user button at footer.
+- **LeftSidebar** (`w-64` to `w-80`): Navigation (repositories, accordion sections: Pinned / Agents / Projects), user button at footer.
 - **Center Panel** (`flex-1`): The active page (Dashboard by default). `<Outlet />` for nested routes. Houses `TopRightControls` (absolute over center) and `TopHandle` (drag handle).
 - **RightPanel** (`w-64` to `w-80`): Context inspector for the active selection in center. Collapsible.
 
@@ -275,11 +275,10 @@ src/
 │   ├── database.ts
 │   ├── seed.ts
 │   ├── types.ts
-│   └── repositories/               # Agent, Project, Settings (3 of 8 wired — Task/Session/Tag/Workspace/Channel deleted)
+│   └── repositories/               # Agent, Project, Settings (3 of 8 wired — Task/Session/Tag/Workspace deleted)
 │
 ├── api/                             # window.api IPC wrappers
 │   ├── agents.ts
-│   ├── channels.ts
 │   ├── projects.ts
 │   └── settings.ts
 │
@@ -315,8 +314,6 @@ Routes config lives at `src/pages/routes.tsx`. Page components are imported dire
 ## Data Layer (LowDB)
 
 3 repositories (Agent, Project, Settings). Per-entity JSON files in Electron `userData` directory. All repo methods async. Cascade deletes handled by repository helpers (no UI-side cascades).
-
-Channel storage uses raw JSONL files in `~/.superhive/channels/` (not LowDB).
 
 See `storage.md` for full repository reference.
 

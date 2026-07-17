@@ -2,7 +2,6 @@ import { registerAgentIpc } from './agents';
 import { registerProjectIpc } from './projects';
 import { registerRuntimeIpc } from './runtime';
 import { registerAppIpc } from './app';
-import { registerChannelsIpc } from './channels';
 import { registerSettingsIpc } from './settings';
 
 export const IPC = {
@@ -47,13 +46,6 @@ export const IPC = {
     GET_VERSION: 'app:get-version',
     INSTALL_UPDATE: 'app:install-update',
   },
-  CHANNELS: {
-    CREATE: 'channels:create',
-    GET: 'channels:get',
-    LIST: 'channels:list',
-    APPEND_MESSAGE: 'channels:append-message',
-    READ_MESSAGES: 'channels:read-messages',
-  },
   SETTINGS: {
     GET_PROVIDERS: 'settings:get-providers',
     SET_PROVIDER: 'settings:set-provider',
@@ -72,6 +64,5 @@ export function registerIpc(): void {
   registerProjectIpc();
   registerRuntimeIpc();
   registerAppIpc();
-  registerChannelsIpc();
   registerSettingsIpc();
 }

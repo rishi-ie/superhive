@@ -4,7 +4,7 @@
  * Does NOT start the runtime. Callers wanting a ready-to-use coordinator
  * should use `prepareProjectAgent` (which composes create + start + wait)
  * or `prepareProject` (which orchestrates the full project + coordinator
- * + channel setup).
+ * setup).
  */
 
 import { agents } from '@/api/agents';

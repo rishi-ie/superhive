@@ -9,7 +9,7 @@ async function getDb() {
 }
 
 export const ProjectRepository = {
-  async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'agentIds' | 'taskIds' | 'channelIds' | 'childProjectIds' | 'archived'>): Promise<Project> {
+  async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'agentIds' | 'taskIds' | 'childProjectIds' | 'archived'>): Promise<Project> {
     const db = await getDb()
     const now = Date.now()
     const project: Project = {
@@ -23,7 +23,6 @@ export const ProjectRepository = {
       archived: false,
       agentIds: [],
       taskIds: [],
-      channelIds: [],
       childProjectIds: [],
       createdAt: now,
       updatedAt: now,
@@ -121,31 +120,11 @@ export const ProjectRepository = {
       project.updatedAt = Date.now()
     }
     if (agent) {
-      agent.projectIds = agent.projectIds.filter((id: string) => id !== projectId)
+      agent.projectIds = agent.projectIds.filter((pid: string) => pid !== projectId)
       agent.updatedAt = Date.now()
     }
     await db.write()
     await agentDb.write()
-  },
-
-  async addChannel(projectId: string, channelId: string): Promise<void> {
-    const db = await getDb()
-    const project = db.data.find((p: Project) => p.id === projectId)
-    if (project && !project.channelIds.includes(channelId)) {
-      project.channelIds.push(channelId)
-      project.updatedAt = Date.now()
-      await db.write()
-    }
-  },
-
-  async removeChannel(projectId: string, channelId: string): Promise<void> {
-    const db = await getDb()
-    const project = db.data.find((p: Project) => p.id === projectId)
-    if (project) {
-      project.channelIds = project.channelIds.filter((id: string) => id !== channelId)
-      project.updatedAt = Date.now()
-      await db.write()
-    }
   },
 
   async addChildProject(parentId: string, childId: string): Promise<void> {

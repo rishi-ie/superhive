@@ -1,8 +1,8 @@
-import type { Agent, AgentStatus, Project, Channel } from '@/storage/types'
+import type { Agent, AgentStatus, Project } from '@/storage/types'
 import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
 
-export type { Agent, AgentStatus, Project, Channel }
+export type { Agent, AgentStatus, Project }
 
 export type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload }
 export type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo }
@@ -91,7 +91,7 @@ export type ProjectCreateInput = {
 	localPath?: string
 }
 
-export type ProjectUpdateInput = Partial<Pick<Project, 'name' | 'description' | 'localPath' | 'channelId'>>
+export type ProjectUpdateInput = Partial<Pick<Project, 'name' | 'description' | 'localPath'>>
 
 export interface AppUpdateInfo {
 	version: string
@@ -109,31 +109,7 @@ export interface ElectronAPI {
 	agents: AgentsAPI
 	projects: ProjectsAPI
 	app: AppAPI
-	channels: ChannelsAPI
 	settings: SettingsAPI
-}
-
-export interface ChannelMessage {
-	id: string
-	senderType: 'user' | 'agent' | 'system'
-	senderId: string
-	content: string
-	timestamp: number
-}
-
-export interface CreateChannelInput {
-	name: string
-	type: 'project' | 'agent' | 'system'
-	projectId?: string
-	participantAgentIds: string[]
-}
-
-export interface ChannelsAPI {
-	create(input: CreateChannelInput): Promise<Channel>
-	get(id: string): Promise<Channel | null>
-	list(): Promise<Channel[]>
-	appendMessage(channelId: string, message: Omit<ChannelMessage, 'id' | 'timestamp'>): Promise<ChannelMessage>
-	readMessages(channelId: string): Promise<ChannelMessage[]>
 }
 
 export interface ProviderEntry {
