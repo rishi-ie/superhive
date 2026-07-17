@@ -2,7 +2,6 @@ import type {
   Agent,
   AgentStatus,
   AgentCreateInput,
-  AgentForkInput,
   Project,
   RuntimeMessage,
   RuntimeStatusPayload,
@@ -26,20 +25,12 @@ export const agents = {
     window.api.agents.getRuntimeState(id),
   getProjects: (id: string): Promise<Project[]> => window.api.agents.getProjects(id),
   getMessages: (id: string): Promise<RuntimeMessage[]> => window.api.agents.getMessages(id),
-  editMessage: (id: string, messageId: string, text: string): Promise<{ ok: boolean }> =>
-    window.api.agents.editMessage(id, messageId, text),
-  regenerate: (id: string, fromMessageId: string): Promise<{ ok: boolean }> =>
-    window.api.agents.regenerate(id, fromMessageId),
-  deleteMessage: (id: string, messageId: string): Promise<{ ok: boolean }> =>
-    window.api.agents.deleteMessage(id, messageId),
 
   readSettings: (id: string): Promise<Record<string, unknown> | null> =>
     window.api.agents.readSettings(id),
   writeSettings: (id: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> =>
     window.api.agents.writeSettings(id, patch),
   reveal: (id: string): Promise<{ ok: boolean }> => window.api.agents.reveal(id),
-  forkFromSettings: (sourceAgentId: string, data: AgentForkInput): Promise<Agent> =>
-    window.api.agents.forkFromSettings(sourceAgentId, data),
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),

@@ -9,7 +9,6 @@ import {
 import {
 	CopyIcon,
 	FolderOpenIcon,
-	GitForkIcon,
 	LinkIcon,
 	PencilSimpleIcon,
 	PlayIcon,
@@ -20,7 +19,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Agent } from '@/types/electron'
 import type { ReactNode } from 'react';
-import { forkAgent, revealAgent } from '@/flows/agents/crud';
+import { revealAgent } from '@/flows/agents/crud';
 import {
 	startAgent,
 	stopAgent,
@@ -44,7 +43,7 @@ const RESTART_SKIPPED: ReadonlySet<Agent['status']> = new Set();
 
 export function AgentRowContextMenu(props: AgentRowContextMenuProps) {
 	const navigate = useNavigate();
-	const { agent, parentDir } = props;
+	const { agent } = props;
 	const hasProject = agent.projectIds.length > 0;
 
 	function copyId() {
@@ -103,17 +102,6 @@ export function AgentRowContextMenu(props: AgentRowContextMenuProps) {
 					onSelect={() => revealAgent(agent.id)}
 				>
 					<FolderOpenIcon /> Reveal in Finder
-				</ContextMenuItem>
-				<ContextMenuItem
-					onSelect={async () => {
-						const res = await forkAgent(
-							{ sourceAgentId: agent.id, parent: agent, parentDir },
-							navigate,
-						);
-						props.onForked?.(res.agent?.id ?? agent.id);
-					}}
-				>
-					<GitForkIcon /> Fork agent
 				</ContextMenuItem>
 				<ContextMenuSeparator />
 				<ContextMenuItem variant="destructive" onSelect={props.onOpenDelete}>

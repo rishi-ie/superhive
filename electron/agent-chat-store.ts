@@ -159,19 +159,3 @@ export async function clear(agentId: string): Promise<void> {
 		// Already gone
 	}
 }
-
-/**
- * Atomically rewrite the chat file to `messages`. Used by Phase 10.2/10.3/10.4
- * (edit/regenerate/delete) where the on-disk ordering must drop or replace
- * rows, not just append. Concurrency: goes through `queueWrite` so it serializes
- * against concurrent `appendBatch` calls.
- */
-export async function replaceAll(agentId: string, messages: RuntimeMessage[]): Promise<void> {
-	await ensureAgentDir(agentId)
-	const path = chatPath(agentId)
-	const normalized = messages.map((m) => migratePersistedMessage(m) ?? m)
-	const body = normalized.length === 0 ? '' : normalized.map((m) => JSON.stringify(m)).join('\n') + '\n'
-	await queueWrite(path, async () => {
-		await fs.writeFile(path, body, 'utf8')
-	})
-}

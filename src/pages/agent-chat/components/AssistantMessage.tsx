@@ -1,5 +1,3 @@
-import { Icon } from '@/components/ui/icon'
-import { ArrowsClockwiseIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
@@ -10,7 +8,6 @@ import { UsageFooter } from './UsageFooter'
 import { PartRenderer } from './message-parts/PartRenderer'
 import { ToolResultPart } from './message-parts/ToolResultPart'
 import { copyToClipboard } from '@/lib/clipboard'
-import { regenerate } from '@/flows/agents/crud'
 import { isMessageInFlight, type ContentPart } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -18,14 +15,11 @@ interface AssistantMessageProps {
   message: RuntimeMessage
   className?: string
   agentId: string
-  onRegenerate?: (messageId: string) => void
 }
 
 export function AssistantMessage({
   message,
   className,
-  agentId,
-  onRegenerate,
 }: AssistantMessageProps) {
   const inFlight = isMessageInFlight(message)
 
@@ -143,18 +137,6 @@ export function AssistantMessage({
           aria-label="Copy message"
         >
           <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
-        </Button>
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => {
-            if (typeof onRegenerate === 'function') onRegenerate(message.id)
-            else void regenerate({ agentId, fromMessageId: message.id })
-          }}
-          aria-label="Regenerate response"
-        >
-          <Icon icon={ArrowsClockwiseIcon} className="size-3.5" />
         </Button>
         <Tooltip>
           <TooltipTrigger asChild>

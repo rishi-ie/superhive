@@ -39,7 +39,6 @@ import { useAgentSettings, useAgentsListVersion } from '@/stores/agent';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
-import { shortcutRegenerateLast } from '@/flows/ui/shortcut-regenerate-last';
 import { getMessageText } from '@/models/runtime';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
@@ -229,9 +228,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   useChatShortcuts({
     onCopyLast: () => {
       void shortcutCopyLastAssistant({ messages });
-    },
-    onRegenerate: () => {
-      void shortcutRegenerateLast({ messages, agentId: projectAgent.id });
     },
     onStop: () => {
       if (status === 'busy' || status === 'active') void stop();

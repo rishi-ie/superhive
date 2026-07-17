@@ -19,7 +19,7 @@ import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { SettingsRepository } from '../src/storage/repositories/SettingsRepository'
 import { parseCounter } from './agent-settings-defaults'
-import { appendBatch, readAll, replaceAll, trimTo } from './agent-chat-store'
+import { appendBatch, readAll, trimTo } from './agent-chat-store'
 import { buildStatusPayload } from './runtime-status'
 
 /**
@@ -284,113 +284,6 @@ class GeneralKaiRuntime {
       this.transitionStatus(entry, 'idle')
       return false
     }
-  }
-
-  /**
-   * Phase 10.2 — Edit a user message in-place and resend. We:
-   *   1. Find the message by id (role must be 'user').
-   *   2. Rewrite that message's text-part and bump its ts so it's "now".
-   *   3. Drop every message after it (truncate the branch).
-   *   4. Push the edited user message onto the agent's stdin again.
-   *
-   * Returns false if the message isn't found or isn't a user message.
-   */
-  editMessage(agentId: string, messageId: string, newText: string): boolean {
-    const entry = this.entries.get(agentId)
-    if (!entry?.process) return false
-    if (!newText.trim()) return false
-    const idx = entry.messages.findIndex((m) => m.id === messageId && m.role === 'user')
-    if (idx === -1) return false
-    const edited: RuntimeMessage = {
-      id: messageId,
-      role: 'user',
-      parts: [{ type: 'text', text: newText, state: 'complete' }],
-      ts: Date.now(),
-    }
-    entry.messages = [
-      ...entry.messages.slice(0, idx),
-      edited,
-    ]
-    entry._chatPending.clear()
-    this.persistChatImmediate(entry)
-    this.transitionStatus(entry, 'busy')
-    this.emitMessages(agentId)
-    try {
-      const wire = entry.adapter.serializeInput(newText)
-      entry.process.stdin?.write(wire)
-      return true
-    } catch (err) {
-      log.error(`[runtime] editMessage failed for ${agentId}:`, err)
-      entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'idle')
-      return false
-    }
-  }
-
-  /**
-   * Phase 10.3 — Regenerate an assistant response. Drop every message from
-   * `fromMessageId` to the end, then re-send the user message that preceded
-   * it (if any). Returns false if the assistant message can't be found.
-   */
-  regenerate(agentId: string, fromMessageId: string): boolean {
-    const entry = this.entries.get(agentId)
-    if (!entry?.process) return false
-    const idx = entry.messages.findIndex(
-      (m) => m.id === fromMessageId && m.role === 'assistant',
-    )
-    if (idx === -1) return false
-    let rewindTo = idx - 1
-    while (rewindTo >= 0 && entry.messages[rewindTo]?.role !== 'user') {
-      rewindTo -= 1
-    }
-    const priorUser = rewindTo >= 0 ? entry.messages[rewindTo] : undefined
-    const priorText = priorUser?.parts.find((p) => p.type === 'text') as
-      | { type: 'text'; text: string }
-      | undefined
-    entry.messages = entry.messages.slice(0, idx)
-    entry._chatPending.clear()
-    this.persistChatImmediate(entry)
-    this.emitMessages(agentId)
-    if (!priorUser || !priorText) return false
-    this.transitionStatus(entry, 'busy')
-    try {
-      const wire = entry.adapter.serializeInput(priorText.text)
-      entry.process.stdin?.write(wire)
-      return true
-    } catch (err) {
-      log.error(`[runtime] regenerate failed for ${agentId}:`, err)
-      entry.lastError = err instanceof Error ? err.message : String(err)
-      this.transitionStatus(entry, 'idle')
-      return false
-    }
-  }
-
-  /**
-   * Phase 10.4 — Delete a single message by id. The deletion is mirrored to
-   * disk via `replaceAll` (on-disk chat is append-only; this is the one
-   * mutation path that requires a full rewrite).
-   */
-  deleteMessage(agentId: string, messageId: string): boolean {
-    const entry = this.entries.get(agentId)
-    if (!entry) return false
-    const before = entry.messages.length
-    entry.messages = entry.messages.filter((m) => m.id !== messageId)
-    if (entry.messages.length === before) return false
-    entry._chatPending.clear()
-    this.persistChatImmediate(entry)
-    this.emitMessages(agentId)
-    return true
-  }
-
-  /**
-   * Synchronous chat rewrite. Used by edit/regenerate/delete to keep disk in
-   * step without relying on the debounced `scheduleChatPersist` (which only
-   * appends new ids — those paths drop rows, so we rewrite the whole file).
-   */
-  private persistChatImmediate(entry: RuntimeEntry): void {
-    replaceAll(entry.agentId, entry.messages).catch((err) =>
-      log.warn(`[runtime] chat persist failed for ${entry.agentId}:`, err),
-    )
   }
 
   async shutdownAll(): Promise<void> {

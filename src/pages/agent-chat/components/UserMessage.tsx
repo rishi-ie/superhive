@@ -1,12 +1,10 @@
 import * as React from 'react'
-import { PencilSimpleIcon } from '@phosphor-icons/react'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { copyToClipboard } from '@/lib/clipboard'
-import { editMessage } from '@/flows/agents/crud'
 import { getMessageText } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -18,82 +16,17 @@ interface UserMessageProps {
 const MAX_COLLAPSED_LINES = 8
 const MAX_COLLAPSED_LENGTH = 600
 
-export function UserMessage({ message, agentId }: UserMessageProps) {
+export function UserMessage({ message }: UserMessageProps) {
   const text = getMessageText(message)
-  const [editing, setEditing] = React.useState(false)
-  const [draft, setDraft] = React.useState(text)
   const [expanded, setExpanded] = React.useState(false)
-  const draftRef = React.useRef<HTMLTextAreaElement | null>(null)
 
   const lines = text.split('\n')
   const isLong = lines.length > MAX_COLLAPSED_LINES || text.length > MAX_COLLAPSED_LENGTH
   const visibleLines = expanded ? lines : lines.slice(0, MAX_COLLAPSED_LINES)
 
   React.useEffect(() => {
-    if (editing) {
-      draftRef.current?.focus()
-      draftRef.current?.setSelectionRange(draft.length, draft.length)
-    }
-  }, [editing, draft.length])
-
-  React.useEffect(() => {
-    setDraft(text)
     setExpanded(false)
   }, [text])
-
-  const onSave = async () => {
-    const next = draft.trim()
-    if (!next || next === text) {
-      setEditing(false)
-      setDraft(text)
-      return
-    }
-    const result = await editMessage({ agentId, messageId: message.id, newText: next })
-    if (result.ok) setEditing(false)
-  }
-
-  const onCancel = () => {
-    setEditing(false)
-    setDraft(text)
-  }
-
-  if (editing) {
-    return (
-      <div className="group relative w-full py-button-y">
-        <div className="ml-auto flex flex-col gap-1.5 rounded-card border border-primary/50 bg-sidebar p-2 max-w-[80%]">
-          <textarea
-            ref={draftRef}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                void onSave()
-              } else if (e.key === 'Escape') {
-                e.preventDefault()
-                onCancel()
-              }
-            }}
-            rows={3}
-            className="w-full resize-y bg-transparent text-[14px] leading-relaxed text-foreground outline-none"
-          />
-          <div className="flex items-center justify-end gap-2">
-            <Button size="sm" variant="ghost" onClick={onCancel} className="h-7">
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => void onSave()}
-              disabled={!draft.trim() || draft.trim() === text}
-              className="h-7"
-            >
-              Save &amp; resend
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="group relative w-full py-button-y flex flex-col items-end">
@@ -134,20 +67,6 @@ export function UserMessage({ message, agentId }: UserMessageProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="top">Copy message</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-              onClick={() => setEditing(true)}
-              aria-label="Edit message"
-            >
-              <PencilSimpleIcon className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">Edit message</TooltipContent>
         </Tooltip>
         {isLong && (
           <Button

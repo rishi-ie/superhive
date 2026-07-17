@@ -151,28 +151,4 @@ export function registerRuntimeIpc(): void {
 	ipcMain.handle(IPC.AGENTS.GET_RUNTIME_STATE, (_e, agentId: string) => {
 		return runtime.getStatusPayload(agentId)
 	})
-
-	ipcMain.handle(
-		IPC.AGENTS.EDIT_MESSAGE,
-		(_e, agentId: string, messageId: string, text: string) => {
-			const ok = runtime.editMessage(agentId, messageId, text)
-			return { ok }
-		},
-	)
-
-	ipcMain.handle(
-		IPC.AGENTS.REGENERATE,
-		(_e, agentId: string, fromMessageId: string) => {
-			const ok = runtime.regenerate(agentId, fromMessageId)
-			return { ok }
-		},
-	)
-
-	ipcMain.handle(
-		IPC.AGENTS.DELETE_MESSAGE,
-		(_e, agentId: string, messageId: string) => {
-			const ok = runtime.deleteMessage(agentId, messageId)
-			return { ok }
-		},
-	)
 }

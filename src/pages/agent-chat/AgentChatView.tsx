@@ -17,7 +17,6 @@ import { useAgentSettings } from '@/stores/agent';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
-import { shortcutRegenerateLast } from '@/flows/ui/shortcut-regenerate-last';
 import { getMessageText } from '@/models/runtime';
 
 export function AgentChatView() {
@@ -146,10 +145,6 @@ export function AgentChatView() {
   useChatShortcuts({
     onCopyLast: () => {
       void shortcutCopyLastAssistant({ messages });
-    },
-    onRegenerate: () => {
-      if (!agentId) return;
-      void shortcutRegenerateLast({ messages, agentId });
     },
     onStop: () => {
       if (status === 'busy' || status === 'active') void stop();

@@ -257,10 +257,7 @@ export function AgentsListView() {
 											onOpenDelete={(agentId) =>
 												setDialog({ kind: 'delete', agentId, agentName: agent.name })
 											}
-onForked={() => {
-											reload();
-										}}
-									/>
+										/>
 									)
 								})}
 							</TableBody>
