@@ -1,74 +1,64 @@
 /**
- * createAgent — creates a standalone working agent.
+ * createAgent — creates a standalone agent record + folder + settings seed.
  *
- * Use this flow when the user creates an agent they will interact
- * with directly. Standalone agents:
- * - Have their own folder at `<parentDir>/<folderName>/`
- * - Are tagged with `agentKind: 'standard'` (default)
- * - Auto-start their runtime immediately after creation
- * - Auto-navigate to `/agents/:agentId` on success
+ * Does NOT start the runtime or navigate. Callers that want a ready-to-use
+ * agent should use `prepareStandaloneAgent` instead, which composes create
+ * + start + wait-for-ready and owns the PreparingToast lifecycle.
  *
- * For project-coordinator agents (lives inside a project folder,
- * no auto-start, no auto-navigate), use `createProjectAgent` instead.
+ * Returns `{ ok, agent }` on success, `{ ok: false, error }` on validation
+ * or IPC failure. The validation-toast pattern is intentionally minimal
+ * here because `prepareStandaloneAgent` is the path used by the dialog;
+ * callers that invoke `createAgent` directly (none today) handle their
+ * own UX.
  */
 
-import { toast } from 'sonner';
 import { agents } from '@/api/agents';
-import type { NavigateFunction } from 'react-router-dom';
 import type { Agent } from '@/types/electron';
 
 export interface CreateAgentInput {
-	name: string;
-	folderName: string;
-	parentDir: string;
+  name: string;
+  folderName: string;
+  parentDir: string;
+  role?: string;
+  description?: string;
 }
 
 export interface CreateAgentResult {
-	ok: boolean;
-	agent?: Agent;
-	error?: string;
+  ok: boolean;
+  agent?: Agent;
+  error?: string;
 }
 
 export async function createAgent(
-	input: CreateAgentInput,
-	navigate: NavigateFunction,
+  input: CreateAgentInput,
 ): Promise<CreateAgentResult> {
-	const name = input.name?.trim();
-	const folderName = input.folderName?.trim();
-	const parentDir = input.parentDir?.trim();
+  const name = input.name?.trim();
+  const folderName = input.folderName?.trim();
+  const parentDir = input.parentDir?.trim();
 
-	if (!name) {
-		toast.error('Agent name is required');
-		return { ok: false, error: 'Agent name is required' };
-	}
-	if (!folderName) {
-		toast.error('Agent folder name is required');
-		return { ok: false, error: 'Agent folder name is required' };
-	}
-	if (!parentDir) {
-		toast.error('Parent directory is required');
-		return { ok: false, error: 'Parent directory is required' };
-	}
+  if (!name) {
+    return { ok: false, error: 'Agent name is required' };
+  }
+  if (!folderName) {
+    return { ok: false, error: 'Agent folder name is required' };
+  }
+  if (!parentDir) {
+    return { ok: false, error: 'Parent directory is required' };
+  }
 
-	try {
-		const agent = await agents.create({
-			name,
-			folderName,
-			parentDir,
-		});
-		try {
-			await agents.start(agent.id);
-		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Failed to start agent';
-			toast.error(message);
-			return { ok: false, error: message, agent };
-		}
-		toast.success(`Agent "${agent.name}" created`);
-		navigate(`/agents/${agent.id}`);
-		return { ok: true, agent };
-	} catch (err) {
-		const message = err instanceof Error ? err.message : 'Failed to create agent';
-		toast.error(message);
-		return { ok: false, error: message };
-	}
+  try {
+    const agent = await agents.create({
+      name,
+      folderName,
+      parentDir,
+      role: input.role,
+      description: input.description,
+    });
+    return { ok: true, agent };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : 'Failed to create agent',
+    };
+  }
 }

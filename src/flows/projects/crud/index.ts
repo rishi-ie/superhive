@@ -1,4 +1,3 @@
-export { createProject } from './create-project';
 export { prepareProject } from './prepare-project';
 export { deleteProject } from './delete-project';
 export { listProjects } from './list-projects';
