@@ -124,9 +124,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   // Read the current model selection so we can gate the send button.
   // Mirrors the guard in AgentChatView: chat is disabled when no model is chosen.
   const agentSettings = useAgentSettings(projectAgent.id);
-  const hasModel = Boolean(
-    agentSettings.settings?.model?.provider && agentSettings.settings?.model?.name,
-  );
   const selectedContextWindow = React.useMemo(() => {
     const provider = agentSettings.settings?.model?.provider;
     const name = agentSettings.settings?.model?.name;
@@ -203,7 +200,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   const isBusy = status === 'busy';
 
   const onSend = () => {
-    const result = sendMessage({ text: input, hasModel, isLive, send })
+    const result = sendMessage({ text: input, isLive, send })
     if (result.ok) {
       setInput('');
       requestAnimationFrame(() => textareaRef.current?.focus());
@@ -289,8 +286,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                 </button>
                 <button
                   onClick={isBusy ? stop : onSend}
-                  disabled={!isBusy && (input.trim().length === 0 || !hasModel)}
-                  title={!hasModel ? 'Pick a model first' : undefined}
+                  disabled={!isBusy && input.trim().length === 0}
+                  title={undefined}
                   className={
                     'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
                     (isBusy

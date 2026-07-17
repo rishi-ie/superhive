@@ -39,9 +39,6 @@ export function AgentChatView() {
     restart,
   } = useAgentRuntime(agentId);
   const agentSettings = useAgentSettings(agentId ?? null);
-  const hasModel = Boolean(
-    agentSettings.settings?.model?.provider && agentSettings.settings?.model?.name,
-  );
   const selectedContextWindow = React.useMemo(() => {
     const provider = agentSettings.settings?.model?.provider;
     const name = agentSettings.settings?.model?.name;
@@ -123,7 +120,7 @@ export function AgentChatView() {
   const isBusy = status === 'busy';
 
   const onSend = () => {
-    const result = sendMessage({ text: input, hasModel, isLive, send })
+    const result = sendMessage({ text: input, isLive, send })
     if (result.ok) {
       setInput('');
       requestAnimationFrame(() => textareaRef.current?.focus());
@@ -210,8 +207,8 @@ export function AgentChatView() {
                   </button>
                   <button
                     onClick={isBusy ? stop : onSend}
-                    disabled={!isBusy && (input.trim().length === 0 || !hasModel)}
-                    title={!hasModel ? 'Pick a model first' : undefined}
+                    disabled={!isBusy && input.trim().length === 0}
+                    title={undefined}
                     className={
                       'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
                       (isBusy
