@@ -1,0 +1,73 @@
+/**
+ * prepareProjectAgent — creates a project-coordinator agent (kind =
+ * 'project-coordinator'), seeds settings, starts the runtime, and waits
+ * until it is ready for sending messages.
+ *
+ * Used as a building block by `prepareProject`; not called directly from
+ * a dialog.
+ */
+
+import { agents } from '@/api/agents'
+import { waitForAgentReady } from './wait-for-agent-ready'
+import type { Agent } from '@/types/electron'
+
+export interface PrepareProjectAgentInput {
+  name: string
+  folderName: string
+  parentDir: string
+}
+
+export type PrepareProjectAgentFailure =
+  | { ok: false; reason: 'create-failed'; message: string }
+  | { ok: false; reason: 'start-failed'; message: string }
+  | { ok: false; reason: 'timeout'; detail: 'model' | 'runtime'; message?: string }
+  | { ok: false; reason: 'error'; message: string }
+
+export type PrepareProjectAgentResult =
+  | { ok: true; agent: Agent }
+  | PrepareProjectAgentFailure
+
+export async function prepareProjectAgent(
+  input: PrepareProjectAgentInput,
+): Promise<PrepareProjectAgentResult> {
+  let agent: Agent
+  try {
+    agent = await agents.create({
+      name: input.name.trim(),
+      folderName: input.folderName.trim(),
+      parentDir: input.parentDir.trim(),
+      agentKind: 'project-coordinator',
+    })
+  } catch (err) {
+    return {
+      ok: false,
+      reason: 'create-failed',
+      message: err instanceof Error ? err.message : 'Failed to create project agent',
+    }
+  }
+
+  try {
+    const startResult = await agents.start(agent.id)
+    if (!startResult.ok) {
+      return {
+        ok: false,
+        reason: 'start-failed',
+        message: 'Project agent runtime failed to start',
+      }
+    }
+  } catch (err) {
+    return {
+      ok: false,
+      reason: 'start-failed',
+      message: err instanceof Error ? err.message : 'Project agent runtime failed to start',
+    }
+  }
+
+  return waitForAgentReady(agent.id).then((result) => {
+    if (result.ok) return { ok: true as const, agent }
+    if (result.reason === 'error') {
+      return { ok: false as const, reason: 'error' as const, message: result.message }
+    }
+    return result
+  })
+}
