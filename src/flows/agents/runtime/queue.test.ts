@@ -2,7 +2,7 @@
  * Tests for the per-agent stream queue that buffers Pi events at a 50ms tick
  * cadence before applying them to the renderer runtime slice.
  *
- * Run via `bun test src/stores/agent-stream-queue.test.ts`.
+ * Run via `bun test src/flows/agents/runtime/queue.test.ts`.
  */
 
 import { afterEach, describe, expect, test } from 'bun:test'
@@ -18,7 +18,7 @@ import {
   setSliceAccessor,
   type SliceAccessor,
   type StreamOp,
-} from './agent-stream-queue'
+} from './queue'
 import type { RuntimeMessage } from '@/models/runtime'
 
 function makeSlice(): {

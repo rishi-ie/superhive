@@ -1,3 +1,39 @@
+/**
+ * Per-agent stream queue — the data pipeline between the IPC event stream
+ * and the renderer's runtime slice.
+ *
+ * Architecture:
+ *   IPC event → event-translator → enqueue(op) → tick (50ms) → applyOp(slice) → notify
+ *
+ * Why the queue exists:
+ *   Pi streams adapter events at very high frequency (text-delta per token,
+ *   tool-call-delta per arg byte, etc.). Without batching, every event would
+ *   trigger a React re-render. The queue coalesces all events that arrive
+ *   within a 50ms window into a single notify, so the renderer re-renders
+ *   once per tick per agent.
+ *
+ * What lives here:
+ *   - `StreamOp` discriminated union: 11 op kinds covering every state-
+ *     mutation IPC event (message I/O, thinking, tool call/result, image,
+ *     compaction summary) plus control ops (set-messages, increment-inflight).
+ *   - `enqueue` / `tick` / `applyOp`: the FIFO + per-agent dispatcher.
+ *   - `setSliceAccessor`: a wiring hook so this module can mutate the
+ *     runtime slice without importing it (avoids the import cycle that
+ *     would arise from `slice.ts` importing this module that needs the
+ *     slice accessor).
+ *   - Pure helpers: `hasStreamingState`, `mergeMessagesPreserveStreaming`.
+ *
+ * What does NOT live here:
+ *   - The slice Map itself — owned by `slice.ts`.
+ *   - The event translator (IPC event → StreamOp[]) — owned by
+ *     `event-translator.ts`.
+ *   - React integration — owned by `use-agent-runtime.ts`.
+ *
+ * This module is pure data manipulation: no React, no IPC, no toast.
+ * It mutates a `RuntimeSliceView` (messages + inFlightToolCount) provided
+ * by the slice via the accessor wiring.
+ */
+
 import type { ContentPart, RuntimeMessage, ToolResultContent } from '@/models/runtime'
 
 export const QUEUE_TICK_MS = 50
