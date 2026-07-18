@@ -4,3 +4,8 @@ export { ProjectAgentStopped } from './ProjectAgentStopped';
 export { ProjectAgentWaiting } from './ProjectAgentWaiting';
 export { ProjectAgentEmpty } from './ProjectAgentEmpty';
 export { ProjectChatHeader } from './ProjectChatHeader';
+export { ProjectsListView } from './ProjectsListView';
+export { ProjectListRow } from './ProjectListRow';
+export { ProjectRowContextMenu } from './ProjectRowContextMenu';
+export { DeleteProjectDialog } from './DeleteProjectDialog';
+export { EmptyProjectsState } from './EmptyProjectsState';

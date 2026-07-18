@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository';
 import { IPC } from './index';
+import { revealProjectInFinder } from './reveal-project';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
 
 export function registerProjectIpc(): void {
@@ -51,5 +52,9 @@ export function registerProjectIpc(): void {
 
   ipcMain.handle(IPC.PROJECTS.REMOVE_AGENT, async (_e, projectId: string, agentId: string) => {
     await ProjectRepository.removeAgent(projectId, agentId);
+  });
+
+  ipcMain.handle(IPC.PROJECTS.REVEAL, async (_e, projectId: string) => {
+    return revealProjectInFinder(projectId);
   });
 }

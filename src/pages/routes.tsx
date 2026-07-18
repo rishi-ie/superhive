@@ -2,7 +2,7 @@ import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/shell";
 import { Landing } from "@/pages/landing";
 import { AgentChatView, AgentsListView } from "@/pages/agent-chat";
-import { ProjectChatView } from "@/pages/project-chat";
+import { ProjectChatView, ProjectsListView } from "@/pages/project-chat";
 import { MetaHiveView } from "@/pages/meta-hive";
 import { RemoteView } from "@/pages/remote";
 import { PluginsView } from "@/pages/plugins";
@@ -27,7 +27,7 @@ export const router = createHashRouter([
       {
         path: "projects",
         children: [
-          { index: true, element: <ProjectChatView /> },
+          { index: true, element: <ProjectsListView /> },
           { path: ":projectId", element: <ProjectChatView /> },
         ],
       },

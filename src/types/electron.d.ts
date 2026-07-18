@@ -65,13 +65,14 @@ export interface AgentsAPI {
 }
 
 export interface ProjectsAPI {
-	list: () => Promise<Project[]>
-	get: (id: string) => Promise<Project | null>
-	create: (data: ProjectCreateInput) => Promise<Project>
-	update: (id: string, data: ProjectUpdateInput) => Promise<Project | null>
-	delete: (id: string) => Promise<boolean>
-	addAgent: (projectId: string, agentId: string) => Promise<void>
-	removeAgent: (projectId: string, agentId: string) => Promise<void>
+  list: () => Promise<Project[]>
+  get: (id: string) => Promise<Project | null>
+  create: (data: ProjectCreateInput) => Promise<Project>
+  update: (id: string, data: ProjectUpdateInput) => Promise<Project | null>
+  delete: (id: string) => Promise<boolean>
+  addAgent: (projectId: string, agentId: string) => Promise<void>
+  removeAgent: (projectId: string, agentId: string) => Promise<void>
+  reveal: (id: string) => Promise<{ ok: boolean }>
 }
 
 export type ProjectCreateInput = {

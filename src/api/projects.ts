@@ -21,4 +21,6 @@ export const projects = {
 
   removeAgent: (projectId: string, agentId: string): Promise<void> =>
     window.api.projects.removeAgent(projectId, agentId),
+
+  reveal: (id: string): Promise<{ ok: boolean }> => window.api.projects.reveal(id),
 };
