@@ -9,6 +9,7 @@ import { registerIpc } from './ipc';
 import { runtime } from './general-kai-runtime';
 import { reconcileAgents } from './reconcile-agents';
 import { reconcileRuntime } from './reconcile-runtime';
+import { migrateLegacyChatFolders } from './agent-chat-store';
 import { isGeneralKaiReady } from './install-general-kai';
 import { agentsFsWatcher } from './agents-fs-watcher';
 
@@ -108,6 +109,11 @@ app.whenReady().then(async () => {
   await seedWorkspace();
   runtime.pruneStaleEntries();
   await reconcileAgents();
+  // After reconcile adopts any orphans and evicts missing folders, the DB
+  // agent rows carry the canonical localPath. Use that to relocate any
+  // legacy chat logs from `~/.superhive/agents/<uuid>/` into the agent's
+  // own folder, so a single agent = one folder on disk.
+  await migrateLegacyChatFolders();
   await reconcileRuntime();
   registerIpc();
 

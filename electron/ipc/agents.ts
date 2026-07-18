@@ -12,7 +12,7 @@ import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
 import { config } from '../config'
-import { readAll as getAgentChatMessages } from '../agent-chat-store'
+import { chatFilePath, readAll as getAgentChatMessages } from '../agent-chat-store'
 import {
 	type SettingsFile,
 	DEFAULT_SETTINGS,
@@ -287,7 +287,9 @@ export function registerAgentIpc(): void {
 	)
 
 	ipcMain.handle(IPC.AGENTS.GET_MESSAGES, async (_e, agentId: string) => {
-		return getAgentChatMessages(agentId)
+		const agent = await AgentRepository.getById(agentId)
+		if (!agent?.localPath) return []
+		return getAgentChatMessages(chatFilePath(agent.localPath))
 	})
 
 	ipcMain.handle(IPC.AGENTS.REVEAL, async (_e, agentId: string) => {

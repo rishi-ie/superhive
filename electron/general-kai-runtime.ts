@@ -20,7 +20,7 @@ import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { SettingsRepository } from '../src/storage/repositories/SettingsRepository'
 import { parseCounter } from './agent-settings-defaults'
-import { appendBatch, readAll, trimTo } from './agent-chat-store'
+import { appendBatch, chatFilePath, readAll, trimTo } from './agent-chat-store'
 import { buildStatusPayload } from './runtime-status'
 
 /**
@@ -161,7 +161,7 @@ class GeneralKaiRuntime {
 
     this.entries.set(agentId, entry)
 
-    const persisted = await readAll(agentId)
+    const persisted = await readAll(chatFilePath(agentDir))
     if (entry.messages.length === 0 && persisted.length > 0) {
       entry.messages = persisted
     }
@@ -283,9 +283,9 @@ class GeneralKaiRuntime {
     entry._chatPending.clear()
     if (msgs.length === 0) return
     try {
-      await appendBatch(entry.agentId, msgs)
+      await appendBatch(chatFilePath(entry.agentDir), msgs)
       if (entry.messages.length > 5000) {
-        trimTo(entry.agentId, 5000).catch((err) =>
+        trimTo(chatFilePath(entry.agentDir), 5000).catch((err) =>
           log.warn(`[runtime] chat trim failed for ${entry.agentId}:`, err),
         )
       }
