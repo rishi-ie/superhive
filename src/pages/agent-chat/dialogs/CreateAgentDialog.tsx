@@ -18,6 +18,7 @@ import { prepareStandaloneAgent } from '@/flows/agents/crud/prepare-standalone-a
 import { usePreparingToast } from '@/components/common/PreparingToast';
 import { cn } from '@/lib/utils';
 import { slugify } from '@/lib/slugify';
+import { goToAgent } from '@/flows/navigation';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/agents';
 
@@ -100,7 +101,7 @@ export function CreateAgentDialog() {
       toast.dismiss(toastId)
       setPhase('idle')
       setOpen(false)
-      navigate(`/agents/${result.agent.id}`)
+      goToAgent(navigate, result.agent.id)
       return
     }
 

@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate, useLocation } from "react-router-dom";
+import { goToSettings } from '@/flows/navigation';
 
 interface TopRightControlsProps {
   rightSidebarOpen: boolean;
@@ -33,7 +34,7 @@ export function TopRightControls({
               variant="ghost"
               size="icon-lg"
               className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
-              onClick={() => navigate("/settings")}
+              onClick={() => goToSettings(navigate)}
             >
               <Icon icon={GearIcon} className="size-4" />
             </Button>
@@ -50,7 +51,7 @@ export function TopRightControls({
               variant="ghost"
               size="icon-lg"
               className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
-              onClick={() => navigate("/settings")}
+              onClick={() => goToSettings(navigate)}
             >
               <Icon icon={GearIcon} className="size-4" />
             </Button>

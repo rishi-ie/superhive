@@ -5,6 +5,7 @@ import { AccordionSection } from '@/components/layout/common/primitives';
 import { AgentRow } from '@/components/layout/common/primitives/AgentRow';
 import { EmptyCtaButton } from '@/components/layout/common/primitives/EmptyCtaButton';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
+import { goToAgent } from '@/flows/navigation';
 import type { Agent } from '@/types/electron';
 
 interface AgentsSectionProps {
@@ -28,7 +29,7 @@ export function AgentsSection({ items }: AgentsSectionProps) {
               name={a.name}
               status={isAgentActive(a.status) ? 'active' : 'idle'}
               currentAction="Working…"
-              onClick={() => navigate(`/agents/${a.id}`)}
+              onClick={() => goToAgent(navigate, a.id)}
             />
           ))
         : (

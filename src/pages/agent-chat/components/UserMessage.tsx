@@ -4,7 +4,7 @@ import { Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { copyToClipboard } from '@/lib/clipboard'
+import { copyText } from '@/flows/ui/copy-text'
 import { getMessageText } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -60,7 +60,7 @@ export function UserMessage({ message }: UserMessageProps) {
               size="icon-sm"
               variant="ghost"
               className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-              onClick={() => copyToClipboard(text)}
+              onClick={() => copyText(text)}
               aria-label="Copy message"
             >
               <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />

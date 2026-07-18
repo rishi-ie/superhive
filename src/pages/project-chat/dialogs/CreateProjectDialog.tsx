@@ -18,6 +18,7 @@ import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
 import { prepareProject } from '@/flows/projects/crud/prepare-project';
 import { usePreparingToast } from '@/components/common/PreparingToast';
 import { slugify } from '@/lib/slugify';
+import { goToProject } from '@/flows/navigation';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/projects';
 type SubmitPhase = 'idle' | 'preparing';
@@ -92,7 +93,7 @@ export function CreateProjectDialog() {
       toast.dismiss(toastId)
       setPhase('idle')
       setOpen(false)
-      navigate(`/projects/${result.project.id}`)
+      goToProject(navigate, result.project.id)
       return
     }
 

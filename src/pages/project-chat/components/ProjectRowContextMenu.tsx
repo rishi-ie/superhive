@@ -15,6 +15,8 @@ import {
 import type { Project } from '@/types/electron';
 import type { ReactNode } from 'react';
 import { revealProject } from '@/flows/projects/crud';
+import { goToProject } from '@/flows/navigation';
+import { copyProjectId } from '@/flows/ui/copy-project-id';
 
 interface ProjectRowContextMenuProps {
   project: Project;
@@ -27,7 +29,7 @@ export function ProjectRowContextMenu(props: ProjectRowContextMenuProps) {
   const { project } = props;
 
   function copyId() {
-    navigator.clipboard.writeText(project.id).catch(() => {});
+    void copyProjectId(project.id);
   }
 
   return (
@@ -36,7 +38,7 @@ export function ProjectRowContextMenu(props: ProjectRowContextMenuProps) {
         {props.children}
       </ContextMenuTrigger>
       <ContextMenuContent className="min-w-56">
-        <ContextMenuItem onSelect={() => navigate(`/projects/${project.id}`)}>
+        <ContextMenuItem onSelect={() => goToProject(navigate, project.id)}>
           <TextOutdentIcon /> Open project
         </ContextMenuItem>
         <ContextMenuSeparator />

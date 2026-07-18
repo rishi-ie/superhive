@@ -28,7 +28,8 @@ import {
 	removeAgentFromProject,
 } from '@/flows/projects/crud';
 import { useOpenCreateAgent } from '@/flows/agents/ui/open-create-agent';
-import { useAgentsListVersion, useAllAgentStatuses } from '@/stores/agent';
+import { useAgentsListVersion, useAllAgentStatuses } from '@/flows/agents/runtime';
+import { goToAgent } from '@/flows/navigation';
 import type { Agent, Project } from '@/types/electron';
 
 type DialogKind =
@@ -72,7 +73,7 @@ export function AgentsListView() {
 			const row = target.closest<HTMLElement>('[data-agent-row]')
 			const id = row?.dataset.agentRow
 			if (!id) return
-			navigate(`/agents/${id}`)
+			goToAgent(navigate, id)
 		},
 		[navigate],
 	)
@@ -238,7 +239,7 @@ export function AgentsListView() {
 										parentDir={parentDir}
 										liveStatus={live?.status}
 										liveBootStep={live?.bootStep}
-										onRowNavigate={(id) => navigate(`/agents/${id}`)}
+										onRowNavigate={(id) => goToAgent(navigate, id)}
 										onOpenAssignProject={(agentId) =>
 											setDialog({ kind: 'assign', agentId })
 										}

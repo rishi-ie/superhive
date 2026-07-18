@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
-import { goBackHome } from "@/flows/navigation";
+import { goBackHome, goToAgents, goToPlugins } from "@/flows/navigation";
 import { useOpenCreateProject } from "@/flows/projects/ui/open-create-project";
 import { useCommandPalette } from "@/flows/ui/use-command-palette";
 
@@ -53,7 +53,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              onClick={() => navigate('/agents')}
+              onClick={() => goToAgents(navigate)}
               className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={UserIcon} className="size-4" />
@@ -63,7 +63,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              onClick={() => navigate('/plugins')}
+              onClick={() => goToPlugins(navigate)}
               className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={PuzzlePieceIcon} className="size-4" />

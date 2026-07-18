@@ -4,7 +4,7 @@
  * don't import clipboard utilities directly.
  */
 
-import { copyToClipboard } from '@/lib/clipboard'
+import { copyText } from './copy-text'
 import { getMessageText } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -24,6 +24,6 @@ export async function shortcutCopyLastAssistant({
   if (!lastAssistant) return { ok: false }
 
   const text = getMessageText(lastAssistant)
-  const copied = await copyToClipboard(text, 'Copied last assistant message')
+  const copied = await copyText(text, { successLabel: 'Copied last assistant message' })
   return { ok: copied, text }
 }

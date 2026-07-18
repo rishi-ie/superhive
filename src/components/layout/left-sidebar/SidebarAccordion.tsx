@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { listProjects } from '@/flows/projects/crud/list-projects';
-import { useAgentsListVersion } from '@/stores/agent';
+import { useAgentsListVersion } from '@/flows/agents/runtime';
 import type { Agent } from '@/types/electron';
 import type { Project } from '@/storage/types';
 import { PinnedSection } from './sections/PinnedSection';

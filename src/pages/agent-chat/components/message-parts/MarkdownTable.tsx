@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Children, isValidElement } from 'react'
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
+import { copyTable } from '@/flows/ui/copy-table'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -125,17 +126,17 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
   )
 
   const handleCopy = React.useCallback(
-    (format: 'md' | 'csv') => {
+    async (format: 'md' | 'csv') => {
       const text = format === 'md' ? rawMd : rawCsv
       if (!text) return
-      navigator.clipboard.writeText(text).then(() => {
-        if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-        setCopiedFormat(format)
-        copyTimerRef.current = setTimeout(() => {
-          setCopiedFormat(null)
-          copyTimerRef.current = null
-        }, 1500)
-      })
+      const ok = await copyTable(format, text)
+      if (!ok) return
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+      setCopiedFormat(format)
+      copyTimerRef.current = setTimeout(() => {
+        setCopiedFormat(null)
+        copyTimerRef.current = null
+      }, 1500)
     },
     [rawMd, rawCsv],
   )

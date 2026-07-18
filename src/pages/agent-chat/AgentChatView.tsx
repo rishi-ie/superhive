@@ -13,7 +13,7 @@ import { AgentWaiting } from './components/AgentWaiting';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { useAgentRuntime } from '@/flows/agents/runtime';
-import { useAgentSettings } from '@/stores/agent';
+import { useAgentSettings } from '@/flows/agents/settings';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';

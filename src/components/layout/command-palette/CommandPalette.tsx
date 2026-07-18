@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import { Icon } from "@/components/ui/icon";
 import { ChatCircleDotsIcon, UserIcon, FolderPlusIcon, GearSixIcon, HexagonIcon } from "@phosphor-icons/react";
 import {
@@ -13,7 +12,8 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { useCommandPalette } from "@/flows/ui/use-command-palette";
-import { goToSettings } from "@/flows/navigation/go-to-settings";
+import { goToSettings, goToHive } from "@/flows/navigation";
+import { showComingSoonToast } from "@/flows/ui/coming-soon-toast";
 
 export function CommandPalette() {
   const navigate = useNavigate();
@@ -37,15 +37,15 @@ export function CommandPalette() {
           <CommandEmpty>No commands found.</CommandEmpty>
 
           <CommandGroup heading="Actions">
-            <CommandItem onSelect={run(() => toast.info("New chat — coming soon"))}>
+            <CommandItem onSelect={run(() => showComingSoonToast("New chat"))}>
               <Icon icon={ChatCircleDotsIcon} />
               New Chat
             </CommandItem>
-            <CommandItem onSelect={run(() => toast.info("New agent — coming soon"))}>
+            <CommandItem onSelect={run(() => showComingSoonToast("New agent"))}>
               <Icon icon={UserIcon} />
               New Agent
             </CommandItem>
-            <CommandItem onSelect={run(() => toast.info("New project — coming soon"))}>
+            <CommandItem onSelect={run(() => showComingSoonToast("New project"))}>
               <Icon icon={FolderPlusIcon} />
               New Project
             </CommandItem>
@@ -58,7 +58,7 @@ export function CommandPalette() {
               <Icon icon={GearSixIcon} />
               Settings
             </CommandItem>
-            <CommandItem onSelect={run(() => navigate("/hive"))}>
+            <CommandItem onSelect={run(() => goToHive(navigate))}>
               <Icon icon={HexagonIcon} />
               Meta Hive
             </CommandItem>

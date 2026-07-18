@@ -13,7 +13,7 @@
  */
 
 import { agents } from '@/api/agents'
-import type { AgentSettingsState } from '@/stores/agent'
+import type { AgentSettingsState } from '@/flows/agents/settings'
 
 export type WaitForReadyFailure =
   | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }

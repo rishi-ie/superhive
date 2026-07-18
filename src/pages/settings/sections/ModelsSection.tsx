@@ -6,6 +6,7 @@ import { ModelRow } from './ModelsSection/ModelRow';
 import { ModelEditorDialog } from './ModelsSection/ModelEditorDialog';
 import { APIKeysSection } from './ModelsSection/APIKeys';
 import { useProviders, useModels } from '@/flows/settings';
+import { useModelUpdatedSubscription } from '@/flows/settings/ui/use-model-updated';
 import { setModelEnabled } from '@/flows/settings/crud/set-model-enabled';
 import { addModel } from '@/flows/settings/crud/add-model';
 import {
@@ -35,13 +36,7 @@ export function ModelsSection() {
   // Auto-fill contextWindow via Pi telemetry. When the main process writes
   // back a previously-undefined ModelEntry.contextWindow, refresh the list
   // so the chip on the row re-renders.
-  React.useEffect(() => {
-    if (!window.api?.settings?.onModelUpdated) return;
-    const unsub = window.api.settings.onModelUpdated(() => {
-      void refreshModels();
-    });
-    return unsub;
-  }, [refreshModels]);
+  useModelUpdatedSubscription(refreshModels);
 
   const catalogById = React.useMemo(
     () => new Map(CATALOG.map((m) => [m.id, m])),

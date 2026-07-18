@@ -5,6 +5,7 @@ import { HugeIcon } from "@/components/ui/huge-icon";
 import { Folder01Icon } from "@hugeicons/core-free-icons";
 import { AccordionSection } from '@/components/layout/common/primitives';
 import { AgentRow } from '@/components/layout/common/primitives/AgentRow';
+import { goToAgent, goToProject } from '@/flows/navigation';
 import type { Agent } from '@/types/electron';
 
 interface ProjectItem {
@@ -36,7 +37,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
               labelClassName="text-muted-foreground"
               leadingIcon={<HugeIcon icon={Folder01Icon} size={16} className="size-4 flex-shrink-0 text-muted-foreground" />}
               swapLeadingOnHover={true}
-              onClick={() => navigate(`/projects/${p.id}`)}
+              onClick={() => goToProject(navigate, p.id)}
             >
             {assignedAgents.length > 0 ? (
               assignedAgents.map((a) => (
@@ -45,7 +46,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
                   name={a.name}
                   showStatus={false}
                   compact={true}
-                  onClick={() => navigate(`/agents/${a.id}`)}
+                  onClick={() => goToAgent(navigate, a.id)}
                 />
               ))
             ) : (

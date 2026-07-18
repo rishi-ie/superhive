@@ -11,22 +11,23 @@ import { WarningIcon, ArrowsClockwiseIcon, TrashIcon } from "@phosphor-icons/rea
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { deleteProject } from '@/flows/projects/crud/delete-project';
+import { goHome } from '@/flows/navigation';
 
 interface ProjectAgentErrorProps {
-  lastError?: string;
-  onRestart: () => void;
-  projectId: string;
+	lastError?: string;
+	onRestart: () => void;
+	projectId: string;
 }
 
 export function ProjectAgentError({ lastError, onRestart, projectId }: ProjectAgentErrorProps) {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const onDelete = async () => {
-    const result = await deleteProject(projectId);
-    if (result.ok) {
-      navigate('/');
-    }
-  };
+	const onDelete = async () => {
+		const result = await deleteProject(projectId);
+		if (result.ok) {
+			goHome(navigate);
+		}
+	};
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-background">

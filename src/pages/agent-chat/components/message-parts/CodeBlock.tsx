@@ -3,6 +3,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Copy01Icon, CheckIcon } from '@hugeicons/core-free-icons'
 import { getHighlighter } from '@/lib/shiki'
+import { copyCodeBlock } from '@/flows/ui/copy-code-block'
 
 interface CodeBlockProps {
   lang: string
@@ -34,21 +35,18 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
   const copiedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const theme = useResolvedTheme()
 
-  const handleCopy = React.useCallback(() => {
-    if (typeof navigator === 'undefined' || !navigator.clipboard) return
-    navigator.clipboard
-      .writeText(code)
-      .then(() => {
-        if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current)
-        setCopied(true)
-        copiedTimerRef.current = setTimeout(() => {
-          setCopied(false)
-          copiedTimerRef.current = null
-        }, 1200)
-      })
-      .catch(() => {
-        setCopied(false)
-      })
+  const handleCopy = React.useCallback(async () => {
+    const ok = await copyCodeBlock(code)
+    if (!ok) {
+      setCopied(false)
+      return
+    }
+    if (copiedTimerRef.current !== null) clearTimeout(copiedTimerRef.current)
+    setCopied(true)
+    copiedTimerRef.current = setTimeout(() => {
+      setCopied(false)
+      copiedTimerRef.current = null
+    }, 1200)
   }, [code])
 
   React.useEffect(() => {

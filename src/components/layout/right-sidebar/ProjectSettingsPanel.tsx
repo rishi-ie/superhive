@@ -7,8 +7,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useState } from "react";
-import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
-import { useAllAgentStatuses } from "@/stores/agent";
+import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
+import { useAllAgentStatuses } from "@/flows/agents/runtime";
+import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
@@ -98,9 +99,6 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
               members={mergedTeam.members}
               onAssignClick={() => setAssignOpen(true)}
               onRemove={async (agent) => {
-                const { removeAgentFromProject } = await import(
-                  "@/flows/projects/crud/remove-agent-from-project"
-                );
                 const r = await removeAgentFromProject({
                   projectId,
                   agentId: agent.id,
@@ -131,12 +129,10 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           )
         }
         loadCandidates={async () => {
-          const { loadUnassignedAgents } = await import("@/flows/projects/crud/load-project-team");
           const list = await loadUnassignedAgents();
           return list.map((a) => ({ id: a.id, name: a.name }));
         }}
         onSelect={async (agentId) => {
-          const { assignAgentToProject } = await import("@/flows/projects/crud/assign-agent-to-project");
           return assignAgentToProject({ projectId, agentId });
         }}
       />

@@ -3,22 +3,23 @@ import { WarningIcon, ArrowsClockwiseIcon, TrashIcon } from "@phosphor-icons/rea
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { deleteAgent } from '@/flows/agents/crud/delete-agent';
+import { goHome } from '@/flows/navigation';
 
 interface AgentErrorProps {
-  lastError?: string;
-  onRestart: () => void;
-  agentId: string;
+	lastError?: string;
+	onRestart: () => void;
+	agentId: string;
 }
 
 export function AgentError({ lastError, onRestart, agentId }: AgentErrorProps) {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const onDelete = async () => {
-    const result = await deleteAgent(agentId);
-    if (result.ok) {
-      navigate('/');
-    }
-  };
+	const onDelete = async () => {
+		const result = await deleteAgent(agentId);
+		if (result.ok) {
+			goHome(navigate);
+		}
+	};
 
   return (
     <div className="flex h-full w-full items-center justify-center bg-background">

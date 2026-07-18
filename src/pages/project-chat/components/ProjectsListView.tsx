@@ -21,6 +21,7 @@ import { DeleteProjectDialog } from './DeleteProjectDialog';
 import { listProjects } from '@/flows/projects/crud/list-projects';
 import { deleteProject } from '@/flows/projects/crud/delete-project';
 import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
+import { goToProject } from '@/flows/navigation';
 import type { Project } from '@/types/electron';
 
 const EXIT_ANIMATION_MS = 250;
@@ -73,7 +74,7 @@ export function ProjectsListView() {
       const row = target.closest<HTMLElement>('[data-project-row]')
       const id = row?.dataset.projectRow
       if (!id) return
-      navigate(`/projects/${id}`)
+      goToProject(navigate, id)
     },
     [navigate],
   )
@@ -154,7 +155,7 @@ export function ProjectsListView() {
                     <ProjectListRow
                       key={project.id}
                       project={project}
-                      onRowNavigate={(id) => navigate(`/projects/${id}`)}
+                      onRowNavigate={(id) => goToProject(navigate, id)}
                       onOpenDelete={(projectId) => {
                         const target = projects.find((p) => p.id === projectId);
                         if (!target) return;

@@ -22,6 +22,10 @@ export const settings = {
   deleteModel: (id: string): Promise<void> =>
     window.api.settings.deleteModel(id),
 
-  getEnabledModels: (): Promise<Array<{ id: string; provider: string; name: string; contextWindow?: number }>> =>
+  getEnabledModels: (): Promise<Array<{ id: string; name: string; contextWindow?: number }>> =>
     window.api.settings.getEnabledModels(),
+
+  onModelUpdated: (
+    cb: (update: { id: string; provider: string; name: string; contextWindow: number }) => void,
+  ): (() => void) => window.api.settings.onModelUpdated(cb),
 }

@@ -1,23 +1,25 @@
 import { useNavigate } from 'react-router-dom';
 import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuTrigger,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import {
-	CopyIcon,
-	FolderOpenIcon,
-	LinkIcon,
-	PencilSimpleIcon,
-	ProhibitIcon,
-	TextOutdentIcon,
-	TrashIcon,
+  CopyIcon,
+  FolderOpenIcon,
+  LinkIcon,
+  PencilSimpleIcon,
+  ProhibitIcon,
+  TextOutdentIcon,
+  TrashIcon,
 } from '@phosphor-icons/react';
 import type { Agent } from '@/types/electron'
 import type { ReactNode } from 'react';
 import { revealAgent } from '@/flows/agents/crud';
+import { goToAgent } from '@/flows/navigation';
+import { copyAgentId } from '@/flows/ui/copy-agent-id';
 
 interface AgentRowContextMenuProps {
 	agent: Agent;
@@ -36,7 +38,7 @@ export function AgentRowContextMenu(props: AgentRowContextMenuProps) {
 	const hasProject = agent.projectIds.length > 0;
 
 	function copyId() {
-		navigator.clipboard.writeText(agent.id).catch(() => {});
+		void copyAgentId(agent.id);
 	}
 
 	return (
@@ -45,7 +47,7 @@ export function AgentRowContextMenu(props: AgentRowContextMenuProps) {
 				{props.children}
 			</ContextMenuTrigger>
 			<ContextMenuContent className="min-w-56">
-				<ContextMenuItem onSelect={() => navigate(`/agents/${agent.id}`)}>
+				<ContextMenuItem onSelect={() => goToAgent(navigate, agent.id)}>
 					<TextOutdentIcon /> Open chat
 				</ContextMenuItem>
 				{props.onEditName ? (

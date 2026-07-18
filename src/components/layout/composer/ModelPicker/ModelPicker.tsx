@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getEnabledModels } from '@/flows/settings/crud/get-enabled-models';
 import { listProviders } from '@/flows/settings/crud/list-providers';
-import { useAgentSettings } from '@/stores/agent';
+import { useAgentSettings } from '@/flows/agents/settings';
+import { goToSettings } from '@/flows/navigation';
 import { cn } from '@/lib/utils';
 
 interface EnabledModel {
@@ -156,7 +157,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
             ))}
             <DropdownMenuSeparator className="bg-border/50 -mx-1 my-1 h-px" />
             <DropdownMenuItem
-              onSelect={() => navigate('/settings')}
+              onSelect={() => goToSettings(navigate)}
               className="flex items-center gap-1.5 cursor-pointer"
             >
               <Icon icon={PlusIcon} className="size-3.5 text-modal-foreground/60" />

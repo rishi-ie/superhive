@@ -7,7 +7,7 @@ import { TurnFoldRow } from './TurnFoldRow'
 import { UsageFooter } from './UsageFooter'
 import { PartRenderer } from './message-parts/PartRenderer'
 import { ToolResultPart } from './message-parts/ToolResultPart'
-import { copyToClipboard } from '@/lib/clipboard'
+import { copyText as copyTextFlow } from '@/flows/ui/copy-text'
 import { type ContentPart, isMessageInFlight } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -130,7 +130,7 @@ export function AssistantMessage({
             size="icon-sm"
             variant="ghost"
             className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-            onClick={() => copyToClipboard(copyText)}
+            onClick={() => copyTextFlow(copyText)}
             aria-label="Copy message"
           >
             <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />

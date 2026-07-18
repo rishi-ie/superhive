@@ -13,7 +13,7 @@ import { projects } from '@/api/projects';
 import { agents } from '@/api/agents';
 import { toast } from 'sonner';
 import { listAgents } from '@/flows/agents/crud/list-agents';
-import { disposeSlice } from '@/stores/agent';
+import { disposeSlice } from '@/flows/agents/settings';
 
 export interface DeleteProjectResult {
   ok: boolean;

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { PasswordInput } from '@/components/common/PasswordInput';
 import { saveProviderBlock } from '@/flows/settings/crud/save-provider-block';
-import { toast } from 'sonner';
+import { notifyProviderBlockSaved, notifyProviderBlockCleared } from '@/flows/settings/crud/notify-provider-block';
 import type { ProviderEntry } from '@/types/electron';
 
 export type ProviderKeyBlockShape = 'single' | 'aws';
@@ -132,7 +132,7 @@ export function ProviderKeyBlock({
         setError(result.error ?? 'Failed to save')
         return
       }
-      toast.success(`${heading} saved`)
+      notifyProviderBlockSaved(heading)
       onSaved?.()
     } catch (err) {
       setPhase('idle')
@@ -160,7 +160,7 @@ export function ProviderKeyBlock({
         setError(result.error ?? 'Failed to clear')
         return
       }
-      toast.success(`${heading} cleared`)
+      notifyProviderBlockCleared(heading)
       setState(initialState(undefined))
       onSaved?.()
     } catch (err) {

@@ -3,7 +3,7 @@ import { Icon } from '@/components/ui/icon';
 import { EyeIcon, EyeSlashIcon, CopyIcon } from '@phosphor-icons/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { copyText } from '@/flows/ui/copy-text';
 import { cn } from '@/lib/utils';
 
 interface PasswordInputProps
@@ -16,15 +16,10 @@ export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputPro
     const [revealed, setRevealed] = React.useState(false);
     const hasValue = value !== undefined && value !== null && String(value).length > 0;
 
-    const handleCopy = React.useCallback(async () => {
+    const handleCopy = React.useCallback(() => {
       const text = String(value ?? '');
       if (!text) return;
-      try {
-        await navigator.clipboard.writeText(text);
-        toast.success('Copied to clipboard');
-      } catch {
-        toast.error('Failed to copy');
-      }
+      void copyText(text);
     }, [value]);
 
     return (
