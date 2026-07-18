@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { HugeIcon } from '@/components/ui/huge-icon'
-import { Copy01Icon } from '@hugeicons/core-free-icons'
+import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { copyText } from '@/flows/ui/copy-text'
+import { copyMessage } from '@/flows/agents/ui/copy-message'
+import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
 import { getMessageText } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -19,6 +20,7 @@ const MAX_COLLAPSED_LENGTH = 600
 export function UserMessage({ message }: UserMessageProps) {
   const text = getMessageText(message)
   const [expanded, setExpanded] = React.useState(false)
+  const { copied, trigger } = useCopyFeedback()
 
   const lines = text.split('\n')
   const isLong = lines.length > MAX_COLLAPSED_LINES || text.length > MAX_COLLAPSED_LENGTH
@@ -54,20 +56,36 @@ export function UserMessage({ message }: UserMessageProps) {
         <span className="text-[11px] text-muted-foreground mr-1">
           {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-              onClick={() => copyText(text)}
-              aria-label="Copy message"
-            >
-              <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top">Copy message</TooltipContent>
-        </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
+                onClick={() => {
+                  void copyMessage(message).then((ok) => {
+                    if (ok) trigger()
+                  })
+                }}
+                aria-label={copied ? 'Copied' : 'Copy message'}
+              >
+                {copied ? (
+                  <HugeIcon
+                    icon={CheckIcon}
+                    size={14}
+                    className="size-3.5"
+                  />
+                ) : (
+                  <HugeIcon
+                    icon={Copy01Icon}
+                    size={14}
+                    className="size-3.5"
+                  />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">{copied ? 'Copied' : 'Copy message'}</TooltipContent>
+          </Tooltip>
         {isLong && (
           <Button
             size="sm"

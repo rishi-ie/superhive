@@ -1,5 +1,5 @@
 import { HugeIcon } from '@/components/ui/huge-icon'
-import { Copy01Icon } from '@hugeicons/core-free-icons'
+import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -7,7 +7,8 @@ import { TurnFoldRow } from './TurnFoldRow'
 import { UsageFooter } from './UsageFooter'
 import { PartRenderer } from './message-parts/PartRenderer'
 import { ToolResultPart } from './message-parts/ToolResultPart'
-import { copyText as copyTextFlow } from '@/flows/ui/copy-text'
+import { copyMessage } from '@/flows/agents/ui/copy-message'
+import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
 import { type ContentPart, isMessageInFlight } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
@@ -21,6 +22,7 @@ export function AssistantMessage({
   message,
   className,
 }: AssistantMessageProps) {
+  const { copied, trigger } = useCopyFeedback()
   const toolResultsById = new Map<
     string,
     Extract<ContentPart, { type: 'tool-result' }>
@@ -28,11 +30,6 @@ export function AssistantMessage({
   for (const part of message.parts) {
     if (part.type === 'tool-result') toolResultsById.set(part.id, part)
   }
-
-  const copyText = message.parts
-    .filter((p) => p.type === 'text' || p.type === 'thinking')
-    .map((p) => (p.type === 'text' || p.type === 'thinking' ? p.text : ''))
-    .join('\n\n')
 
   const toolCalls = message.parts.filter(
     (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
@@ -130,10 +127,26 @@ export function AssistantMessage({
             size="icon-sm"
             variant="ghost"
             className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-            onClick={() => copyTextFlow(copyText)}
-            aria-label="Copy message"
+            onClick={() => {
+              void copyMessage(message).then((ok) => {
+                if (ok) trigger()
+              })
+            }}
+            aria-label={copied ? 'Copied' : 'Copy message'}
           >
-            <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
+            {copied ? (
+              <HugeIcon
+                icon={CheckIcon}
+                size={14}
+                className="size-3.5"
+              />
+            ) : (
+              <HugeIcon
+                icon={Copy01Icon}
+                size={14}
+                className="size-3.5"
+              />
+            )}
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
