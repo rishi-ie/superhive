@@ -42,6 +42,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [activeModelContextWindow, setActiveModelContextWindow] =
     React.useState<number | undefined>(undefined)
   const [activeModelName, setActiveModelName] = React.useState<string | undefined>(undefined)
+  const [activeModelProvider, setActiveModelProvider] = React.useState<string | undefined>(undefined)
   const [compaction, setCompaction] = React.useState<CompactionStatus | undefined>(undefined)
   const [retry, setRetry] = React.useState<RetryStatus | undefined>(undefined)
   const [inFlightToolCount, setInFlightToolCount] = React.useState(0)
@@ -67,6 +68,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setAvailableModels(sliceRef.current.availableModels)
       setActiveModelContextWindow(sliceRef.current.activeModelContextWindow)
       setActiveModelName(sliceRef.current.activeModelName)
+      setActiveModelProvider(sliceRef.current.activeModelProvider)
       setCompaction(sliceRef.current.compaction)
       setRetry(sliceRef.current.retry)
       setInFlightToolCount(sliceRef.current.inFlightToolCount)
@@ -121,6 +123,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     availableModels,
     activeModelContextWindow,
     activeModelName,
+    activeModelProvider,
     compaction,
     retry,
     inFlightToolCount,

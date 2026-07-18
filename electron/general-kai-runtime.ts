@@ -81,22 +81,7 @@ class GeneralKaiRuntime {
   getStatusPayload(agentId: string): RuntimeStatusPayload | null {
     const entry = this.entries.get(agentId)
     if (!entry) return null
-    return {
-      agentId: entry.agentId,
-      status: entry.status,
-      pid: entry.pid,
-      startedAt: entry.startedAt,
-      endedAt: entry.endedAt,
-      lastError: entry.lastError,
-      bootStep: entry.bootStep,
-      usage: entry.usage,
-      contextUsage: entry.contextUsage,
-      availableModels: entry.availableModels,
-      activeModelContextWindow: entry.activeModelContextWindow,
-      activeModelName: entry.activeModelName,
-      compaction: entry.compaction,
-      retry: entry.retry,
-    }
+    return buildStatusPayload(entry, agentId)
   }
 
   listAgents(): string[] {
@@ -151,6 +136,7 @@ class GeneralKaiRuntime {
     entry.availableModels = undefined
     entry.activeModelContextWindow = undefined
     entry.activeModelName = undefined
+    entry.activeModelProvider = undefined
     entry.compaction = undefined
     entry.retry = undefined
     entry.stderrLog = []
@@ -458,9 +444,15 @@ class GeneralKaiRuntime {
           ? event.contextWindow
           : undefined
       const name = typeof event.name === 'string' ? event.name : undefined
-      if (entry.activeModelContextWindow === contextWindow && entry.activeModelName === name) return
+      const provider = typeof event.provider === 'string' ? event.provider : undefined
+      if (
+        entry.activeModelContextWindow === contextWindow &&
+        entry.activeModelName === name &&
+        entry.activeModelProvider === provider
+      ) return
       entry.activeModelContextWindow = contextWindow
       entry.activeModelName = name
+      entry.activeModelProvider = provider
       this.emitStatus(agentId)
       // Auto-write-back: if there's a custom ModelEntry row for this
       // provider+name with contextWindow still undefined, fill it in. This

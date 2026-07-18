@@ -105,4 +105,23 @@ describe('buildStatusPayload', () => {
     )
     expect(payload.agentId).toBe('fresh-id')
   })
+
+  test('includes activeModelProvider from the entry', () => {
+    // Locks the contract for `useAgentModel` in the renderer: the flow
+    // syncs the runtime's chosen provider+name back to settings.json when
+    // the two disagree. If the runtime's `getRuntimeState` IPC response
+    // ever drops `activeModelProvider` (the bug that this test pins), the
+    // flow's `if (!activeModelProvider) return` guard fires permanently
+    // and the picker stays on "Select model" until another status push
+    // re-syncs the slice.
+    const payload = buildStatusPayload(
+      makeEntry({
+        activeModelProvider: 'anthropic',
+        activeModelName: 'claude-sonnet-4-5',
+      }),
+      'agent-1',
+    )
+    expect(payload.activeModelProvider).toBe('anthropic')
+    expect(payload.activeModelName).toBe('claude-sonnet-4-5')
+  })
 })

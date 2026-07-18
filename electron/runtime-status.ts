@@ -51,6 +51,7 @@ export interface RuntimeEntry {
   availableModels?: ModelInfo[]
   activeModelContextWindow?: number
   activeModelName?: string
+  activeModelProvider?: string
   compaction?: CompactionStatus
   retry?: RetryStatus
   _chatPending: Set<string>
@@ -84,6 +85,7 @@ export function buildStatusPayload(
     availableModels: entry.availableModels,
     activeModelContextWindow: entry.activeModelContextWindow,
     activeModelName: entry.activeModelName,
+    activeModelProvider: entry.activeModelProvider,
     compaction: entry.compaction,
     retry: entry.retry,
   }

@@ -55,6 +55,7 @@ export interface RuntimeSlice {
   availableModels?: ModelInfo[]
   activeModelContextWindow?: number
   activeModelName?: string
+  activeModelProvider?: string
   compaction?: CompactionStatus
   retry?: RetryStatus
   inFlightToolCount: number
@@ -101,6 +102,7 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     availableModels: undefined,
     activeModelContextWindow: undefined,
     activeModelName: undefined,
+    activeModelProvider: undefined,
     loading: true,
     initialized: false,
     inFlightToolCount: 0,
@@ -122,6 +124,7 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.availableModels = s.availableModels
       entry.activeModelContextWindow = s.activeModelContextWindow
       entry.activeModelName = s.activeModelName
+      entry.activeModelProvider = s.activeModelProvider
     }
     entry.loading = false
     entry.listeners.forEach((l) => l())
@@ -147,6 +150,7 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.availableModels = s.availableModels
       entry.activeModelContextWindow = s.activeModelContextWindow
       entry.activeModelName = s.activeModelName
+      entry.activeModelProvider = s.activeModelProvider
       entry.compaction = s.compaction
       entry.retry = s.retry
       entry.listeners.forEach((l) => l())

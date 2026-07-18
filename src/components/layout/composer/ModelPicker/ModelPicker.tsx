@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { getEnabledModels } from '@/flows/settings/crud/get-enabled-models';
 import { listProviders } from '@/flows/settings/crud/list-providers';
-import { useAgentSettings } from '@/flows/agents/settings';
+import { useAgentModel } from '@/flows/agents/settings';
 import { goToSettings } from '@/flows/navigation';
 import { cn } from '@/lib/utils';
 
@@ -35,15 +35,15 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
   const [localSelection, setLocalSelection] = React.useState<EnabledModel | null>(null);
   const navigate = useNavigate();
 
-  const agentSettings = useAgentSettings(agentId ?? null);
+  const { model: persistedModel, setModel } = useAgentModel(agentId);
   const persistedSelection: EnabledModel | null = React.useMemo(() => {
-    if (!agentSettings.settings?.model?.name) return null;
+    if (!persistedModel?.name) return null;
     return {
-      id: `${agentSettings.settings.model.provider}:${agentSettings.settings.model.name}`,
-      provider: agentSettings.settings.model.provider,
-      name: agentSettings.settings.model.name,
+      id: `${persistedModel.provider}:${persistedModel.name}`,
+      provider: persistedModel.provider,
+      name: persistedModel.name,
     };
-  }, [agentSettings.settings?.model]);
+  }, [persistedModel]);
 
   const refetch = React.useCallback(async () => {
     try {
@@ -122,7 +122,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
 
   const onSelect = (model: EnabledModel) => {
     if (agentId) {
-      agentSettings.patch('model', { provider: model.provider, name: model.name });
+      setModel({ provider: model.provider, name: model.name });
     } else {
       setLocalSelection(model);
     }

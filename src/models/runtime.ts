@@ -240,6 +240,7 @@ export interface RuntimeStatusPayload {
   availableModels?: ModelInfo[]
   activeModelContextWindow?: number
   activeModelName?: string
+  activeModelProvider?: string
   /** Live compaction state; absent unless compaction is currently active. */
   compaction?: CompactionStatus
   /** Live auto-retry state; absent unless retry is currently in flight. */
