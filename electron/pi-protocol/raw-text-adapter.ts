@@ -26,6 +26,17 @@ export class RawTextAdapter implements PiProtocolAdapter {
         const obj = parsed as Record<string, unknown>
         if (obj.type === 'message_update') {
           const ev = obj.assistantMessageEvent as Record<string, unknown> | undefined
+          if (ev?.type === 'text_start') {
+            if (!this.currentMessageId) {
+              this.currentMessageId = randomUUID()
+              emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
+            }
+            emit({
+              type: 'text-start',
+              messageId: this.currentMessageId,
+              contentIndex: typeof ev.contentIndex === 'number' ? ev.contentIndex : 0,
+            })
+          }
           if (ev?.type === 'text_delta') {
             if (!this.currentMessageId) {
               this.currentMessageId = randomUUID()
@@ -35,6 +46,15 @@ export class RawTextAdapter implements PiProtocolAdapter {
               type: 'text-delta',
               messageId: this.currentMessageId,
               delta: (ev.delta as string) ?? '',
+            })
+          }
+          if (ev?.type === 'text_end') {
+            if (!this.currentMessageId) return
+            emit({
+              type: 'text-end',
+              messageId: this.currentMessageId,
+              contentIndex: typeof ev.contentIndex === 'number' ? ev.contentIndex : 0,
+              content: (ev.content as string) ?? '',
             })
           }
           if (ev?.type === 'thinking_start') {

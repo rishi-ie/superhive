@@ -10,10 +10,15 @@ import type {
   ContextSnapshot,
   ModelInfo,
 } from '@/types/electron'
-import type { ContentPart, CompactionStatus, RetryStatus } from '@/models/runtime'
+import type { CompactionStatus, RetryStatus } from '@/models/runtime'
+import { normalizeToolResult } from '@/models/runtime'
 import { toast } from 'sonner'
+import {
+  clearAgentQueue,
+  enqueue,
+  setSliceAccessor,
+} from '@/stores/agent-stream-queue'
 
-const MAX_MESSAGES = 5000
 const AUTO_SAVE_DEBOUNCE_MS = 500
 
 type NotifyFn = () => void
@@ -69,37 +74,14 @@ export interface AgentSettingsState {
 const runtimeSlices = new Map<string, RuntimeSlice>()
 const settingsSlices = new Map<string, SettingsSlice>()
 
-function appendPart(slice: RuntimeSlice, messageId: string, part: ContentPart): boolean {
-  const idx = slice.messages.findIndex((m) => m.id === messageId)
-  if (idx === -1) return false
-  const cur = slice.messages[idx]!
-  slice.messages = [
-    ...slice.messages.slice(0, idx),
-    { ...cur, parts: [...cur.parts, part] },
-    ...slice.messages.slice(idx + 1),
-  ]
-  return true
-}
-
-function updateLastPart(
-  slice: RuntimeSlice,
-  messageId: string,
-  fn: (last: ContentPart) => ContentPart | null,
-): boolean {
-  const idx = slice.messages.findIndex((m) => m.id === messageId)
-  if (idx === -1) return false
-  const cur = slice.messages[idx]!
-  const last = cur.parts[cur.parts.length - 1]
-  if (!last) return false
-  const next = fn(last)
-  if (!next) return false
-  slice.messages = [
-    ...slice.messages.slice(0, idx),
-    { ...cur, parts: [...cur.parts.slice(0, -1), next] },
-    ...slice.messages.slice(idx + 1),
-  ]
-  return true
-}
+setSliceAccessor((agentId) => {
+  const slice = runtimeSlices.get(agentId)
+  if (!slice) return null
+  return {
+    slice,
+    notify: () => slice.listeners.forEach((l) => l()),
+  }
+})
 
 function disposeRuntimeSliceNow(agentId: string): void {
   const slice = runtimeSlices.get(agentId)
@@ -107,6 +89,7 @@ function disposeRuntimeSliceNow(agentId: string): void {
   slice.unsubs.forEach((u) => u())
   slice.unsubs = []
   runtimeSlices.delete(agentId)
+  clearAgentQueue(agentId)
 }
 
 function disposeSettingsSliceNow(agentId: string): void {
@@ -186,183 +169,203 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
     }),
   )
 
+  // Main process emits `entry.messages` via `ON_MESSAGES` after every push
+  // (start hydration, send, message-end, completion). This is the only path
+  // for user messages into the renderer — Pi's adapter does not emit
+  // `message-start` for the user echo (only for assistant events, see
+  // `raw-text-adapter.ts`). Main dedupes at push (defensive `message-start`
+  // check in `general-kai-runtime.ts`), so the queue's `set-messages` merge
+  // sees no duplicate ids. We route through the queue's `set-messages` op
+  // instead of overwriting `entry.messages` directly to preserve the
+  // queue-as-single-writer invariant and protect in-flight streaming parts.
   unsubs.push(
-    agents.onMessages(agentId, (msgs) => {
-      const entry = runtimeSlices.get(agentId)
-      if (!entry) return
-      entry.messages = msgs
-      // Renderer cap matches disk trim (5000). Drop the oldest rows that
-      // aren't in the just-arrived snapshot. Skip silently — the user
-      // shouldn't see a toast; the chat-fade-bottom + scrolled further-up
-      // affordance is enough indication.
-      if (entry.messages.length > MAX_MESSAGES) {
-        entry.messages = entry.messages.slice(-MAX_MESSAGES)
-      }
-      entry.listeners.forEach((l) => l())
+    agents.onMessages(agentId, (messages) => {
+      enqueue({ kind: 'set-messages', agentId, messages })
     }),
   )
 
   unsubs.push(
     agents.onEvent(agentId, (ev: AdapterEvent) => {
-      const entry = runtimeSlices.get(agentId)
-      if (!entry) return
-      if (ev.type === 'text-delta') {
-        const updated = updateLastPart(entry, ev.messageId, (last) => {
-          if (last.type === 'text') {
-            return { ...last, text: last.text + ev.delta, state: 'streaming' }
-          }
-          return { type: 'text', text: ev.delta, state: 'streaming' }
-        })
-        if (!updated) {
-          appendPart(entry, ev.messageId, { type: 'text', text: ev.delta, state: 'streaming' })
+      // High-frequency state-mutation events go through the queue so the
+      // renderer re-renders once per 50ms tick instead of once per event.
+      // Boundary events and refetches stay immediate.
+      switch (ev.type) {
+        case 'text-delta': {
+          enqueue({
+            kind: 'append-delta',
+            agentId,
+            messageId: ev.messageId,
+            partType: 'text',
+            delta: ev.delta,
+          })
+          return
         }
-      } else if (ev.type === 'thinking-start') {
-        appendPart(entry, ev.messageId, { type: 'thinking', text: '', state: 'streaming' })
-      } else if (ev.type === 'thinking-delta') {
-        const updated = updateLastPart(entry, ev.messageId, (last) => {
-          if (last.type === 'thinking') {
-            return { ...last, text: last.text + ev.delta, state: 'streaming' }
-          }
-          return null
-        })
-        if (!updated) {
-          appendPart(entry, ev.messageId, { type: 'thinking', text: ev.delta, state: 'streaming' })
+        case 'thinking-start': {
+          enqueue({
+            kind: 'append-part',
+            agentId,
+            messageId: ev.messageId,
+            part: { type: 'thinking', text: '', state: 'streaming' },
+          })
+          return
         }
-      } else if (ev.type === 'thinking-end') {
-        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
-        if (idx !== -1) {
-          const msg = entry.messages[idx]!
-          let flipped = false
-          entry.messages = [
-            ...entry.messages.slice(0, idx),
-            {
-              ...msg,
-              parts: msg.parts.map((p) => {
-                if (flipped || p.type !== 'thinking' || p.state === 'complete') return p
-                flipped = true
-                return { ...p, text: ev.content || p.text, state: 'complete' as const }
-              }),
+        case 'thinking-delta': {
+          enqueue({
+            kind: 'append-delta',
+            agentId,
+            messageId: ev.messageId,
+            partType: 'thinking',
+            delta: ev.delta,
+          })
+          return
+        }
+        case 'thinking-end': {
+          enqueue({
+            kind: 'finalize-part',
+            agentId,
+            messageId: ev.messageId,
+            partType: 'thinking',
+            content: ev.content,
+          })
+          return
+        }
+        case 'text-end': {
+          enqueue({
+            kind: 'finalize-part',
+            agentId,
+            messageId: ev.messageId,
+            partType: 'text',
+            content: ev.content,
+          })
+          return
+        }
+        case 'tool-call-start': {
+          enqueue({
+            kind: 'append-part',
+            agentId,
+            messageId: ev.messageId,
+            part: {
+              type: 'tool-call',
+              id: ev.toolCallId,
+              name: ev.name,
+              args: undefined,
+              state: 'pending',
             },
-            ...entry.messages.slice(idx + 1),
-          ]
+          })
+          return
         }
-      } else if (ev.type === 'tool-execution-start') {
-        entry.inFlightToolCount += 1
-        entry.listeners.forEach((l) => l())
-      } else if (ev.type === 'tool-call-start') {
-        appendPart(entry, ev.messageId, {
-          type: 'tool-call',
-          id: ev.toolCallId,
-          name: ev.name,
-          args: undefined,
-          state: 'pending',
-        })
-      } else if (ev.type === 'tool-call-delta') {
-        // Args deltas are JSON-string deltas. We append to whichever text
-        // state the tool-call part currently uses — main's logic mirrors
-        // this exactly in handleAdapterEvent. The renderer will only parse
-        // args once tool-call-end arrives.
-        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
-        if (idx === -1) return
-        const cur = entry.messages[idx]!
-        const partIdx = cur.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === ev.toolCallId,
-        )
-        if (partIdx === -1) return
-        const part = cur.parts[partIdx]!
-        if (part.type !== 'tool-call') return
-        const prevArgs = typeof part.args === 'string' ? part.args : ''
-        const nextParts = [
-          ...cur.parts.slice(0, partIdx),
-          { ...part, args: prevArgs + ev.delta, state: 'streaming-args' as const },
-          ...cur.parts.slice(partIdx + 1),
-        ]
-        entry.messages = [
-          ...entry.messages.slice(0, idx),
-          { ...cur, parts: nextParts },
-          ...entry.messages.slice(idx + 1),
-        ]
-      } else if (ev.type === 'tool-call-end') {
-        const idx = entry.messages.findIndex((m) => m.id === ev.messageId)
-        if (idx === -1) return
-        const cur = entry.messages[idx]!
-        const partIdx = cur.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === ev.toolCallId,
-        )
-        if (partIdx === -1) return
-        const part = cur.parts[partIdx]!
-        if (part.type !== 'tool-call') return
-        entry.messages = [
-          ...entry.messages.slice(0, idx),
-          {
-            ...cur,
-            parts: [
-              ...cur.parts.slice(0, partIdx),
-              { ...part, args: ev.args, state: 'complete' as const },
-              ...cur.parts.slice(partIdx + 1),
-            ],
-          },
-          ...entry.messages.slice(idx + 1),
-        ]
-      } else if (ev.type === 'tool-execution-end') {
-        // Main has already linked the tool-result part onto the message that
-        // owns the tool-call. Re-fetch via getMessages so the canonical state
-        // is mirrored.
-        if (entry.inFlightToolCount > 0) entry.inFlightToolCount -= 1
-        agents.getMessages(agentId).then((msgs) => {
-          const e = runtimeSlices.get(agentId)
-          if (!e) return
-          e.messages = msgs
-          e.listeners.forEach((l) => l())
-        })
-      } else if (ev.type === 'compaction-start') {
-        // Re-fetch status to capture compaction envelope + the parts main
-        // may have appended during compaction-end. (Status is also broadcast
-        // via onStatus, but the message-level mutation needs getMessages.)
-        agents.getRuntimeState(agentId).then((s) => {
-          const e = runtimeSlices.get(agentId)
-          if (!e || !s) return
-          e.compaction = s.compaction
-          e.listeners.forEach((l) => l())
-        })
-      } else if (ev.type === 'compaction-end') {
-        agents.getMessages(agentId).then((msgs) => {
-          const e = runtimeSlices.get(agentId)
-          if (!e) return
-          e.messages = msgs
-          e.listeners.forEach((l) => l())
-        })
-        agents.getRuntimeState(agentId).then((s) => {
-          const e = runtimeSlices.get(agentId)
-          if (!e || !s) return
-          e.compaction = s.compaction
-          e.listeners.forEach((l) => l())
-        })
-      } else if (ev.type === 'auto-retry-start' || ev.type === 'auto-retry-end') {
-        agents.getRuntimeState(agentId).then((s) => {
-          const e = runtimeSlices.get(agentId)
-          if (!e || !s) return
-          e.retry = s.retry
-          e.listeners.forEach((l) => l())
-        })
-      } else if (ev.type === 'image-attachment') {
-        appendPart(entry, ev.messageId, {
-          type: 'image',
-          data: ev.data,
-          mimeType: ev.mimeType,
-        })
-      } else if (ev.type === 'message-start') {
-        if (!entry.messages.some((m) => m.id === ev.messageId)) {
-          entry.messages = [
-            ...entry.messages,
-            { id: ev.messageId, role: ev.role, parts: [], ts: Date.now() },
-          ]
+        case 'tool-call-delta': {
+          enqueue({
+            kind: 'append-tool-call-delta',
+            agentId,
+            messageId: ev.messageId,
+            toolCallId: ev.toolCallId,
+            delta: ev.delta,
+          })
+          return
         }
-      } else if (ev.type === 'error') {
-        toast.error(ev.message, { duration: Infinity })
-        entry.lastError = ev.message
+        case 'tool-call-end': {
+          enqueue({
+            kind: 'finalize-tool-call',
+            agentId,
+            messageId: ev.messageId,
+            toolCallId: ev.toolCallId,
+            args: ev.args,
+          })
+          return
+        }
+        case 'tool-execution-start': {
+          enqueue({ kind: 'increment-inflight', agentId, delta: 1 })
+          return
+        }
+        case 'image-attachment': {
+          enqueue({
+            kind: 'append-part',
+            agentId,
+            messageId: ev.messageId,
+            part: { type: 'image', data: ev.data, mimeType: ev.mimeType },
+          })
+          return
+        }
+        case 'message-start': {
+          enqueue({
+            kind: 'message-start',
+            agentId,
+            messageId: ev.messageId,
+            role: ev.role,
+          })
+          return
+        }
+        case 'message-end': {
+          enqueue({
+            kind: 'finalize-message',
+            agentId,
+            messageId: ev.messageId,
+          })
+          return
+        }
+        // Tool-call end and refetches — the queue is the single writer for
+        // message state. `tool-execution-end` carries the result payload in
+        // the event itself, so we route it through `finalize-tool-result`
+        // instead of refetching from disk. `compaction-end` carries the
+        // summary text, routed through `append-compaction-summary`.
+        // Status fields (compaction envelope, retry) are not part of message
+        // state — they stay on direct runtime-state refetch since they're
+        // unrelated to the queue's scope.
+        case 'tool-execution-end': {
+          enqueue({ kind: 'increment-inflight', agentId, delta: -1 })
+          enqueue({
+            kind: 'finalize-tool-result',
+            agentId,
+            toolCallId: ev.toolCallId,
+            result: normalizeToolResult(ev.result),
+            isError: ev.isError,
+          })
+          return
+        }
+        case 'compaction-start': {
+          agents.getRuntimeState(agentId).then((s) => {
+            const e = runtimeSlices.get(agentId)
+            if (!e || !s) return
+            e.compaction = s.compaction
+            e.listeners.forEach((l) => l())
+          })
+          return
+        }
+        case 'compaction-end': {
+          if (typeof ev.result === 'string' && ev.result.trim().length > 0) {
+            enqueue({
+              kind: 'append-compaction-summary',
+              agentId,
+              summary: ev.result,
+              tokensBefore: 0,
+            })
+          }
+          agents.getRuntimeState(agentId).then((s) => {
+            const e = runtimeSlices.get(agentId)
+            if (!e || !s) return
+            e.compaction = s.compaction
+            e.listeners.forEach((l) => l())
+          })
+          return
+        }
+        case 'auto-retry-start':
+        case 'auto-retry-end': {
+          agents.getRuntimeState(agentId).then((s) => {
+            const e = runtimeSlices.get(agentId)
+            if (!e || !s) return
+            e.retry = s.retry
+            e.listeners.forEach((l) => l())
+          })
+          return
+        }
+        case 'error': {
+          toast.error(ev.message, { duration: Infinity })
+          const e = runtimeSlices.get(agentId)
+          if (e) e.lastError = ev.message
+          return
+        }
       }
-      entry.listeners.forEach((l) => l())
     }),
   )
 
@@ -390,20 +393,12 @@ function initRuntimeSlice(agentId: string): RuntimeSlice {
         })
       }
     })
-    // Always fetch messages from disk on slice init. When the runtime is
-    // already running (e.g. Cmd+W close-window reopen on macOS) the init
-    // above returns early and no emitMessages fires, so the slice would
-    // otherwise start with messages:[]. The onMessages subscription (set up
-    // below) catches the emitMessages from runtime.start for the start case;
-    // for the already-running case this getMessages call populates the slice.
+    // Always fetch messages from disk on slice init and route through the
+    // queue as a `set-messages` op so the merge (with streaming-state
+    // preservation) is applied centrally. The queue's applyOp is the only
+    // writer of `entry.messages`.
     agents.getMessages(agentId).then((msgs) => {
-      const entry = runtimeSlices.get(agentId)
-      if (!entry) return
-      entry.messages = msgs
-      if (entry.messages.length > MAX_MESSAGES) {
-        entry.messages = entry.messages.slice(-MAX_MESSAGES)
-      }
-      entry.listeners.forEach((l) => l())
+      enqueue({ kind: 'set-messages', agentId, messages: msgs })
     })
     slice.initialized = true
   }

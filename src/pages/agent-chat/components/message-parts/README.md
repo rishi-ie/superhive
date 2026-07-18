@@ -19,14 +19,14 @@ tool call is always visible.
 
 ## Key design decisions
 
-- **Deferred reveal** — `isMessageInFlight()` returns `true` during streaming. `AssistantMessage`
-  renders `null` in that case; `ConversationArea` shows a `WorkingTimelineRow` footer instead.
+- **Direct streaming** — `AssistantMessage` renders incrementally as text-delta and
+  tool-call-delta events arrive; parts with `state: 'streaming'` are rendered in-place.
+  The text/thinking/tool-call parts are appended to or extended on every event, so the
+  user sees Pi generate the response in real time.
 - **Fold detection** — `shouldFold = toolCalls.length >= 2 || parts has non-text/thinking/tool-call/tool-result`.
   Default collapsed. Expand toggles all fold-content; terminal text always visible.
 - **`running` derivation** — computed in `ToolCallPart` as `part.state !== 'complete' ||
   (result && result.state !== 'complete')`. Never written to the store.
-- **`WorkingTimelineRow`** — absolute-positioned inside `ConversationArea`; not a Virtuoso item.
-  Shows pulsing dots + `WorkingTimer` + live tool summary.
 - **`CodeBlock`** — shiki highlighting via `getHighlighter()`, language header bar, wrap toggle,
   copy-check feedback (1.2s). Falls back to plain `<pre><code>` before highlighter loads.
 - **`MarkdownTable`** — overflow-x-auto, fade mask, expand/collapse for >8 rows,

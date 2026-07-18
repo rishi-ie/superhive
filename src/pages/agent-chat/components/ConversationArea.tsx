@@ -1,8 +1,6 @@
 import * as React from 'react'
 import { UserMessage } from './UserMessage'
 import { AssistantMessage } from './AssistantMessage'
-import { WorkingTimelineRow } from './WorkingTimelineRow'
-import { isMessageInFlight, getMessageStartedAt, getActiveToolSummary } from '@/models/runtime'
 import { cn } from '@/lib/utils'
 import { ActiveStateBanners } from './ActiveStateBanners'
 import { ChatEmptyState } from './SuggestedPrompts'
@@ -35,8 +33,6 @@ export function ConversationArea({
   const seenIdsRef = React.useRef<Set<string>>(new Set())
   const [freshIds, setFreshIds] = React.useState<Set<string>>(new Set())
 
-  const lastTailRef = React.useRef('')
-
   React.useEffect(() => {
     const currentIds = new Set(messages.map((m) => m.id))
     const next = new Set<string>()
@@ -67,7 +63,6 @@ export function ConversationArea({
   React.useEffect(() => {
     if (!busy) return
     if (messages.length === 0) return
-    lastTailRef.current = messages[messages.length - 1]?.id ?? ''
     setAtBottom(true)
     requestAnimationFrame(() => {
       virtuosoRef.current?.scrollToIndex({
@@ -92,12 +87,6 @@ export function ConversationArea({
       <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />
     )
   }
-
-  void lastTailRef
-
-  const lastMessage = messages[messages.length - 1]
-  const showWorkingRow =
-    lastMessage?.role === 'assistant' && isMessageInFlight(lastMessage)
 
   return (
     <div
@@ -144,14 +133,6 @@ export function ConversationArea({
           </div>
         )}
       />
-      {showWorkingRow ? (
-        <div className="absolute bottom-0 inset-x-0 z-10 mx-auto max-w-3xl px-4 sm:px-6 pb-2 pointer-events-none">
-          <WorkingTimelineRow
-            startedAt={getMessageStartedAt(lastMessage)}
-            toolSummary={getActiveToolSummary(lastMessage)}
-          />
-        </div>
-      ) : null}
       {compaction || retry ? (
         <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-3xl px-4 sm:px-6">
           <ActiveStateBanners

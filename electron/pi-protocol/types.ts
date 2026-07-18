@@ -30,7 +30,9 @@ export interface ModelInfo {
 }
 
 export type AdapterEvent =
+  | { type: 'text-start'; messageId: string; contentIndex: number }
   | { type: 'text-delta'; messageId: string; delta: string }
+  | { type: 'text-end'; messageId: string; contentIndex: number; content: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
   | { type: 'message-end'; messageId: string }
   | { type: 'thinking-start'; messageId: string; contentIndex: number }

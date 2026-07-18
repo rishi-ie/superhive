@@ -8,7 +8,7 @@ import { UsageFooter } from './UsageFooter'
 import { PartRenderer } from './message-parts/PartRenderer'
 import { ToolResultPart } from './message-parts/ToolResultPart'
 import { copyToClipboard } from '@/lib/clipboard'
-import { isMessageInFlight, type ContentPart } from '@/models/runtime'
+import { type ContentPart, isMessageInFlight } from '@/models/runtime'
 import type { RuntimeMessage } from '@/types/electron'
 
 interface AssistantMessageProps {
@@ -21,8 +21,6 @@ export function AssistantMessage({
   message,
   className,
 }: AssistantMessageProps) {
-  const inFlight = isMessageInFlight(message)
-
   const toolResultsById = new Map<
     string,
     Extract<ContentPart, { type: 'tool-result' }>
@@ -35,8 +33,6 @@ export function AssistantMessage({
     .filter((p) => p.type === 'text' || p.type === 'thinking')
     .map((p) => (p.type === 'text' || p.type === 'thinking' ? p.text : ''))
     .join('\n\n')
-
-  if (inFlight) return null
 
   const toolCalls = message.parts.filter(
     (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
@@ -128,41 +124,43 @@ export function AssistantMessage({
           )
         })}
 
-      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
-        <Button
-          size="icon-sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
-          onClick={() => copyToClipboard(copyText)}
-          aria-label="Copy message"
-        >
-          <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
-        </Button>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="text-[11px] text-muted-foreground ml-1 cursor-default">
-              {new Date(message.ts).toLocaleTimeString([], {
+      {!isMessageInFlight(message) && (
+        <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
+            onClick={() => copyToClipboard(copyText)}
+            aria-label="Copy message"
+          >
+            <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
+          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-[11px] text-muted-foreground ml-1 cursor-default">
+                {new Date(message.ts).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              {new Date(message.ts).toLocaleString([], {
+                month: 'short',
+                day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit',
+                second: '2-digit',
               })}
-            </span>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            {new Date(message.ts).toLocaleString([], {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            })}
-          </TooltipContent>
-        </Tooltip>
-        {message.usage ? (
-          <div className="ml-auto">
-            <UsageFooter usage={message.usage} />
-          </div>
-        ) : null}
-      </div>
+            </TooltipContent>
+          </Tooltip>
+          {message.usage ? (
+            <div className="ml-auto">
+              <UsageFooter usage={message.usage} />
+            </div>
+          ) : null}
+        </div>
+      )}
     </div>
   )
 }

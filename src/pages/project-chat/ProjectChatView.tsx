@@ -51,11 +51,28 @@ export function ProjectChatView() {
   // Re-resolve the project coordinator when the agents table changes (e.g.
   // the coordinator's folder was deleted and the watcher evicted the row).
   const agentsVersion = useAgentsListVersion();
+  // Track the projectId that the current state was resolved against so we
+  // only tear down the chat UI when the user actually navigates to a
+  // different project. agentsVersion bumps re-resolve in place — without
+  // this guard, every fs reconcile would unmount/remount ProjectChatContent
+  // and reset useAgentRuntime's internal state, causing visible flicker.
+  const prevProjectIdRef = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
-    if (!projectId) return;
+    if (!projectId) {
+      setProject(null);
+      setProjectAgent(null);
+      setProjectResolved(false);
+      prevProjectIdRef.current = undefined;
+      return;
+    }
     let cancelled = false;
-    setProjectResolved(false);
+    if (prevProjectIdRef.current !== projectId) {
+      setProjectResolved(false);
+      setProject(null);
+      setProjectAgent(null);
+      prevProjectIdRef.current = projectId;
+    }
     (async () => {
       const p = await loadProject(projectId);
       if (cancelled) return;

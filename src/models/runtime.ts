@@ -106,6 +106,64 @@ export function getMessageTailFingerprint(message: RuntimeMessage): string {
 }
 
 /**
+ * Convert whatever shape the runtime emitted for a partial / final tool result
+ * into the discriminated `ToolResultContent[]` shape persisted on the message.
+ * Defaults to a single text entry — adequate for the common string result
+ * shape and until Phase 6 (diff view) replaces it with a real diff parser.
+ */
+export function normalizeToolResult(raw: unknown): ToolResultContent[] {
+  if (raw == null) return [{ type: 'text', text: '' }]
+  if (typeof raw === 'string') return [{ type: 'text', text: raw }]
+  if (Array.isArray(raw)) {
+    const out: ToolResultContent[] = []
+    for (const item of raw) {
+      out.push(...normalizeToolResult(item))
+    }
+    return out
+  }
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>
+    // Pi already-shape payloads: { type: 'diff', path, oldText, newText }
+    if (obj.type === 'diff' && typeof obj.path === 'string') {
+      return [
+        {
+          type: 'diff',
+          path: obj.path,
+          oldText: typeof obj.oldText === 'string' ? obj.oldText : '',
+          newText: typeof obj.newText === 'string' ? obj.newText : '',
+        },
+      ]
+    }
+    // { type: 'truncation', path, reason, totalLines, shownLines }
+    if (obj.type === 'truncation' && typeof obj.path === 'string') {
+      const reason =
+        obj.reason === 'lineLimit' || obj.reason === 'byteLimit' || obj.reason === 'binary'
+          ? obj.reason
+          : 'lineLimit'
+      return [
+        {
+          type: 'truncation',
+          path: obj.path,
+          reason,
+          totalLines: typeof obj.totalLines === 'number' ? obj.totalLines : 0,
+          shownLines: typeof obj.shownLines === 'number' ? obj.shownLines : 0,
+        },
+      ]
+    }
+    // { text }
+    if (typeof obj.text === 'string') return [{ type: 'text', text: obj.text }]
+    // { content: string | string[] }
+    if (typeof obj.content === 'string') return [{ type: 'text', text: obj.content }]
+    if (Array.isArray(obj.content)) {
+      const out: ToolResultContent[] = []
+      for (const item of obj.content) out.push(...normalizeToolResult(item))
+      return out
+    }
+  }
+  return [{ type: 'text', text: String(raw) }]
+}
+
+/**
  * Returns true when the message is still being constructed — any part is in a
  * streaming/pending state, or a tool call has been dispatched but its result
  * has not yet arrived.
