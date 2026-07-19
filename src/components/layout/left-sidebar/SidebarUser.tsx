@@ -81,11 +81,11 @@ export function SidebarUser() {
       <button
         type="button"
         onClick={() => goToSettings(navigate)}
-        className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent hover:cursor-default"
         aria-label="Open settings"
         title="Settings"
       >
-        <Icon icon={GearSixIcon} className="size-3.5" />
+        <Icon icon={GearSixIcon} className="size-4" />
       </button>
     </div>
   );

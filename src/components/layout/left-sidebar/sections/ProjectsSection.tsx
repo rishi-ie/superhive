@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { FolderOpenIcon } from "@phosphor-icons/react";
+import { UserIcon } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Folder01Icon } from "@hugeicons/core-free-icons";
 import { AccordionSection } from '@/components/layout/common/primitives';
@@ -51,7 +51,7 @@ export function ProjectsSection({ items, agents }: ProjectsSectionProps) {
               ))
             ) : (
               <div className="flex items-center gap-stack px-row py-1.5">
-                <Icon icon={FolderOpenIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
+                <Icon icon={UserIcon} className="size-4 flex-shrink-0 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">No assigned agents</span>
               </div>
             )}

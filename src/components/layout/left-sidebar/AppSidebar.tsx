@@ -30,7 +30,7 @@ export function AppSidebar({ width = 330 }: AppSidebarProps) {
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-list-item">
+      <SidebarFooter className="p-list-item">
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>
