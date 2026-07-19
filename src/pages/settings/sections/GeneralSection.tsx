@@ -58,7 +58,7 @@ function SettingsRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[64px] items-center justify-between gap-stack px-6 py-[10px]">
+    <div className="flex min-h-[44px] items-center justify-between gap-stack px-4 py-2">
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="text-sm font-medium text-foreground">{title}</span>
         {description && (
@@ -71,7 +71,7 @@ function SettingsRow({
 }
 
 function SettingsDivider() {
-  return <div className="mx-6 h-px bg-border/50" />;
+  return <div className="mx-4 h-px bg-border/50" />;
 }
 
 function DropdownChoice<T extends string>({
