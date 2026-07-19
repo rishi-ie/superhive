@@ -10,3 +10,9 @@ export { ResponsibilitySlider } from './ResponsibilitySlider';
 export { ActivityRow } from './ActivityRow';
 export type { ActivityType } from './ActivityRow';
 export { SettingRow } from './SettingRow';
+export { InboxItemRow } from './InboxItemRow';
+export type {
+  InboxItemKind,
+  InboxAction,
+  InboxOutcome,
+} from './InboxItemRow';

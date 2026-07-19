@@ -1,8 +1,6 @@
 import { Icon } from "@/components/ui/icon";
 import {
   PlusIcon,
-  HandIcon,
-  CaretDownIcon,
   MicrophoneIcon,
   ArrowUpIcon,
 } from "@phosphor-icons/react";
@@ -20,11 +18,6 @@ export function ComposerCard() {
           <div className="flex items-center gap-4">
             <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
               <Icon icon={PlusIcon} className="size-5" />
-            </button>
-            <button className="flex items-center gap-list-item text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
-              <Icon icon={HandIcon} className="size-4" />
-              <span>Ask for approval</span>
-              <Icon icon={CaretDownIcon} className="size-3" />
             </button>
           </div>
           <div className="flex items-center gap-4">
