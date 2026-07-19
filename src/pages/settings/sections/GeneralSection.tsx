@@ -45,7 +45,7 @@ function SectionHeader({
 }
 
 function SettingsCard({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl bg-card-elevated py-1">{children}</div>;
+  return <div className="rounded-lg bg-card-elevated py-1">{children}</div>;
 }
 
 function SettingsRow({
