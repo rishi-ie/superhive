@@ -34,7 +34,7 @@ function SectionHeader({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <h2 className="text-xl font-semibold tracking-tight text-foreground">
+      <h2 className="text-sm font-semibold text-muted-foreground">
         {title}
       </h2>
       {description && (
@@ -59,10 +59,10 @@ function SettingsRow({
 }) {
   return (
     <div className="flex min-h-[44px] items-center justify-between gap-stack px-4 py-2">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-sm font-medium text-foreground">{title}</span>
         {description && (
-          <span className="text-xs text-muted-foreground">{description}</span>
+          <span className="text-sm text-muted-foreground">{description}</span>
         )}
       </div>
       <div className="flex shrink-0 items-center">{children}</div>
@@ -128,7 +128,6 @@ export function GeneralSection() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <SectionHeader title="General" />
         <SettingsCard>
           <SettingsRow
             title="Theme"
