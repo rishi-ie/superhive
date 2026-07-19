@@ -56,7 +56,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
       type="button"
       onClick={onClick}
       className={compact
-        ? "group flex h-6 w-full cursor-default items-center gap-1 rounded-sm px-1.5 text-xs text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        ? "group flex h-6 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 text-xs text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
         : "group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground"
       }
     >

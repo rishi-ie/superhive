@@ -23,4 +23,6 @@ export const projects = {
     window.api.projects.removeAgent(projectId, agentId),
 
   reveal: (id: string): Promise<{ ok: boolean }> => window.api.projects.reveal(id),
+
+  onChanged: (cb: () => void): (() => void) => window.api.projects.onChanged(cb),
 };

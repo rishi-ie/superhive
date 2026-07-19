@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('api', {
     addAgent: (projectId, agentId) => ipcRenderer.invoke('projects:addAgent', projectId, agentId),
     removeAgent: (projectId, agentId) => ipcRenderer.invoke('projects:removeAgent', projectId, agentId),
     reveal: (id) => ipcRenderer.invoke('projects:reveal', id),
+    onChanged: (cb) => subscribe('projects:changed', cb),
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:get-version'),

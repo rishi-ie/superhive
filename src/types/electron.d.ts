@@ -73,6 +73,13 @@ export interface ProjectsAPI {
   addAgent: (projectId: string, agentId: string) => Promise<void>
   removeAgent: (projectId: string, agentId: string) => Promise<void>
   reveal: (id: string) => Promise<{ ok: boolean }>
+  /**
+   * Subscribe to `projects:changed` IPC events. Broadcast by the main process
+   * after every IPC handler that mutates `db.projects.json` — CREATE, UPDATE,
+   * DELETE, ADD_AGENT, REMOVE_AGENT. Consumers re-fetch `list()` to pull the
+   * current state without polling.
+   */
+  onChanged: (cb: () => void) => () => void
 }
 
 export type ProjectCreateInput = {

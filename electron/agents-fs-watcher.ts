@@ -43,6 +43,7 @@ const PROJECTS_ROOT = join(homedir(), '.superhive', 'projects')
 const COORDINATOR_SUBPATH = 'agent'
 
 const IPC_AGENTS_CHANGED = 'agents:changed'
+const IPC_PROJECTS_CHANGED = 'projects:changed'
 
 class AgentsFsWatcher {
   private watchers: FSWatcher[] = []
@@ -209,11 +210,26 @@ class AgentsFsWatcher {
     }
   }
 
+  private broadcastProjectsChanged(): void {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send(IPC_PROJECTS_CHANGED)
+      }
+    }
+  }
+
   /** Push `agents:changed` to every renderer. Use after boot reconcile so the
    *  freshly-loaded renderer pulls the up-to-date list without waiting for the
    *  next fs event or the 5 s poll tick. */
   notifyChanged(): void {
     this.broadcastChanged()
+  }
+
+  /** Push `projects:changed` to every renderer. Call after a project
+   *  mutation that updates db.projects.json, so the sidebar refreshes
+   *  instantly instead of waiting for the 5 s polling fallback. */
+  notifyProjectsChanged(): void {
+    this.broadcastProjectsChanged()
   }
 }
 

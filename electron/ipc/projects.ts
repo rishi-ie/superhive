@@ -2,6 +2,7 @@ import { ipcMain } from 'electron';
 import { mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository';
+import { agentsFsWatcher } from '../agents-fs-watcher';
 import { IPC } from './index';
 import { revealProjectInFinder } from './reveal-project';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
@@ -30,28 +31,36 @@ export function registerProjectIpc(): void {
         localPath = resolved;
       }
 
-      return ProjectRepository.create({
+      const created = await ProjectRepository.create({
         name: data.name.trim(),
         description: data.description?.trim() || undefined,
         localPath,
       });
+      agentsFsWatcher.notifyProjectsChanged();
+      return created;
     }
   );
 
   ipcMain.handle(IPC.PROJECTS.UPDATE, async (_e, id: string, data: ProjectUpdateInput) => {
-    return ProjectRepository.update(id, data);
+    const updated = await ProjectRepository.update(id, data);
+    agentsFsWatcher.notifyProjectsChanged();
+    return updated;
   });
 
   ipcMain.handle(IPC.PROJECTS.DELETE, async (_e, id: string) => {
-    return ProjectRepository.delete(id);
+    const ok = await ProjectRepository.delete(id);
+    agentsFsWatcher.notifyProjectsChanged();
+    return ok;
   });
 
   ipcMain.handle(IPC.PROJECTS.ADD_AGENT, async (_e, projectId: string, agentId: string) => {
     await ProjectRepository.addAgent(projectId, agentId);
+    agentsFsWatcher.notifyProjectsChanged();
   });
 
   ipcMain.handle(IPC.PROJECTS.REMOVE_AGENT, async (_e, projectId: string, agentId: string) => {
     await ProjectRepository.removeAgent(projectId, agentId);
+    agentsFsWatcher.notifyProjectsChanged();
   });
 
   ipcMain.handle(IPC.PROJECTS.REVEAL, async (_e, projectId: string) => {
