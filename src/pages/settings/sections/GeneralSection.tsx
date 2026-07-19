@@ -45,7 +45,7 @@ function SectionHeader({
 }
 
 function SettingsCard({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-2xl bg-card-elevated py-3">{children}</div>;
+  return <div className="rounded-2xl bg-card-elevated py-1">{children}</div>;
 }
 
 function SettingsRow({
@@ -58,7 +58,7 @@ function SettingsRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[88px] items-center justify-between gap-stack px-6 py-[18px]">
+    <div className="flex min-h-[64px] items-center justify-between gap-stack px-6 py-[10px]">
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="text-sm font-medium text-foreground">{title}</span>
         {description && (
@@ -126,8 +126,8 @@ export function GeneralSection() {
   const [localOnly, setLocalOnly] = React.useState(false);
 
   return (
-    <div className="flex flex-col gap-14">
-      <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
         <SectionHeader title="General" />
         <SettingsCard>
           <SettingsRow
@@ -166,7 +166,7 @@ export function GeneralSection() {
         </SettingsCard>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <SectionHeader title="Startup" />
         <SettingsCard>
           <SettingsRow
@@ -205,7 +205,7 @@ export function GeneralSection() {
         </SettingsCard>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <SectionHeader title="Notifications" />
         <SettingsCard>
           <SettingsRow
@@ -243,7 +243,7 @@ export function GeneralSection() {
         </SettingsCard>
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
         <SectionHeader title="Privacy" />
         <SettingsCard>
           <SettingsRow
