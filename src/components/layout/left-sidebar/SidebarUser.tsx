@@ -12,7 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { goToSettings } from "@/flows/navigation/go-to-settings";
 
-export function SidebarUser() {
+interface SidebarUserProps {
+  showGear?: boolean;
+}
+
+export function SidebarUser({ showGear = true }: SidebarUserProps) {
   const navigate = useNavigate();
   return (
     <div className="flex items-center gap-1">
@@ -78,15 +82,17 @@ export function SidebarUser() {
       </DropdownMenuContent>
       </DropdownMenu>
 
-      <button
-        type="button"
-        onClick={() => goToSettings(navigate)}
-        className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent hover:cursor-default"
-        aria-label="Open settings"
-        title="Settings"
-      >
-        <Icon icon={GearSixIcon} className="size-4" />
-      </button>
+      {showGear && (
+        <button
+          type="button"
+          onClick={() => goToSettings(navigate)}
+          aria-label="Open settings"
+          title="Settings"
+          className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent hover:cursor-default"
+        >
+          <Icon icon={GearSixIcon} className="size-4" />
+        </button>
+      )}
     </div>
   );
 }

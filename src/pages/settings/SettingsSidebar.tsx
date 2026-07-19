@@ -4,6 +4,7 @@ import { CaretLeftIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { SETTINGS_GROUPS } from "./sections/registry";
 import { goBackHome } from "@/flows/navigation/go-back-home";
+import { SidebarUser } from "@/components/layout/left-sidebar/SidebarUser";
 
 export function SettingsSidebar() {
   const navigate = useNavigate();
@@ -44,6 +45,9 @@ export function SettingsSidebar() {
           </div>
         ))}
       </nav>
+      <div className="mt-auto p-list-item">
+        <SidebarUser showGear={false} />
+      </div>
     </aside>
   );
 }
