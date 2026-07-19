@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { KeyboardIcon, HeadphonesIcon, SignOutIcon, CreditCardIcon, GearSixIcon, DotsThreeIcon } from "@phosphor-icons/react";
+import { KeyboardIcon, HeadphonesIcon, SignOutIcon, CreditCardIcon, GearSixIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,22 +15,33 @@ import { goToSettings } from "@/flows/navigation/go-to-settings";
 export function SidebarUser() {
   const navigate = useNavigate();
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+    <div className="flex items-center gap-1">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex flex-1 items-center gap-stack rounded-md py-1 px-1.5 hover:cursor-default"
+          >
+            <Avatar className="size-8">
+              <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
+                U
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex min-w-0 flex-col items-start text-left">
+              <span className="truncate text-sm font-medium text-foreground/70 hover:text-foreground">
+                User
+              </span>
+              <span className="truncate text-xs text-muted-foreground">
+                Free plan
+              </span>
+            </div>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          side="top"
+          className="border-border bg-modal font-sans text-sm text-modal-foreground p-[6px]"
         >
-          <Icon icon={GearSixIcon} className="size-4" />
-          <span className="flex-1 text-left">Settings</span>
-          <Icon icon={DotsThreeIcon} className="size-4 text-muted-foreground" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        side="top"
-        className="border-border bg-modal font-sans text-sm text-modal-foreground p-[6px]"
-      >
         <DropdownMenuLabel className="flex items-center gap-stack p-row rounded-button">
           <Avatar className="size-8">
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
@@ -65,6 +76,17 @@ export function SidebarUser() {
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
-    </DropdownMenu>
+      </DropdownMenu>
+
+      <button
+        type="button"
+        onClick={() => goToSettings(navigate)}
+        className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"
+        aria-label="Open settings"
+        title="Settings"
+      >
+        <Icon icon={GearSixIcon} className="size-3.5" />
+      </button>
+    </div>
   );
 }

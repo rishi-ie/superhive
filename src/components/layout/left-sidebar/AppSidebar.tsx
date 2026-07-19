@@ -16,7 +16,7 @@ interface AppSidebarProps {
 export function AppSidebar({ width = 330 }: AppSidebarProps) {
   return (
     <Sidebar
-      className="border-r border-sidebar-border bg-sidebar-bg"
+      className="border-r-[0.5px] border-sidebar-border bg-sidebar-bg"
       collapsible="none"
       style={{ "--sidebar-width": `${width}px` } as React.CSSProperties}
     >
