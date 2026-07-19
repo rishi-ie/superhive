@@ -9,7 +9,7 @@ export function SettingsSidebar() {
   const navigate = useNavigate();
 
   return (
-    <aside className="flex h-full w-68 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+    <aside className="flex h-full w-68 flex-shrink-0 flex-col border-r border-sidebar-border bg-sidebar-bg">
       <div className="flex flex-col gap-gap-tight px-row pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
