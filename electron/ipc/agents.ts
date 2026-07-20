@@ -21,6 +21,7 @@ import {
 import { revealInFinder } from './reveal-in-finder'
 import { getTopEnabledModel } from '../get-top-enabled-model'
 import { resolveContextExtensionPath } from '../install-context'
+import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -36,7 +37,6 @@ const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
 const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
 const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
 const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
-const SUPERHIVE_PI_ORCHESTRATION_URL = 'https://github.com/rishi-ie/superhive-pi-orchestration.git'
 
 interface CreateAgentInput {
 	name: string
@@ -147,14 +147,24 @@ export function registerAgentIpc(): void {
 				baseSettingsExtensions.push('./extensions/superhive-pi-context')
 
 				// Gap 1: wire superhive-pi-orchestration (coordinator-only).
-				// Symlinks from a git clone of rishi-ie/superhive-pi-orchestration.
+				// Resolved from local bundle — same pattern as superhive-pi-context.
+				// See electron/install-orchestration.ts for the walk-up resolver.
+				let orchestrationSourcePath: string
+				try {
+					orchestrationSourcePath = resolveOrchestrationExtensionPath(
+						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
+					)
+				} catch (err) {
+					log.error(`[agents:create] coordinator orchestration extension missing: ${err instanceof Error ? err.message : String(err)}`)
+					throw err
+				}
 				const orchestrationSource = ensureExtension(SUPERHIVE_PI_ORCHESTRATION_NAME, {
-					kind: 'git',
-					url: SUPERHIVE_PI_ORCHESTRATION_URL,
+					kind: 'local',
+					path: orchestrationSourcePath,
 				})
 				const orchestrationLink = join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME)
 				symlinkSync(orchestrationSource, orchestrationLink, 'dir')
-				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_ORCHESTRATION_NAME} from canonical clone`)
+				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_ORCHESTRATION_NAME} from local bundle`)
 
 				baseManifestExtensions.push('./extensions/superhive-pi-orchestration')
 				baseSettingsExtensions.push('./extensions/superhive-pi-orchestration')

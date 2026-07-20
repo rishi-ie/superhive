@@ -7,11 +7,14 @@ files:
   - dist
   - dist-electron
   - superhive-pi-context/**
+  - superhive-pi-orchestration/**
 asar: true
 afterPack: build/after-pack.cjs
 extraResources:
   - from: superhive-pi-context
     to: extensions/superhive-pi-context
+  - from: superhive-pi-orchestration
+    to: extensions/superhive-pi-orchestration
 mac:
   target:
     - dmg
