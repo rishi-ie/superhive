@@ -10,26 +10,39 @@ import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
 import { useAllAgentStatuses } from "@/flows/agents/runtime";
 import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
-import type { Agent } from "@/storage/types";
+import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
+import {
+  ProjectOverviewSection,
+  type ProjectOverviewSectionData,
+} from "./sections/ProjectOverviewSection";
 
 interface ProjectSettingsPanelProps {
   projectId: string;
 }
 
 interface TeamState {
+  project: Project | null;
   coordinator: Agent | null;
   members: Agent[];
 }
 
 export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
-  const [team, setTeam] = useState<TeamState>({ coordinator: null, members: [] });
+  const [team, setTeam] = useState<TeamState>({
+    project: null,
+    coordinator: null,
+    members: [],
+  });
   const [assignOpen, setAssignOpen] = useState(false);
 
   useEffect(() => {
     loadProjectTeam(projectId).then((t) =>
-      setTeam({ coordinator: t.coordinator, members: t.members }),
+      setTeam({
+        project: t.project,
+        coordinator: t.coordinator,
+        members: t.members,
+      }),
     );
   }, [projectId]);
 
@@ -48,10 +61,20 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
       return live ? { ...a, status: live.status } : a
     }
     return {
+      project: team.project,
       coordinator: apply(team.coordinator),
       members: team.members.map((m) => apply(m) ?? m),
     }
   }, [team, liveStates])
+
+  const overviewData = useMemo<ProjectOverviewSectionData>(
+    () => ({
+      project: mergedTeam.project,
+      coordinator: mergedTeam.coordinator,
+      members: mergedTeam.members,
+    }),
+    [mergedTeam],
+  )
 
   return (
     <div className="flex h-full flex-col px-button-x">
@@ -73,21 +96,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <div className="flex flex-col gap-4 py-button-y">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold text-foreground">
-                  Project Overview
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  ID: {projectId}
-                </span>
-              </div>
-              <div className="flex flex-col gap-gap-tight">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Coming soon
-                </span>
-              </div>
-            </div>
+            <ProjectOverviewSection data={overviewData} />
           </ScrollArea>
         </TabsContent>
 
@@ -105,7 +114,11 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                 });
                 if (r.ok) {
                   const t = await loadProjectTeam(projectId);
-                  setTeam({ coordinator: t.coordinator, members: t.members });
+                  setTeam({
+                    project: t.project,
+                    coordinator: t.coordinator,
+                    members: t.members,
+                  });
                 }
               }}
             />
@@ -114,8 +127,15 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="inbox" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <div className="flex h-full items-center justify-center">
-              <span className="text-xs text-muted-foreground">Coming soon</span>
+            <div className="flex h-full flex-col items-center justify-center gap-gap-loose text-center">
+              <Icon icon={TrayIcon} className="size-8 text-muted-foreground/30" />
+              <p className="text-xs text-muted-foreground">
+                No pending requests from{" "}
+                <span className="text-foreground/80">
+                  {mergedTeam.project?.name ?? "this project"}
+                </span>
+                .
+              </p>
             </div>
           </ScrollArea>
         </TabsContent>
@@ -125,7 +145,11 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
         onOpenChange={setAssignOpen}
         onAssigned={() =>
           loadProjectTeam(projectId).then((t) =>
-            setTeam({ coordinator: t.coordinator, members: t.members }),
+            setTeam({
+              project: t.project,
+              coordinator: t.coordinator,
+              members: t.members,
+            }),
           )
         }
         loadCandidates={async () => {

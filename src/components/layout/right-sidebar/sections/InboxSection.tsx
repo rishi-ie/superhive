@@ -4,7 +4,7 @@ import type { SettingsSectionProps } from "./registry";
 
 export function InboxSection({ settings }: SettingsSectionProps) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-gap-loose p-card text-center">
+    <div className="flex h-full flex-col items-center justify-center gap-gap-loose text-center">
       <Icon
         icon={TrayIcon}
         className="size-8 text-muted-foreground/30"

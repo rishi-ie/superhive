@@ -18,7 +18,7 @@ export function ProjectMembersList(props: ProjectMembersListProps) {
 	const [pendingRemove, setPendingRemove] = useState<Agent | null>(null);
 
 	return (
-		<div className="flex flex-col gap-stack p-card">
+		<div className="flex flex-col gap-stack">
 			<div className="flex items-center justify-between">
 				<span className="text-sm font-semibold">Team</span>
 				<Button size="sm" variant="outline" onClick={props.onAssignClick}>
