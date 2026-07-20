@@ -65,6 +65,9 @@ export async function prepareProject(
     name: `${name} (Coordinator)`,
     folderName: 'agent',
     parentDir: localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
+    // Gap 1: thread the freshly-created project id so the coordinator's
+    // truth settings file gets the `project` block seeded with the right id.
+    projectId: project.id,
   }
 
   const coordinator = await prepareProjectAgent(coordinatorInput)

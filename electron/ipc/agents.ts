@@ -35,6 +35,8 @@ const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.g
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
 const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
 const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
+const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
+const SUPERHIVE_PI_ORCHESTRATION_URL = 'https://github.com/rishi-ie/superhive-pi-orchestration.git'
 
 interface CreateAgentInput {
 	name: string
@@ -43,6 +45,12 @@ interface CreateAgentInput {
 	role?: string
 	description?: string
 	agentKind?: string
+	/**
+	 * Gap 1: when creating a project-coordinator, pass the parent project's id
+	 * so the seed SettingsFile can carry the `project` block the orchestration
+	 * extension reads on session_start. Ignored for non-coordinator agents.
+	 */
+	projectId?: string
 }
 
 export function registerAgentIpc(): void {
@@ -138,6 +146,19 @@ export function registerAgentIpc(): void {
 				baseManifestExtensions.push('./extensions/superhive-pi-context')
 				baseSettingsExtensions.push('./extensions/superhive-pi-context')
 
+				// Gap 1: wire superhive-pi-orchestration (coordinator-only).
+				// Symlinks from a git clone of rishi-ie/superhive-pi-orchestration.
+				const orchestrationSource = ensureExtension(SUPERHIVE_PI_ORCHESTRATION_NAME, {
+					kind: 'git',
+					url: SUPERHIVE_PI_ORCHESTRATION_URL,
+				})
+				const orchestrationLink = join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME)
+				symlinkSync(orchestrationSource, orchestrationLink, 'dir')
+				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_ORCHESTRATION_NAME} from canonical clone`)
+
+				baseManifestExtensions.push('./extensions/superhive-pi-orchestration')
+				baseSettingsExtensions.push('./extensions/superhive-pi-orchestration')
+
 				await mkdir(join(agentDir, 'context', 'nodes'), { recursive: true })
 				await mkdir(join(agentDir, 'context', '.lock'), { recursive: true })
 				await writeFile(
@@ -219,6 +240,18 @@ export function registerAgentIpc(): void {
 					defaultModel: topModel.name,
 					enabledModels: [topModel.id],
 				}),
+				// Gap 1: seed the project block for coordinators so the
+				// orchestration extension can build the CEO prompt and read
+				// member status on session_start. Members array is empty at
+				// creation; populated as specialists are added to the project.
+				...(isCoordinator && data.projectId && {
+					project: {
+						id: data.projectId,
+						name: data.name.trim(),
+						description: data.description?.trim() ?? '',
+						members: [],
+					},
+				}),
 			}
 			await writeFile(settingsPath, JSON.stringify(seed, null, '\t') + '\n', 'utf8')
 
@@ -236,7 +269,14 @@ export function registerAgentIpc(): void {
 	ipcMain.handle(
 		IPC.AGENTS.UPDATE_STATUS,
 		async (_e, id: string, status: AgentStatus, lastError?: string) => {
-			return AgentRepository.update(id, { status, lastError })
+			const updated = await AgentRepository.update(id, { status, lastError })
+			// Gap 1: mirror status to coordinator's truth file so the roster
+			// stays fresh on external status flips (e.g. error from telemetry).
+			if (updated) {
+				const { patchCoordinatorForMemberStatus } = await import('../project-status-mirror')
+				await patchCoordinatorForMemberStatus(id, status)
+			}
+			return updated
 		},
 	)
 

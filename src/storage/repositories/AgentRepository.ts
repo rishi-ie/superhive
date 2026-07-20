@@ -43,6 +43,19 @@ export const AgentRepository = {
     return db.data
   },
 
+  /**
+   * Synchronous read of all agents. Returns the cached in-memory snapshot
+   * if the repo has been initialized; returns an empty array if not.
+   *
+   * Used at Pi spawn time (a sync code path) to resolve `agentKind` for the
+   * `AGENT_KIND` env var without making `spawn()` async. The repo's in-memory
+   * `_db` is shared by all consumers and only mutated through the async
+   * methods, so this read is race-free in single-threaded JS.
+   */
+  getAllSync(): Agent[] {
+    return _db?.data ?? []
+  },
+
   async getByProject(projectId: string): Promise<Agent[]> {
     const db = await getDb()
     return db.data.filter((a: Agent) => a.projectIds.includes(projectId))

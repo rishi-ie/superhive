@@ -14,6 +14,11 @@ export interface AgentCreateInput {
 	role?: string
 	description?: string
 	agentKind?: string
+	/**
+	 * Gap 1: when creating a project-coordinator, pass the parent project's
+	 * id so the seed truth settings file carries the `project` block.
+	 */
+	projectId?: string
 }
 
 export interface AgentsAPI {

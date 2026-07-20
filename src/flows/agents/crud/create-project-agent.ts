@@ -14,6 +14,12 @@ export interface CreateProjectAgentInput {
   name: string;
   folderName: string;
   parentDir: string;
+  /**
+   * Gap 1: the parent project's id. Seeded into the coordinator's truth
+   * settings `project` block so the orchestration extension can read it
+   * on session_start.
+   */
+  projectId?: string;
 }
 
 export interface CreateProjectAgentResult {
@@ -45,6 +51,7 @@ export async function createProjectAgent(
       folderName,
       parentDir,
       agentKind: 'project-coordinator',
+      projectId: input.projectId,
     });
     return { ok: true, agent };
   } catch (err) {

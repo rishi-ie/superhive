@@ -7,6 +7,7 @@ import { SettingsRepository } from '../../src/storage/repositories'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR } from '../install-general-kai'
 import { settingsFilePathFor, type SettingsFile, parseCounter } from '../agent-settings-defaults'
+import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 
 /**
  * Bootstrap env-var API keys from process.env into the `providers` map.
@@ -127,12 +128,17 @@ export function registerRuntimeIpc(): void {
 		await autoSeedProviders(agentId, agent.localPath)
 		await runtime.start(agentId, agent.localPath, GENERAL_KAI_DIR)
 		await AgentRepository.update(agentId, { status: 'active', lastError: undefined })
+		// Gap 1: mirror status to the coordinator's truth file so its roster
+		// reflects this member as 'active' on the next session_start.
+		await patchCoordinatorForMemberStatus(agentId, 'active')
 		return { ok: true }
 	})
 
 	ipcMain.handle(IPC.AGENTS.STOP, async (_e, agentId: string) => {
 		runtime.stop(agentId)
 		await AgentRepository.update(agentId, { status: 'idle' })
+		// Gap 1: mirror status to coordinator's truth file.
+		await patchCoordinatorForMemberStatus(agentId, 'idle')
 		return { ok: true }
 	})
 
@@ -140,6 +146,8 @@ export function registerRuntimeIpc(): void {
 		await autoSeedProviders(agentId, (await AgentRepository.getById(agentId))?.localPath ?? '')
 		runtime.restart(agentId)
 		await AgentRepository.update(agentId, { status: 'active', lastError: undefined })
+		// Gap 1: mirror status to coordinator's truth file.
+		await patchCoordinatorForMemberStatus(agentId, 'active')
 		return { ok: true }
 	})
 

@@ -15,6 +15,11 @@ export interface PrepareProjectAgentInput {
   name: string
   folderName: string
   parentDir: string
+  /**
+   * Gap 1: the parent project's id. Forwarded to `agents.create` so the
+   * coordinator's truth settings file gets the `project` block seeded.
+   */
+  projectId?: string
 }
 
 export type PrepareProjectAgentFailure =
@@ -37,6 +42,7 @@ export async function prepareProjectAgent(
       folderName: input.folderName.trim(),
       parentDir: input.parentDir.trim(),
       agentKind: 'project-coordinator',
+      projectId: input.projectId,
     })
   } catch (err) {
     return {

@@ -88,6 +88,27 @@ class GeneralKaiRuntime {
     return Array.from(this.entries.keys())
   }
 
+  /**
+   * Synchronously read the agentKind from the database for one agent.
+   * Used at spawn time to populate the `AGENT_KIND` env var so coordinator-only
+   * Pi extensions (e.g. superhive-pi-orchestration) can gate on it.
+   *
+   * Returns 'standard' if the agent cannot be found or has no agentKind set,
+   * preserving the pre-Gap-1 behavior (no orchestration tools registered).
+   *
+   * Implemented via the repository's sync listing to avoid making spawn()
+   * async. The runtime is single-threaded JS so the read is race-free.
+   */
+  private resolveAgentKindSync(agentId: string): string {
+    try {
+      const all = AgentRepository.getAllSync()
+      const agent = all.find((a) => a.id === agentId)
+      return agent?.agentKind ?? 'standard'
+    } catch {
+      return 'standard'
+    }
+  }
+
   isRunning(agentId: string): boolean {
     const entry = this.entries.get(agentId)
     return !!entry?.process && entry.status !== 'idle'
@@ -563,6 +584,11 @@ class GeneralKaiRuntime {
           PI_DIR: piDir,
           AGENT_DIR: agentDir,
           PI_AGENT_DIR: agentDir,
+          // Gap 1: pass the agent kind so coordinator-only extensions can
+          // gate on `process.env.AGENT_KIND === 'project-coordinator'`.
+          // Standard agents get AGENT_KIND='standard' and the orchestration
+          // extension no-ops for them.
+          AGENT_KIND: this.resolveAgentKindSync(entry.agentId),
           // Diagnostic knob: when set, the telemetry extension writes
           // every handler route + journal-path decision to stderr.
           SUPERHIVE_TELEMETRY_DEBUG:
