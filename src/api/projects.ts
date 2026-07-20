@@ -25,4 +25,8 @@ export const projects = {
   reveal: (id: string): Promise<{ ok: boolean }> => window.api.projects.reveal(id),
 
   onChanged: (cb: () => void): (() => void) => window.api.projects.onChanged(cb),
+
+  onFolderMissing: (
+    cb: (removed: Array<{ id: string; name: string }>) => void,
+  ): (() => void) => window.api.projects.onFolderMissing(cb),
 };

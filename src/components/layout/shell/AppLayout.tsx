@@ -10,6 +10,7 @@ import { TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
+import { useProjectReconcileToast } from "@/flows/projects/runtime";
 
 const MIN_WIDTH = 240;
 const MAX_WIDTH = 480;
@@ -27,6 +28,10 @@ export function AppLayout() {
 }
 
 function AppLayoutShell() {
+  // Mounts a single subscription for `projects:folder-missing`. Shows a
+  // toast per project the fs-watcher hard-deleted because its folder
+  // vanished (Finder delete, move, unmounted drive).
+  useProjectReconcileToast();
   const { open: leftSidebarOpen } = useSidebar();
   const location = useLocation();
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);

@@ -63,6 +63,12 @@ contextBridge.exposeInMainWorld('api', {
     removeAgent: (projectId, agentId) => ipcRenderer.invoke('projects:removeAgent', projectId, agentId),
     reveal: (id) => ipcRenderer.invoke('projects:reveal', id),
     onChanged: (cb) => subscribe('projects:changed', cb),
+    // `projects:folder-missing` carries the list of project rows that were
+    // hard-deleted because their folder vanished (Finder delete, move,
+    // unmounted drive). The toast hook consumes this to surface one toast
+    // per deletion. Separate channel from `projects:changed` so list
+    // re-fetch logic doesn't have to inspect payloads.
+    onFolderMissing: (cb) => subscribe('projects:folder-missing', cb),
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:get-version'),

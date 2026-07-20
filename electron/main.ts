@@ -8,6 +8,7 @@ import { seedWorkspace } from '../src/storage/seed';
 import { registerIpc } from './ipc';
 import { runtime } from './general-kai-runtime';
 import { reconcileAgents } from './reconcile-agents';
+import { reconcileProjects } from './reconcile-projects';
 import { reconcileRuntime } from './reconcile-runtime';
 import { migrateLegacyChatFolders } from './agent-chat-store';
 import { isGeneralKaiReady } from './install-general-kai';
@@ -109,6 +110,11 @@ app.whenReady().then(async () => {
   await seedWorkspace();
   runtime.pruneStaleEntries();
   await reconcileAgents();
+  // Project reconcile runs after agent reconcile so coordinator agent
+  // rows are already canonical (manifest stamped, localPath set). Any
+  // folder adopted as a project here will be correctly linked to its
+  // coordinator agent in the same boot cycle.
+  const projectReport = await reconcileProjects();
   // After reconcile adopts any orphans and evicts missing folders, the DB
   // agent rows carry the canonical localPath. Use that to relocate any
   // legacy chat logs from `~/.superhive/agents/<uuid>/` into the agent's
@@ -124,6 +130,17 @@ app.whenReady().then(async () => {
   // (now-canonical) list.
   agentsFsWatcher.start();
   agentsFsWatcher.notifyChanged();
+  // If the boot reconcile dropped projects whose folders were missing,
+  // the renderer needs to know before the user navigates to the projects
+  // page. Surface the deletions so the toast can render, and push a
+  // generic projects:changed so the sidebar/table re-fetch any adopted
+  // projects too.
+  if (projectReport.removed.length > 0) {
+    agentsFsWatcher.notifyProjectsRemoved(projectReport.removed);
+  }
+  if (projectReport.adopted.length > 0) {
+    agentsFsWatcher.notifyProjectsChanged();
+  }
 
   createWindow();
   if (mainWindow) setupAutoUpdater(mainWindow);

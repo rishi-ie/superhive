@@ -20,6 +20,7 @@ import { EmptyProjectsState } from './EmptyProjectsState';
 import { DeleteProjectDialog } from './DeleteProjectDialog';
 import { listProjects } from '@/flows/projects/crud/list-projects';
 import { deleteProject } from '@/flows/projects/crud/delete-project';
+import { useProjectsListVersion } from '@/flows/projects/runtime';
 import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
 import { goToProject } from '@/flows/navigation';
 import type { Project } from '@/types/electron';
@@ -39,6 +40,12 @@ export function ProjectsListView() {
     return listProjects().catch(() => [] as Project[]);
   }, []);
 
+  // Subscribe to db.projects.json mutations: any create/update/delete from
+  // another window or from the fs-watcher's project reconcile will bump
+  // this version and re-fetch the list. Previously this page only loaded
+  // on mount, leaving the table stale after any external mutation.
+  const projectsVersion = useProjectsListVersion();
+
   React.useEffect(() => {
     let cancelled = false;
     reload()
@@ -46,7 +53,7 @@ export function ProjectsListView() {
       .catch(() => { if (!cancelled) setProjects([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [reload]);
+  }, [reload, projectsVersion]);
 
   React.useEffect(() => {
     if (dialog.kind !== 'closed') {

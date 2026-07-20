@@ -33,6 +33,7 @@ import { homedir } from 'node:os'
 import { BrowserWindow } from 'electron'
 import log from 'electron-log/main'
 import { reconcileAgentsOnce, evictMissingAgent } from './reconcile-agents'
+import { reconcileProjects } from './reconcile-projects'
 
 const DEBOUNCE_MS = 250
 const SOFT_DELETE_MS = 2000
@@ -181,6 +182,17 @@ class AgentsFsWatcher {
         )
       }
 
+      // Project reconcile: filesystem is source of truth for projects.
+      // Runs AFTER agent reconcile so coordinator agent rows are canonical
+      // for the project→coordinator link step.
+      const projectReport = await reconcileProjects()
+      if (projectReport.removed.length > 0) {
+        this.broadcastProjectsRemoved(projectReport.removed)
+      }
+      if (projectReport.adopted.length > 0 || projectReport.removed.length > 0) {
+        this.broadcastProjectsChanged()
+      }
+
       this.broadcastChanged()
     } catch (err) {
       log.warn('[fs-watcher] reconcile failed:', err)
@@ -230,6 +242,24 @@ class AgentsFsWatcher {
    *  instantly instead of waiting for the 5 s polling fallback. */
   notifyProjectsChanged(): void {
     this.broadcastProjectsChanged()
+  }
+
+  /** Push a `projects:folder-missing` event to every renderer carrying
+   *  the list of projects that were hard-deleted because their folder
+   *  vanished. The toast hook subscribes to this and renders one toast
+   *  per deletion. Separate channel from `projects:changed` so the
+   *  table/sidebar re-fetch logic doesn't have to filter payloads. */
+  notifyProjectsRemoved(removed: Array<{ id: string; name: string }>): void {
+    if (removed.length === 0) return
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send('projects:folder-missing', removed)
+      }
+    }
+  }
+
+  private broadcastProjectsRemoved(removed: Array<{ id: string; name: string }>): void {
+    this.notifyProjectsRemoved(removed)
   }
 }
 

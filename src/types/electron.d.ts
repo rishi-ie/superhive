@@ -85,6 +85,17 @@ export interface ProjectsAPI {
    * current state without polling.
    */
   onChanged: (cb: () => void) => () => void
+  /**
+   * Subscribe to `projects:folder-missing` IPC events. Carries the list of
+   * project rows that were hard-deleted because their folder vanished from
+   * disk (Finder delete, move, unmounted drive). The toast hook consumes
+   * this to surface one toast per deletion. Separate channel from
+   * `projects:changed` so list re-fetch logic doesn't have to inspect
+   * payloads.
+   */
+  onFolderMissing: (
+    cb: (removed: Array<{ id: string; name: string }>) => void,
+  ) => () => void
 }
 
 export type ProjectCreateInput = {
