@@ -20,6 +20,7 @@ import {
 } from '../agent-settings-defaults'
 import { revealInFinder } from './reveal-in-finder'
 import { getTopEnabledModel } from '../get-top-enabled-model'
+import { resolveContextExtensionPath } from '../install-context'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -33,6 +34,7 @@ const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
 const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
+const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
 
 interface CreateAgentInput {
 	name: string
@@ -85,12 +87,12 @@ export function registerAgentIpc(): void {
 
 			// Ensure the extension is cloned to its canonical location, then symlink
 			// it into the agent's extensions folder (zero copy, always fresh).
-			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, SUPERHIVE_PI_TRUTH_URL)
+			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL })
 			const extLink = join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME)
 			symlinkSync(extensionSource, extLink, 'dir')
 			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TRUTH_NAME} from canonical clone`)
 
-			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, SUPERHIVE_PI_TELEMETRY_URL)
+			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL })
 			const telemetryLink = join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME)
 			symlinkSync(telemetrySource, telemetryLink, 'dir')
 			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TELEMETRY_NAME} from canonical clone`)
@@ -104,6 +106,73 @@ export function registerAgentIpc(): void {
 				agentKind: data.agentKind as AgentKind | undefined,
 			})
 
+			// Coordinators only: wire superhive-pi-context (local-bundled) and seed
+			// the context-graph directory. Standard agents are unaffected.
+			const isCoordinator = agent.agentKind === 'project-coordinator'
+			const baseManifestExtensions: string[] = [
+				'./extensions/superhive-pi-truth',
+				'./extensions/superhive-pi-telemetry',
+			]
+			const baseSettingsExtensions: string[] = [
+				'./extensions/superhive-pi-truth',
+				'./extensions/superhive-pi-telemetry',
+			]
+			if (isCoordinator) {
+				let contextSourcePath: string
+				try {
+					contextSourcePath = resolveContextExtensionPath(
+						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
+					)
+				} catch (err) {
+					log.error(`[agents:create] coordinator context extension missing: ${err instanceof Error ? err.message : String(err)}`)
+					throw err
+				}
+				const contextSource = ensureExtension(SUPERHIVE_PI_CONTEXT_NAME, {
+					kind: 'local',
+					path: contextSourcePath,
+				})
+				const contextLink = join(agentDir, 'extensions', SUPERHIVE_PI_CONTEXT_NAME)
+				symlinkSync(contextSource, contextLink, 'dir')
+				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_CONTEXT_NAME} from local bundle`)
+
+				baseManifestExtensions.push('./extensions/superhive-pi-context')
+				baseSettingsExtensions.push('./extensions/superhive-pi-context')
+
+				await mkdir(join(agentDir, 'context', 'nodes'), { recursive: true })
+				await mkdir(join(agentDir, 'context', '.lock'), { recursive: true })
+				await writeFile(
+					join(agentDir, 'context', 'meta.json'),
+					JSON.stringify(
+						{
+							schemaVersion: 1,
+							agentId: agent.id,
+							projectId: agent.projectIds[0] ?? null,
+							nextId: 1,
+							updatedAt: new Date().toISOString(),
+						},
+						null,
+						2,
+					) + '\n',
+					'utf8',
+				)
+				await writeFile(
+					join(agentDir, 'context', 'index.json'),
+					JSON.stringify({ schemaVersion: 1, entries: [], hash: '' }, null, 2) + '\n',
+					'utf8',
+				)
+				await writeFile(join(agentDir, 'context', 'log.jsonl'), '', 'utf8')
+
+				await mkdir(join(agentDir, 'skills', 'context-compaction'), { recursive: true })
+				try {
+					const skillSrc = join(contextSourcePath, 'skills', 'context-compaction', 'SKILL.md')
+					if (existsSync(skillSrc)) {
+						await cp(skillSrc, join(agentDir, 'skills', 'context-compaction', 'SKILL.md'))
+					}
+				} catch (err) {
+					log.warn(`[agents:create] could not copy coordinator skill: ${err instanceof Error ? err.message : String(err)}`)
+				}
+			}
+
 			// Minimal manifest — just enough for agent.sh --manifest to load Pi and the extension.
 			// environment.MINIMAX_API_KEY is included so the agent has API access at first launch.
 			const manifestContent = JSON.stringify(
@@ -111,10 +180,7 @@ export function registerAgentIpc(): void {
 					superhiveId: agent.id,
 					version: 1,
 					workspace: './workspace',
-					extensions: [
-						'./extensions/superhive-pi-truth',
-						'./extensions/superhive-pi-telemetry',
-					],
+					extensions: baseManifestExtensions,
 					environment: {
 						MINIMAX_API_KEY: config.minimaxApiKey,
 					},
@@ -146,10 +212,7 @@ export function registerAgentIpc(): void {
 				description: data.description?.trim() ?? '',
 				managedBy: 'superhive-pi-truth@1#0',
 				lastModified: new Date().toISOString(),
-				extensions: [
-					'./extensions/superhive-pi-truth',
-					'./extensions/superhive-pi-telemetry',
-				],
+				extensions: baseSettingsExtensions,
 				...(topModel && {
 					model: { provider: topModel.provider, name: topModel.name },
 					defaultProvider: topModel.provider,

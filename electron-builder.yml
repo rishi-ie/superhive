@@ -6,8 +6,12 @@ directories:
 files:
   - dist
   - dist-electron
+  - superhive-pi-context/**
 asar: true
 afterPack: build/after-pack.cjs
+extraResources:
+  - from: superhive-pi-context
+    to: extensions/superhive-pi-context
 mac:
   target:
     - dmg

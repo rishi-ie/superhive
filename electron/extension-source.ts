@@ -10,7 +10,7 @@
  *   // → ~/.superhive/extensions/superhive-pi-truth  (cloned if missing)
  */
 
-import { existsSync, mkdirSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
@@ -18,38 +18,61 @@ import log from 'electron-log/main'
 
 export const EXTENSIONS_DIR = join(homedir(), '.superhive', 'extensions')
 
+export type ExtensionSource =
+	| { kind: 'git'; url: string }
+	| { kind: 'local'; path: string }
+
 /**
- * Ensure an extension is cloned to its canonical location.
+ * Ensure an extension is present at its canonical location.
  * Idempotent: if the canonical dir exists and contains the sentinel file,
- * the existing clone is reused. Otherwise, `git clone` from `repoUrl`.
+ * the existing clone is reused. Otherwise populated from `source`:
+ *   - `{ kind: 'git', url }` → `git clone <url> <dir>`
+ *   - `{ kind: 'local', path }` → copy directory contents from `path`
  *
  * @returns absolute path to the canonical extension directory.
  */
-export function ensureExtension(name: string, repoUrl: string, sentinel = 'index.ts'): string {
+export function ensureExtension(name: string, source: ExtensionSource, sentinel = 'index.ts'): string {
 	const dir = join(EXTENSIONS_DIR, name)
 	if (existsSync(join(dir, sentinel))) {
 		return dir
 	}
 
-	log.info(`[extension-source] ${name} missing, cloning from ${repoUrl}...`)
 	mkdirSync(EXTENSIONS_DIR, { recursive: true })
 
-	try {
-		execFileSync('git', ['clone', repoUrl, dir], { stdio: 'pipe' })
-	} catch (err) {
-		const msg = err instanceof Error ? err.message : String(err)
-		log.error(`[extension-source] git clone failed for ${name}: ${msg}`)
-		throw new Error(
-			`Failed to clone extension "${name}" from ${repoUrl}.\n` +
-			`Check your network connection and try again.`,
-		)
+	if (source.kind === 'git') {
+		log.info(`[extension-source] ${name} missing, cloning from ${source.url}...`)
+		try {
+			execFileSync('git', ['clone', source.url, dir], { stdio: 'pipe' })
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : String(err)
+			log.error(`[extension-source] git clone failed for ${name}: ${msg}`)
+			throw new Error(
+				`Failed to clone extension "${name}" from ${source.url}.\n` +
+				`Check your network connection and try again.`,
+			)
+		}
+	} else {
+		log.info(`[extension-source] ${name} missing, copying from ${source.path}...`)
+		if (!existsSync(join(source.path, sentinel))) {
+			log.error(`[extension-source] local source missing sentinel ${sentinel} at ${source.path}`)
+			throw new Error(
+				`Local extension "${name}" not found at ${source.path} (missing ${sentinel}).`,
+			)
+		}
+		try {
+			cpSync(source.path, dir, { recursive: true })
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : String(err)
+			log.error(`[extension-source] copy failed for ${name}: ${msg}`)
+			throw new Error(`Failed to copy extension "${name}" from ${source.path}.`)
+		}
 	}
 
 	if (!existsSync(join(dir, sentinel))) {
-		log.error(`[extension-source] clone succeeded but ${sentinel} is missing — repo may be empty or corrupted`)
+		log.error(`[extension-source] source consumed but ${sentinel} is missing — repo may be empty or corrupted`)
 		throw new Error(
-			`Extension "${name}" clone succeeded but ${sentinel} is missing.\n` +
-			`The extension repository may be empty or corrupted.`,
+			`Extension "${name}" source consumed but ${sentinel} is missing.\n` +
+			`The extension source may be empty or corrupted.`,
 		)
 	}
 
@@ -58,7 +81,7 @@ export function ensureExtension(name: string, repoUrl: string, sentinel = 'index
 }
 
 /**
- * Return the canonical path for an extension. Does NOT clone — assumes
+ * Return the canonical path for an extension. Does NOT populate — assumes
  * `ensureExtension()` was called first.
  */
 export function getExtensionPath(name: string): string {
