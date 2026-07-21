@@ -14,6 +14,8 @@ import { migrateLegacyChatFolders } from './agent-chat-store';
 import { isGeneralKaiReady } from './install-general-kai';
 import { agentsFsWatcher } from './agents-fs-watcher';
 import { attachMailboxWatches } from './ipc/mailbox';
+import { tasksFileWatcher } from './tasks-file-watcher';
+import { getTaskRunner } from './task-runner';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -134,6 +136,11 @@ app.whenReady().then(async () => {
   // Gap 2: wire the mailbox watcher's onCoordMail + onMemberMail hooks
   // to runtime.send() wake prompts, and start the watcher.
   attachMailboxWatches();
+  // Gap 3: start the tasks file watcher (ingests plan/complete
+  // drops from the coordinator) and the task runner (5s poll loop
+  // that dispatches ready tasks to their assigned workers).
+  tasksFileWatcher.start();
+  getTaskRunner().start();
   // If the boot reconcile dropped projects whose folders were missing,
   // the renderer needs to know before the user navigates to the projects
   // page. Surface the deletions so the toast can render, and push a
@@ -166,6 +173,8 @@ app.on('window-all-closed', () => {
 app.on('before-quit', async () => {
   log.info('Shutting down agent runtimes...');
   agentsFsWatcher.stop();
+  tasksFileWatcher.stop();
+  getTaskRunner().stop();
   await runtime.shutdownAll();
 });
 

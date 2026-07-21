@@ -157,7 +157,11 @@ export const TaskRepository = {
       patch.outcome = opts?.outcome
       patch.staleSince = undefined
     }
-    if (opts?.staleSince !== undefined) {
+    // ponytail: staleSince handling. Callers can:
+    //   - omit opts.staleSince       → leave the field as-is
+    //   - pass opts.staleSince=null  → clear the field (set to undefined)
+    //   - pass opts.staleSince=number→ set to that number
+    if (opts && 'staleSince' in opts) {
       patch.staleSince = opts.staleSince === null ? undefined : opts.staleSince
     }
     return this.update(taskId, patch)
