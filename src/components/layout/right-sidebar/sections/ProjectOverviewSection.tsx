@@ -1,6 +1,8 @@
-import type { Agent, Project } from "@/storage/types";
+import type { Agent, Project, Task } from "@/storage/types";
 import { AgentStatusBadge } from "@/components/common";
 import { Accordion } from "../primitives";
+import { useTasksByProject } from "@/flows/tasks/runtime/use-tasks-by-project";
+import { cn } from "@/lib/utils";
 
 export interface ProjectOverviewSectionData {
   project: Project | null;
@@ -10,6 +12,23 @@ export interface ProjectOverviewSectionData {
 
 interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData;
+}
+
+const STATUS_COLOR: Record<Task["status"], string> = {
+  running: "text-foreground",
+  todo: "text-muted-foreground",
+  blocked: "text-warning",
+  completed: "text-muted-foreground/60",
+  cancelled: "text-muted-foreground/40 line-through",
+};
+
+function TaskRow({ task }: { task: Task }) {
+  return (
+    <div className={cn("flex items-center gap-2 py-1", STATUS_COLOR[task.status])}>
+      <span className="text-sm">{task.title}</span>
+      <span className="text-[10px] uppercase tracking-wide">{task.status}</span>
+    </div>
+  );
 }
 
 function formatDate(ms: number | undefined): string {
@@ -23,6 +42,25 @@ function formatDate(ms: number | undefined): string {
   } catch {
     return "—";
   }
+}
+
+function ActiveTasksAccordion({ projectId }: { projectId: string }) {
+  const tasks = useTasksByProject(projectId);
+  const activeCount = tasks.filter(
+    (t) => t.status !== "completed" && t.status !== "cancelled",
+  ).length;
+  return (
+    <Accordion
+      title="Active tasks"
+      badge={activeCount}
+      defaultOpen
+      emptyText="No tasks yet — ask the coordinator to plan"
+    >
+      {tasks.map((t) => (
+        <TaskRow key={t.id} task={t} />
+      ))}
+    </Accordion>
+  );
 }
 
 export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
@@ -90,12 +128,7 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         </span>
       </div>
 
-      <Accordion
-        title="Active tasks"
-        badge={0}
-        defaultOpen={false}
-        emptyText="No tasks yet — appears once work is planned"
-      />
+      <ActiveTasksAccordion projectId={project.id} />
 
       <Accordion
         title="Recent activity"
