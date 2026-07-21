@@ -1,15 +1,6 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
-
-export interface AddModelInput {
-  provider: string;
-  name: string;
-}
-
-export interface AddModelResult {
-  ok: boolean;
-  error?: string;
-}
+import type { AddModelInput, AddModelResult } from '@/models/settings';
 
 export async function addModel(input: AddModelInput): Promise<AddModelResult> {
   const provider = input.provider?.trim();

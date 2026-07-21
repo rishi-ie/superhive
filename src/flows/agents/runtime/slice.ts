@@ -24,46 +24,15 @@
  */
 
 import { agents } from '@/api/agents'
-import type {
-  Agent,
-  AdapterEvent,
-  AgentStatus,
-  InitStep,
-  UsageSnapshot,
-  ContextSnapshot,
-  ModelInfo,
-} from '@/types/electron'
-import type { RuntimeMessage, CompactionStatus, RetryStatus } from '@/models/runtime'
+import type { AdapterEvent } from '@/types/electron'
 import { toast } from 'sonner'
+import type { RuntimeSlice } from '@/models/agent'
 import {
   clearAgentQueue,
   enqueue,
   setSliceAccessor,
 } from './queue'
 import { translateEventToOps } from './event-translator'
-
-type NotifyFn = () => void
-
-export interface RuntimeSlice {
-  agent: Agent | null
-  status: AgentStatus
-  messages: RuntimeMessage[]
-  lastError?: string
-  bootStep?: InitStep
-  usage?: UsageSnapshot
-  contextUsage?: ContextSnapshot
-  availableModels?: ModelInfo[]
-  activeModelContextWindow?: number
-  activeModelName?: string
-  activeModelProvider?: string
-  compaction?: CompactionStatus
-  retry?: RetryStatus
-  inFlightToolCount: number
-  loading: boolean
-  initialized: boolean
-  unsubs: Array<() => void>
-  listeners: Set<NotifyFn>
-}
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 

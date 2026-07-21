@@ -10,4 +10,5 @@
 export { useAgentRuntime } from './use-agent-runtime'
 export { disposeRuntimeSliceNow } from './slice'
 export { useAgentsListVersion } from './use-agents-list-version'
-export { useAllAgentStatuses, type AgentLiveState } from './use-all-agent-statuses'
+export { useAllAgentStatuses } from './use-all-agent-statuses'
+export type { AgentLiveState } from '@/models/agent'

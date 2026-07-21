@@ -1,9 +1,5 @@
 import { settings } from '@/api/settings';
-
-export interface SetModelEnabledResult {
-  ok: boolean;
-  error?: string;
-}
+import type { SetModelEnabledResult } from '@/models/settings';
 
 export async function setModelEnabled(
   id: string,

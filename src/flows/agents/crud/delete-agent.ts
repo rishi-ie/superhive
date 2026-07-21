@@ -1,11 +1,7 @@
 import { toast } from 'sonner';
 import { agents } from '@/api/agents';
 import { disposeSlice } from '@/flows/agents/settings';
-
-export interface DeleteAgentResult {
-  ok: boolean;
-  error?: string;
-}
+import type { DeleteAgentResult } from '@/models/agent';
 
 export async function deleteAgent(id: string): Promise<DeleteAgentResult> {
   try {

@@ -15,25 +15,9 @@
 import { projects } from '@/api/projects'
 import { agents } from '@/api/agents'
 import { prepareProjectAgent } from '@/flows/agents/crud/prepare-project-agent'
-import type { Project } from '@/types/electron'
+import type { PrepareProjectInput, PrepareProjectResult, PrepareProjectFailure } from '@/models/project'
+import type { Project } from '@/storage/types'
 
-export interface PrepareProjectInput {
-  name: string
-  description?: string
-  localPath?: string
-}
-
-export type PrepareProjectFailure =
-  | { ok: false; reason: 'create-failed'; message: string }
-  | { ok: false; reason: 'coordinator-create-failed'; message: string }
-  | { ok: false; reason: 'coordinator-start-failed'; message: string }
-  | { ok: false; reason: 'coordinator-timeout'; detail: 'runtime'; message?: string }
-  | { ok: false; reason: 'coordinator-error'; message: string }
-  | { ok: false; reason: 'link-failed'; message: string }
-
-export type PrepareProjectResult =
-  | { ok: true; project: Project }
-  | PrepareProjectFailure
 
 export async function prepareProject(
   input: PrepareProjectInput,

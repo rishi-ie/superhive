@@ -1,20 +1,5 @@
 import { settings } from '@/api/settings';
-
-export interface SaveProviderBlockInput {
-  provider: string;
-  baseUrl?: string;
-  apiKey?: string;
-  enabled?: boolean;
-  preferredModel?: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-  region?: string;
-}
-
-export interface SaveProviderBlockResult {
-  ok: boolean;
-  error?: string;
-}
+import type { SaveProviderBlockInput, SaveProviderBlockResult } from '@/models/settings';
 
 /**
  * Persist a single API Keys block. The IPC handles master-toggle cleanup

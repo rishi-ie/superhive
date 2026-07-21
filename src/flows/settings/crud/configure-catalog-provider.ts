@@ -1,18 +1,7 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
 import { setModelEnabled } from '@/flows/settings/crud/set-model-enabled';
-
-export interface ConfigureCatalogProviderInput {
-  provider: string;
-  baseUrl?: string;
-  apiKey: string;
-  modelName: string;
-}
-
-export interface ConfigureCatalogProviderResult {
-  ok: boolean;
-  error?: string;
-}
+import type { ConfigureCatalogProviderInput, ConfigureCatalogProviderResult } from '@/models/settings';
 
 /**
  * Save a key for one of the 5 curated catalog providers, plus flip that

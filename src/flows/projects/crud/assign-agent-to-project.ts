@@ -1,8 +1,6 @@
 import { projects } from '@/api/projects';
 import { toast } from 'sonner';
-
-export interface AssignAgentInput { projectId: string; agentId: string }
-export interface AssignAgentResult { ok: boolean; error?: string }
+import type { AssignAgentInput, AssignAgentResult } from '@/models/project';
 
 export async function assignAgentToProject(input: AssignAgentInput): Promise<AssignAgentResult> {
 	const { projectId, agentId } = input;

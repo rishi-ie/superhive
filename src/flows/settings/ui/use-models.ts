@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { settings } from '@/api/settings';
 import type { ModelEntry } from '@/types/electron';
-
-export interface UseModelsResult {
-  models: ModelEntry[];
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
+import type { UseModelsResult } from '@/models/settings';
 
 export function useModels(): UseModelsResult {
   const [models, setModels] = React.useState<ModelEntry[]>([]);

@@ -8,25 +8,7 @@
  */
 
 import { agents } from '@/api/agents';
-import type { Agent } from '@/types/electron';
-
-export interface CreateProjectAgentInput {
-  name: string;
-  folderName: string;
-  parentDir: string;
-  /**
-   * Gap 1: the parent project's id. Seeded into the coordinator's truth
-   * settings `project` block so the orchestration extension can read it
-   * on session_start.
-   */
-  projectId?: string;
-}
-
-export interface CreateProjectAgentResult {
-  ok: boolean;
-  agent?: Agent;
-  error?: string;
-}
+import type { CreateProjectAgentInput, CreateProjectAgentResult } from '@/models/agent';
 
 export async function createProjectAgent(
   input: CreateProjectAgentInput,

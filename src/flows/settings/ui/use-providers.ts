@@ -1,17 +1,7 @@
 import * as React from 'react';
 import { listProviders } from '@/flows/settings/crud/list-providers';
 import type { ProviderEntry } from '@/types/electron';
-
-export interface UseProvidersResult {
-  providers: Record<string, ProviderEntry>;
-  providerNames: Set<string>;
-  providersWithKey: Set<string>;
-  hasProvider: (name: string) => boolean;
-  hasApiKey: (name: string) => boolean;
-  loading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
+import type { UseProvidersResult } from '@/models/settings';
 
 export function useProviders(): UseProvidersResult {
   const [providers, setProviders] = React.useState<Record<string, ProviderEntry>>({});

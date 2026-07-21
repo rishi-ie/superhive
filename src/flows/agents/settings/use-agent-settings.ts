@@ -6,9 +6,8 @@ import {
   getSettingsSlice,
   initSettingsSlice,
   reloadSettings,
-  type AgentSettingsState,
-  type SettingsSlice,
 } from './agent-settings-slice'
+import type { AgentSettingsState, SettingsSlice } from '@/models/agent'
 
 export type { AgentSettingsState }
 

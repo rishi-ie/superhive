@@ -34,81 +34,20 @@
  * by the slice via the accessor wiring.
  */
 
-import type { ContentPart, RuntimeMessage, ToolResultContent } from '@/models/runtime'
+import type {
+  ContentPart,
+  RuntimeMessage,
+  StreamOp,
+  RuntimeSliceView,
+  AccessorFn,
+} from '@/models/runtime'
+
+export type { StreamOp, RuntimeSliceView, SliceAccessor, AccessorFn } from '@/models/runtime'
 
 export const QUEUE_TICK_MS = 50
 const MAX_QUEUE_SIZE = 1000
 /** Cap matches disk trim (5000). Drop oldest rows beyond this. */
 export const MAX_QUEUE_MESSAGES = 5000
-
-export type StreamOp =
-  | {
-      kind: 'message-start'
-      agentId: string
-      messageId: string
-      role: 'user' | 'assistant'
-    }
-  | { kind: 'append-part'; agentId: string; messageId: string; part: ContentPart }
-  | {
-      kind: 'append-delta'
-      agentId: string
-      messageId: string
-      partType: 'text' | 'thinking'
-      delta: string
-    }
-  | {
-      kind: 'append-tool-call-delta'
-      agentId: string
-      messageId: string
-      toolCallId: string
-      delta: string
-    }
-  | {
-      kind: 'finalize-part'
-      agentId: string
-      messageId: string
-      partType: 'text' | 'thinking'
-      content?: string
-    }
-  | {
-      kind: 'finalize-tool-call'
-      agentId: string
-      messageId: string
-      toolCallId: string
-      args: unknown
-    }
-  | {
-      kind: 'finalize-tool-result'
-      agentId: string
-      toolCallId: string
-      result: ToolResultContent[]
-      isError: boolean
-    }
-  | { kind: 'finalize-message'; agentId: string; messageId: string }
-  | { kind: 'increment-inflight'; agentId: string; delta: number }
-  | {
-      kind: 'set-messages'
-      agentId: string
-      messages: RuntimeMessage[]
-    }
-  | {
-      kind: 'append-compaction-summary'
-      agentId: string
-      summary: string
-      tokensBefore: number
-    }
-
-export interface RuntimeSliceView {
-  messages: RuntimeMessage[]
-  inFlightToolCount: number
-}
-
-export interface SliceAccessor {
-  slice: RuntimeSliceView
-  notify: () => void
-}
-
-export type AccessorFn = (agentId: string) => SliceAccessor | null
 
 let sliceAccessor: AccessorFn | null = null
 

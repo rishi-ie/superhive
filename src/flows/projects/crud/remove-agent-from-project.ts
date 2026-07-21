@@ -1,8 +1,6 @@
 import { projects } from '@/api/projects';
 import { toast } from 'sonner';
-
-export interface RemoveAgentInput { projectId: string; agentId: string }
-export interface RemoveAgentResult { ok: boolean; error?: string }
+import type { RemoveAgentInput, RemoveAgentResult } from '@/models/project';
 
 export async function removeAgentFromProject(input: RemoveAgentInput): Promise<RemoveAgentResult> {
 	const { projectId, agentId } = input;

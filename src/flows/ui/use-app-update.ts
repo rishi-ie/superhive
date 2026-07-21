@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { installUpdate } from './install-update';
-
-export interface UpdateInfo {
-	version: string;
-	releaseName?: string;
-}
+import type { UpdateInfo } from '@/models/ui';
 
 export function useAppUpdate(): {
 	pendingUpdate: UpdateInfo | null;

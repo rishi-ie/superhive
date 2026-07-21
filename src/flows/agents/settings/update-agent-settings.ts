@@ -1,11 +1,6 @@
 import { agents } from '@/api/agents'
 import { toast } from 'sonner'
-import type { AgentSettingsState } from './index'
-
-export interface UpdateAgentSettingsInput {
-  agentId: string
-  patch: Partial<AgentSettingsState>
-}
+import type { AgentSettingsState, UpdateAgentSettingsInput } from '@/models/agent'
 
 export async function updateAgentSettings(input: UpdateAgentSettingsInput): Promise<{ ok: boolean; settings?: AgentSettingsState }> {
   try {

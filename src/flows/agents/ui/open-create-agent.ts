@@ -1,9 +1,5 @@
 import * as React from 'react';
-
-export interface OpenCreateAgentState {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-}
+import type { OpenCreateAgentState } from '@/models/agent';
 
 let listeners: Array<(open: boolean) => void> = [];
 let currentState = false;

@@ -1,10 +1,6 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
-
-export interface DeleteProviderResult {
-  ok: boolean;
-  error?: string;
-}
+import type { DeleteProviderResult } from '@/models/settings';
 
 export async function deleteProvider(name: string): Promise<DeleteProviderResult> {
   if (!name?.trim()) {

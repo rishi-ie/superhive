@@ -21,24 +21,10 @@
 import { agents } from '@/api/agents'
 import { waitForAgentReady } from './wait-for-agent-ready'
 import type { Agent } from '@/types/electron'
-
-export interface PrepareStandaloneAgentInput {
-  name: string
-  folderName: string
-  parentDir: string
-  role?: string
-  description?: string
-}
-
-export type PrepareStandaloneAgentFailure =
-  | { ok: false; reason: 'create-failed'; message: string }
-  | { ok: false; reason: 'start-failed'; message: string }
-  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
-  | { ok: false; reason: 'error'; message: string }
-
-export type PrepareStandaloneAgentResult =
-  | { ok: true; agent: Agent }
-  | PrepareStandaloneAgentFailure
+import type {
+  PrepareStandaloneAgentInput,
+  PrepareStandaloneAgentResult,
+} from '@/models/agent'
 
 export async function prepareStandaloneAgent(
   input: PrepareStandaloneAgentInput,

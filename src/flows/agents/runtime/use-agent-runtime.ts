@@ -23,7 +23,8 @@ import type {
 } from '@/types/electron'
 import type { CompactionStatus, RetryStatus } from '@/models/runtime'
 import { toast } from 'sonner'
-import { initRuntimeSlice, type RuntimeSlice } from './slice'
+import { initRuntimeSlice } from './slice'
+import type { RuntimeSlice } from '@/models/agent'
 
 export function useAgentRuntime(agentId: string | undefined) {
   const slice = React.useMemo(() => {

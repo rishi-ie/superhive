@@ -1,10 +1,6 @@
 import { agents } from '@/api/agents';
 import { toast } from 'sonner';
-
-export interface RevealAgentResult {
-	ok: boolean;
-	error?: string;
-}
+import type { RevealAgentResult } from '@/models/agent';
 
 export async function revealAgent(id: string): Promise<RevealAgentResult> {
 	try {

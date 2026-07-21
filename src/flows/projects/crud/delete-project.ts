@@ -14,11 +14,7 @@ import { agents } from '@/api/agents';
 import { toast } from 'sonner';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { disposeSlice } from '@/flows/agents/settings';
-
-export interface DeleteProjectResult {
-  ok: boolean;
-  error?: string;
-}
+import type { DeleteProjectResult } from '@/models/project';
 
 export async function deleteProject(projectId: string): Promise<DeleteProjectResult> {
   try {

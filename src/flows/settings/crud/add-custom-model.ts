@@ -1,17 +1,6 @@
 import { toast } from 'sonner';
 import { settings } from '@/api/settings';
-
-export interface AddCustomModelInput {
-  provider: string;
-  modelName: string;
-  baseUrl?: string;
-  apiKey: string;
-}
-
-export interface AddCustomModelResult {
-  ok: boolean;
-  error?: string;
-}
+import type { AddCustomModelInput, AddCustomModelResult } from '@/models/settings';
 
 export async function addCustomModel(
   input: AddCustomModelInput,

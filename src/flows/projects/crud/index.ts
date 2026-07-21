@@ -6,5 +6,5 @@ export { loadProjectTeam, loadUnassignedAgents } from './load-project-team';
 export { assignAgentToProject } from './assign-agent-to-project';
 export { removeAgentFromProject } from './remove-agent-from-project';
 export { revealProject } from './reveal-project';
-export type { PrepareProjectInput, PrepareProjectResult } from './prepare-project';
-export type { RevealProjectResult } from './reveal-project';
+export type { PrepareProjectInput, PrepareProjectResult } from '@/models/project';
+export type { RevealProjectResult } from '@/models/project';

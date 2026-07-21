@@ -6,16 +6,7 @@
 
 import { copyText } from './copy-text'
 import { getMessageText } from '@/models/runtime'
-import type { RuntimeMessage } from '@/types/electron'
-
-export interface ShortcutCopyLastAssistantInput {
-  messages: RuntimeMessage[]
-}
-
-export interface ShortcutCopyLastAssistantResult {
-  ok: boolean
-  text?: string
-}
+import type { ShortcutCopyLastAssistantInput, ShortcutCopyLastAssistantResult } from '@/models/ui'
 
 export async function shortcutCopyLastAssistant({
   messages,

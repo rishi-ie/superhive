@@ -14,36 +14,7 @@
 
 import { agents } from '@/api/agents'
 import { toast } from 'sonner'
-
-export interface AgentSettingsState {
-  name?: string
-  description?: string
-  model?: { provider: string; name: string }
-  systemPrompt?: string
-  permissions?: { filesystem?: boolean; terminal?: boolean; network?: boolean }
-  runtime?: { thinkingLevel?: string; activeTools?: string[] }
-  catalog?: {
-    skills?: Array<{ path: string; active: boolean }>
-    extensions?: Array<{ path: string; active: boolean }>
-    prompts?: Array<{ path: string; active: boolean }>
-  }
-  sessionsIndex?: {
-    sessions: Array<{ id: string; name?: string; messageCount: number; cost: number; path: string }>
-  }
-  [k: string]: unknown
-}
-
-type NotifyFn = () => void
-
-export interface SettingsSlice {
-  settings: AgentSettingsState | null
-  isLoading: boolean
-  error: string | null
-  dirty: Record<string, unknown> | null
-  unsub: (() => void) | null
-  debounceTimer: ReturnType<typeof setTimeout> | null
-  listeners: Set<NotifyFn>
-}
+import type { AgentSettingsState, SettingsSlice } from '@/models/agent'
 
 const settingsSlices = new Map<string, SettingsSlice>()
 

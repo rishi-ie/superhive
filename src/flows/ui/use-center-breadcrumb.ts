@@ -2,12 +2,7 @@ import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { agents } from "@/api/agents";
 import { loadProject } from "@/flows/projects/crud/load-project";
-
-export interface BreadcrumbSegment {
-  label: string;
-  href?: string;
-  clickable?: boolean;
-}
+import type { BreadcrumbSegment } from "@/models/ui";
 
 export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
   const { pathname } = useLocation();

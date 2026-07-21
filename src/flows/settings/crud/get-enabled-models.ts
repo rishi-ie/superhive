@@ -1,11 +1,5 @@
 import { settings } from '@/api/settings';
-
-export interface EnabledModel {
-  id: string;
-  provider: string;
-  name: string;
-  contextWindow?: number;
-}
+import type { EnabledModel } from '@/models/settings';
 
 /**
  * The IPC returns `{ id, name, contextWindow }` without `provider`. We

@@ -13,20 +13,8 @@
  */
 
 import { agents } from '@/api/agents'
-import type { AgentSettingsState } from '@/flows/agents/settings'
-
-export type WaitForReadyFailure =
-  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
-  | { ok: false; reason: 'error'; message: string }
-
-export type WaitForReadyResult =
-  | { ok: true; settings: AgentSettingsState }
-  | WaitForReadyFailure
-
-export interface WaitForAgentReadyOptions {
-  timeoutMs?: number
-  pollMs?: number
-}
+import type { AgentSettingsState } from '@/models/agent'
+import type { WaitForReadyResult, WaitForAgentReadyOptions } from '@/models/agent'
 
 const DEFAULT_TIMEOUT_MS = 15_000
 const DEFAULT_POLL_MS = 300

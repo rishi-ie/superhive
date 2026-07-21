@@ -1,11 +1,7 @@
 import * as React from 'react'
 import { agents } from '@/api/agents'
 import type { AgentStatus, InitStep } from '@/types/electron'
-
-export interface AgentLiveState {
-  status: AgentStatus
-  bootStep?: InitStep
-}
+import type { AgentLiveState } from '@/models/agent'
 
 interface AggregatorSlice {
   states: Map<string, AgentLiveState>

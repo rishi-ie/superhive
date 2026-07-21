@@ -7,15 +7,7 @@
  * stays interactive so the user can edit and retry.
  */
 
-export interface SendMessageInput {
-  text: string
-  isLive: boolean
-  send: (text: string) => void
-}
-
-export interface SendMessageResult {
-  ok: boolean
-}
+import type { SendMessageInput, SendMessageResult } from '@/models/ui'
 
 export function sendMessage({ text, isLive, send }: SendMessageInput): SendMessageResult {
   const trimmed = text.trim()

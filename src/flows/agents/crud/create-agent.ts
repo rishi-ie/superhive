@@ -13,21 +13,7 @@
  */
 
 import { agents } from '@/api/agents';
-import type { Agent } from '@/types/electron';
-
-export interface CreateAgentInput {
-  name: string;
-  folderName: string;
-  parentDir: string;
-  role?: string;
-  description?: string;
-}
-
-export interface CreateAgentResult {
-  ok: boolean;
-  agent?: Agent;
-  error?: string;
-}
+import type { CreateAgentInput, CreateAgentResult } from '@/models/agent';
 
 export async function createAgent(
   input: CreateAgentInput,

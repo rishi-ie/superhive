@@ -1,10 +1,5 @@
 import * as React from "react";
-
-export interface CommandPaletteState {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  toggle: () => void;
-}
+import type { CommandPaletteState } from "@/models/ui";
 
 let openState = false;
 const listeners = new Set<(open: boolean) => void>();

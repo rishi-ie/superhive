@@ -254,3 +254,85 @@ export interface RuntimeExitPayload {
   /** Exits only happen when there is no live runtime, so the agent lands in `idle`. */
   status: 'idle'
 }
+
+// ---------------------------------------------------------------------------
+// Stream queue ops (renderer-side pipeline)
+// ---------------------------------------------------------------------------
+
+/**
+ * The per-agent stream queue's discriminated ops. The queue batches
+ * high-frequency `AdapterEvent` mutations and applies them on a 50ms
+ * tick so the renderer re-renders once per tick instead of once per
+ * event. See `src/flows/agents/runtime/queue.ts` for the queue
+ * mechanics and `event-translator.ts` for the event → op mapping.
+ */
+export type StreamOp =
+  | {
+      kind: 'message-start'
+      agentId: string
+      messageId: string
+      role: 'user' | 'assistant'
+    }
+  | { kind: 'append-part'; agentId: string; messageId: string; part: ContentPart }
+  | {
+      kind: 'append-delta'
+      agentId: string
+      messageId: string
+      partType: 'text' | 'thinking'
+      delta: string
+    }
+  | {
+      kind: 'append-tool-call-delta'
+      agentId: string
+      messageId: string
+      toolCallId: string
+      delta: string
+    }
+  | {
+      kind: 'finalize-part'
+      agentId: string
+      messageId: string
+      partType: 'text' | 'thinking'
+      content?: string
+    }
+  | {
+      kind: 'finalize-tool-call'
+      agentId: string
+      messageId: string
+      toolCallId: string
+      args: unknown
+    }
+  | {
+      kind: 'finalize-tool-result'
+      agentId: string
+      toolCallId: string
+      result: ToolResultContent[]
+      isError: boolean
+    }
+  | { kind: 'finalize-message'; agentId: string; messageId: string }
+  | { kind: 'increment-inflight'; agentId: string; delta: number }
+  | {
+      kind: 'set-messages'
+      agentId: string
+      messages: RuntimeMessage[]
+    }
+  | {
+      kind: 'append-compaction-summary'
+      agentId: string
+      summary: string
+      tokensBefore: number
+    }
+
+/** Read-only view the queue needs of a runtime slice, used to apply ops. */
+export interface RuntimeSliceView {
+  messages: RuntimeMessage[]
+  inFlightToolCount: number
+}
+
+/** The accessor the queue calls at tick time to read+notify a slice. */
+export interface SliceAccessor {
+  slice: RuntimeSliceView
+  notify: () => void
+}
+
+export type AccessorFn = (agentId: string) => SliceAccessor | null

@@ -10,27 +10,10 @@
 import { agents } from '@/api/agents'
 import { waitForAgentReady } from './wait-for-agent-ready'
 import type { Agent } from '@/types/electron'
-
-export interface PrepareProjectAgentInput {
-  name: string
-  folderName: string
-  parentDir: string
-  /**
-   * Gap 1: the parent project's id. Forwarded to `agents.create` so the
-   * coordinator's truth settings file gets the `project` block seeded.
-   */
-  projectId?: string
-}
-
-export type PrepareProjectAgentFailure =
-  | { ok: false; reason: 'create-failed'; message: string }
-  | { ok: false; reason: 'start-failed'; message: string }
-  | { ok: false; reason: 'timeout'; detail: 'runtime'; message?: string }
-  | { ok: false; reason: 'error'; message: string }
-
-export type PrepareProjectAgentResult =
-  | { ok: true; agent: Agent }
-  | PrepareProjectAgentFailure
+import type {
+  PrepareProjectAgentInput,
+  PrepareProjectAgentResult,
+} from '@/models/agent'
 
 export async function prepareProjectAgent(
   input: PrepareProjectAgentInput,

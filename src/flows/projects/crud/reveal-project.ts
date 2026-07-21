@@ -1,10 +1,6 @@
 import { projects } from '@/api/projects';
 import { toast } from 'sonner';
-
-export interface RevealProjectResult {
-  ok: boolean;
-  error?: string;
-}
+import type { RevealProjectResult } from '@/models/project';
 
 /**
  * Reveal a project's folder in Finder/Explorer.
