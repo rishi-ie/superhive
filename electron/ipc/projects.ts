@@ -7,6 +7,7 @@ import { agentsFsWatcher } from '../agents-fs-watcher';
 import { IPC } from './index';
 import { revealProjectInFinder } from './reveal-project';
 import { patchCoordinatorForMemberStatus } from '../project-status-mirror';
+import { getTopEnabledModel } from '../get-top-enabled-model';
 import { readFileSync } from 'node:fs';
 import { writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -113,9 +114,7 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
     if (!settings.project) return;
     if (settings.project.members.some((m) => m.agentId === agentId)) return;
 
-    const topModel = await (await import('../get-top-enabled-model'))
-      .getTopEnabledModel()
-      .catch(() => null);
+    const topModel = await getTopEnabledModel().catch(() => null);
 
     settings.project.members.push({
       agentId: member.id,

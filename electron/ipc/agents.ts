@@ -20,6 +20,7 @@ import {
 } from '../agent-settings-defaults'
 import { revealInFinder } from './reveal-in-finder'
 import { getTopEnabledModel } from '../get-top-enabled-model'
+import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 
@@ -283,7 +284,6 @@ export function registerAgentIpc(): void {
 			// Gap 1: mirror status to coordinator's truth file so the roster
 			// stays fresh on external status flips (e.g. error from telemetry).
 			if (updated) {
-				const { patchCoordinatorForMemberStatus } = await import('../project-status-mirror')
 				await patchCoordinatorForMemberStatus(id, status)
 			}
 			return updated

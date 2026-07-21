@@ -43,7 +43,7 @@ function getDefaultRuntime(): RuntimeLike {
   // Lazy require so tests that pass an explicit runtime never touch
   // general-kai-runtime (which imports electron at the top level).
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { runtime } = require('../general-kai-runtime') as { runtime: RuntimeLike }
+  const { runtime } = require('./general-kai-runtime') as { runtime: RuntimeLike }
   return runtime
 }
 
