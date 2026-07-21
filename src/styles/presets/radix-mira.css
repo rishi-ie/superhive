@@ -32,6 +32,12 @@
   --info-foreground: oklch(0.985 0 0);
   --border-inverse: oklch(0.15 0 0);
 
+  /* TabsList surface — the row of tab buttons in the right sidebar panels.
+   * In light mode this matches the page background; in dark mode it's a
+   * hair lighter than `--background` (`#141414`) so the tab row reads as
+   * its own surface against the panel. */
+  --tabs-list-bg: var(--background);
+
   /* Chat bubble surfaces (Phase 2.1.1). User = sidebar tint; assistant = page. */
   --chat-bubble-user: var(--sidebar);
   --chat-bubble-assistant: var(--background);
@@ -167,6 +173,10 @@
   --sidebar-border: oklch(0 0 0 / 8%);
   --sidebar-ring: oklch(0.556 0 0);
   --sidebar-bg: #181818;
+
+  /* TabsList surface (dark) — one shade lighter than the panel/page so the
+   * tab row reads as its own surface. */
+  --tabs-list-bg: #1a1a1a;
   color-scheme: dark;
 
   /* Chat bubble surfaces (dark variant). User = deeper sidebar tint; assistant = page. */
@@ -217,6 +227,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-card-elevated: var(--card-elevated);
+  --color-tabs-list-bg: var(--tabs-list-bg);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-modal: var(--modal);
