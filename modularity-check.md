@@ -221,6 +221,8 @@ Files in `src/flows/` follow a verb-first pattern.
 
 Wrong casing, wrong order, wrong form is a **Warn**. The fix is to rename. The barrel must be `index.ts`.
 
+**Engine files exception.** Files in `src/flows/<entity>/runtime/` whose purpose is a *pipeline* — the per-agent stream queue (`queue.ts`), the event-to-op mapping (`event-translator.ts`), the slice state container (`slice.ts`) — are exempt from the verb-first rule. They are engines, not flows. Their consumers (the runtime hooks like `useAgentRuntime`) are the flows. The name describes the artifact, not the action. This is the only naming exception in `src/flows/`. Same rule documented in `superhive/AGENTS.md` Section 5.
+
 ---
 
 ## Step 12 — Magic numbers and config
