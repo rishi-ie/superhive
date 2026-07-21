@@ -13,6 +13,7 @@ import { reconcileRuntime } from './reconcile-runtime';
 import { migrateLegacyChatFolders } from './agent-chat-store';
 import { isGeneralKaiReady } from './install-general-kai';
 import { agentsFsWatcher } from './agents-fs-watcher';
+import { attachMailboxWatches } from './ipc/mailbox';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -130,6 +131,9 @@ app.whenReady().then(async () => {
   // (now-canonical) list.
   agentsFsWatcher.start();
   agentsFsWatcher.notifyChanged();
+  // Gap 2: wire the mailbox watcher's onCoordMail + onMemberMail hooks
+  // to runtime.send() wake prompts, and start the watcher.
+  attachMailboxWatches();
   // If the boot reconcile dropped projects whose folders were missing,
   // the renderer needs to know before the user navigates to the projects
   // page. Surface the deletions so the toast can render, and push a

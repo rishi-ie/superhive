@@ -589,6 +589,10 @@ class GeneralKaiRuntime {
           // Standard agents get AGENT_KIND='standard' and the orchestration
           // extension no-ops for them.
           AGENT_KIND: this.resolveAgentKindSync(entry.agentId),
+          // Gap 2: pass the agent's UUID so the orchestrator extension
+          // can detect role at session_start by comparing against
+          // `settings.project.coordinatorAgentId` in the truth file.
+          AGENT_ID: agentId,
           // Diagnostic knob: when set, the telemetry extension writes
           // every handler route + journal-path decision to stderr.
           SUPERHIVE_TELEMETRY_DEBUG:

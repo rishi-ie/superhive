@@ -3,6 +3,7 @@ import { registerProjectIpc } from './projects';
 import { registerRuntimeIpc } from './runtime';
 import { registerAppIpc } from './app';
 import { registerSettingsIpc } from './settings';
+import { registerMailboxIpc } from './mailbox';
 
 export const IPC = {
   AGENTS: {
@@ -28,6 +29,12 @@ export const IPC = {
     ON_SETTINGS_CHANGED: (settings: string) => `settings:${settings}:changed`,
     ON_CREATED: (id: string) => `agent:${id}:created`,
     ON_CHANGED: 'agents:changed',
+    // Gap 2: mailbox
+    POST_TO_PROJECT: 'agents:post-to-project',
+    ASK_MEMBER:      'agents:ask-member',
+    READ_INBOX:      'agents:read-inbox',
+    ACK_MESSAGE:     'agents:ack-message',
+    ON_MAIL:         (id: string) => `agent:${id}:mail`,
   },
   PROJECTS: {
     LIST: 'projects:list',
@@ -63,4 +70,5 @@ export function registerIpc(): void {
   registerRuntimeIpc();
   registerAppIpc();
   registerSettingsIpc();
+  registerMailboxIpc();
 }
