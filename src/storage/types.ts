@@ -55,6 +55,11 @@ export interface Task extends BaseEntity {
   priority: TaskPriority
   context?: string
   tagIds: string[]
+  // Gap 3: dependency graph + runner state
+  dependencies: string[]          // taskIds that must be 'completed' before this is ready
+  blockerReason?: string          // when status='blocked'
+  staleSince?: number             // epoch ms; runner-managed, used for auto-retry
+  outcome?: string                // final summary set by complete_task
 }
 
 export interface Session extends BaseEntity {

@@ -8,6 +8,10 @@ async function getDb() {
   return _db
 }
 
+export function __resetAgentDb(): void {
+  _db = null
+}
+
 export const AgentRepository = {
   async create(data: Omit<Agent, 'id' | 'createdAt' | 'updatedAt' | 'projectIds' | 'taskIds' | 'sessionIds'>): Promise<Agent> {
     const db = await getDb()

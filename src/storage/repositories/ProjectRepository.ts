@@ -8,6 +8,10 @@ async function getDb() {
   return _db
 }
 
+export function __resetProjectDb(): void {
+  _db = null
+}
+
 export const ProjectRepository = {
   async create(data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'agentIds' | 'taskIds' | 'childProjectIds' | 'archived'>): Promise<Project> {
     const db = await getDb()
