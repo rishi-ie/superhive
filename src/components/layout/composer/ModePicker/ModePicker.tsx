@@ -15,8 +15,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-export type Mode = "plan" | "execute" | "auto";
+import type { Mode } from "@/models/component";
 
 const MODES: Array<{ value: Mode; label: string; icon: HugeiconsIconProps["icon"] }> = [
   { value: "plan", label: "Plan", icon: Plant01Icon },

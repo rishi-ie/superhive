@@ -14,6 +14,12 @@ import {
 } from "@phosphor-icons/react";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
+import type {
+  SettingsSection,
+  SettingsSectionGroup,
+} from "@/models/page";
+
+export type { SettingsSection, SettingsSectionGroup };
 
 type IconComponent = (props: { className?: string }) => ReactNode;
 
@@ -21,18 +27,6 @@ function makeIcon(icon: PhosphorIcon): IconComponent {
   return function SettingsIcon({ className }: { className?: string }) {
     return <Icon icon={icon} className={className} />;
   };
-}
-
-export interface SettingsSection {
-  id: string;
-  label: string;
-  icon: IconComponent;
-  trailingIcon?: IconComponent;
-}
-
-export interface SettingsSectionGroup {
-  title?: string;
-  sections: SettingsSection[];
 }
 
 export const SETTINGS_GROUPS: SettingsSectionGroup[] = [

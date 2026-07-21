@@ -6,8 +6,9 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import { Icon as IconWrapper } from "@/components/ui/icon";
+import type { ActivityType } from "@/models/component";
 
-export type ActivityType = "message" | "tool" | "run" | "edit";
+export type { ActivityType };
 
 interface ActivityRowProps {
   type: ActivityType;

@@ -1,44 +1,11 @@
 import { Link } from "react-router-dom";
-import type { Project } from "@/storage/types";
 import {
   Accordion,
   ActivityRow,
   ChecklistRow,
   SessionRow,
-  type ActivityType,
 } from "../primitives";
-
-export interface OverviewPreviousTask {
-  name: string;
-  cost: number;
-}
-
-export interface OverviewChecklistItem {
-  text: string;
-  done: boolean;
-}
-
-export interface OverviewChecklist {
-  taskName: string;
-  items: OverviewChecklistItem[];
-}
-
-export interface OverviewRecentActivityItem {
-  type: ActivityType;
-  label: string;
-  timestamp?: string;
-}
-
-export interface OverviewData {
-  name: string;
-  description: string;
-  roleSummary?: string;
-  previousTasks: OverviewPreviousTask[];
-  activeChecklist: OverviewChecklist | null;
-  recentActivity: OverviewRecentActivityItem[];
-  responsibilityCount: number;
-  projects: Project[];
-}
+import type { OverviewData } from "@/models/component";
 
 interface OverviewSectionProps {
   data: OverviewData;

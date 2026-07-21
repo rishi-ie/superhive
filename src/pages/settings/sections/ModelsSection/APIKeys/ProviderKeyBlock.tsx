@@ -8,22 +8,9 @@ import { PasswordInput } from '@/components/common/PasswordInput';
 import { saveProviderBlock } from '@/flows/settings/crud/save-provider-block';
 import { notifyProviderBlockSaved, notifyProviderBlockCleared } from '@/flows/settings/crud/notify-provider-block';
 import type { ProviderEntry } from '@/types/electron';
+import type { ProviderKeyBlockProps, ProviderKeyBlockShape } from '@/models/page';
 
-export type ProviderKeyBlockShape = 'single' | 'aws';
-
-export interface ProviderKeyBlockProps {
-  providerName: string;
-  heading: string;
-  docsUrl?: string;
-  /** `single`: API Key + Base URL + Model.
-   *  `aws`: Access Key ID + Secret Access Key + Region + Model. */
-  shape: ProviderKeyBlockShape;
-  /** Should this block show the optional Base URL field? */
-  showBaseUrl?: boolean;
-  baseUrlPlaceholder?: string;
-  existingProvider?: ProviderEntry;
-  onSaved?: () => void;
-}
+export type { ProviderKeyBlockProps, ProviderKeyBlockShape };
 
 interface FormState {
   apiKey: string;

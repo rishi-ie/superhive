@@ -3,20 +3,14 @@ import { CircleNotchIcon, WarningCircleIcon, XIcon } from '@phosphor-icons/react
 import { Icon } from '@/components/ui/icon'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import type {
+  PreparingToastAction,
+  PreparingToastHandle,
+  PreparingToastInput,
+  PreparingToastVariant,
+} from '@/models/component'
 
-export type PreparingToastVariant = 'loading' | 'error'
-
-export interface PreparingToastAction {
-  label: string
-  onClick: () => void
-}
-
-export interface PreparingToastInput {
-  title: string
-  description?: string
-  variant?: PreparingToastVariant
-  actions?: PreparingToastAction[]
-}
+export type { PreparingToastVariant, PreparingToastAction, PreparingToastInput, PreparingToastHandle }
 
 interface InternalToast extends PreparingToastInput {
   id: string
@@ -29,12 +23,6 @@ let toasts: InternalToast[] = []
 
 function emit(): void {
   for (const l of listeners) l()
-}
-
-export interface PreparingToastHandle {
-  show: (input: PreparingToastInput) => string
-  update: (id: string, patch: Partial<PreparingToastInput>) => void
-  dismiss: (id: string) => void
 }
 
 export function usePreparingToast(): PreparingToastHandle {

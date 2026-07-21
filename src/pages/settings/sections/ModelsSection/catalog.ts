@@ -1,24 +1,6 @@
-export interface CatalogModel {
-  id: string;
-  provider: string;
-  name: string;
-}
+import type { CatalogModel, CatalogProviderMeta } from '@/models/page';
 
-export interface CatalogProviderMeta {
-  /** Stable provider name used as the key in `db.settings.json` and the
-   *  provider entrypoint throughout the app. */
-  name: string;
-  /** Default base URL override; not all providers expose one. */
-  baseUrl: string;
-  showBaseUrl: boolean;
-  keyLabel: string;
-  /** External page where the user can obtain an API key. */
-  docsUrl: string;
-  /** Whether this provider has a block in the API Keys section. */
-  hasApiKeysBlock: boolean;
-  /** For AWS Bedrock: multi-field auth. */
-  authKind: 'single' | 'aws';
-}
+export type { CatalogModel, CatalogProviderMeta };
 
 export const PROVIDERS: CatalogProviderMeta[] = [
   {

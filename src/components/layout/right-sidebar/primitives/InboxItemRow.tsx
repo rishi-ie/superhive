@@ -8,20 +8,9 @@ import {
 import { Icon as IconWrapper } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { InboxAction, InboxItemKind, InboxOutcome } from "@/models/component";
 
-export type InboxItemKind = "approval" | "question" | "status";
-
-export type InboxAction =
-  | { kind: "allow"; label: string }
-  | { kind: "deny"; label: string }
-  | { kind: "answer"; label: string; value: string }
-  | { kind: "dismiss" };
-
-export type InboxOutcome =
-  | { kind: "allowed" }
-  | { kind: "denied" }
-  | { kind: "answered"; value: string; label: string }
-  | { kind: "dismissed" };
+export type { InboxItemKind, InboxAction, InboxOutcome };
 
 interface InboxItemRowProps {
   kind: InboxItemKind;

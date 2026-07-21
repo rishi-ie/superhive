@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { updateAgentSettings } from '@/flows/agents/settings/update-agent-settings'
-
-export interface AutoSaveHandle {
-  patch: (key: string, value: unknown) => void
-  flush: (p: Record<string, unknown>) => Promise<void>
-}
+import type { AutoSaveHandle } from '@/models/component'
 
 /**
  * Expand a dotted key (`"catalog.extensions"`) into a nested object

@@ -13,10 +13,8 @@ import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/c
 import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
-import {
-  ProjectOverviewSection,
-  type ProjectOverviewSectionData,
-} from "./sections/ProjectOverviewSection";
+import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
+import type { ProjectOverviewSectionData } from "@/models/component";
 
 interface ProjectSettingsPanelProps {
   projectId: string;

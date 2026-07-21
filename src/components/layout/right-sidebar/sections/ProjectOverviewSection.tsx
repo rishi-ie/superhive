@@ -1,14 +1,9 @@
-import type { Agent, Project, Task } from "@/storage/types";
+import type { Task } from "@/storage/types";
 import { AgentStatusBadge } from "@/components/common";
 import { Accordion } from "../primitives";
 import { useTasksByProject } from "@/flows/tasks/runtime/use-tasks-by-project";
 import { cn } from "@/lib/utils";
-
-export interface ProjectOverviewSectionData {
-  project: Project | null;
-  coordinator: Agent | null;
-  members: Agent[];
-}
+import type { ProjectOverviewSectionData } from "@/models/component";
 
 interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData;

@@ -1,1 +1,2 @@
-export { ModePicker, type Mode } from './ModePicker';
+export { ModePicker } from './ModePicker';
+export type { Mode } from '@/models/component';

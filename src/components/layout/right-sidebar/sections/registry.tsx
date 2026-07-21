@@ -1,5 +1,8 @@
-import type { ComponentType } from "react";
-import type { AgentSettingsState } from "@/flows/agents/settings";
+import type { AgentSettingsState } from "@/models/agent";
+import type {
+  ManageSectionDef,
+  SearchableAtom,
+} from "@/models/component";
 import { OverviewSection } from "./OverviewSection";
 import { IdentitySection } from "./IdentitySection";
 import { BehaviorSection } from "./BehaviorSection";
@@ -9,20 +12,6 @@ import { ExtensionsSection, getExtensionsAtoms } from "./ExtensionsSection";
 import { PromptsSection, getPromptsAtoms } from "./PromptsSection";
 import { InboxSection } from "./InboxSection";
 
-export interface SearchableAtom {
-  id: string;
-  label: string;
-  description?: string;
-}
-
-export interface SettingsSectionProps {
-  settings: AgentSettingsState;
-  agentId: string;
-  query?: string;
-  patch?: (key: string, value: unknown) => void;
-  flush?: (p: Record<string, unknown>) => Promise<void>;
-}
-
 export { OverviewSection };
 export { IdentitySection };
 export { BehaviorSection };
@@ -31,14 +20,7 @@ export { SkillsSection };
 export { ExtensionsSection };
 export { PromptsSection };
 export { InboxSection };
-
-export interface ManageSectionDef {
-  id: string;
-  label: string;
-  description?: string;
-  Component: ComponentType<SettingsSectionProps>;
-  getSearchableAtoms: (settings: AgentSettingsState) => SearchableAtom[];
-}
+export type { SearchableAtom, SettingsSectionProps, ManageSectionDef } from "@/models/component";
 
 function getIdentityAtoms(settings: AgentSettingsState): SearchableAtom[] {
   return [

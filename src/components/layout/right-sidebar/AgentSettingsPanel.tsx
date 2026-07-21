@@ -16,7 +16,8 @@ import {
   InboxSection,
   type ManageSectionDef,
 } from "./sections/registry";
-import { OverviewSection, type OverviewData } from "./sections/OverviewSection";
+import { OverviewSection } from "./sections/OverviewSection";
+import type { OverviewData } from "@/models/component";
 import { ResponsibilitySlider } from "./primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
