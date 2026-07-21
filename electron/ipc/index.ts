@@ -4,6 +4,7 @@ import { registerRuntimeIpc } from './runtime';
 import { registerAppIpc } from './app';
 import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
+import { registerTaskIpc } from './tasks';
 
 export const IPC = {
   AGENTS: {
@@ -62,6 +63,17 @@ export const IPC = {
     GET_ENABLED_MODELS: 'settings:get-enabled-models',
     ON_MODEL_UPDATED: 'settings:model-updated',
   },
+  // Gap 3: task queue
+  TASKS: {
+    LIST: 'tasks:list',
+    GET: 'tasks:get',
+    CREATE: 'tasks:create',
+    UPDATE: 'tasks:update',
+    DELETE: 'tasks:delete',
+    ASSIGN: 'tasks:assign',
+    CHANGE_STATUS: 'tasks:changeStatus',
+    ON_CHANGED: 'tasks:changed',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -71,4 +83,5 @@ export function registerIpc(): void {
   registerAppIpc();
   registerSettingsIpc();
   registerMailboxIpc();
+  registerTaskIpc();
 }

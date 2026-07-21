@@ -93,4 +93,16 @@ contextBridge.exposeInMainWorld('api', {
     // row's previous contextWindow was undefined.
     onModelUpdated: (cb) => subscribe('settings:model-updated', cb),
   },
+  tasks: {
+    list:   (filter) => ipcRenderer.invoke('tasks:list', filter),
+    get:    (id) => ipcRenderer.invoke('tasks:get', id),
+    create: (data) => ipcRenderer.invoke('tasks:create', data),
+    update: (id, patch) => ipcRenderer.invoke('tasks:update', id, patch),
+    delete: (id) => ipcRenderer.invoke('tasks:delete', id),
+    assign: (taskId, agentId) => ipcRenderer.invoke('tasks:assign', taskId, agentId),
+    changeStatus: (taskId, status, outcome) => ipcRenderer.invoke('tasks:changeStatus', taskId, status, outcome),
+    // `tasks:changed` is broadcast by the tasks fs-watcher on every
+    // db.tasks.json write. Consumers re-fetch via `tasks.list()`.
+    onChanged: (cb) => subscribe('tasks:changed', cb),
+  },
 });

@@ -1,8 +1,9 @@
-import type { Agent, AgentStatus, Project } from '@/storage/types'
+import type { Agent, AgentStatus, Project, Task, TaskStatus, TaskPriority } from '@/storage/types'
 import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
 
 export type { Agent, AgentStatus, Project }
+export type { Task, TaskStatus, TaskPriority }
 
 export type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload }
 export type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo }
@@ -123,6 +124,7 @@ export interface ElectronAPI {
 	projects: ProjectsAPI
 	app: AppAPI
 	settings: SettingsAPI
+	tasks: TasksAPI
 }
 
 export interface ProviderEntry {
@@ -178,6 +180,37 @@ export interface SettingsAPI {
 	 * fallback). Only emitted when the previous contextWindow was undefined.
 	 */
 	onModelUpdated: (cb: (update: { id: string; provider: string; name: string; contextWindow: number }) => void) => () => void
+}
+
+// Gap 3: task queue
+export type TaskCreateInput = {
+	title: string
+	description?: string
+	projectId: string
+	assignedAgentId?: string
+}
+
+export type TaskUpdateInput = Partial<Pick<Task, 'title' | 'description' | 'assignedAgentId' | 'status' | 'priority' | 'dependencies' | 'outcome' | 'blockerReason'>>
+
+export interface TaskFilter {
+	projectId?: string
+	agentId?: string
+	status?: TaskStatus
+}
+
+export interface TasksAPI {
+	list: (filter?: TaskFilter) => Promise<Task[]>
+	get: (id: string) => Promise<Task | null>
+	create: (data: TaskCreateInput) => Promise<Task>
+	update: (id: string, patch: TaskUpdateInput) => Promise<Task | null>
+	delete: (id: string) => Promise<boolean>
+	assign: (taskId: string, agentId: string | null) => Promise<Task | null>
+	changeStatus: (taskId: string, status: TaskStatus, outcome?: string) => Promise<Task | null>
+	/**
+	 * Subscribe to `tasks:changed` IPC events. Broadcast by the main
+	 * process on every db.tasks.json write. Consumers re-fetch `list()`.
+	 */
+	onChanged: (cb: () => void) => () => void
 }
 
 declare global {
