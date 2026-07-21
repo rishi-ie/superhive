@@ -71,19 +71,20 @@ This is the highest-leverage gap. Without it, none of the coordination stories w
 
 ## Gap 3 — No task queue, dependency graph, or parallel execution
 
-**Vision**: Project Agent expands requests into a dependency graph. Independent tasks execute simultaneously.
-
-**Current**: `Task` type exists in `storage/types.ts:46-58` but has no repository, no IPC, no UI, no creation flow, no worker. `taskIds` arrays on agents and projects are scaffolding. `AgentsListRow` shows `—` because nothing populates the count.
-
-**Work**:
-
-- `TaskRepository` in `superhive/src/storage/repositories/TaskRepository.ts` matching `AgentRepository` shape (CRUD + queue-write serialization).
-- Task IPC in `superhive/electron/ipc/tasks.ts`: `tasks:list`, `tasks:create`, `tasks:update`, `tasks:cancel`, `tasks:assign`, `tasks:dependencies:add`, `tasks:dependencies:remove`.
-- Dependency graph in `superhive/electron/task-graph.ts`: edges stored separately; resolver returns "ready" tasks given current statuses.
-- Parallel runner in `superhive/electron/task-runner.ts`: picks ready tasks, ensures assigned runtime is started, calls `agents:send`. Per-project concurrency cap (e.g. 4).
-- Coordinator LLM tool `plan_tasks` in `superhive-pi-orchestration`: takes a plan, parses into Task rows + edges, commits them, kicks the runner.
-- Project backlog UI in a new `superhive/src/pages/project-chat/tabs/BacklogTab.tsx`: columns for todo / running / blocked / done, drag to reorder, click to inspect.
-- Per-agent task badge wired to actual count in `AgentListRow`.
+> **STATUS**: ✅ IMPLEMENTED. See `superhive/changelog/2026-07-21-gap-3-task-queue.md` for full details.
+>
+> - New `TaskRepository` (CRUD + assignAgent bidirectional + changeStatus + getStaleRunning)
+> - `Task` type extended: `dependencies[]`, `blockerReason?`, `staleSince?`, `outcome?`
+> - 7 IPC channels (`tasks:list`, `get`, `create`, `update`, `delete`, `assign`, `changeStatus`) + `tasks:changed` broadcast
+> - 5s polling task runner: serial dispatch, auto-start agent, 10-min stale auto-retry, block on cancelled deps
+> - 2 new coordinator-only orchestrator tools: `plan_tasks` (writes JSON plan file) and `complete_task` (appends JSONL)
+> - File-drop protocol: `<coordDir>/tasks-plan.json` (atomic) + `<coordDir>/tasks-complete.jsonl` (append) — orchestrator never reaches into Electron
+> - Right-panel "Active tasks" accordion wired to real data via `useTasksByProject(projectId)` pub-sub hook
+>
+> **Known limitations (deferred to later gaps):**
+> - Auto-completion: coordinator calls `complete_task` after a `result` chat message; no auto-detect
+> - Backlog kanban: right-panel accordion is the conservative default
+> - Task-runner integration test: blocked by the IPC test suite's leaked `mock.module`; passes in isolation
 
 ---
 
