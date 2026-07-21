@@ -39,6 +39,19 @@ This document maps the twelve load-bearing gaps between the two. Phasing recomme
 
 ## Gap 2 — No agent-to-agent communication
 
+> **STATUS**: ✅ IMPLEMENTED. See `superhive/changelog/2026-07-21-gap-2-mailbox.md` for full details.
+>
+> - Workers post into the project chat (`<coordDir>/chat.jsonl`); coordinator sees them via `read_inbox` filtered by kind, excluding self + user + already-delivered.
+> - Coordinator private-asks a specific worker via `ask_member` → writes to `<workerDir>/inbox.jsonl` → main-process tailer wakes the worker.
+> - Members get 2 tools (`read_inbox`, `post_to_project`); coordinator gets all 5.
+> - `MailboxWatcher.watchAgent` does an immediate cold-start check so a worker that was offline during an `ask_member` wakes the moment it starts.
+> - On-disk format identical between orchestrator (Pi subprocess) and main-process IPC, so the watcher treats both writes the same.
+> - 51 unit + 11 smoke orchestrator tests; 13 mailbox-watcher tests; 177 main-repo tests. All green.
+> - Bundle synced to `general-kai/extensions/superhive-pi-orchestration/`.
+>
+> **Known limitations (deferred to Gap 7+):**
+> - Right-panel `InboxSection` and `ProjectSettingsPanel` Inbox tab are still placeholders. C7 (separate commit) wires them to real data.
+
 **Vision**: Workers never communicate randomly. Everything routes through the Project Agent.
 
 **Current**: Two agents can only "communicate" by the user manually opening each chat. There is no mailbox, no event bus, no dispatch IPC, no shared inbox, no `agents:send-to-agent`.
