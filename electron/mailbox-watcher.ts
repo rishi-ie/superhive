@@ -140,6 +140,19 @@ class MailboxWatcherImpl {
 				this.checkProjectChat(opts.projectDir!),
 			)
 		}
+
+		// Cold-start wake: if the agent's inbox already has pending
+		// entries (e.g. the worker was offline when the coordinator
+		// called ask_member), fire onMemberMail now so the worker
+		// wakes immediately on attach instead of waiting up to
+		// POLL_INTERVAL_MS for the polling fallback. Same for the
+		// project chat if a worker posted while the coordinator was
+		// down. This updates lastInboxSize/lastChatSize so the next
+		// poll won't refire the same entries.
+		this.checkMemberInbox(opts.agentId)
+		if (opts.projectDir) {
+			this.checkProjectChat(opts.projectDir)
+		}
 	}
 
 	unwatchAgent(agentId: string): void {

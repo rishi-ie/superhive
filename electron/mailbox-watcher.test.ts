@@ -319,3 +319,47 @@ describe('MailboxWatcher — error resilience', () => {
 		expect(calls[0]?.id).toBe(good.id)
 	})
 })
+
+describe('MailboxWatcher — cold-start wake', () => {
+	test('fires onMemberMail immediately for pending entries written before watchAgent', async () => {
+		// Worker was offline when coordinator wrote these. The inbox
+		// already has 2 pending entries.
+		const a = makeInboxEntry({ toAgentId: 'late-agent' })
+		const b = makeInboxEntry({ toAgentId: 'late-agent' })
+		appendMemberInbox(memberDir, a)
+		appendMemberInbox(memberDir, b)
+
+		const calls: InboxEntry[] = []
+		mailboxWatcher.onMemberMail = (_memberId, entry) => {
+			calls.push(entry)
+		}
+
+		// Now the worker comes online and the watcher starts watching.
+		mailboxWatcher.watchAgent({ agentId: 'late-agent', agentDir: memberDir })
+
+		// Cold-start: should fire onMemberMail twice without waiting
+		// for the 5s polling tick.
+		await sleep(100)
+		expect(calls).toHaveLength(2)
+		expect(calls[0]?.id).toBe(a.id)
+		expect(calls[1]?.id).toBe(b.id)
+	})
+
+	test('cold-start wake does not refire on the next polling tick', async () => {
+		const a = makeInboxEntry({ toAgentId: 'late-agent-2' })
+		appendMemberInbox(memberDir, a)
+
+		const calls: InboxEntry[] = []
+		mailboxWatcher.onMemberMail = (_memberId, entry) => {
+			calls.push(entry)
+		}
+
+		mailboxWatcher.watchAgent({ agentId: 'late-agent-2', agentDir: memberDir })
+		await sleep(100)
+		expect(calls).toHaveLength(1)
+
+		// Wait past the polling interval; the entry should not refire.
+		await sleep(4800)
+		expect(calls).toHaveLength(1)
+	}, 8000)
+})
