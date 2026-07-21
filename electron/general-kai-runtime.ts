@@ -22,6 +22,7 @@ import { SettingsRepository } from '../src/storage/repositories/SettingsReposito
 import { parseCounter } from './agent-settings-defaults'
 import { appendBatch, chatFilePath, readAll, trimTo } from './agent-chat-store'
 import { buildStatusPayload } from './runtime-status'
+import { AGENT_CHAT_MESSAGE_CAP } from '../src/lib/constants'
 
 /**
  * Live runtime state for one agent instance.
@@ -291,8 +292,8 @@ class GeneralKaiRuntime {
     if (msgs.length === 0) return
     try {
       await appendBatch(chatFilePath(entry.agentDir), msgs)
-      if (entry.messages.length > 5000) {
-        trimTo(chatFilePath(entry.agentDir), 5000).catch((err) =>
+      if (entry.messages.length > AGENT_CHAT_MESSAGE_CAP) {
+        trimTo(chatFilePath(entry.agentDir), AGENT_CHAT_MESSAGE_CAP).catch((err) =>
           log.warn(`[runtime] chat trim failed for ${entry.agentId}:`, err),
         )
       }

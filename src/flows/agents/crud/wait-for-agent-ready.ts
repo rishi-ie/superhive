@@ -15,9 +15,10 @@
 import { agents } from '@/api/agents'
 import type { AgentSettingsState } from '@/models/agent'
 import type { WaitForReadyResult, WaitForAgentReadyOptions } from '@/models/agent'
+import { AGENT_READY_TIMEOUT_MS, AGENT_READY_POLL_MS } from '@/lib/constants'
 
-const DEFAULT_TIMEOUT_MS = 15_000
-const DEFAULT_POLL_MS = 300
+const DEFAULT_TIMEOUT_MS = AGENT_READY_TIMEOUT_MS
+const DEFAULT_POLL_MS = AGENT_READY_POLL_MS
 
 export async function waitForAgentReady(
   agentId: string,

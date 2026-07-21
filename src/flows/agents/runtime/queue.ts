@@ -41,13 +41,14 @@ import type {
   RuntimeSliceView,
   AccessorFn,
 } from '@/models/runtime'
+import { AGENT_CHAT_MESSAGE_CAP } from '@/lib/constants'
 
 export type { StreamOp, RuntimeSliceView, SliceAccessor, AccessorFn } from '@/models/runtime'
 
 export const QUEUE_TICK_MS = 50
 const MAX_QUEUE_SIZE = 1000
-/** Cap matches disk trim (5000). Drop oldest rows beyond this. */
-export const MAX_QUEUE_MESSAGES = 5000
+/** Cap matches disk trim (AGENT_CHAT_MESSAGE_CAP). Drop oldest rows beyond this. */
+export const MAX_QUEUE_MESSAGES = AGENT_CHAT_MESSAGE_CAP
 
 let sliceAccessor: AccessorFn | null = null
 
