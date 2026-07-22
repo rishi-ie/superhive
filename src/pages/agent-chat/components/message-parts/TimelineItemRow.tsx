@@ -58,10 +58,7 @@ function TimelineItemRowBase({
             onClick={() => setOpen((v) => !v)}
             className="text-foreground/80 hover:text-foreground cursor-pointer text-left"
           >
-            <span className="inline-flex items-center gap-1.5">
-              <span aria-hidden>{openForFrozen ? '▼' : '▶'}</span>
-              <span>{label}</span>
-            </span>
+            {label}
           </button>
         ) : (
           <span className="text-foreground/80">{label}</span>
