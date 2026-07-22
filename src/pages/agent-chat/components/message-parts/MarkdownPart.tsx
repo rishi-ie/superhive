@@ -88,7 +88,7 @@ const components: Components = {
     <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h6>
   ),
   p: ({ children }) => (
-    <p className="text-sm leading-relaxed my-1.5">{children}</p>
+    <p className="text-[14px] leading-relaxed my-1.5">{children}</p>
   ),
   strong: ({ children }) => (
     <strong className="font-semibold text-foreground">{children}</strong>
@@ -105,7 +105,7 @@ const components: Components = {
     <ol className="list-decimal list-inside my-1.5 gap-1">{children}</ol>
   ),
   li: ({ children }) => (
-    <li className="text-sm leading-relaxed">{children}</li>
+    <li className="text-[14px] leading-relaxed">{children}</li>
   ),
   input: ({ checked, type }) => {
     if (type !== 'checkbox') return null
