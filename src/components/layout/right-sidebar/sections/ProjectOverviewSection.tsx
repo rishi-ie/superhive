@@ -102,7 +102,7 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
             )}
           </span>
         ) : (
-          <span className="text-xs text-muted-foreground/70 italic">
+          <span className="text-xs text-muted-foreground/70">
             {DESCRIPTION_FALLBACK_TEXT}
           </span>
         )}
