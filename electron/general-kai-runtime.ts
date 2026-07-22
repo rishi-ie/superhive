@@ -69,7 +69,7 @@ type TelemetryWireEvent = {
  *     handler is in place but the renderer doesn't fire it yet — the
  *     `finalize-message` op lands in Phase B.
  */
-class GeneralKaiRuntime {
+export class GeneralKaiRuntime {
   private entries = new Map<string, RuntimeEntry>()
   private adapterFactories = new Map<string, () => PiProtocolAdapter>()
   private silenceTimers = new Map<string, NodeJS.Timeout>()
