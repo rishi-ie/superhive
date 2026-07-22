@@ -263,8 +263,20 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
               clearFrozenSafetyNet(e)
               e.pendingTurn = null
               e.lastResponseStart = null
-              e.listeners.forEach((l) => l())
             }
+            // If a message is mid-stream, freeze it with an `error` or
+            // `warning` timeline item. Per Q13: persist with empty response
+            // so the user can scroll back and see the failure.
+            if (e.inFlight && !e.inFlight.frozen) {
+              enqueue({
+                kind: 'append-error',
+                agentId,
+                messageId: e.inFlight.id,
+                message: ev.message,
+                recoverable: ev.recoverable,
+              })
+            }
+            e.listeners.forEach((l) => l())
           }
           return
         }

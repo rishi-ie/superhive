@@ -320,10 +320,14 @@ class GeneralKaiRuntime {
   }
 
   /**
-   * Renderer-driven assistant-message persistence. Wired in Phase C
-   * via the `agents:persistAssistantMessage` IPC handler. Phase A
-   * keeps this stub in place so the IPC can be registered and tested
-   * even though no caller exists yet.
+   * Renderer-driven assistant-message persistence. Fired by the slice's
+   * `notify` path on every finalized `AssistantMessage` (via
+   * `finalize-message`, `set-frozen`, or `append-error`). Replaces the
+   * in-flight placeholder by id, queues the row to `_chatPending`, and
+   * schedules the debounced flush to chat.jsonl via `appendBatch`.
+   *
+   * Idempotent — repeated calls with the same id overwrite the in-memory
+   * row (e.g. a retried freeze from the 60s safety net).
    */
   persistAssistantMessage(agentId: string, message: AssistantMessage): void {
     const entry = this.entries.get(agentId)
