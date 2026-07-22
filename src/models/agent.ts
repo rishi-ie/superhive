@@ -189,6 +189,19 @@ export interface RuntimeSlice {
    */
   lastResponseStart: number | null
   /**
+   * True from the first assistant `message-start` until the next
+   * `agent-end`. Drives the chat footer (copy + timestamp + usage)
+   * gate: the footer stays hidden while this is true, even though
+   * per-turn `message-end`s may have already frozen individual rows
+   * in `messages`. Reset to false on `agent-end`; flipped true again
+   * on the next response's first assistant `message-start`.
+   *
+   * Independent of `status` — `status` flips back to `active` between
+   * turns in a multi-turn response, so it can't carry the "response
+   * still in progress" signal across turns.
+   */
+  agentResponseActive: boolean
+  /**
    * Renderer-side dedup set: tracks which finalized assistant messages
    * have already had their persistence IPC fired. Without this, every
    * notify would re-emit the IPC and spam chat.jsonl. Entries are added

@@ -370,6 +370,16 @@ export type StreamOp =
       messageId: string
       role: 'user' | 'assistant'
     }
+  | {
+      /**
+       * End of the agent's response to the current user prompt. Bridge
+       * of Pi's `agent_end` event through the runtime pipeline. The
+       * queue flips `agentResponseActive` to false on this op so the
+       * chat footer (copy + timestamp + usage) becomes visible.
+       */
+      kind: 'agent-end'
+      agentId: string
+    }
   | { kind: 'append-part'; agentId: string; messageId: string; part: ContentPart }
   | {
       kind: 'append-delta'
@@ -450,6 +460,11 @@ export interface RuntimeSliceView {
   inFlight: RuntimeAssistantState | null
   inFlightToolCount: number
   lastResponseStart: number | null
+  /**
+   * True from the first assistant `message-start` until the next
+   * `agent-end`. See `RuntimeSlice.agentResponseActive`.
+   */
+  agentResponseActive: boolean
 }
 
 /** The accessor the queue calls at tick time to read+notify a slice. */

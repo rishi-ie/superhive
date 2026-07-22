@@ -9,6 +9,14 @@ interface MergedAssistantMessageProps {
   messages: PersistedAssistantMessage[]
   agentId: string
   className?: string
+  /**
+   * Forwarded to the inner `AssistantMessage`. When true, the
+   * per-message footer (copy + timestamp + usage) is suppressed
+   * even for already-frozen rows — only clears once the agent's
+   * entire response has been written (see
+   * `RuntimeSlice.agentResponseActive`).
+   */
+  agentResponseActive?: boolean
 }
 
 /**
@@ -28,9 +36,21 @@ interface MergedAssistantMessageProps {
  * arrays and letting the existing sort handle ordering gives the
  * correct visual.
  */
-export function MergedAssistantMessage({ messages, agentId, className }: MergedAssistantMessageProps) {
+export function MergedAssistantMessage({
+  messages,
+  agentId,
+  className,
+  agentResponseActive = false,
+}: MergedAssistantMessageProps) {
   if (messages.length === 1) {
-    return <AssistantMessage message={messages[0]!} agentId={agentId} className={className} />
+    return (
+      <AssistantMessage
+        message={messages[0]!}
+        agentId={agentId}
+        className={className}
+        agentResponseActive={agentResponseActive}
+      />
+    )
   }
 
   const first = messages[0]!
@@ -52,5 +72,12 @@ export function MergedAssistantMessage({ messages, agentId, className }: MergedA
     },
   }
 
-  return <AssistantMessage message={merged} agentId={agentId} className={className} />
+  return (
+    <AssistantMessage
+      message={merged}
+      agentId={agentId}
+      className={className}
+      agentResponseActive={agentResponseActive}
+    />
+  )
 }

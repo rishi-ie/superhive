@@ -33,6 +33,15 @@ interface ConversationAreaProps {
    * 60s safety net fires.
    */
   pendingTurn?: { userMessageId: string; startedAt: number } | null
+  /**
+   * True from the first assistant `message-start` until the next
+   * `agent-end`. Forwards into `AssistantMessage`'s footer gate so
+   * the per-message footer (copy + timestamp + usage) only appears
+   * after the agent's *entire* response has been written. Stays true
+   * across turns in a multi-turn response — only `agent-end` clears
+   * it.
+   */
+  agentResponseActive?: boolean
 }
 
 export function ConversationArea({
@@ -46,6 +55,7 @@ export function ConversationArea({
   agentName,
   onPromptSelect,
   pendingTurn = null,
+  agentResponseActive = false,
 }: ConversationAreaProps) {
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null)
   const [atBottom, setAtBottom] = React.useState(true)
@@ -208,6 +218,7 @@ export function ConversationArea({
                   key={row.message.id}
                   message={row.message}
                   agentId={agentId ?? ''}
+                  agentResponseActive={agentResponseActive}
                   className={
                     freshIds.has(row.message.id)
                       ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
@@ -225,6 +236,7 @@ export function ConversationArea({
                 <MergedAssistantMessage
                   messages={row.messages}
                   agentId={agentId ?? ''}
+                  agentResponseActive={agentResponseActive}
                   className={
                     isFresh
                       ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'

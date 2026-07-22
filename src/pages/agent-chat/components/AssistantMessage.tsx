@@ -24,6 +24,16 @@ interface AssistantMessageProps {
   message: PersistedAssistantMessage | RuntimeAssistantState
   className?: string
   agentId: string
+  /**
+   * True while the agent is still streaming any part of the response
+   * to the current user prompt — i.e. between the first assistant
+   * `message-start` and the next `agent-end`. Gate for the per-message
+   * footer (copy + timestamp + usage): while true, the footer stays
+   * hidden even for rows that have already frozen per-turn, so the
+   * user sees one footer surface at the *end* of the whole response
+   * rather than N footers flickering at every turn boundary.
+   */
+  agentResponseActive?: boolean
 }
 
 /**
@@ -80,6 +90,7 @@ function ResponseBlockView({ block }: { block: ResponseBlock }) {
 export function AssistantMessage({
   message,
   className,
+  agentResponseActive = false,
 }: AssistantMessageProps) {
   const { copied, trigger } = useCopyFeedback()
 
@@ -186,7 +197,7 @@ export function AssistantMessage({
         </div>
       ) : null}
 
-      {frozen ? (
+      {frozen && !agentResponseActive ? (
         <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
           <Button
             size="icon-sm"

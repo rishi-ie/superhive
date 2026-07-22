@@ -70,6 +70,7 @@ export function disposeRuntimeSliceNow(agentId: string): void {
   clearFrozenSafetyNet(slice)
   slice.pendingTurn = null
   slice.lastResponseStart = null
+  slice.agentResponseActive = false
   slice.inFlight = null
   runtimeSlices.delete(agentId)
   clearAgentQueue(agentId)
@@ -154,6 +155,7 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     pendingTurnTimeoutId: undefined,
     frozenSafetyNetTimer: undefined,
     lastResponseStart: null,
+    agentResponseActive: false,
     persistedFrozenMessages: new Set(),
     unsubs,
     listeners: new Set(),

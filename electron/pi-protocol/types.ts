@@ -35,6 +35,15 @@ export type AdapterEvent =
   | { type: 'text-end'; messageId: string; contentIndex: number; content: string }
   | { type: 'message-start'; messageId: string; role: 'user' | 'assistant' }
   | { type: 'message-end'; messageId: string }
+  /**
+   * End of the agent's response to a single user prompt. Emitted by
+   * raw-text-adapter once Pi finishes its multi-turn response loop.
+   * The renderer treats this as the "response fully written" signal —
+   * the per-message footer (copy button + timestamp + usage) stays
+   * hidden until this lands, even when individual per-turn
+   * `message-end`s have already frozen their rows.
+   */
+  | { type: 'agent-end' }
   | { type: 'thinking-start'; messageId: string; contentIndex: number }
   | { type: 'thinking-delta'; messageId: string; contentIndex: number; delta: string }
   | { type: 'thinking-end'; messageId: string; contentIndex: number; content: string }

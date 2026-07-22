@@ -184,6 +184,11 @@ export class RawTextAdapter implements PiProtocolAdapter {
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
           }
+          // Surface "response fully written" to the renderer so it can
+          // show the per-message footer (copy + timestamp + usage).
+          // Per-turn `message-end`s freeze their rows individually; only
+          // `agent_end` says the entire prompt response is complete.
+          emit({ type: 'agent-end' })
         } else if (obj.type === 'message_end') {
           // Pi emits message_end for every message in its protocol —
           // assistant, toolResult, and user. We only want to close our

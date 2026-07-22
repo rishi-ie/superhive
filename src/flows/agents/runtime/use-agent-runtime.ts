@@ -52,6 +52,7 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [pendingTurn, setPendingTurn] = React.useState<
     { userMessageId: string; startedAt: number } | null
   >(null)
+  const [agentResponseActive, setAgentResponseActive] = React.useState(false)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -80,6 +81,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setRetry(sliceRef.current.retry)
       setInFlightToolCount(sliceRef.current.inFlightToolCount)
       setPendingTurn(sliceRef.current.pendingTurn ? { ...sliceRef.current.pendingTurn } : null)
+      setAgentResponseActive(sliceRef.current.agentResponseActive)
       setLoading(sliceRef.current.loading)
     }
 
@@ -158,6 +160,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     retry,
     inFlightToolCount,
     pendingTurn,
+    agentResponseActive,
     loading,
     send,
     stop,

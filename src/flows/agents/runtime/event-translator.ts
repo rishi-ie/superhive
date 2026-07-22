@@ -179,6 +179,14 @@ export function translateEventToOps(
         },
       ]
 
+    case 'agent-end':
+      // Bridge Pi's "response done" signal. The queue flips
+      // `agentResponseActive` to false on this op so the chat footer
+      // (copy + timestamp + usage) becomes visible. Per-turn
+      // `finalize-message`s freeze their rows individually but don't
+      // trigger the footer on their own.
+      return [{ kind: 'agent-end', agentId }]
+
     case 'usage': {
       // The `usage` event arrives mid-message-end. Forward it via the
       // finalize-message op's metadata so the freeze step attaches it.

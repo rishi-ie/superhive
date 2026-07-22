@@ -277,6 +277,13 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         activityTimeline: [],
         response: [],
       }
+      // Flip the "agent is mid-response" sentinel. Holds the chat
+      // footer (copy + timestamp + usage) until `agent-end` clears
+      // it. Per-turn `message-end`s leave this true because more
+      // turns may still arrive.
+      if (op.role === 'assistant') {
+        slice.agentResponseActive = true
+      }
       return
     }
 
@@ -528,6 +535,15 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
       const message = buildAssistantMessage(frozen)
       slice.messages = [...slice.messages, message]
       slice.inFlight = null
+      return
+    }
+
+    case 'agent-end': {
+      // End of the agent's response to the current user prompt.
+      // Clears the response-active sentinel so the per-message footer
+      // (copy + timestamp + usage) can render. Idempotent — repeated
+      // `agent-end` events are safe.
+      slice.agentResponseActive = false
       return
     }
 

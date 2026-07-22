@@ -137,6 +137,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     compaction,
     retry,
     pendingTurn,
+    agentResponseActive,
     loading,
     send,
     stop,
@@ -266,6 +267,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
         agentId={projectAgent.id}
         agentName={projectAgent.name}
         pendingTurn={pendingTurn}
+        agentResponseActive={agentResponseActive}
         onPromptSelect={(prompt) => {
           setInput(prompt)
           requestAnimationFrame(() => textareaRef.current?.focus())
