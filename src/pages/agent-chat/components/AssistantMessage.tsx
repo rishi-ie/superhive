@@ -95,10 +95,7 @@ export function AssistantMessage({
       ) : null}
 
       {showProse && response.length > 0 ? (
-        <>
-          <div className="my-1 h-px bg-border" aria-hidden />
-          <ResponseBlocks blocks={response} frozen={frozen} />
-        </>
+        <ResponseBlocks blocks={response} frozen={frozen} />
       ) : null}
 
       {frozen ? (
