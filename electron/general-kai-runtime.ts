@@ -14,8 +14,8 @@ import {
 } from './pi-protocol'
 import { TelemetryTailer } from './pi-protocol/telemetry-tailer'
 import type { AgentStatus } from '../src/storage/types'
-import type { RuntimeStatusPayload, RuntimeMessage } from '../src/types/electron'
-import { normalizeToolResult } from '../src/models/runtime'
+import type { RuntimeStatusPayload } from '../src/types/electron'
+import type { ChatRow, UserMessage, AssistantMessage } from '../src/models/assistant-message'
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { SettingsRepository } from '../src/storage/repositories/SettingsRepository'
@@ -55,6 +55,19 @@ type TelemetryWireEvent = {
 /**
  * Manages live Pi runtime processes for all agents.
  * Single-threaded JS: all `entries` map mutations are safe without locks.
+ *
+ * SuperHive Chat Runtime v2 — Phase A scope:
+ *   - `entry.messages: ChatRow[]` holds ONLY finalized rows
+ *     (`UserMessage | AssistantMessage`). Streaming state never reaches
+ *     disk.
+ *   - The main process is a pure forwarder for assistant-streaming
+ *     events. It does NOT mutate `entry.messages` on streaming events;
+ *     the renderer is the sole owner of the in-flight state.
+ *   - User messages persist immediately on send.
+ *   - Assistant message persistence will be wired in Phase C via the
+ *     `agents:persistAssistantMessage` IPC. For Phase A, the IPC
+ *     handler is in place but the renderer doesn't fire it yet — the
+ *     `finalize-message` op lands in Phase B.
  */
 class GeneralKaiRuntime {
   private entries = new Map<string, RuntimeEntry>()
@@ -65,10 +78,6 @@ class GeneralKaiRuntime {
   private telemetryTailers = new Map<string, TelemetryTailer>()
   private lastSeenCounter = new Map<string, number>()
 
-  /**
-   * Register a custom PiProtocolAdapter factory for an agent.
-   * Allows swapping the text-adapter for a structured-JSONL adapter in the future.
-   */
   registerAdapterFactory(agentId: string, factory: () => PiProtocolAdapter): void {
     this.adapterFactories.set(agentId, factory)
   }
@@ -89,17 +98,6 @@ class GeneralKaiRuntime {
     return Array.from(this.entries.keys())
   }
 
-  /**
-   * Synchronously read the agentKind from the database for one agent.
-   * Used at spawn time to populate the `AGENT_KIND` env var so coordinator-only
-   * Pi extensions (e.g. superhive-pi-orchestration) can gate on it.
-   *
-   * Returns 'standard' if the agent cannot be found or has no agentKind set,
-   * preserving the pre-Gap-1 behavior (no orchestration tools registered).
-   *
-   * Implemented via the repository's sync listing to avoid making spawn()
-   * async. The runtime is single-threaded JS so the read is race-free.
-   */
   private resolveAgentKindSync(agentId: string): string {
     try {
       const all = AgentRepository.getAllSync()
@@ -169,6 +167,8 @@ class GeneralKaiRuntime {
 
     this.entries.set(agentId, entry)
 
+    // Hydrate from disk on start. The disk always holds finalized rows
+    // (no streaming state) so this is a plain readAll.
     const persisted = await readAll(chatFilePath(agentDir))
     if (entry.messages.length === 0 && persisted.length > 0) {
       entry.messages = persisted
@@ -210,15 +210,20 @@ class GeneralKaiRuntime {
     setTimeout(() => this.start(agentId, entry.agentDir, entry.manifestPiSource), 800)
   }
 
+  /**
+   * Send a user prompt. The user message is persisted immediately
+   * (spec: "User Message — Persist immediately"). The runtime then
+   * writes the wire envelope to Pi's stdin.
+   */
   send(agentId: string, text: string): boolean {
     const entry = this.entries.get(agentId)
     if (!entry?.process) return false
     if (!text.trim()) return false
-    const userMsg: RuntimeMessage = {
+    const userMsg: UserMessage = {
       id: crypto.randomUUID(),
       role: 'user',
-      parts: [{ type: 'text', text, state: 'complete' }],
-      ts: Date.now(),
+      timestamp: Date.now(),
+      text,
     }
     entry.messages.push(userMsg)
     entry._chatPending.add(userMsg.id)
@@ -268,7 +273,7 @@ class GeneralKaiRuntime {
   }
 
   // ============================================================
-  // CHAT PERSISTENCE
+  // CHAT PERSISTENCE — only finalized rows reach disk
   // ============================================================
 
   private scheduleChatPersist(entry: RuntimeEntry): void {
@@ -283,15 +288,15 @@ class GeneralKaiRuntime {
   private async flushChatEntry(entry: RuntimeEntry): Promise<void> {
     entry._chatDebounceTimer = null
     if (entry._chatPending.size === 0) return
-    const msgs: RuntimeMessage[] = []
+    const rows: ChatRow[] = []
     for (const id of entry._chatPending) {
-      const msg = entry.messages.find((m) => m.id === id)
-      if (msg) msgs.push(msg)
+      const m = entry.messages.find((r) => r.id === id)
+      if (m) rows.push(m)
     }
     entry._chatPending.clear()
-    if (msgs.length === 0) return
+    if (rows.length === 0) return
     try {
-      await appendBatch(chatFilePath(entry.agentDir), msgs)
+      await appendBatch(chatFilePath(entry.agentDir), rows)
       if (entry.messages.length > AGENT_CHAT_MESSAGE_CAP) {
         trimTo(chatFilePath(entry.agentDir), AGENT_CHAT_MESSAGE_CAP).catch((err) =>
           log.warn(`[runtime] chat trim failed for ${entry.agentId}:`, err),
@@ -312,6 +317,29 @@ class GeneralKaiRuntime {
         return this.flushChatEntry(entry)
       }),
     )
+  }
+
+  /**
+   * Renderer-driven assistant-message persistence. Wired in Phase C
+   * via the `agents:persistAssistantMessage` IPC handler. Phase A
+   * keeps this stub in place so the IPC can be registered and tested
+   * even though no caller exists yet.
+   */
+  persistAssistantMessage(agentId: string, message: AssistantMessage): void {
+    const entry = this.entries.get(agentId)
+    if (!entry) return
+    const idx = entry.messages.findIndex((m) => m.id === message.id)
+    if (idx === -1) {
+      entry.messages = [...entry.messages, message]
+    } else {
+      entry.messages = [
+        ...entry.messages.slice(0, idx),
+        message,
+        ...entry.messages.slice(idx + 1),
+      ]
+    }
+    entry._chatPending.add(message.id)
+    this.scheduleChatPersist(entry)
   }
 
   ensureSettingsWatcher(agentId: string, settingsPath: string): void {
@@ -371,11 +399,6 @@ class GeneralKaiRuntime {
     this.entries.delete(agentId)
   }
 
-  /**
-   * Called by the WRITE_SETTINGS IPC handler after it successfully bumps the
-   * counter. Keeps the watcher's self-write guard in sync so the watcher does
-   * not re-broadcast a change we just wrote ourselves.
-   */
   markSelfWrite(agentId: string, counter: number): void {
     this.lastSeenCounter.set(agentId, counter)
   }
@@ -441,10 +464,6 @@ class GeneralKaiRuntime {
     }
     if (event.type === 'context') {
       const tokens = typeof event.tokens === 'number' ? event.tokens : null
-      // Pi may legitimately return contextWindow = 0 for a freshly-loaded
-      // model whose registry entry is missing or unknown. Don't drop the
-      // snapshot — the renderer falls back through selectedContextWindow →
-      // activeModelContextWindow → contextUsage.contextWindow.
       const contextWindow = typeof event.contextWindow === 'number' ? event.contextWindow : 0
       const percent = typeof event.percent === 'number' ? event.percent : null
       const next: ContextSnapshot = { tokens, contextWindow, percent }
@@ -476,23 +495,13 @@ class GeneralKaiRuntime {
       entry.activeModelName = name
       entry.activeModelProvider = provider
       this.emitStatus(agentId)
-      // Auto-write-back: if there's a custom ModelEntry row for this
-      // provider+name with contextWindow still undefined, fill it in. This
-      // is how the Add Model dialog's "no context window prompt" works —
-      // Pi knows the window (registry or HARDCODED_CONTEXT_WINDOWS
-      // fallback), telemetry surfaces it, main writes it back.
       if (typeof event.provider === 'string' && name && typeof contextWindow === 'number') {
         this.persistModelContextWindow(event.provider, name, contextWindow)
       }
       return
     }
-    // 'lifecycle' events are recorded but do not change UI state.
   }
 
-  /**
-   * Fill in contextWindow on the matching ModelEntry row if it's still
-   * undefined. Existing user-typed values are preserved.
-   */
   private async persistModelContextWindow(
     provider: string,
     name: string,
@@ -585,17 +594,8 @@ class GeneralKaiRuntime {
           PI_DIR: piDir,
           AGENT_DIR: agentDir,
           PI_AGENT_DIR: agentDir,
-          // Gap 1: pass the agent kind so coordinator-only extensions can
-          // gate on `process.env.AGENT_KIND === 'project-coordinator'`.
-          // Standard agents get AGENT_KIND='standard' and the orchestration
-          // extension no-ops for them.
           AGENT_KIND: this.resolveAgentKindSync(entry.agentId),
-          // Gap 2: pass the agent's UUID so the orchestrator extension
-          // can detect role at session_start by comparing against
-          // `settings.project.coordinatorAgentId` in the truth file.
           AGENT_ID: agentId,
-          // Diagnostic knob: when set, the telemetry extension writes
-          // every handler route + journal-path decision to stderr.
           SUPERHIVE_TELEMETRY_DEBUG:
             process.env.SUPERHIVE_TELEMETRY_DEBUG ?? '0',
         },
@@ -629,12 +629,6 @@ class GeneralKaiRuntime {
         if (entry.stderrLog.length > STDERR_LOG_LIMIT) {
           entry.stderrLog.shift()
         }
-        // Promote any extension-load failure lines to warn level so
-        // they show up in main.log without requiring debug logging.
-        // Pi's loader catches extension exceptions and returns them in
-        // LoadExtensionsResult.errors, but the agent harness swallows
-        // that — extension authors write to stderr (or stdout) instead,
-        // and we want those visible.
         if (
           /Failed to load extension/i.test(trimmed) ||
           /Cannot find module/i.test(trimmed) ||
@@ -708,7 +702,11 @@ class GeneralKaiRuntime {
   }
 
   // ============================================================
-  // EVENT BROADCAST
+  // EVENT BROADCAST — pure forwarder for streaming events.
+  //
+  // Phase A: the main process does NOT mutate `entry.messages` on any
+  // streaming event. It only updates status/lastError and forwards the
+  // event to the renderer (which is the sole owner of in-flight state).
   // ============================================================
 
   private handleAdapterEvent(agentId: string, event: AdapterEvent): void {
@@ -728,253 +726,21 @@ class GeneralKaiRuntime {
     }
 
     if (event.type === 'message-start') {
-      // Defensive dedup: the renderer mirrors this check via the queue's
-      // message-start op. If a wire-format glitch ever re-emits the same
-      // messageId within a single turn, we must not push a duplicate row.
-      if (entry.messages.some((m) => m.id === event.messageId)) {
-        log.debug(
-          `[runtime.event] agent=${agentId} duplicate message-start id=${event.messageId}; skipping push`,
-        )
-        return
-      }
-      const msg: RuntimeMessage = {
-        id: event.messageId,
-        role: event.role,
-        parts: [],
-        ts: Date.now(),
-      }
-      entry.messages.push(msg)
-      entry._chatPending.add(msg.id)
-      this.scheduleChatPersist(entry)
+      // Phase A: no in-flight placeholder is pushed. The renderer
+      // creates its own in-flight state on receipt of this event.
       this.transitionStatus(entry, 'busy')
       log.debug(`[runtime.event] agent=${agentId} type=message-start role=${event.role}`)
-      this.emitMessages(agentId)
-      return
-    }
-
-    if (event.type === 'text-delta') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        const last = msg.parts[msg.parts.length - 1]
-        if (last && last.type === 'text') {
-          msg.parts = [
-            ...msg.parts.slice(0, -1),
-            { ...last, text: last.text + event.delta, state: 'streaming' },
-          ]
-        } else {
-          msg.parts = [
-            ...msg.parts,
-            { type: 'text', text: event.delta, state: 'streaming' },
-          ]
-        }
-        this.scheduleChatPersist(entry)
-        const preview = event.delta.length > 100 ? event.delta.slice(0, 100) + '...' : event.delta
-        log.debug(`[runtime.event] agent=${agentId} type=text-delta delta=${JSON.stringify(preview)}`)
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'message-end') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        msg.parts = msg.parts.map((p) => {
-          if (p.type === 'text' && p.state !== 'complete')
-            return { ...p, state: 'complete' as const }
-          if (p.type === 'thinking' && p.state !== 'complete')
-            return { ...p, state: 'complete' as const }
-          return p
-        })
-        // Re-arm the persist timer so the now-complete state lands on disk.
-        // An earlier flush may have raced message-end and written 'streaming'
-        // state; this guarantees a follow-up flush with the correct state.
-        entry._chatPending.add(msg.id)
-        this.scheduleChatPersist(entry)
-        this.emitEvent(agentId, event)
-        this.emitMessages(agentId)
-      }
-      this.transitionStatus(entry, 'active')
-      log.debug(`[runtime.event] agent=${agentId} type=message-end`)
-      return
-    }
-
-    if (event.type === 'thinking-start') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        msg.parts = [...msg.parts, { type: 'thinking', text: '', state: 'streaming' }]
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'thinking-delta') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        const last = msg.parts[msg.parts.length - 1]
-        if (last && last.type === 'thinking') {
-          msg.parts = [
-            ...msg.parts.slice(0, -1),
-            { ...last, text: last.text + event.delta, state: 'streaming' },
-          ]
-        }
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'thinking-end') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        let flipped = false
-        msg.parts = msg.parts.map((p) => {
-          if (flipped || p.type !== 'thinking' || p.state === 'complete') return p
-          flipped = true
-          return { ...p, text: event.content || p.text, state: 'complete' as const }
-        })
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'tool-call-start') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        msg.parts = [
-          ...msg.parts,
-          {
-            type: 'tool-call',
-            id: event.toolCallId,
-            name: event.name,
-            args: undefined,
-            state: 'pending',
-          },
-        ]
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'tool-call-delta') {
-      // Args deltas are JSON-string deltas; we accumulate them per tool-call
-      // id. We don't try to parse partial JSON — the renderer shows a
-      // streaming caret and only attempts to render after tool-call-end.
-      for (const msg of entry.messages) {
-        const idx = msg.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === event.toolCallId,
-        )
-        if (idx === -1) continue
-        const cur = msg.parts[idx]!
-        if (cur.type !== 'tool-call') continue
-        const prevArgs = typeof cur.args === 'string' ? cur.args : ''
-        msg.parts = [
-          ...msg.parts.slice(0, idx),
-          { ...cur, args: prevArgs + event.delta, state: 'streaming-args' },
-          ...msg.parts.slice(idx + 1),
-        ]
-        this.emitEvent(agentId, event)
-        break
-      }
-      return
-    }
-
-    if (event.type === 'tool-call-end') {
-      for (const msg of entry.messages) {
-        const idx = msg.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === event.toolCallId,
-        )
-        if (idx === -1) continue
-        const cur = msg.parts[idx]!
-        if (cur.type !== 'tool-call') continue
-        msg.parts = [
-          ...msg.parts.slice(0, idx),
-          { ...cur, args: event.args, state: 'complete' },
-          ...msg.parts.slice(idx + 1),
-        ]
-        this.emitEvent(agentId, event)
-        break
-      }
-      return
-    }
-
-    if (event.type === 'tool-execution-start') {
-      entry._inFlightTools.set(event.toolCallId, {
-        type: 'tool-result',
-        id: event.toolCallId,
-        name: event.name,
-        result: [{ type: 'text', text: '' }],
-        isError: false,
-        state: 'streaming',
-      })
       this.emitEvent(agentId, event)
       return
     }
 
-    if (event.type === 'tool-execution-update') {
-      // Partial result snapshots replace whatever we have buffered. The host
-      // (Pi) sends the full snapshot on every update, not a delta. Keeping a
-      // single tool-result part in the in-flight map lets the renderer show
-      // a streaming body until the next update arrives.
-      const cur = entry._inFlightTools.get(event.toolCallId)
-      if (cur) {
-        entry._inFlightTools.set(event.toolCallId, {
-          ...cur,
-          result: normalizeToolResult(event.partialResult),
-          state: 'streaming',
-        })
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'tool-execution-end') {
-      const finalized = entry._inFlightTools.get(event.toolCallId)
-      const finalPart: import('../src/models/runtime').ContentPart = finalized
-        ? {
-            ...finalized,
-            result: normalizeToolResult(event.result),
-            isError: event.isError,
-            state: 'complete',
-          }
-        : {
-            type: 'tool-result',
-            id: event.toolCallId,
-            name: '',
-            result: normalizeToolResult(event.result),
-            isError: event.isError,
-            state: 'complete',
-          }
-      entry._inFlightTools.delete(event.toolCallId)
-
-      // Link the tool-result to the message that owns the matching tool-call.
-      // If we can't find a matching tool-call (e.g. the assistantMessageEvent
-      // stream lagged), append the result to the last assistant message.
-      let linked = false
-      for (const msg of entry.messages) {
-        const idx = msg.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === event.toolCallId,
-        )
-        if (idx === -1) continue
-        msg.parts = [...msg.parts.slice(0, idx + 1), finalPart, ...msg.parts.slice(idx + 1)]
-        this.emitEvent(agentId, event)
-        linked = true
-        break
-      }
-      if (!linked) {
-        for (let i = entry.messages.length - 1; i >= 0; i--) {
-          const m = entry.messages[i]!
-          if (m.role === 'assistant') {
-            m.parts = [...m.parts, finalPart]
-            this.emitEvent(agentId, event)
-            break
-          }
-        }
-      }
-      return
-    }
-
-    if (event.type === 'log') {
-      const preview = event.line.length > 200 ? event.line.slice(0, 200) + '...' : event.line
-      log.debug(`[runtime.event] agent=${agentId} type=log stream=${event.stream} line=${JSON.stringify(preview)}`)
+    if (event.type === 'message-end') {
+      // Phase A: the finalized AssistantMessage is constructed and
+      // pushed by the renderer in Phase B (via the queue's
+      // `finalize-message` op + `persistAssistantMessage` IPC in
+      // Phase C). For now, just transition status and forward.
+      this.transitionStatus(entry, 'active')
+      log.debug(`[runtime.event] agent=${agentId} type=message-end`)
       this.emitEvent(agentId, event)
       return
     }
@@ -1003,32 +769,8 @@ class GeneralKaiRuntime {
 
     if (event.type === 'compaction-end') {
       entry.compaction = undefined
-      // Attach the summary as a branch-summary-style part on the most recent
-      // assistant message so the renderer can render a "Context compacted"
-      // card. If no assistant message exists yet, push onto the running
-      // message-start (handled in Phase 4 — for now we drop silently).
-      if (typeof event.result === 'string' && event.result.trim().length > 0) {
-        const summary = event.result
-        for (let i = entry.messages.length - 1; i >= 0; i--) {
-          const m = entry.messages[i]!
-          if (m.role !== 'assistant') continue
-          m.parts = [
-            ...m.parts,
-            {
-              type: 'compaction-summary',
-              tokensBefore: 0,
-              summary,
-            },
-          ]
-          break
-        }
-      }
       this.emitStatus(agentId)
       this.emitEvent(agentId, event)
-      // Renderer's queue drives the visible `compaction-summary` card via
-      // `append-compaction-summary` op (constructed from the event itself).
-      // Emit messages here is no longer required — the renderer's queue is
-      // the only writer of `entry.messages` in its slice.
       return
     }
 
@@ -1052,45 +794,10 @@ class GeneralKaiRuntime {
       return
     }
 
-    if (event.type === 'image-attachment') {
-      const msg = entry.messages.find((m) => m.id === event.messageId)
-      if (msg) {
-        msg.parts = [
-          ...msg.parts,
-          { type: 'image', data: event.data, mimeType: event.mimeType },
-        ]
-        this.emitEvent(agentId, event)
-      }
-      return
-    }
-
-    if (event.type === 'branch-summary') {
-      // Branch-summary events arrive without a messageId; attach to the most
-      // recent assistant message (or create one if none). The renderer treats
-      // this as an in-band context-restored card.
-      let msg = entry.messages[entry.messages.length - 1]
-      if (!msg || msg.role !== 'assistant') {
-        msg = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          parts: [],
-          ts: Date.now(),
-        }
-        entry.messages.push(msg)
-      }
-      msg.parts = [
-        ...msg.parts,
-        // branch-summary has no messageId; emit a synthetic compaction-summary
-        // so the renderer can show a single UI card type.
-        { type: 'compaction-summary', tokensBefore: 0, summary: event.summary },
-      ]
-      this.emitEvent(agentId, event)
-      return
-    }
-
-    const payload = JSON.stringify(event)
-    const truncated = payload.length > 300 ? payload.slice(0, 300) + '...' : payload
-    log.debug(`[runtime.event] agent=${agentId} ${truncated}`)
+    // All other streaming events (text-delta, thinking-*,
+    // tool-call-*, tool-execution-*, message-start/end,
+    // image-attachment, branch-summary, log) — forward only.
+    // The renderer is the sole owner of in-flight state.
     this.emitEvent(agentId, event)
   }
 
@@ -1159,9 +866,6 @@ class GeneralKaiRuntime {
     if (!entry || !entry.process) return
     if (entry.status === 'idle') return
     this.readyEmitted.add(agentId)
-    // Route through transitionStatus so the DB row catches up. Without this
-    // the DB agent stayed at `initializing` (pre-rewrite) while the live
-    // runtime reported `running`, leaving the agents table visually stuck.
     entry.bootStep = 'ready'
     this.transitionStatus(entry, 'active')
     log.info(`[runtime] agent ${agentId} ready (silence-based)`)

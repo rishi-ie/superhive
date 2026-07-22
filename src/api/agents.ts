@@ -8,6 +8,7 @@ import type {
   RuntimeExitPayload,
   AdapterEvent,
 } from '@/types/electron'
+import type { StateOneRow } from '@/models/runtime'
 
 export const agents = {
   list: (): Promise<Agent[]> => window.api.agents.list(),
@@ -30,7 +31,14 @@ export const agents = {
     window.api.agents.readSettings(id),
   writeSettings: (id: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> =>
     window.api.agents.writeSettings(id, patch),
-  reveal: (id: string): Promise<{ ok: boolean }> => window.api.agents.reveal(id),
+  reveal: (id: string): Promise<{ ok: boolean }> =>
+    window.api.agents.reveal(id),
+  setMessageLineage: (
+    id: string,
+    messageId: string,
+    lineage: readonly StateOneRow[],
+  ): Promise<{ ok: boolean }> =>
+    window.api.agents.setMessageLineage(id, messageId, lineage),
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),

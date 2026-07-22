@@ -25,9 +25,10 @@ function makeSlice(): {
   slice: SliceAccessor['slice']
   getNotifyCount: () => number
 } {
-  const slice = {
-    messages: [] as RuntimeMessage[],
+  const slice: SliceAccessor['slice'] = {
+    messages: [],
     inFlightToolCount: 0,
+    lastResponseStart: null,
   }
   let notifyCount = 0
   const accessor: SliceAccessor = {
@@ -120,8 +121,8 @@ describe('agent-stream-queue', () => {
   })
 
   test('isolates agents', () => {
-    const sliceA = { messages: [] as RuntimeMessage[], inFlightToolCount: 0 }
-    const sliceB = { messages: [] as RuntimeMessage[], inFlightToolCount: 0 }
+    const sliceA: SliceAccessor['slice'] = { messages: [], inFlightToolCount: 0, lastResponseStart: null }
+    const sliceB: SliceAccessor['slice'] = { messages: [], inFlightToolCount: 0, lastResponseStart: null }
     setSliceAccessor((id) => {
       if (id === 'a1') return { slice: sliceA, notify: () => {} }
       if (id === 'a2') return { slice: sliceB, notify: () => {} }
@@ -486,6 +487,8 @@ describe('hasStreamingState', () => {
       id: 'm',
       role: 'assistant',
       parts: [{ type: 'text', text: 'in-flight', state: 'streaming' }],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(true)
@@ -496,6 +499,8 @@ describe('hasStreamingState', () => {
       id: 'm',
       role: 'assistant',
       parts: [{ type: 'thinking', text: 'in-flight', state: 'streaming' }],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(true)
@@ -506,6 +511,8 @@ describe('hasStreamingState', () => {
       id: 'm',
       role: 'assistant',
       parts: [{ type: 'tool-call', id: 'tc', name: 'bash', args: undefined, state: 'pending' }],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(true)
@@ -516,6 +523,8 @@ describe('hasStreamingState', () => {
       id: 'm',
       role: 'assistant',
       parts: [{ type: 'tool-call', id: 'tc', name: 'bash', args: '{}', state: 'streaming-args' }],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(true)
@@ -526,6 +535,8 @@ describe('hasStreamingState', () => {
       id: 'm',
       role: 'assistant',
       parts: [{ type: 'tool-result', id: 'tc', name: '', result: [], isError: false, state: 'pending' }],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(true)
@@ -540,13 +551,15 @@ describe('hasStreamingState', () => {
         { type: 'thinking', text: 'thought', state: 'complete' },
         { type: 'tool-call', id: 'tc', name: 'bash', args: {}, state: 'complete' },
       ],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(false)
   })
 
   test('returns false for empty parts', () => {
-    expect(hasStreamingState({ id: 'm', role: 'assistant', parts: [], ts: 0 })).toBe(false)
+    expect(hasStreamingState({ id: 'm', role: 'assistant', parts: [], activityTimeline: [], response: [], ts: 0 })).toBe(false)
   })
 
   test('returns false for image and compaction-summary parts', () => {
@@ -557,6 +570,8 @@ describe('hasStreamingState', () => {
         { type: 'image', data: 'b64', mimeType: 'image/svg+xml' },
         { type: 'compaction-summary', tokensBefore: 0, summary: 'sum' },
       ],
+      activityTimeline: [],
+      response: [],
       ts: 0,
     }
     expect(hasStreamingState(msg)).toBe(false)
@@ -568,6 +583,8 @@ describe('mergeMessagesPreserveStreaming', () => {
     id,
     role: 'assistant',
     parts,
+    activityTimeline: [],
+    response: [],
     ts: 0,
   })
 
@@ -768,7 +785,9 @@ describe('set-messages', () => {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'hi', state: 'complete' }],
-        ts: 0,
+      activityTimeline: [],
+      response: [],
+      ts: 0,
       },
     ] })
     _test_drainNow()
@@ -783,7 +802,9 @@ describe('set-messages', () => {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'stale', state: 'complete' }],
-        ts: 0,
+      activityTimeline: [],
+      response: [],
+      ts: 0,
       },
     ] })
     _test_drainNow()
@@ -793,7 +814,9 @@ describe('set-messages', () => {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'stale', state: 'complete' }],
-        ts: 0,
+      activityTimeline: [],
+      response: [],
+      ts: 0,
       },
     ] })
     enqueue({
@@ -808,7 +831,9 @@ describe('set-messages', () => {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'stale', state: 'complete' }],
-        ts: 0,
+      activityTimeline: [],
+      response: [],
+      ts: 0,
       },
     ] })
     _test_drainNow()
@@ -825,7 +850,9 @@ describe('set-messages', () => {
         id: `m-${i}`,
         role: 'assistant',
         parts: [{ type: 'text', text: `${i}`, state: 'complete' }],
-        ts: i,
+      activityTimeline: [],
+      response: [],
+      ts: i,
       })
     }
     enqueue({ kind: 'set-messages', agentId: 'a1', messages: incoming })
@@ -838,12 +865,12 @@ describe('set-messages', () => {
   test('appends new ids at the end', () => {
     const { slice } = makeSlice()
     enqueue({ kind: 'set-messages', agentId: 'a1', messages: [
-      { id: 'x', role: 'assistant', parts: [], ts: 0 },
+      { id: 'x', role: 'assistant', parts: [], activityTimeline: [], response: [], ts: 0 },
     ] })
     _test_drainNow()
     enqueue({ kind: 'set-messages', agentId: 'a1', messages: [
-      { id: 'x', role: 'assistant', parts: [], ts: 0 },
-      { id: 'y', role: 'assistant', parts: [], ts: 1 },
+      { id: 'x', role: 'assistant', parts: [], activityTimeline: [], response: [], ts: 0 },
+      { id: 'y', role: 'assistant', parts: [], activityTimeline: [], response: [], ts: 1 },
     ] })
     _test_drainNow()
     expect(slice.messages.map((m) => m.id)).toEqual(['x', 'y'])
@@ -856,13 +883,17 @@ describe('set-messages', () => {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'first', state: 'complete' }],
-        ts: 0,
+      activityTimeline: [],
+      response: [],
+      ts: 0,
       },
       {
         id: 'x',
         role: 'assistant',
         parts: [{ type: 'text', text: 'second', state: 'complete' }],
-        ts: 1,
+      activityTimeline: [],
+      response: [],
+      ts: 1,
       },
     ] })
     _test_drainNow()

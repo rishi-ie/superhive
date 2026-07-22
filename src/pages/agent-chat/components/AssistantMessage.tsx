@@ -3,14 +3,15 @@ import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { TurnFoldRow } from './TurnFoldRow'
+import { ActionChainFold } from './message-parts/ActionChainFold'
+import { WorkingStream } from './WorkingStream'
 import { UsageFooter } from './UsageFooter'
-import { PartRenderer } from './message-parts/PartRenderer'
-import { ToolResultPart } from './message-parts/ToolResultPart'
+import { MarkdownPart } from './message-parts/MarkdownPart'
+import { ImagePart } from './message-parts/ImagePart'
+import { CompactionCard } from './message-parts/CompactionCard'
 import { copyMessage } from '@/flows/agents/ui/copy-message'
 import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
-import { type ContentPart, isMessageInFlight } from '@/models/runtime'
-import type { RuntimeMessage } from '@/types/electron'
+import type { ContentPart, RuntimeMessage } from '@/models/runtime'
 
 interface AssistantMessageProps {
   message: RuntimeMessage
@@ -18,48 +19,46 @@ interface AssistantMessageProps {
   agentId: string
 }
 
+/**
+ * Render prose parts (text + image + compaction-summary). The chain
+ * (thinking + tool-call) lives in `message.lineage` and is rendered
+ * separately by `WorkingStream` (state 1) or `ActionChainFold` (state 2).
+ */
+function renderProsePart(part: ContentPart, i: number) {
+  if (part.type === 'text') {
+    return <MarkdownPart key={`text-${i}`} source={part.text} />
+  }
+  if (part.type === 'image') {
+    return <ImagePart key={`image-${i}`} data={part.data} mimeType={part.mimeType} />
+  }
+  if (part.type === 'compaction-summary') {
+    return (
+      <CompactionCard
+        key={`compaction-${i}`}
+        tokensBefore={part.tokensBefore}
+        summary={part.summary}
+      />
+    )
+  }
+  return null
+}
+
 export function AssistantMessage({
   message,
   className,
 }: AssistantMessageProps) {
   const { copied, trigger } = useCopyFeedback()
-  const toolResultsById = new Map<
-    string,
-    Extract<ContentPart, { type: 'tool-result' }>
-  >()
-  for (const part of message.parts) {
-    if (part.type === 'tool-result') toolResultsById.set(part.id, part)
-  }
 
-  const toolCalls = message.parts.filter(
-    (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
-      p.type === 'tool-call',
-  )
+  // The lineage is the single source of truth for state 1 / state 2.
+  // When `message.lineageFrozen` is true (queue's finalize-message op or
+  // the 60s safety net set it), render the fold. Otherwise render the
+  // WorkingStream — the chain rows grow live as the agent streams.
+  const lineage = message.lineage ?? []
+  const frozen = message.lineageFrozen === true
 
-  const shouldFold =
-    toolCalls.length >= 2 ||
-    message.parts.some(
-      (p) =>
-        p.type !== 'text' &&
-        p.type !== 'thinking' &&
-        p.type !== 'tool-call' &&
-        p.type !== 'tool-result',
-    )
-
-  const lastToolCallIndex = message.parts
-    .map((p, i) => (p.type === 'tool-call' ? i : -1))
-    .filter((i) => i !== -1)
-    .at(-1)
-
-  const nonFoldContent: ContentPart[] =
-    lastToolCallIndex !== undefined
-      ? message.parts.slice(lastToolCallIndex + 1)
-      : []
-
-  const foldContent: ContentPart[] =
-    lastToolCallIndex !== undefined
-      ? message.parts.slice(0, lastToolCallIndex + 1)
-      : message.parts
+  // In state 1, we DON'T render prose yet — only the chain. Prose appears
+  // in state 2 below the fold. This is the explicit user-facing rule.
+  const showProse = frozen
 
   return (
     <div
@@ -68,60 +67,24 @@ export function AssistantMessage({
         className ?? '',
       )}
     >
-      {shouldFold && toolCalls.length >= 2 ? (
-        <TurnFoldRow
-          startedAt={message.ts}
-          endedAt={message.ts + 1}
-          toolCount={toolCalls.length}
-          totalNonTextParts={
-            foldContent.filter(
-              (p) =>
-                p.type !== 'text' && p.type !== 'thinking' && p.type !== 'compaction-summary',
-            ).length
-          }
-          defaultCollapsed={true}
-        >
-          {foldContent.map((part, i) => (
-            <PartRenderer
-              key={`fold-${i}`}
-              part={part}
-              toolResultsById={toolResultsById}
-            />
-          ))}
-        </TurnFoldRow>
-      ) : (
-        message.parts.map((part, i) => (
-          <PartRenderer
-            key={`part-${i}`}
-            part={part}
-            toolResultsById={toolResultsById}
-          />
-        ))
-      )}
-
-      {shouldFold && nonFoldContent.length > 0 ? (
-        nonFoldContent.map((part, i) => (
-          <PartRenderer
-            key={`post-fold-${i}`}
-            part={part}
-            toolResultsById={toolResultsById}
-          />
-        ))
+      {lineage.length > 0 ? (
+        frozen ? (
+          <ActionChainFold rows={lineage} />
+        ) : (
+          <WorkingStream lineage={lineage} />
+        )
       ) : null}
 
-      {/* Orphan tool-results: persisted JSONL where the call was pruned. */}
-      {message.parts
-        .filter((p) => p.type === 'tool-result')
-        .map((part) => {
-          if (Array.from(toolResultsById.values()).includes(part) === false) return null
-          const match = toolCalls.find((c) => c.id === part.id)
-          if (match) return null
-          return (
-            <ToolResultPart key={`orphan-${(part as { id: string }).id}`} part={part} />
-          )
-        })}
+      {showProse ? (
+        <>
+          {message.parts.map((part, i) => {
+            if (part.type === 'thinking' || part.type === 'tool-call') return null
+            return renderProsePart(part, i)
+          })}
+        </>
+      ) : null}
 
-      {!isMessageInFlight(message) && (
+      {frozen ? (
         <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
           <Button
             size="icon-sm"
@@ -173,7 +136,7 @@ export function AssistantMessage({
             </div>
           ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

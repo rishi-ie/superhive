@@ -6,6 +6,11 @@ import { ActiveStateBanners } from './ActiveStateBanners'
 import { ChatEmptyState } from './SuggestedPrompts'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import type { RuntimeMessage } from '@/types/electron'
+import { isMessageInFlight } from '@/models/runtime'
+
+type Row =
+  | { kind: 'message'; message: RuntimeMessage }
+  | { kind: 'pending'; id: string; startedAt: number }
 
 interface ConversationAreaProps {
   messages: RuntimeMessage[]
@@ -16,6 +21,13 @@ interface ConversationAreaProps {
   agentId?: string
   agentName?: string
   onPromptSelect?: (prompt: string) => void
+  /**
+   * Optimistic sentinel set the instant the user sends a message. Renders as
+   * a virtual "Waiting for response…" row at the end of the list —
+   * disappears when the first `message-start` event lands or when the
+   * 60s safety net fires.
+   */
+  pendingTurn?: { userMessageId: string; startedAt: number } | null
 }
 
 export function ConversationArea({
@@ -27,11 +39,32 @@ export function ConversationArea({
   agentId,
   agentName,
   onPromptSelect,
+  pendingTurn = null,
 }: ConversationAreaProps) {
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null)
   const [atBottom, setAtBottom] = React.useState(true)
   const seenIdsRef = React.useRef<Set<string>>(new Set())
   const [freshIds, setFreshIds] = React.useState<Set<string>>(new Set())
+
+  const rows: Row[] = React.useMemo(() => {
+    const out: Row[] = messages.map((m) => ({ kind: 'message', message: m }))
+
+    // If the last message is an in-flight assistant message, the
+    // AssistantMessage component is already rendering a WorkingStream.
+    // Don't stack a second state-1 row on top of it.
+    const tail = messages[messages.length - 1]
+    const tailIsInFlightAssistant =
+      tail?.role === 'assistant' && isMessageInFlight(tail)
+
+    if (pendingTurn && !tailIsInFlightAssistant) {
+      out.push({
+        kind: 'pending',
+        id: pendingTurn.userMessageId,
+        startedAt: pendingTurn.startedAt,
+      })
+    }
+    return out
+  }, [messages, pendingTurn])
 
   React.useEffect(() => {
     const currentIds = new Set(messages.map((m) => m.id))
@@ -62,15 +95,15 @@ export function ConversationArea({
 
   React.useEffect(() => {
     if (!busy) return
-    if (messages.length === 0) return
+    if (rows.length === 0) return
     setAtBottom(true)
     requestAnimationFrame(() => {
       virtuosoRef.current?.scrollToIndex({
-        index: messages.length - 1,
+        index: rows.length - 1,
         align: 'end',
       })
     })
-  }, [busy, messages])
+  }, [busy, rows])
 
   const Scroller = React.useCallback(
     (props: React.HTMLAttributes<HTMLDivElement>) => (
@@ -82,7 +115,7 @@ export function ConversationArea({
     [],
   )
 
-  if (messages.length === 0 && !busy) {
+  if (rows.length === 0 && !busy) {
     return (
       <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />
     )
@@ -98,40 +131,50 @@ export function ConversationArea({
       <Virtuoso
         ref={virtuosoRef}
         style={{ height: '100%' }}
-        data={messages}
-        computeItemKey={(_, m) => m.id}
+        data={rows}
+        computeItemKey={(_, row) => (row.kind === 'pending' ? `pending-${row.id}` : row.message.id)}
         followOutput={atBottom ? 'smooth' : false}
         atBottomStateChange={onAtBottomChange}
-        initialTopMostItemIndex={Math.max(0, messages.length - 1)}
+        initialTopMostItemIndex={Math.max(0, rows.length - 1)}
         components={{ Scroller }}
-        itemContent={(index, message) => (
-          <div
-            className={
-              index === messages.length - 1
-                ? 'mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2'
-                : 'mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2'
-            }
-          >
-            {message.role === 'user' ? (
-              <UserMessage
-                key={message.id}
-                message={message}
-                agentId={agentId ?? ''}
-              />
-            ) : (
-              <AssistantMessage
-                key={message.id}
-                message={message}
-                agentId={agentId ?? ''}
-                className={
-                  freshIds.has(message.id)
-                    ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
-                    : undefined
-                }
-              />
-            )}
-          </div>
-        )}
+        itemContent={(_index, row) => {
+          if (row.kind === 'pending') {
+            return (
+              <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+                <div className="flex items-center gap-2 self-start text-xs text-muted-foreground">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground opacity-50" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-muted-foreground" />
+                  </span>
+                  <span>Waiting for response…</span>
+                </div>
+              </div>
+            )
+          }
+          const message = row.message
+          return (
+            <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+              {message.role === 'user' ? (
+                <UserMessage
+                  key={message.id}
+                  message={message}
+                  agentId={agentId ?? ''}
+                />
+              ) : (
+                <AssistantMessage
+                  key={message.id}
+                  message={message}
+                  agentId={agentId ?? ''}
+                  className={
+                    freshIds.has(message.id)
+                      ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
+                      : undefined
+                  }
+                />
+              )}
+            </div>
+          )
+        }}
       />
       {compaction || retry ? (
         <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-3xl px-4 sm:px-6">

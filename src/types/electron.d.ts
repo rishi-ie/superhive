@@ -39,6 +39,17 @@ export interface AgentsAPI {
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 	reveal: (id: string) => Promise<{ ok: boolean }>
+	/**
+	 * Renderer-driven lineage freeze: the renderer froze a message's
+	 * lineage after the response transitioned to state 2, and is
+	 * asking the main process to persist it as part of the next
+	 * chat.jsonl write.
+	 */
+	setMessageLineage: (
+		id: string,
+		messageId: string,
+		lineage: readonly import('@/models/runtime').StateOneRow[],
+	) => Promise<{ ok: boolean }>
 
 	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated

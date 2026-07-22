@@ -23,6 +23,7 @@ export const IPC = {
     READ_SETTINGS: 'agents:readSettings',
     WRITE_SETTINGS: 'agents:writeSettings',
     REVEAL: 'agents:reveal',
+    PERSIST_ASSISTANT_MESSAGE: 'agents:persistAssistantMessage',
     ON_EVENT:    (id: string) => `agent:${id}:event`,
     ON_STATUS:   (id: string) => `agent:${id}:status`,
     ON_MESSAGES: (id: string) => `agent:${id}:messages`,

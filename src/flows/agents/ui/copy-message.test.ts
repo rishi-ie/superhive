@@ -3,7 +3,14 @@ import { copyMessage } from './copy-message'
 import type { RuntimeMessage } from '@/models/runtime'
 
 function makeMessage(role: 'user' | 'assistant', parts: RuntimeMessage['parts']): RuntimeMessage {
-  return { id: 'm1', role, parts, ts: 1 }
+  return {
+    id: 'm1',
+    role,
+    parts,
+    activityTimeline: [],
+    response: [],
+    ts: 1,
+  }
 }
 
 let writeStub: ReturnType<typeof jest.fn>
@@ -68,7 +75,7 @@ describe('copyMessage', () => {
     expect(writeStub.mock.calls[0]?.[0]).toBe('visible answer')
   })
 
-  test('returns false and writes nothing when assistant has no text parts', async () => {
+  test('writes empty string when assistant has no text parts', async () => {
     const msg = makeMessage('assistant', [
       { type: 'thinking', text: 'only thinking', state: 'complete' },
       {

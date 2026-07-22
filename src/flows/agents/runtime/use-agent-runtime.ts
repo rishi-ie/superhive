@@ -47,6 +47,9 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [compaction, setCompaction] = React.useState<CompactionStatus | undefined>(undefined)
   const [retry, setRetry] = React.useState<RetryStatus | undefined>(undefined)
   const [inFlightToolCount, setInFlightToolCount] = React.useState(0)
+  const [pendingTurn, setPendingTurn] = React.useState<
+    { userMessageId: string; startedAt: number } | null
+  >(null)
   const [loading, setLoading] = React.useState(true)
 
   const sliceRef = React.useRef<RuntimeSlice | null>(null)
@@ -73,6 +76,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setCompaction(sliceRef.current.compaction)
       setRetry(sliceRef.current.retry)
       setInFlightToolCount(sliceRef.current.inFlightToolCount)
+      setPendingTurn(sliceRef.current.pendingTurn ? { ...sliceRef.current.pendingTurn } : null)
       setLoading(sliceRef.current.loading)
     }
 
@@ -85,6 +89,27 @@ export function useAgentRuntime(agentId: string | undefined) {
 
   const send = React.useCallback((text: string) => {
     if (!agentId) return
+    const s = sliceRef.current
+    if (s) {
+      if (s.pendingTurnTimeoutId) {
+        clearTimeout(s.pendingTurnTimeoutId)
+        s.pendingTurnTimeoutId = undefined
+      }
+      const now = Date.now()
+      const userMessageId = `pending-${now}-${Math.random().toString(36).slice(2, 8)}`
+      s.pendingTurn = { userMessageId, startedAt: now }
+      s.lastResponseStart = now
+      s.pendingTurnTimeoutId = setTimeout(() => {
+        const cur = sliceRef.current
+        if (cur?.pendingTurn?.userMessageId === userMessageId) {
+          cur.pendingTurn = null
+          cur.lastResponseStart = null
+          cur.pendingTurnTimeoutId = undefined
+          cur.listeners.forEach((l) => l())
+        }
+      }, 60_000)
+      s.listeners.forEach((l) => l())
+    }
     agents
       .send(agentId, text)
       .catch((err: unknown) => {
@@ -128,6 +153,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     compaction,
     retry,
     inFlightToolCount,
+    pendingTurn,
     loading,
     send,
     stop,

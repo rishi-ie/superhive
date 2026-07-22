@@ -379,4 +379,12 @@ export function registerAgentIpc(): void {
 	ipcMain.handle(IPC.AGENTS.REVEAL, async (_e, agentId: string) => {
 		return revealInFinder(agentId)
 	})
+
+  ipcMain.handle(
+    IPC.AGENTS.PERSIST_ASSISTANT_MESSAGE,
+    async (_e, agentId: string, message: import('../../src/models/assistant-message').AssistantMessage) => {
+      runtime.persistAssistantMessage(agentId, message)
+      return { ok: true }
+    },
+  )
 }

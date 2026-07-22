@@ -2,37 +2,45 @@
  * Runtime slice — the singleton cache of per-agent runtime state in the
  * renderer.
  *
+ * Phase A scope:
+ *   - `slice.messages: RuntimeAssistantState[]` keeps the legacy
+ *     `parts + lineage + lineageFrozen` shape so the existing
+ *     AssistantMessage UI continues to work unchanged.
+ *   - Main process is a pure forwarder (see `general-kai-runtime.ts`):
+ *     it does not mirror streaming state. The renderer is the sole
+ *     writer of in-flight messages.
+ *   - The `setMessageLineage` IPC + 60s safety net are still wired
+ *     so the line-merge race fix from the previous phase keeps
+ *     working. Phase C will replace this with the
+ *     `agents:persistAssistantMessage` IPC.
+ *
  * Owns:
  *   - The `runtimeSlices` Map (keyed by agentId, survives component unmount).
- *   - All IPC subscriptions for the runtime flow (`onStatus`, `onEvent`,
- *     `onMessages`, `onExit`).
+ *   - All IPC subscriptions for the runtime flow.
  *   - The wiring between the slice and the queue (`setSliceAccessor`).
- *   - Initial hydration (`getRuntimeState`, `get`, `getMessages`, `start`).
- *   - Side-effect handlers for events that don't translate to queue ops
- *     (status refetches, toasts).
- *
- * What does NOT live here:
- *   - The queue mechanics → `queue.ts`.
- *   - The event → op translation → `event-translator.ts`.
- *   - The React hook bridge → `use-agent-runtime.ts`.
- *   - Settings persistence → `flows/agents/settings/` (separate flow).
- *   - Aggregator / list-version hooks → `flows/agents/list/`.
- *
- * The queue is wired to this slice via `setSliceAccessor` at module load.
- * This avoids an import cycle (queue ↔ slice) by having queue read the
- * accessor lazily at tick time, not at module-load time.
+ *   - Initial hydration.
+ *   - Side-effect handlers for events that don't translate to queue ops.
  */
 
 import { agents } from '@/api/agents'
 import type { AdapterEvent } from '@/types/electron'
 import { toast } from 'sonner'
 import type { RuntimeSlice } from '@/models/agent'
+import type { StateOneRow } from '@/models/runtime'
 import {
   clearAgentQueue,
   enqueue,
   setSliceAccessor,
 } from './queue'
 import { translateEventToOps } from './event-translator'
+
+/**
+ * 60s safety net: if `finalize-message` op never lands for an in-flight
+ * assistant message (agent crash, dropped event, lost connection),
+ * force-freeze the lineage after 60s so the renderer can transition
+ * state 1 → state 2.
+ */
+const LINEAGE_SAFETY_NET_MS = 60_000
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 
@@ -41,7 +49,10 @@ setSliceAccessor((agentId) => {
   if (!slice) return null
   return {
     slice,
-    notify: () => slice.listeners.forEach((l) => l()),
+    notify: () => {
+      persistFrozenLineages(slice, agentId)
+      slice.listeners.forEach((l) => l())
+    },
   }
 })
 
@@ -50,8 +61,71 @@ export function disposeRuntimeSliceNow(agentId: string): void {
   if (!slice) return
   slice.unsubs.forEach((u) => u())
   slice.unsubs = []
+  if (slice.pendingTurnTimeoutId) {
+    clearTimeout(slice.pendingTurnTimeoutId)
+    slice.pendingTurnTimeoutId = undefined
+  }
+  clearLineageSafetyNet(slice)
+  slice.pendingTurn = null
+  slice.lastResponseStart = null
   runtimeSlices.delete(agentId)
   clearAgentQueue(agentId)
+}
+
+/**
+ * After every slice notify, scan for newly-frozen lineages and IPC them
+ * to the main process for persistence. Idempotent via the
+ * `persistedFrozenLineages` set so re-renders don't re-fire the IPC.
+ *
+ * Also drives the 60s lineage safety net: when a new in-flight assistant
+ * message begins streaming, start the timer. When the message freezes,
+ * clear the timer.
+ */
+function persistFrozenLineages(slice: RuntimeSlice, agentId: string): void {
+  for (const m of slice.messages) {
+    if (!m.lineageFrozen) continue
+    if (slice.persistedFrozenLineages.has(m.id)) continue
+    slice.persistedFrozenLineages.add(m.id)
+    const lineage: readonly StateOneRow[] = m.lineage ?? []
+    void agents.setMessageLineage(agentId, m.id, lineage).catch((err: unknown) => {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[runtime] setMessageLineage failed for ${agentId}/${m.id}:`,
+        err,
+      )
+    })
+  }
+  // Manage the 60s safety net.
+  const tail = slice.messages[slice.messages.length - 1]
+  if (tail && tail.role === 'assistant' && !tail.lineageFrozen) {
+    if (!slice.lineageSafetyNetTimer) {
+      startLineageSafetyNet(slice, agentId)
+    }
+  } else {
+    clearLineageSafetyNet(slice)
+  }
+}
+
+function startLineageSafetyNet(slice: RuntimeSlice, agentId: string): void {
+  if (slice.lineageSafetyNetTimer) return
+  slice.lineageSafetyNetTimer = setTimeout(() => {
+    const entry = runtimeSlices.get(agentId)
+    if (!entry) return
+    for (let i = entry.messages.length - 1; i >= 0; i -= 1) {
+      const m = entry.messages[i]!
+      if (m.role !== 'assistant') continue
+      if (m.lineageFrozen) return
+      enqueue({ kind: 'set-lineage', agentId, messageId: m.id })
+      return
+    }
+  }, LINEAGE_SAFETY_NET_MS)
+}
+
+function clearLineageSafetyNet(slice: RuntimeSlice): void {
+  if (slice.lineageSafetyNetTimer) {
+    clearTimeout(slice.lineageSafetyNetTimer)
+    slice.lineageSafetyNetTimer = undefined
+  }
 }
 
 export function initRuntimeSlice(agentId: string): RuntimeSlice {
@@ -75,6 +149,11 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     loading: true,
     initialized: false,
     inFlightToolCount: 0,
+    pendingTurn: null,
+    pendingTurnTimeoutId: undefined,
+    lineageSafetyNetTimer: undefined,
+    lastResponseStart: null,
+    persistedFrozenLineages: new Set(),
     unsubs,
     listeners: new Set(),
   }
@@ -126,28 +205,31 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     }),
   )
 
-  // Main process emits `entry.messages` via `ON_MESSAGES` after every push
-  // (start hydration, send, message-end, completion). This is the only path
-  // for user messages into the renderer — Pi's adapter does not emit
-  // `message-start` for the user echo (only for assistant events, see
-  // `raw-text-adapter.ts`). Main dedupes at push (defensive `message-start`
-  // check in `general-kai-runtime.ts`), so the queue's `set-messages` merge
-  // sees no duplicate ids. We route through the queue's `set-messages` op
-  // instead of overwriting `entry.messages` directly to preserve the
-  // queue-as-single-writer invariant and protect in-flight streaming parts.
   unsubs.push(
     agents.onMessages(agentId, (messages) => {
-      enqueue({ kind: 'set-messages', agentId, messages })
+      // Phase A: main process emits `entry.messages` after every push
+      // (user-send). The queue merges them in.
+      enqueue({ kind: 'set-messages', agentId, messages: messages as never })
     }),
   )
 
   unsubs.push(
     agents.onEvent(agentId, (ev: AdapterEvent) => {
-      // High-frequency state-mutation events go through the queue so the
-      // renderer re-renders once per 50ms tick instead of once per event.
-      for (const op of translateEventToOps(ev, agentId)) enqueue(op)
+      const ops = translateEventToOps(ev, agentId)
+      for (const op of ops) enqueue(op)
 
-      // Side effects for events that don't translate to queue ops.
+      if (ops.length > 0) {
+        const e = runtimeSlices.get(agentId)
+        if (e?.pendingTurn) {
+          if (e.pendingTurnTimeoutId) {
+            clearTimeout(e.pendingTurnTimeoutId)
+            e.pendingTurnTimeoutId = undefined
+          }
+          e.pendingTurn = null
+          e.listeners.forEach((l) => l())
+        }
+      }
+
       switch (ev.type) {
         case 'compaction-start':
         case 'compaction-end':
@@ -169,11 +251,21 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
         case 'error': {
           toast.error(ev.message, { duration: Infinity })
           const e = runtimeSlices.get(agentId)
-          if (e) e.lastError = ev.message
+          if (e) {
+            e.lastError = ev.message
+            if (e.pendingTurn || e.lastResponseStart !== null) {
+              if (e.pendingTurnTimeoutId) {
+                clearTimeout(e.pendingTurnTimeoutId)
+                e.pendingTurnTimeoutId = undefined
+              }
+              clearLineageSafetyNet(e)
+              e.pendingTurn = null
+              e.lastResponseStart = null
+              e.listeners.forEach((l) => l())
+            }
+          }
           return
         }
-        // All other events are pure queue ops (handled by translator) or
-        // status-only events (handled by onStatus subscription above).
         default:
           return
       }
@@ -196,20 +288,14 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.getRuntimeState(agentId).then((s) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      // Start the runtime if it isn't live yet — this also hydrates
-      // entry.messages from disk and emits via onMessages.
       if (!s || s.status === 'idle') {
         agents.start(agentId).catch((err: unknown) => {
           toast.error(err instanceof Error ? err.message : 'Failed to start agent')
         })
       }
     })
-    // Always fetch messages from disk on slice init and route through the
-    // queue as a `set-messages` op so the merge (with streaming-state
-    // preservation) is applied centrally. The queue's applyOp is the only
-    // writer of `entry.messages`.
     agents.getMessages(agentId).then((msgs) => {
-      enqueue({ kind: 'set-messages', agentId, messages: msgs })
+      enqueue({ kind: 'set-messages', agentId, messages: msgs as never })
     })
     slice.initialized = true
   }

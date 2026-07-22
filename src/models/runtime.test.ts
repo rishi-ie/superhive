@@ -1,6 +1,10 @@
 /**
  * Phase 15.1 — pure-function tests for message-shape helpers.
  *
+ * Phase A scope: tests for the in-memory `RuntimeAssistantState` helpers.
+ * The persisted `AssistantMessage` lives in `assistant-message.ts` and has
+ * its own helpers (`getAssistantMessageText`, etc.).
+ *
  * Run via `bun test src/models/runtime.test.ts`.
  */
 
@@ -8,13 +12,16 @@ import { describe, expect, test } from 'bun:test'
 import {
   getMessageText,
   getMessageTailFingerprint,
-  type RuntimeMessage,
+  isMessageInFlight,
+  type RuntimeAssistantState,
 } from './runtime'
 
-const mkMsg = (parts: RuntimeMessage['parts']): RuntimeMessage => ({
+const mkMsg = (parts: RuntimeAssistantState['parts']): RuntimeAssistantState => ({
   id: 'm',
   role: 'user',
   parts,
+  activityTimeline: [],
+  response: [],
   ts: 1,
 })
 
@@ -70,62 +77,65 @@ describe('getMessageTailFingerprint', () => {
   })
 })
 
-describe('parseDiff', () => {
-  test('emits add/remove/context rows with line numbers', async () => {
-    const { parseDiff } = await import(
-      '@/pages/agent-chat/components/message-parts/DiffView'
-    )
-    const rows = parseDiff(
-      [
-        '--- a/foo',
-        '+++ b/foo',
-        '@@ -1,2 +1,2 @@',
-        ' unchanged',
-        '-old',
-        '+new',
-      ].join('\n'),
-    )
-    // 3 rows: context "unchanged", remove "old", add "new"
-    expect(rows).toHaveLength(3)
-    expect(rows[0]!.type).toBe('context')
-    expect(rows[1]!.type).toBe('remove')
-    expect(rows[2]!.type).toBe('add')
+describe('isMessageInFlight', () => {
+  test('returns false when frozen', () => {
+    const m: RuntimeAssistantState = {
+      id: 'm',
+      role: 'assistant',
+      parts: [{ type: 'text', text: 'in-flight', state: 'streaming' }],
+      activityTimeline: [],
+      response: [],
+      ts: 0,
+      frozen: true,
+    }
+    expect(isMessageInFlight(m)).toBe(false)
   })
 
-  test('parses abbreviated diffs without --- / +++ headers', async () => {
-    const { parseDiff } = await import(
-      '@/pages/agent-chat/components/message-parts/DiffView'
-    )
-    const rows = parseDiff(
-      ['@@ -10 +10 @@', '-a', '+b'].join('\n'),
-    )
-    expect(rows).toHaveLength(2)
-    expect(rows.map((r) => r.type)).toEqual(['remove', 'add'])
-    // Both rows should have null line numbers (no preceding hunk anchors
-    // beyond the @@ -10 +10 — but the parser doesn't decrement after
-    // the hunk; the add row does carry newLine).
-    expect(rows[1]!.newLine).toBe(10)
+  test('returns true when any text part is streaming', () => {
+    expect(
+      isMessageInFlight(
+        mkMsg([{ type: 'text', text: 'in-flight', state: 'streaming' }]),
+      ),
+    ).toBe(true)
   })
 
-  test('returns one empty context row for an empty input', async () => {
-    const { parseDiff } = await import(
-      '@/pages/agent-chat/components/message-parts/DiffView'
-    )
-    // An empty string yields a single context row with empty content;
-    // the renderer collapses this visually anyway. The fallback is
-    // specifically for non-diff text, which we test below.
-    const rows = parseDiff('')
-    expect(rows).toHaveLength(1)
-    expect(rows[0]!.type).toBe('context')
-    expect(rows[0]!.content).toBe('')
+  test('returns true when any thinking part is streaming', () => {
+    expect(
+      isMessageInFlight(
+        mkMsg([{ type: 'thinking', text: 'in-flight', state: 'streaming' }]),
+      ),
+    ).toBe(true)
   })
 
-  test('treats prose lines as context rows (graceful fallback)', async () => {
-    const { parseDiff } = await import(
-      '@/pages/agent-chat/components/message-parts/DiffView'
-    )
-    const rows = parseDiff('just some prose\nno diff here')
-    expect(rows).toHaveLength(2)
-    expect(rows.every((r) => r.type === 'context')).toBe(true)
+  test('returns true when a tool-call is pending', () => {
+    expect(
+      isMessageInFlight(
+        mkMsg([
+          { type: 'tool-call', id: 'tc', name: 'bash', args: undefined, state: 'pending' },
+        ]),
+      ),
+    ).toBe(true)
+  })
+
+  test('returns false when all parts are complete and frozen', () => {
+    expect(
+      isMessageInFlight({
+        id: 'm',
+        role: 'assistant',
+        parts: [
+          { type: 'text', text: 'done', state: 'complete' },
+          { type: 'thinking', text: 'thought', state: 'complete' },
+          { type: 'tool-call', id: 'tc', name: 'bash', args: {}, state: 'complete' },
+        ],
+        activityTimeline: [],
+        response: [],
+        ts: 0,
+        frozen: true,
+      }),
+    ).toBe(false)
+  })
+
+  test('returns false for empty parts', () => {
+    expect(isMessageInFlight(mkMsg([]))).toBe(false)
   })
 })

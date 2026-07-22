@@ -21,8 +21,9 @@ import type {
   PiProtocolAdapter,
 } from './pi-protocol'
 import type { AgentStatus } from '../src/storage/types'
-import type { RuntimeMessage, RuntimeStatusPayload } from '../src/types/electron'
+import type { RuntimeStatusPayload } from '../src/types/electron'
 import type { CompactionStatus, RetryStatus } from '../src/models/runtime'
+import type { ChatRow } from '../src/models/assistant-message'
 
 /**
  * Live runtime state for one agent instance.
@@ -31,6 +32,9 @@ import type { CompactionStatus, RetryStatus } from '../src/models/runtime'
  * Mirrors the `RuntimeEntry` shape inside `general-kai-runtime.ts`. Kept as
  * its own minimal type here because this file is the canonical reference for
  * what fields the IPC payload reads.
+ *
+ * `messages` is the per-agent chat history. Phase A keeps the legacy
+ * `RuntimeAssistantState[]` shape so the renderer UI doesn't change.
  */
 export interface RuntimeEntry {
   agentId: string
@@ -40,7 +44,7 @@ export interface RuntimeEntry {
   pid?: number
   startedAt?: number
   endedAt?: number
-  messages: RuntimeMessage[]
+  messages: ChatRow[]
   stderrLog: string[]
   status: AgentStatus
   bootStep?: InitStep

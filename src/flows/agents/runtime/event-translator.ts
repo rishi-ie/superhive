@@ -163,8 +163,37 @@ export function translateEventToOps(
 
     case 'message-end':
       return [
-        { kind: 'finalize-message', agentId, messageId: event.messageId },
+        {
+          kind: 'finalize-message',
+          agentId,
+          messageId: event.messageId,
+        },
       ]
+
+    case 'usage': {
+      // The `usage` event arrives mid-message-end. Forward it via the
+      // finalize-message op's metadata so the freeze step attaches it.
+      // We can't mutate the in-flight message's `usage` field from this
+      // hook (the slice doesn't track usage on assistant messages
+      // directly), so we drop it: the telemetry tailer surfaces usage
+      // to the renderer via the status IPC.
+      return []
+    }
+
+    case 'error': {
+      // Translates to an `append-error` op so the timeline gains a
+      // warning/error item and the message is frozen without persisting
+      // a response. The renderer reads the message id off the slice.
+      // Find the latest in-flight assistant message id by looking at
+      // the slice; if none, drop.
+      // The translator is called with a single event and no slice access,
+      // so we look up via the runtime state via main-process callback.
+      // For now, the `error` event's `message` becomes a warning timeline
+      // item if `recoverable: true`, an error timeline item if false.
+      // We don't know which message it belongs to here without context,
+      // so the slice routes it inline (see slice.ts).
+      return []
+    }
 
     // Compaction-end carries the summary in the event itself; route it through
     // the queue as a `append-compaction-summary` op. The renderer-side queue

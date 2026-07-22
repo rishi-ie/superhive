@@ -32,6 +32,7 @@ export function AgentChatView() {
     activeModelContextWindow,
     compaction,
     retry,
+    pendingTurn,
     loading,
     send,
     stop,
@@ -162,6 +163,7 @@ export function AgentChatView() {
         onCancel={stop}
         agentId={agentId}
         agentName={agent?.name}
+        pendingTurn={pendingTurn}
         onPromptSelect={(prompt) => {
           setInput(prompt)
           requestAnimationFrame(() => textareaRef.current?.focus())
