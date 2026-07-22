@@ -9,6 +9,13 @@ interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData;
 }
 
+// Cap matches the truth-side write gate (`update_project_description`
+// rejects strings longer than this). Display layer just truncates so the
+// right sidebar stays scannable when the coordinator writes a wall of text.
+const DESCRIPTION_DISPLAY_MAX_CHARS = 280;
+const DESCRIPTION_FALLBACK_TEXT =
+  "Interact more with the project agent to set a description.";
+
 const STATUS_COLOR: Record<Task["status"], string> = {
   running: "text-foreground",
   todo: "text-muted-foreground",
@@ -39,6 +46,14 @@ function formatDate(ms: number | undefined): string {
   }
 }
 
+// Hard-clamp the rendered description to the truth-side write cap. Anything
+// past the cap gets an ellipsis so the overview line stays scannable; the
+// underlying truth file still holds the full string.
+function truncateForDisplay(text: string, maxChars: number): string {
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, maxChars - 1).trimEnd()}…`;
+}
+
 function ActiveTasksAccordion({ projectId }: { projectId: string }) {
   const tasks = useTasksByProject(projectId);
   const activeCount = tasks.filter(
@@ -59,7 +74,7 @@ function ActiveTasksAccordion({ projectId }: { projectId: string }) {
 }
 
 export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
-  const { project, coordinator, members } = data;
+  const { project, coordinator, members, coordinatorProjectDescription } = data;
   if (!project) {
     return (
       <div className="flex flex-col gap-stack py-button-y">
@@ -79,14 +94,18 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         <span className="text-lg font-semibold text-foreground/80">
           {project.name}
         </span>
-        {project.description && (
-          <span className="text-sm text-muted-foreground">
-            {project.description}
+        {coordinatorProjectDescription ? (
+          <span className="text-sm text-muted-foreground line-clamp-2">
+            {truncateForDisplay(
+              coordinatorProjectDescription,
+              DESCRIPTION_DISPLAY_MAX_CHARS,
+            )}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground/70 italic">
+            {DESCRIPTION_FALLBACK_TEXT}
           </span>
         )}
-        <span className="mt-gap-tight text-xs text-muted-foreground/60">
-          {project.localPath ?? "No path configured"}
-        </span>
       </div>
 
       <div className="flex flex-col gap-gap-tight rounded-button border border-border bg-card px-row py-2">

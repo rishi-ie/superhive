@@ -68,6 +68,15 @@ export interface ProjectOverviewSectionData {
   project: Project | null
   coordinator: Agent | null
   members: Agent[]
+  /**
+   * Live project description owned by the coordinator's truth settings
+   * (`Superhive-pi-<basename>.json` → `project.description`). The
+   * coordinator refreshes this itself via the `update_project_description`
+   * truth tool; `null` means the agent hasn't written one yet and the
+   * overview tab should render the fallback ("interact more to put a
+   * description").
+   */
+  coordinatorProjectDescription: string | null
 }
 
 // ---------------------------------------------------------------------------

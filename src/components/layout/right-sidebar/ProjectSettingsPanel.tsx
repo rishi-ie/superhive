@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
 import { useAllAgentStatuses } from "@/flows/agents/runtime";
+import { useAgentSettings } from "@/flows/agents/settings";
 import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
@@ -65,13 +66,31 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     }
   }, [team, liveStates])
 
+  // Read the coordinator's project description straight from truth
+  // settings (Superhive-pi-<basename>.json → project.description). The
+  // settings file is the only place the coordinator itself can write,
+  // and `useAgentSettings` is wired to the settings-file watcher so
+  // every truth tool write re-renders the overview tab for free.
+  const coordinatorSettings = useAgentSettings(mergedTeam.coordinator?.id ?? null)
+  const coordinatorProjectDescription = useMemo<string | null>(() => {
+    const projectBlock = coordinatorSettings.settings?.project as
+      | { description?: unknown }
+      | undefined
+    if (!projectBlock) return null
+    const raw = projectBlock.description
+    if (typeof raw !== "string") return null
+    const trimmed = raw.trim()
+    return trimmed.length === 0 ? null : trimmed
+  }, [coordinatorSettings.settings])
+
   const overviewData = useMemo<ProjectOverviewSectionData>(
     () => ({
       project: mergedTeam.project,
       coordinator: mergedTeam.coordinator,
       members: mergedTeam.members,
+      coordinatorProjectDescription,
     }),
-    [mergedTeam],
+    [mergedTeam, coordinatorProjectDescription],
   )
 
   return (
