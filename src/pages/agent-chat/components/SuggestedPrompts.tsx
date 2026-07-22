@@ -31,7 +31,7 @@ const DEFAULT_PROMPTS: Array<{ title: string; prompt: string }> = [
  */
 export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-2xl w-full px-6 mt-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-3xl w-full px-6 mt-6">
       {DEFAULT_PROMPTS.map((p) => (
         <button
           key={p.title}

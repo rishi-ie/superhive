@@ -162,7 +162,7 @@ export function ConversationArea({
         itemContent={(_index, row) => {
           if (row.kind === 'pending') {
             return (
-              <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+              <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
                 <div className="flex items-center gap-2 self-start text-xs text-muted-foreground">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground opacity-50" />
@@ -175,7 +175,7 @@ export function ConversationArea({
           }
           if (row.kind === 'in-flight') {
             return (
-              <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+              <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
                 <AssistantMessage
                   key={row.message.id}
                   message={row.message}
@@ -191,7 +191,7 @@ export function ConversationArea({
           }
           const message = row.message
           return (
-            <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+            <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
               {message.role === 'user' ? (
                 <UserMessage
                   key={message.id}
@@ -215,7 +215,7 @@ export function ConversationArea({
         }}
       />
       {compaction || retry ? (
-        <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-3xl px-4 sm:px-6">
+        <div className="absolute top-2 inset-x-0 z-10 mx-auto max-w-4xl px-4 sm:px-6">
           <ActiveStateBanners
             compaction={compaction}
             retry={retry}
