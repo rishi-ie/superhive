@@ -8,7 +8,6 @@
  */
 
 import type { ReactNode } from 'react'
-import type { ContentPart } from './runtime'
 import type { ProviderEntry } from '@/types/electron'
 
 // ---------------------------------------------------------------------------
@@ -73,22 +72,4 @@ export interface SettingsSectionGroup {
   sections: SettingsSection[]
 }
 
-// ---------------------------------------------------------------------------
-// Agent chat: tool-call card primitives
-// ---------------------------------------------------------------------------
 
-export interface ToolCallCardBaseProps {
-  part: Extract<ContentPart, { type: 'tool-call' }>
-  result?: Extract<ContentPart, { type: 'tool-result' }>
-  /** When true, the card treats itself as actively running — shows the elapsed timer
-   *  and keeps itself expanded. Derived from: part.state !== 'complete' || result?.state !== 'complete'. */
-  running?: boolean
-}
-
-/** Header is rendered by each tool-specific subclass. Body content goes
- *  through `<CollapsibleContent>`. The base owns the chrome — token-driven
- *  background, status dot, duration timer, collapse-by-default behavior. */
-export interface ToolCallCardSlots {
-  header: React.ReactNode
-  body: React.ReactNode
-}
