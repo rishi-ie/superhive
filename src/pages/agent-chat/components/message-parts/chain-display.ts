@@ -55,3 +55,16 @@ export const FALLBACK_ICON: IconComponent = WrenchIcon
 export function getToolDisplay(name: string): ToolDisplay | undefined {
   return TOOL_DISPLAY[name]
 }
+
+/**
+ * Best-effort human label for an unknown tool. Replaces `_` and `-` with
+ * spaces and title-cases. Returns "Tool" for empty/whitespace input so
+ * the row always has a label.
+ */
+export function formatToolName(name: string): string {
+  const trimmed = name.trim()
+  if (!trimmed) return 'Tool'
+  return trimmed
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+}

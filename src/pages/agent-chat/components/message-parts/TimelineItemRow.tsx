@@ -3,6 +3,7 @@ import {
   THINKING_ICON as THOUGHT_ICON,
   FALLBACK_ICON,
   getToolDisplay,
+  formatToolName,
   type ToolDisplay,
 } from './chain-display'
 import { CheckCircle2Icon } from 'lucide-react'
@@ -83,7 +84,7 @@ function TimelineItemRowBase({
         </Bullet>
         <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="text-foreground/80 font-medium">
-            {display?.verb ?? item.toolName}
+            {display?.verb ?? formatToolName(item.toolName)}
           </span>
           {!frozen && item.state !== 'complete' ? (
             <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse" />
