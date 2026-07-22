@@ -1,16 +1,18 @@
 import * as React from 'react'
 import { UserMessage } from './UserMessage'
 import { AssistantMessage } from './AssistantMessage'
+import { MergedAssistantMessage } from './MergedAssistantMessage'
 import { cn } from '@/lib/utils'
 import { ActiveStateBanners } from './ActiveStateBanners'
 import { ChatEmptyState } from './SuggestedPrompts'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
-import type { ChatRow } from '@/models/assistant-message'
+import type { AssistantMessage as PersistedAssistantMessage, ChatRow } from '@/models/assistant-message'
 import type { RuntimeAssistantState } from '@/models/runtime'
 import { isMessageInFlight } from '@/models/runtime'
 
 type Row =
-  | { kind: 'message'; message: ChatRow }
+  | { kind: 'message'; message: ChatRow }                       // user message (non-assistant) only
+  | { kind: 'merged-assistant'; messages: PersistedAssistantMessage[] }
   | { kind: 'in-flight'; message: RuntimeAssistantState }
   | { kind: 'pending'; id: string; startedAt: number }
 
@@ -51,7 +53,32 @@ export function ConversationArea({
   const [freshIds, setFreshIds] = React.useState<Set<string>>(new Set())
 
   const rows: Row[] = React.useMemo(() => {
-    const out: Row[] = messages.map((m) => ({ kind: 'message', message: m }))
+    const out: Row[] = []
+
+    // Walk the message list and collapse consecutive AssistantMessage
+    // rows into a single `merged-assistant` row. Pi's agent-loop emits
+    // one message_start/message_end pair per turn, so a single user
+    // prompt can land as N AssistantMessage rows in `slice.messages`.
+    // Merging here gives the user one indicator + one footer +
+    // interleaved prose per prompt response. User messages and any
+    // other role break the chain (each renders individually).
+    let i = 0
+    while (i < messages.length) {
+      const m = messages[i]!
+      if (m.role !== 'assistant') {
+        out.push({ kind: 'message', message: m })
+        i++
+        continue
+      }
+      const group: PersistedAssistantMessage[] = [m as PersistedAssistantMessage]
+      let j = i + 1
+      while (j < messages.length && messages[j]!.role === 'assistant') {
+        group.push(messages[j]! as PersistedAssistantMessage)
+        j++
+      }
+      out.push({ kind: 'merged-assistant', messages: group })
+      i = j
+    }
 
     // If there's an in-flight message AND no finalized row already carries
     // that id, render it as a virtual trailing row. The frozen AssistantMessage
@@ -153,6 +180,7 @@ export function ConversationArea({
         computeItemKey={(_, row) => {
           if (row.kind === 'pending') return `pending-${row.id}`
           if (row.kind === 'in-flight') return `inflight-${row.message.id}`
+          if (row.kind === 'merged-assistant') return `merged-${row.messages[0]!.id}`
           return row.message.id
         }}
         followOutput={atBottom ? 'smooth' : false}
@@ -189,27 +217,33 @@ export function ConversationArea({
               </div>
             )
           }
-          const message = row.message
-          return (
-            <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
-              {message.role === 'user' ? (
-                <UserMessage
-                  key={message.id}
-                  message={message}
-                  agentId={agentId ?? ''}
-                />
-              ) : (
-                <AssistantMessage
-                  key={message.id}
-                  message={message}
+          if (row.kind === 'merged-assistant') {
+            // Animate-in if any of the merged messages is fresh.
+            const isFresh = row.messages.some((m) => freshIds.has(m.id))
+            return (
+              <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
+                <MergedAssistantMessage
+                  messages={row.messages}
                   agentId={agentId ?? ''}
                   className={
-                    freshIds.has(message.id)
+                    isFresh
                       ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
                       : undefined
                   }
                 />
-              )}
+              </div>
+            )
+          }
+          // kind: 'message' — user messages only (assistant rows were
+          // collapsed into `merged-assistant` upstream).
+          const userMessage = row.message as Extract<ChatRow, { role: 'user' }>
+          return (
+            <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
+              <UserMessage
+                key={userMessage.id}
+                message={userMessage}
+                agentId={agentId ?? ''}
+              />
             </div>
           )
         }}
