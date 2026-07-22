@@ -134,7 +134,7 @@
 
   /* Global UI density knob. Dial this number to scale the whole app
    * (text, spacing, control heights). All other tokens read it. */
-  --ui-scale: 0.92;
+  --ui-scale: 1;
 
   color-scheme: light;
 }
