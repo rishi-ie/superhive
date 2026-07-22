@@ -14,7 +14,6 @@
     "dev": "vite",
     "typecheck": "tsc --noEmit",
     "build": "bun run typecheck && vite build",
-    "test": "bun test electron/ src/ --timeout 10000",
     "preview": "vite preview",
     "electron:dev": "vite",
     "electron:build": "bun run build && electron-builder",
