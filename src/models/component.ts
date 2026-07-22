@@ -79,6 +79,52 @@ export interface ProjectOverviewSectionData {
 }
 
 // ---------------------------------------------------------------------------
+// Project Overview mission-control sub-components
+// ---------------------------------------------------------------------------
+//
+// The redesign treats the Overview tab as a "Project Mission Control"
+// dashboard. Each sub-component is mock-driven today and will swap to live
+// runtime data later (truth settings for description/focus, telemetry for
+// activity, mailbox for attention). The shapes are local to the renderer
+// so swapping sources is a per-component job — no shape leakage into
+// storage or IPC layers.
+
+export type ProjectHealthStatus = 'healthy' | 'attention' | 'blocked'
+
+export interface ProjectHealth {
+  status: ProjectHealthStatus
+  agents: number
+  active: number
+  idle: number
+  tasks: number
+  completed: number
+  waiting: number
+}
+
+export type AgentOverviewStatus = 'active' | 'waiting' | 'idle' | 'error'
+
+export interface AgentOverviewCard {
+  id: string
+  name: string
+  status: AgentOverviewStatus
+  /** One short line describing what the agent is currently doing. */
+  work: string
+}
+
+export interface ActivityItem {
+  id: string
+  time: string
+  text: string
+}
+
+export interface AttentionItem {
+  id: string
+  title: string
+  description: string
+  actionLabel: string
+}
+
+// ---------------------------------------------------------------------------
 // Right sidebar: settings panels
 // ---------------------------------------------------------------------------
 
