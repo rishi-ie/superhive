@@ -178,8 +178,23 @@ export class RawTextAdapter implements PiProtocolAdapter {
             attempt: typeof obj.attempt === 'number' ? obj.attempt : 1,
             finalError: typeof obj.finalError === 'string' ? obj.finalError : undefined,
           })
-        } else if (obj.type === 'agent_end' || obj.type === 'message_end') {
+        } else if (obj.type === 'agent_end') {
+          // End of the agent run. Always close our assistant slot.
           if (this.currentMessageId) {
+            emit({ type: 'message-end', messageId: this.currentMessageId })
+            this.currentMessageId = null
+          }
+        } else if (obj.type === 'message_end') {
+          // Pi emits message_end for every message in its protocol —
+          // assistant, toolResult, and user. We only want to close our
+          // assistant slot when the closing event is for the assistant
+          // turn. Otherwise, a toolResult message_end mid-turn would
+          // reset currentMessageId and the next text_start would create
+          // a brand-new (split) assistant message — turning a single
+          // Pi turn into N+1 AssistantMessage rows, each with its own
+          // Indicator, Completion, and footer.
+          const role = (obj as { message?: { role?: string } }).message?.role
+          if (role === 'assistant' && this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
           }

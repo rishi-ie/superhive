@@ -61,9 +61,14 @@ export interface MessageUsage {
  * `RuntimeAssistantState.parts` only to derive the `activityTimeline`
  * (thinking + tool-call rows) and `response` (text + image + compaction
  * blocks) before discarding the parts array.
+ *
+ * `startedAt` on text / image / compaction-summary is captured when the
+ * part is first appended. It flows through to the corresponding
+ * ResponseBlock so the renderer can interleave prose and timeline items
+ * by chronological order.
  */
 export type ContentPart =
-  | { type: 'text'; text: string; state?: 'streaming' | 'complete' }
+  | { type: 'text'; text: string; state?: 'streaming' | 'complete'; startedAt: number }
   | {
       type: 'thinking'
       text: string
@@ -84,11 +89,12 @@ export type ContentPart =
       isError: boolean
       state: 'pending' | 'streaming' | 'complete'
     }
-  | { type: 'image'; data: string; mimeType: string }
+  | { type: 'image'; data: string; mimeType: string; startedAt: number }
   | {
       type: 'compaction-summary'
       tokensBefore: number
       summary: string
+      startedAt: number
     }
 
 /**

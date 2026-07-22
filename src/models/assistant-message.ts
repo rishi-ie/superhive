@@ -116,10 +116,20 @@ export interface CompletionTimelineItem {
  * cards (e.g. "Context compacted" summary cards). A flat list captures
  * both without forcing a shape mismatch.
  */
+/**
+ * A block of the assistant's prose response. Renders BELOW or BETWEEN
+ * timeline items depending on chronological order — see `AssistantMessage`
+ * for the interleaving logic.
+ *
+ * Every variant carries `startedAt` (wall-clock ms). The renderer sorts
+ * timeline items and response blocks together by this field to preserve
+ * the order in which Pi emitted them, so prose that arrived between
+ * two thinking/tool-call rounds renders between them in the lineage.
+ */
 export type ResponseBlock =
-  | { type: 'text'; text: string; state: 'streaming' | 'complete' }
-  | { type: 'image'; data: string; mimeType: string }
-  | { type: 'compaction-summary'; tokensBefore: number; summary: string }
+  | { type: 'text'; text: string; state: 'streaming' | 'complete'; startedAt: number }
+  | { type: 'image'; data: string; mimeType: string; startedAt: number }
+  | { type: 'compaction-summary'; tokensBefore: number; summary: string; startedAt: number }
 
 // ---------------------------------------------------------------------------
 // Persisted assistant message
@@ -149,9 +159,12 @@ export interface AssistantMessage {
   role: 'assistant'
   /** Wall-clock ms at message-start (== user-send time). */
   timestamp: number
-  /** Ordered execution metadata. Renders ABOVE the response. */
+  /** Ordered execution metadata. Renders ABOVE / BETWEEN the response
+   *  blocks depending on `startedAt` — see AssistantMessage for the
+   *  chronological interleaving logic. */
   activityTimeline: TimelineItem[]
-  /** Assistant prose. Renders BELOW the timeline, hidden in state 1. */
+  /** Assistant prose. Sorted with `activityTimeline` by `startedAt` to
+   *  preserve chronological order; renderer interleaves them in one list. */
   response: ResponseBlock[]
   metadata: AssistantMessageMetadata
 }

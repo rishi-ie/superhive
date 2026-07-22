@@ -6,12 +6,18 @@ import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TimelineItemRow } from './message-parts/TimelineItemRow'
 import { ToolCallGroupRow } from './message-parts/ToolCallGroupRow'
-import { groupTimelineItems } from './message-parts/group-timeline-items'
-import { ResponseBlocks } from './message-parts/ResponseBlocks'
+import { groupTimelineItems, type TimelineGroup } from './message-parts/group-timeline-items'
+import { MarkdownPart } from './message-parts/MarkdownPart'
+import { ImagePart } from './message-parts/ImagePart'
+import { CompactionCard } from './message-parts/CompactionCard'
 import { UsageFooter } from './UsageFooter'
 import { copyMessage } from '@/flows/agents/ui/copy-message'
 import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
-import type { AssistantMessage as PersistedAssistantMessage } from '@/models/assistant-message'
+import type {
+  AssistantMessage as PersistedAssistantMessage,
+  ResponseBlock,
+  TimelineItem,
+} from '@/models/assistant-message'
 import type { RuntimeAssistantState } from '@/models/runtime'
 
 interface AssistantMessageProps {
@@ -55,6 +61,22 @@ function Indicator({ frozen }: { frozen: boolean }) {
   )
 }
 
+/**
+ * Render one ResponseBlock. The dispatcher used to live in
+ * `message-parts/ResponseBlocks.tsx` — inlined here so we can interleave
+ * blocks with timeline items without a separate wrapper.
+ */
+function ResponseBlockView({ block }: { block: ResponseBlock }) {
+  switch (block.type) {
+    case 'text':
+      return <MarkdownPart source={block.text} />
+    case 'image':
+      return <ImagePart data={block.data} mimeType={block.mimeType} />
+    case 'compaction-summary':
+      return <CompactionCard tokensBefore={block.tokensBefore} summary={block.summary} />
+  }
+}
+
 export function AssistantMessage({
   message,
   className,
@@ -71,7 +93,7 @@ export function AssistantMessage({
     : message.totalDurationMs
 
   // In state 1, we DON'T render prose yet — only the chain. Prose appears
-  // in state 2 below the separator. (Q5: hidden in state 1.)
+  // in state 2 (and is interleaved with the lineage in chronological order).
   const showProse = frozen
 
   // Cluster consecutive tool-call items into a single group so parallel
@@ -82,6 +104,43 @@ export function AssistantMessage({
     [timeline],
   )
 
+  // Merge timeline groups and prose blocks into a single chronologically
+  // ordered list. The renderer iterates this list top-to-bottom, so the
+  // user sees prose appear in the same position it was emitted (between
+  // thinking/tool-call rounds that bracketed it).
+  //
+  // Items without a startedAt (warning / error / legacy completion) sort
+  // to the top — harmless in practice since they're rare and the chronological
+  // order of the surrounding items is preserved.
+  const orderedItems = React.useMemo(() => {
+    type Entry =
+      | { kind: 'timeline'; at: number; group: TimelineGroup }
+      | { kind: 'response'; at: number; block: ResponseBlock }
+
+    const tAt = (item: TimelineItem): number =>
+      item.kind === 'thinking' || item.kind === 'tool-call' ? item.startedAt : 0
+
+    const out: Entry[] = []
+    for (const group of groupedTimeline) {
+      if (group.kind === 'single') {
+        out.push({ kind: 'timeline', at: tAt(group.item), group })
+      } else {
+        out.push({
+          kind: 'timeline',
+          at: Math.min(...group.items.map(tAt)),
+          group,
+        })
+      }
+    }
+    if (showProse) {
+      for (const block of response) {
+        out.push({ kind: 'response', at: block.startedAt, block })
+      }
+    }
+    out.sort((a, b) => a.at - b.at)
+    return out
+  }, [groupedTimeline, response, showProse])
+
   return (
     <div
       className={cn(
@@ -91,29 +150,40 @@ export function AssistantMessage({
     >
       <Indicator frozen={frozen} />
 
-      {groupedTimeline.length > 0 ? (
-        <ol className="ml-1.5 list-none">
-          {groupedTimeline.map((group) =>
-            group.kind === 'single' ? (
-              <TimelineItemRow
-                key={group.item.id}
-                item={group.item}
-                frozen={frozen}
-                totalDurationMs={totalDurationMs}
-              />
-            ) : (
-              <ToolCallGroupRow
-                key={group.items[0]!.id}
-                items={group.items}
-                frozen={frozen}
-              />
-            ),
-          )}
-        </ol>
-      ) : null}
-
-      {showProse && response.length > 0 ? (
-        <ResponseBlocks blocks={response} frozen={frozen} />
+      {orderedItems.length > 0 ? (
+        // Plain flex column (not <ol>) because we render mixed kinds —
+        // timeline rows and prose blocks. The previous <ol> wrapper only
+        // worked when everything in it was a TimelineItem.
+        <div className="flex flex-col gap-2">
+          {orderedItems.map((entry) => {
+            const key =
+              entry.kind === 'timeline'
+                ? entry.group.kind === 'single'
+                  ? entry.group.item.id
+                  : entry.group.items[0]!.id
+                : `block-${entry.at}-${entry.block.type}`
+            return (
+              <div key={key}>
+                {entry.kind === 'timeline' ? (
+                  entry.group.kind === 'single' ? (
+                    <TimelineItemRow
+                      item={entry.group.item}
+                      frozen={frozen}
+                      totalDurationMs={totalDurationMs}
+                    />
+                  ) : (
+                    <ToolCallGroupRow
+                      items={entry.group.items}
+                      frozen={frozen}
+                    />
+                  )
+                ) : (
+                  <ResponseBlockView block={entry.block} />
+                )}
+              </div>
+            )
+          })}
+        </div>
       ) : null}
 
       {frozen ? (

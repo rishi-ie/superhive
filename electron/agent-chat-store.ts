@@ -240,22 +240,31 @@ export function migratePersistedRow(raw: unknown): ChatRow | null {
           endedAt: stateRaw === 'complete' ? now : null,
         })
       } else if (ptype === 'text') {
+        // Legacy v1 parts have no startedAt — fall back to `nowCounter`
+        // so the block sorts somewhere reasonable alongside other
+        // legacy parts. New writes always carry startedAt.
+        const now = timestamp + nowCounter++
         response.push({
           type: 'text',
           text: typeof part.text === 'string' ? part.text : '',
           state: part.state === 'streaming' ? 'streaming' : 'complete',
+          startedAt: now,
         })
       } else if (ptype === 'image') {
+        const now = timestamp + nowCounter++
         response.push({
           type: 'image',
           data: typeof part.data === 'string' ? part.data : '',
           mimeType: typeof part.mimeType === 'string' ? part.mimeType : 'application/octet-stream',
+          startedAt: now,
         })
       } else if (ptype === 'compaction-summary') {
+        const now = timestamp + nowCounter++
         response.push({
           type: 'compaction-summary',
           tokensBefore: typeof part.tokensBefore === 'number' ? part.tokensBefore : 0,
           summary: typeof part.summary === 'string' ? part.summary : '',
+          startedAt: now,
         })
       }
     }
@@ -283,7 +292,12 @@ export function migratePersistedRow(raw: unknown): ChatRow | null {
       role: 'assistant',
       timestamp,
       activityTimeline: [],
-      response: [{ type: 'text', text: obj.content, state: 'complete' }],
+      // Legacy single-content rows have no startedAt — pin to the
+      // message timestamp so they don't sort to the top of the order
+      // (which would push unrelated timeline items out of position).
+      response: [
+        { type: 'text', text: obj.content, state: 'complete', startedAt: timestamp },
+      ],
       metadata: {},
     }
     return out
@@ -359,11 +373,16 @@ function normalizeResponseBlocks(raw: unknown[]): AssistantMessage['response'] {
   for (const item of raw) {
     if (!item || typeof item !== 'object') continue
     const obj = item as Record<string, unknown>
+    // startedAt is required for chronological interleaving. On-disk rows
+    // written before the field existed will lack it — pin them to 0 so
+    // they sort to the top rather than NaN-comparing and breaking the sort.
+    const startedAt = typeof obj.startedAt === 'number' ? obj.startedAt : 0
     if (obj.type === 'text') {
       out.push({
         type: 'text',
         text: typeof obj.text === 'string' ? obj.text : '',
         state: obj.state === 'streaming' ? 'streaming' : 'complete',
+        startedAt,
       })
     } else if (obj.type === 'image') {
       out.push({
@@ -371,12 +390,14 @@ function normalizeResponseBlocks(raw: unknown[]): AssistantMessage['response'] {
         data: typeof obj.data === 'string' ? obj.data : '',
         mimeType:
           typeof obj.mimeType === 'string' ? obj.mimeType : 'application/octet-stream',
+        startedAt,
       })
     } else if (obj.type === 'compaction-summary') {
       out.push({
         type: 'compaction-summary',
         tokensBefore: typeof obj.tokensBefore === 'number' ? obj.tokensBefore : 0,
         summary: typeof obj.summary === 'string' ? obj.summary : '',
+        startedAt,
       })
     }
   }

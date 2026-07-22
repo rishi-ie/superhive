@@ -6,7 +6,6 @@ import {
   formatToolName,
   type ToolDisplay,
 } from './chain-display'
-import { CheckCircle2Icon } from 'lucide-react'
 import type { TimelineItem } from '@/models/assistant-message'
 
 interface TimelineItemRowProps {
@@ -27,9 +26,14 @@ interface TimelineItemRowProps {
  * Tool call: compact, non-expandable. Shows just the tool name. No
  * arguments inline (spec: "No verbose tool output").
  *
- * Completion: `✓ Completed`. Non-expandable.
- *
  * Warning / Error: `⚠ <message>` / `❌ <message>`. Non-expandable.
+ *
+ * Note: there is no `completion` case here. The "Completed" marker
+ * used to be a row in the lineage but was redundant — the finished
+ * state already lives at the top of the message (the `Indicator`
+ * component in AssistantMessage). Newer messages never emit a
+ * CompletionTimelineItem; legacy ones are filtered in
+ * `group-timeline-items.ts`.
  */
 function TimelineItemRowBase({
   item,
@@ -89,19 +93,6 @@ function TimelineItemRowBase({
           {!frozen && item.state !== 'complete' ? (
             <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse" />
           ) : null}
-        </div>
-      </li>
-    )
-  }
-
-  if (item.kind === 'completion') {
-    return (
-      <li className="flex items-start gap-2 pb-3">
-        <Bullet>
-          <CheckCircle2Icon className="size-3.5 text-foreground/70" />
-        </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug">
-          <span className="text-foreground/80">Completed</span>
         </div>
       </li>
     )

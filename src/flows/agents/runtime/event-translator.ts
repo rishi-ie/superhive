@@ -147,7 +147,16 @@ export function translateEventToOps(
           kind: 'append-part',
           agentId,
           messageId: event.messageId,
-          part: { type: 'image', data: event.data, mimeType: event.mimeType },
+          // startedAt is required on ContentPart for chronological
+          // interleaving. The queue re-stamps it on append-part, but
+          // event-translator must include the field to satisfy the
+          // ContentPart type.
+          part: {
+            type: 'image',
+            data: event.data,
+            mimeType: event.mimeType,
+            startedAt: Date.now(),
+          },
         },
       ]
 

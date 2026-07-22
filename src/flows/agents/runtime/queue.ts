@@ -31,7 +31,6 @@ import type {
   AssistantMessage,
   AssistantMessageMetadata,
   ChatRow,
-  CompletionTimelineItem,
   ErrorTimelineItem,
   ResponseBlock,
   ThinkingTimelineItem,
@@ -124,9 +123,15 @@ function tick(): void {
  *   - idempotent (returns same state if already frozen),
  *   - force-flips every in-flight thinking / tool-call / text / response
  *     block to `complete`,
- *   - appends a `CompletionTimelineItem`,
  *   - computes `totalDurationMs`,
  *   - sets `frozen: true`.
+ *
+ * Note: we deliberately do NOT append a `CompletionTimelineItem`. The
+ * finished-marker lives at the top of the message (the `Indicator`
+ * component) — having a second "Completed" row at the end of the
+ * timeline is redundant and clutters the lineage. The type still exists
+ * for forward compat with on-disk messages written before this change;
+ * see `group-timeline-items.ts` which filters them.
  *
  * Pure — does not mutate the input. The slice applies the returned state.
  */
@@ -165,20 +170,6 @@ export function freezeAssistantState(
     return block
   })
 
-  // Append a completion marker. Skip when one is already last (idempotency
-  // for repeated freeze calls).
-  const last = activityTimeline[activityTimeline.length - 1]
-  const finalTimeline: TimelineItem[] =
-    last && last.kind === 'completion'
-      ? activityTimeline
-      : [
-          ...activityTimeline,
-          {
-            kind: 'completion',
-            id: `completion-${state.id}`,
-          } satisfies CompletionTimelineItem,
-        ]
-
   const metadata: AssistantMessageMetadata = {}
   if (extras.usage) metadata.usage = extras.usage
   if (extras.model) metadata.model = extras.model
@@ -186,7 +177,7 @@ export function freezeAssistantState(
 
   return {
     ...state,
-    activityTimeline: finalTimeline,
+    activityTimeline,
     response,
     frozen: true,
     totalDurationMs,
@@ -292,7 +283,19 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
     case 'append-part': {
       withInFlight(slice, op.messageId, (state) => {
         const now = Date.now()
-        const parts = [...state.parts, op.part]
+        // For part types that flow into ResponseBlock, attach startedAt so the
+        // renderer can interleave timeline items and prose chronologically.
+        // event-translator doesn't know `now` (it lives in queue time), so the
+        // queue stamps it here before mirroring into parts[] + response[].
+        let part = op.part
+        if (
+          part.type === 'text' ||
+          part.type === 'image' ||
+          part.type === 'compaction-summary'
+        ) {
+          part = { ...part, startedAt: now }
+        }
+        const parts = [...state.parts, part]
         let activityTimeline = state.activityTimeline
         let response = state.response
 
@@ -306,10 +309,23 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         } else if (op.part.type === 'text') {
           response = [
             ...response,
-            { type: 'text', text: op.part.text, state: op.part.state ?? 'streaming' },
+            {
+              type: 'text',
+              text: op.part.text,
+              state: op.part.state ?? 'streaming',
+              startedAt: now,
+            },
           ]
         } else if (op.part.type === 'image') {
-          response = [...response, { type: 'image', data: op.part.data, mimeType: op.part.mimeType }]
+          response = [
+            ...response,
+            {
+              type: 'image',
+              data: op.part.data,
+              mimeType: op.part.mimeType,
+              startedAt: now,
+            },
+          ]
         } else if (op.part.type === 'compaction-summary') {
           response = [
             ...response,
@@ -317,6 +333,7 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               type: 'compaction-summary',
               tokensBefore: op.part.tokensBefore,
               summary: op.part.summary,
+              startedAt: now,
             },
           ]
         }
@@ -334,15 +351,25 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         if (op.partType === 'text') {
           const last = response[response.length - 1]
           if (last && last.type === 'text') {
+            // Extend the trailing text block. Spread preserves startedAt —
+            // subsequent deltas don't shift the block's position in the
+            // chronological order.
             response[response.length - 1] = {
               ...last,
               text: last.text + op.delta,
               state: 'streaming',
             }
           } else {
-            response.push({ type: 'text', text: op.delta, state: 'streaming' })
+            // First delta of a new text block — stamp it with `now`. This
+            // is the block's birth time for chronological interleaving.
+            response.push({
+              type: 'text',
+              text: op.delta,
+              state: 'streaming',
+              startedAt: Date.now(),
+            })
           }
-          // Mirror into parts[] (parts is the internal mutation target).
+          // Mirror into parts[] — same rule.
           const lastPart = parts[parts.length - 1]
           if (lastPart && lastPart.type === 'text') {
             parts[parts.length - 1] = {
@@ -351,7 +378,12 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               state: 'streaming',
             }
           } else {
-            parts.push({ type: 'text', text: op.delta, state: 'streaming' })
+            parts.push({
+              type: 'text',
+              text: op.delta,
+              state: 'streaming',
+              startedAt: Date.now(),
+            })
           }
         } else {
           // thinking — extend trailing thinking part AND trailing thinking timeline item
@@ -563,16 +595,21 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
       // Append a compaction-summary block to the live in-flight response
       // and the parts[] mirror. Compaction events fire mid-conversation
       // before message-end — if the message has already frozen, drop.
+      // Stamp `now` so the block sorts into its correct chronological
+      // position between the timeline items that bracket it.
       if (!slice.inFlight) return
+      const now = Date.now()
       const block = {
         type: 'compaction-summary' as const,
         tokensBefore: op.tokensBefore,
         summary: op.summary,
+        startedAt: now,
       }
       const part: ContentPart = {
         type: 'compaction-summary',
         tokensBefore: op.tokensBefore,
         summary: op.summary,
+        startedAt: now,
       }
       slice.inFlight = {
         ...slice.inFlight,
