@@ -2,35 +2,44 @@
  * Per-agent stream queue — the data pipeline between the IPC event stream
  * and the renderer's runtime slice.
  *
- * Phase A scope:
- *   - The queue still mutates `parts[]` + `lineage[]` on
- *     `RuntimeAssistantState` (legacy shape). The UI uses these fields.
- *   - `activityTimeline` + `response` are scaffold fields on
- *     `RuntimeAssistantState` (added by the new `assistant-message.ts`
- *     types). Phase A initializes them empty but does not dual-write
- *     to them. Phase B will rewrite the queue to populate them.
- *   - Streaming state never reaches disk — the main process is a pure
- *     forwarder (see `general-kai-runtime.ts`).
+ * Phase BD scope:
+ *   - The queue mutates `slice.inFlight` for every streaming op. `inFlight`
+ *     is a `RuntimeAssistantState` with three coordinated surfaces:
+ *     `parts` (internal mutation target — never persisted), `activityTimeline`
+ *     (the chain metadata), and `response` (the assistant prose).
+ *   - `slice.messages: ChatRow[]` only grows on freeze (via `finalize-message`,
+ *     `set-frozen`, or `append-error`). It contains finalized rows only.
+ *   - `freezeAssistantState` + `buildAssistantMessage` are the two-step
+ *     converter from in-flight → persisted. Called by the slice's notify
+ *     path when `inFlight.frozen` becomes true.
+ *   - `set-messages` is a simple merge by id — the main process is a pure
+ *     forwarder, so it never sends streaming state.
  *
  * Architecture:
- *   IPC event → event-translator → enqueue(op) → tick (50ms) → applyOp(slice) → notify
+ *   IPC event → event-translator → enqueue(op) → tick (50ms) → applyOp(slice) → notify → persist
  */
 
 import type {
   ContentPart,
+  MessageUsage,
   RuntimeAssistantState,
   RuntimeSliceView,
   StreamOp,
   AccessorFn,
 } from '@/models/runtime'
+import type {
+  AssistantMessage,
+  AssistantMessageMetadata,
+  ChatRow,
+  CompletionTimelineItem,
+  ErrorTimelineItem,
+  ResponseBlock,
+  ThinkingTimelineItem,
+  TimelineItem,
+  ToolCallTimelineItem,
+  WarningTimelineItem,
+} from '@/models/assistant-message'
 import { AGENT_CHAT_MESSAGE_CAP } from '@/lib/constants'
-import {
-  type StateOneRow,
-  appendToLineage,
-  accumulateLineage,
-  freezeLineage,
-  partsToLineage,
-} from '@/pages/agent-chat/components/message-parts/state-one-queue'
 
 export type { StreamOp, RuntimeSliceView, SliceAccessor, AccessorFn } from '@/models/runtime'
 
@@ -89,68 +98,6 @@ export function _test_drainNow(): void {
   tick()
 }
 
-/**
- * A message has streaming state when any of its parts is currently
- * `streaming` or `pending`. Used to decide which version wins during a
- * merge between the renderer's in-flight state and a stale disk
- * snapshot.
- */
-export function hasStreamingState(message: RuntimeAssistantState): boolean {
-  return message.parts.some((p) => {
-    if (p.type === 'text' || p.type === 'thinking') {
-      return p.state === 'streaming'
-    }
-    if (p.type === 'tool-call' || p.type === 'tool-result') {
-      return p.state === 'pending' || p.state === 'streaming' || p.state === 'streaming-args'
-    }
-    return false
-  })
-}
-
-/**
- * Merge two RuntimeAssistantState lists by id, preserving in-flight
- * streaming parts.
- *
- * - Existing messages with streaming parts are kept when the incoming
- *   version has the same id but no streaming state — protects in-flight
- *   UI from a stale refetch overwriting live deltas with disk state.
- * - When both versions have streaming state (or neither does),
- *   last-write-wins.
- * - Ids present only in `incoming` are appended at the end.
- * - Ids present only in `existing` are preserved.
- *
- * Position in the result list: existing order is preserved; incoming-only
- * ids land at the end in incoming order.
- */
-export function mergeMessagesPreserveStreaming(
-  existing: RuntimeAssistantState[],
-  incoming: RuntimeAssistantState[],
-): RuntimeAssistantState[] {
-  const byId = new Map<string, RuntimeAssistantState>()
-  for (const m of existing) byId.set(m.id, m)
-  for (const m of incoming) {
-    const current = byId.get(m.id)
-    if (current && hasStreamingState(current) && !hasStreamingState(m)) {
-      // Existing is live; incoming is stale (no streaming parts). Keep existing.
-      continue
-    }
-    // `lineage` and `lineageFrozen` are renderer-only fields — the main
-    // process only stores them after the renderer's `setMessageLineage`
-    // IPC round-trips. When the main process emits `entry.messages`
-    // immediately after `message-end` (BEFORE the IPC lands), the
-    // incoming doesn't have these fields, but the renderer just froze
-    // the message via `finalize-message`. Preserve them from `current`
-    // so the freeze survives the merge.
-    const merged: RuntimeAssistantState = {
-      ...m,
-      lineage: m.lineage ?? current?.lineage,
-      lineageFrozen: m.lineageFrozen ?? current?.lineageFrozen,
-    }
-    byId.set(m.id, merged)
-  }
-  return Array.from(byId.values())
-}
-
 function tick(): void {
   if (queues.size === 0) {
     clearAll()
@@ -168,373 +115,471 @@ function tick(): void {
   queues.clear()
 }
 
+// ---------------------------------------------------------------------------
+// Freeze + build — the one-shot bridge from in-flight to persisted shape
+// ---------------------------------------------------------------------------
+
+/**
+ * Force-freeze a `RuntimeAssistantState`:
+ *   - idempotent (returns same state if already frozen),
+ *   - force-flips every in-flight thinking / tool-call / text / response
+ *     block to `complete`,
+ *   - appends a `CompletionTimelineItem`,
+ *   - computes `totalDurationMs`,
+ *   - sets `frozen: true`.
+ *
+ * Pure — does not mutate the input. The slice applies the returned state.
+ */
+export function freezeAssistantState(
+  state: RuntimeAssistantState,
+  extras: {
+    model?: { provider: string; name: string }
+    usage?: MessageUsage
+  } = {},
+): RuntimeAssistantState {
+  if (state.frozen) return state
+
+  const endedAt = Date.now()
+  const totalDurationMs = endedAt - state.ts
+
+  const activityTimeline: TimelineItem[] = state.activityTimeline.map((item) => {
+    if (item.kind === 'thinking') {
+      if (item.state === 'streaming') {
+        return { ...item, state: 'complete', endedAt }
+      }
+      return item.endedAt === 0 ? { ...item, endedAt } : item
+    }
+    if (item.kind === 'tool-call') {
+      if (item.state !== 'complete') {
+        return { ...item, state: 'complete', endedAt }
+      }
+      return item.endedAt === null ? { ...item, endedAt } : item
+    }
+    return item
+  })
+
+  const response: ResponseBlock[] = state.response.map((block) => {
+    if (block.type === 'text' && block.state === 'streaming') {
+      return { ...block, state: 'complete' }
+    }
+    return block
+  })
+
+  // Append a completion marker. Skip when one is already last (idempotency
+  // for repeated freeze calls).
+  const last = activityTimeline[activityTimeline.length - 1]
+  const finalTimeline: TimelineItem[] =
+    last && last.kind === 'completion'
+      ? activityTimeline
+      : [
+          ...activityTimeline,
+          {
+            kind: 'completion',
+            id: `completion-${state.id}`,
+          } satisfies CompletionTimelineItem,
+        ]
+
+  const metadata: AssistantMessageMetadata = {}
+  if (extras.usage) metadata.usage = extras.usage
+  if (extras.model) metadata.model = extras.model
+  metadata.totalDurationMs = totalDurationMs
+
+  return {
+    ...state,
+    activityTimeline: finalTimeline,
+    response,
+    frozen: true,
+    totalDurationMs,
+    usage: extras.usage ?? state.usage,
+  }
+}
+
+/**
+ * Convert a frozen `RuntimeAssistantState` into the persisted
+ * `AssistantMessage` shape. Throws if the state is not frozen.
+ */
+export function buildAssistantMessage(state: RuntimeAssistantState): AssistantMessage {
+  if (!state.frozen) {
+    throw new Error(
+      `[buildAssistantMessage] state ${state.id} is not frozen — call freezeAssistantState first`,
+    )
+  }
+  const metadata: AssistantMessageMetadata = {}
+  if (state.usage) metadata.usage = state.usage
+  if (state.totalDurationMs !== undefined) metadata.totalDurationMs = state.totalDurationMs
+
+  return {
+    id: state.id,
+    role: 'assistant',
+    timestamp: state.ts,
+    activityTimeline: state.activityTimeline,
+    response: state.response,
+    metadata,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pure helpers for queue ops
+// ---------------------------------------------------------------------------
+
+function withInFlight(
+  slice: RuntimeSliceView,
+  messageId: string,
+  mutator: (state: RuntimeAssistantState) => RuntimeAssistantState | null,
+): boolean {
+  if (!slice.inFlight || slice.inFlight.id !== messageId) return false
+  const next = mutator(slice.inFlight)
+  if (next === null) return false
+  slice.inFlight = next
+  return true
+}
+
+function appendThinkingTimelineItem(
+  state: RuntimeAssistantState,
+  startedAt: number,
+): ThinkingTimelineItem {
+  return {
+    kind: 'thinking',
+    id: `thinking-${startedAt}-${state.activityTimeline.length}`,
+    text: '',
+    state: 'streaming',
+    startedAt,
+    endedAt: 0,
+  }
+}
+
+function appendToolCallTimelineItem(
+  _state: RuntimeAssistantState,
+  startedAt: number,
+  toolCallId: string,
+  toolName: string,
+): ToolCallTimelineItem {
+  return {
+    kind: 'tool-call',
+    id: `toolcall-${toolCallId}`,
+    toolName,
+    state: 'pending',
+    startedAt,
+    endedAt: null,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// applyOp — the per-op dispatcher
+// ---------------------------------------------------------------------------
+
 function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
   switch (op.kind) {
     case 'message-start': {
-      if (!slice.messages.some((m) => m.id === op.messageId)) {
-        const startedAt = slice.lastResponseStart ?? Date.now()
-        slice.lastResponseStart = null
-        slice.messages = [
-          ...slice.messages,
-          {
-            id: op.messageId,
-            role: op.role,
-            parts: [],
-            activityTimeline: [],
-            response: [],
-            lineage: [],
-            ts: startedAt,
-          },
-        ]
+      // Initialize inFlight. If the same id is already in messages (rare —
+      // would mean the main process emitted a finalized row whose id
+      // matches an in-flight slot), skip.
+      if (slice.inFlight && slice.inFlight.id === op.messageId) return
+      if (slice.messages.some((m) => m.id === op.messageId)) return
+      const startedAt = slice.lastResponseStart ?? Date.now()
+      slice.lastResponseStart = null
+      slice.inFlight = {
+        id: op.messageId,
+        role: op.role,
+        ts: startedAt,
+        parts: [],
+        activityTimeline: [],
+        response: [],
       }
       return
     }
+
     case 'append-part': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        { ...cur, parts: [...cur.parts, op.part] },
-        ...slice.messages.slice(idx + 1),
-      ]
-      // Mirror chain-shaped parts into the lineage.
-      const row = partToLineageRow(op.part)
-      if (row) {
-        const next = appendToLineage(cur.lineage ?? [], row)
-        slice.messages = [
-          ...slice.messages.slice(0, idx),
-          { ...slice.messages[idx]!, lineage: next },
-          ...slice.messages.slice(idx + 1),
-        ]
-      }
-      return
-    }
-    case 'append-delta': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      const last = cur.parts[cur.parts.length - 1]
+      withInFlight(slice, op.messageId, (state) => {
+        const now = Date.now()
+        const parts = [...state.parts, op.part]
+        let activityTimeline = state.activityTimeline
+        let response = state.response
 
-      if (op.partType === 'text') {
-        if (last && last.type === 'text') {
-          const updated: ContentPart = {
-            ...last,
-            text: last.text + op.delta,
-            state: 'streaming',
-          }
-          slice.messages = [
-            ...slice.messages.slice(0, idx),
-            { ...cur, parts: [...cur.parts.slice(0, -1), updated] },
-            ...slice.messages.slice(idx + 1),
+        if (op.part.type === 'thinking') {
+          activityTimeline = [...activityTimeline, appendThinkingTimelineItem(state, now)]
+        } else if (op.part.type === 'tool-call') {
+          activityTimeline = [
+            ...activityTimeline,
+            appendToolCallTimelineItem(state, now, op.part.id, op.part.name),
           ]
-          return
-        }
-        const appended: ContentPart = {
-          type: 'text',
-          text: op.delta,
-          state: 'streaming',
-        }
-        slice.messages = [
-          ...slice.messages.slice(0, idx),
-          { ...cur, parts: [...cur.parts, appended] },
-          ...slice.messages.slice(idx + 1),
-        ]
-        return
-      }
-
-      // thinking — mirror into lineage by walking to the trailing thinking row.
-      if (last && last.type === 'thinking') {
-        const updated: ContentPart = {
-          ...last,
-          text: last.text + op.delta,
-          state: 'streaming',
-        }
-        slice.messages = [
-          ...slice.messages.slice(0, idx),
-          { ...cur, parts: [...cur.parts.slice(0, -1), updated] },
-          ...slice.messages.slice(idx + 1),
-        ]
-        const lineageId = `thinking-${updated.text.slice(0, 8)}-${cur.parts.length - 1}`
-        const next = accumulateLineage(
-          cur.lineage ?? [],
-          lineageId,
-          (row) => {
-            if (row.kind === 'thinking') {
-              row.text = updated.text
-              row.state = 'streaming'
-            }
-          },
-        )
-        slice.messages = [
-          ...slice.messages.slice(0, idx),
-          { ...slice.messages[idx]!, lineage: next },
-          ...slice.messages.slice(idx + 1),
-        ]
-        return
-      }
-      const appended: ContentPart = {
-        type: 'thinking',
-        text: op.delta,
-        state: 'streaming',
-      }
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        { ...cur, parts: [...cur.parts, appended] },
-        ...slice.messages.slice(idx + 1),
-      ]
-      const lineageId = `thinking-${appended.text.slice(0, 8)}-${cur.parts.length}`
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...slice.messages[idx]!,
-          lineage: appendToLineage(slice.messages[idx]!.lineage ?? [], {
-            kind: 'thinking',
-            id: lineageId,
-            text: appended.text,
-            state: 'streaming',
-          }),
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'append-tool-call-delta': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      const partIdx = cur.parts.findIndex(
-        (p) => p.type === 'tool-call' && p.id === op.toolCallId,
-      )
-      if (partIdx === -1) return
-      const part = cur.parts[partIdx]!
-      if (part.type !== 'tool-call') return
-      const prevArgs = typeof part.args === 'string' ? part.args : ''
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...cur,
-          parts: [
-            ...cur.parts.slice(0, partIdx),
+        } else if (op.part.type === 'text') {
+          response = [
+            ...response,
+            { type: 'text', text: op.part.text, state: op.part.state ?? 'streaming' },
+          ]
+        } else if (op.part.type === 'image') {
+          response = [...response, { type: 'image', data: op.part.data, mimeType: op.part.mimeType }]
+        } else if (op.part.type === 'compaction-summary') {
+          response = [
+            ...response,
             {
-              ...part,
-              args: prevArgs + op.delta,
-              state: 'streaming-args',
+              type: 'compaction-summary',
+              tokensBefore: op.part.tokensBefore,
+              summary: op.part.summary,
             },
-            ...cur.parts.slice(partIdx + 1),
-          ],
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'finalize-part': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      let flipped = false
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...cur,
-          parts: cur.parts.map((p) => {
-            if (flipped || p.type !== op.partType || p.state === 'complete') return p
-            flipped = true
-            return { ...p, text: op.content ?? p.text, state: 'complete' as const }
-          }),
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'finalize-tool-call': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      const partIdx = cur.parts.findIndex(
-        (p) => p.type === 'tool-call' && p.id === op.toolCallId,
-      )
-      if (partIdx === -1) return
-      const part = cur.parts[partIdx]!
-      if (part.type !== 'tool-call') return
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...cur,
-          parts: [
-            ...cur.parts.slice(0, partIdx),
-            { ...part, args: op.args, state: 'complete' as const },
-            ...cur.parts.slice(partIdx + 1),
-          ],
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      // Flip the lineage row's state to complete.
-      const lineageId = `toolcall-${op.toolCallId}`
-      const next = accumulateLineage(cur.lineage ?? [], lineageId, (row) => {
-        if (row.kind === 'tool-call') row.state = 'complete'
-      })
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        { ...slice.messages[idx]!, lineage: next },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'finalize-message': {
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      const totalDurationMs = Date.now() - cur.ts
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...cur,
-          lineageFrozen: true,
-          frozen: true,
-          totalDurationMs,
-          lineage: freezeLineage(cur.lineage ?? []),
-          parts: cur.parts.map((p) =>
-            (p.type === 'text' || p.type === 'thinking') && p.state === 'streaming'
-              ? { ...p, state: 'complete' as const }
-              : p,
-          ),
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'set-lineage': {
-      // Force-freeze without going through finalize-message. Used by the
-      // 60s safety net when the agent never emits `message-end`.
-      const idx = slice.messages.findIndex((m) => m.id === op.messageId)
-      if (idx === -1) return
-      const cur = slice.messages[idx]!
-      slice.messages = [
-        ...slice.messages.slice(0, idx),
-        {
-          ...cur,
-          lineageFrozen: true,
-          frozen: true,
-          totalDurationMs: Date.now() - cur.ts,
-          lineage: freezeLineage(cur.lineage ?? []),
-        },
-        ...slice.messages.slice(idx + 1),
-      ]
-      return
-    }
-    case 'finalize-tool-result': {
-      let foundMsgIdx = -1
-      let foundPartIdx = -1
-      for (let i = 0; i < slice.messages.length; i += 1) {
-        const partIdx = slice.messages[i]!.parts.findIndex(
-          (p) => p.type === 'tool-call' && p.id === op.toolCallId,
-        )
-        if (partIdx !== -1) {
-          foundMsgIdx = i
-          foundPartIdx = partIdx
-          break
+          ]
         }
-      }
-      if (foundMsgIdx === -1) return
-      const cur = slice.messages[foundMsgIdx]!
+        return { ...state, parts, activityTimeline, response }
+      })
+      return
+    }
+
+    case 'append-delta': {
+      withInFlight(slice, op.messageId, (state) => {
+        const parts = [...state.parts]
+        const activityTimeline = [...state.activityTimeline]
+        const response = [...state.response]
+
+        if (op.partType === 'text') {
+          const last = response[response.length - 1]
+          if (last && last.type === 'text') {
+            response[response.length - 1] = {
+              ...last,
+              text: last.text + op.delta,
+              state: 'streaming',
+            }
+          } else {
+            response.push({ type: 'text', text: op.delta, state: 'streaming' })
+          }
+          // Mirror into parts[] (parts is the internal mutation target).
+          const lastPart = parts[parts.length - 1]
+          if (lastPart && lastPart.type === 'text') {
+            parts[parts.length - 1] = {
+              ...lastPart,
+              text: lastPart.text + op.delta,
+              state: 'streaming',
+            }
+          } else {
+            parts.push({ type: 'text', text: op.delta, state: 'streaming' })
+          }
+        } else {
+          // thinking — extend trailing thinking part AND trailing thinking timeline item
+          const lastPart = parts[parts.length - 1]
+          if (lastPart && lastPart.type === 'thinking') {
+            parts[parts.length - 1] = {
+              ...lastPart,
+              text: lastPart.text + op.delta,
+              state: 'streaming',
+            }
+          } else {
+            parts.push({ type: 'thinking', text: op.delta, state: 'streaming' })
+          }
+          const lastTimeline = activityTimeline[activityTimeline.length - 1]
+          if (lastTimeline && lastTimeline.kind === 'thinking') {
+            activityTimeline[activityTimeline.length - 1] = {
+              ...lastTimeline,
+              text: lastTimeline.text + op.delta,
+              state: 'streaming',
+            }
+          } else {
+            const fresh = appendThinkingTimelineItem(state, Date.now())
+            fresh.text = op.delta
+            activityTimeline.push(fresh)
+          }
+        }
+        return { ...state, parts, activityTimeline, response }
+      })
+      return
+    }
+
+    case 'append-tool-call-delta': {
+      withInFlight(slice, op.messageId, (state) => {
+        const parts = state.parts.map((p) => {
+          if (p.type === 'tool-call' && p.id === op.toolCallId) {
+            const prevArgs = typeof p.args === 'string' ? p.args : ''
+            return { ...p, args: prevArgs + op.delta, state: 'streaming-args' as const }
+          }
+          return p
+        })
+        const activityTimeline = state.activityTimeline.map((item) => {
+          if (item.kind === 'tool-call' && item.id === `toolcall-${op.toolCallId}`) {
+            return { ...item, state: 'streaming-args' as const }
+          }
+          return item
+        })
+        return { ...state, parts, activityTimeline }
+      })
+      return
+    }
+
+    case 'finalize-part': {
+      withInFlight(slice, op.messageId, (state) => {
+        const now = Date.now()
+        const parts = state.parts.map((p) => {
+          if (p.type !== op.partType || p.state === 'complete') return p
+          return { ...p, text: op.content ?? p.text, state: 'complete' as const }
+        })
+        const response = state.response.map((block) => {
+          if (op.partType === 'text' && block.type === 'text' && block.state === 'streaming') {
+            return {
+              ...block,
+              text: op.content ?? block.text,
+              state: 'complete' as const,
+            }
+          }
+          return block
+        })
+        const activityTimeline =
+          op.partType === 'thinking'
+            ? state.activityTimeline.map((item) => {
+                if (item.kind === 'thinking' && item.state === 'streaming') {
+                  return { ...item, state: 'complete' as const, endedAt: now }
+                }
+                return item
+              })
+            : state.activityTimeline
+        return { ...state, parts, response, activityTimeline }
+      })
+      return
+    }
+
+    case 'finalize-tool-call': {
+      withInFlight(slice, op.messageId, (state) => {
+        const now = Date.now()
+        const parts = state.parts.map((p) => {
+          if (p.type === 'tool-call' && p.id === op.toolCallId) {
+            return { ...p, args: op.args, state: 'complete' as const }
+          }
+          return p
+        })
+        const activityTimeline = state.activityTimeline.map((item) => {
+          if (item.kind === 'tool-call' && item.id === `toolcall-${op.toolCallId}`) {
+            return { ...item, state: 'complete' as const, endedAt: now }
+          }
+          return item
+        })
+        return { ...state, parts, activityTimeline }
+      })
+      return
+    }
+
+    case 'finalize-tool-result': {
+      // Mutate inFlight.parts[] only (per spec — UI drops tool output).
+      // Tool-result is never mirrored to activityTimeline or response.
+      // `finalize-tool-result` carries no `messageId`; the in-flight
+      // assistant message is the only place tool-results can land.
+      if (!slice.inFlight) return
+      const toolCallId = op.toolCallId
+      const parts = slice.inFlight.parts.slice()
       const toolResultPart: ContentPart = {
         type: 'tool-result',
-        id: op.toolCallId,
+        id: toolCallId,
         name: '',
         result: op.result,
         isError: op.isError,
         state: 'complete',
       }
-      const existingResultIdx = cur.parts.findIndex(
-        (p) => p.type === 'tool-result' && p.id === op.toolCallId,
+      const existingResultIdx = parts.findIndex(
+        (p) => p.type === 'tool-result' && p.id === toolCallId,
       )
-      let newParts: ContentPart[]
       if (existingResultIdx >= 0) {
-        newParts = [
-          ...cur.parts.slice(0, existingResultIdx),
-          toolResultPart,
-          ...cur.parts.slice(existingResultIdx + 1),
-        ]
+        parts[existingResultIdx] = toolResultPart
       } else {
-        newParts = [
-          ...cur.parts.slice(0, foundPartIdx + 1),
-          toolResultPart,
-          ...cur.parts.slice(foundPartIdx + 1),
-        ]
+        const toolCallIdx = parts.findIndex(
+          (p) => p.type === 'tool-call' && p.id === toolCallId,
+        )
+        if (toolCallIdx === -1) return
+        parts.splice(toolCallIdx + 1, 0, toolResultPart)
       }
-      slice.messages = [
-        ...slice.messages.slice(0, foundMsgIdx),
-        { ...cur, parts: newParts },
-        ...slice.messages.slice(foundMsgIdx + 1),
-      ]
+      slice.inFlight = { ...slice.inFlight, parts }
       return
     }
+
+    case 'finalize-message': {
+      // Freeze + build + push + clear in one shot.
+      if (!slice.inFlight || slice.inFlight.id !== op.messageId || slice.inFlight.frozen) return
+      const frozen = freezeAssistantState(slice.inFlight, {
+        model: op.model,
+        usage: op.usage,
+      })
+      const message = buildAssistantMessage(frozen)
+      slice.messages = [...slice.messages, message]
+      slice.inFlight = null
+      return
+    }
+
+    case 'set-frozen': {
+      // Force-freeze (e.g. 60s safety net) without model/usage. The slice's
+      // notify path detects inFlight.frozen and pushes to messages.
+      if (!slice.inFlight || slice.inFlight.id !== op.messageId || slice.inFlight.frozen) return
+      slice.inFlight = freezeAssistantState(slice.inFlight)
+      return
+    }
+
+    case 'append-error': {
+      // Append a warning/error timeline item, freeze, push to messages
+      // with empty response, clear inFlight. Idempotent if already frozen.
+      if (!slice.inFlight || slice.inFlight.id !== op.messageId || slice.inFlight.frozen) return
+      const idPrefix = op.recoverable ? 'warning' : 'error'
+      const item: WarningTimelineItem | ErrorTimelineItem = op.recoverable
+        ? {
+            kind: 'warning',
+            id: `${idPrefix}-${op.messageId}-${Date.now()}`,
+            message: op.message,
+          }
+        : {
+            kind: 'error',
+            id: `${idPrefix}-${op.messageId}-${Date.now()}`,
+            message: op.message,
+          }
+      const frozen = freezeAssistantState({
+        ...slice.inFlight,
+        activityTimeline: [...slice.inFlight.activityTimeline, item],
+      })
+      const message: AssistantMessage = {
+        ...buildAssistantMessage(frozen),
+        response: [],
+      }
+      slice.messages = [...slice.messages, message]
+      slice.inFlight = null
+      return
+    }
+
     case 'increment-inflight': {
       slice.inFlightToolCount = Math.max(0, slice.inFlightToolCount + op.delta)
       return
     }
+
     case 'set-messages': {
-      slice.messages = mergeMessagesPreserveStreaming(slice.messages, op.messages as RuntimeAssistantState[])
-      // Hydration: ensure every incoming message has a lineage field so the
-      // renderer can read it without a null-check. Older chat.jsonl files
-      // (pre-lineage) won't have one — derive from parts in that case.
-      slice.messages = slice.messages.map((m) => {
-        if (m.lineage !== undefined) return m
-        return { ...m, lineage: partsToLineage(m.parts) }
-      })
+      // Plain merge by id. Main process is a pure forwarder — it never
+      // sends streaming state, so no streaming preservation needed.
+      const byId = new Map<string, ChatRow>()
+      for (const m of slice.messages) byId.set(m.id, m)
+      for (const m of op.messages) byId.set(m.id, m)
+      slice.messages = Array.from(byId.values())
+      // If a finalized row's id matches the current inFlight, the freeze
+      // already landed — clear the slot to avoid double-rendering.
+      if (slice.inFlight && slice.messages.some((m) => m.id === slice.inFlight!.id)) {
+        slice.inFlight = null
+      }
       if (slice.messages.length > MAX_QUEUE_MESSAGES) {
         slice.messages = slice.messages.slice(-MAX_QUEUE_MESSAGES)
       }
       return
     }
+
     case 'append-compaction-summary': {
-      for (let i = slice.messages.length - 1; i >= 0; i--) {
-        if (slice.messages[i]!.role !== 'assistant') continue
-        slice.messages = [
-          ...slice.messages.slice(0, i),
-          {
-            ...slice.messages[i]!,
-            parts: [
-              ...slice.messages[i]!.parts,
-              {
-                type: 'compaction-summary',
-                tokensBefore: op.tokensBefore,
-                summary: op.summary,
-              },
-            ],
-          },
-          ...slice.messages.slice(i + 1),
-        ]
-        return
+      // Append a compaction-summary block to the live in-flight response
+      // and the parts[] mirror. Compaction events fire mid-conversation
+      // before message-end — if the message has already frozen, drop.
+      if (!slice.inFlight) return
+      const block = {
+        type: 'compaction-summary' as const,
+        tokensBefore: op.tokensBefore,
+        summary: op.summary,
+      }
+      const part: ContentPart = {
+        type: 'compaction-summary',
+        tokensBefore: op.tokensBefore,
+        summary: op.summary,
+      }
+      slice.inFlight = {
+        ...slice.inFlight,
+        parts: [...slice.inFlight.parts, part],
+        response: [...slice.inFlight.response, block],
       }
       return
     }
   }
-}
-
-/**
- * Map a single ContentPart to a StateOneRow, or null if the part is
- * prose-shaped (text + image + compaction-summary). Used by `append-part`
- * to mirror chain parts into the lineage.
- */
-function partToLineageRow(part: ContentPart): StateOneRow | null {
-  if (part.type === 'thinking') {
-    return {
-      kind: 'thinking',
-      id: `thinking-${part.text.slice(0, 8)}`,
-      text: part.text,
-      state: part.state,
-    }
-  }
-  if (part.type === 'tool-call') {
-    return {
-      kind: 'tool-call',
-      id: `toolcall-${part.id}`,
-      toolName: part.name,
-      firstArg: null,
-      state: part.state,
-    }
-  }
-  return null
 }

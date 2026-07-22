@@ -5,7 +5,7 @@
  */
 
 import { copyText } from './copy-text'
-import { getMessageText } from '@/models/runtime'
+import { getAssistantMessageText } from '@/models/assistant-message'
 import type { ShortcutCopyLastAssistantInput, ShortcutCopyLastAssistantResult } from '@/models/ui'
 
 export async function shortcutCopyLastAssistant({
@@ -14,7 +14,7 @@ export async function shortcutCopyLastAssistant({
   const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')
   if (!lastAssistant) return { ok: false }
 
-  const text = getMessageText(lastAssistant)
+  const text = getAssistantMessageText(lastAssistant)
   const copied = await copyText(text, { successLabel: 'Copied last assistant message' })
   return { ok: copied, text }
 }

@@ -1,12 +1,14 @@
 import type { Agent, AgentStatus, Project, Task, TaskStatus, TaskPriority } from '@/storage/types'
-import type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
+import type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
+import type { AssistantMessage, ChatRow } from '@/models/assistant-message'
 
 export type { Agent, AgentStatus, Project }
 export type { Task, TaskStatus, TaskPriority }
 
-export type { RuntimeMessage, RuntimeStatusPayload, RuntimeExitPayload }
+export type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload }
 export type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo }
+export type { ChatRow, AssistantMessage }
 
 export interface AgentCreateInput {
 	name: string
@@ -35,21 +37,17 @@ export interface AgentsAPI {
 	send: (id: string, message: string) => Promise<{ ok: boolean }>
 	getRuntimeState: (id: string) => Promise<RuntimeStatusPayload | null>
 	getProjects: (id: string) => Promise<Project[]>
-	getMessages: (id: string) => Promise<RuntimeMessage[]>
+	getMessages: (id: string) => Promise<ChatRow[]>
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
 	reveal: (id: string) => Promise<{ ok: boolean }>
 	/**
-	 * Renderer-driven lineage freeze: the renderer froze a message's
-	 * lineage after the response transitioned to state 2, and is
-	 * asking the main process to persist it as part of the next
-	 * chat.jsonl write.
+	 * Renderer-driven assistant-message persistence. Fired on every
+	 * `message-end` (or `set-frozen` from the 60s safety net, or
+	 * `append-error`). Main process appends the row to chat.jsonl in
+	 * one atomic write.
 	 */
-	setMessageLineage: (
-		id: string,
-		messageId: string,
-		lineage: readonly import('@/models/runtime').StateOneRow[],
-	) => Promise<{ ok: boolean }>
+	persistAssistantMessage: (id: string, message: AssistantMessage) => Promise<{ ok: boolean }>
 
 	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated
@@ -68,7 +66,7 @@ export interface AgentsAPI {
 	 */
 	onEvent: (id: string, cb: (event: AdapterEvent) => void) => () => void
 	onStatus: (id: string, cb: (status: RuntimeStatusPayload) => void) => () => void
-	onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void) => () => void
+	onMessages: (id: string, cb: (messages: ChatRow[]) => void) => () => void
 	onExit: (id: string, cb: (payload: RuntimeExitPayload) => void) => () => void
 	onSettingsChanged: (id: string, cb: (agentId: string) => void) => () => void
 	onCreated: (id: string, cb: (info: { defaultModel: string | null }) => void) => () => void

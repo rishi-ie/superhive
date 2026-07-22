@@ -19,8 +19,9 @@ import type {
   UsageSnapshot,
   ContextSnapshot,
   ModelInfo,
-  RuntimeMessage,
+  RuntimeAssistantState,
 } from '@/types/electron'
+import type { ChatRow } from '@/models/assistant-message'
 import type { CompactionStatus, RetryStatus } from '@/models/runtime'
 import { toast } from 'sonner'
 import { initRuntimeSlice } from './slice'
@@ -34,7 +35,8 @@ export function useAgentRuntime(agentId: string | undefined) {
 
   const [agent, setAgent] = React.useState<Agent | null>(null)
   const [status, setStatus] = React.useState<AgentStatus>('idle')
-  const [messages, setMessages] = React.useState<RuntimeMessage[]>([])
+  const [messages, setMessages] = React.useState<ChatRow[]>([])
+  const [inFlight, setInFlight] = React.useState<RuntimeAssistantState | null>(null)
   const [lastError, setLastError] = React.useState<string | undefined>(undefined)
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
   const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
@@ -65,6 +67,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       setAgent(sliceRef.current.agent)
       setStatus(sliceRef.current.status)
       setMessages([...sliceRef.current.messages])
+      setInFlight(sliceRef.current.inFlight)
       setLastError(sliceRef.current.lastError)
       setBootStep(sliceRef.current.bootStep)
       setUsage(sliceRef.current.usage)
@@ -142,6 +145,7 @@ export function useAgentRuntime(agentId: string | undefined) {
     agent,
     status,
     messages,
+    inFlight,
     lastError,
     bootStep,
     usage,

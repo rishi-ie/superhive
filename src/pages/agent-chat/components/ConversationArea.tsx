@@ -5,15 +5,18 @@ import { cn } from '@/lib/utils'
 import { ActiveStateBanners } from './ActiveStateBanners'
 import { ChatEmptyState } from './SuggestedPrompts'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
-import type { RuntimeMessage } from '@/types/electron'
+import type { ChatRow } from '@/models/assistant-message'
+import type { RuntimeAssistantState } from '@/models/runtime'
 import { isMessageInFlight } from '@/models/runtime'
 
 type Row =
-  | { kind: 'message'; message: RuntimeMessage }
+  | { kind: 'message'; message: ChatRow }
+  | { kind: 'in-flight'; message: RuntimeAssistantState }
   | { kind: 'pending'; id: string; startedAt: number }
 
 interface ConversationAreaProps {
-  messages: RuntimeMessage[]
+  messages: ChatRow[]
+  inFlight?: RuntimeAssistantState | null
   busy?: boolean
   compaction?: import('@/models/runtime').CompactionStatus
   retry?: import('@/models/runtime').RetryStatus
@@ -32,6 +35,7 @@ interface ConversationAreaProps {
 
 export function ConversationArea({
   messages,
+  inFlight = null,
   busy = false,
   compaction,
   retry,
@@ -49,12 +53,24 @@ export function ConversationArea({
   const rows: Row[] = React.useMemo(() => {
     const out: Row[] = messages.map((m) => ({ kind: 'message', message: m }))
 
-    // If the last message is an in-flight assistant message, the
-    // AssistantMessage component is already rendering a WorkingStream.
-    // Don't stack a second state-1 row on top of it.
-    const tail = messages[messages.length - 1]
+    // If there's an in-flight message AND no finalized row already carries
+    // that id, render it as a virtual trailing row. The frozen AssistantMessage
+    // already includes the in-flight id once `finalize-message` lands, so
+    // `set-messages` clears the slot.
+    const inFlightId = inFlight?.id
+    const alreadyInMessages =
+      inFlightId !== undefined && messages.some((m) => m.id === inFlightId)
+    if (inFlight && !alreadyInMessages) {
+      out.push({ kind: 'in-flight', message: inFlight })
+    }
+
+    // If the tail is an in-flight assistant message (either via `inFlight`
+    // slot OR a finalized row whose id matches the live in-flight), the
+    // AssistantMessage component is already rendering the chain. Don't
+    // stack a "Waiting for response…" placeholder on top.
+    const tail = out[out.length - 1]
     const tailIsInFlightAssistant =
-      tail?.role === 'assistant' && isMessageInFlight(tail)
+      tail?.kind === 'in-flight' && isMessageInFlight(tail.message)
 
     if (pendingTurn && !tailIsInFlightAssistant) {
       out.push({
@@ -64,10 +80,12 @@ export function ConversationArea({
       })
     }
     return out
-  }, [messages, pendingTurn])
+  }, [messages, inFlight, pendingTurn])
 
   React.useEffect(() => {
-    const currentIds = new Set(messages.map((m) => m.id))
+    const currentIds = new Set<string>()
+    for (const m of messages) currentIds.add(m.id)
+    if (inFlight) currentIds.add(inFlight.id)
     const next = new Set<string>()
     for (const id of currentIds) {
       if (!seenIdsRef.current.has(id)) next.add(id)
@@ -87,7 +105,7 @@ export function ConversationArea({
       })
     }, 400)
     return () => clearTimeout(t)
-  }, [messages])
+  }, [messages, inFlight])
 
   const onAtBottomChange = React.useCallback((bottom: boolean) => {
     setAtBottom(bottom)
@@ -132,7 +150,11 @@ export function ConversationArea({
         ref={virtuosoRef}
         style={{ height: '100%' }}
         data={rows}
-        computeItemKey={(_, row) => (row.kind === 'pending' ? `pending-${row.id}` : row.message.id)}
+        computeItemKey={(_, row) => {
+          if (row.kind === 'pending') return `pending-${row.id}`
+          if (row.kind === 'in-flight') return `inflight-${row.message.id}`
+          return row.message.id
+        }}
         followOutput={atBottom ? 'smooth' : false}
         atBottomStateChange={onAtBottomChange}
         initialTopMostItemIndex={Math.max(0, rows.length - 1)}
@@ -148,6 +170,22 @@ export function ConversationArea({
                   </span>
                   <span>Waiting for response…</span>
                 </div>
+              </div>
+            )
+          }
+          if (row.kind === 'in-flight') {
+            return (
+              <div className="mx-auto flex w-full max-w-3xl flex-col px-4 sm:px-6 py-2">
+                <AssistantMessage
+                  key={row.message.id}
+                  message={row.message}
+                  agentId={agentId ?? ''}
+                  className={
+                    freshIds.has(row.message.id)
+                      ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
+                      : undefined
+                  }
+                />
               </div>
             )
           }

@@ -3,44 +3,53 @@ import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { ActionChainFold } from './message-parts/ActionChainFold'
-import { WorkingStream } from './WorkingStream'
+import { TimelineItemRow } from './message-parts/TimelineItemRow'
+import { ResponseBlocks } from './message-parts/ResponseBlocks'
 import { UsageFooter } from './UsageFooter'
-import { MarkdownPart } from './message-parts/MarkdownPart'
-import { ImagePart } from './message-parts/ImagePart'
-import { CompactionCard } from './message-parts/CompactionCard'
 import { copyMessage } from '@/flows/agents/ui/copy-message'
 import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
-import type { ContentPart, RuntimeMessage } from '@/models/runtime'
+import type { AssistantMessage as PersistedAssistantMessage } from '@/models/assistant-message'
+import type { RuntimeAssistantState } from '@/models/runtime'
 
 interface AssistantMessageProps {
-  message: RuntimeMessage
+  message: PersistedAssistantMessage | RuntimeAssistantState
   className?: string
   agentId: string
 }
 
 /**
- * Render prose parts (text + image + compaction-summary). The chain
- * (thinking + tool-call) lives in `message.lineage` and is rendered
- * separately by `WorkingStream` (state 1) or `ActionChainFold` (state 2).
+ * Discriminant: persisted `AssistantMessage` has a `timestamp` field;
+ * in-flight `RuntimeAssistantState` has `ts` instead.
  */
-function renderProsePart(part: ContentPart, i: number) {
-  if (part.type === 'text') {
-    return <MarkdownPart key={`text-${i}`} source={part.text} />
-  }
-  if (part.type === 'image') {
-    return <ImagePart key={`image-${i}`} data={part.data} mimeType={part.mimeType} />
-  }
-  if (part.type === 'compaction-summary') {
+function isPersisted(
+  m: PersistedAssistantMessage | RuntimeAssistantState,
+): m is PersistedAssistantMessage {
+  return 'timestamp' in m
+}
+
+/**
+ * Top-of-message indicator. State 1 (live): pulsing dot + "Working…".
+ * State 2 (frozen): ✓ Finished. The indicator scrolls with the message
+ * row (per Q11: not sticky to viewport).
+ */
+function Indicator({ frozen }: { frozen: boolean }) {
+  if (frozen) {
     return (
-      <CompactionCard
-        key={`compaction-${i}`}
-        tokensBefore={part.tokensBefore}
-        summary={part.summary}
-      />
+      <div className="flex items-center gap-2 self-start text-xs text-muted-foreground">
+        <span aria-hidden>✓</span>
+        <span>Finished</span>
+      </div>
     )
   }
-  return null
+  return (
+    <div className="flex items-center gap-2 self-start text-xs text-muted-foreground">
+      <span className="relative flex h-2 w-2">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-muted-foreground" />
+      </span>
+      <span>Working…</span>
+    </div>
+  )
 }
 
 export function AssistantMessage({
@@ -49,15 +58,17 @@ export function AssistantMessage({
 }: AssistantMessageProps) {
   const { copied, trigger } = useCopyFeedback()
 
-  // The lineage is the single source of truth for state 1 / state 2.
-  // When `message.lineageFrozen` is true (queue's finalize-message op or
-  // the 60s safety net set it), render the fold. Otherwise render the
-  // WorkingStream — the chain rows grow live as the agent streams.
-  const lineage = message.lineage ?? []
-  const frozen = message.lineageFrozen === true
+  const frozen = isFrozen(message)
+  const timeline = message.activityTimeline
+  const response = message.response
+  const timestamp = isPersisted(message) ? message.timestamp : message.ts
+  const usage = isPersisted(message) ? message.metadata.usage : message.usage
+  const totalDurationMs = isPersisted(message)
+    ? message.metadata.totalDurationMs
+    : message.totalDurationMs
 
   // In state 1, we DON'T render prose yet — only the chain. Prose appears
-  // in state 2 below the fold. This is the explicit user-facing rule.
+  // in state 2 below the separator. (Q5: hidden in state 1.)
   const showProse = frozen
 
   return (
@@ -67,20 +78,26 @@ export function AssistantMessage({
         className ?? '',
       )}
     >
-      {lineage.length > 0 ? (
-        frozen ? (
-          <ActionChainFold rows={lineage} />
-        ) : (
-          <WorkingStream lineage={lineage} />
-        )
+      <Indicator frozen={frozen} />
+
+      {timeline.length > 0 ? (
+        <ol className="ml-1.5 list-none">
+          {timeline.map((item, i) => (
+            <TimelineItemRow
+              key={item.id}
+              item={item}
+              frozen={frozen}
+              isLast={i === timeline.length - 1}
+              totalDurationMs={totalDurationMs}
+            />
+          ))}
+        </ol>
       ) : null}
 
-      {showProse ? (
+      {showProse && response.length > 0 ? (
         <>
-          {message.parts.map((part, i) => {
-            if (part.type === 'thinking' || part.type === 'tool-call') return null
-            return renderProsePart(part, i)
-          })}
+          <div className="my-1 h-px bg-border" aria-hidden />
+          <ResponseBlocks blocks={response} frozen={frozen} />
         </>
       ) : null}
 
@@ -91,37 +108,29 @@ export function AssistantMessage({
             variant="ghost"
             className="text-muted-foreground hover:text-foreground h-7 w-7 border-0"
             onClick={() => {
-              void copyMessage(message).then((ok) => {
+              void copyMessage(toPersisted(message)).then((ok) => {
                 if (ok) trigger()
               })
             }}
             aria-label={copied ? 'Copied' : 'Copy message'}
           >
             {copied ? (
-              <HugeIcon
-                icon={CheckIcon}
-                size={14}
-                className="size-3.5"
-              />
+              <HugeIcon icon={CheckIcon} size={14} className="size-3.5" />
             ) : (
-              <HugeIcon
-                icon={Copy01Icon}
-                size={14}
-                className="size-3.5"
-              />
+              <HugeIcon icon={Copy01Icon} size={14} className="size-3.5" />
             )}
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
               <span className="text-[11px] text-muted-foreground ml-1 cursor-default">
-                {new Date(message.ts).toLocaleTimeString([], {
+                {new Date(timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
               </span>
             </TooltipTrigger>
             <TooltipContent side="top">
-              {new Date(message.ts).toLocaleString([], {
+              {new Date(timestamp).toLocaleString([], {
                 month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
@@ -130,13 +139,43 @@ export function AssistantMessage({
               })}
             </TooltipContent>
           </Tooltip>
-          {message.usage ? (
+          {usage ? (
             <div className="ml-auto">
-              <UsageFooter usage={message.usage} />
+              <UsageFooter usage={usage} />
             </div>
           ) : null}
         </div>
       ) : null}
     </div>
   )
+}
+
+function isFrozen(message: PersistedAssistantMessage | RuntimeAssistantState): boolean {
+  // `PersistedAssistantMessage` is always frozen (by construction).
+  // `RuntimeAssistantState` may or may not be — when frozen, it can be
+  // treated like the persisted shape.
+  return isPersisted(message) ? true : message.frozen === true
+}
+
+/**
+ * Narrow an in-flight or persisted assistant message to a `ChatRow`-compatible
+ * value for `copyMessage`. In-flight messages don't have a stable `ChatRow`
+ * representation, but `copyMessage` only reads `text` from `response` —
+ * which exists on both shapes — so a thin ad-hoc object suffices.
+ */
+function toPersisted(message: PersistedAssistantMessage | RuntimeAssistantState): PersistedAssistantMessage {
+  if (isPersisted(message)) return message
+  return {
+    id: message.id,
+    role: 'assistant',
+    timestamp: message.ts,
+    activityTimeline: message.activityTimeline,
+    response: message.response,
+    metadata: {
+      ...(message.usage ? { usage: message.usage } : {}),
+      ...(message.totalDurationMs !== undefined
+        ? { totalDurationMs: message.totalDurationMs }
+        : {}),
+    },
+  }
 }

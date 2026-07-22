@@ -33,8 +33,10 @@ import type { ChatRow } from '../src/models/assistant-message'
  * its own minimal type here because this file is the canonical reference for
  * what fields the IPC payload reads.
  *
- * `messages` is the per-agent chat history. Phase A keeps the legacy
- * `RuntimeAssistantState[]` shape so the renderer UI doesn't change.
+ * `messages` is the per-agent chat history. Phase BD: holds finalized
+ * `ChatRow[]` rows (`UserMessage | AssistantMessage`). The renderer is
+ * the sole owner of in-flight state; the main process never stores
+ * streaming state.
  */
 export interface RuntimeEntry {
   agentId: string

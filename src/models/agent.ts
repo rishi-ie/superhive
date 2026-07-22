@@ -12,6 +12,7 @@
 
 import type { Agent, AgentStatus, InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/types/electron'
 import type { RuntimeAssistantState, CompactionStatus, RetryStatus } from './runtime'
+import type { ChatRow } from './assistant-message'
 
 // ---------------------------------------------------------------------------
 // CRUD inputs and results
@@ -146,7 +147,10 @@ export interface SettingsSlice {
 export interface RuntimeSlice {
   agent: Agent | null
   status: AgentStatus
-  messages: RuntimeAssistantState[]
+  /** Finalized chat history. `UserMessage | AssistantMessage`. */
+  messages: ChatRow[]
+  /** Live in-memory placeholder for the assistant's currently-streaming message. */
+  inFlight: RuntimeAssistantState | null
   lastError?: string
   bootStep?: InitStep
   usage?: UsageSnapshot
@@ -170,14 +174,14 @@ export interface RuntimeSlice {
   pendingTurn: { userMessageId: string; startedAt: number } | null
   pendingTurnTimeoutId?: ReturnType<typeof setTimeout>
   /**
-   * 60s safety-net timer for lineage freeze. Set by `startLineageSafetyNet`
+   * 60s safety-net timer for frozen freeze. Set by `startFrozenSafetyNet`
    * when a new in-flight assistant message begins streaming (on
    * `message-start` op). Cleared on `finalize-message` op or when the slice
-   * is disposed. If the timer fires, it enqueues a `set-lineage` op to
-   * force-freeze the lineage so the renderer can transition state 1 →
+   * is disposed. If the timer fires, it enqueues a `set-frozen` op to
+   * force-freeze the message so the renderer can transition state 1 →
    * state 2.
    */
-  lineageSafetyNetTimer?: ReturnType<typeof setTimeout>
+  frozenSafetyNetTimer?: ReturnType<typeof setTimeout>
   /**
    * Set by `useAgentRuntime.send` to the same `startedAt` as `pendingTurn`.
    * Read+cleared by the queue's `message-start` op to set the new assistant
@@ -185,13 +189,13 @@ export interface RuntimeSlice {
    */
   lastResponseStart: number | null
   /**
-   * Renderer-side dedup set: tracks which assistant messages have already
-   * had their frozen lineage IPC'd to the main process for persistence.
-   * Without this, every notify would re-emit the IPC and spam chat.jsonl.
-   * Entries are added when the IPC fires; entries are never removed (a
-   * frozen message stays frozen).
+   * Renderer-side dedup set: tracks which finalized assistant messages
+   * have already had their persistence IPC fired. Without this, every
+   * notify would re-emit the IPC and spam chat.jsonl. Entries are added
+   * when the IPC fires; entries are never removed (a frozen message
+   * stays frozen).
    */
-  persistedFrozenLineages: Set<string>
+  persistedFrozenMessages: Set<string>
   unsubs: Array<() => void>
   listeners: Set<() => void>
 }

@@ -40,7 +40,6 @@ import { useAgentsListVersion } from '@/flows/agents/runtime';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
-import { getMessageText } from '@/models/runtime';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
@@ -129,6 +128,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   const {
     status,
     messages,
+    inFlight,
     lastError,
     bootStep,
     contextUsage,
@@ -238,7 +238,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
       const lastUser = [...messages].reverse().find((m) => m.role === 'user');
       if (lastUser) {
         e.preventDefault();
-        setInput(getMessageText(lastUser));
+        setInput(lastUser.text);
         requestAnimationFrame(() => textareaRef.current?.focus());
       }
     }
@@ -258,6 +258,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     <div className="flex flex-1 min-h-0 flex-col">
       <ConversationArea
         messages={messages}
+        inFlight={inFlight}
         busy={isBusy}
         compaction={compaction}
         retry={retry}

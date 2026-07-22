@@ -4,7 +4,7 @@
  * SuperHive Chat Runtime v2:
  *   - `RuntimeAssistantState` is the ephemeral in-memory shape the queue
  *     mutates while Pi is streaming. **Never persisted.** Lives only in
- *     the runtime slice; destroyed on dispose.
+ *     `slice.inFlight`; cleared on dispose.
  *   - `AssistantMessage` is the persisted shape (see `./assistant-message`).
  *   - The on-disk shape and the runtime shape are distinct objects; the
  *     freeze step on `message-end` is the one-shot builder that converts
@@ -13,7 +13,17 @@
  * Two persist routes:
  *   - User messages persist immediately on send (handled by main process).
  *   - Assistant messages persist only on `message-end`, in one atomic write
- *     carrying the finalized `AssistantMessage`.
+ *     carrying the finalized `AssistantMessage` — fired by the renderer's
+ *     `agents.persistAssistantMessage` IPC after `buildAssistantMessage`.
+ *
+ * Phase BD scope:
+ *   - `RuntimeAssistantState` no longer carries the legacy `parts +
+ *     lineage + lineageFrozen` triplet. Only `parts` survives (as the
+ *     queue's internal mutation target — never persisted). The new fields
+ *     `activityTimeline + response + frozen + totalDurationMs + usage`
+ *     are the source of truth for state 1 / state 2.
+ *   - `RuntimeSliceView.messages` is now finalized-only `ChatRow[]`.
+ *     The live in-flight shape lives in `RuntimeSliceView.inFlight`.
  */
 
 import type { InitStep, UsageSnapshot, ContextSnapshot, ModelInfo } from '../../electron/pi-protocol/types'
@@ -25,25 +35,6 @@ import type { TimelineItem, ResponseBlock } from './assistant-message'
 export type { TimelineItem, ResponseBlock } from './assistant-message'
 export type { AssistantMessage, AssistantMessageMetadata } from './assistant-message'
 export type { ChatRow, UserMessage } from './assistant-message'
-
-/**
- * Legacy lineage row shape (v1). Kept on `RuntimeAssistantState` for
- * back-compat with the existing AssistantMessage UI in Phase A. Phase B
- * will dual-write `activityTimeline` + `response` alongside `lineage`;
- * Phase D will switch the UI to read from the new fields.
- */
-export type StateOneRow =
-  | { kind: 'thinking'; id: string; text: string; state: 'streaming' | 'complete' }
-  | {
-      kind: 'tool-call'
-      id: string
-      toolName: string
-      firstArg: string | null
-      state: 'pending' | 'streaming-args' | 'complete'
-    }
-  | { kind: 'text'; id: string; text: string; state: 'streaming' | 'complete' }
-  | { kind: 'image'; id: string }
-  | { kind: 'compaction'; id: string; tokensBefore: number }
 
 /**
  * Per-turn usage snapshot the assistant reports on `message_end`. Optional
@@ -126,12 +117,13 @@ export type ToolResultContent =
 
 /**
  * The runtime's per-message workspace while Pi is streaming. Lives only
- * in the renderer-side queue; never serialized to `chat.jsonl`.
+ * in `slice.inFlight`; cleared on freeze. Never serialized to `chat.jsonl`.
  *
- * Phase A: this still carries the legacy `parts` + `lineage` +
- * `lineageFrozen` fields so the existing AssistantMessage UI keeps
- * working. Phase B will dual-write `activityTimeline` + `response`
- * alongside `lineage`; Phase D will retire `lineage`.
+ * Phase BD: this is the live in-memory workspace. The queue mutates
+ * `parts` (internal mutation target) + `activityTimeline` + `response`
+ * as events arrive. The freeze step (`freezeAssistantState`) seals
+ * everything, computes `totalDurationMs`, and hands the state to
+ * `buildAssistantMessage` which produces the persisted shape.
  */
 export interface RuntimeAssistantState {
   id: string
@@ -139,43 +131,33 @@ export interface RuntimeAssistantState {
   role: 'user' | 'assistant'
   /**
    * Internal queue mutation target. The freeze step derives the
-   * persisted shape from this. **Never persisted.**
+   * persisted shape from this. **Never persisted.** Tool-result parts
+   * live here only (UI drops them per spec).
    */
   parts: ContentPart[]
   /**
-   * Legacy lineage of the agent's chain (thinking + tool-call rows).
-   * Phase A: populated by the queue ops for UI back-compat. Phase B
-   * will dual-write `activityTimeline`; Phase D will switch the UI to
-   * read from the new field.
-   */
-  lineage?: readonly StateOneRow[]
-  /**
-   * True once the queue has frozen the lineage. Phase A: read by the
-   * UI to switch between state 1 (live) and state 2 (finalized).
-   */
-  lineageFrozen?: boolean
-  /**
-   * Live activity timeline. Phase A: scaffold only — populated by Phase
-   * B queue ops; not yet consumed by the UI.
+   * Live activity timeline. Populated by the queue ops in lock-step
+   * with `parts`. This is the source of truth for the state-1 / state-2
+   * chain display.
    */
   activityTimeline: TimelineItem[]
   /**
-   * Live response blocks. Phase A: scaffold only — populated by Phase
-   * B queue ops; not yet consumed by the UI.
+   * Live response blocks. Populated by the queue ops. Streams
+   * alongside `parts` but stays hidden in state 1.
    */
   response: ResponseBlock[]
   /**
-   * Phase A: total wall-clock duration in ms. Set by the freeze step.
-   * Phase D will surface this as the `▶ Thought (3.2s)` label.
+   * Total wall-clock duration in ms. Set by the freeze step on
+   * `message-end`. Surfaced as the `▶ Thought (3.2s)` label.
    */
   totalDurationMs?: number
   /**
-   * Phase A: synonym for `lineageFrozen` for new-code consumers. The
-   * queue's `finalize-message` op sets both; `set-frozen` (Phase B
-   * safety-net path) sets both. Phase D will read `frozen` and stop
-   * reading `lineageFrozen`.
+   * True once the queue has frozen the message. Read by
+   * `isMessageInFlight` (returns false when true) and by the UI to
+   * switch between state 1 (live) and state 2 (finalized).
    */
   frozen?: boolean
+  /** Per-turn usage snapshot the assistant reports on `message_end`. */
   usage?: MessageUsage
 }
 
@@ -430,12 +412,11 @@ export type StreamOp =
       agentId: string
       messageId: string
     }
-  | { kind: 'set-lineage'; agentId: string; messageId: string }
   | { kind: 'increment-inflight'; agentId: string; delta: number }
   | {
       kind: 'set-messages'
       agentId: string
-      messages: RuntimeAssistantState[]
+      messages: import('./assistant-message').ChatRow[]
     }
   | {
       kind: 'append-compaction-summary'
@@ -452,15 +433,15 @@ export type StreamOp =
     }
 
 /** Slice fields the queue reads (and writes — the queue is the single
- *  writer of `messages` + `inFlightToolCount` and also reads+clears
- *  `lastResponseStart` when applying a `message-start` op).
+ *  writer of `messages` + `inFlight` + `inFlightToolCount` and also
+ *  reads+clears `lastResponseStart` when applying a `message-start` op).
  *
- * Phase A: `messages` is `RuntimeAssistantState[]` so the legacy UI
- * keeps compiling. Phase B will split this into finalized `ChatRow[]`
- * (persisted) + a separate `inFlight` slot.
+ * Phase BD: split into finalized `ChatRow[]` (persisted) + a separate
+ * `inFlight` slot for the live in-memory `RuntimeAssistantState`.
  */
 export interface RuntimeSliceView {
-  messages: RuntimeAssistantState[]
+  messages: import('./assistant-message').ChatRow[]
+  inFlight: RuntimeAssistantState | null
   inFlightToolCount: number
   lastResponseStart: number | null
 }

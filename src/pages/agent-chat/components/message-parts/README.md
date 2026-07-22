@@ -1,48 +1,58 @@
-# Per-part renderers for `RuntimeMessage.parts`
+# Per-part renderers for `AssistantMessage`
 
-See `src/models/runtime.ts` for the `ContentPart` discriminated union.
+See `src/models/assistant-message.ts` for the persisted shape (`activityTimeline`
++ `response`).
 
-`AssistantMessage` splits `message.parts` into two groups:
+## Layout
 
-- **Visible**: `text`, `image`, `compaction-summary` — rendered inline in original order
-- **Hidden**: `thinking`, `tool-call` — collected into a single `<ActionChainFold>` at the bottom of the message
+`AssistantMessage` renders two stacked sections per assistant turn:
 
-| Part type | Renderer | Visible? |
-|---|---|---|
-| `text` | `MarkdownPart` | ✅ inline |
-| `thinking` | (label only, inside fold) | ❌ hidden in fold |
-| `image` | `ImagePart` | ✅ inline |
-| `compaction-summary` | `CompactionCard` | ✅ inline |
-| `tool-call` | (name only, inside fold) | ❌ hidden in fold |
+1. **Top indicator** — `● Working…` (state 1) or `✓ Finished` (state 2). Always
+   visible at the top of the message. Scrolls with the row (not sticky to
+   viewport).
+2. **Activity timeline** (`message.activityTimeline`) — one `TimelineItemRow`
+   per item. Each row is type-driven:
+   - `thinking` — state 1: `▼ Thinking` placeholder (click to expand). State 2:
+     `▶ Thought (3.2s)` collapsed (click to expand). Same total-duration label
+     for every thinking row in one response.
+   - `tool-call` — compact `✓ <toolName>`, no inline args. Non-expandable.
+   - `completion` — `✓ Completed`. Non-expandable.
+   - `warning` — `⚠ <message>`. `error` — `❌ <message>`. Non-expandable.
+   - `planning` / `system` — defined but never emitted today.
+3. **Separator** — `h-px bg-border`. Visible only when frozen AND `response.length > 0`.
+4. **Response blocks** (`message.response`) — one block per response entry:
+   - `text` → `<MarkdownPart>`
+   - `image` → `<ImagePart>`
+   - `compaction-summary` → `<CompactionCard>`
+5. **Footer** (frozen only, opacity-revealed on hover/focus) — copy button,
+   timestamp tooltip, `<UsageFooter>`.
 
-## ActionChainFold
-
-Replaces the per-call blue cards (Phase 16) and the single-purpose `ToolCallList` (Phase 17).
-
-- **Default state** (collapsed): `Worked for Xs · N actions` or `Working… M of N actions` while in flight
-- **Expanded**: numbered chronological list of internal actions — `1. Thought`, `2. bash`, `3. Thought`, `4. read`, etc.
-- **In-flight derivation**: a part is in flight if `state === 'streaming'` (thinking) or `state !== 'complete'` (tool-call)
-- **Duration**: live-ticking while in flight via `useElapsedSeconds`, frozen when done
-
-`ThinkingPart.tsx` is kept parked but no longer rendered inline. Available for a future per-row drill-down.
+In state 1, prose (section 4) is hidden. Only the indicator + timeline show.
 
 ## Files
 
 ```
 message-parts/
-  MarkdownPart.tsx     — react-markdown + remark-gfm/remark-math/rehype-katex
-  CodeBlock.tsx        — shiki-highlighted fenced code with header chrome
-  MermaidBlock.tsx     — mermaid 11 renderer
-  MarkdownTable.tsx    — overflow-x-auto table with copy/expand
-  ThinkingPart.tsx     — parked (was inline thinking renderer; fold replaces it)
-  ImagePart.tsx        — image with lightbox
-  CompactionCard.tsx   — compaction summary divider
-  ActionChainFold.tsx  — fold for thinking + tool-call action chain
-  ImageLightbox.tsx    — image lightbox dialog
-  README.md            — this file
+  TimelineItemRow.tsx   — one row per TimelineItem (memoized)
+  ResponseBlocks.tsx    — text / image / compaction-summary blocks (memoized)
+  MarkdownPart.tsx      — react-markdown + remark-gfm/remark-math/rehype-katex
+  CodeBlock.tsx         — shiki-highlighted fenced code with header chrome
+  MermaidBlock.tsx      — mermaid 11 renderer
+  MarkdownTable.tsx     — overflow-x-auto table with copy/expand
+  ThinkingPart.tsx      — parked (was inline thinking renderer; timeline replaces it)
+  ImagePart.tsx         — image with lightbox
+  ImageLightbox.tsx     — image lightbox dialog
+  CompactionCard.tsx    — compaction summary divider
+  chain-display.ts      — per-tool icon + verb mapping
+  README.md             — this file
 ```
 
-Deleted (Phase 16/17): `PartRenderer`, `ToolCallPart`, `ToolCallCard`,
-`BashToolCard`, `ReadToolCard`, `EditToolCard`, `WriteToolCard`, `GrepToolCard`,
-`FindToolCard`, `LsToolCard`, `UnknownToolCard`, `DiffView`, `ToolResultPart`,
-`ToolCallList`.
+## Memoization (Phase F)
+
+- `TimelineItemRow` is `React.memo`'d on `(item, frozen, isLast, totalDurationMs)`
+  reference equality.
+- `ResponseBlocks` is `React.memo`'d on `(blocks, frozen)` reference equality.
+
+The comparator's reference-equality on `blocks` and `item` only works because
+the queue returns new arrays on every mutation. Don't mutate `state.activityTimeline`
+or `state.response` in place — always replace.

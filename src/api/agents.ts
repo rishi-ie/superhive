@@ -3,12 +3,11 @@ import type {
   AgentStatus,
   AgentCreateInput,
   Project,
-  RuntimeMessage,
   RuntimeStatusPayload,
   RuntimeExitPayload,
   AdapterEvent,
 } from '@/types/electron'
-import type { StateOneRow } from '@/models/runtime'
+import type { AssistantMessage, ChatRow } from '@/models/assistant-message'
 
 export const agents = {
   list: (): Promise<Agent[]> => window.api.agents.list(),
@@ -25,7 +24,7 @@ export const agents = {
   getRuntimeState: (id: string): Promise<RuntimeStatusPayload | null> =>
     window.api.agents.getRuntimeState(id),
   getProjects: (id: string): Promise<Project[]> => window.api.agents.getProjects(id),
-  getMessages: (id: string): Promise<RuntimeMessage[]> => window.api.agents.getMessages(id),
+  getMessages: (id: string): Promise<ChatRow[]> => window.api.agents.getMessages(id),
 
   readSettings: (id: string): Promise<Record<string, unknown> | null> =>
     window.api.agents.readSettings(id),
@@ -33,16 +32,15 @@ export const agents = {
     window.api.agents.writeSettings(id, patch),
   reveal: (id: string): Promise<{ ok: boolean }> =>
     window.api.agents.reveal(id),
-  setMessageLineage: (
+  persistAssistantMessage: (
     id: string,
-    messageId: string,
-    lineage: readonly StateOneRow[],
+    message: AssistantMessage,
   ): Promise<{ ok: boolean }> =>
-    window.api.agents.setMessageLineage(id, messageId, lineage),
+    window.api.agents.persistAssistantMessage(id, message),
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),
-  onMessages: (id: string, cb: (messages: RuntimeMessage[]) => void): (() => void) => window.api.agents.onMessages(id, cb),
+  onMessages: (id: string, cb: (messages: ChatRow[]) => void): (() => void) => window.api.agents.onMessages(id, cb),
   onExit:     (id: string, cb: (payload: RuntimeExitPayload) => void): (() => void) => window.api.agents.onExit(id, cb),
   onSettingsChanged: (id: string, cb: (agentId: string) => void): (() => void) =>
     window.api.agents.onSettingsChanged(id, cb),

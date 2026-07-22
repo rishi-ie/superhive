@@ -5,7 +5,7 @@
  * pages (composer, command palette, breadcrumbs, app-update banner).
  */
 
-import type { RuntimeMessage } from '@/types/electron'
+import type { ChatRow } from '@/models/assistant-message'
 
 // ---------------------------------------------------------------------------
 // Composer
@@ -55,7 +55,7 @@ export interface UpdateInfo {
 // ---------------------------------------------------------------------------
 
 export interface ShortcutCopyLastAssistantInput {
-  messages: RuntimeMessage[]
+  messages: ChatRow[]
 }
 
 export interface ShortcutCopyLastAssistantResult {

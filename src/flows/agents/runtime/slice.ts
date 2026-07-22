@@ -2,17 +2,17 @@
  * Runtime slice — the singleton cache of per-agent runtime state in the
  * renderer.
  *
- * Phase A scope:
- *   - `slice.messages: RuntimeAssistantState[]` keeps the legacy
- *     `parts + lineage + lineageFrozen` shape so the existing
- *     AssistantMessage UI continues to work unchanged.
- *   - Main process is a pure forwarder (see `general-kai-runtime.ts`):
- *     it does not mirror streaming state. The renderer is the sole
- *     writer of in-flight messages.
- *   - The `setMessageLineage` IPC + 60s safety net are still wired
- *     so the line-merge race fix from the previous phase keeps
- *     working. Phase C will replace this with the
- *     `agents:persistAssistantMessage` IPC.
+ * Phase BD scope:
+ *   - `slice.messages: ChatRow[]` holds finalized rows only.
+ *   - `slice.inFlight: RuntimeAssistantState | null` is the live workspace
+ *     the queue mutates as events arrive. Cleared on freeze.
+ *   - The slice's notify path is the bridge from in-flight → persisted:
+ *     when `inFlight.frozen === true`, build the AssistantMessage, push to
+ *     `slice.messages`, clear `inFlight`. Then fire the
+ *     `agents.persistAssistantMessage` IPC for every unfrozen-id row.
+ *   - The 60s safety net (renamed from `lineageSafetyNetTimer` →
+ *     `frozenSafetyNetTimer`) enqueues `set-frozen` if the freeze never
+ *     lands.
  *
  * Owns:
  *   - The `runtimeSlices` Map (keyed by agentId, survives component unmount).
@@ -26,7 +26,10 @@ import { agents } from '@/api/agents'
 import type { AdapterEvent } from '@/types/electron'
 import { toast } from 'sonner'
 import type { RuntimeSlice } from '@/models/agent'
-import type { StateOneRow } from '@/models/runtime'
+import type {
+  AssistantMessage,
+  ChatRow,
+} from '@/models/assistant-message'
 import {
   clearAgentQueue,
   enqueue,
@@ -37,10 +40,9 @@ import { translateEventToOps } from './event-translator'
 /**
  * 60s safety net: if `finalize-message` op never lands for an in-flight
  * assistant message (agent crash, dropped event, lost connection),
- * force-freeze the lineage after 60s so the renderer can transition
- * state 1 → state 2.
+ * force-freeze after 60s so the renderer can transition state 1 → state 2.
  */
-const LINEAGE_SAFETY_NET_MS = 60_000
+const FROZEN_SAFETY_NET_MS = 60_000
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 
@@ -50,7 +52,7 @@ setSliceAccessor((agentId) => {
   return {
     slice,
     notify: () => {
-      persistFrozenLineages(slice, agentId)
+      persistFrozenMessages(slice, agentId)
       slice.listeners.forEach((l) => l())
     },
   }
@@ -65,66 +67,64 @@ export function disposeRuntimeSliceNow(agentId: string): void {
     clearTimeout(slice.pendingTurnTimeoutId)
     slice.pendingTurnTimeoutId = undefined
   }
-  clearLineageSafetyNet(slice)
+  clearFrozenSafetyNet(slice)
   slice.pendingTurn = null
   slice.lastResponseStart = null
+  slice.inFlight = null
   runtimeSlices.delete(agentId)
   clearAgentQueue(agentId)
 }
 
 /**
- * After every slice notify, scan for newly-frozen lineages and IPC them
- * to the main process for persistence. Idempotent via the
- * `persistedFrozenLineages` set so re-renders don't re-fire the IPC.
+ * After every slice notify, scan for newly-finalized assistant messages
+ * and IPC them to the main process for persistence. Idempotent via the
+ * `persistedFrozenMessages` set so re-renders don't re-fire the IPC.
  *
- * Also drives the 60s lineage safety net: when a new in-flight assistant
+ * Also drives the 60s frozen safety net: when a new in-flight assistant
  * message begins streaming, start the timer. When the message freezes,
  * clear the timer.
  */
-function persistFrozenLineages(slice: RuntimeSlice, agentId: string): void {
+function persistFrozenMessages(slice: RuntimeSlice, agentId: string): void {
   for (const m of slice.messages) {
-    if (!m.lineageFrozen) continue
-    if (slice.persistedFrozenLineages.has(m.id)) continue
-    slice.persistedFrozenLineages.add(m.id)
-    const lineage: readonly StateOneRow[] = m.lineage ?? []
-    void agents.setMessageLineage(agentId, m.id, lineage).catch((err: unknown) => {
+    if (m.role !== 'assistant') continue
+    if (slice.persistedFrozenMessages.has(m.id)) continue
+    slice.persistedFrozenMessages.add(m.id)
+    const message: AssistantMessage = m
+    void agents.persistAssistantMessage(agentId, message).catch((err: unknown) => {
       // eslint-disable-next-line no-console
       console.warn(
-        `[runtime] setMessageLineage failed for ${agentId}/${m.id}:`,
+        `[runtime] persistAssistantMessage failed for ${agentId}/${m.id}:`,
         err,
       )
     })
   }
   // Manage the 60s safety net.
-  const tail = slice.messages[slice.messages.length - 1]
-  if (tail && tail.role === 'assistant' && !tail.lineageFrozen) {
-    if (!slice.lineageSafetyNetTimer) {
-      startLineageSafetyNet(slice, agentId)
+  if (slice.inFlight && !slice.inFlight.frozen) {
+    if (!slice.frozenSafetyNetTimer) {
+      startFrozenSafetyNet(slice, agentId)
     }
   } else {
-    clearLineageSafetyNet(slice)
+    clearFrozenSafetyNet(slice)
   }
 }
 
-function startLineageSafetyNet(slice: RuntimeSlice, agentId: string): void {
-  if (slice.lineageSafetyNetTimer) return
-  slice.lineageSafetyNetTimer = setTimeout(() => {
+function startFrozenSafetyNet(slice: RuntimeSlice, agentId: string): void {
+  if (slice.frozenSafetyNetTimer) return
+  slice.frozenSafetyNetTimer = setTimeout(() => {
     const entry = runtimeSlices.get(agentId)
-    if (!entry) return
-    for (let i = entry.messages.length - 1; i >= 0; i -= 1) {
-      const m = entry.messages[i]!
-      if (m.role !== 'assistant') continue
-      if (m.lineageFrozen) return
-      enqueue({ kind: 'set-lineage', agentId, messageId: m.id })
-      return
-    }
-  }, LINEAGE_SAFETY_NET_MS)
+    if (!entry?.inFlight || entry.inFlight.frozen) return
+    enqueue({
+      kind: 'set-frozen',
+      agentId,
+      messageId: entry.inFlight.id,
+    })
+  }, FROZEN_SAFETY_NET_MS)
 }
 
-function clearLineageSafetyNet(slice: RuntimeSlice): void {
-  if (slice.lineageSafetyNetTimer) {
-    clearTimeout(slice.lineageSafetyNetTimer)
-    slice.lineageSafetyNetTimer = undefined
+function clearFrozenSafetyNet(slice: RuntimeSlice): void {
+  if (slice.frozenSafetyNetTimer) {
+    clearTimeout(slice.frozenSafetyNetTimer)
+    slice.frozenSafetyNetTimer = undefined
   }
 }
 
@@ -138,6 +138,7 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     agent: null,
     status: 'idle',
     messages: [],
+    inFlight: null,
     lastError: undefined,
     bootStep: undefined,
     usage: undefined,
@@ -151,9 +152,9 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     inFlightToolCount: 0,
     pendingTurn: null,
     pendingTurnTimeoutId: undefined,
-    lineageSafetyNetTimer: undefined,
+    frozenSafetyNetTimer: undefined,
     lastResponseStart: null,
-    persistedFrozenLineages: new Set(),
+    persistedFrozenMessages: new Set(),
     unsubs,
     listeners: new Set(),
   }
@@ -207,9 +208,10 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
 
   unsubs.push(
     agents.onMessages(agentId, (messages) => {
-      // Phase A: main process emits `entry.messages` after every push
-      // (user-send). The queue merges them in.
-      enqueue({ kind: 'set-messages', agentId, messages: messages as never })
+      // Main process emits finalized rows on user-send. The queue merges
+      // them into `slice.messages`.
+      const rows: ChatRow[] = messages
+      enqueue({ kind: 'set-messages', agentId, messages: rows })
     }),
   )
 
@@ -253,12 +255,12 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
           const e = runtimeSlices.get(agentId)
           if (e) {
             e.lastError = ev.message
-            if (e.pendingTurn || e.lastResponseStart !== null) {
+            if (e.pendingTurn || e.lastResponseStart !== null || e.inFlight) {
               if (e.pendingTurnTimeoutId) {
                 clearTimeout(e.pendingTurnTimeoutId)
                 e.pendingTurnTimeoutId = undefined
               }
-              clearLineageSafetyNet(e)
+              clearFrozenSafetyNet(e)
               e.pendingTurn = null
               e.lastResponseStart = null
               e.listeners.forEach((l) => l())
@@ -295,7 +297,8 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
       }
     })
     agents.getMessages(agentId).then((msgs) => {
-      enqueue({ kind: 'set-messages', agentId, messages: msgs as never })
+      const rows: ChatRow[] = msgs
+      enqueue({ kind: 'set-messages', agentId, messages: rows })
     })
     slice.initialized = true
   }

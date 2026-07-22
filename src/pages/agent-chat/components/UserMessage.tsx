@@ -6,11 +6,10 @@ import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { copyMessage } from '@/flows/agents/ui/copy-message'
 import { useCopyFeedback } from '@/flows/ui/use-copy-feedback'
-import { getMessageText } from '@/models/runtime'
-import type { RuntimeMessage } from '@/types/electron'
+import type { UserMessage as UserMessageShape } from '@/models/assistant-message'
 
 interface UserMessageProps {
-  message: RuntimeMessage
+  message: UserMessageShape
   agentId: string
 }
 
@@ -18,17 +17,16 @@ const MAX_COLLAPSED_LINES = 8
 const MAX_COLLAPSED_LENGTH = 600
 
 export function UserMessage({ message }: UserMessageProps) {
-  const text = getMessageText(message)
-  const [expanded, setExpanded] = React.useState(false)
   const { copied, trigger } = useCopyFeedback()
+  const [expanded, setExpanded] = React.useState(false)
 
-  const lines = text.split('\n')
-  const isLong = lines.length > MAX_COLLAPSED_LINES || text.length > MAX_COLLAPSED_LENGTH
+  const lines = message.text.split('\n')
+  const isLong = lines.length > MAX_COLLAPSED_LINES || message.text.length > MAX_COLLAPSED_LENGTH
   const visibleLines = expanded ? lines : lines.slice(0, MAX_COLLAPSED_LINES)
 
   React.useEffect(() => {
     setExpanded(false)
-  }, [text])
+  }, [message.text])
 
   return (
     <div className="group relative w-full py-button-y flex flex-col items-end">
@@ -48,13 +46,13 @@ export function UserMessage({ message }: UserMessageProps) {
           </div>
         ) : (
           <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
-            {text}
+            {message.text}
           </p>
         )}
       </div>
       <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
         <span className="text-[11px] text-muted-foreground mr-1">
-          {new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
           <Tooltip>
             <TooltipTrigger asChild>
