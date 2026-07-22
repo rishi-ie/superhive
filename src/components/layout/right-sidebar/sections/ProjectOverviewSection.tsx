@@ -95,14 +95,14 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
           {project.name}
         </span>
         {coordinatorProjectDescription ? (
-          <span className="text-sm text-muted-foreground line-clamp-2">
+          <span className="text-xs text-muted-foreground line-clamp-2">
             {truncateForDisplay(
               coordinatorProjectDescription,
               DESCRIPTION_DISPLAY_MAX_CHARS,
             )}
           </span>
         ) : (
-          <span className="text-sm text-muted-foreground/70 italic">
+          <span className="text-xs text-muted-foreground/70 italic">
             {DESCRIPTION_FALLBACK_TEXT}
           </span>
         )}
