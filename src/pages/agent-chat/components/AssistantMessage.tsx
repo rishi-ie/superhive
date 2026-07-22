@@ -82,12 +82,11 @@ export function AssistantMessage({
 
       {timeline.length > 0 ? (
         <ol className="ml-1.5 list-none">
-          {timeline.map((item, i) => (
+          {timeline.map((item) => (
             <TimelineItemRow
               key={item.id}
               item={item}
               frozen={frozen}
-              isLast={i === timeline.length - 1}
               totalDurationMs={totalDurationMs}
             />
           ))}
