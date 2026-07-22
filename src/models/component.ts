@@ -66,7 +66,6 @@ export interface OverviewData {
 
 export interface ProjectOverviewSectionData {
   project: Project | null
-  coordinator: Agent | null
   members: Agent[]
   /**
    * Live project description owned by the coordinator's truth settings

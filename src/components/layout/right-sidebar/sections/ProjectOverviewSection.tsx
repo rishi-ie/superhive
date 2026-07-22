@@ -1,5 +1,4 @@
 import type { Task } from "@/storage/types";
-import { AgentStatusBadge } from "@/components/common";
 import { Accordion } from "../primitives";
 import { useTasksByProject } from "@/flows/tasks/runtime/use-tasks-by-project";
 import { cn } from "@/lib/utils";
@@ -74,7 +73,7 @@ function ActiveTasksAccordion({ projectId }: { projectId: string }) {
 }
 
 export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
-  const { project, coordinator, members, coordinatorProjectDescription } = data;
+  const { project, members, coordinatorProjectDescription } = data;
   if (!project) {
     return (
       <div className="flex flex-col gap-stack py-button-y">
@@ -106,24 +105,6 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
             {DESCRIPTION_FALLBACK_TEXT}
           </span>
         )}
-      </div>
-
-      <div className="flex flex-col gap-gap-tight rounded-button border border-border bg-card px-row py-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Coordinator
-          </span>
-          {coordinator && (
-            <AgentStatusBadge
-              status={coordinator.status}
-              error={Boolean(coordinator.lastError)}
-              compact
-            />
-          )}
-        </div>
-        <span className="truncate text-sm">
-          {coordinator?.name ?? "Not created"}
-        </span>
       </div>
 
       <div className="flex flex-col gap-gap-tight rounded-button border border-border bg-card px-row py-2">
