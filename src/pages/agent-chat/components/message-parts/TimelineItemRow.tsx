@@ -48,7 +48,7 @@ function TimelineItemRowBase({
         <Bullet>
           <THOUGHT_ICON className="size-3.5 text-muted-foreground" />
         </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug pt-px">
+        <div className="flex-1 min-w-0 text-xs leading-snug">
           {expandable ? (
             <button
               type="button"
@@ -81,7 +81,7 @@ function TimelineItemRowBase({
         <Bullet>
           <Icon className="size-3.5 text-muted-foreground" />
         </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug pt-px">
+        <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="inline-flex items-center gap-1.5 text-foreground/80">
             <CheckCircle2Icon className="size-3 text-foreground/60" />
             <span>{display?.verb ?? item.toolName}</span>
@@ -100,7 +100,7 @@ function TimelineItemRowBase({
         <Bullet>
           <CheckCircle2Icon className="size-3.5 text-foreground/70" />
         </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug pt-px">
+        <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="text-foreground/80">Completed</span>
         </div>
       </li>
@@ -113,7 +113,7 @@ function TimelineItemRowBase({
         <Bullet>
           <span aria-hidden className="text-amber-500">⚠</span>
         </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug pt-px">
+        <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="text-foreground/80">{item.message}</span>
         </div>
       </li>
@@ -126,7 +126,7 @@ function TimelineItemRowBase({
         <Bullet>
           <span aria-hidden className="text-destructive">❌</span>
         </Bullet>
-        <div className="flex-1 min-w-0 text-xs leading-snug pt-px">
+        <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="text-foreground/80">{item.message}</span>
         </div>
       </li>
