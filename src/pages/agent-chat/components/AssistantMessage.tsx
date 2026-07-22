@@ -1,9 +1,12 @@
+import * as React from 'react'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TimelineItemRow } from './message-parts/TimelineItemRow'
+import { ToolCallGroupRow } from './message-parts/ToolCallGroupRow'
+import { groupTimelineItems } from './message-parts/group-timeline-items'
 import { ResponseBlocks } from './message-parts/ResponseBlocks'
 import { UsageFooter } from './UsageFooter'
 import { copyMessage } from '@/flows/agents/ui/copy-message'
@@ -71,6 +74,14 @@ export function AssistantMessage({
   // in state 2 below the separator. (Q5: hidden in state 1.)
   const showProse = frozen
 
+  // Cluster consecutive tool-call items into a single group so parallel
+  // tool calls render as one row instead of N stacked rows. Non-tool-call
+  // items break the chain and stay standalone.
+  const groupedTimeline = React.useMemo(
+    () => groupTimelineItems(timeline),
+    [timeline],
+  )
+
   return (
     <div
       className={cn(
@@ -80,16 +91,24 @@ export function AssistantMessage({
     >
       <Indicator frozen={frozen} />
 
-      {timeline.length > 0 ? (
+      {groupedTimeline.length > 0 ? (
         <ol className="ml-1.5 list-none">
-          {timeline.map((item) => (
-            <TimelineItemRow
-              key={item.id}
-              item={item}
-              frozen={frozen}
-              totalDurationMs={totalDurationMs}
-            />
-          ))}
+          {groupedTimeline.map((group) =>
+            group.kind === 'single' ? (
+              <TimelineItemRow
+                key={group.item.id}
+                item={group.item}
+                frozen={frozen}
+                totalDurationMs={totalDurationMs}
+              />
+            ) : (
+              <ToolCallGroupRow
+                key={group.items[0]!.id}
+                items={group.items}
+                frozen={frozen}
+              />
+            ),
+          )}
         </ol>
       ) : null}
 
