@@ -82,9 +82,8 @@ function TimelineItemRowBase({
           <Icon className="size-3.5 text-muted-foreground" />
         </Bullet>
         <div className="flex-1 min-w-0 text-xs leading-snug">
-          <span className="inline-flex items-center gap-1.5 text-foreground/80">
-            <CheckCircle2Icon className="size-3 text-foreground/60" />
-            <span>{display?.verb ?? item.toolName}</span>
+          <span className="text-foreground/80 font-medium">
+            {display?.verb ?? item.toolName}
           </span>
           {!frozen && item.state !== 'complete' ? (
             <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse" />
