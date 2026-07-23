@@ -44,7 +44,7 @@ export function SidebarUser({ showGear = true }: SidebarUserProps) {
         <DropdownMenuContent
           align="start"
           side="top"
-          className="border-border bg-modal font-sans text-sm text-modal-foreground p-[6px]"
+          className="ring-1 ring-sidebar-border bg-modal font-sans text-sm text-modal-foreground p-[6px]"
         >
         <DropdownMenuLabel className="flex items-center gap-stack p-row rounded-button">
           <Avatar className="size-8">
