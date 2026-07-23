@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/icon'
-import { TrayIcon, CheckIcon, XIcon } from '@phosphor-icons/react'
+import { TrayIcon, CheckIcon, XIcon, FileTextIcon } from '@phosphor-icons/react'
 import type { InboxItemRaw } from '@/flows/agents/settings/use-agent-inbox'
 import { useAgentInbox } from '@/flows/agents/settings'
 
@@ -20,6 +20,37 @@ function formatTime(iso: string): string {
 	} catch {
 		return iso
 	}
+}
+
+/**
+ * Phase D: planning decisions render with a "Plan" badge inline.
+ * The orchestrator appends a notification with
+ * `payload = { kind: 'plan', summary, planFilePath, steps }` when
+ * it writes a plan file. The Plan badge makes those rows visually
+ * distinct from generic status notifications, so the user can
+ * see at a glance which inbox items are actionable plans.
+ */
+function isPlanPayload(payload: unknown): boolean {
+	if (!payload || typeof payload !== 'object') return false
+	const k = (payload as { kind?: unknown }).kind
+	return k === 'plan'
+}
+
+function PlanBadge({ payload }: { payload: unknown }) {
+	if (!isPlanPayload(payload)) return null
+	const planFilePath =
+		typeof (payload as { planFilePath?: unknown }).planFilePath === 'string'
+			? ((payload as { planFilePath: string }).planFilePath)
+			: null
+	return (
+		<span
+			className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-primary"
+			title={planFilePath ?? 'Plan'}
+		>
+			<Icon icon={FileTextIcon} className="size-2.5" />
+			Plan
+		</span>
+	)
 }
 
 function ItemRow({
@@ -43,6 +74,7 @@ function ItemRow({
 						<span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
 							{item.kind}
 						</span>
+						<PlanBadge payload={item.payload} />
 						{item.status === 'pending' && (
 							<span className="size-1.5 rounded-full bg-primary/70" aria-label="pending" />
 						)}
