@@ -20,14 +20,8 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
   }
   return (
     <ul className="flex flex-col">
-      {items.map((item, i) => (
-        <li
-          key={item.id}
-          className={
-            'flex items-start gap-3 py-2 ' +
-            (i < items.length - 1 ? 'border-b border-border/40' : '')
-          }
-        >
+      {items.map((item) => (
+        <li key={item.id} className="flex items-start gap-3 py-1.5">
           <Activity className="mt-0.5 size-3 shrink-0 text-muted-foreground/60" />
           <span className="flex-1 text-xs text-foreground/80">{item.text}</span>
           <span className="shrink-0 text-xs text-muted-foreground/60 tabular-nums">
