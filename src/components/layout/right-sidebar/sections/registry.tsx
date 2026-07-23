@@ -11,6 +11,7 @@ import { SkillsSection, getSkillsAtoms } from "./SkillsSection";
 import { ExtensionsSection, getExtensionsAtoms } from "./ExtensionsSection";
 import { PromptsSection, getPromptsAtoms } from "./PromptsSection";
 import { InboxSection } from "./InboxSection";
+import { PlanModeSection, getPlanModeAtoms } from "./PlanModeSection";
 
 export { OverviewSection };
 export { IdentitySection };
@@ -20,6 +21,7 @@ export { SkillsSection };
 export { ExtensionsSection };
 export { PromptsSection };
 export { InboxSection };
+export { PlanModeSection };
 export type { SearchableAtom, SettingsSectionProps, ManageSectionDef } from "@/models/component";
 
 function getIdentityAtoms(settings: AgentSettingsState): SearchableAtom[] {
@@ -80,5 +82,12 @@ export const MANAGE_SECTIONS: ManageSectionDef[] = [
     description: "Prompt templates and instructions",
     Component: PromptsSection,
     getSearchableAtoms: getPromptsAtoms,
+  },
+  {
+    id: "plan-mode",
+    label: "Plan Mode",
+    description: "Default mode, thinking level, and safe tools for plan-mode planning",
+    Component: PlanModeSection,
+    getSearchableAtoms: getPlanModeAtoms,
   },
 ];
