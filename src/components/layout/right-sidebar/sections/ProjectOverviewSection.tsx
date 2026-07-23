@@ -1,17 +1,19 @@
 /**
  * `ProjectOverviewSection` — the right sidebar's Overview tab for a
- * project coordinator.
+ * project agent.
  *
- * Mission-control redesign: five glanceable sections.
- *   1. Project header  (project name + coordinator-authored description)
+ * Mission-control redesign: four glanceable sections.
+ *   1. Project header  (project name + agent-authored description)
  *   2. Project health  (status + agent + task stats)
- *   3. Team            (one compact card per assigned agent)
+ *   3. Project agent   (ONE card for the project agent — name + status +
+ *                       role/description. Replaces the old "Team"
+ *                       card which fabricated a list of mock members;
+ *                       the project agent IS the project.)
  *   4. Current focus   (project priorities — bullets)
  *   5. Recent activity (chronological feed)
  *
- * Today the section is mock-driven end-to-end except for the header
- * (project name + description read from the coordinator's truth settings
- * via `coordinatorProjectDescription`). The sub-components take typed
+ * The header reads the coordinator's `overview.json` description via
+ * `data.coordinatorProjectDescription`. The sub-components take typed
  * props so swapping each mock source for live runtime data is a per-card
  * job.
  */
@@ -55,13 +57,6 @@ const MOCK_HEALTH: ProjectHealth = {
   tasks: 12,
   completed: 8,
   waiting: 1,
-}
-
-const MOCK_AGENT_WORK: Record<string, string> = {
-  'Architecture Agent': 'Designing reasoning engine',
-  'Research Agent': 'Reading HRM papers',
-  'Backend Agent': 'Waiting for architecture',
-  'Documentation Agent': 'Idle',
 }
 
 const MOCK_FOCUS: string[] = [
@@ -109,16 +104,17 @@ function agentStatusToOverview(status: Agent['status']): AgentOverviewStatus {
   }
 }
 
-function memberToAgentCard(member: Agent): AgentOverviewCard {
-  const work =
-    MOCK_AGENT_WORK[member.name] ??
-    member.role ??
-    member.description ??
-    'Assigned'
+// The "Project agent" card — gap 6 rewrite. The project agent IS the
+// project (no coordinator-vs-members plurality). The card shows one
+// agent — the project agent itself — with its live status and a brief
+// role line. We use the agent's `role`, then `description`, then a
+// static fallback so the card always renders something readable.
+function projectAgentToCard(coordinator: Agent): AgentOverviewCard {
+  const work = coordinator.role ?? coordinator.description ?? 'Project agent'
   return {
-    id: member.id,
-    name: member.name,
-    status: agentStatusToOverview(member.status),
+    id: coordinator.id,
+    name: coordinator.name,
+    status: agentStatusToOverview(coordinator.status),
     work,
   }
 }
@@ -141,7 +137,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ---------------------------------------------------------------------------
 
 export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
-  const { project, members, coordinatorProjectDescription } = data
+  const { project, coordinator, coordinatorProjectDescription } = data
 
   if (!project) {
     return (
@@ -153,8 +149,6 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
       </div>
     )
   }
-
-  const teamCards: AgentOverviewCard[] = members.map(memberToAgentCard)
 
   return (
     <div className={cn('flex flex-col gap-6 pt-8 pb-6')}>
@@ -183,19 +177,15 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         <ProjectHealthCard health={MOCK_HEALTH} />
       </div>
 
-      {/* 3. Team */}
+      {/* 3. Project agent — ONE card. Replaces the old "Team" mock list. */}
       <div className="flex flex-col gap-3">
-        <SectionLabel>Team</SectionLabel>
-        {teamCards.length === 0 ? (
-          <span className="text-xs text-muted-foreground/70">
-            No specialists assigned yet.
-          </span>
+        <SectionLabel>Project agent</SectionLabel>
+        {coordinator ? (
+          <AgentCard agent={projectAgentToCard(coordinator)} />
         ) : (
-          <div className="flex flex-col gap-2">
-            {teamCards.map((a) => (
-              <AgentCard key={a.id} agent={a} />
-            ))}
-          </div>
+          <span className="text-xs text-muted-foreground/70">
+            Project agent offline.
+          </span>
         )}
       </div>
 
@@ -211,5 +201,5 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         <ActivityFeed items={MOCK_ACTIVITY} />
       </div>
     </div>
-  )
+  );
 }

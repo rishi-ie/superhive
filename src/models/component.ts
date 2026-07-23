@@ -66,14 +66,20 @@ export interface OverviewData {
 
 export interface ProjectOverviewSectionData {
   project: Project | null
-  members: Agent[]
   /**
-   * Live project description owned by the coordinator's truth settings
-   * (`Superhive-pi-<basename>.json` → `project.description`). The
-   * coordinator writes this on demand via `update_settings` (no dedicated
-   * narrow-write tool). `null` means the agent hasn't written one yet and
-   * the overview tab should render the fallback ("interact more to put a
-   * description").
+   * The project agent. Gap 6: the project agent IS the project, so this
+   * is the only agent referenced by the Overview tab (the old "Team"
+   * card fabricated mock members via `members: Agent[]`, which was
+   * removed in the same gap). When null the Overview renders a muted
+   * "Project agent offline" hint.
+   */
+  coordinator: Agent | null
+  /**
+   * Live project description owned by the project agent's
+   * `overview.json`. Mirrored there by `superhive-pi-truth` when the
+   * agent writes `project.description` via `update_manage`.
+   * `null` means the agent hasn't written one yet and the overview tab
+   * should render the fallback ("interact more to put a description").
    */
   coordinatorProjectDescription: string | null
 }

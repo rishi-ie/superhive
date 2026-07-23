@@ -1,4 +1,3 @@
-import { Icon } from "@/components/ui/icon";
 import {
   BookOpenTextIcon,
   TreeViewIcon,
@@ -6,20 +5,16 @@ import {
 } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
+import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
 import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import { useAgentManage, useAgentOverview, useAgentSettings } from "@/flows/agents/settings";
-import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent, Project } from "@/storage/types";
-import { ProjectMembersList } from "./sections/ProjectMembersList";
-import { AssignAgentDialog } from "./sections/AssignAgentDialog";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { InboxSection } from "./sections/InboxSection";
 import { MANAGE_SECTIONS, type ManageSectionDef } from "./sections/registry";
 import type { ProjectOverviewSectionData } from "@/models/component";
+import { Icon } from "@/components/ui/icon";
 
 interface ProjectSettingsPanelProps {
   projectId: string;
@@ -37,20 +32,21 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     coordinator: null,
     members: [],
   });
-  const [teamLoading, setTeamLoading] = useState(true);
-  const [assignOpen, setAssignOpen] = useState(false);
   const agentsVersion = useAgentsListVersion();
   // Tracks whether we have ever resolved loadProjectTeam for *this* projectId.
-  // Used to gate `setTeamLoading(true)`: only the very first load shows the
-  // loading flag; subsequent agentsVersion bumps (e.g. caused by every
-  // manage.json write triggering the fs watcher) refresh the team in the
-  // background without blanking the manage-tab section list.
+  // Used to gate the team re-load spinner: only the very first load shows
+  // loading; subsequent agentsVersion bumps (every manage.json write
+  // triggers the fs watcher) refresh in the background without blanking the
+  // sections.
   const hasLoadedOnceRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
     if (!hasLoadedOnceRef.current) {
-      setTeamLoading(true);
+      // No-op placeholder: we don't surface a spinner for the team load
+      // anymore (the Team block was dropped from the Manage tab in gap 6;
+      // Overview + Inbox fetch this data on demand).
+      hasLoadedOnceRef.current = true;
     }
     loadProjectTeam(projectId)
       .then((t) => {
@@ -60,16 +56,10 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           coordinator: t.coordinator,
           members: t.members,
         });
-        hasLoadedOnceRef.current = true;
       })
       .catch(() => {
         // loadProjectTeam never rejects today, but if it ever does we still
-        // want teamLoading to flip back to false so the UI isn't stuck on a
-        // muted placeholder forever.
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setTeamLoading(false);
+        // want the panel to render without crashing.
       });
     return () => {
       cancelled = true;
@@ -117,11 +107,14 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     return trimmed.length === 0 ? null : trimmed;
   }, [coordinatorOverview.settings]);
 
+  // Gap 6: `members` is no longer rendered anywhere — Overview's "Team"
+  // section now shows the project agent itself (the coordinator) as a
+  // single card. The data stays loaded for future gaps; the renderer no
+  // longer references it.
   const overviewData = useMemo<ProjectOverviewSectionData>(
     () => ({
       project: mergedTeam.project,
       coordinator: mergedTeam.coordinator,
-      members: mergedTeam.members,
       coordinatorProjectDescription,
     }),
     [mergedTeam, coordinatorProjectDescription],
@@ -136,34 +129,6 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     const catalog = settings.catalog ?? manage.catalog;
     return { ...manage, catalog };
   }, [coordinatorManage.settings, coordinatorSettings.settings]);
-
-  const handleAssign = async (agentId: string) => {
-    const r = await assignAgentToProject({ projectId, agentId });
-    if (r.ok) {
-      const t = await loadProjectTeam(projectId);
-      setTeam({
-        project: t.project,
-        coordinator: t.coordinator,
-        members: t.members,
-      });
-    }
-    return r;
-  };
-
-  const handleRemove = async (agent: Agent) => {
-    const r = await removeAgentFromProject({
-      projectId,
-      agentId: agent.id,
-    });
-    if (r.ok) {
-      const t = await loadProjectTeam(projectId);
-      setTeam({
-        project: t.project,
-        coordinator: t.coordinator,
-        members: t.members,
-      });
-    }
-  };
 
   return (
     <div className="flex h-full flex-col px-button-x">
@@ -192,38 +157,14 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
         <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full" scrollbar={false}>
             <div className="flex flex-col gap-5">
-              <ProjectMembersList
-                projectId={projectId}
-                coordinator={mergedTeam.coordinator}
-                members={mergedTeam.members}
-                onAssignClick={() => setAssignOpen(true)}
-                onRemove={handleRemove}
-              />
-
-              {!teamLoading && mergedTeam.coordinator ? (
+              {coordinatorId ? (
                 <ManageSectionList
                   sections={MANAGE_SECTIONS}
-                  agentId={mergedTeam.coordinator.id}
+                  agentId={coordinatorId}
                   settings={coordinatorMergedManage}
                   patch={coordinatorManage.patch}
                   flush={coordinatorManage.flush}
                 />
-              ) : !teamLoading ? (
-                <Empty>
-                  <EmptyTitle>No project coordinator assigned</EmptyTitle>
-                  <EmptyDescription>
-                    Assign a coordinator agent to this project so its manage.json
-                    settings can render in this tab.
-                  </EmptyDescription>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 mt-2"
-                    onClick={() => setAssignOpen(true)}
-                  >
-                    Assign
-                  </Button>
-                </Empty>
               ) : null}
             </div>
           </ScrollArea>
@@ -235,24 +176,6 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-      <AssignAgentDialog
-        open={assignOpen}
-        onOpenChange={setAssignOpen}
-        onAssigned={() =>
-          loadProjectTeam(projectId).then((t) =>
-            setTeam({
-              project: t.project,
-              coordinator: t.coordinator,
-              members: t.members,
-            }),
-          )
-        }
-        loadCandidates={async () => {
-          const list = await loadUnassignedAgents();
-          return list.map((a) => ({ id: a.id, name: a.name }));
-        }}
-        onSelect={handleAssign}
-      />
     </div>
   );
 }
