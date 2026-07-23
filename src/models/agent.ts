@@ -24,6 +24,7 @@ export interface CreateAgentInput {
   parentDir: string
   role?: string
   description?: string
+  category?: string
 }
 
 export interface CreateAgentResult {
@@ -37,6 +38,7 @@ export interface CreateProjectAgentInput {
   folderName: string
   parentDir: string
   projectId?: string
+  category?: string
 }
 
 export interface CreateProjectAgentResult {
@@ -68,6 +70,7 @@ export interface PrepareProjectAgentInput {
   folderName: string
   parentDir: string
   projectId?: string
+  category?: string
 }
 
 export type PrepareProjectAgentFailure =

@@ -22,6 +22,14 @@ export interface AgentCreateInput {
 	 * id so the seed truth settings file carries the `project` block.
 	 */
 	projectId?: string
+	/**
+	 * Phase A: when creating a project-coordinator, the bundled
+	 * category overlay (research / marketing / sales / product-dev /
+	 * project-dev / general) is merged into the seed manage.json.
+	 * Ignored for non-coordinator agents. Falls back to 'general' if
+	 * omitted or unknown.
+	 */
+	category?: string
 }
 
 export interface AgentsAPI {

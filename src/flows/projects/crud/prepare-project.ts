@@ -52,6 +52,10 @@ export async function prepareProject(
     // Gap 1: thread the freshly-created project id so the coordinator's
     // truth settings file gets the `project` block seeded with the right id.
     projectId: project.id,
+    // Phase A: thread the category so the bundled overlay lands on the
+    // coordinator's manage.json (skills, permissions, behavior, system
+    // prompt fragment). Falls back to 'general' in the IPC handler.
+    category: input.category,
   }
 
   const coordinator = await prepareProjectAgent(coordinatorInput)
