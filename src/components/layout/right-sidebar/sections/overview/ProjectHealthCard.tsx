@@ -1,12 +1,12 @@
 /**
- * `ProjectHealthCard` — small reassurance card under the project header.
+ * `ProjectHealthCard` — small reassurance block under the project header.
+ * No card chrome — just the status row + two stat rows.
  *
  * Mock-driven for now. Future source: aggregate runtime status from
  * `useAllAgentStatuses` + `useTasksByProject`.
  */
 
 import { CheckCircle2, AlertCircle, AlertTriangle, Users, Clock3 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { ProjectHealth, ProjectHealthStatus } from '@/models/component'
 
@@ -43,26 +43,24 @@ export function ProjectHealthCard({ health }: ProjectHealthCardProps) {
   const StatusIcon = meta.Icon
 
   return (
-    <Card size="sm" className="gap-2">
-      <CardContent className="flex flex-col gap-2 p-0">
-        <div className="flex items-center gap-2">
-          <span className={cn('size-2 shrink-0 rounded-full', meta.dotClass)} />
-          <StatusIcon className={cn('size-3.5 shrink-0', meta.textClass)} />
-          <span className={cn('text-xs font-medium', meta.textClass)}>{meta.label}</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Users className="size-3 shrink-0" />
-          <span>
-            {health.agents} Agents · {health.active} Active · {health.idle} Idle
-          </span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Clock3 className="size-3 shrink-0" />
-          <span>
-            {health.tasks} Tasks · {health.completed} Complete · {health.waiting} Waiting
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <span className={cn('size-2 shrink-0 rounded-full', meta.dotClass)} />
+        <StatusIcon className={cn('size-3.5 shrink-0', meta.textClass)} />
+        <span className={cn('text-xs font-medium', meta.textClass)}>{meta.label}</span>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Users className="size-3 shrink-0" />
+        <span>
+          {health.agents} Agents · {health.active} Active · {health.idle} Idle
+        </span>
+      </div>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <Clock3 className="size-3 shrink-0" />
+        <span>
+          {health.tasks} Tasks · {health.completed} Complete · {health.waiting} Waiting
+        </span>
+      </div>
+    </div>
   )
 }
