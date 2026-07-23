@@ -28,7 +28,7 @@ export interface AgentManageSlice {
 
 const slices = new Map<string, AgentManageSlice>()
 
-const DEBOUNCE_MS = 500
+const DEBOUNCE_MS = 50
 
 function ensureSlice(agentId: string): AgentManageSlice {
 	const existing = slices.get(agentId)
