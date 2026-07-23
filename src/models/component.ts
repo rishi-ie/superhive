@@ -128,7 +128,12 @@ export interface SearchableAtom {
 }
 
 export interface SettingsSectionProps {
-  settings: AgentSettingsState
+  /**
+   * Loose object so a section can be re-used against either truth file
+   * (settings.json for the agent tab, manage.json for the project tab).
+   * Sections reach for `settings.<dotted.path>` and tolerate missing keys.
+   */
+  settings: AgentSettingsState | ManageFileState
   agentId: string
   query?: string
   patch?: (key: string, value: unknown) => void
@@ -139,8 +144,75 @@ export interface ManageSectionDef {
   id: string
   label: string
   description?: string
+  /** Coordinator-only gate — section is omitted from the project manage tab when false. */
+  coordinatorOnly?: boolean
   Component: ComponentType<SettingsSectionProps>
-  getSearchableAtoms: (settings: AgentSettingsState) => SearchableAtom[]
+  getSearchableAtoms: (settings: AgentSettingsState | ManageFileState) => SearchableAtom[]
+}
+
+/**
+ * Renderer mirror of the truth's `ManageFile` shape. Kept loose (index
+ * signature + optional fields) so sections can read whatever they need
+ * without locking to schema additions. Mirrors the truth schema in
+ * `superhive-pi-truth/settings-schema.ts::ManageFile`.
+ */
+export interface IdentityBlock {
+  name?: string
+  description?: string
+  workspace?: string
+}
+
+export interface ManagePermissionsBlock {
+  filesystem?: boolean
+  terminal?: boolean
+  network?: boolean
+}
+
+export interface ManageBehaviorBlock {
+  steeringMode?: 'all' | 'one-at-a-time' | 'none'
+  followUpMode?: 'all' | 'one-at-a-time' | 'none'
+  autoCompaction?: boolean
+  autoRetry?: boolean
+  compaction?: { enabled?: boolean; reserveTokens?: number; keepRecentTokens?: number }
+  branchSummary?: { reserveTokens?: number; skipPrompt?: boolean }
+  retry?: { enabled?: boolean; maxRetries?: number; baseDelayMs?: number }
+}
+
+export interface ManageProjectBlock {
+  id?: string
+  name?: string
+  description?: string
+  coordinatorAgentId?: string
+}
+
+export interface ManageFileState {
+  identity?: IdentityBlock
+  permissions?: ManagePermissionsBlock
+  behavior?: ManageBehaviorBlock
+  skills?: string[]
+  extensions?: string[]
+  prompts?: string[]
+  packages?: unknown[]
+  themes?: string[]
+  planMode?: {
+    defaultMode?: 'plan' | 'build' | 'auto'
+    thinkingLevel?: string
+    defaultPlanTools?: string[]
+    safeSubcommands?: { git?: string[]; gh?: string[] }
+  }
+  project?: ManageProjectBlock
+  /**
+   * Catalog list (settings.json-cached) for the skills/extensions/prompts
+   * sections. Sections only need this in the project manage tab where
+   * the catalog slice sits in settings.json but the active set lives in
+   * manage.json. Omitted in the agent tab where they share a single file.
+   */
+  catalog?: {
+    skills?: Array<{ path: string; active?: boolean }>
+    extensions?: Array<{ path: string; active?: boolean }>
+    prompts?: Array<{ path: string; active?: boolean }>
+  }
+  [k: string]: unknown
 }
 
 // ---------------------------------------------------------------------------
