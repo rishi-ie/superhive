@@ -1,7 +1,7 @@
-import type { AgentSettingsState } from "@/models/agent";
 import type {
   ManageSectionDef,
   SearchableAtom,
+  SettingsSectionProps,
 } from "@/models/component";
 import { OverviewSection } from "./OverviewSection";
 import { IdentitySection } from "./IdentitySection";
@@ -24,19 +24,23 @@ export { InboxSection };
 export { PlanModeSection };
 export type { SearchableAtom, SettingsSectionProps, ManageSectionDef } from "@/models/component";
 
-function getIdentityAtoms(settings: AgentSettingsState): SearchableAtom[] {
+function getIdentityAtoms(settings: SettingsSectionProps["settings"]): SearchableAtom[] {
+  const identity = (settings.identity ?? {}) as { name?: string; description?: string; workspace?: string };
   return [
-    { id: "name", label: settings.name || "Name", description: "Agent display name" },
-    { id: "description", label: "Description", description: "Brief description" },
+    { id: "identity.name", label: "Name", description: identity.name || "Agent display name" },
+    { id: "identity.description", label: "Description", description: "Brief description" },
+    { id: "identity.workspace", label: "Workspace", description: "Working directory" },
     { id: "identity", label: "Identity" },
   ];
 }
 
 function getBehaviorAtoms(): SearchableAtom[] {
   return [
-    { id: "system", label: "System prompt", description: "Agent instructions" },
+    { id: "behavior.steeringMode", label: "Steering mode", description: "How steering messages queue up" },
+    { id: "behavior.followUpMode", label: "Follow-up mode", description: "How follow-up messages queue up" },
+    { id: "behavior.autoCompaction", label: "Auto compaction", description: "Auto-compact context when full" },
+    { id: "behavior.autoRetry", label: "Auto retry", description: "Retry failed turns automatically" },
     { id: "behavior", label: "Behavior" },
-    { id: "permissions", label: "Permissions", description: "Filesystem, terminal, network" },
   ];
 }
 
@@ -44,14 +48,14 @@ export const MANAGE_SECTIONS: ManageSectionDef[] = [
   {
     id: "identity",
     label: "Identity",
-    description: "Name and description",
+    description: "Name, description, and workspace",
     Component: IdentitySection,
     getSearchableAtoms: getIdentityAtoms,
   },
   {
     id: "behavior",
     label: "Behavior",
-    description: "System prompt and permissions",
+    description: "Steering, follow-up, compaction, retry",
     Component: BehaviorSection,
     getSearchableAtoms: getBehaviorAtoms,
   },
@@ -87,7 +91,9 @@ export const MANAGE_SECTIONS: ManageSectionDef[] = [
     id: "plan-mode",
     label: "Plan Mode",
     description: "Default mode, thinking level, and safe tools for plan-mode planning",
+    coordinatorOnly: true,
     Component: PlanModeSection,
     getSearchableAtoms: getPlanModeAtoms,
   },
 ];
+
