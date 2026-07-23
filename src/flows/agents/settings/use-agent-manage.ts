@@ -125,6 +125,14 @@ export function useAgentManage(agentId: string | null) {
 				slice.dirty[k] = v
 			}
 		}
+		// Optimistic: deep-merge the patched value into slice.state so
+		// controlled inputs (Identity Name, etc.) reflect the new value
+		// immediately. Mirrors the optimistic line in useAgentSettings.patch.
+		// Without this the input reverts to its pre-typed value on the next
+		// React reconciliation and the typed character flickers out.
+		if (slice.state) {
+			slice.state = deepMergeDotted(slice.state, key, value) as ManageFileState
+		}
 		if (slice.debounceTimer) clearTimeout(slice.debounceTimer)
 		slice.debounceTimer = setTimeout(async () => {
 			const cur = slices.get(agentId)
@@ -153,6 +161,14 @@ export function useAgentManage(agentId: string | null) {
 		const merged: Record<string, unknown> = slice.dirty
 			? { ...slice.dirty, ...p }
 			: { ...p }
+		// Optimistic: apply the explicit `p` to slice.state so any controlled
+		// inputs wired through this flush reflect the new values immediately.
+		// Use the same dotted-key merging as patch.
+		if (slice.state) {
+			for (const [k, v] of Object.entries(merged)) {
+				slice.state = deepMergeDotted(slice.state, k, v) as ManageFileState
+			}
+		}
 		slice.dirty = null
 		if (Object.keys(merged).length === 0) return
 		try {

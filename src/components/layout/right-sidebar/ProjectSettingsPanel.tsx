@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
 import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import { useAgentManage, useAgentOverview, useAgentSettings } from "@/flows/agents/settings";
@@ -40,14 +40,18 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   const [teamLoading, setTeamLoading] = useState(true);
   const [assignOpen, setAssignOpen] = useState(false);
   const agentsVersion = useAgentsListVersion();
+  // Tracks whether we have ever resolved loadProjectTeam for *this* projectId.
+  // Used to gate `setTeamLoading(true)`: only the very first load shows the
+  // loading flag; subsequent agentsVersion bumps (e.g. caused by every
+  // manage.json write triggering the fs watcher) refresh the team in the
+  // background without blanking the manage-tab section list.
+  const hasLoadedOnceRef = useRef(false);
 
   useEffect(() => {
-    // Gap 5: re-run on `[projectId, agentsVersion]` so an agents-reconcile
-    // that adopts a freshly-created coordinator mid-session refreshes the
-    // panel. Without this, a project that opened before reconcile completed
-    // could show a sticky empty-state.
     let cancelled = false;
-    setTeamLoading(true);
+    if (!hasLoadedOnceRef.current) {
+      setTeamLoading(true);
+    }
     loadProjectTeam(projectId)
       .then((t) => {
         if (cancelled) return;
@@ -56,6 +60,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           coordinator: t.coordinator,
           members: t.members,
         });
+        hasLoadedOnceRef.current = true;
       })
       .catch(() => {
         // loadProjectTeam never rejects today, but if it ever does we still
