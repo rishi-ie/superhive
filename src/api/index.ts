@@ -3,3 +3,4 @@ export { projects } from './projects';
 export { settings } from './settings';
 export { tasks } from './tasks';
 export { defaults } from './defaults';
+export { truth } from './truth';
