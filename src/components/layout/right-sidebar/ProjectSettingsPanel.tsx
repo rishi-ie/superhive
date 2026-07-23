@@ -6,9 +6,11 @@ import {
 } from "@phosphor-icons/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
-import { useAllAgentStatuses } from "@/flows/agents/runtime";
+import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import { useAgentManage, useAgentOverview, useAgentSettings } from "@/flows/agents/settings";
 import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent, Project } from "@/storage/types";
@@ -35,17 +37,39 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     coordinator: null,
     members: [],
   });
+  const [teamLoading, setTeamLoading] = useState(true);
   const [assignOpen, setAssignOpen] = useState(false);
+  const agentsVersion = useAgentsListVersion();
 
   useEffect(() => {
-    loadProjectTeam(projectId).then((t) =>
-      setTeam({
-        project: t.project,
-        coordinator: t.coordinator,
-        members: t.members,
-      }),
-    );
-  }, [projectId]);
+    // Gap 5: re-run on `[projectId, agentsVersion]` so an agents-reconcile
+    // that adopts a freshly-created coordinator mid-session refreshes the
+    // panel. Without this, a project that opened before reconcile completed
+    // could show a sticky empty-state.
+    let cancelled = false;
+    setTeamLoading(true);
+    loadProjectTeam(projectId)
+      .then((t) => {
+        if (cancelled) return;
+        setTeam({
+          project: t.project,
+          coordinator: t.coordinator,
+          members: t.members,
+        });
+      })
+      .catch(() => {
+        // loadProjectTeam never rejects today, but if it ever does we still
+        // want teamLoading to flip back to false so the UI isn't stuck on a
+        // muted placeholder forever.
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setTeamLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, agentsVersion]);
 
   const liveIds = useMemo(() => {
     const ids: string[] = []
@@ -176,7 +200,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                 />
               </div>
 
-              {mergedTeam.coordinator && coordinatorManage.settings ? (
+              {!teamLoading && mergedTeam.coordinator ? (
                 <ManageSectionList
                   sections={MANAGE_SECTIONS}
                   agentId={mergedTeam.coordinator.id}
@@ -184,13 +208,23 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                   patch={coordinatorManage.patch}
                   flush={coordinatorManage.flush}
                 />
-              ) : (
-                <div className="flex flex-col gap-gap-tight py-4">
-                  <span className="text-xs text-muted-foreground">
-                    Assign a project coordinator to edit manage settings.
-                  </span>
-                </div>
-              )}
+              ) : !teamLoading ? (
+                <Empty>
+                  <EmptyTitle>No project coordinator assigned</EmptyTitle>
+                  <EmptyDescription>
+                    Assign a coordinator agent to this project so its manage.json
+                    settings can render in this tab.
+                  </EmptyDescription>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 mt-2"
+                    onClick={() => setAssignOpen(true)}
+                  >
+                    Assign
+                  </Button>
+                </Empty>
+              ) : null}
             </div>
           </ScrollArea>
         </TabsContent>
