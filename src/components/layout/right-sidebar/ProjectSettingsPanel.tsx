@@ -15,6 +15,8 @@ import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
+import { PlanModeSection } from "./sections/PlanModeSection";
+import { useAutoSave } from "./use-auto-save";
 import type { ProjectOverviewSectionData } from "@/models/component";
 
 interface ProjectSettingsPanelProps {
@@ -72,6 +74,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   // and `useAgentSettings` is wired to the settings-file watcher so
   // every truth tool write re-renders the overview tab for free.
   const coordinatorSettings = useAgentSettings(mergedTeam.coordinator?.id ?? null)
+  const coordinatorAutoSave = useAutoSave(mergedTeam.coordinator?.id ?? null)
   const coordinatorProjectDescription = useMemo<string | null>(() => {
     const projectBlock = coordinatorSettings.settings?.project as
       | { description?: unknown }
@@ -139,6 +142,19 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                 }
               }}
             />
+            {mergedTeam.coordinator && coordinatorSettings.settings ? (
+              <div className="flex flex-col gap-stack px-card-x pt-gap-loose pb-card">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Plan Mode
+                </span>
+                <PlanModeSection
+                  settings={coordinatorSettings.settings}
+                  agentId={mergedTeam.coordinator.id}
+                  patch={coordinatorAutoSave.patch}
+                  flush={coordinatorAutoSave.flush}
+                />
+              </div>
+            ) : null}
           </ScrollArea>
         </TabsContent>
 

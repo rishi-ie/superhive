@@ -25,49 +25,51 @@ function expandDottedKey(key: string, value: unknown): Record<string, unknown> {
   return root
 }
 
-export function useAutoSave(agentId: string): AutoSaveHandle {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingRef = useRef<Record<string, unknown> | null>(null)
+export function useAutoSave(agentId: string | null): AutoSaveHandle {
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const pendingRef = useRef<Record<string, unknown> | null>(null)
 
-  const patch = useCallback((key: string, value: unknown) => {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    if (!pendingRef.current) pendingRef.current = {}
-    Object.assign(pendingRef.current, expandDottedKey(key, value))
-    timerRef.current = setTimeout(async () => {
-      const p = pendingRef.current
-      pendingRef.current = null
-      timerRef.current = null
-      if (!p || Object.keys(p).length === 0) return
-      await updateAgentSettings({ agentId, patch: p })
-    }, 300)
-  }, [agentId])
+	const patch = useCallback((key: string, value: unknown) => {
+		if (!agentId) return
+		if (timerRef.current) clearTimeout(timerRef.current)
+		if (!pendingRef.current) pendingRef.current = {}
+		Object.assign(pendingRef.current, expandDottedKey(key, value))
+		timerRef.current = setTimeout(async () => {
+			const p = pendingRef.current
+			pendingRef.current = null
+			timerRef.current = null
+			if (!p || Object.keys(p).length === 0) return
+			await updateAgentSettings({ agentId, patch: p })
+		}, 300)
+	}, [agentId])
 
-  const flush = useCallback(async (p: Record<string, unknown>) => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null
-    }
-    // Merge the explicit `p` into any pending patch so we don't drop work.
-    const merged: Record<string, unknown> = pendingRef.current
-      ? { ...pendingRef.current, ...p }
-      : { ...p }
-    pendingRef.current = null
-    if (Object.keys(merged).length === 0) return
-    await updateAgentSettings({ agentId, patch: merged })
-  }, [agentId])
+	const flush = useCallback(async (p: Record<string, unknown>) => {
+		if (!agentId) return
+		if (timerRef.current) {
+			clearTimeout(timerRef.current)
+			timerRef.current = null
+		}
+		// Merge the explicit `p` into any pending patch so we don't drop work.
+		const merged: Record<string, unknown> = pendingRef.current
+			? { ...pendingRef.current, ...p }
+			: { ...p }
+		pendingRef.current = null
+		if (Object.keys(merged).length === 0) return
+		await updateAgentSettings({ agentId, patch: merged })
+	}, [agentId])
 
-  // Flush on unmount so unsaved patches don't disappear.
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        const p = pendingRef.current
-        if (p && Object.keys(p).length > 0) {
-          void updateAgentSettings({ agentId, patch: p })
-        }
-      }
-    }
-  }, [agentId])
+	// Flush on unmount so unsaved patches don't disappear.
+	useEffect(() => {
+		return () => {
+			if (timerRef.current) {
+				clearTimeout(timerRef.current)
+				const p = pendingRef.current
+				if (p && Object.keys(p).length > 0) {
+					void updateAgentSettings({ agentId: agentId ?? '', patch: p })
+				}
+			}
+		}
+	}, [agentId])
 
-  return { patch, flush }
+	return { patch, flush }
 }
