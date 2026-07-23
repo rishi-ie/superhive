@@ -10,11 +10,14 @@ import * as React from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
 import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import {
+  useAgentInbox,
   useAgentManage,
   useAgentOverview,
   useAgentSettings,
   useTruthFiles,
 } from "@/flows/agents/settings";
+import { useProjectHealth } from "@/flows/projects/health";
+import { useProjectStaff } from "@/flows/projects/runtime";
 import type { Agent, Project } from "@/storage/types";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { InboxSection } from "./sections/InboxSection";
@@ -104,6 +107,15 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   const coordinatorManage = useAgentManage(coordinatorId);
   const coordinatorOverview = useAgentOverview(coordinatorId);
   const coordinatorSettings = useAgentSettings(coordinatorId);
+  // Phase D: feed the health derivation. Inbox items give us
+  // lastInboxAt (most recent createdAt). The staff hook filters
+  // agents by projectIds — the same filter the future "Spawned
+  // staff" section in Phase G will reuse.
+  const coordinatorInbox = useAgentInbox(coordinatorId)
+  const { staff } = useProjectStaff(
+    mergedTeam.project?.id ?? null,
+    coordinatorId,
+  )
 
   // Overview tab reads from overview.json (mirrored from manage by the truth ext).
   const coordinatorProjectDescription = useMemo<string | null>(() => {
@@ -114,6 +126,22 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     return trimmed.length === 0 ? null : trimmed;
   }, [coordinatorOverview.settings]);
 
+  // Phase D: project health derived from live runtime + lastInboxAt.
+  // Replace MOCK_HEALTH in the Overview section.
+  const projectHealth = useProjectHealth({
+    coordinator: mergedTeam.coordinator,
+    staff,
+    inboxItems: coordinatorInbox.items,
+  })
+
+  // Phase D: pass the full overview.json through. The ProjectOverviewSection
+  // reads focus[] and activity[] from here.
+  const overviewMirror = useMemo(() => {
+    const ov = coordinatorOverview.settings
+    if (!ov || typeof ov !== "object") return null
+    return ov as unknown as ProjectOverviewSectionData["overview"]
+  }, [coordinatorOverview.settings])
+
   // Gap 6: `members` is no longer rendered anywhere — Overview's "Team"
   // section now shows the project agent itself (the coordinator) as a
   // single card. The data stays loaded for future gaps; the renderer no
@@ -123,8 +151,11 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
       project: mergedTeam.project,
       coordinator: mergedTeam.coordinator,
       coordinatorProjectDescription,
+      overview: overviewMirror,
+      health: projectHealth,
+      staff,
     }),
-    [mergedTeam, coordinatorProjectDescription],
+    [mergedTeam, coordinatorProjectDescription, overviewMirror, projectHealth, staff],
   )
 
   // Merge manage.json + the catalog slice of settings.json into one
