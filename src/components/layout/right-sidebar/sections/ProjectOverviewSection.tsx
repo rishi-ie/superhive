@@ -35,9 +35,8 @@ interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData
 }
 
-// Cap matches the truth-side write gate (`update_project_description`
-// rejects strings longer than this). Display layer just truncates so the
-// right sidebar stays scannable when the coordinator writes a wall of text.
+// Display cap for the right-sidebar overview. Prevents a runaway
+// description from breaking the header layout.
 const DESCRIPTION_DISPLAY_MAX_CHARS = 280
 const DESCRIPTION_FALLBACK_TEXT =
   'Interact more with the project agent to set a description.'

@@ -38,7 +38,6 @@ import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/settings';
 import { useAgentsListVersion } from '@/flows/agents/runtime';
-import { useProjectDescriptionCadence } from '@/flows/projects/runtime/use-project-description-cadence';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
@@ -189,27 +188,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
       : 0;
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
-
-  // Drive the coordinator's project-description cadence. Reads the live
-  // description straight from truth settings so the "refresh vs set"
-  // branch in the reminder matches what's actually rendered in the
-  // overview tab. The hook itself gates on idle/active and the threshold
-  // (see INTERACTIONS_BEFORE_DESCRIPTION_REFRESH in
-  // flows/projects/runtime/use-project-description-cadence.ts).
-  const projectDescriptionFromTruth = (() => {
-    const block = agentSettings.settings?.project as { description?: unknown } | undefined
-    if (!block) return null
-    const raw = block.description
-    if (typeof raw !== 'string') return null
-    const trimmed = raw.trim()
-    return trimmed.length === 0 ? null : trimmed
-  })()
-  useProjectDescriptionCadence({
-    agentId: projectAgent.id,
-    status,
-    messages,
-    hasDescription: projectDescriptionFromTruth !== null,
-  });
 
   if (loading) {
     return (
