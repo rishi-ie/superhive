@@ -23,6 +23,7 @@ import { getTopEnabledModel } from '../get-top-enabled-model'
 import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
+import { resolvePlanExtensionPath } from '../install-plan'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -38,6 +39,7 @@ const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
 const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
 const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
 const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
+const SUPERHIVE_PI_PLAN_NAME = 'superhive-pi-plan'
 
 interface CreateAgentInput {
 	name: string
@@ -169,6 +171,29 @@ export function registerAgentIpc(): void {
 
 				baseManifestExtensions.push('./extensions/superhive-pi-orchestration')
 				baseSettingsExtensions.push('./extensions/superhive-pi-orchestration')
+
+				// Plan extension: coordinator-only. Resolved from local bundle —
+				// same pattern as superhive-pi-orchestration above. See
+				// electron/install-plan.ts for the walk-up resolver.
+				let planSourcePath: string
+				try {
+					planSourcePath = resolvePlanExtensionPath(
+						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
+					)
+				} catch (err) {
+					log.error(`[agents:create] coordinator plan extension missing: ${err instanceof Error ? err.message : String(err)}`)
+					throw err
+				}
+				const planSource = ensureExtension(SUPERHIVE_PI_PLAN_NAME, {
+					kind: 'local',
+					path: planSourcePath,
+				})
+				const planLink = join(agentDir, 'extensions', SUPERHIVE_PI_PLAN_NAME)
+				symlinkSync(planSource, planLink, 'dir')
+				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_PLAN_NAME} from local bundle`)
+
+				baseManifestExtensions.push('./extensions/superhive-pi-plan')
+				baseSettingsExtensions.push('./extensions/superhive-pi-plan')
 
 				await mkdir(join(agentDir, 'context', 'nodes'), { recursive: true })
 				await mkdir(join(agentDir, 'context', '.lock'), { recursive: true })
