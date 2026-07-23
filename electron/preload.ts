@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('api', {
     persistAssistantMessage: (id, message) =>
       ipcRenderer.invoke('agents:persistAssistantMessage', id, message),
 
+    spawnFromTemplate: (input) =>
+      ipcRenderer.invoke('agents:spawn-from-template', input),
+
     // `agent:${id}:event` forwards every `AdapterEvent` variant. The full
     // discriminated union now spans (per implementation.md Phase 1.1):
     //   - Lifecycle: boot-step, ready, error, usage

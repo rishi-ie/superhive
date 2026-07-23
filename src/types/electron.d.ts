@@ -71,6 +71,32 @@ export interface AgentsAPI {
 	persistAssistantMessage: (id: string, message: AssistantMessage) => Promise<{ ok: boolean }>
 
 	/**
+	 * Phase E: project-coordinator spawns a regular agent on the fly
+	 * from a marketplace template. The spawn ext (running in the
+	 * coordinator's Pi subprocess) calls this via the IPC bridge.
+	 * The main process:
+	 *   - re-validates the caller is a project-coordinator
+	 *     bound to the requested project
+	 *   - creates the agent folder, copies agent.sh, symlinks
+	 *     truth + telemetry (NOT context/orch/plan — spawned
+	 *     agents are regular)
+	 *   - seeds manage.json from the rendered template
+	 *   - binds projectIds: [spawner.projectId]
+	 *   - does NOT start the spawned agent
+	 *
+	 * The main process broadcasts `agents:changed` on success so
+	 * the AgentsListView refreshes. The IPC name is
+	 * `agents:spawn-from-template`.
+	 */
+	spawnFromTemplate: (input: {
+		spawnerAgentId: string
+		projectId: string
+		renderedTemplate: Record<string, unknown>
+		name?: string
+		role?: string
+	}) => Promise<{ agentId: string; status: string }>
+
+	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated
 	 * union flows through this single channel; consumers narrow on `event.type`.
 	 *
