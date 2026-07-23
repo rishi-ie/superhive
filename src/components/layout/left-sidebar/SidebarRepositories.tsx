@@ -67,7 +67,7 @@ export function SidebarRepositories() {
               className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
             >
               <Icon icon={PuzzlePieceIcon} className="size-4" />
-              <span>Plugins</span>
+              <span>Marketplace</span>
             </button>
           </SidebarMenuItem>
           <div className="mt-2 group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm text-muted-foreground">
