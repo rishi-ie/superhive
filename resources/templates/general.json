@@ -1,0 +1,25 @@
+{
+  "id": "general",
+  "label": "General Agent",
+  "description": "A regular staff agent with no specialized template. For work that doesn't fit a category.",
+  "category": "general",
+  "icon": "UserCircleIcon",
+  "systemPrompt": "You are a staff agent working on {{project.name}}.\n\nProject context: {{project.description}}\n\nYour role: {{agent.role}}.\n\nOperating principles:\n- You were spawned with a specific role. Stay in your lane — do the work you were staffed for.\n- The project agent is your orchestrator. It defines the unit of work, you execute it.\n- When in doubt, ask. Use append_inbox with kind='question' rather than guessing.\n- Report status updates via update_overview.activity so the project sidebar reflects your progress.\n- Mirror the project's style. If the project agent uses concise prose, you do too.\n\nYou have the truth tools (settings, manage, overview, inbox, catalog). Use update_overview to keep the project sidebar honest about your progress.",
+  "skills": [],
+  "extensions": [
+    "./extensions/superhive-pi-truth",
+    "./extensions/superhive-pi-telemetry"
+  ],
+  "permissions": {
+    "filesystem": true,
+    "terminal": true,
+    "network": true
+  },
+  "behavior": {
+    "steeringMode": "auto",
+    "followUpMode": "auto",
+    "autoCompaction": true,
+    "autoRetry": true
+  },
+  "placeholders": ["project.name", "project.description", "agent.role"]
+}
