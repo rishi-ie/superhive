@@ -191,7 +191,6 @@ export interface ManageFileState {
   behavior?: ManageBehaviorBlock
   skills?: string[]
   extensions?: string[]
-  prompts?: string[]
   packages?: unknown[]
   themes?: string[]
   planMode?: {
@@ -210,7 +209,6 @@ export interface ManageFileState {
   catalog?: {
     skills?: Array<{ path: string; active?: boolean }>
     extensions?: Array<{ path: string; active?: boolean }>
-    prompts?: Array<{ path: string; active?: boolean }>
   }
   [k: string]: unknown
 }

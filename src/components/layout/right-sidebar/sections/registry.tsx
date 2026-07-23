@@ -9,7 +9,6 @@ import { BehaviorSection } from "./BehaviorSection";
 import { PermissionsSection, getPermissionsAtoms } from "./PermissionsSection";
 import { SkillsSection, getSkillsAtoms } from "./SkillsSection";
 import { ExtensionsSection, getExtensionsAtoms } from "./ExtensionsSection";
-import { PromptsSection, getPromptsAtoms } from "./PromptsSection";
 import { InboxSection } from "./InboxSection";
 import { PlanModeSection, getPlanModeAtoms } from "./PlanModeSection";
 
@@ -19,7 +18,6 @@ export { BehaviorSection };
 export { PermissionsSection };
 export { SkillsSection };
 export { ExtensionsSection };
-export { PromptsSection };
 export { InboxSection };
 export { PlanModeSection };
 export type { SearchableAtom, SettingsSectionProps, ManageSectionDef } from "@/models/component";
@@ -79,13 +77,6 @@ export const MANAGE_SECTIONS: ManageSectionDef[] = [
     description: "Code and integrations",
     Component: ExtensionsSection,
     getSearchableAtoms: getExtensionsAtoms,
-  },
-  {
-    id: "prompts",
-    label: "Prompts",
-    description: "Prompt templates and instructions",
-    Component: PromptsSection,
-    getSearchableAtoms: getPromptsAtoms,
   },
   {
     id: "plan-mode",
