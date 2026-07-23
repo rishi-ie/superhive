@@ -110,4 +110,9 @@ contextBridge.exposeInMainWorld('api', {
   defaults: {
     get: () => ipcRenderer.invoke('defaults:get'),
   },
+  truth: {
+    listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
+    readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
+    writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
+  },
 });
