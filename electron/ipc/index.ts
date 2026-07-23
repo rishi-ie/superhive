@@ -6,6 +6,7 @@ import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
 import { registerDefaultsIpc } from './defaults';
+import { registerTruthIpc } from './truth';
 
 export const IPC = {
   AGENTS: {
@@ -89,6 +90,12 @@ export const IPC = {
   DEFAULTS: {
     GET: 'defaults:get',
   },
+  // Phase C: generic truth-file IPC (per-extension dynamic sections)
+  TRUTH: {
+    LIST_FILES: 'truth:list-files',
+    READ_FILE: 'truth:read-file',
+    WRITE_FILE: 'truth:write-file',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -100,4 +107,5 @@ export function registerIpc(): void {
   registerMailboxIpc();
   registerTaskIpc();
   registerDefaultsIpc();
+  registerTruthIpc();
 }
