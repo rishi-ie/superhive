@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { updateAgentSettings } from '@/flows/agents/settings/update-agent-settings'
+import { updateAgentManage } from '@/flows/agents/settings/update-agent-settings'
 import type { AutoSaveHandle } from '@/models/component'
 
 /**
@@ -39,7 +39,7 @@ export function useAutoSave(agentId: string | null): AutoSaveHandle {
 			pendingRef.current = null
 			timerRef.current = null
 			if (!p || Object.keys(p).length === 0) return
-			await updateAgentSettings({ agentId, patch: p })
+			await updateAgentManage({ agentId, patch: p })
 		}, 300)
 	}, [agentId])
 
@@ -55,7 +55,7 @@ export function useAutoSave(agentId: string | null): AutoSaveHandle {
 			: { ...p }
 		pendingRef.current = null
 		if (Object.keys(merged).length === 0) return
-		await updateAgentSettings({ agentId, patch: merged })
+		await updateAgentManage({ agentId, patch: merged })
 	}, [agentId])
 
 	// Flush on unmount so unsaved patches don't disappear.
@@ -65,7 +65,7 @@ export function useAutoSave(agentId: string | null): AutoSaveHandle {
 				clearTimeout(timerRef.current)
 				const p = pendingRef.current
 				if (p && Object.keys(p).length > 0) {
-					void updateAgentSettings({ agentId: agentId ?? '', patch: p })
+					void updateAgentManage({ agentId: agentId ?? '', patch: p })
 				}
 			}
 		}

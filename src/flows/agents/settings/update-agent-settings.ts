@@ -13,3 +13,15 @@ export async function updateAgentSettings(input: UpdateAgentSettingsInput): Prom
     return { ok: false }
   }
 }
+
+export async function updateAgentManage(input: UpdateAgentSettingsInput): Promise<{ ok: boolean }> {
+  try {
+    await agents.writeManage(input.agentId, input.patch as Record<string, unknown>)
+    toast.success('Manage saved')
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to save manage.json'
+    toast.error(message)
+    return { ok: false }
+  }
+}

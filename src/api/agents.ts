@@ -30,6 +30,38 @@ export const agents = {
     window.api.agents.readSettings(id),
   writeSettings: (id: string, patch: Record<string, unknown>): Promise<Record<string, unknown>> =>
     window.api.agents.writeSettings(id, patch),
+  readManage: (id: string): Promise<Record<string, unknown> | null> =>
+    window.api.agents.readManage(id),
+  writeManage: (
+    id: string,
+    patch: Record<string, unknown>,
+  ): Promise<{ ok: boolean; writtenVersion: number }> =>
+    window.api.agents.writeManage(id, patch),
+  readOverview: (id: string): Promise<Record<string, unknown> | null> =>
+    window.api.agents.readOverview(id),
+  writeOverview: (
+    id: string,
+    patch: Record<string, unknown>,
+  ): Promise<{ ok: boolean; writtenVersion: number }> =>
+    window.api.agents.writeOverview(id, patch),
+  readInboxJson: (id: string): Promise<{ items: unknown[] } | null> =>
+    window.api.agents.readInbox(id),
+  appendInbox: (
+    id: string,
+    input: { kind: 'notification' | 'permission' | 'question'; message: string; severity?: 'info' | 'warning' | 'error'; payload?: Record<string, unknown> },
+  ): Promise<{ ok: boolean; id: string; writtenVersion: number }> =>
+    window.api.agents.appendInbox(id, input),
+  markInboxRead: (
+    id: string,
+    inboxId: string,
+    answeredWith?: unknown,
+  ): Promise<{ ok: boolean }> =>
+    window.api.agents.markInboxRead(id, inboxId, answeredWith),
+  clearInbox: (
+    id: string,
+    status?: 'pending' | 'read' | 'answered' | 'dismissed',
+  ): Promise<{ ok: boolean; removed: number }> =>
+    window.api.agents.clearInbox(id, status),
   reveal: (id: string): Promise<{ ok: boolean }> =>
     window.api.agents.reveal(id),
   persistAssistantMessage: (

@@ -9,13 +9,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
 import { useAllAgentStatuses } from "@/flows/agents/runtime";
-import { useAgentSettings } from "@/flows/agents/settings";
+import { useAgentManage, useAgentOverview } from "@/flows/agents/settings";
 import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { PlanModeSection } from "./sections/PlanModeSection";
+import { InboxSection } from "./sections/InboxSection";
 import { useAutoSave } from "./use-auto-save";
 import type { ProjectOverviewSectionData } from "@/models/component";
 
@@ -68,23 +69,24 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     }
   }, [team, liveStates])
 
-  // Read the coordinator's project description straight from truth
-  // settings (Superhive-pi-<basename>.json → project.description). The
-  // settings file is the only place the coordinator itself can write,
-  // and `useAgentSettings` is wired to the settings-file watcher so
-  // every truth tool write re-renders the overview tab for free.
-  const coordinatorSettings = useAgentSettings(mergedTeam.coordinator?.id ?? null)
-  const coordinatorAutoSave = useAutoSave(mergedTeam.coordinator?.id ?? null)
+  const coordinatorId = mergedTeam.coordinator?.id ?? null;
+  // 4-file split: each truth file has its own React flow.
+  //   manage.json    → coordinatorAutoSave + coordinatorManage  (manage tab)
+  //   overview.json  → coordinatorOverview                     (overview tab)
+  const coordinatorManage = useAgentManage(coordinatorId);
+  const coordinatorOverview = useAgentOverview(coordinatorId);
+  const coordinatorAutoSave = useAutoSave(coordinatorId);
+  // PlanModeSection reads from manage.json (planMode block lives there).
+  const settingsForSection = (coordinatorManage.settings ?? {}) as Record<string, unknown>;
+
+  // Overview tab reads from overview.json (mirrored from manage by the truth ext).
   const coordinatorProjectDescription = useMemo<string | null>(() => {
-    const projectBlock = coordinatorSettings.settings?.project as
-      | { description?: unknown }
-      | undefined
-    if (!projectBlock) return null
-    const raw = projectBlock.description
-    if (typeof raw !== "string") return null
-    const trimmed = raw.trim()
-    return trimmed.length === 0 ? null : trimmed
-  }, [coordinatorSettings.settings])
+    const ov = coordinatorOverview.settings as { description?: unknown } | null;
+    if (!ov) return null;
+    if (typeof ov.description !== "string") return null;
+    const trimmed = ov.description.trim();
+    return trimmed.length === 0 ? null : trimmed;
+  }, [coordinatorOverview.settings]);
 
   const overviewData = useMemo<ProjectOverviewSectionData>(
     () => ({
@@ -142,13 +144,13 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                 }
               }}
             />
-            {mergedTeam.coordinator && coordinatorSettings.settings ? (
+            {mergedTeam.coordinator && coordinatorManage.settings ? (
               <div className="flex flex-col gap-stack px-card-x pt-gap-loose pb-card">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   Plan Mode
                 </span>
                 <PlanModeSection
-                  settings={coordinatorSettings.settings}
+                  settings={settingsForSection}
                   agentId={mergedTeam.coordinator.id}
                   patch={coordinatorAutoSave.patch}
                   flush={coordinatorAutoSave.flush}
@@ -160,16 +162,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="inbox" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <div className="flex h-full flex-col items-center justify-center gap-gap-loose text-center">
-              <Icon icon={TrayIcon} className="size-8 text-muted-foreground/30" />
-              <p className="text-xs text-muted-foreground">
-                No pending requests from{" "}
-                <span className="text-foreground/80">
-                  {mergedTeam.project?.name ?? "this project"}
-                </span>
-                .
-              </p>
-            </div>
+            <InboxSection agentId={coordinatorId} projectName={mergedTeam.project?.name} />
           </ScrollArea>
         </TabsContent>
       </Tabs>

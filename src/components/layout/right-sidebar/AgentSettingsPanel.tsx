@@ -225,12 +225,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
         </TabsContent>
 
         <TabsContent value="inbox" className="mt-0 flex-1 min-h-0 p-0">
-          <InboxSection
-            settings={settings}
-            agentId={agentId}
-            patch={autoSave.patch}
-            flush={autoSave.flush}
-          />
+          <InboxSection agentId={agentId} />
         </TabsContent>
       </Tabs>
     </div>
