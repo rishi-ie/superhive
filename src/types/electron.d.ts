@@ -266,6 +266,41 @@ export interface ElectronAPI {
 	tasks: TasksAPI
 	defaults: DefaultsAPI
 	truth: TruthAPI
+	templates: TemplatesAPI
+}
+
+/**
+ * Phase F: marketplace IPC for the /plugins → marketplace page.
+ * - templates.list() returns summary cards (id, label, description,
+ *   category, icon).
+ * - templates.get(id) returns the full TemplateDetail including the
+ *   raw JSON for the preview modal.
+ * - templates.openFolder() opens the user's templates directory in
+ *   the system file explorer; the main process creates the dir
+ *   if it doesn't exist.
+ */
+export interface TemplateSummary {
+	id: string
+	label: string
+	description?: string
+	category?: string
+	icon?: string
+}
+
+export interface TemplateDetail {
+	id: string
+	label: string
+	description?: string
+	category?: string
+	icon?: string
+	version: number
+	raw: Record<string, unknown>
+}
+
+export interface TemplatesAPI {
+	list: () => Promise<TemplateSummary[]>
+	get: (id: string) => Promise<TemplateDetail | null>
+	openFolder: () => Promise<{ ok: boolean; path: string }>
 }
 
 export interface ProviderEntry {

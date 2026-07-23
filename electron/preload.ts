@@ -113,9 +113,15 @@ contextBridge.exposeInMainWorld('api', {
   defaults: {
     get: () => ipcRenderer.invoke('defaults:get'),
   },
-  truth: {
-    listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
-    readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
-    writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
-  },
+    truth: {
+      listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
+      readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
+      writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
+    },
+
+    templates: {
+      list: () => ipcRenderer.invoke('templates:list'),
+      get: (id) => ipcRenderer.invoke('templates:get', id),
+      openFolder: () => ipcRenderer.invoke('templates:open-folder'),
+    },
 });
