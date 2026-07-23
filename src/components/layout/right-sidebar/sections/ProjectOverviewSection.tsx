@@ -24,6 +24,7 @@
 import * as React from 'react'
 import type { Agent } from '@/storage/types'
 import { cn } from '@/lib/utils'
+import type { AgentLiveState } from '@/models/agent'
 import type {
   ProjectOverviewSectionData,
   ProjectHealth,
@@ -35,9 +36,16 @@ import { ProjectHealthCard } from './overview/ProjectHealthCard'
 import { AgentCard } from './overview/AgentCard'
 import { CurrentFocusCard } from './overview/CurrentFocusCard'
 import { ActivityFeed } from './overview/ActivityFeed'
+import { SpawnedStaffCard } from './overview/SpawnedStaffCard'
 
 interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData
+  /**
+   * Live runtime statuses for the spawned staff (and the project
+   * agent). Optional — when omitted, the SpawnedStaffCard falls
+   * back to each agent's last-known DB status.
+   */
+  liveStatuses?: Map<string, AgentLiveState>
 }
 
 // Display cap for the right-sidebar overview. Prevents a runaway
@@ -133,13 +141,14 @@ function relativeTime(iso: string): string {
 // Render
 // ---------------------------------------------------------------------------
 
-export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
+export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSectionProps) {
   const {
     project,
     coordinator,
     coordinatorProjectDescription,
     overview,
     health,
+    staff,
   } = data
 
   if (!project) {
@@ -216,6 +225,19 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
           </span>
         )}
       </div>
+
+      {/* 3b. Spawned staff — Phase G. Renders one card per agent the
+            project has spawned via spawn_agent. The card hides itself
+            when the list is empty so brand-new projects show just the
+            other sections. Live status flows in via the optional
+            liveStatuses prop from ProjectSettingsPanel's
+            useAllAgentStatuses. */}
+      {staff && staff.length > 0 && (
+        <SpawnedStaffCard
+          agents={staff}
+          liveStatuses={liveStatuses ?? new Map()}
+        />
+      )}
 
       {/* 4. Current Focus — read from overview.json.focus (live). */}
       <div className="flex flex-col gap-3">

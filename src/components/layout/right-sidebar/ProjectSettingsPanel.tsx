@@ -188,7 +188,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full" scrollbar={false}>
-            <ProjectOverviewSection data={overviewData} />
+            <ProjectOverviewSection data={overviewData} liveStatuses={liveStates} />
           </ScrollArea>
         </TabsContent>
 
