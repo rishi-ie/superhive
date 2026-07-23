@@ -149,12 +149,44 @@ export interface AppAPI {
 	installUpdate: () => Promise<{ ok: boolean }>
 }
 
+export interface ProjectAgentDefaultsOverlay {
+	systemPromptAddition: string
+	skills: string[]
+}
+
+export interface ProjectAgentDefaults {
+	version: number
+	base: {
+		extensions: string[]
+		skills: string[]
+		permissions: { filesystem: boolean; terminal: boolean; network: boolean }
+		behavior: {
+			steeringMode: string
+			followUpMode: string
+			autoCompaction: boolean
+			autoRetry: boolean
+		}
+	}
+	overlays: Record<string, ProjectAgentDefaultsOverlay>
+}
+
+export interface DefaultsAPI {
+	/**
+	 * Read the bundled project-agent-defaults.json from
+	 * ~/.superhive/. Returns null if the file is missing or malformed.
+	 * The dialog uses this to render the category picker with live
+	 * preview of each overlay's systemPromptAddition.
+	 */
+	get: () => Promise<ProjectAgentDefaults | null>
+}
+
 export interface ElectronAPI {
 	agents: AgentsAPI
 	projects: ProjectsAPI
 	app: AppAPI
 	settings: SettingsAPI
 	tasks: TasksAPI
+	defaults: DefaultsAPI
 }
 
 export interface ProviderEntry {

@@ -107,4 +107,7 @@ contextBridge.exposeInMainWorld('api', {
     // db.tasks.json write. Consumers re-fetch via `tasks.list()`.
     onChanged: (cb) => subscribe('tasks:changed', cb),
   },
+  defaults: {
+    get: () => ipcRenderer.invoke('defaults:get'),
+  },
 });

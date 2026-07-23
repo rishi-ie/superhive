@@ -5,6 +5,7 @@ import { registerAppIpc } from './app';
 import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
+import { registerDefaultsIpc } from './defaults';
 
 export const IPC = {
   AGENTS: {
@@ -84,6 +85,10 @@ export const IPC = {
     CHANGE_STATUS: 'tasks:changeStatus',
     ON_CHANGED: 'tasks:changed',
   },
+  // Phase A: project-agent defaults
+  DEFAULTS: {
+    GET: 'defaults:get',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -94,4 +99,5 @@ export function registerIpc(): void {
   registerSettingsIpc();
   registerMailboxIpc();
   registerTaskIpc();
+  registerDefaultsIpc();
 }
