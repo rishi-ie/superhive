@@ -12,6 +12,7 @@ import { reconcileProjects } from './reconcile-projects';
 import { reconcileRuntime } from './reconcile-runtime';
 import { migrateLegacyChatFolders } from './agent-chat-store';
 import { isGeneralKaiReady } from './install-general-kai';
+import { installDefaultsBundle } from './install-defaults-bundle';
 import { agentsFsWatcher } from './agents-fs-watcher';
 import { attachMailboxWatches } from './ipc/mailbox';
 import { tasksFileWatcher } from './tasks-file-watcher';
@@ -109,6 +110,8 @@ app.whenReady().then(async () => {
       '[main] Agent creation will fail until you run: bun run install:kai',
     )
   }
+
+  installDefaultsBundle()
 
   await seedWorkspace();
   runtime.pruneStaleEntries();
