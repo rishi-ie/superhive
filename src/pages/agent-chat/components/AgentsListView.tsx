@@ -111,6 +111,15 @@ export function AgentsListView() {
 		[agents],
 	);
 
+	// Phase G: include project-coordinators in the list with a "Project
+	// agent" badge so the user can visually distinguish them from
+	// regular agents. Live status overlay only applies to non-coordinators
+	// (project-coordinators don't get the per-agent runtime lifecycle).
+	const visibleAgents = React.useMemo(
+		() => agents,
+		[agents],
+	);
+
 	const liveStatesMap = useAllAgentStatuses(
 		nonCoordinators.map((a) => a.id),
 		nonCoordinators.length > 0,
@@ -118,11 +127,11 @@ export function AgentsListView() {
 
 	const agentsWithLiveStatus = React.useMemo(
 		() =>
-			nonCoordinators.map((a) => {
+			visibleAgents.map((a) => {
 				const live = liveStatesMap.get(a.id)
 				return live ? { ...a, status: live.status } : a
 			}),
-		[nonCoordinators, liveStatesMap],
+		[visibleAgents, liveStatesMap],
 	);
 
 	const filtered = React.useMemo(() => {

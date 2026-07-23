@@ -6,3 +6,4 @@ export {
   type AgentStatusBadgeProps,
   type AgentStatusPresentation,
 } from './AgentStatusBadge';
+export { AgentKindBadge, type AgentKindBadgeProps } from './agent-kind-badge';

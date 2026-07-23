@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { TableRow } from "@/components/ui/table";
 import { TableCell } from "@/components/ui/table";
-import { AgentStatusBadge } from '@/components/common';
+import { AgentStatusBadge, AgentKindBadge } from '@/components/common';
 import type { Agent, InitStep, AgentStatus } from '@/types/electron';
 import { AgentRowContextMenu } from './AgentRowContextMenu';
 
@@ -85,9 +85,12 @@ export function AgentListRow({
       className="group cursor-pointer"
     >
       <TableCell className="w-[260px]">
-        <span className="truncate font-medium text-foreground text-sm">
-          {agent.name}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="truncate font-medium text-foreground text-sm">
+            {agent.name}
+          </span>
+          <AgentKindBadge agentKind={agent.agentKind} />
+        </div>
       </TableCell>
 
       <TableCell>
