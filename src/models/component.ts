@@ -117,13 +117,6 @@ export interface ActivityItem {
   text: string
 }
 
-export interface AttentionItem {
-  id: string
-  title: string
-  description: string
-  actionLabel: string
-}
-
 // ---------------------------------------------------------------------------
 // Right sidebar: settings panels
 // ---------------------------------------------------------------------------

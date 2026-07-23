@@ -2,13 +2,12 @@
  * `ProjectOverviewSection` — the right sidebar's Overview tab for a
  * project coordinator.
  *
- * Mission-control redesign: six glanceable sections.
+ * Mission-control redesign: five glanceable sections.
  *   1. Project header  (project name + coordinator-authored description)
  *   2. Project health  (status + agent + task stats)
  *   3. Team            (one compact card per assigned agent)
  *   4. Current focus   (project priorities — bullets)
  *   5. Recent activity (chronological feed)
- *   6. Needs attention (action cards the user must resolve)
  *
  * Today the section is mock-driven end-to-end except for the header
  * (project name + description read from the coordinator's truth settings
@@ -26,13 +25,11 @@ import type {
   AgentOverviewCard,
   AgentOverviewStatus,
   ActivityItem,
-  AttentionItem,
 } from '@/models/component'
 import { ProjectHealthCard } from './overview/ProjectHealthCard'
 import { AgentCard } from './overview/AgentCard'
 import { CurrentFocusCard } from './overview/CurrentFocusCard'
 import { ActivityFeed } from './overview/ActivityFeed'
-import { AttentionCard } from './overview/AttentionCard'
 
 interface ProjectOverviewSectionProps {
   data: ProjectOverviewSectionData
@@ -94,21 +91,6 @@ const MOCK_ACTIVITY: ActivityItem[] = [
     id: 'a4',
     time: '1h ago',
     text: 'Project kickoff — priorities set',
-  },
-]
-
-const MOCK_ATTENTION: AttentionItem[] = [
-  {
-    id: 'at1',
-    title: 'Review Architecture Draft',
-    description: 'Pending approval',
-    actionLabel: 'Review',
-  },
-  {
-    id: 'at2',
-    title: 'Choose Database',
-    description: 'Project blocked until selected',
-    actionLabel: 'Answer',
   },
 ]
 
@@ -228,16 +210,6 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
       <div className="flex flex-col gap-2">
         <SectionLabel>Recent Activity</SectionLabel>
         <ActivityFeed items={MOCK_ACTIVITY} />
-      </div>
-
-      {/* 6. Needs Your Attention */}
-      <div className="flex flex-col gap-2">
-        <SectionLabel>Needs Your Attention</SectionLabel>
-        <div className="flex flex-col gap-2">
-          {MOCK_ATTENTION.map((item) => (
-            <AttentionCard key={item.id} item={item} />
-          ))}
-        </div>
       </div>
     </div>
   )
