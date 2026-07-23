@@ -27,6 +27,11 @@ import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 import { resolvePlanExtensionPath } from '../install-plan'
+import {
+	installProjectAgentSkills,
+	BUNDLED_SKILL_NAMES,
+} from '../install-project-agent-skills'
+import { getProjectAgentDefaultsPath } from '../install-project-agent-defaults'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -57,6 +62,60 @@ interface CreateAgentInput {
 	 * extension reads on session_start. Ignored for non-coordinator agents.
 	 */
 	projectId?: string
+	/**
+	 * Phase A: when creating a project-coordinator, the bundled
+	 * category overlay (research / marketing / sales / product-dev /
+	 * project-dev / general) is merged into the seed manage.json.
+	 * Ignored for non-coordinator agents. Defaults to 'general' if
+	 * omitted on a coordinator.
+	 */
+	category?: string
+}
+
+const VALID_CATEGORIES = new Set([
+	'research',
+	'marketing',
+	'sales',
+	'product-dev',
+	'project-dev',
+	'general',
+])
+
+interface BundledDefaults {
+	version: number
+	base: {
+		extensions: string[]
+		skills: string[]
+		permissions: { filesystem: boolean; terminal: boolean; network: boolean }
+		behavior: {
+			steeringMode: string
+			followUpMode: string
+			autoCompaction: boolean
+			autoRetry: boolean
+		}
+	}
+	overlays: Record<string, { systemPromptAddition: string; skills: string[] }>
+}
+
+async function loadBundledDefaults(): Promise<BundledDefaults | null> {
+	const path = getProjectAgentDefaultsPath()
+	if (!existsSync(path)) {
+		log.warn(`[agents:create] bundled defaults missing at ${path}; coordinator will use legacy hardcoded values`)
+		return null
+	}
+	try {
+		const raw = await readFile(path, 'utf8')
+		const parsed = JSON.parse(raw) as BundledDefaults
+		if (!parsed?.base || !parsed?.overlays) {
+			log.warn(`[agents:create] bundled defaults at ${path} missing base/overlays; ignoring`)
+			return null
+		}
+		return parsed
+	} catch (err) {
+		const msg = err instanceof Error ? err.message : String(err)
+		log.warn(`[agents:create] failed to parse bundled defaults at ${path}: ${msg}`)
+		return null
+	}
 }
 
 export function registerAgentIpc(): void {
@@ -283,6 +342,43 @@ export function registerAgentIpc(): void {
 
 			// manage.json — identity + permissions + extensions + planMode +
 			// (for coordinators) the project block.
+			//
+			// Phase A: when the agent is a project-coordinator, merge the
+			// bundled defaults (base + category overlay) into the seed so
+			// the project agent boots with the right skills, extensions,
+			// permissions, and behavior profile for its category.
+			const resolvedCategory = isCoordinator
+				? (VALID_CATEGORIES.has(data.category ?? '')
+					? (data.category as string)
+					: 'general')
+				: undefined
+			const bundledDefaults = isCoordinator ? await loadBundledDefaults() : null
+			const overlaySkills =
+				bundledDefaults && resolvedCategory
+					? (bundledDefaults.overlays[resolvedCategory]?.skills ?? [])
+					: []
+			const mergedSkills = bundledDefaults
+				? Array.from(new Set([...bundledDefaults.base.skills, ...overlaySkills]))
+				: BUNDLED_SKILL_NAMES.slice()
+			const mergedPermissions = bundledDefaults?.base.permissions ?? {
+				filesystem: true,
+				terminal: true,
+				network: true,
+			}
+			const mergedBehavior = bundledDefaults?.base.behavior ?? {
+				steeringMode: 'auto',
+				followUpMode: 'auto',
+				autoCompaction: true,
+				autoRetry: true,
+			}
+			const mergedExtensions = bundledDefaults?.base.extensions ?? baseSettingsExtensions
+
+			if (isCoordinator && bundledDefaults) {
+				log.info(
+					`[agents:create] seeding coordinator with bundled defaults category=${resolvedCategory} skills=${mergedSkills.length}`,
+				)
+			}
+
 			const manageSeed = {
 				version: 1 as const,
 				managedBy: 'superhive-pi-truth@1#0',
@@ -291,13 +387,17 @@ export function registerAgentIpc(): void {
 					name: data.name.trim(),
 					description: data.description?.trim() ?? '',
 					workspace: './workspace',
+					...(isCoordinator && resolvedCategory && {
+						category: resolvedCategory,
+					}),
 				},
-				permissions: { filesystem: true, terminal: true, network: true },
-				skills: [],
-				extensions: baseSettingsExtensions,
+				permissions: mergedPermissions,
+				skills: mergedSkills,
+				extensions: mergedExtensions,
 				prompts: [],
 				packages: [],
 				themes: [],
+				behavior: mergedBehavior,
 				planMode: { defaultMode: 'auto' as const, thinkingLevel: 'inherit' as const },
 				...(isCoordinator && data.projectId && {
 					project: {
@@ -350,6 +450,19 @@ export function registerAgentIpc(): void {
 				) + '\n',
 				'utf8',
 			)
+
+			// Phase A: copy the 5 bundled SKILL.md files into the
+			// agent's own skills folder. Runs for project-coordinator
+			// agents only (regular agents have no bundled skill list).
+			// Per-skill idempotency — existing files are not overwritten.
+			if (isCoordinator) {
+				try {
+					installProjectAgentSkills(agentDir)
+				} catch (err) {
+					const msg = err instanceof Error ? err.message : String(err)
+					log.warn(`[agents:create] skill install failed for coordinator ${agent.id}: ${msg}`)
+				}
+			}
 
 			const win = BrowserWindow.getAllWindows()[0]
 			if (win && !win.isDestroyed()) {
