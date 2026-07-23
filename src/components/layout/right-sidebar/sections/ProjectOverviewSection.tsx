@@ -158,7 +158,7 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
   const teamCards: AgentOverviewCard[] = members.map(memberToAgentCard)
 
   return (
-    <div className={cn('flex flex-col gap-stack py-button-y')}>
+    <div className={cn('flex flex-col gap-6 pt-8 pb-6')}>
       {/* 1. Project Header */}
       <div className="flex flex-col gap-0.5">
         <span className="truncate text-lg font-semibold text-foreground/85">
@@ -179,13 +179,13 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
       </div>
 
       {/* 2. Project Health */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SectionLabel>Health</SectionLabel>
         <ProjectHealthCard health={MOCK_HEALTH} />
       </div>
 
       {/* 3. Team */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SectionLabel>Team</SectionLabel>
         {teamCards.length === 0 ? (
           <span className="text-xs text-muted-foreground/70">
@@ -201,13 +201,13 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
       </div>
 
       {/* 4. Current Focus */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SectionLabel>Current Focus</SectionLabel>
         <CurrentFocusCard items={MOCK_FOCUS} />
       </div>
 
       {/* 5. Recent Activity */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3">
         <SectionLabel>Recent Activity</SectionLabel>
         <ActivityFeed items={MOCK_ACTIVITY} />
       </div>
