@@ -12,9 +12,15 @@ interface ProjectRef {
 	name: string;
 }
 
+export interface SpawnerRef {
+	id: string;
+	name: string;
+}
+
 interface AgentListRowProps {
 	agent: Agent;
 	project?: ProjectRef | null;
+	spawner?: SpawnerRef | null;
 	parentDir: string;
 	/** Live runtime status + bootStep, used to overlay the DB snapshot. */
 	liveStatus?: AgentStatus;
@@ -44,6 +50,7 @@ function relativeTime(timestamp?: number): string | null {
 export function AgentListRow({
   agent,
   project,
+  spawner,
   parentDir,
   liveStatus,
   liveBootStep,
@@ -111,13 +118,23 @@ export function AgentListRow({
 
       <TableCell className="w-[180px]">
         {project ? (
-          <Link
-            to={`/projects/${project.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="text-sm text-muted-foreground"
-          >
-            {project.name}
-          </Link>
+          <div className="flex flex-col gap-0.5">
+            <Link
+              to={`/projects/${project.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-sm text-muted-foreground"
+            >
+              {project.name}
+            </Link>
+            {spawner && (
+              <span
+                className="text-[10px] text-muted-foreground/70"
+                title={`Spawned by project agent: ${spawner.name}`}
+              >
+               	spawned by: {spawner.name}
+              </span>
+            )}
+          </div>
         ) : (
           <span className="text-sm text-muted-foreground">No project</span>
         )}

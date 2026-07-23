@@ -153,6 +153,45 @@ export function AgentsListView() {
 		return { id: p.id, name: p.name };
 	};
 
+	// Phase G T-G-2: for each non-coordinator agent, find the project
+	// agent (coordinator) that owns the same project. The spawned-by
+	// badge surfaces the parent project agent in the project cell.
+	//
+	// agents[] already includes project-coordinators (T-G-1) so we can
+	// scan it directly. A coordinator that no longer exists (orphaned
+	// project) renders as "spawned by: <unknown>" with warning color.
+	const coordinatorById = React.useMemo(() => {
+		const map: Record<string, Agent> = {};
+		for (const a of agents) {
+			if (a.agentKind === 'project-coordinator') {
+				map[a.id] = a;
+			}
+		}
+		return map;
+	}, [agents]);
+
+	const spawnerFor = (agent: Agent): { id: string; name: string } | null => {
+		if (agent.agentKind === 'project-coordinator') return null;
+		// Look across the agent's projectIds for a project whose
+		// coordinator is in coordinatorById. We pick the first match.
+		for (const projectId of agent.projectIds) {
+			const project = projectsById[projectId];
+			if (!project) continue;
+			// Project has agentIds[] (list of bound agent ids). The
+			// coordinator for this project is whichever coordinator
+			// agent has this projectId in its projectIds[].
+			// We don't have a direct coordinatorId on the project,
+			// so we walk coordinatorById looking for any coordinator
+			// whose projectIds includes projectId.
+			for (const coord of Object.values(coordinatorById)) {
+				if (coord.projectIds.includes(projectId)) {
+					return { id: coord.id, name: coord.name };
+				}
+			}
+		}
+		return null;
+	};
+
 	const parentDir = `~/.superhive/agents`;
 
 	const liveStatuses = new Set<Agent['status']>(['active', 'busy', 'waiting']);
@@ -245,6 +284,7 @@ export function AgentsListView() {
 										key={agent.id}
 										agent={agent}
 										project={projectFor(agent)}
+										spawner={spawnerFor(agent)}
 										parentDir={parentDir}
 										liveStatus={live?.status}
 										liveBootStep={live?.bootStep}
