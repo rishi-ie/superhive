@@ -2,20 +2,23 @@
  * `ProjectOverviewSection` — the right sidebar's Overview tab for a
  * project agent.
  *
- * Mission-control redesign: four glanceable sections.
+ * Mission-control redesign: five glanceable sections.
  *   1. Project header  (project name + agent-authored description)
  *   2. Project health  (status + agent + task stats)
  *   3. Project agent   (ONE card for the project agent — name + status +
  *                       role/description. Replaces the old "Team"
  *                       card which fabricated a list of mock members;
  *                       the project agent IS the project.)
- *   4. Current focus   (project priorities — bullets)
- *   5. Recent activity (chronological feed)
+ *   4. Current focus   (project priorities — bullets from overview.json.focus)
+ *   5. Recent activity (chronological feed from overview.json.activity)
  *
- * The header reads the coordinator's `overview.json` description via
- * `data.coordinatorProjectDescription`. The sub-components take typed
- * props so swapping each mock source for live runtime data is a per-card
- * job.
+ * Phase D: MOCK_HEALTH / MOCK_FOCUS / MOCK_ACTIVITY are gone. The
+ * section reads the live ProjectOverviewSectionData shape populated
+ * by ProjectSettingsPanel: derived `health` from useProjectHealth,
+ * `overview.focus[]` and `overview.activity[]` from the project
+ * agent's overview.json. Empty arrays render empty-state hints so
+ * the user knows the data is "not yet populated" vs "the section
+ * is broken".
  */
 
 import * as React from 'react'
@@ -43,50 +46,19 @@ const DESCRIPTION_DISPLAY_MAX_CHARS = 280
 const DESCRIPTION_FALLBACK_TEXT =
   'Interact more with the project agent to set a description.'
 
-// ---------------------------------------------------------------------------
-// Mock data — replaced by live runtime sources piece-by-piece over time.
-// Kept at the top of the file so the orchestrator reads top-to-bottom:
-// header (real) → mocks → render.
-// ---------------------------------------------------------------------------
-
-const MOCK_HEALTH: ProjectHealth = {
+// Default health when none is provided (e.g. coordinator offline or
+// staff list not yet loaded). Mirrors the previous MOCK_HEALTH values
+// minus the 5-agent / 12-task counts (those were narrative padding;
+// today the truth is "we don't know yet" until the first runtime tick).
+const PLACEHOLDER_HEALTH: ProjectHealth = {
   status: 'healthy',
-  agents: 5,
-  active: 3,
-  idle: 2,
-  tasks: 12,
-  completed: 8,
-  waiting: 1,
+  agents: 0,
+  active: 0,
+  idle: 0,
+  tasks: 0,
+  completed: 0,
+  waiting: 0,
 }
-
-const MOCK_FOCUS: string[] = [
-  'Design latent optimizer',
-  'Compare with Transformers',
-  'Build mathematical proof',
-]
-
-const MOCK_ACTIVITY: ActivityItem[] = [
-  {
-    id: 'a1',
-    time: '8m ago',
-    text: 'Research Agent summarized HRM paper',
-  },
-  {
-    id: 'a2',
-    time: '12m ago',
-    text: 'Coordinator assigned Backend Agent',
-  },
-  {
-    id: 'a3',
-    time: '26m ago',
-    text: 'Architecture Agent updated design document',
-  },
-  {
-    id: 'a4',
-    time: '1h ago',
-    text: 'Project kickoff — priorities set',
-  },
-]
 
 // ---------------------------------------------------------------------------
 // Mappers
@@ -132,12 +104,43 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
+// Empty-state hint for sections where the agent hasn't populated data yet.
+function EmptyHint({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-xs text-muted-foreground/70 italic">
+      {children}
+    </span>
+  )
+}
+
+// Format an ISO timestamp into a "Nm ago / Nh ago / Nd ago" string.
+// Returns the input verbatim if it can't be parsed.
+function relativeTime(iso: string): string {
+	const ms = Date.parse(iso)
+	if (Number.isNaN(ms)) return iso
+	const delta = Date.now() - ms
+	if (delta < 0) return iso
+	const minutes = Math.floor(delta / 60_000)
+	if (minutes < 1) return 'just now'
+	if (minutes < 60) return `${minutes}m ago`
+	const hours = Math.floor(minutes / 60)
+	if (hours < 24) return `${hours}h ago`
+	const days = Math.floor(hours / 24)
+	return `${days}d ago`
+}
+
 // ---------------------------------------------------------------------------
 // Render
 // ---------------------------------------------------------------------------
 
 export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
-  const { project, coordinator, coordinatorProjectDescription } = data
+  const {
+    project,
+    coordinator,
+    coordinatorProjectDescription,
+    overview,
+    health,
+  } = data
 
   if (!project) {
     return (
@@ -149,6 +152,29 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
       </div>
     )
   }
+
+  // Normalize the live overview file into the shapes the sub-components
+  // expect. The truth ext (superhive-pi-truth) writes focus[]/activity[]
+  // as JSON arrays; the agent controls their content via update_overview.
+  // Missing fields default to empty arrays so the section renders
+  // empty-state hints rather than throwing.
+  const focusItems: string[] = Array.isArray(overview?.focus)
+    ? (overview!.focus as string[]).filter((s) => typeof s === 'string' && s.length > 0)
+    : []
+  const activityItems: ActivityItem[] = Array.isArray(overview?.activity)
+    ? (overview!.activity as Array<{ id?: unknown; time?: unknown; text?: unknown }>)
+        .filter(
+          (a): a is { id: string; time: string; text: string } =>
+            typeof a?.id === 'string' &&
+            typeof a?.text === 'string' &&
+            typeof a?.time === 'string',
+        )
+        .map((a) => ({
+          id: a.id,
+          time: relativeTime(a.time),
+          text: a.text,
+        }))
+    : []
 
   return (
     <div className={cn('flex flex-col gap-6 pt-8 pb-6')}>
@@ -171,10 +197,12 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         )}
       </div>
 
-      {/* 2. Project Health */}
+      {/* 2. Project Health — driven by useProjectHealth. Falls back to
+            a placeholder shape when no coordinator is online yet
+            (so the panel still renders, with agents=0 etc.). */}
       <div className="flex flex-col gap-3">
         <SectionLabel>Health</SectionLabel>
-        <ProjectHealthCard health={MOCK_HEALTH} />
+        <ProjectHealthCard health={health ?? PLACEHOLDER_HEALTH} />
       </div>
 
       {/* 3. Project agent — ONE card. Replaces the old "Team" mock list. */}
@@ -189,16 +217,32 @@ export function ProjectOverviewSection({ data }: ProjectOverviewSectionProps) {
         )}
       </div>
 
-      {/* 4. Current Focus */}
+      {/* 4. Current Focus — read from overview.json.focus (live). */}
       <div className="flex flex-col gap-3">
         <SectionLabel>Current Focus</SectionLabel>
-        <CurrentFocusCard items={MOCK_FOCUS} />
+        {focusItems.length > 0 ? (
+          <CurrentFocusCard items={focusItems} />
+        ) : (
+          <EmptyHint>
+            No focus areas yet. The project agent will populate this
+            as it reasons.
+          </EmptyHint>
+        )}
       </div>
 
-      {/* 5. Recent Activity */}
+      {/* 5. Recent Activity — read from overview.json.activity (live).
+            The truth ext records ISO timestamps; we render the relative
+            "Nm ago" form here. */}
       <div className="flex flex-col gap-3">
         <SectionLabel>Recent Activity</SectionLabel>
-        <ActivityFeed items={MOCK_ACTIVITY} />
+        {activityItems.length > 0 ? (
+          <ActivityFeed items={activityItems} />
+        ) : (
+          <EmptyHint>
+            No activity yet. The project agent will log progress as it
+            works.
+          </EmptyHint>
+        )}
       </div>
     </div>
   );
