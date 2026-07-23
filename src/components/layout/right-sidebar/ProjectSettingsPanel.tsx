@@ -9,15 +9,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useState } from "react";
 import { loadProjectTeam, loadUnassignedAgents } from "@/flows/projects/crud/load-project-team";
 import { useAllAgentStatuses } from "@/flows/agents/runtime";
-import { useAgentManage, useAgentOverview } from "@/flows/agents/settings";
+import { useAgentManage, useAgentOverview, useAgentSettings } from "@/flows/agents/settings";
 import { assignAgentToProject, removeAgentFromProject } from "@/flows/projects/crud";
 import type { Agent, Project } from "@/storage/types";
 import { ProjectMembersList } from "./sections/ProjectMembersList";
 import { AssignAgentDialog } from "./sections/AssignAgentDialog";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
-import { PlanModeSection } from "./sections/PlanModeSection";
 import { InboxSection } from "./sections/InboxSection";
-import { useAutoSave } from "./use-auto-save";
+import { MANAGE_SECTIONS, type ManageSectionDef } from "./sections/registry";
 import type { ProjectOverviewSectionData } from "@/models/component";
 
 interface ProjectSettingsPanelProps {
@@ -70,14 +69,15 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   }, [team, liveStates])
 
   const coordinatorId = mergedTeam.coordinator?.id ?? null;
-  // 4-file split: each truth file has its own React flow.
-  //   manage.json    → coordinatorAutoSave + coordinatorManage  (manage tab)
-  //   overview.json  → coordinatorOverview                     (overview tab)
+  // 4-file split: each truth file has its own React flow. We read all
+  // three so the catalog (skills/extensions/prompts) is available in
+  // addition to the manage.json user-tweakable surface.
+  //   settings.json → coordinatorSettings   (catalog.skills / .extensions / .prompts)
+  //   manage.json   → coordinatorManage     (identity / behavior / permissions / active sets / planMode / project)
+  //   overview.json → coordinatorOverview   (right-sidebar Overview snapshot)
   const coordinatorManage = useAgentManage(coordinatorId);
   const coordinatorOverview = useAgentOverview(coordinatorId);
-  const coordinatorAutoSave = useAutoSave(coordinatorId);
-  // PlanModeSection reads from manage.json (planMode block lives there).
-  const settingsForSection = (coordinatorManage.settings ?? {}) as Record<string, unknown>;
+  const coordinatorSettings = useAgentSettings(coordinatorId);
 
   // Overview tab reads from overview.json (mirrored from manage by the truth ext).
   const coordinatorProjectDescription = useMemo<string | null>(() => {
@@ -97,6 +97,44 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     }),
     [mergedTeam, coordinatorProjectDescription],
   )
+
+  // Merge manage.json + the catalog slice of settings.json into one
+  // object so sections can reach `settings.skills` (manage) and
+  // `settings.catalog.skills` (settings) side by side.
+  const coordinatorMergedManage = useMemo(() => {
+    const manage = (coordinatorManage.settings ?? {}) as Record<string, unknown>;
+    const settings = (coordinatorSettings.settings ?? {}) as Record<string, unknown>;
+    const catalog = settings.catalog ?? manage.catalog;
+    return { ...manage, catalog };
+  }, [coordinatorManage.settings, coordinatorSettings.settings]);
+
+  const handleAssign = async (agentId: string) => {
+    const r = await assignAgentToProject({ projectId, agentId });
+    if (r.ok) {
+      const t = await loadProjectTeam(projectId);
+      setTeam({
+        project: t.project,
+        coordinator: t.coordinator,
+        members: t.members,
+      });
+    }
+    return r;
+  };
+
+  const handleRemove = async (agent: Agent) => {
+    const r = await removeAgentFromProject({
+      projectId,
+      agentId: agent.id,
+    });
+    if (r.ok) {
+      const t = await loadProjectTeam(projectId);
+      setTeam({
+        project: t.project,
+        coordinator: t.coordinator,
+        members: t.members,
+      });
+    }
+  };
 
   return (
     <div className="flex h-full flex-col px-button-x">
@@ -124,39 +162,36 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full">
-            <ProjectMembersList
-              projectId={projectId}
-              coordinator={mergedTeam.coordinator}
-              members={mergedTeam.members}
-              onAssignClick={() => setAssignOpen(true)}
-              onRemove={async (agent) => {
-                const r = await removeAgentFromProject({
-                  projectId,
-                  agentId: agent.id,
-                });
-                if (r.ok) {
-                  const t = await loadProjectTeam(projectId);
-                  setTeam({
-                    project: t.project,
-                    coordinator: t.coordinator,
-                    members: t.members,
-                  });
-                }
-              }}
-            />
-            {mergedTeam.coordinator && coordinatorManage.settings ? (
-              <div className="flex flex-col gap-stack px-card-x pt-gap-loose pb-card">
+            <div className="flex flex-col gap-stack px-card-x pt-gap-loose pb-card">
+              <div className="flex flex-col gap-stack">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Plan Mode
+                  Team
                 </span>
-                <PlanModeSection
-                  settings={settingsForSection}
-                  agentId={mergedTeam.coordinator.id}
-                  patch={coordinatorAutoSave.patch}
-                  flush={coordinatorAutoSave.flush}
+                <ProjectMembersList
+                  projectId={projectId}
+                  coordinator={mergedTeam.coordinator}
+                  members={mergedTeam.members}
+                  onAssignClick={() => setAssignOpen(true)}
+                  onRemove={handleRemove}
                 />
               </div>
-            ) : null}
+
+              {mergedTeam.coordinator && coordinatorManage.settings ? (
+                <ManageSectionList
+                  sections={MANAGE_SECTIONS}
+                  agentId={mergedTeam.coordinator.id}
+                  settings={coordinatorMergedManage}
+                  patch={coordinatorManage.patch}
+                  flush={coordinatorManage.flush}
+                />
+              ) : (
+                <div className="flex flex-col gap-gap-tight py-4">
+                  <span className="text-xs text-muted-foreground">
+                    Assign a project coordinator to edit manage settings.
+                  </span>
+                </div>
+              )}
+            </div>
           </ScrollArea>
         </TabsContent>
 
@@ -182,10 +217,42 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
           const list = await loadUnassignedAgents();
           return list.map((a) => ({ id: a.id, name: a.name }));
         }}
-        onSelect={async (agentId) => {
-          return assignAgentToProject({ projectId, agentId });
-        }}
+        onSelect={handleAssign}
       />
     </div>
+  );
+}
+
+interface ManageSectionListProps {
+  sections: ManageSectionDef[];
+  agentId: string;
+  settings: Record<string, unknown>;
+  patch: (key: string, value: unknown) => void;
+  flush: (p: Record<string, unknown>) => Promise<void>;
+}
+
+function ManageSectionList({ sections, agentId, settings, patch, flush }: ManageSectionListProps) {
+  const project = (settings.project ?? {}) as { id?: string };
+  const isCoordinator = Boolean(project.id);
+
+  return (
+    <>
+      {sections.map((s) => {
+        if (s.coordinatorOnly && !isCoordinator) return null;
+        return (
+          <div key={s.id} className="flex flex-col gap-stack">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              {s.label}
+            </span>
+            <s.Component
+              settings={settings}
+              agentId={agentId}
+              patch={patch}
+              flush={flush}
+            />
+          </div>
+        );
+      })}
+    </>
   );
 }
