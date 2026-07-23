@@ -1,4 +1,3 @@
-import * as React from "react";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import type { HugeiconsIconProps } from "@hugeicons/react";
 import {
@@ -15,6 +14,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAgentSettings } from "@/flows/agents/settings";
 import type { Mode } from "@/models/component";
 
 const MODES: Array<{ value: Mode; label: string; icon: HugeiconsIconProps["icon"] }> = [
@@ -23,10 +23,44 @@ const MODES: Array<{ value: Mode; label: string; icon: HugeiconsIconProps["icon"
   { value: "auto", label: "Auto mode", icon: LanternIcon },
 ];
 
-export function ModePicker() {
-  const [mode, setMode] = React.useState<Mode>("execute");
-  const current = MODES.find((m) => m.value === mode) ?? MODES[1]!;
+/**
+ * The composer's `Mode` type uses `execute` for what truth's plan extension
+ * calls `build`. This is the only place the two are reconciled.
+ */
+const MODE_TO_TRUTH: Record<Mode, "plan" | "build" | "auto"> = {
+  plan: "plan",
+  execute: "build",
+  auto: "auto",
+};
+
+const TRUTH_TO_MODE: Record<"plan" | "build" | "auto", Mode> = {
+  plan: "plan",
+  build: "execute",
+  auto: "auto",
+};
+
+interface ModePickerProps {
+  agentId: string;
+}
+
+export function ModePicker({ agentId }: ModePickerProps) {
+  const { settings, patch } = useAgentSettings(agentId);
+  const planModeBlock = settings?.planMode as
+    | { defaultMode?: "plan" | "build" | "auto" }
+    | undefined;
+  const truthDefaultMode = (planModeBlock?.defaultMode ?? "auto") as
+    | "plan"
+    | "build"
+    | "auto";
+  const mode: Mode = TRUTH_TO_MODE[truthDefaultMode];
+  const current = MODES.find((m) => m.value === mode) ?? MODES[2]!;
   const CurrentIcon = current.icon;
+
+  const onChange = (next: string) => {
+    if (next !== "plan" && next !== "execute" && next !== "auto") return;
+    const truthValue = MODE_TO_TRUTH[next];
+    patch("planMode", { ...(planModeBlock ?? {}), defaultMode: truthValue });
+  };
 
   return (
     <DropdownMenu>
@@ -41,10 +75,7 @@ export function ModePicker() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[140px] bg-modal text-modal-foreground">
-        <DropdownMenuRadioGroup
-          value={mode}
-          onValueChange={(v) => setMode(v as Mode)}
-        >
+        <DropdownMenuRadioGroup value={mode} onValueChange={onChange}>
           {MODES.map((m) => (
             <DropdownMenuRadioItem key={m.value} value={m.value}>
               <HugeIcon icon={m.icon} size={14} className="text-modal-foreground/70" />

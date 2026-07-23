@@ -26,6 +26,7 @@ import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
+import { ModePicker } from '@/components/layout/composer/ModePicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { ProjectAgentBooting } from './components/ProjectAgentBooting';
 import { ProjectAgentError } from './components/ProjectAgentError';
@@ -324,6 +325,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                 </div>
               </div>
               <div className="flex items-center gap-5">
+                <ModePicker agentId={projectAgent.id} />
                 <ModelPicker agentId={projectAgent.id} />
                 <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
                   <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
