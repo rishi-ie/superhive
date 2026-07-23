@@ -48,6 +48,9 @@ export const IPC = {
     READ_INBOX:      'agents:read-inbox',
     ACK_MESSAGE:     'agents:ack-message',
     ON_MAIL:         (id: string) => `agent:${id}:mail`,
+    // Phase E: project-coordinator spawns a regular agent on the fly
+    // from a marketplace template, auto-bound to the same project.
+    SPAWN_FROM_TEMPLATE: 'agents:spawn-from-template',
   },
   PROJECTS: {
     LIST: 'projects:list',

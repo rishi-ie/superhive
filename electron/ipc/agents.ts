@@ -822,6 +822,255 @@ export function registerAgentIpc(): void {
 		return revealInFinder(agentId)
 	})
 
+	// -------------------------------------------------------------------------
+	// Phase E: spawn-from-template
+	// Project-coordinator agents can spawn regular agents on the fly from
+	// marketplace templates. The spawn ext (in the spawner agent's Pi
+	// subprocess) calls this handler via the IPC bridge; the main process
+	// creates the agent directory, seeds manage.json from the rendered
+	// template, and binds projectIds: [spawner.project.id].
+	//
+	// The spawned agent is NOT started — the user starts it from
+	// AgentsListView. This matches the "no auto-start" contract from the
+	// spawn ext.
+	//
+	// Defense-in-depth: the handler re-validates that the spawner is a
+	// project-coordinator agent. The spawn ext's gate is upstream but
+	// the main process is the final line of defense.
+	// -------------------------------------------------------------------------
+
+	ipcMain.handle(
+		IPC.AGENTS.SPAWN_FROM_TEMPLATE,
+		async (
+			_e,
+			input: {
+				spawnerAgentId: string
+				projectId: string
+				renderedTemplate: Record<string, unknown>
+				name?: string
+				role?: string
+			},
+		): Promise<{ agentId: string; status: string }> => {
+			if (!input?.spawnerAgentId) throw new Error('spawnerAgentId is required')
+			if (!input?.projectId) throw new Error('projectId is required')
+			if (!input?.renderedTemplate || typeof input.renderedTemplate !== 'object') {
+				throw new Error('renderedTemplate is required and must be an object')
+			}
+
+			// Defense-in-depth: re-validate the spawner is a project
+			// coordinator. The spawn ext's gate is upstream; we re-check
+			// here in case the spawn ext or its bridge were misconfigured.
+			const spawner = await AgentRepository.getById(input.spawnerAgentId)
+			if (!spawner) throw new Error(`Spawner agent not found: ${input.spawnerAgentId}`)
+			if (spawner.agentKind !== 'project-coordinator') {
+				throw new Error(
+					`Spawner ${input.spawnerAgentId} is not a project-coordinator (agentKind=${spawner.agentKind}); refusing to spawn`,
+				)
+			}
+			const spawnerProjectIds = Array.isArray(spawner.projectIds) ? spawner.projectIds : []
+			if (!spawnerProjectIds.includes(input.projectId)) {
+				throw new Error(
+					`Spawner ${input.spawnerAgentId} is not bound to project ${input.projectId}; refusing to spawn`,
+				)
+			}
+
+			// Extract a usable agent name. Priority: caller override →
+			// template.identity.name → error (no nameable agent).
+			const tplIdentity = (input.renderedTemplate.identity as { name?: unknown; role?: unknown } | undefined) ?? {}
+			const baseName = (input.name?.trim() || (typeof tplIdentity.name === 'string' ? tplIdentity.name.trim() : ''))
+			if (!baseName) {
+				throw new Error('spawn-from-template: cannot determine agent name (no name override and template.identity.name missing)')
+			}
+			const role = (input.role?.trim() || (typeof tplIdentity.role === 'string' ? tplIdentity.role.trim() : '') || 'generalist')
+
+			// Derive a folder name from the agent name. We use the
+			// same sanitize scheme as agents:create so a coordinator
+			// can spawn an agent, then a follow-up spawn with the same
+			// name collides predictably.
+			const folderName = sanitizeFolderName(baseName)
+			if (!folderName) {
+				throw new Error(`Invalid agent name "${baseName}" — cannot be empty after sanitization`)
+			}
+
+			// Spawned agents live at ~/.superhive/agents/<folderName>
+			// (same parent as create).
+			const parentDir = join(process.env.HOME ?? '', '.superhive', 'agents')
+			const agentDir = join(parentDir, folderName)
+			if (existsSync(agentDir)) {
+				throw new Error(`Spawned agent folder already exists: ${agentDir}`)
+			}
+			await mkdir(parentDir, { recursive: true })
+			await mkdir(agentDir, { recursive: true })
+			await mkdir(join(agentDir, 'extensions'), { recursive: true })
+			log.info(`[agents:spawn-from-template] creating agent dir ${agentDir}`)
+
+			// Copy agent.sh + symlink truth + telemetry ONLY.
+			// Spawned agents are regular agents, NOT project
+			// coordinators — they don't get context, orch, or plan.
+			ensureGeneralKai()
+			await cp(join(GENERAL_KAI_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
+			await chmod(join(agentDir, 'agent.sh'), 0o755)
+
+			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL })
+			symlinkSync(extensionSource, join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME), 'dir')
+			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL })
+			symlinkSync(telemetrySource, join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME), 'dir')
+
+			// Create the Agent row first so we have an id to thread
+			// into the manage.json seed and any post-write cascades.
+			// Note: AgentRepository.create() always initializes
+			// projectIds: []; we add to projectIds[] after the
+			// create via the repository's addToProject (or by
+			// mutating the returned row before the next write).
+			const agent = await AgentRepository.create({
+				name: baseName,
+				role,
+				description: typeof tplIdentity.name === 'string' ? tplIdentity.name : undefined,
+				localPath: agentDir,
+				status: 'idle',
+				// agentKind: undefined — spawned agents are regular, not coordinators
+			})
+
+			// Minimal manifest — same shape as create, but no env block
+			// (the spawned agent inherits the user's env at launch time).
+			const manifestContent = JSON.stringify(
+				{
+					superhiveId: agent.id,
+					version: 1,
+					workspace: './workspace',
+					extensions: [
+						'./extensions/superhive-pi-truth',
+						'./extensions/superhive-pi-telemetry',
+					],
+				},
+				null,
+				2,
+			) + '\n'
+			await writeFile(join(agentDir, 'manifest.json'), manifestContent, 'utf8')
+			symlinkSync('manifest.json', join(agentDir, 'agent.json'))
+
+			// Seed settings.json with a top model.
+			const topModel = await getTopEnabledModel()
+			const settingsSeed: SettingsFile = {
+				...DEFAULT_SETTINGS,
+				managedBy: 'superhive-pi-truth@1#0',
+				lastModified: new Date().toISOString(),
+				...(topModel && {
+					model: { provider: topModel.provider, name: topModel.name },
+					defaultProvider: topModel.provider,
+					defaultModel: topModel.name,
+					enabledModels: [topModel.id],
+				}),
+			}
+			await writeFile(
+				settingsFilePathFor(agentDir),
+				JSON.stringify(settingsSeed, null, '\t') + '\n',
+				'utf8',
+			)
+
+			// Seed manage.json from the rendered template. We pluck the
+			// standard fields the user expects; the rest of the rendered
+			// template is preserved as a top-level `extras` block so
+			// nothing in the template is silently dropped.
+			const tplPerms = (input.renderedTemplate.permissions as { filesystem?: unknown; terminal?: unknown; network?: unknown } | undefined) ?? {}
+			const tplBehavior = (input.renderedTemplate.behavior as { steeringMode?: unknown; followUpMode?: unknown; autoCompaction?: unknown; autoRetry?: unknown } | undefined) ?? {}
+			const tplSkills = Array.isArray(input.renderedTemplate.skills) ? input.renderedTemplate.skills as string[] : []
+			const manageSeed = {
+				version: 1 as const,
+				managedBy: 'superhive-pi-truth@1#0',
+				lastModified: new Date().toISOString(),
+				identity: {
+					name: baseName,
+					description: typeof tplIdentity.name === 'string' ? tplIdentity.name : '',
+					workspace: './workspace',
+				},
+				permissions: {
+					filesystem: tplPerms.filesystem !== false,
+					terminal: tplPerms.terminal !== false,
+					network: tplPerms.network !== false,
+				},
+				behavior: {
+					steeringMode: (typeof tplBehavior.steeringMode === 'string' ? tplBehavior.steeringMode : 'all') as 'all' | 'one-at-a-time',
+					followUpMode: (typeof tplBehavior.followUpMode === 'string' ? tplBehavior.followUpMode : 'all') as 'all' | 'one-at-a-time',
+					autoCompaction: tplBehavior.autoCompaction !== false,
+					autoRetry: tplBehavior.autoRetry !== false,
+				},
+				skills: tplSkills,
+				extensions: [
+					'./extensions/superhive-pi-truth',
+					'./extensions/superhive-pi-telemetry',
+				],
+				prompts: [],
+				packages: [],
+				themes: [],
+				planMode: { defaultMode: 'auto' as const, thinkingLevel: 'inherit' as const },
+				// spawner-bound: the spawned agent carries the spawner's
+				// project id so it shows up in project rosters.
+				projectIds: [input.projectId],
+			}
+			await writeFile(
+				manageFilePathFor(agentDir),
+				JSON.stringify(manageSeed, null, '\t') + '\n',
+				'utf8',
+			)
+
+			// overview.json — empty, will be populated by truth ext
+			await writeFile(
+				overviewFilePathFor(agentDir),
+				JSON.stringify(
+					{
+						version: 1,
+						managedBy: 'superhive-pi-truth@1#0',
+						lastModified: new Date().toISOString(),
+						name: baseName,
+						description: '',
+						team: [],
+						focus: [],
+						activity: [],
+					},
+					null,
+					'\t',
+				) + '\n',
+				'utf8',
+			)
+
+			// inbox.json — empty array
+			await writeFile(
+				inboxFilePathFor(agentDir),
+				JSON.stringify(
+					{
+						version: 1,
+						managedBy: 'superhive-pi-truth@1#0',
+						lastModified: new Date().toISOString(),
+						items: [],
+					},
+					null,
+					'\t',
+				) + '\n',
+				'utf8',
+			)
+
+			// Bind the spawned agent to the spawner's project. The
+			// repo's create() always sets projectIds: [], so we
+			// assignToProject post-create.
+			await AgentRepository.assignToProject(agent.id, input.projectId)
+
+			// Notify any listening renderer that a new agent exists.
+			// (Same pattern as agents:create — broadcast on the
+			// window so AgentsListView refreshes.)
+			const { BrowserWindow } = await import('electron')
+			const win = BrowserWindow.getAllWindows()[0]
+			if (win && !win.isDestroyed()) {
+				win.webContents.send(IPC.AGENTS.ON_CHANGED, { reason: 'spawned', agentId: agent.id })
+			}
+
+			log.info(
+				`[agents:spawn-from-template] spawned ${agent.id} (${baseName}) bound to project=${input.projectId} from spawner=${input.spawnerAgentId}`,
+			)
+			return { agentId: agent.id, status: 'ready' }
+		},
+	)
+
   ipcMain.handle(
     IPC.AGENTS.PERSIST_ASSISTANT_MESSAGE,
     async (_e, agentId: string, message: import('../../src/models/assistant-message').AssistantMessage) => {
