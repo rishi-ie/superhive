@@ -102,10 +102,10 @@ Imports from `@/api/*` are **Fail**. Imports from `window.api.*` in `src/compone
 
 The cross-module contracts live in the parent `superhive-5/AGENTS.md` and apply unchanged:
 
-- **Settings file**: `<agentDir>/Superhive-pi-<basename>.json` — atomic write, `managedBy` counter
+- **Truth files**: 4-file split under `<agentDir>/` — `settings.json` (runtime essentials) + `manage.json` (user-tweakable surface — identity/permissions/behavior/skills/extensions/prompts/planMode/project) + `overview.json` (right-sidebar Overview snapshot) + `inbox.json` (append-only feed). Each has its own `managedBy: "superhive-pi-truth@1#N"` counter + atomic `tmp + rename`. Legacy `Superhive-pi-<basename>.json` is migrated on first launch and deleted by the truth extension.
 - **Telemetry stream**: `<agentDir>/telemetry.jsonl` — append-only, one JSON per line
-- **IPC channel**: `agent:<id>:event` — 22 `AdapterEvent` variants in `electron/pi-protocol/types.ts`
-- **Launch**: `bash agent.sh --manifest <Superhive-pi-<name>.json>`
+- **IPC channels**: `agent:<id>:event` (22 `AdapterEvent` variants in `electron/pi-protocol/types.ts`) + 8 truth-file channels (`READ/WRITE` for `settings`/`manage`/`overview` + `READ/APPEND/MARK_READ/CLEAR` for `inbox`)
+- **Launch**: `bash agent.sh --manifest <manifest.json>` — copied per agent
 
 Cross-layer communication flows only through these contracts. No new IPC channels, no new file formats, no new telemetry events without updating the canonical schema in the module that owns it.
 
