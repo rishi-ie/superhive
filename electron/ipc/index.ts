@@ -7,6 +7,7 @@ import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
 import { registerDefaultsIpc } from './defaults';
 import { registerTruthIpc } from './truth';
+import { registerTemplatesIpc } from './templates';
 
 export const IPC = {
   AGENTS: {
@@ -99,6 +100,12 @@ export const IPC = {
     READ_FILE: 'truth:read-file',
     WRITE_FILE: 'truth:write-file',
   },
+  // Phase F: marketplace — list/get/open-folder for template library
+  TEMPLATES: {
+    LIST: 'templates:list',
+    GET: 'templates:get',
+    OPEN_FOLDER: 'templates:open-folder',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -111,4 +118,5 @@ export function registerIpc(): void {
   registerTaskIpc();
   registerDefaultsIpc();
   registerTruthIpc();
+  registerTemplatesIpc();
 }
