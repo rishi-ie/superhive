@@ -129,12 +129,12 @@ export function getPlanModeAtoms(
 
 export function PlanModeSection({ settings, patch }: SettingsSectionProps) {
   // Coordinator gate. The truth file's `project` block is only present
-  // for project-coordinator agents. The plan extension also gates on this
-  // block in its session_start handler, so we use the same signal here.
-  const project = (settings as SettingsSectionProps["settings"] & {
-    project?: { localPath?: string; coordinatorAgentId?: string };
-  }).project;
-  if (!project?.localPath || !project.coordinatorAgentId) return null;
+  // for project-coordinator agents. The plan extension's session_start
+  // handler uses the same signal (project.id only — see
+  // superhive-pi-plan/plan-mode.ts::isProjectCoordinatorAgent). We mirror
+  // it here so the section hides for non-project agents.
+  const project = settings.project as { id?: string } | undefined;
+  if (!project?.id) return null;
 
   const block = readBlock(settings);
   const merged = { ...DEFAULT_PLAN_MODE_BLOCK, ...block };
