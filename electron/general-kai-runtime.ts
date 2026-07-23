@@ -16,6 +16,7 @@ import * as spawnModule from './runtime/spawn'
 import * as eventRouter from './runtime/event-router'
 import * as telemetryWiring from './runtime/telemetry-wiring'
 import * as settingsWatcher from './runtime/settings-watcher'
+import type { TruthFileKey } from './runtime/settings-watcher'
 import * as chatPersistence from './runtime/chat-persistence'
 
 /**
@@ -53,7 +54,10 @@ export class GeneralKaiRuntime {
   readyEmitted = new Set<string>()
   settingsWatchers = new Map<string, FSWatcher>()
   telemetryTailers = new Map<string, TelemetryTailer>()
-  lastSeenCounter = new Map<string, number>()
+  /** Per-agent, per-file last-seen writer counters. Replaces the legacy
+   *  single-counter map now that the truth layout splits across four
+   *  sibling files, each with its own managedBy counter. */
+  lastSeenCounters = new Map<string, Map<TruthFileKey, number>>()
 
   registerAdapterFactory(agentId: string, factory: () => PiProtocolAdapter): void {
     this.adapterFactories.set(agentId, factory)
@@ -156,8 +160,8 @@ export class GeneralKaiRuntime {
     settingsWatcher.ensureSettingsWatcher(this, agentId, settingsPath)
   }
 
-  markSelfWrite(agentId: string, counter: number): void {
-    settingsWatcher.markSelfWrite(this, agentId, counter)
+  markSelfWrite(agentId: string, fileKey: TruthFileKey, counter: number): void {
+    settingsWatcher.markSelfWrite(this, agentId, fileKey, counter)
   }
 
   // ============================================================

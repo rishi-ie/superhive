@@ -40,7 +40,7 @@ import log from 'electron-log/main'
 import { ProjectRepository } from '../src/storage/repositories/ProjectRepository'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import type { Project, Agent } from '../src/storage/types'
-import { settingsFilePathFor } from './agent-settings-defaults'
+import { manageFilePathFor } from './agent-settings-defaults'
 
 const PROJECTS_ROOT = join(homedir(), '.superhive', 'projects')
 const COORDINATOR_SUBPATH = 'agent'
@@ -53,15 +53,13 @@ export interface ReconcileProjectsReport {
   removed: Array<{ id: string; name: string }>
 }
 
-/** Returns true iff `<root>/agent/Superhive-pi-agent.json` exists. */
+/** Returns true iff `<root>/agent/manage.json` exists (the coordinator's
+ *  truth file carrying the `project` block). */
 export function isValidProjectRoot(root: string): boolean {
   if (!root) return false
   const coordinatorDir = join(root, COORDINATOR_SUBPATH)
   if (!existsSync(coordinatorDir)) return false
-  // The settings filename mirrors the coordinator folder basename
-  // (`agent`), which is fixed by the create flow — see
-  // agent-settings-defaults.ts:settingsFilePathFor.
-  return existsSync(settingsFilePathFor(coordinatorDir))
+  return existsSync(manageFilePathFor(coordinatorDir))
 }
 
 /** Walks the default projects root and returns every candidate root path,
@@ -93,18 +91,23 @@ function dedupe(roots: Array<string | undefined | null>): string[] {
   return out
 }
 
-/** Read the project name from the coordinator's truth settings file. Falls
- *  back to the folder basename. The settings file is JSON with a top-level
- *  `name` field; if the JSON is malformed we silently fall back. */
+/** Read the project name from the coordinator's manage.json. Falls back to
+ *  the folder basename. manage.json's `project.name` is the canonical
+ *  project name (mirrored into overview.json by the truth ext). */
 function readProjectNameFromDisk(root: string): string {
   const coordinatorDir = join(root, COORDINATOR_SUBPATH)
-  const settingsPath = settingsFilePathFor(coordinatorDir)
+  const managePath = manageFilePathFor(coordinatorDir)
   const fallback = basename(root)
-  if (!existsSync(settingsPath)) return fallback
+  if (!existsSync(managePath)) return fallback
   try {
-    const raw = readFileSync(settingsPath, 'utf8')
-    const parsed = JSON.parse(raw) as { name?: string }
-    return parsed.name?.trim() || fallback
+    const raw = readFileSync(managePath, 'utf8')
+    const parsed = JSON.parse(raw) as {
+      project?: { name?: unknown };
+      identity?: { name?: unknown };
+    }
+    const fromProject = typeof parsed.project?.name === 'string' ? parsed.project.name.trim() : ''
+    const fromIdentity = typeof parsed.identity?.name === 'string' ? parsed.identity.name.trim() : ''
+    return fromProject || fromIdentity || fallback
   } catch {
     return fallback
   }

@@ -40,6 +40,19 @@ export interface AgentsAPI {
 	getMessages: (id: string) => Promise<ChatRow[]>
 	readSettings: (id: string) => Promise<Record<string, unknown> | null>
 	writeSettings: (id: string, patch: Record<string, unknown>) => Promise<Record<string, unknown>>
+	/**
+	 * 4-file truth split. Each channel reads or writes a single sibling
+	 * file under <agentDir>/. truth migrates the legacy Superhive-pi-*.json
+	 * on first launch; these channels always operate on the new layout.
+	 */
+	readManage: (id: string) => Promise<Record<string, unknown> | null>
+	writeManage: (id: string, patch: Record<string, unknown>) => Promise<{ ok: boolean; writtenVersion: number }>
+	readOverview: (id: string) => Promise<Record<string, unknown> | null>
+	writeOverview: (id: string, patch: Record<string, unknown>) => Promise<{ ok: boolean; writtenVersion: number }>
+	readInbox: (id: string) => Promise<{ items: unknown[] } | null>
+	appendInbox: (id: string, input: { kind: 'notification' | 'permission' | 'question'; message: string; severity?: 'info' | 'warning' | 'error'; payload?: Record<string, unknown> }) => Promise<{ ok: boolean; id: string; writtenVersion: number }>
+	markInboxRead: (id: string, inboxId: string, answeredWith?: unknown) => Promise<{ ok: boolean }>
+	clearInbox: (id: string, status?: 'pending' | 'read' | 'answered' | 'dismissed') => Promise<{ ok: boolean; removed: number }>
 	reveal: (id: string) => Promise<{ ok: boolean }>
 	/**
 	 * Renderer-driven assistant-message persistence. Fired on every

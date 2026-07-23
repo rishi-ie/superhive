@@ -27,7 +27,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import log from 'electron-log/main'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
-import { settingsFilePathFor } from './agent-settings-defaults'
+import { manageFilePathFor } from './agent-settings-defaults'
 import type { AgentStatus } from '../src/storage/types'
 
 interface ProjectMemberLike {
@@ -75,10 +75,10 @@ export async function patchCoordinatorForMemberStatus(
 		const coordinator = await findProjectCoordinator(projectId)
 		if (!coordinator?.localPath) continue
 
-		const settingsPath = settingsFilePathFor(coordinator.localPath)
+		const settingsPath = manageFilePathFor(coordinator.localPath)
 		if (!existsSync(settingsPath)) {
 			log.warn(
-				`[status-mirror] coordinator settings missing for project=${projectId} at ${settingsPath}`,
+				`[status-mirror] coordinator manage.json missing for project=${projectId} at ${settingsPath}`,
 			)
 			continue
 		}

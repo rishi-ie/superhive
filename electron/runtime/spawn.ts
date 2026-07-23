@@ -187,7 +187,7 @@ export function pruneStaleEntries(rt: GeneralKaiRuntime): void {
       log.info(`[runtime] pruning stale entry for ${id} (folder missing: ${entry.agentDir})`)
       rt.clearSilenceTimer(id)
       rt.readyEmitted.delete(id)
-      rt.lastSeenCounter.delete(id)
+      rt.lastSeenCounters.delete(id)
       rt.stopTelemetryTailer(id)
       if (entry.process) {
         try { entry.process.kill('SIGTERM') } catch { /* ignore */ }
@@ -202,7 +202,7 @@ export function removeEntry(rt: GeneralKaiRuntime, agentId: string): void {
   rt.readyEmitted.delete(agentId)
   rt.closeSettingsWatcher(agentId)
   rt.stopTelemetryTailer(agentId)
-  rt.lastSeenCounter.delete(agentId)
+  rt.lastSeenCounters.delete(agentId)
   rt.stop(agentId)
   rt.entries.delete(agentId)
 }

@@ -11,7 +11,7 @@ import { getTopEnabledModel } from '../get-top-enabled-model';
 import { readFileSync } from 'node:fs';
 import { writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
-import { settingsFilePathFor } from '../agent-settings-defaults';
+import { manageFilePathFor } from '../agent-settings-defaults';
 import log from 'electron-log/main';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
 
@@ -99,9 +99,9 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
   const coordinator = allInProject.find((a) => a.agentKind === 'project-coordinator');
   if (!coordinator?.localPath) return;
 
-  const settingsPath = settingsFilePathFor(coordinator.localPath);
+  const settingsPath = manageFilePathFor(coordinator.localPath);
   if (!existsSync(settingsPath)) {
-    log.warn(`[projects:addAgent] coordinator settings missing at ${settingsPath}`);
+    log.warn(`[projects:addAgent] coordinator manage.json missing at ${settingsPath}`);
     return;
   }
 
@@ -152,7 +152,7 @@ async function removeMemberFromCoordinatorRoster(projectId: string, agentId: str
   const coordinator = allInProject.find((a) => a.agentKind === 'project-coordinator');
   if (!coordinator?.localPath) return;
 
-  const settingsPath = settingsFilePathFor(coordinator.localPath);
+  const settingsPath = manageFilePathFor(coordinator.localPath);
   if (!existsSync(settingsPath)) return;
 
   try {

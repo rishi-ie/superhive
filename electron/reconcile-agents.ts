@@ -85,12 +85,16 @@ function writeManifestSuperhiveId(agentDir: string, id: string): void {
 }
 
 function readSettingsName(agentDir: string, fallback: string): string {
-  const folderName = basename(agentDir)
-  const settingsPath = join(agentDir, `Superhive-pi-${folderName}.json`)
+  const settingsPath = join(agentDir, 'manage.json')
   if (!existsSync(settingsPath)) return fallback
   try {
-    const parsed = JSON.parse(readFileSync(settingsPath, 'utf8')) as { name?: string }
-    return parsed.name?.trim() || fallback
+    const parsed = JSON.parse(readFileSync(settingsPath, 'utf8')) as {
+      identity?: { name?: string }
+      project?: { name?: string }
+    }
+    const fromIdentity = typeof parsed.identity?.name === 'string' ? parsed.identity.name.trim() : ''
+    const fromProject = typeof parsed.project?.name === 'string' ? parsed.project.name.trim() : ''
+    return fromIdentity || fromProject || fallback
   } catch {
     return fallback
   }
@@ -123,8 +127,7 @@ function isAgentSettingsMarker(agentDir: string): boolean {
   // An agent folder must contain a settings file to be considered a real
   // Superhive agent. Without this marker, an unrelated folder in
   // `~/.superhive/agents/` would be auto-adopted.
-  const folderName = basename(agentDir)
-  const settingsPath = join(agentDir, `Superhive-pi-${folderName}.json`)
+  const settingsPath = join(agentDir, 'manage.json')
   return existsSync(settingsPath)
 }
 

@@ -29,7 +29,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import log from 'electron-log/main'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
-import { settingsFilePathFor } from '../agent-settings-defaults'
+import { manageFilePathFor } from '../agent-settings-defaults'
 import {
 	appendProjectChat,
 	appendMemberInbox,
@@ -98,7 +98,7 @@ export function readAgentProjectContext(agentId: string): AgentProjectContext {
 	if (!agent || !agent.localPath) {
 		return { agentId, agentDir: '', role: 'standalone', projectBlock: null }
 	}
-	const settingsPath = settingsFilePathFor(agent.localPath)
+	const settingsPath = manageFilePathFor(agent.localPath)
 	if (!existsSync(settingsPath)) {
 		return { agentId, agentDir: agent.localPath, role: 'standalone', projectBlock: null }
 	}
@@ -361,7 +361,7 @@ export function readProjectLocalPathSync(projectId: string): string | null {
 
 export function resolveCoordinatorForProjectSync(projectLocalPath: string): string | null {
 	const coordDir = join(projectLocalPath, 'agent')
-	const settingsPath = settingsFilePathFor(coordDir)
+	const settingsPath = manageFilePathFor(coordDir)
 	if (!existsSync(settingsPath)) return null
 	try {
 		const raw = readFileSync(settingsPath, 'utf8')
