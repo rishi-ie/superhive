@@ -82,6 +82,43 @@ export interface ProjectOverviewSectionData {
    * should render the fallback ("interact more to put a description").
    */
   coordinatorProjectDescription: string | null
+  /**
+   * Phase D: full content of the project agent's `overview.json`,
+   * passed through by ProjectSettingsPanel from `useAgentOverview`.
+   * The ProjectOverviewSection reads `focus[]` and `activity[]` from
+   * here, replacing the MOCK_FOCUS / MOCK_ACTIVITY constants that lived
+   * in the section file pre-Phase-D. The header description is still
+   * sourced from `coordinatorProjectDescription` for layout reasons
+   * (it's displayed as a single truncated line under the project
+   * name; the rest of the overview is not displayed here).
+   */
+  overview: OverviewFileMirror | null
+  /**
+   * Phase D: derived health (status + counts) computed by
+   * `useProjectHealth` from live runtime state. Replaces MOCK_HEALTH.
+   */
+  health: ProjectHealth | null
+  /**
+   * Phase D: project's spawned staff. Used to render the future
+   * "Spawned staff" section in Phase G and as input to
+   * `deriveProjectHealth` for the spawned-side status counts.
+   */
+  staff: Agent[]
+}
+
+/**
+ * Renderer mirror of the truth's `OverviewFile` shape (see
+ * superhive-pi-truth/settings-schema.ts). Loose typing so the section
+ * can render any subset the agent has populated; missing arrays
+ * default to empty in the consumer.
+ */
+export interface OverviewFileMirror {
+  name: string
+  description: string
+  health?: ProjectHealth
+  team?: AgentOverviewCard[]
+  focus?: string[]
+  activity?: Array<{ id: string; time: string; text: string }>
 }
 
 // ---------------------------------------------------------------------------
