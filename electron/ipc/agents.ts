@@ -483,12 +483,15 @@ export function registerAgentIpc(): void {
 				)
 				const current = JSON.parse(raw) as Record<string, unknown>
 				const myCounter = parseCounter(current.managedBy as string | undefined) + 1
-				const merged: Record<string, unknown> = {
-					...current,
-					...patch,
-					managedBy: `superhive-pi-truth@1#${myCounter}`,
-					lastModified: new Date().toISOString(),
-				}
+				// Recursive deep-merge (mirrors WRITE_MANAGE) so partial nested
+				// blocks never wipe siblings. The shallow `{ ...current, ...patch }`
+				// we used to do would replace, e.g., `runtime` entirely on a
+				// `{ runtime: { thinkingLevel: 'high' } }` patch — losing
+				// `activeTools`. See AGENT_SETTINGS.md §12.
+				const merged = deepMerge(current, patch) as Record<string, unknown>
+				merged.version = 1
+				merged.managedBy = `superhive-pi-truth@1#${myCounter}`
+				merged.lastModified = new Date().toISOString()
 				return merged
 			}
 

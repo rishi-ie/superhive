@@ -52,22 +52,44 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const manage = useAgentManage(agentId);
   const settingsJson = useAgentSettings(agentId);
 
-  // Merge manage.json (skills/extensions/etc) with settings.json (catalog)
-  // so sections can reach both under one `settings` object — mirrors
-  // ProjectSettingsPanel's merge so the two panels stay in lockstep.
+  // Merge manage.json (skills/extensions/etc) with settings.json (catalog +
+  // runtime essentials) so sections can reach both under one `settings`
+  // object — mirrors ProjectSettingsPanel's merge so the two panels stay
+  // in lockstep. The catalog override stays so manage.json's catalog (if
+  // any) loses to settings.json's truth.
   const settings = React.useMemo<ManageFileState>(() => {
     const m = (manage.settings ?? {}) as ManageFileState;
-    const s = (settingsJson.settings ?? {}) as { catalog?: ManageFileState["catalog"] };
-    return { ...m, catalog: s.catalog ?? m.catalog } as ManageFileState;
+    const s = (settingsJson.settings ?? {}) as ManageFileState;
+    return { ...m, ...s, catalog: s.catalog ?? m.catalog } as ManageFileState;
   }, [manage.settings, settingsJson.settings]);
 
-  // Routing patch: writes to settings.json for the few settings-only
-  // keys we expose (defaultThinkingLevel); everything else goes to
-  // manage.json. Add new settings.json keys here as the Manage tab grows.
+  // Routing patch: writes to settings.json for settings-only keys
+  // (defaultThinkingLevel + runtime.thinkingLevel); everything else goes
+  // to manage.json. Add new settings.json keys here as the Manage tab grows.
+  // The defaultThinkingLevel patch is a DUAL-WRITE: persistent (Tier 2,
+  // applies on session restart) + live (Tier 1, applies to the next LLM
+  // call within ~30ms). See AGENT_SETTINGS.md §17.
   const patch = React.useCallback(
     (key: string, value: unknown) => {
       if (key === "defaultThinkingLevel") {
-        settingsJson.patch(key, value);
+        // Tier 2 (persistent): top-level field — lands correctly via the
+        // (now-deep) WRITE_SETTINGS merge. Next session start uses this.
+        settingsJson.patch("defaultThinkingLevel", value);
+        // Tier 1 (live): runtime.thinkingLevel is nested under runtime.
+        // Build the full nested object so the deep merge preserves
+        // siblings (activeTools, currentSessionId, lastReloadedAt).
+        // The truth ext's applySettingsDiff reads next.runtime.thinkingLevel
+        // and calls pi.setThinkingLevel() within ~30ms of the write.
+        const currentRuntime = (settingsJson.settings?.runtime ?? {}) as {
+          thinkingLevel?: string;
+          activeTools?: string[];
+          currentSessionId?: string;
+          lastReloadedAt?: string;
+        };
+        settingsJson.patch("runtime", {
+          ...currentRuntime,
+          thinkingLevel: value,
+        });
       } else {
         manage.patch(key, value);
       }

@@ -1142,13 +1142,7 @@ These are findings from the audit that produced this doc. **Fix in a follow-up c
 
 ### WRITE_SETTINGS shallow merge vs WRITE_MANAGE deep merge
 
-`WRITE_MANAGE` (`electron/ipc/agents.ts:553`) uses `deepMerge` (recursive), so partial blocks preserve siblings.
-
-`WRITE_SETTINGS` (`electron/ipc/agents.ts:485-493`) uses `{ ...current, ...patch, managedBy, lastModified }` (shallow). Partial patches of nested blocks (e.g. `markdown.codeBlockIndent`) will clobber siblings unless the patch is shaped correctly.
-
-**Risk**: a renderer bug that writes `{ markdown: { codeBlockIndent: "    "} }` would wipe `markdown.codeBlockIndent`'s other sibling fields. Today no renderer code paths are known to write partial nested blocks; only flat top-level patches are made.
-
-**Fix**: replace `WRITE_SETTINGS` shallow merge with `deepMerge` (mirror `WRITE_MANAGE`). Safe — same semantics, just safer for nested blocks.
+**Resolved 2026-07-25.** `WRITE_SETTINGS` (`electron/ipc/agents.ts:478-493`) now uses `deepMerge` (mirroring `WRITE_MANAGE`), so partial nested blocks preserve siblings. Any renderer `patch('X.Y', v)` that builds a literal dotted key at the top level still lands as a top-level key — callers patching nested fields must send a full nested object (`patch('runtime', { ...currentRuntime, thinkingLevel: v })`). See the ThinkingLevelSection + AgentSettingsPanel pattern in §17.
 
 ### `runtime.currentSessionId` and `runtime.lastReloadedAt` (dead fields)
 
@@ -1287,4 +1281,28 @@ The remaining sections (Identity, Behavior, Permissions, Plan Mode) are unregist
 - The LLM-callable **`update_manage`** tool (covers identity / behavior / permissions / planMode / project)
 - The LLM-callable **`update_settings`** tool (covers any settings.json field)
 
-**Renderer wiring**: `AgentSettingsPanel` (the standalone agent's panel) was previously broken — it read via `useAgentSettings` (which only loads `settings.json`, where the manage-only fields like `skills`/`extensions`/`permissions`/`behavior` don't exist). The fix mirrors `ProjectSettingsPanel`'s pattern: read both `useAgentManage` + `useAgentSettings`, merge them (`{ ...manage, catalog: settings.catalog ?? manage.catalog }`), and provide a routing `patch` function that writes `defaultThinkingLevel` to `settings.json` and everything else to `manage.json`.
+**Renderer wiring**: `AgentSettingsPanel` (the standalone agent's panel) was previously broken — it read via `useAgentSettings` (which only loads `settings.json`, where the manage-only fields like `skills`/`extensions`/`permissions`/`behavior` don't exist). The fix mirrors `ProjectSettingsPanel`'s pattern: read both `useAgentManage` + `useAgentSettings`, merge them (`{ ...manage, ...settings, catalog: settings.catalog ?? manage.catalog }`), and provide a routing `patch` function that writes `defaultThinkingLevel` to `settings.json` and everything else to `manage.json`. See §17 for the dual-write pattern.
+
+---
+
+## 17. Dual-write pattern for live + persistent settings
+
+When a Manage-tab control needs to (a) apply immediately to the running session AND (b) persist across session restarts, write to BOTH a Tier 1 nested field and a Tier 2 top-level field. The renderer pattern (see `AgentSettingsPanel.patch` in `superhive/src/components/layout/right-sidebar/AgentSettingsPanel.tsx`):
+
+- **Tier 2 (persistent)**: `settings.json.defaultThinkingLevel` — top-level field, survives across sessions, applied on next session start.
+- **Tier 1 (live)**: `settings.json.runtime.thinkingLevel` — nested under `runtime`, fires `pi.setThinkingLevel()` within ~30ms of the write (per `superhive-pi-truth/applier.ts:85-92`). Next LLM call uses the new level.
+
+The patch function sends two IPC calls:
+
+```ts
+settingsJson.patch("defaultThinkingLevel", value);  // top-level, simple
+settingsJson.patch("runtime", { ...currentRuntime, thinkingLevel: value });  // nested, preserves siblings
+```
+
+Always spread the current nested object (`...currentRuntime`) before patching — without it, the WRITE_SETTINGS deep merge would still work, but you lose the explicit sibling-preservation signal in code review.
+
+Add new sections that follow this pattern by mirroring the same two-write shape: persist via a Tier 2 top-level field, live-apply via a Tier 1 nested field under `runtime` (or whatever lifecycle hook the truth ext owns).
+
+### Why this isn't a single nested write
+
+`useAgentSettings.patch(key, value)` treats `key` as a literal top-level key. A patch with `key = "runtime.thinkingLevel"` would land as `settings["runtime.thinkingLevel"]` (literal dotted key), not `settings.runtime.thinkingLevel` (nested). The renderer must send the full nested object (`patch("runtime", { ... })`) for nested writes to land at the right nesting level.
