@@ -22,6 +22,9 @@ export interface AgentCreateInput {
 	 * id so the seed truth settings file carries the `project` block.
 	 */
 	projectId?: string
+	projectName?: string
+	projectDescription?: string
+	projectPath?: string
 }
 
 export interface AgentsAPI {

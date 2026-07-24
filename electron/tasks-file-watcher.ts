@@ -19,7 +19,7 @@
  */
 
 import { existsSync, watch, type FSWatcher } from 'node:fs'
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
 import log from 'electron-log/main'
@@ -51,6 +51,7 @@ class TasksFileWatcher {
   private debounceTimers = new Map<string, NodeJS.Timeout>()
   private stopped = true
   private userDataPath: string | null = null
+  private watchedCoordinatorDirs = new Set<string>()
 
   start(): void {
     if (!this.stopped) return
@@ -58,7 +59,7 @@ class TasksFileWatcher {
     this.userDataPath = getUserDataPath()
 
     this.attachDbTasksWatch()
-    this.attachCoordinatorFileWatches()
+    void this.refresh()
     log.info('[tasks-fs-watcher] started')
   }
 
@@ -75,6 +76,7 @@ class TasksFileWatcher {
       }
     }
     this.watchers = []
+    this.watchedCoordinatorDirs.clear()
     log.info('[tasks-fs-watcher] stopped')
   }
 
@@ -85,6 +87,15 @@ class TasksFileWatcher {
       if (!win.isDestroyed()) {
         win.webContents.send(IPC.TASKS.ON_CHANGED)
       }
+    }
+  }
+
+  /** Discover coordinators created after app startup. Watching the directory,
+   * not the files, also catches the first task plan written by Pi. */
+  async refresh(): Promise<void> {
+    if (this.stopped) return
+    for (const coordDir of this.getCoordinatorDirs()) {
+      this.attachCoordinatorDirWatch(coordDir)
     }
   }
 
@@ -102,32 +113,43 @@ class TasksFileWatcher {
     }
   }
 
-  private attachCoordinatorFileWatches(): void {
-    if (!existsSync(PROJECTS_ROOT)) return
-    let projectDirs: string[] = []
-    try {
-      projectDirs = readdirSync(PROJECTS_ROOT, { withFileTypes: true })
-        .filter((d) => d.isDirectory() && !d.name.startsWith('.'))
-        .map((d) => join(PROJECTS_ROOT, d.name))
-    } catch (err) {
-      log.warn(`[tasks-fs-watcher] failed to list ${PROJECTS_ROOT}:`, err)
-      return
+  private getCoordinatorDirs(): string[] {
+    const roots = new Set<string>()
+    if (existsSync(PROJECTS_ROOT)) {
+      try {
+        for (const entry of readdirSync(PROJECTS_ROOT, { withFileTypes: true })) {
+          if (entry.isDirectory() && !entry.name.startsWith('.')) roots.add(join(PROJECTS_ROOT, entry.name))
+        }
+      } catch (err) {
+        log.warn(`[tasks-fs-watcher] failed to list ${PROJECTS_ROOT}:`, err)
+      }
     }
-    for (const dir of projectDirs) {
-      const coordDir = join(dir, COORDINATOR_SUBPATH)
-      if (!existsSync(coordDir)) continue
-      this.attachFileWatch(join(coordDir, PLAN_FILE), () => this.handlePlan(coordDir))
-      this.attachFileWatch(join(coordDir, COMPLETE_FILE), () => this.handleComplete(coordDir))
+    if (this.userDataPath) {
+      try {
+        const projects = JSON.parse(readFileSync(join(this.userDataPath, 'db.projects.json'), 'utf8')) as Array<{ localPath?: string }>
+        for (const project of projects) {
+          if (project.localPath) roots.add(project.localPath)
+        }
+      } catch {
+        // The project DB may not exist on first launch.
+      }
     }
+    return Array.from(roots, (root) => join(root, COORDINATOR_SUBPATH)).filter(existsSync)
   }
 
-  private attachFileWatch(file: string, onChange: () => void): void {
-    if (!existsSync(file)) return
+  private attachCoordinatorDirWatch(coordDir: string): void {
+    if (this.watchedCoordinatorDirs.has(coordDir)) return
+    this.watchedCoordinatorDirs.add(coordDir)
     try {
-      const w = watch(file, () => this.scheduleDebounced(file, onChange))
-      this.watchers.push(w)
+      const watcher = watch(coordDir, (_event, filename) => {
+        const name = filename?.toString()
+        if (name === PLAN_FILE) this.scheduleDebounced(join(coordDir, PLAN_FILE), () => this.handlePlan(coordDir))
+        if (name === COMPLETE_FILE) this.scheduleDebounced(join(coordDir, COMPLETE_FILE), () => this.handleComplete(coordDir))
+      })
+      this.watchers.push(watcher)
     } catch (err) {
-      log.warn(`[tasks-fs-watcher] watch failed for ${file}:`, err)
+      this.watchedCoordinatorDirs.delete(coordDir)
+      log.warn(`[tasks-fs-watcher] watch failed for ${coordDir}:`, err)
     }
   }
 

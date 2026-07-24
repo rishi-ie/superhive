@@ -11,9 +11,11 @@ import { getTopEnabledModel } from '../get-top-enabled-model';
 import { readFileSync } from 'node:fs';
 import { writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import { manageFilePathFor } from '../agent-settings-defaults';
 import log from 'electron-log/main';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
+import { tasksFileWatcher } from '../tasks-file-watcher';
 
 export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
@@ -29,14 +31,13 @@ export function registerProjectIpc(): void {
         throw new Error('Project name is required');
       }
 
-      let localPath: string | undefined;
-      if (data.localPath?.trim()) {
-        const resolved = data.localPath.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? '');
-        await mkdir(resolved, { recursive: true });
-        if (!existsSync(resolved)) {
-          throw new Error(`Failed to create project folder: ${resolved}`);
-        }
-        localPath = resolved;
+      const requestedPath = data.localPath?.trim();
+      const defaultFolder = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
+      const localPath = (requestedPath ?? join(homedir(), '.superhive', 'projects', defaultFolder))
+        .replace(/^~(?=\/|$)/, process.env.HOME ?? homedir());
+      await mkdir(localPath, { recursive: true });
+      if (!existsSync(localPath)) {
+        throw new Error(`Failed to create project folder: ${localPath}`);
       }
 
       const created = await ProjectRepository.create({
@@ -67,6 +68,7 @@ export function registerProjectIpc(): void {
     // so the orchestration extension sees this agent on the next
     // session_start (or immediately, if the coordinator is running).
     await addMemberToCoordinatorRoster(projectId, agentId);
+    await tasksFileWatcher.refresh();
     agentsFsWatcher.notifyProjectsChanged();
   });
 
@@ -99,6 +101,16 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
   const coordinator = allInProject.find((a) => a.agentKind === 'project-coordinator');
   if (!coordinator?.localPath) return;
 
+  // The coordinator belongs to its project but is not a specialist in its
+  // own roster. Its project block was seeded when it was created.
+  if (coordinator.id === member.id) return;
+
+  const project = await ProjectRepository.getById(projectId);
+  if (!project?.localPath) {
+    log.warn(`[projects:addAgent] project ${projectId} has no workspace path`);
+    return;
+  }
+
   const settingsPath = manageFilePathFor(coordinator.localPath);
   if (!existsSync(settingsPath)) {
     log.warn(`[projects:addAgent] coordinator manage.json missing at ${settingsPath}`);
@@ -125,6 +137,7 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
         : undefined,
       status: member.status ?? 'idle',
       joinedAt: new Date().toISOString(),
+      localPath: member.localPath,
     });
 
     const counter = parseCounter(settings.managedBy) + 1;
@@ -135,11 +148,40 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
     const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
     await writeFile(tmp, serialized, 'utf8');
     await rename(tmp, settingsPath);
+    await writeMemberProjectContext(member, project, coordinator);
   } catch (err) {
     log.error(
       `[projects:addAgent] failed to patch coordinator roster: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
+}
+
+/** Give a specialist the same canonical project context the coordinator uses.
+ * The orchestration extension uses this block to select its member tool set. */
+async function writeMemberProjectContext(
+  member: { id: string; localPath?: string },
+  project: { id: string; name: string; description?: string; localPath?: string },
+  coordinator: { id: string },
+): Promise<void> {
+  if (!member.localPath || !project.localPath) return;
+  const settingsPath = manageFilePathFor(member.localPath);
+  if (!existsSync(settingsPath)) return;
+  const raw = readFileSync(settingsPath, 'utf8');
+  const settings = JSON.parse(raw) as Record<string, unknown> & { managedBy?: string };
+  const counter = parseCounter(settings.managedBy) + 1;
+  settings.project = {
+    id: project.id,
+    name: project.name,
+    description: project.description ?? '',
+    localPath: project.localPath,
+    coordinatorAgentId: coordinator.id,
+    members: [],
+  };
+  settings.managedBy = `superhive-pi-truth@1#${counter}`;
+  settings.lastModified = new Date().toISOString();
+  const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tmp, JSON.stringify(settings, null, '\t') + '\n', 'utf8');
+  await rename(tmp, settingsPath);
 }
 
 /**
@@ -175,11 +217,33 @@ async function removeMemberFromCoordinatorRoster(projectId: string, agentId: str
     const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
     await writeFile(tmp, serialized, 'utf8');
     await rename(tmp, settingsPath);
+    const member = await AgentRepository.getById(agentId);
+    if (member?.localPath) {
+      await clearMemberProjectContext(member.localPath, projectId);
+    }
   } catch (err) {
     log.error(
       `[projects:removeAgent] failed to patch coordinator roster: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
+}
+
+async function clearMemberProjectContext(memberPath: string, projectId: string): Promise<void> {
+  const settingsPath = manageFilePathFor(memberPath);
+  if (!existsSync(settingsPath)) return;
+  const raw = readFileSync(settingsPath, 'utf8');
+  const settings = JSON.parse(raw) as Record<string, unknown> & {
+    managedBy?: string;
+    project?: { id?: string };
+  };
+  if (settings.project?.id !== projectId) return;
+  const counter = parseCounter(settings.managedBy) + 1;
+  delete settings.project;
+  settings.managedBy = `superhive-pi-truth@1#${counter}`;
+  settings.lastModified = new Date().toISOString();
+  const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
+  await writeFile(tmp, JSON.stringify(settings, null, '\t') + '\n', 'utf8');
+  await rename(tmp, settingsPath);
 }
 
 function parseCounter(managedBy: string | undefined): number {

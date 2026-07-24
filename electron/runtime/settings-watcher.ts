@@ -30,6 +30,10 @@ import { parseCounter } from '../agent-settings-defaults'
 import { IPC } from '../ipc/index'
 import type { GeneralKaiRuntime } from '../general-kai-runtime'
 
+type EventedWatcher = FSWatcher & {
+  on(event: 'error', listener: (error: Error) => void): EventedWatcher
+}
+
 const SETTINGS_DEBOUNCE_MS = 100
 
 /**
@@ -52,7 +56,7 @@ export function ensureSettingsWatcher(
   const watchDir = dirname(settingsPath)
 
   let debounceTimer: NodeJS.Timeout | null = null
-  const watcher: FSWatcher = watch(watchDir, (eventType, filename) => {
+  const watcher = watch(watchDir, (eventType, filename) => {
     if (eventType !== 'change' && eventType !== 'rename') return
     if (!filename) return
     // Match exactly one of the four file names.
@@ -86,7 +90,7 @@ export function ensureSettingsWatcher(
       }
       win.webContents.send(IPC.AGENTS.ON_SETTINGS_CHANGED(agentId), agentId)
     }, SETTINGS_DEBOUNCE_MS)
-  })
+  }) as EventedWatcher
 
   watcher.on('error', (err) => {
     log.warn(`[settings-watcher] error for ${agentId}:`, err)

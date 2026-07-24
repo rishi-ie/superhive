@@ -19,6 +19,11 @@ import type { GeneralKaiRuntime } from '../general-kai-runtime'
 import type { UserMessage } from '../../src/models/assistant-message'
 import { RawTextAdapter } from '../pi-protocol'
 
+type EventedChildProcess = ChildProcess & {
+  on(event: 'exit', listener: (code: number | null, signal: NodeJS.Signals | null) => void): EventedChildProcess
+  on(event: 'error', listener: (error: Error) => void): EventedChildProcess
+}
+
 const STDERR_LOG_LIMIT = 500
 const RESTART_DELAY_MS = 800
 const SIGTERM_DELAY_MS = 500
@@ -214,7 +219,7 @@ export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
 
   log.info(`[runtime] spawning ${agentSh} (PI_DIR=${piDir})`)
 
-  let proc: ChildProcess
+  let proc: EventedChildProcess
   try {
     proc = spawn('/bin/bash', [agentSh, '--mode', 'rpc', '--no-session'], {
       cwd: agentDir,
@@ -229,7 +234,7 @@ export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
         SUPERHIVE_TELEMETRY_DEBUG:
           process.env.SUPERHIVE_TELEMETRY_DEBUG ?? '0',
       },
-    })
+    }) as EventedChildProcess
   } catch (err) {
     log.error(`[runtime] spawn failed for ${agentId}:`, err)
     entry.lastError = err instanceof Error ? err.message : String(err)

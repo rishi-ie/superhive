@@ -30,6 +30,7 @@ interface ManageSlice {
 
 interface SettingsSlice {
   patch: (key: string, value: unknown) => void
+  flush: (patch: Record<string, unknown>) => Promise<void>
   settings: {
     runtime?: {
       thinkingLevel?: string
@@ -50,7 +51,10 @@ export function useManageTabPatch(manage: ManageSlice, settingsJson: SettingsSli
         // Tier 1 (live): nested under runtime. Build the full nested object
         // so the deep merge preserves siblings.
         const currentRuntime = settingsJson.settings?.runtime ?? {}
-        settingsJson.patch('runtime', { ...currentRuntime, thinkingLevel: value })
+        // A user can change this control and immediately send a project-chat
+        // message. Flush the complete settings revision now instead of waiting
+        // for the normal 500ms renderer debounce.
+        void settingsJson.flush({ runtime: { ...currentRuntime, thinkingLevel: value } })
       } else {
         manage.patch(key, value)
       }

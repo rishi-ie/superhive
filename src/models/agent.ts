@@ -38,6 +38,9 @@ export interface CreateProjectAgentInput {
   folderName: string
   parentDir: string
   projectId?: string
+  projectName?: string
+  projectDescription?: string
+  projectPath?: string
   category?: string
 }
 
@@ -70,6 +73,9 @@ export interface PrepareProjectAgentInput {
   folderName: string
   parentDir: string
   projectId?: string
+  projectName?: string
+  projectDescription?: string
+  projectPath?: string
   category?: string
 }
 

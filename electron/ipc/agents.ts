@@ -98,6 +98,9 @@ interface CreateAgentInput {
 	 * extension reads on session_start. Ignored for non-coordinator agents.
 	 */
 	projectId?: string
+	projectName?: string
+	projectDescription?: string
+	projectPath?: string
 }
 
 export function registerAgentIpc(): void {
@@ -247,7 +250,7 @@ export function registerAgentIpc(): void {
 						{
 							schemaVersion: 1,
 							agentId: agent.id,
-							projectId: agent.projectIds[0] ?? null,
+							projectId: data.projectId ?? null,
 							nextId: 1,
 							updatedAt: new Date().toISOString(),
 						},
@@ -349,11 +352,13 @@ export function registerAgentIpc(): void {
 				},
 				planMode: { defaultMode: 'auto' as const, thinkingLevel: 'inherit' as const },
 				...(isCoordinator && data.projectId && {
-					project: {
-						id: data.projectId,
-						name: data.name.trim(),
-						description: data.description?.trim() ?? '',
-						members: [],
+						project: {
+							id: data.projectId,
+							name: data.projectName?.trim() || data.name.trim(),
+							description: data.projectDescription?.trim() ?? data.description?.trim() ?? '',
+							localPath: data.projectPath,
+							coordinatorAgentId: agent.id,
+							members: [],
 					},
 				}),
 			}

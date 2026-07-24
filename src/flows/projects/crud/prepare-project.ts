@@ -45,13 +45,21 @@ export async function prepareProject(
     }
   }
 
+  if (!project.localPath) {
+    await projects.delete(project.id).catch(() => {})
+    return { ok: false, reason: 'create-failed', message: 'Project workspace was not created' }
+  }
+
   const coordinatorInput = {
     name: `${name} (Coordinator)`,
     folderName: 'agent',
-    parentDir: localPath ?? `~/.superhive/projects/${name.toLowerCase().replace(/\s+/g, '-')}`,
+    parentDir: project.localPath,
     // Gap 1: thread the freshly-created project id so the coordinator's
     // truth settings file gets the `project` block seeded with the right id.
     projectId: project.id,
+    projectName: project.name,
+    projectDescription: project.description,
+    projectPath: project.localPath,
   }
 
   const coordinator = await prepareProjectAgent(coordinatorInput)

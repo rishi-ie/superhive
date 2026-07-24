@@ -34,6 +34,9 @@ export async function createProjectAgent(
       parentDir,
       agentKind: 'project-coordinator',
       projectId: input.projectId,
+      projectName: input.projectName,
+      projectDescription: input.projectDescription,
+      projectPath: input.projectPath,
     });
     return { ok: true, agent };
   } catch (err) {

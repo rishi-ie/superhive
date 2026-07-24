@@ -29,13 +29,14 @@ import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { getUserDataPath } from '../src/storage/database'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { GENERAL_KAI_DIR } from './install-general-kai'
 
 const TICK_MS = 5_000
 const STALE_MS = 10 * 60 * 1000  // 10 minutes before auto-retry
 
 export interface RuntimeLike {
   isRunning(agentId: string): boolean
-  start(agentId: string, agentDir: string, manifestPiSource?: string): void | Promise<void>
+  start(agentId: string, agentDir: string, manifestPiSource: string): Promise<void>
   send(agentId: string, text: string): boolean
 }
 
@@ -177,7 +178,7 @@ export class TaskRunner {
     }
 
     if (!this.runtime.isRunning(agent.id)) {
-      this.runtime.start(agent.id, agent.localPath, (agent as { manifestPiSource?: string }).manifestPiSource)
+      await this.runtime.start(agent.id, agent.localPath, GENERAL_KAI_DIR)
     }
     const prompt = buildTaskPrompt({
       taskId: ready.id,
