@@ -5,7 +5,6 @@ import { registerAppIpc } from './app';
 import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
-import { registerDefaultsIpc } from './defaults';
 import { registerTruthIpc } from './truth';
 import { registerTemplatesIpc } from './templates';
 
@@ -90,10 +89,6 @@ export const IPC = {
     CHANGE_STATUS: 'tasks:changeStatus',
     ON_CHANGED: 'tasks:changed',
   },
-  // Phase A: project-agent defaults
-  DEFAULTS: {
-    GET: 'defaults:get',
-  },
   // Phase C: generic truth-file IPC (per-extension dynamic sections)
   TRUTH: {
     LIST_FILES: 'truth:list-files',
@@ -116,7 +111,6 @@ export function registerIpc(): void {
   registerSettingsIpc();
   registerMailboxIpc();
   registerTaskIpc();
-  registerDefaultsIpc();
   registerTruthIpc();
   registerTemplatesIpc();
 }

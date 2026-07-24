@@ -22,14 +22,6 @@ export interface AgentCreateInput {
 	 * id so the seed truth settings file carries the `project` block.
 	 */
 	projectId?: string
-	/**
-	 * Phase A: when creating a project-coordinator, the bundled
-	 * category overlay (research / marketing / sales / product-dev /
-	 * project-dev / general) is merged into the seed manage.json.
-	 * Ignored for non-coordinator agents. Falls back to 'general' if
-	 * omitted or unknown.
-	 */
-	category?: string
 }
 
 export interface AgentsAPI {
@@ -175,37 +167,6 @@ export interface AppAPI {
 	installUpdate: () => Promise<{ ok: boolean }>
 }
 
-export interface ProjectAgentDefaultsOverlay {
-	systemPromptAddition: string
-	skills: string[]
-}
-
-export interface ProjectAgentDefaults {
-	version: number
-	base: {
-		extensions: string[]
-		skills: string[]
-		permissions: { filesystem: boolean; terminal: boolean; network: boolean }
-		behavior: {
-			steeringMode: string
-			followUpMode: string
-			autoCompaction: boolean
-			autoRetry: boolean
-		}
-	}
-	overlays: Record<string, ProjectAgentDefaultsOverlay>
-}
-
-export interface DefaultsAPI {
-	/**
-	 * Read the bundled project-agent-defaults.json from
-	 * ~/.superhive/. Returns null if the file is missing or malformed.
-	 * The dialog uses this to render the category picker with live
-	 * preview of each overlay's systemPromptAddition.
-	 */
-	get: () => Promise<ProjectAgentDefaults | null>
-}
-
 /**
  * One truth file entry returned by `truth:list-files`.
  *
@@ -264,7 +225,6 @@ export interface ElectronAPI {
 	app: AppAPI
 	settings: SettingsAPI
 	tasks: TasksAPI
-	defaults: DefaultsAPI
 	truth: TruthAPI
 	templates: TemplatesAPI
 }

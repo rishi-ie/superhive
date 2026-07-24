@@ -14,30 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from '@/components/ui/tabs';
 import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
-import { useProjectAgentDefaults } from '@/flows/projects/ui/use-project-agent-defaults';
 import { prepareProject } from '@/flows/projects/crud/prepare-project';
 import { usePreparingToast } from '@/components/common/PreparingToast';
 import { slugify } from '@/lib/slugify';
 import { goToProject } from '@/flows/navigation';
 
 const DEFAULT_PARENT_DIR = '~/.superhive/projects';
-const DEFAULT_CATEGORY = 'general';
-
-const CATEGORY_LABELS: Record<string, string> = {
-  research: 'Research',
-  marketing: 'Marketing',
-  sales: 'Sales',
-  'product-dev': 'Product',
-  'project-dev': 'Project',
-  general: 'General',
-};
 
 type SubmitPhase = 'idle' | 'preparing';
 
@@ -50,19 +33,14 @@ export function CreateProjectDialog() {
   const [description, setDescription] = React.useState('');
   const [localPath, setLocalPath] = React.useState('');
   const [localPathTouched, setLocalPathTouched] = React.useState(false);
-  const [category, setCategory] = React.useState<string>(DEFAULT_CATEGORY);
   const [phase, setPhase] = React.useState<SubmitPhase>('idle');
   const [validationError, setValidationError] = React.useState<string | null>(null);
-
-  const { defaults, loading: defaultsLoading, error: defaultsError } =
-    useProjectAgentDefaults(open);
 
   const resetForm = () => {
     setName('');
     setDescription('');
     setLocalPath('');
     setLocalPathTouched(false);
-    setCategory(DEFAULT_CATEGORY);
     setPhase('idle');
     setValidationError(null);
   };
@@ -110,7 +88,6 @@ export function CreateProjectDialog() {
       name: trimmedName,
       description: description.trim() || undefined,
       localPath: localPath.trim() || undefined,
-      category: category || undefined,
     })
 
     if (result.ok) {
@@ -145,12 +122,10 @@ export function CreateProjectDialog() {
         { label: 'Dismiss', onClick: () => toast.dismiss(toastId) },
       ],
     })
-  }, [phase, name, description, localPath, category, toast, setOpen, navigate])
+  }, [phase, name, description, localPath, toast, setOpen, navigate])
 
   const submitting = phase !== 'idle';
   const buttonLabel = phase === 'preparing' ? 'Preparing Project…' : 'Create Project';
-
-  const baseSkills = defaults?.base.skills ?? [];
 
   return (
     <Dialog
@@ -225,76 +200,6 @@ export function CreateProjectDialog() {
               disabled={submitting}
               className="min-h-[80px] resize-none bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40"
             />
-          </div>
-
-          <div className="flex flex-col gap-stack">
-            <Label className="text-sidebar-foreground">
-              Category
-            </Label>
-            {defaultsLoading && (
-              <span className="text-xs text-sidebar-foreground/50">
-                Loading categories…
-              </span>
-            )}
-            {defaultsError && (
-              <span className="text-xs text-destructive">
-                {defaultsError}
-              </span>
-            )}
-            {defaults && (
-              <Tabs
-                value={category}
-                onValueChange={setCategory}
-                orientation="horizontal"
-                className="w-full"
-              >
-                <TabsList variant="default" className="w-full">
-                  {Object.keys(defaults.overlays).map((id) => (
-                    <TabsTrigger key={id} value={id}>
-                      {CATEGORY_LABELS[id] ?? id}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                {Object.entries(defaults.overlays).map(([id, overlay]) => (
-                  <TabsContent key={id} value={id} className="mt-2 min-h-[80px]">
-                    {overlay.systemPromptAddition?.trim() ? (
-                      <p className="text-xs text-sidebar-foreground/70 leading-relaxed">
-                        {overlay.systemPromptAddition}
-                      </p>
-                    ) : (
-                      <p className="text-xs text-sidebar-foreground/50 italic">
-                        No category-specific guidance. Default agent behavior.
-                      </p>
-                    )}
-                    {(baseSkills.length > 0 || overlay.skills.length > 0) && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {baseSkills.map((skill) => (
-                          <span
-                            key={`base-${skill}`}
-                            className="rounded-md border border-sidebar-border bg-input/20 px-1.5 py-0.5 text-[10px] font-mono text-sidebar-foreground/70"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                        {overlay.skills.map((skill) => (
-                          <span
-                            key={`overlay-${skill}`}
-                            className="rounded-md border border-sidebar-border bg-sidebar-foreground/10 px-1.5 py-0.5 text-[10px] font-mono text-sidebar-foreground"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-                ))}
-              </Tabs>
-            )}
-            {!defaults && !defaultsLoading && !defaultsError && (
-              <span className="text-xs text-sidebar-foreground/50">
-                Default category will be applied (general).
-              </span>
-            )}
           </div>
 
           {validationError && (

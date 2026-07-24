@@ -39,7 +39,6 @@ export interface PrepareProjectInput {
   name: string
   description?: string
   localPath?: string
-  category?: string
 }
 
 export type PrepareProjectFailure =

@@ -20,9 +20,11 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, copyFileSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { SUPERHIVE_HOME } from './install-project-agent-defaults'
 import log from 'electron-log/main'
+
+const SUPERHIVE_HOME = join(homedir(), '.superhive')
 
 export const TEMPLATES_DIR_NAME = 'templates'
 export const USER_TEMPLATES_DIR = join(SUPERHIVE_HOME, TEMPLATES_DIR_NAME)

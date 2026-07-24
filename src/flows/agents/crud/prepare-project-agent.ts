@@ -26,7 +26,6 @@ export async function prepareProjectAgent(
       parentDir: input.parentDir.trim(),
       agentKind: 'project-coordinator',
       projectId: input.projectId,
-      category: input.category,
     })
   } catch (err) {
     return {
