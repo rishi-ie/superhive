@@ -9,6 +9,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useAgentManage, useAgentSettings } from "@/flows/agents/settings";
+import { useManageTabPatch } from "@/flows/agents/settings/use-manage-tab-patch";
 import { loadAgentProjects } from "@/flows/agents/crud/load-agent-projects";
 import {
   MANAGE_SECTIONS,
@@ -63,39 +64,11 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
     return { ...m, ...s, catalog: s.catalog ?? m.catalog } as ManageFileState;
   }, [manage.settings, settingsJson.settings]);
 
-  // Routing patch: writes to settings.json for settings-only keys
-  // (defaultThinkingLevel + runtime.thinkingLevel); everything else goes
-  // to manage.json. Add new settings.json keys here as the Manage tab grows.
-  // The defaultThinkingLevel patch is a DUAL-WRITE: persistent (Tier 2,
-  // applies on session restart) + live (Tier 1, applies to the next LLM
-  // call within ~30ms). See AGENT_SETTINGS.md §17.
-  const patch = React.useCallback(
-    (key: string, value: unknown) => {
-      if (key === "defaultThinkingLevel") {
-        // Tier 2 (persistent): top-level field — lands correctly via the
-        // (now-deep) WRITE_SETTINGS merge. Next session start uses this.
-        settingsJson.patch("defaultThinkingLevel", value);
-        // Tier 1 (live): runtime.thinkingLevel is nested under runtime.
-        // Build the full nested object so the deep merge preserves
-        // siblings (activeTools, currentSessionId, lastReloadedAt).
-        // The truth ext's applySettingsDiff reads next.runtime.thinkingLevel
-        // and calls pi.setThinkingLevel() within ~30ms of the write.
-        const currentRuntime = (settingsJson.settings?.runtime ?? {}) as {
-          thinkingLevel?: string;
-          activeTools?: string[];
-          currentSessionId?: string;
-          lastReloadedAt?: string;
-        };
-        settingsJson.patch("runtime", {
-          ...currentRuntime,
-          thinkingLevel: value,
-        });
-      } else {
-        manage.patch(key, value);
-      }
-    },
-    [manage, settingsJson],
-  );
+  // Routing patch: settings-only keys (defaultThinkingLevel +
+  // runtime.thinkingLevel dual-write) → settings.json; everything else →
+  // manage.json. Shared with ProjectSettingsPanel via useManageTabPatch.
+  // See AGENT_SETTINGS.md §17.
+  const patch = useManageTabPatch(manage, settingsJson);
 
   const isLoading = manage.isLoading || settingsJson.isLoading;
   const error = manage.error ?? settingsJson.error;

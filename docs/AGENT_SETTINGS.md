@@ -1287,12 +1287,16 @@ The remaining sections (Identity, Behavior, Permissions, Plan Mode) are unregist
 
 ## 17. Dual-write pattern for live + persistent settings
 
-When a Manage-tab control needs to (a) apply immediately to the running session AND (b) persist across session restarts, write to BOTH a Tier 1 nested field and a Tier 2 top-level field. The renderer pattern (see `AgentSettingsPanel.patch` in `superhive/src/components/layout/right-sidebar/AgentSettingsPanel.tsx`):
+When a Manage-tab control needs to (a) apply immediately to the running session AND (b) persist across session restarts, write to BOTH a Tier 1 nested field and a Tier 2 top-level field. Both `AgentSettingsPanel` (standalone agent) and `ProjectSettingsPanel` (project coordinator) share the same routing-patch hook:
+
+- **`superhive/src/flows/agents/settings/use-manage-tab-patch.ts`** — the shared hook
+- **`superhive/src/components/layout/right-sidebar/AgentSettingsPanel.tsx`** — uses the hook
+- **`superhive/src/components/layout/right-sidebar/ProjectSettingsPanel.tsx`** — uses the hook
+
+The hook sends two IPC calls when patching `defaultThinkingLevel`:
 
 - **Tier 2 (persistent)**: `settings.json.defaultThinkingLevel` — top-level field, survives across sessions, applied on next session start.
 - **Tier 1 (live)**: `settings.json.runtime.thinkingLevel` — nested under `runtime`, fires `pi.setThinkingLevel()` within ~30ms of the write (per `superhive-pi-truth/applier.ts:85-92`). Next LLM call uses the new level.
-
-The patch function sends two IPC calls:
 
 ```ts
 settingsJson.patch("defaultThinkingLevel", value);  // top-level, simple
@@ -1306,3 +1310,7 @@ Add new sections that follow this pattern by mirroring the same two-write shape:
 ### Why this isn't a single nested write
 
 `useAgentSettings.patch(key, value)` treats `key` as a literal top-level key. A patch with `key = "runtime.thinkingLevel"` would land as `settings["runtime.thinkingLevel"]` (literal dotted key), not `settings.runtime.thinkingLevel` (nested). The renderer must send the full nested object (`patch("runtime", { ... })`) for nested writes to land at the right nesting level.
+
+### Both panels must use the shared hook
+
+The project chat's `ProjectSettingsPanel` was the original bug location — it previously patched `manage.json` for every key (including `defaultThinkingLevel`), and the merged settings dropped `defaultThinkingLevel` from `settings.json`. After the fix, both panels use `useManageTabPatch` so the routing and dual-write are consistent across the agent tab and the project tab.

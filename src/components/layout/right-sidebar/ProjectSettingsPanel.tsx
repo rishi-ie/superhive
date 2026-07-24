@@ -14,13 +14,14 @@ import {
   useAgentOverview,
   useAgentSettings,
 } from "@/flows/agents/settings";
+import { useManageTabPatch } from "@/flows/agents/settings/use-manage-tab-patch";
 import { useProjectHealth } from "@/flows/projects/health";
 import { useProjectStaff } from "@/flows/projects/runtime";
 import type { Agent, Project } from "@/storage/types";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { InboxSection } from "./sections/InboxSection";
 import { MANAGE_SECTIONS, type ManageSectionDef } from "./sections/registry";
-import type { ProjectOverviewSectionData } from "@/models/component";
+import type { ProjectOverviewSectionData, ManageFileState } from "@/models/component";
 import { Icon } from "@/components/ui/icon";
 
 interface ProjectSettingsPanelProps {
@@ -155,15 +156,21 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     [mergedTeam, coordinatorProjectDescription, overviewMirror, projectHealth, staff],
   )
 
-  // Merge manage.json + the catalog slice of settings.json into one
-  // object so sections can reach `settings.skills` (manage) and
-  // `settings.catalog.skills` (settings) side by side.
-  const coordinatorMergedManage = useMemo(() => {
-    const manage = (coordinatorManage.settings ?? {}) as Record<string, unknown>;
-    const settings = (coordinatorSettings.settings ?? {}) as Record<string, unknown>;
-    const catalog = settings.catalog ?? manage.catalog;
-    return { ...manage, catalog };
+  // Merge manage.json + settings.json (catalog + runtime essentials) into
+  // one object so sections can reach `settings.skills` (manage),
+  // `settings.catalog.skills` (settings), AND `settings.defaultThinkingLevel`
+  // / `settings.runtime` (settings) side by side. Mirrors AgentSettingsPanel's
+  // merge so the two panels stay in lockstep.
+  const coordinatorMergedManage = useMemo<ManageFileState>(() => {
+    const manage = (coordinatorManage.settings ?? {}) as ManageFileState;
+    const settings = (coordinatorSettings.settings ?? {}) as ManageFileState;
+    return { ...manage, ...settings, catalog: settings.catalog ?? manage.catalog } as ManageFileState;
   }, [coordinatorManage.settings, coordinatorSettings.settings]);
+
+  // Routing patch: writes settings-only keys (defaultThinkingLevel +
+  // runtime.thinkingLevel dual-write) to settings.json; everything else
+  // goes to manage.json. Shared hook — see useManageTabPatch.
+  const routingPatch = useManageTabPatch(coordinatorManage, coordinatorSettings);
 
   return (
     <div className="flex h-full flex-col px-button-x">
@@ -197,7 +204,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                   sections={MANAGE_SECTIONS}
                   agentId={coordinatorId}
                   settings={coordinatorMergedManage}
-                  patch={coordinatorManage.patch}
+                  patch={routingPatch}
                 />
               ) : null}
             </div>
