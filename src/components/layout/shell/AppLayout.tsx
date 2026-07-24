@@ -123,7 +123,7 @@ function AppLayoutShell() {
 
   return (
     <>
-      <div className="flex h-screen w-screen overflow-hidden bg-background">
+      <div className="flex h-screen w-screen overflow-hidden">
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
 
         {leftSidebarOpen && (

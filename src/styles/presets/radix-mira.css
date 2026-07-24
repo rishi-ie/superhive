@@ -177,6 +177,7 @@
   --sidebar-border: oklch(0 0 0 / 8%);
   --sidebar-ring: oklch(0.556 0 0);
   --sidebar-bg: #181818;
+  --sidebar-bg-translucent: rgba(24, 24, 24, 0.85);
   --sidebar-btn-text: #ABABAB;
   --sidebar-btn-text-hover: #E8E8E8;
 
@@ -294,6 +295,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-bg-translucent: var(--sidebar-bg-translucent);
   --color-sidebar-btn-text: var(--sidebar-btn-text);
   --color-sidebar-btn-text-hover: var(--sidebar-btn-text-hover);
   --color-chat-bubble-user: var(--chat-bubble-user);
