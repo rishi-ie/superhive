@@ -17,7 +17,7 @@ export function SidebarRepositories() {
   const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   return (
-    <SidebarGroup>
+    <SidebarGroup className="[--font-scale:1.05]">
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
