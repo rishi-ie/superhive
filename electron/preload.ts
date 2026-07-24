@@ -1,16 +1,25 @@
-// @ts-nocheck
 // ============================================================
 // IPC BRIDGE — exposes window.api to the renderer (contextBridge)
+//
+// The exposed object's shape is the canonical `ElectronAPI` type from
+// `src/types/electron.d.ts` (Step 4 type home). Removing `@ts-nocheck`
+// here makes drift between the bridge and the renderer contract a
+// build error, so a missing method (like the 8 that hid the Manage
+// tab bug) can't recur.
 // ============================================================
-const { contextBridge, ipcRenderer } = require('electron');
+import type { ElectronAPI } from '@/types/electron'
 
-function subscribe(channel, cb) {
-  const listener = (_event, payload) => cb(payload);
-  ipcRenderer.on(channel, listener);
-  return () => ipcRenderer.removeListener(channel, listener);
+const { contextBridge, ipcRenderer } = require('electron')
+
+function subscribe<T>(channel: string, cb: (payload: T) => void): () => void {
+  const listener = (_event: unknown, payload: T): void => cb(payload)
+  ipcRenderer.on(channel, listener)
+  return () => {
+    ipcRenderer.removeListener(channel, listener)
+  }
 }
 
-contextBridge.exposeInMainWorld('api', {
+const api: ElectronAPI = {
   agents: {
     list:    () => ipcRenderer.invoke('agents:list'),
     get:     (id) => ipcRenderer.invoke('agents:get', id),
@@ -126,15 +135,16 @@ contextBridge.exposeInMainWorld('api', {
   defaults: {
     get: () => ipcRenderer.invoke('defaults:get'),
   },
-    truth: {
-      listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
-      readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
-      writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
-    },
+  truth: {
+    listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
+    readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
+    writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
+  },
+  templates: {
+    list: () => ipcRenderer.invoke('templates:list'),
+    get: (id) => ipcRenderer.invoke('templates:get', id),
+    openFolder: () => ipcRenderer.invoke('templates:open-folder'),
+  },
+}
 
-    templates: {
-      list: () => ipcRenderer.invoke('templates:list'),
-      get: (id) => ipcRenderer.invoke('templates:get', id),
-      openFolder: () => ipcRenderer.invoke('templates:open-folder'),
-    },
-});
+contextBridge.exposeInMainWorld('api', api)
