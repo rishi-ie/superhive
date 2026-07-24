@@ -14,7 +14,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAgentSettings } from "@/flows/agents/settings";
+import { useAgentManage } from "@/flows/agents/settings";
 import type { Mode } from "@/models/component";
 
 const MODES: Array<{ value: Mode; label: string; icon: HugeiconsIconProps["icon"] }> = [
@@ -44,7 +44,7 @@ interface ModePickerProps {
 }
 
 export function ModePicker({ agentId }: ModePickerProps) {
-  const { settings, patch } = useAgentSettings(agentId);
+  const { settings, patch } = useAgentManage(agentId);
   const planModeBlock = settings?.planMode as
     | { defaultMode?: "plan" | "build" | "auto" }
     | undefined;
