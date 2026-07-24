@@ -155,7 +155,7 @@ export function AgentChatView() {
   });
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.05]">
+    <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.025]">
       <ConversationArea
         messages={messages}
         inFlight={inFlight}
