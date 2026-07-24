@@ -215,7 +215,6 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
                       agentId={agentId}
                       query={effectiveQuery}
                       patch={autoSave.patch}
-                      flush={autoSave.flush}
                     />
                   </div>
                 ))

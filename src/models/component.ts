@@ -280,7 +280,6 @@ export type InboxOutcome =
 
 export interface AutoSaveHandle {
   patch: (key: string, value: unknown) => void
-  flush: (p: Record<string, unknown>) => Promise<void>
 }
 
 // ---------------------------------------------------------------------------
