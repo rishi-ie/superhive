@@ -8,16 +8,15 @@ import {
   MagnifyingGlassIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { useAgentSettings } from "@/flows/agents/settings";
+import { useAgentManage, useAgentSettings } from "@/flows/agents/settings";
 import { loadAgentProjects } from "@/flows/agents/crud/load-agent-projects";
-import { useAutoSave } from "./use-auto-save";
 import {
   MANAGE_SECTIONS,
   InboxSection,
   type ManageSectionDef,
 } from "./sections/registry";
 import { OverviewSection } from "./sections/OverviewSection";
-import type { OverviewData } from "@/models/component";
+import type { OverviewData, ManageFileState } from "@/models/component";
 import { ResponsibilitySlider } from "./primitives";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -50,8 +49,35 @@ function sectionMatchesLabel(sec: ManageSectionDef, tokens: string[]): boolean {
 }
 
 export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
-  const { settings, isLoading, error, reload } = useAgentSettings(agentId);
-  const autoSave = useAutoSave(agentId);
+  const manage = useAgentManage(agentId);
+  const settingsJson = useAgentSettings(agentId);
+
+  // Merge manage.json (skills/extensions/etc) with settings.json (catalog)
+  // so sections can reach both under one `settings` object — mirrors
+  // ProjectSettingsPanel's merge so the two panels stay in lockstep.
+  const settings = React.useMemo<ManageFileState>(() => {
+    const m = (manage.settings ?? {}) as ManageFileState;
+    const s = (settingsJson.settings ?? {}) as { catalog?: ManageFileState["catalog"] };
+    return { ...m, catalog: s.catalog ?? m.catalog } as ManageFileState;
+  }, [manage.settings, settingsJson.settings]);
+
+  // Routing patch: writes to settings.json for the few settings-only
+  // keys we expose (defaultThinkingLevel); everything else goes to
+  // manage.json. Add new settings.json keys here as the Manage tab grows.
+  const patch = React.useCallback(
+    (key: string, value: unknown) => {
+      if (key === "defaultThinkingLevel") {
+        settingsJson.patch(key, value);
+      } else {
+        manage.patch(key, value);
+      }
+    },
+    [manage, settingsJson],
+  );
+
+  const isLoading = manage.isLoading || settingsJson.isLoading;
+  const error = manage.error ?? settingsJson.error;
+  const reload = manage.reload;
 
   const [projects, setProjects] = React.useState<Project[]>([]);
   React.useEffect(() => {
@@ -61,8 +87,8 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   const [query, setQuery] = React.useState("");
 
   const overviewData = React.useMemo<OverviewData>(() => ({
-    name: settings?.name ?? "Untitled agent",
-    description: settings?.description ?? "",
+    name: (settings?.name as string | undefined) ?? (settings?.identity as { name?: string } | undefined)?.name ?? "Untitled agent",
+    description: (settings?.description as string | undefined) ?? (settings?.identity as { description?: string } | undefined)?.description ?? "",
     roleSummary: "Autonomous coding agent that reviews pull requests, writes tests, and refactors legacy modules with minimal supervision.",
     previousTasks: [
       { name: "Audit settings page", cost: 0.31 },
@@ -214,7 +240,7 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
                       settings={settings}
                       agentId={agentId}
                       query={effectiveQuery}
-                      patch={autoSave.patch}
+                      patch={patch}
                     />
                   </div>
                 ))

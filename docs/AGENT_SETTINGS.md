@@ -1269,3 +1269,22 @@ When you need to add a new tweakable setting to the agent, follow these steps:
 | Date | Change |
 |---|---|
 | 2026-07-25 | Initial doc. ModePicker drift fix: `useAgentSettings` → `useAgentManage`. |
+| 2026-07-25 | Simple Manage tab: 3 sections (Skills, Extensions, Thinking Level). Schema unchanged. See §16. |
+
+---
+
+## 16. Current Manage tab UI surface
+
+**As of 2026-07-25**, the Manage tab UI surface is reduced to 3 sections (in this order):
+
+1. **Skills** — toggle list from `manage.json.skills`
+2. **Extensions** — toggle list from `manage.json.extensions`
+3. **Thinking Level** — dropdown from `settings.json.defaultThinkingLevel` (Tier 2 reload)
+
+The remaining sections (Identity, Behavior, Permissions, Plan Mode) are unregistered from `MANAGE_SECTIONS` but their section files stay on disk and the underlying schema stays in `manage.json` / `settings.json`. They remain writable via:
+
+- The chat composer's **ModePicker** for `manage.json.planMode.defaultMode` (post-fix)
+- The LLM-callable **`update_manage`** tool (covers identity / behavior / permissions / planMode / project)
+- The LLM-callable **`update_settings`** tool (covers any settings.json field)
+
+**Renderer wiring**: `AgentSettingsPanel` (the standalone agent's panel) was previously broken — it read via `useAgentSettings` (which only loads `settings.json`, where the manage-only fields like `skills`/`extensions`/`permissions`/`behavior` don't exist). The fix mirrors `ProjectSettingsPanel`'s pattern: read both `useAgentManage` + `useAgentSettings`, merge them (`{ ...manage, catalog: settings.catalog ?? manage.catalog }`), and provide a routing `patch` function that writes `defaultThinkingLevel` to `settings.json` and everything else to `manage.json`.
