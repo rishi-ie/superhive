@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { LaptopIcon, PlusIcon, ArrowUpIcon, Stop } from "@phosphor-icons/react";
+import { PlusIcon, ArrowUpIcon, Stop } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
@@ -195,10 +195,6 @@ export function AgentChatView() {
                     usedTokens={contextUsedTokens}
                     maxTokens={contextWindow}
                   />
-                  <div className="flex items-center gap-1 text-sidebar-foreground/70">
-                    <Icon icon={LaptopIcon} className="size-5" />
-                    <span className="text-sm">Local</span>
-                  </div>
                 </div>
                 <div className="flex items-center gap-5">
                   <ModelPicker agentId={agentId} />

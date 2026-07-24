@@ -19,7 +19,6 @@ import { Icon } from '@/components/ui/icon';
 import {
   PlusIcon,
   ArrowUpIcon,
-  LaptopIcon,
   Stop,
 } from '@phosphor-icons/react';
 import { HugeIcon } from "@/components/ui/huge-icon";
@@ -296,10 +295,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
                   usedTokens={contextUsedTokens}
                   maxTokens={contextWindow}
                 />
-                <div className="flex items-center gap-1 text-sidebar-foreground/70">
-                  <Icon icon={LaptopIcon} className="size-5" />
-                  <span className="text-sm">Local</span>
-                </div>
               </div>
               <div className="flex items-center gap-5">
                 <ModelPicker agentId={projectAgent.id} />
