@@ -38,14 +38,14 @@ export function UserMessage({ message }: UserMessageProps) {
         {isLong && !expanded ? (
           <div className="relative">
             {visibleLines.map((line, i) => (
-              <p key={i} className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
+              <p key={i} className="text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
                 {line}
               </p>
             ))}
             <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent to-[--chat-bubble-user-bg] pointer-events-none" />
           </div>
         ) : (
-          <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
+          <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
             {message.text}
           </p>
         )}

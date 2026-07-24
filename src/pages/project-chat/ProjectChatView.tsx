@@ -257,7 +257,7 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   });
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.025]">
+    <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.025] [--foreground:#D8D8D8] [--muted-foreground:#5B5B5B]">
       <ConversationArea
         messages={messages}
         inFlight={inFlight}
