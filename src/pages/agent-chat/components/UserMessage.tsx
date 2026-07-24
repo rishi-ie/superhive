@@ -50,7 +50,7 @@ export function UserMessage({ message }: UserMessageProps) {
           </p>
         )}
       </div>
-      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
+      <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1 [--muted-foreground:#707070]">
         <span className="text-xs text-muted-foreground mr-1">
           {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
