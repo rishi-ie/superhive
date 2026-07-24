@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { AppSidebar } from "../left-sidebar/AppSidebar";
 import { RightSidebar } from "../right-sidebar/RightSidebar";
+import { RightStatusBar } from "../right-sidebar/RightStatusBar";
 import { cn } from "@/lib/utils";
 import { Workspace } from "./Workspace";
 import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
@@ -39,10 +40,13 @@ function AppLayoutShell() {
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
   const [isResizingRight, setIsResizingRight] = React.useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = React.useState(location.pathname === "/");
+  const [statusBarOpen, setStatusBarOpen] = React.useState(false);
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    setRightSidebarOpen(location.pathname !== "/" && location.pathname !== "/plugins");
+    const shouldOpen = location.pathname !== "/" && location.pathname !== "/plugins";
+    setRightSidebarOpen(shouldOpen);
+    if (shouldOpen) setStatusBarOpen(false);
   }, [location.pathname]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
@@ -140,7 +144,15 @@ function AppLayoutShell() {
           <CenterBreadcrumb />
           <TopRightControls
             rightSidebarOpen={rightSidebarOpen}
-            onToggleRightSidebar={() => setRightSidebarOpen(o => !o)}
+            onToggleRightSidebar={() => {
+              setStatusBarOpen(false);
+              setRightSidebarOpen((o) => !o);
+            }}
+            statusBarOpen={statusBarOpen}
+            onToggleStatusBar={() => {
+              setRightSidebarOpen(false);
+              setStatusBarOpen((o) => !o);
+            }}
           />
           <Outlet />
         </Workspace>
@@ -162,6 +174,7 @@ function AppLayoutShell() {
             <RightSidebar width={rightSidebarWidth} />
           </div>
         </div>
+        {statusBarOpen && <RightStatusBar />}
       </div>
       <CommandPalette />
       <CreateAgentDialog />
