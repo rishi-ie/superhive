@@ -41,6 +41,43 @@ function sanitizeFolderName(raw: string): string {
 	return trimmed.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
 }
 
+/**
+ * Recursive deep-merge. Mirrors the truth ext's helper at
+ * `superhive-pi-truth/settings-schema.ts:747-770`.
+ *
+ * Semantics:
+ *  - objects: recurse
+ *  - arrays: replace (not concat)
+ *  - primitives and `null`: replace (`null` = set to null, not delete)
+ *  - `undefined`: ignored (so an explicit "no change" can be sent)
+ */
+function deepMerge<T>(base: T, overrides: unknown): T {
+	if (overrides === null || overrides === undefined) return base
+	if (typeof base !== 'object' || base === null || Array.isArray(base)) {
+		return (overrides as T) ?? base
+	}
+	if (typeof overrides !== 'object' || Array.isArray(overrides)) {
+		return (overrides as T) ?? base
+	}
+	const result: Record<string, unknown> = { ...(base as Record<string, unknown>) }
+	for (const [key, value] of Object.entries(overrides as Record<string, unknown>)) {
+		const baseValue = result[key]
+		if (
+			typeof baseValue === 'object' &&
+			baseValue !== null &&
+			!Array.isArray(baseValue) &&
+			typeof value === 'object' &&
+			value !== null &&
+			!Array.isArray(value)
+		) {
+			result[key] = deepMerge(baseValue, value)
+		} else if (value !== undefined) {
+			result[key] = value
+		}
+	}
+	return result as T
+}
+
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
@@ -597,13 +634,15 @@ export function registerAgentIpc(): void {
 				const raw = await readFile(filePath, 'utf8').catch(() => '{}')
 				const current = JSON.parse(raw) as Record<string, unknown>
 				const myCounter = parseCounter(current.managedBy as string | undefined) + 1
-				return {
-					...current,
-					...patch,
-					version: 1,
-					managedBy: `superhive-pi-truth@1#${myCounter}`,
-					lastModified: new Date().toISOString(),
-				}
+				// Recursive deep-merge: partial blocks never wipe siblings.
+				// (Old code did `{ ...current, ...patch }` which REPLACED
+				// top-level keys — toggling one `behavior.autoCompaction`
+				// would wipe `steeringMode`, `compaction`, etc.)
+				const merged = deepMerge(current, patch) as Record<string, unknown>
+				merged.version = 1
+				merged.managedBy = `superhive-pi-truth@1#${myCounter}`
+				merged.lastModified = new Date().toISOString()
+				return merged
 			}
 			let merged: Record<string, unknown> = {}
 			for (let attempt = 0; attempt < 3; attempt++) {
