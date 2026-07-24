@@ -20,6 +20,7 @@ interface OverviewSlice {
 	error: string | null
 	dirty: Record<string, unknown> | null
 	debounceTimer: NodeJS.Timeout | null
+	unsub: (() => void) | null
 	listeners: Set<() => void>
 }
 
@@ -35,10 +36,16 @@ function ensureSlice(agentId: string): OverviewSlice {
 		error: null,
 		dirty: null,
 		debounceTimer: null,
+		unsub: null,
 		listeners: new Set(),
 	}
 	slices.set(agentId, slice)
 	void reloadOverview(agentId)
+	// Truth writes overview.json from inside Pi. Reload this slice when the
+	// existing per-agent file watcher reports that external write.
+	slice.unsub = agents.onSettingsChanged(agentId, () => {
+		void reloadOverview(agentId)
+	})
 	return slice
 }
 
@@ -139,5 +146,6 @@ export function disposeOverviewSliceNow(agentId: string): void {
 	const slice = slices.get(agentId)
 	if (!slice) return
 	if (slice.debounceTimer) clearTimeout(slice.debounceTimer)
+	slice.unsub?.()
 	slices.delete(agentId)
 }

@@ -15,6 +15,7 @@ interface AgentCardProps {
 
 const STATUS_DOT: Record<AgentOverviewStatus, string> = {
   active: 'bg-emerald-500',
+	busy: 'bg-emerald-500',
   waiting: 'bg-amber-500',
   idle: 'bg-muted-foreground/40',
   error: 'bg-destructive',
@@ -22,6 +23,7 @@ const STATUS_DOT: Record<AgentOverviewStatus, string> = {
 
 const STATUS_LABEL: Record<AgentOverviewStatus, string> = {
   active: 'Active',
+	busy: 'Working',
   waiting: 'Waiting',
   idle: 'Idle',
   error: 'Error',

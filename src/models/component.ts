@@ -117,6 +117,11 @@ export interface OverviewFileMirror {
   description: string
   health?: ProjectHealth
   team?: AgentOverviewCard[]
+  current?: {
+    phase: 'planning' | 'researching' | 'delegating' | 'building' | 'reviewing' | 'waiting' | 'blocked' | 'complete'
+    summary: string
+    updatedAt: string
+  }
   focus?: string[]
   activity?: Array<{ id: string; time: string; text: string }>
 }
@@ -144,7 +149,7 @@ export interface ProjectHealth {
   waiting: number
 }
 
-export type AgentOverviewStatus = 'active' | 'waiting' | 'idle' | 'error'
+export type AgentOverviewStatus = 'active' | 'busy' | 'waiting' | 'idle' | 'error'
 
 export interface AgentOverviewCard {
   id: string

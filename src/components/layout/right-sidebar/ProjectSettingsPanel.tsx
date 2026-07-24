@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
-import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
+import { useAgentRuntime, useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import {
   useAgentInbox,
   useAgentManage,
@@ -96,6 +96,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   }, [team, liveStates])
 
   const coordinatorId = mergedTeam.coordinator?.id ?? null;
+	const coordinatorRuntime = useAgentRuntime(coordinatorId ?? undefined)
   // 4-file split: each truth file has its own React flow. We read all
   // three so the catalog (skills/extensions/prompts) is available in
   // addition to the manage.json user-tweakable surface.
@@ -139,6 +140,29 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
     if (!ov || typeof ov !== "object") return null
     return ov as unknown as ProjectOverviewSectionData["overview"]
   }, [coordinatorOverview.settings])
+
+	const liveRuntimeSummary = useMemo(() => {
+		if (coordinatorRuntime.retry) {
+			return `Retrying (${coordinatorRuntime.retry.attempt}/${coordinatorRuntime.retry.maxAttempts})…`
+		}
+		if (coordinatorRuntime.compaction) return 'Compacting project context…'
+		if (coordinatorRuntime.inFlightToolCount > 0) {
+			return `Running ${coordinatorRuntime.inFlightToolCount} tool${coordinatorRuntime.inFlightToolCount === 1 ? '' : 's'}…`
+		}
+		if (coordinatorRuntime.inFlight?.activityTimeline.some((item) => item.kind === 'thinking' && item.state === 'streaming')) {
+			return 'Thinking through the request…'
+		}
+		if (coordinatorRuntime.agentResponseActive) return 'Preparing a response…'
+		if (coordinatorRuntime.pendingTurn) return 'Starting the project agent…'
+		return null
+	}, [
+		coordinatorRuntime.agentResponseActive,
+		coordinatorRuntime.compaction,
+		coordinatorRuntime.inFlight,
+		coordinatorRuntime.inFlightToolCount,
+		coordinatorRuntime.pendingTurn,
+		coordinatorRuntime.retry,
+	])
 
   // Gap 6: `members` is no longer rendered anywhere — Overview's "Team"
   // section now shows the project agent itself (the coordinator) as a
@@ -192,7 +216,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
 
         <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
           <ScrollArea className="h-full" scrollbar={false}>
-            <ProjectOverviewSection data={overviewData} liveStatuses={liveStates} />
+				<ProjectOverviewSection data={overviewData} liveStatuses={liveStates} liveRuntimeSummary={liveRuntimeSummary} />
           </ScrollArea>
         </TabsContent>
 

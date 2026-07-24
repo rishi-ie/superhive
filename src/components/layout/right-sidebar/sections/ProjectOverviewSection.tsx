@@ -42,6 +42,7 @@ interface ProjectOverviewSectionProps {
    * back to each agent's last-known DB status.
    */
   liveStatuses?: Map<string, AgentLiveState>
+	liveRuntimeSummary?: string | null
 }
 
 // Display cap for the right-sidebar overview. Prevents a runaway
@@ -110,7 +111,7 @@ function relativeTime(iso: string): string {
 // Render
 // ---------------------------------------------------------------------------
 
-export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSectionProps) {
+export function ProjectOverviewSection({ data, liveStatuses, liveRuntimeSummary }: ProjectOverviewSectionProps) {
   const {
     project,
     coordinatorProjectDescription,
@@ -152,6 +153,17 @@ export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSe
           text: a.text,
         }))
     : []
+  const current = overview?.current
+  // `active` means the runtime is ready, not that it is responding. Only
+  // explicit Pi turn signals may show a live working state here.
+  const liveFallback = liveRuntimeSummary
+  const workByAgentId = new Map(
+    Array.isArray(overview?.team)
+      ? overview.team
+          .filter((member) => typeof member?.id === 'string' && typeof member?.work === 'string')
+          .map((member) => [member.id, member.work] as const)
+      : [],
+  )
 
   return (
     <div className={cn('flex flex-col gap-6 pt-8 pb-6')}>
@@ -174,6 +186,28 @@ export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSe
         )}
       </div>
 
+      {/* Agent-authored state is durable; the runtime fallback keeps the
+            sidebar useful before the first reporting tool call lands. */}
+      <div className="flex flex-col gap-2">
+        <SectionLabel>Now</SectionLabel>
+        {liveFallback ? (
+          <div className="rounded-card border border-border bg-muted/30 px-3 py-2.5 text-xs text-muted-foreground">
+            <span className="mr-1.5 inline-block size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {liveFallback}
+          </div>
+        ) : current?.summary ? (
+          <div className="rounded-card border border-border bg-muted/30 px-3 py-2.5">
+            <div className="text-xs font-medium capitalize text-foreground/80">Last update: {current.phase}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{current.summary}</div>
+            {current.updatedAt ? (
+              <div className="mt-1.5 text-[11px] text-muted-foreground/70">Updated {relativeTime(current.updatedAt)}</div>
+            ) : null}
+          </div>
+        ) : (
+          <EmptyHint>The project agent will describe its current work here.</EmptyHint>
+        )}
+      </div>
+
       {/* 2. Project Health — driven by useProjectHealth. Falls back to
             a placeholder shape when no coordinator is online yet
             (so the panel still renders, with agents=0 etc.). */}
@@ -192,6 +226,7 @@ export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSe
         <SpawnedStaffCard
           agents={staff}
           liveStatuses={liveStatuses ?? new Map()}
+		  workByAgentId={workByAgentId}
         />
       )}
 

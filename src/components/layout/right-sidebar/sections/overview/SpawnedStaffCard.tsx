@@ -25,6 +25,7 @@ import type { Agent, AgentStatus, InitStep } from '@/types/electron'
 export interface SpawnedStaffCardProps {
 	agents: Agent[]
 	liveStatuses: Map<string, { status: AgentStatus; bootStep?: InitStep }>
+	workByAgentId?: Map<string, string>
 }
 
 function statusDot(status: AgentStatus, booting: boolean, hasError: boolean): { className: string; label: string } {
@@ -42,7 +43,7 @@ function statusDot(status: AgentStatus, booting: boolean, hasError: boolean): { 
 	}
 }
 
-export function SpawnedStaffCard({ agents, liveStatuses }: SpawnedStaffCardProps) {
+export function SpawnedStaffCard({ agents, liveStatuses, workByAgentId = new Map() }: SpawnedStaffCardProps) {
 	const navigate = useNavigate()
 
 	if (agents.length === 0) return null
@@ -87,7 +88,7 @@ export function SpawnedStaffCard({ agents, liveStatuses }: SpawnedStaffCardProps
 								/>
 							</div>
 							<span className="truncate text-xs text-muted-foreground">
-								{agent.role ?? 'generalist'}
+								{workByAgentId.get(agent.id) ?? agent.role ?? 'generalist'}
 							</span>
 						</button>
 					)
