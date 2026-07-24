@@ -135,8 +135,10 @@
   /* Global UI density knob. Scales spacing + control heights. Text reads --font-scale (independent). */
   --ui-scale: 1;
 
-  /* Font scale — scales text only. Independent of --ui-scale so spacing/controls stay compact. */
-  --font-scale: 1.10;
+  /* Font scale — scales text only. Set globally or per-route via a parent
+   * class (e.g. [--font-scale:1.05]). Independent of --ui-scale so
+   * spacing/controls stay compact. */
+  --font-scale: 1;
 
   color-scheme: light;
 }
