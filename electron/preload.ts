@@ -28,6 +28,19 @@ contextBridge.exposeInMainWorld('api', {
     getMessages:   (id) => ipcRenderer.invoke('agents:get-messages', id),
     readSettings:  (id) => ipcRenderer.invoke('agents:readSettings', id),
     writeSettings: (id, patch) => ipcRenderer.invoke('agents:writeSettings', id, patch),
+    // 4-file truth split — per-file channels. Each reads or writes a
+    // single sibling file under <agentDir>/. truth migrates the legacy
+    // Superhive-pi-*.json on first launch; these channels always operate
+    // on the new layout.
+    readManage:    (id) => ipcRenderer.invoke('agents:readManage', id),
+    writeManage:   (id, patch) => ipcRenderer.invoke('agents:writeManage', id, patch),
+    readOverview:  (id) => ipcRenderer.invoke('agents:readOverview', id),
+    writeOverview: (id, patch) => ipcRenderer.invoke('agents:writeOverview', id, patch),
+    readInbox:     (id) => ipcRenderer.invoke('agents:readInboxFile', id),
+    appendInbox:   (id, input) => ipcRenderer.invoke('agents:appendInbox', id, input),
+    markInboxRead: (id, inboxId, answeredWith) =>
+      ipcRenderer.invoke('agents:markInboxRead', id, inboxId, answeredWith),
+    clearInbox:    (id, status) => ipcRenderer.invoke('agents:clearInbox', id, status),
     reveal:        (id) => ipcRenderer.invoke('agents:reveal', id),
     persistAssistantMessage: (id, message) =>
       ipcRenderer.invoke('agents:persistAssistantMessage', id, message),
