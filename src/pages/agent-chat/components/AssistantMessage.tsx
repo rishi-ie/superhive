@@ -218,7 +218,7 @@ export function AssistantMessage({
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span className="text-[11px] text-muted-foreground ml-1 cursor-default">
+              <span className="text-xs text-muted-foreground ml-1 cursor-default">
                 {new Date(timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',

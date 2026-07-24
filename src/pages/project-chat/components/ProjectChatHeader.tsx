@@ -12,10 +12,10 @@ export function ProjectChatHeader({ project, members }: ProjectChatHeaderProps) 
       <div className="flex flex-col gap-0.5">
         <h2 className="text-sm font-semibold text-foreground">{project.name}</h2>
         <div className="flex items-center gap-stack">
-          <span className="rounded-full bg-sidebar-primary/10 px-row py-0.5 text-[10px] font-medium text-sidebar-primary">
+          <span className="rounded-full bg-sidebar-primary/10 px-row py-0.5 text-xs font-medium text-sidebar-primary">
             Project Agent
           </span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {members.length} member{members.length !== 1 ? 's' : ''}
           </span>
         </div>

@@ -82,7 +82,7 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
   return (
     <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg my-2">
       <div className="sticky top-0 z-10 flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
-        <span className="text-[11px] text-muted-foreground font-mono uppercase tracking-wide">
+        <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">
           {lang}
         </span>
         <span className="flex items-center gap-0.5">

@@ -69,7 +69,7 @@ function TimelineItemRowBase({
             <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground animate-pulse" />
           ) : null}
           {expandable && openForFrozen ? (
-            <p className="mt-1 text-foreground/60 text-[11px] whitespace-pre-wrap">
+            <p className="mt-1 text-foreground/60 text-xs whitespace-pre-wrap">
               {item.text}
             </p>
           ) : null}

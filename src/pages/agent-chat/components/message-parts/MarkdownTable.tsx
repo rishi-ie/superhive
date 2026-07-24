@@ -181,11 +181,11 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
                 aria-label="Copy table"
               >
                 {copiedFormat ? (
-                  <span className="text-[10px] text-chat-status-success font-mono">
+                  <span className="text-xs text-chat-status-success font-mono">
                     {copiedFormat.toUpperCase()}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground font-mono">COPY</span>
+                  <span className="text-xs text-muted-foreground font-mono">COPY</span>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -203,7 +203,7 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
       {showToggle && (
         <button
           type="button"
-          className="flex items-center gap-1 mt-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => setIsExpanded((v) => !v)}
         >
           {isExpanded ? (

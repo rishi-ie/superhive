@@ -11,7 +11,7 @@ export function UsageFooter({ usage }: UsageFooterProps) {
   const cost = usage.cost
 
   return (
-    <div className="ml-auto flex items-center gap-2 text-[11px] text-muted-foreground">
+    <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
       <span className="font-mono">
         ↑{fmt(usage.input)} ↓{fmt(usage.output)}
         {usage.cacheRead ? ` R${fmt(usage.cacheRead)}` : ''}
@@ -27,7 +27,7 @@ export function UsageFooter({ usage }: UsageFooterProps) {
         {open ? '−' : '+'}
       </button>
       {open ? (
-        <span className="font-mono text-[10px] text-muted-foreground/80">
+        <span className="font-mono text-xs text-muted-foreground/80">
           total {fmt(usage.totalTokens)}
           {usage.cacheWrite ? ` · W${fmt(usage.cacheWrite)}` : ''}
         </span>

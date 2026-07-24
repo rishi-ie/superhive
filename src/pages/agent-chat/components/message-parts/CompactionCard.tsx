@@ -24,7 +24,7 @@ export function CompactionCard({ tokensBefore, summary }: CompactionCardProps) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-1.5 rounded-full border border-dashed border-border bg-muted/40 px-3 py-1 text-[11px] text-muted-foreground cursor-pointer hover:bg-muted/70 hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-dashed border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground cursor-pointer hover:bg-muted/70 hover:text-foreground transition-colors"
           aria-expanded={open}
         >
           <span className="font-mono uppercase tracking-wider">Compaction</span>

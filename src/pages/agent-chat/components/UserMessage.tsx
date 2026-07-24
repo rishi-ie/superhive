@@ -38,20 +38,20 @@ export function UserMessage({ message }: UserMessageProps) {
         {isLong && !expanded ? (
           <div className="relative">
             {visibleLines.map((line, i) => (
-              <p key={i} className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
+              <p key={i} className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
                 {line}
               </p>
             ))}
             <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent to-[--chat-bubble-user-bg] pointer-events-none" />
           </div>
         ) : (
-          <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
+          <p className="text-base leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
             {message.text}
           </p>
         )}
       </div>
       <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1">
-        <span className="text-[11px] text-muted-foreground mr-1">
+        <span className="text-xs text-muted-foreground mr-1">
           {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
           <Tooltip>
@@ -88,7 +88,7 @@ export function UserMessage({ message }: UserMessageProps) {
           <Button
             size="sm"
             variant="ghost"
-            className="text-[11px] text-muted-foreground hover:text-foreground h-6 px-1.5 border-0"
+            className="text-xs text-muted-foreground hover:text-foreground h-6 px-1.5 border-0"
             onClick={() => setExpanded((v) => !v)}
           >
             {expanded ? 'Show less' : `Show all (${lines.length} lines)`}
