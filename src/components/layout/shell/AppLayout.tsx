@@ -174,7 +174,15 @@ function AppLayoutShell() {
             <RightSidebar width={rightSidebarWidth} />
           </div>
         </div>
-        {statusBarOpen && <RightStatusBar />}
+        <div
+          className={cn(
+            "relative flex-shrink-0 h-full overflow-hidden transition-[width] duration-200 ease-out",
+            statusBarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
+          )}
+          style={{ width: statusBarOpen ? 320 : 0 }}
+        >
+          <RightStatusBar />
+        </div>
       </div>
       <CommandPalette />
       <CreateAgentDialog />
