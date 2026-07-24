@@ -77,6 +77,35 @@ function deepMerge<T>(base: T, overrides: unknown): T {
 	return result as T
 }
 
+/**
+ * The Plan extension reads this file at the beginning of each Pi turn.
+ * Mirror a committed manage.planMode immediately so a user can select a mode
+ * and send without waiting for Truth's asynchronous filesystem watcher.
+ */
+async function writePlanModeExtension(agentDir: string, planMode: unknown): Promise<void> {
+	if (!planMode || typeof planMode !== 'object' || Array.isArray(planMode)) return
+	const filePath = join(agentDir, 'superhive-pi-plan.json')
+	let current: Record<string, unknown> = {}
+	try {
+		const parsed = JSON.parse(await readFile(filePath, 'utf8')) as unknown
+		if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+			current = parsed as Record<string, unknown>
+		}
+	} catch {
+		// A missing or malformed extension file is replaced with a valid seed.
+	}
+	const next = {
+		...current,
+		version: typeof current.version === 'number' ? current.version : 1,
+		managedBy: 'superhive-pi-truth@1',
+		lastModified: new Date().toISOString(),
+		planMode,
+	}
+	const tmp = `${filePath}.${process.pid}.${Date.now()}.tmp`
+	await writeFile(tmp, JSON.stringify(next, null, '\t') + '\n', 'utf8')
+	await rename(tmp, filePath)
+}
+
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
@@ -574,6 +603,7 @@ export function registerAgentIpc(): void {
 				const verify = JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>
 				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
 					runtime.markSelfWrite(agentId, 'manage', parseCounter(verify.managedBy as string | undefined))
+					await writePlanModeExtension(agent.localPath, merged.planMode)
 					return { ok: true, writtenVersion: parseCounter(verify.managedBy as string | undefined) }
 				}
 			}

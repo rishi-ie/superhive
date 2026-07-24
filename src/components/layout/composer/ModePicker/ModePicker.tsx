@@ -44,7 +44,7 @@ interface ModePickerProps {
 }
 
 export function ModePicker({ agentId }: ModePickerProps) {
-  const { settings, patch } = useAgentManage(agentId);
+  const { settings, patch, isSaving } = useAgentManage(agentId);
   const planModeBlock = settings?.planMode as
     | { defaultMode?: "plan" | "build" | "auto" }
     | undefined;
@@ -59,7 +59,7 @@ export function ModePicker({ agentId }: ModePickerProps) {
   const onChange = (next: string) => {
     if (next !== "plan" && next !== "execute" && next !== "auto") return;
     const truthValue = MODE_TO_TRUTH[next];
-    patch("planMode", { ...(planModeBlock ?? {}), defaultMode: truthValue });
+    void patch("planMode", { ...(planModeBlock ?? {}), defaultMode: truthValue });
   };
 
   return (
@@ -70,7 +70,7 @@ export function ModePicker({ agentId }: ModePickerProps) {
           className="flex items-center gap-list-item text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default"
         >
           <HugeIcon icon={CurrentIcon} size={16} />
-          <span>{current.label}</span>
+          <span>{isSaving ? "Applying…" : current.label}</span>
           <Icon icon={CaretDownIcon} className="size-3" />
         </button>
       </DropdownMenuTrigger>

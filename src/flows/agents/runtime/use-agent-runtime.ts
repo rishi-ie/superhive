@@ -26,6 +26,7 @@ import type { CompactionStatus, RetryStatus } from '@/models/runtime'
 import { toast } from 'sonner'
 import { initRuntimeSlice } from './slice'
 import type { RuntimeSlice } from '@/models/agent'
+import { flushAgentManage } from '@/flows/agents/settings/use-agent-manage'
 
 export function useAgentRuntime(agentId: string | undefined) {
   const slice = React.useMemo(() => {
@@ -92,8 +93,16 @@ export function useAgentRuntime(agentId: string | undefined) {
     }
   }, [slice])
 
-  const send = React.useCallback((text: string) => {
+  const send = React.useCallback(async (text: string) => {
     if (!agentId) return
+    try {
+      // The Plan extension reads its config in before_agent_start. Waiting
+      // here makes a just-selected composer mode apply to this very turn.
+      await flushAgentManage(agentId)
+    } catch {
+      // The Manage flow already surfaced the persistence failure.
+      return
+    }
     const s = sliceRef.current
     if (s) {
       if (s.pendingTurnTimeoutId) {
@@ -115,11 +124,12 @@ export function useAgentRuntime(agentId: string | undefined) {
       }, 60_000)
       s.listeners.forEach((l) => l())
     }
-    agents
-      .send(agentId, text)
-      .catch((err: unknown) => {
-        toast.error(err instanceof Error ? err.message : 'Failed to send message')
-      })
+    try {
+      const result = await agents.send(agentId, text)
+      if (!result.ok) throw new Error('Agent is not running')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send message')
+    }
   }, [agentId])
 
   const stop = React.useCallback(() => {

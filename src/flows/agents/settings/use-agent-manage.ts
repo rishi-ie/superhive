@@ -22,6 +22,8 @@ export interface AgentManageSlice {
 	state: ManageFileState
 	isLoading: boolean
 	error: string | null
+	pending: Promise<void>
+	pendingWrites: number
 	listeners: Set<() => void>
 }
 
@@ -34,11 +36,18 @@ function ensureSlice(agentId: string): AgentManageSlice {
 		state: null,
 		isLoading: false,
 		error: null,
+		pending: Promise.resolve(),
+		pendingWrites: 0,
 		listeners: new Set(),
 	}
 	slices.set(agentId, slice)
 	void reloadManage(agentId)
 	return slice
+}
+
+/** Wait for all renderer-initiated Manage writes for an agent to reach disk. */
+export async function flushAgentManage(agentId: string): Promise<void> {
+	await slices.get(agentId)?.pending
 }
 
 export async function reloadManage(agentId: string): Promise<void> {
@@ -90,6 +99,7 @@ export function useAgentManage(agentId: string | null) {
 
 	const [state, setState] = React.useState<ManageFileState>(null)
 	const [isLoading, setIsLoading] = React.useState(false)
+	const [isSaving, setIsSaving] = React.useState(false)
 	const [error, setError] = React.useState<string | null>(null)
 
 	React.useEffect(() => {
@@ -97,6 +107,7 @@ export function useAgentManage(agentId: string | null) {
 		const sync = () => {
 			setState(slice.state)
 			setIsLoading(slice.isLoading)
+			setIsSaving(slice.pendingWrites > 0)
 			setError(slice.error)
 		}
 		sync()
@@ -106,10 +117,10 @@ export function useAgentManage(agentId: string | null) {
 		}
 	}, [slice])
 
-	const patch = React.useCallback((key: string, value: unknown) => {
-		if (!agentId) return
+	const patch = React.useCallback((key: string, value: unknown): Promise<void> => {
+		if (!agentId) return Promise.resolve()
 		const s = slices.get(agentId)
-		if (!s) return
+		if (!s) return Promise.resolve()
 		// Optimistic local state: deep-merge so siblings are preserved.
 		if (s.state) {
 			s.state = deepMergeDotted(s.state, key, value) as ManageFileState
@@ -119,12 +130,22 @@ export function useAgentManage(agentId: string | null) {
 		// { behavior: { autoCompaction: false } }). The main process's
 		// deep-merge + 3-attempt retry loop handles correctness.
 		const partial = deepMergeDotted({}, key, value) as Record<string, unknown>
-		void agents
-			.writeManage(agentId, partial)
-			.then(() => reloadManage(agentId))
-			.catch((err: unknown) => {
-				toast.error(err instanceof Error ? err.message : 'Failed to save manage.json')
-			})
+		// Serialize writes per agent. A Plan selection followed immediately by
+		// Send must see this exact write, not an earlier concurrent patch.
+		s.pendingWrites += 1
+		const write = s.pending.catch(() => undefined).then(async () => {
+			await agents.writeManage(agentId, partial)
+			await reloadManage(agentId)
+		})
+		s.pending = write
+		void write.catch((err: unknown) => {
+			toast.error(err instanceof Error ? err.message : 'Failed to save manage.json')
+		}).finally(() => {
+			s.pendingWrites -= 1
+			s.listeners.forEach((l) => l())
+		})
+		s.listeners.forEach((l) => l())
+		return write
 	}, [agentId])
 
 	const reload = React.useCallback(async () => {
@@ -132,7 +153,7 @@ export function useAgentManage(agentId: string | null) {
 		await reloadManage(agentId)
 	}, [agentId])
 
-	return { settings: state, isLoading, error, patch, reload }
+	return { settings: state, isLoading, error, isSaving, patch, reload }
 }
 
 export function disposeManageSliceNow(agentId: string): void {
