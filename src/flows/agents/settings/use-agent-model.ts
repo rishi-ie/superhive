@@ -23,7 +23,7 @@ import { useAgentRuntime } from '../runtime/use-agent-runtime'
  * no-op.
  */
 export function useAgentModel(agentId: string | undefined) {
-  const { settings, patch } = useAgentSettings(agentId ?? null)
+  const { settings, patch, flush } = useAgentSettings(agentId ?? null)
   const { activeModelProvider, activeModelName } = useAgentRuntime(agentId)
 
   React.useEffect(() => {
@@ -43,8 +43,12 @@ export function useAgentModel(agentId: string | undefined) {
     (model: { provider: string; name: string }) => {
       if (!agentId) return
       patch('model', model)
+      // Composer model changes must be durable before the user can send the
+      // next turn. `patch` also queues the matching provider/model fields;
+      // flushing an empty explicit patch commits that complete revision.
+      void flush({})
     },
-    [agentId, patch],
+    [agentId, patch, flush],
   )
 
   return { model: settings?.model ?? null, setModel }

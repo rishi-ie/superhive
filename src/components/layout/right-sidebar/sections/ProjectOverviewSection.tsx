@@ -22,18 +22,14 @@
  */
 
 import * as React from 'react'
-import type { Agent } from '@/storage/types'
 import { cn } from '@/lib/utils'
 import type { AgentLiveState } from '@/models/agent'
 import type {
   ProjectOverviewSectionData,
   ProjectHealth,
-  AgentOverviewCard,
-  AgentOverviewStatus,
   ActivityItem,
 } from '@/models/component'
 import { ProjectHealthCard } from './overview/ProjectHealthCard'
-import { AgentCard } from './overview/AgentCard'
 import { CurrentFocusCard } from './overview/CurrentFocusCard'
 import { ActivityFeed } from './overview/ActivityFeed'
 import { SpawnedStaffCard } from './overview/SpawnedStaffCard'
@@ -71,33 +67,6 @@ const PLACEHOLDER_HEALTH: ProjectHealth = {
 // ---------------------------------------------------------------------------
 // Mappers
 // ---------------------------------------------------------------------------
-
-function agentStatusToOverview(status: Agent['status']): AgentOverviewStatus {
-  switch (status) {
-    case 'active':
-    case 'busy':
-      return 'active'
-    case 'waiting':
-      return 'waiting'
-    default:
-      return 'idle'
-  }
-}
-
-// The "Project agent" card — gap 6 rewrite. The project agent IS the
-// project (no coordinator-vs-members plurality). The card shows one
-// agent — the project agent itself — with its live status and a brief
-// role line. We use the agent's `role`, then `description`, then a
-// static fallback so the card always renders something readable.
-function projectAgentToCard(coordinator: Agent): AgentOverviewCard {
-  const work = coordinator.role ?? coordinator.description ?? 'Project agent'
-  return {
-    id: coordinator.id,
-    name: coordinator.name,
-    status: agentStatusToOverview(coordinator.status),
-    work,
-  }
-}
 
 function truncateForDisplay(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text
@@ -144,7 +113,6 @@ function relativeTime(iso: string): string {
 export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSectionProps) {
   const {
     project,
-    coordinator,
     coordinatorProjectDescription,
     overview,
     health,
@@ -214,19 +182,7 @@ export function ProjectOverviewSection({ data, liveStatuses }: ProjectOverviewSe
         <ProjectHealthCard health={health ?? PLACEHOLDER_HEALTH} />
       </div>
 
-      {/* 3. Project agent — ONE card. Replaces the old "Team" mock list. */}
-      <div className="flex flex-col gap-3">
-        <SectionLabel>Project agent</SectionLabel>
-        {coordinator ? (
-          <AgentCard agent={projectAgentToCard(coordinator)} />
-        ) : (
-          <span className="text-xs text-muted-foreground/70">
-            Project agent offline.
-          </span>
-        )}
-      </div>
-
-      {/* 3b. Spawned staff — Phase G. Renders one card per agent the
+      {/* 3. Team — excludes the project manager. Renders one card per agent the
             project has spawned via spawn_agent. The card hides itself
             when the list is empty so brand-new projects show just the
             other sections. Live status flows in via the optional
