@@ -132,12 +132,6 @@ const api: ElectronAPI = {
     // db.tasks.json write. Consumers re-fetch via `tasks.list()`.
     onChanged: (cb) => subscribe('tasks:changed', cb),
   },
-  truth: {
-    listFiles: (agentId) => ipcRenderer.invoke('truth:list-files', agentId),
-    readFile: (agentId, extName) => ipcRenderer.invoke('truth:read-file', agentId, extName),
-    writeFile: (agentId, input) => ipcRenderer.invoke('truth:write-file', agentId, input),
-  },
-
   templates: {
     list: () => ipcRenderer.invoke('templates:list'),
     get: (id) => ipcRenderer.invoke('templates:get', id),

@@ -6,7 +6,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as React from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
 import { useAgentsListVersion, useAllAgentStatuses } from "@/flows/agents/runtime";
 import {
@@ -14,7 +13,6 @@ import {
   useAgentManage,
   useAgentOverview,
   useAgentSettings,
-  useTruthFiles,
 } from "@/flows/agents/settings";
 import { useProjectHealth } from "@/flows/projects/health";
 import { useProjectStaff } from "@/flows/projects/runtime";
@@ -22,7 +20,6 @@ import type { Agent, Project } from "@/storage/types";
 import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { InboxSection } from "./sections/InboxSection";
 import { MANAGE_SECTIONS, type ManageSectionDef } from "./sections/registry";
-import { DynamicExtSection } from "./sections/dynamic-sections/DynamicExtSection";
 import type { ProjectOverviewSectionData } from "@/models/component";
 import { Icon } from "@/components/ui/icon";
 
@@ -228,18 +225,6 @@ function ManageSectionList({ sections, agentId, settings, patch }: ManageSection
   const project = (settings.project ?? {}) as { id?: string };
   const isCoordinator = Boolean(project.id);
 
-  // Phase C: enumerate ext-truth files for this agent and render one
-  // DynamicExtSection per file inline-append after the 6 core
-  // sections. No sub-header, no group — sections just appear in
-  // order, separated by the section's own border-t. Hidden for
-  // non-coordinator agents (regular agents don't carry ext-truth
-  // files the user is expected to edit).
-  const { files: truthFiles } = useTruthFiles(isCoordinator ? agentId : null)
-  const extTruthFiles = React.useMemo(
-    () => truthFiles.filter((f) => f.extName.startsWith("superhive-pi-")),
-    [truthFiles],
-  )
-
   return (
     <>
       {sections.map((s) => {
@@ -257,14 +242,6 @@ function ManageSectionList({ sections, agentId, settings, patch }: ManageSection
           </div>
         );
       })}
-      {extTruthFiles.map((f) => (
-        <DynamicExtSection
-          key={f.extName}
-          agentId={agentId}
-          extName={f.extName}
-          fileName={f.fileName}
-        />
-      ))}
     </>
   );
 }

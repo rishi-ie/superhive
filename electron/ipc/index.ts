@@ -5,7 +5,6 @@ import { registerAppIpc } from './app';
 import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
-import { registerTruthIpc } from './truth';
 import { registerTemplatesIpc } from './templates';
 
 export const IPC = {
@@ -89,12 +88,6 @@ export const IPC = {
     CHANGE_STATUS: 'tasks:changeStatus',
     ON_CHANGED: 'tasks:changed',
   },
-  // Phase C: generic truth-file IPC (per-extension dynamic sections)
-  TRUTH: {
-    LIST_FILES: 'truth:list-files',
-    READ_FILE: 'truth:read-file',
-    WRITE_FILE: 'truth:write-file',
-  },
   // Phase F: marketplace — list/get/open-folder for template library
   TEMPLATES: {
     LIST: 'templates:list',
@@ -111,6 +104,5 @@ export function registerIpc(): void {
   registerSettingsIpc();
   registerMailboxIpc();
   registerTaskIpc();
-  registerTruthIpc();
   registerTemplatesIpc();
 }

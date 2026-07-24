@@ -167,65 +167,12 @@ export interface AppAPI {
 	installUpdate: () => Promise<{ ok: boolean }>
 }
 
-/**
- * One truth file entry returned by `truth:list-files`.
- *
- * `fileName` is the on-disk name (e.g. "settings.json" or
- * "superhive-pi-plan.json"). `extName` is the logical key
- * (e.g. "settings" or "superhive-pi-plan") — same value the
- * read/write-file channels take as `extName`. `exists` is true
- * when the file is on disk; canonical files always appear, even
- * with `exists: false`, so the renderer knows about all 4 slots
- * even on a fresh agent.
- */
-export interface TruthFileEntry {
-	fileName: string
-	extName: string
-	exists: boolean
-	managedBy: string | null
-	lastModified: string | null
-}
-
-export interface TruthReadResult {
-	/** Parsed JSON content (managedBy + lastModified stripped out). */
-	content: Record<string, unknown>
-	managedBy: string | null
-	lastModified: string | null
-}
-
-export interface TruthWriteInput {
-	/** Logical ext key, e.g. "superhive-pi-plan" or "superhive-pi-spawn". */
-	extName: string
-	/** Object to merge over the current file contents. */
-	patch: Record<string, unknown>
-}
-
-export interface TruthWriteResult {
-	ok: boolean
-	writtenVersion: number
-}
-
-/**
- * Phase C: generic truth-file IPC for the Manage tab's dynamic
- * per-extension sections. The main process doesn't know about
- * every extension in advance — it just lists, reads, and writes
- * files under <agentDir>/. Renderer-side dynamic sections use
- * known-exts.ts to render a typed UI for extensions it knows
- * about, and fall back to a raw JSON form for unknown ones.
- */
-export interface TruthAPI {
-	listFiles: (agentId: string) => Promise<TruthFileEntry[]>
-	readFile: (agentId: string, extName: string) => Promise<TruthReadResult | null>
-	writeFile: (agentId: string, input: TruthWriteInput) => Promise<TruthWriteResult>
-}
-
 export interface ElectronAPI {
 	agents: AgentsAPI
 	projects: ProjectsAPI
 	app: AppAPI
 	settings: SettingsAPI
 	tasks: TasksAPI
-	truth: TruthAPI
 	templates: TemplatesAPI
 }
 
