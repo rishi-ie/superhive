@@ -24,7 +24,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => goBackHome(navigate)}
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-sidebar-btn-text transition-colors hover:bg-sidebar-accent hover:text-sidebar-btn-text-hover hover:cursor-default"
             >
               <Icon icon={PaperPlaneTiltIcon} className="size-4" />
               <span>New Agent</span>
@@ -33,7 +33,7 @@ export function SidebarRepositories() {
           <SidebarMenuItem>
             <button
               type="button"
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-sidebar-btn-text transition-colors hover:bg-sidebar-accent hover:text-sidebar-btn-text-hover hover:cursor-default"
             >
               <Icon icon={HexagonIcon} className="size-4" />
               <span>Meta hive</span>
@@ -44,7 +44,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => setCommandPaletteOpen(true)}
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-sidebar-btn-text transition-colors hover:bg-sidebar-accent hover:text-sidebar-btn-text-hover hover:cursor-default"
             >
               <Icon icon={MagnifyingGlassIcon} className="size-4" />
               <span>Search</span>
@@ -54,7 +54,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => goToAgents(navigate)}
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-sidebar-btn-text transition-colors hover:bg-sidebar-accent hover:text-sidebar-btn-text-hover hover:cursor-default"
             >
               <Icon icon={UserIcon} className="size-4" />
               <span>Agents</span>
@@ -64,7 +64,7 @@ export function SidebarRepositories() {
             <button
               type="button"
               onClick={() => goToPlugins(navigate)}
-              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-foreground hover:cursor-default"
+              className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm text-sidebar-btn-text transition-colors hover:bg-sidebar-accent hover:text-sidebar-btn-text-hover hover:cursor-default"
             >
               <Icon icon={PuzzlePieceIcon} className="size-4" />
               <span>Marketplace</span>
