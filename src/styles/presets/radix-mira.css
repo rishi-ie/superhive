@@ -132,9 +132,11 @@
   --sidebar-bg: #181818;
   --font-geist: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-  /* Global UI density knob. Dial this number to scale the whole app
-   * (text, spacing, control heights). All other tokens read it. */
+  /* Global UI density knob. Scales spacing + control heights. Text reads --font-scale (independent). */
   --ui-scale: 1;
+
+  /* Font scale — scales text only. Independent of --ui-scale so spacing/controls stay compact. */
+  --font-scale: 1.10;
 
   color-scheme: light;
 }
@@ -323,21 +325,21 @@
   --font-heading: var(--font-sans);
   --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-  /* Scale Tailwind v4 defaults through --ui-scale so every text-* utility
-   * and every p-N / gap-N / m-N / w-N / h-N / inset-N / size-N utility
-   * (driven by --spacing) shrinks together. Line-height ratios are left
-   * untouched — they were already tight. */
+  /* Scale Tailwind v4 --spacing through --ui-scale so every p-N / gap-N / m-N
+   * / w-N / h-N / inset-N / size-N utility shrinks together. Text-* utilities
+   * are scaled independently via --font-scale below. Line-height ratios are
+   * left untouched — they were already tight. */
   --spacing: calc(0.25rem * var(--ui-scale));
-  --text-xs: calc(0.75rem * var(--ui-scale));
-  --text-sm: calc(0.875rem * var(--ui-scale));
-  --text-base: calc(1rem * var(--ui-scale));
-  --text-lg: calc(1.125rem * var(--ui-scale));
-  --text-xl: calc(1.25rem * var(--ui-scale));
-  --text-2xl: calc(1.5rem * var(--ui-scale));
-  --text-3xl: calc(1.875rem * var(--ui-scale));
-  --text-4xl: calc(2.25rem * var(--ui-scale));
-  --text-5xl: calc(3rem * var(--ui-scale));
-  --text-6xl: calc(3.75rem * var(--ui-scale));
+  --text-xs: calc(0.75rem * var(--font-scale));
+  --text-sm: calc(0.875rem * var(--font-scale));
+  --text-base: calc(1rem * var(--font-scale));
+  --text-lg: calc(1.125rem * var(--font-scale));
+  --text-xl: calc(1.25rem * var(--font-scale));
+  --text-2xl: calc(1.5rem * var(--font-scale));
+  --text-3xl: calc(1.875rem * var(--font-scale));
+  --text-4xl: calc(2.25rem * var(--font-scale));
+  --text-5xl: calc(3rem * var(--font-scale));
+  --text-6xl: calc(3.75rem * var(--font-scale));
 }
 
 @layer base {
