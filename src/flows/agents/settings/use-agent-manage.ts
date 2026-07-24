@@ -4,11 +4,12 @@
  * Mirror of `useAgentSettings` but targeting the `manage.json` truth file
  * (identity, behavior, permissions, skills/extensions/prompts/packages/
  * themes, planMode, project). Used by the right-sidebar Manage tab —
- * each MANAGE_SECTIONS row's `patch` and `flush` go through this hook.
+ * each MANAGE_SECTIONS row's `patch` goes through this hook.
  *
- * The flow is intentionally simpler than useAgentSettings: there's no
- * model pick + defaultProvider/defaultModel/enabledModels lockstep. The
- * patch shim just merges any (dotted-key) value into the manage object.
+ * Writes are immediate (no debounce). The main process's deep-merge +
+ * 3-attempt retry loop handles correctness. Text inputs add a
+ * per-component 250ms debounce so rapid typing doesn't trigger one
+ * IPC per keystroke.
  */
 
 import * as React from 'react'
@@ -21,14 +22,10 @@ export interface AgentManageSlice {
 	state: ManageFileState
 	isLoading: boolean
 	error: string | null
-	dirty: Record<string, unknown> | null
-	debounceTimer: NodeJS.Timeout | null
 	listeners: Set<() => void>
 }
 
 const slices = new Map<string, AgentManageSlice>()
-
-const DEBOUNCE_MS = 50
 
 function ensureSlice(agentId: string): AgentManageSlice {
 	const existing = slices.get(agentId)
@@ -37,8 +34,6 @@ function ensureSlice(agentId: string): AgentManageSlice {
 		state: null,
 		isLoading: false,
 		error: null,
-		dirty: null,
-		debounceTimer: null,
 		listeners: new Set(),
 	}
 	slices.set(agentId, slice)
@@ -113,70 +108,23 @@ export function useAgentManage(agentId: string | null) {
 
 	const patch = React.useCallback((key: string, value: unknown) => {
 		if (!agentId) return
-		const slice = slices.get(agentId)
-		if (!slice) return
-		if (!slice.dirty) slice.dirty = {}
-		const merged = deepMergeDotted(slice.dirty, key, value)
-		// For each top-level sub-key produced by the dotted merge, accumulate
-		// into `slice.dirty` (latter writes win, same shape as a JSON Merge
-		// Patch caller would build by hand).
-		if (merged && typeof merged === 'object' && !Array.isArray(merged)) {
-			for (const [k, v] of Object.entries(merged as Record<string, unknown>)) {
-				slice.dirty[k] = v
-			}
+		const s = slices.get(agentId)
+		if (!s) return
+		// Optimistic local state: deep-merge so siblings are preserved.
+		if (s.state) {
+			s.state = deepMergeDotted(s.state, key, value) as ManageFileState
 		}
-		// Optimistic: deep-merge the patched value into slice.state so
-		// controlled inputs (Identity Name, etc.) reflect the new value
-		// immediately. Mirrors the optimistic line in useAgentSettings.patch.
-		// Without this the input reverts to its pre-typed value on the next
-		// React reconciliation and the typed character flickers out.
-		if (slice.state) {
-			slice.state = deepMergeDotted(slice.state, key, value) as ManageFileState
-		}
-		if (slice.debounceTimer) clearTimeout(slice.debounceTimer)
-		slice.debounceTimer = setTimeout(async () => {
-			const cur = slices.get(agentId)
-			if (!cur || !cur.dirty || Object.keys(cur.dirty).length === 0) return
-			const p = cur.dirty
-			cur.dirty = null
-			cur.debounceTimer = null
-			try {
-				await agents.writeManage(agentId, p)
-				await reloadManage(agentId)
-			} catch (err) {
+		s.listeners.forEach((l) => l())
+		// Build the top-level partial patch (e.g. "behavior.autoCompaction" ->
+		// { behavior: { autoCompaction: false } }). The main process's
+		// deep-merge + 3-attempt retry loop handles correctness.
+		const partial = deepMergeDotted({}, key, value) as Record<string, unknown>
+		void agents
+			.writeManage(agentId, partial)
+			.then(() => reloadManage(agentId))
+			.catch((err: unknown) => {
 				toast.error(err instanceof Error ? err.message : 'Failed to save manage.json')
-			}
-		}, DEBOUNCE_MS)
-		slice.listeners.forEach((l) => l())
-	}, [agentId])
-
-	const flush = React.useCallback(async (p: Record<string, unknown>) => {
-		if (!agentId) return
-		const slice = slices.get(agentId)
-		if (!slice) return
-		if (slice.debounceTimer) {
-			clearTimeout(slice.debounceTimer)
-			slice.debounceTimer = null
-		}
-		const merged: Record<string, unknown> = slice.dirty
-			? { ...slice.dirty, ...p }
-			: { ...p }
-		// Optimistic: apply the explicit `p` to slice.state so any controlled
-		// inputs wired through this flush reflect the new values immediately.
-		// Use the same dotted-key merging as patch.
-		if (slice.state) {
-			for (const [k, v] of Object.entries(merged)) {
-				slice.state = deepMergeDotted(slice.state, k, v) as ManageFileState
-			}
-		}
-		slice.dirty = null
-		if (Object.keys(merged).length === 0) return
-		try {
-			await agents.writeManage(agentId, merged)
-			await reloadManage(agentId)
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : 'Failed to save manage.json')
-		}
+			})
 	}, [agentId])
 
 	const reload = React.useCallback(async () => {
@@ -184,12 +132,11 @@ export function useAgentManage(agentId: string | null) {
 		await reloadManage(agentId)
 	}, [agentId])
 
-	return { settings: state, isLoading, error, patch, flush, reload }
+	return { settings: state, isLoading, error, patch, reload }
 }
 
 export function disposeManageSliceNow(agentId: string): void {
 	const slice = slices.get(agentId)
 	if (!slice) return
-	if (slice.debounceTimer) clearTimeout(slice.debounceTimer)
 	slices.delete(agentId)
 }

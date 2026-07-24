@@ -201,7 +201,6 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
                   agentId={coordinatorId}
                   settings={coordinatorMergedManage}
                   patch={coordinatorManage.patch}
-                  flush={coordinatorManage.flush}
                 />
               ) : null}
             </div>
@@ -223,10 +222,9 @@ interface ManageSectionListProps {
   agentId: string;
   settings: Record<string, unknown>;
   patch: (key: string, value: unknown) => void;
-  flush: (p: Record<string, unknown>) => Promise<void>;
 }
 
-function ManageSectionList({ sections, agentId, settings, patch, flush }: ManageSectionListProps) {
+function ManageSectionList({ sections, agentId, settings, patch }: ManageSectionListProps) {
   const project = (settings.project ?? {}) as { id?: string };
   const isCoordinator = Boolean(project.id);
 
@@ -255,7 +253,6 @@ function ManageSectionList({ sections, agentId, settings, patch, flush }: Manage
               settings={settings}
               agentId={agentId}
               patch={patch}
-              flush={flush}
             />
           </div>
         );
