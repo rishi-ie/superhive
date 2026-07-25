@@ -164,13 +164,8 @@ export function AgentChatView() {
         retry={retry}
         onCancel={stop}
         agentId={agentId}
-        agentName={agent?.name}
         pendingTurn={pendingTurn}
         agentResponseActive={agentResponseActive}
-        onPromptSelect={(prompt) => {
-          setInput(prompt)
-          requestAnimationFrame(() => textareaRef.current?.focus())
-        }}
       />
       <div className="shrink-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">

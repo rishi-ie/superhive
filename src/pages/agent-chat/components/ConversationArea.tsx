@@ -4,7 +4,6 @@ import { AssistantMessage } from './AssistantMessage'
 import { MergedAssistantMessage } from './MergedAssistantMessage'
 import { cn } from '@/lib/utils'
 import { ActiveStateBanners } from './ActiveStateBanners'
-import { ChatEmptyState } from './SuggestedPrompts'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import type { AssistantMessage as PersistedAssistantMessage, ChatRow } from '@/models/assistant-message'
 import type { RuntimeAssistantState } from '@/models/runtime'
@@ -24,8 +23,6 @@ interface ConversationAreaProps {
   retry?: import('@/models/runtime').RetryStatus
   onCancel?: () => void
   agentId?: string
-  agentName?: string
-  onPromptSelect?: (prompt: string) => void
   /**
    * Optimistic sentinel set the instant the user sends a message. Renders as
    * a virtual "Waiting for response…" row at the end of the list —
@@ -52,8 +49,6 @@ export function ConversationArea({
   retry,
   onCancel,
   agentId,
-  agentName,
-  onPromptSelect,
   pendingTurn = null,
   agentResponseActive = false,
 }: ConversationAreaProps) {
@@ -184,12 +179,6 @@ export function ConversationArea({
     ),
     [],
   )
-
-  if (rows.length === 0 && !busy) {
-    return (
-      <ChatEmptyState agentName={agentName} onPromptSelect={onPromptSelect} />
-    )
-  }
 
   return (
     <div

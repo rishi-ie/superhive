@@ -229,10 +229,8 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
         retry={retry}
         onCancel={stop}
         agentId={projectAgent.id}
-        agentName={projectAgent.name}
         pendingTurn={pendingTurn}
         agentResponseActive={agentResponseActive}
-        onPromptSelect={() => undefined}
       />
       <div className="shrink-0"><ProjectChatComposer agentId={projectAgent.id} isBusy={isBusy} isLive={isLive} contextPercent={contextPercent} contextUsedTokens={contextUsedTokens} contextWindow={contextWindow} onSend={(input) => void send(input)} onStop={() => void stop()} /></div>
     </div>
