@@ -5,6 +5,7 @@ import { homedir } from 'node:os'
 import { queueWrite } from '../src/storage/queue-write'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import type { AssistantMessage, ChatRow, TimelineItem, UserMessage } from '../src/models/assistant-message'
+import { normalizeToolResult } from '../src/models/runtime'
 
 /**
  * Chat-history persistence lives inside the agent's own folder at
@@ -20,7 +21,7 @@ import type { AssistantMessage, ChatRow, TimelineItem, UserMessage } from '../sr
  *     and response blocks are normalized to `complete`.)
  *   - User messages persist immediately on send (handled by the runtime
  *     in `send()`).
- *   - Assistant messages persist only on `message-end` (handled by the
+ *   - Assistant messages persist only on `agent-end` (handled by the
  *     renderer's `agents.persistAssistantMessage` IPC → main process
  *     appendBatch).
  *
@@ -56,7 +57,7 @@ export async function append(chatPath: string, row: ChatRow): Promise<void> {
 
 /**
  * Append (or replace, by id) a batch of finalized rows. The hot path for
- * `message-end` → IPC → appendBatch: a single debounced write carries
+ * `agent-end` → IPC → appendBatch: a single debounced write carries
  * any queued finalized rows.
  *
  * Merges with the existing file by id so the same row flushed twice (a
@@ -309,6 +310,7 @@ export function migratePersistedRow(raw: unknown): ChatRow | null {
 function normalizeTimelineItem(raw: unknown): TimelineItem {
   const obj = raw as Record<string, unknown>
   const kind = obj.kind
+  const sequence = typeof obj.sequence === 'number' ? obj.sequence : undefined
   if (kind === 'thinking') {
     return {
       kind: 'thinking',
@@ -317,27 +319,38 @@ function normalizeTimelineItem(raw: unknown): TimelineItem {
       state: obj.state === 'streaming' ? 'streaming' : 'complete',
       startedAt: typeof obj.startedAt === 'number' ? obj.startedAt : 0,
       endedAt: typeof obj.endedAt === 'number' ? obj.endedAt : 0,
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   if (kind === 'tool-call') {
+    const result = Array.isArray(obj.result) ? normalizeToolResult(obj.result) : undefined
     return {
       kind: 'tool-call',
       id: typeof obj.id === 'string' ? obj.id : `tc-${Math.random()}`,
       toolName: typeof obj.toolName === 'string' ? obj.toolName : '',
+      target: typeof obj.target === 'string' ? obj.target : undefined,
       state:
         obj.state === 'pending'
           ? 'pending'
           : obj.state === 'streaming-args'
             ? 'streaming-args'
+            : obj.state === 'running'
+              ? 'running'
+              : obj.state === 'error'
+                ? 'error'
             : 'complete',
       startedAt: typeof obj.startedAt === 'number' ? obj.startedAt : 0,
       endedAt: typeof obj.endedAt === 'number' ? obj.endedAt : null,
+      ...(typeof obj.error === 'string' ? { error: obj.error } : {}),
+      ...(result ? { result } : {}),
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   if (kind === 'completion') {
     return {
       kind: 'completion',
       id: typeof obj.id === 'string' ? obj.id : `c-${Math.random()}`,
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   if (kind === 'warning') {
@@ -345,6 +358,7 @@ function normalizeTimelineItem(raw: unknown): TimelineItem {
       kind: 'warning',
       id: typeof obj.id === 'string' ? obj.id : `w-${Math.random()}`,
       message: typeof obj.message === 'string' ? obj.message : '',
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   if (kind === 'error') {
@@ -352,6 +366,7 @@ function normalizeTimelineItem(raw: unknown): TimelineItem {
       kind: 'error',
       id: typeof obj.id === 'string' ? obj.id : `e-${Math.random()}`,
       message: typeof obj.message === 'string' ? obj.message : '',
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   if (kind === 'system') {
@@ -359,12 +374,16 @@ function normalizeTimelineItem(raw: unknown): TimelineItem {
       kind: 'system',
       id: typeof obj.id === 'string' ? obj.id : `s-${Math.random()}`,
       message: typeof obj.message === 'string' ? obj.message : '',
+      ...(sequence !== undefined ? { sequence } : {}),
     }
   }
   return {
     kind: 'planning',
     id: typeof obj.id === 'string' ? obj.id : `p-${Math.random()}`,
-    text: typeof obj.text === 'string' ? obj.text : '',
+    summary: typeof obj.summary === 'string' ? obj.summary : typeof obj.text === 'string' ? obj.text : '',
+    startedAt: typeof obj.startedAt === 'number' ? obj.startedAt : 0,
+    endedAt: typeof obj.endedAt === 'number' ? obj.endedAt : 0,
+    ...(sequence !== undefined ? { sequence } : {}),
   }
 }
 
@@ -377,12 +396,14 @@ function normalizeResponseBlocks(raw: unknown[]): AssistantMessage['response'] {
     // written before the field existed will lack it — pin them to 0 so
     // they sort to the top rather than NaN-comparing and breaking the sort.
     const startedAt = typeof obj.startedAt === 'number' ? obj.startedAt : 0
+    const sequence = typeof obj.sequence === 'number' ? obj.sequence : undefined
     if (obj.type === 'text') {
       out.push({
         type: 'text',
         text: typeof obj.text === 'string' ? obj.text : '',
         state: obj.state === 'streaming' ? 'streaming' : 'complete',
         startedAt,
+        ...(sequence !== undefined ? { sequence } : {}),
       })
     } else if (obj.type === 'image') {
       out.push({
@@ -391,6 +412,7 @@ function normalizeResponseBlocks(raw: unknown[]): AssistantMessage['response'] {
         mimeType:
           typeof obj.mimeType === 'string' ? obj.mimeType : 'application/octet-stream',
         startedAt,
+        ...(sequence !== undefined ? { sequence } : {}),
       })
     } else if (obj.type === 'compaction-summary') {
       out.push({
@@ -398,6 +420,7 @@ function normalizeResponseBlocks(raw: unknown[]): AssistantMessage['response'] {
         tokensBefore: typeof obj.tokensBefore === 'number' ? obj.tokensBefore : 0,
         summary: typeof obj.summary === 'string' ? obj.summary : '',
         startedAt,
+        ...(sequence !== undefined ? { sequence } : {}),
       })
     }
   }

@@ -7,8 +7,8 @@
  *     is a `RuntimeAssistantState` with three coordinated surfaces:
  *     `parts` (internal mutation target — never persisted), `activityTimeline`
  *     (the chain metadata), and `response` (the assistant prose).
- *   - `slice.messages: ChatRow[]` only grows on freeze (via `finalize-message`,
- *     `set-frozen`, or `append-error`). It contains finalized rows only.
+ *   - `slice.messages: ChatRow[]` grows at `agent-end` (or an explicit error).
+ *     It contains finalized rows only.
  *   - `freezeAssistantState` + `buildAssistantMessage` are the two-step
  *     converter from in-flight → persisted. Called by the slice's notify
  *     path when `inFlight.frozen` becomes true.
@@ -155,7 +155,7 @@ export function freezeAssistantState(
       return item.endedAt === 0 ? { ...item, endedAt } : item
     }
     if (item.kind === 'tool-call') {
-      if (item.state !== 'complete') {
+      if (item.state !== 'complete' && item.state !== 'error') {
         return { ...item, state: 'complete', endedAt }
       }
       return item.endedAt === null ? { ...item, endedAt } : item
@@ -218,7 +218,7 @@ function withInFlight(
   messageId: string,
   mutator: (state: RuntimeAssistantState) => RuntimeAssistantState | null,
 ): boolean {
-  if (!slice.inFlight || slice.inFlight.id !== messageId) return false
+  if (!slice.inFlight || slice.inFlight.sourceMessageId !== messageId) return false
   const next = mutator(slice.inFlight)
   if (next === null) return false
   slice.inFlight = next
@@ -228,6 +228,7 @@ function withInFlight(
 function appendThinkingTimelineItem(
   state: RuntimeAssistantState,
   startedAt: number,
+  sequence: number,
 ): ThinkingTimelineItem {
   return {
     kind: 'thinking',
@@ -236,12 +237,14 @@ function appendThinkingTimelineItem(
     state: 'streaming',
     startedAt,
     endedAt: 0,
+    sequence,
   }
 }
 
 function appendToolCallTimelineItem(
   _state: RuntimeAssistantState,
   startedAt: number,
+  sequence: number,
   toolCallId: string,
   toolName: string,
 ): ToolCallTimelineItem {
@@ -252,7 +255,28 @@ function appendToolCallTimelineItem(
     state: 'pending',
     startedAt,
     endedAt: null,
+    sequence,
   }
+}
+
+/** Keep the activity UI useful without persisting raw tool arguments. */
+function getToolTarget(toolName: string, args: unknown): string | undefined {
+  if (!args || typeof args !== 'object') return undefined
+  const value = (key: string) => {
+    const candidate = (args as Record<string, unknown>)[key]
+    return typeof candidate === 'string' && candidate.trim() ? candidate.trim() : undefined
+  }
+  const target =
+    toolName === 'bash'
+      ? value('command')
+      : toolName === 'grep' || toolName === 'find'
+        ? value('pattern') ?? value('query')
+        : toolName === 'web_search' || toolName === 'fetch'
+          ? value('query') ?? value('searchQuery') ?? value('url')
+          : toolName === 'set_project_current_work'
+            ? value('summary')
+            : value('path')
+  return target ? target.replace(/\s+/g, ' ').slice(0, 120) : undefined
 }
 
 // ---------------------------------------------------------------------------
@@ -262,16 +286,20 @@ function appendToolCallTimelineItem(
 function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
   switch (op.kind) {
     case 'message-start': {
-      // Initialize inFlight. If the same id is already in messages (rare —
-      // would mean the main process emitted a finalized row whose id
-      // matches an in-flight slot), skip.
-      if (slice.inFlight && slice.inFlight.id === op.messageId) return
+      // Pi can emit several assistant messages around tool calls. They are
+      // one user-visible response run, so only the source-message id changes.
+      if (slice.inFlight && !slice.inFlight.frozen) {
+        slice.inFlight = { ...slice.inFlight, sourceMessageId: op.messageId }
+        return
+      }
       if (slice.messages.some((m) => m.id === op.messageId)) return
-      const startedAt = slice.lastResponseStart ?? Date.now()
+      const startedAt = Date.now()
       slice.lastResponseStart = null
       slice.inFlight = {
         id: op.messageId,
         role: op.role,
+        sourceMessageId: op.messageId,
+        nextSequence: 0,
         ts: startedAt,
         parts: [],
         activityTimeline: [],
@@ -305,14 +333,18 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         const parts = [...state.parts, part]
         let activityTimeline = state.activityTimeline
         let response = state.response
+        const sequence = state.nextSequence
+        let nextSequence = sequence
 
         if (op.part.type === 'thinking') {
-          activityTimeline = [...activityTimeline, appendThinkingTimelineItem(state, now)]
+          activityTimeline = [...activityTimeline, appendThinkingTimelineItem(state, now, sequence)]
+          nextSequence++
         } else if (op.part.type === 'tool-call') {
           activityTimeline = [
             ...activityTimeline,
-            appendToolCallTimelineItem(state, now, op.part.id, op.part.name),
+            appendToolCallTimelineItem(state, now, sequence, op.part.id, op.part.name),
           ]
+          nextSequence++
         } else if (op.part.type === 'text') {
           response = [
             ...response,
@@ -321,8 +353,10 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               text: op.part.text,
               state: op.part.state ?? 'streaming',
               startedAt: now,
+              sequence,
             },
           ]
+          nextSequence++
         } else if (op.part.type === 'image') {
           response = [
             ...response,
@@ -331,8 +365,10 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               data: op.part.data,
               mimeType: op.part.mimeType,
               startedAt: now,
+              sequence,
             },
           ]
+          nextSequence++
         } else if (op.part.type === 'compaction-summary') {
           response = [
             ...response,
@@ -341,10 +377,12 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               tokensBefore: op.part.tokensBefore,
               summary: op.part.summary,
               startedAt: now,
+              sequence,
             },
           ]
+          nextSequence++
         }
-        return { ...state, parts, activityTimeline, response }
+        return { ...state, parts, activityTimeline, response, nextSequence }
       })
       return
     }
@@ -354,10 +392,13 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         const parts = [...state.parts]
         const activityTimeline = [...state.activityTimeline]
         const response = [...state.response]
+        let nextSequence = state.nextSequence
 
         if (op.partType === 'text') {
           const last = response[response.length - 1]
-          if (last && last.type === 'text') {
+          const lastPart = parts[parts.length - 1]
+          const continuesText = lastPart?.type === 'text'
+          if (continuesText && last && last.type === 'text') {
             // Extend the trailing text block. Spread preserves startedAt —
             // subsequent deltas don't shift the block's position in the
             // chronological order.
@@ -374,11 +415,11 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               text: op.delta,
               state: 'streaming',
               startedAt: Date.now(),
+              sequence: nextSequence++,
             })
           }
           // Mirror into parts[] — same rule.
-          const lastPart = parts[parts.length - 1]
-          if (lastPart && lastPart.type === 'text') {
+          if (continuesText && lastPart?.type === 'text') {
             parts[parts.length - 1] = {
               ...lastPart,
               text: lastPart.text + op.delta,
@@ -412,12 +453,12 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
               state: 'streaming',
             }
           } else {
-            const fresh = appendThinkingTimelineItem(state, Date.now())
+            const fresh = appendThinkingTimelineItem(state, Date.now(), nextSequence++)
             fresh.text = op.delta
             activityTimeline.push(fresh)
           }
         }
-        return { ...state, parts, activityTimeline, response }
+        return { ...state, parts, activityTimeline, response, nextSequence }
       })
       return
     }
@@ -438,6 +479,28 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
           return item
         })
         return { ...state, parts, activityTimeline }
+      })
+      return
+    }
+
+    case 'append-activity-summary': {
+      withInFlight(slice, op.messageId, (state) => {
+        const now = Date.now()
+        return {
+          ...state,
+          activityTimeline: [
+            ...state.activityTimeline,
+            {
+              kind: 'planning' as const,
+              id: `planning-${now}-${state.activityTimeline.length}`,
+              summary: op.summary.slice(0, 160),
+              startedAt: now,
+              endedAt: now,
+              sequence: state.nextSequence,
+            },
+          ],
+          nextSequence: state.nextSequence + 1,
+        }
       })
       return
     }
@@ -475,7 +538,6 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
 
     case 'finalize-tool-call': {
       withInFlight(slice, op.messageId, (state) => {
-        const now = Date.now()
         const parts = state.parts.map((p) => {
           if (p.type === 'tool-call' && p.id === op.toolCallId) {
             return { ...p, args: op.args, state: 'complete' as const }
@@ -484,7 +546,13 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         })
         const activityTimeline = state.activityTimeline.map((item) => {
           if (item.kind === 'tool-call' && item.id === `toolcall-${op.toolCallId}`) {
-            return { ...item, state: 'complete' as const, endedAt: now }
+            // The model finished producing arguments; the host may still be executing.
+            return {
+              ...item,
+              target: getToolTarget(item.toolName, op.args),
+              state: item.state === 'running' ? 'running' as const : 'pending' as const,
+              endedAt: null,
+            }
           }
           return item
         })
@@ -493,14 +561,39 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
       return
     }
 
+    case 'start-tool-execution': {
+      if (!slice.inFlight) return
+      const parts = slice.inFlight.parts.map((part) =>
+        part.type === 'tool-call' && part.id === op.toolCallId
+          ? { ...part, args: op.args, state: 'running' as const }
+          : part,
+      )
+      const activityTimeline = slice.inFlight.activityTimeline.map((item) =>
+        item.kind === 'tool-call' && item.id === `toolcall-${op.toolCallId}`
+          ? {
+              ...item,
+              target: getToolTarget(op.name, op.args),
+              state: 'running' as const,
+              endedAt: null,
+            }
+          : item,
+      )
+      slice.inFlight = { ...slice.inFlight, parts, activityTimeline }
+      return
+    }
+
     case 'finalize-tool-result': {
-      // Mutate inFlight.parts[] only (per spec — UI drops tool output).
-      // Tool-result is never mirrored to activityTimeline or response.
+      // Keep the raw result in parts and its normalized form on the activity
+      // row. The UI reveals that row only when the frozen State 2 trace opens.
       // `finalize-tool-result` carries no `messageId`; the in-flight
       // assistant message is the only place tool-results can land.
       if (!slice.inFlight) return
       const toolCallId = op.toolCallId
-      const parts = slice.inFlight.parts.slice()
+      let parts = slice.inFlight.parts.map((part) =>
+        part.type === 'tool-call' && part.id === toolCallId
+          ? { ...part, state: op.isError ? 'error' as const : 'complete' as const }
+          : part,
+      )
       const toolResultPart: ContentPart = {
         type: 'tool-result',
         id: toolCallId,
@@ -521,35 +614,48 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         if (toolCallIdx === -1) return
         parts.splice(toolCallIdx + 1, 0, toolResultPart)
       }
-      slice.inFlight = { ...slice.inFlight, parts }
+      const activityTimeline = slice.inFlight.activityTimeline.map((item) =>
+        item.kind === 'tool-call' && item.id === `toolcall-${toolCallId}`
+          ? {
+              ...item,
+              state: op.isError ? 'error' as const : 'complete' as const,
+              endedAt: Date.now(),
+              ...(op.isError ? { error: 'Tool execution failed' } : {}),
+              result: op.result,
+            }
+          : item,
+      )
+      slice.inFlight = { ...slice.inFlight, parts, activityTimeline }
       return
     }
 
     case 'finalize-message': {
-      // Freeze + build + push + clear in one shot.
-      if (!slice.inFlight || slice.inFlight.id !== op.messageId || slice.inFlight.frozen) return
-      const frozen = freezeAssistantState(slice.inFlight, {
-        model: op.model,
-        usage: op.usage,
-      })
-      const message = buildAssistantMessage(frozen)
-      slice.messages = [...slice.messages, message]
-      slice.inFlight = null
+      // This ends a Pi sub-turn, not the user's response. Keep the run alive
+      // until the adapter reports `agent-end`.
+      if (!slice.inFlight || slice.inFlight.sourceMessageId !== op.messageId || slice.inFlight.frozen) return
+      slice.inFlight = {
+        ...slice.inFlight,
+        sourceMessageId: undefined,
+        usage: op.usage ?? slice.inFlight.usage,
+      }
       return
     }
 
     case 'agent-end': {
-      // End of the agent's response to the current user prompt.
-      // Clears the response-active sentinel so the per-message footer
-      // (copy + timestamp + usage) can render. Idempotent — repeated
-      // `agent-end` events are safe.
+      // This is the only State 1 → State 2 boundary. It captures the exact
+      // elapsed duration, then persists one complete response run.
+      if (slice.inFlight && !slice.inFlight.frozen) {
+        const frozen = freezeAssistantState(slice.inFlight)
+        slice.messages = [...slice.messages, buildAssistantMessage(frozen)]
+        slice.inFlight = null
+      }
       slice.agentResponseActive = false
       return
     }
 
     case 'set-frozen': {
-      // Force-freeze (e.g. 60s safety net) without model/usage. The slice's
-      // notify path detects inFlight.frozen and pushes to messages.
+      // Explicit recovery freeze without model/usage. The slice's notify path
+      // detects inFlight.frozen and pushes the finalized message to disk.
       if (!slice.inFlight || slice.inFlight.id !== op.messageId || slice.inFlight.frozen) return
       slice.inFlight = freezeAssistantState(slice.inFlight)
       return

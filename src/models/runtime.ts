@@ -7,12 +7,12 @@
  *     `slice.inFlight`; cleared on dispose.
  *   - `AssistantMessage` is the persisted shape (see `./assistant-message`).
  *   - The on-disk shape and the runtime shape are distinct objects; the
- *     freeze step on `message-end` is the one-shot builder that converts
+ *     freeze step on `agent-end` is the one-shot builder that converts
  *     one into the other.
  *
  * Two persist routes:
  *   - User messages persist immediately on send (handled by main process).
- *   - Assistant messages persist only on `message-end`, in one atomic write
+ *   - Assistant messages persist only on `agent-end`, in one atomic write
  *     carrying the finalized `AssistantMessage` — fired by the renderer's
  *     `agents.persistAssistantMessage` IPC after `buildAssistantMessage`.
  *
@@ -57,7 +57,7 @@ export interface MessageUsage {
 /**
  * One structured piece of an assistant message in flight. The queue
  * mutates these as Pi streams events. **Internal to the queue pipeline;
- * never reaches disk.** The freeze step on `message-end` reads from
+ * never reaches disk.** The freeze step on `agent-end` reads from
  * `RuntimeAssistantState.parts` only to derive the `activityTimeline`
  * (thinking + tool-call rows) and `response` (text + image + compaction
  * blocks) before discarding the parts array.
@@ -79,7 +79,7 @@ export type ContentPart =
       id: string
       name: string
       args: unknown
-      state: 'pending' | 'streaming-args' | 'complete'
+      state: 'pending' | 'streaming-args' | 'running' | 'complete' | 'error'
     }
   | {
       type: 'tool-result'
@@ -135,6 +135,10 @@ export interface RuntimeAssistantState {
   id: string
   ts: number
   role: 'user' | 'assistant'
+  /** Pi's current assistant-message id. Multiple Pi turns share this run. */
+  sourceMessageId?: string
+  /** Assigns a stable cross-surface order to status and prose events. */
+  nextSequence: number
   /**
    * Internal queue mutation target. The freeze step derives the
    * persisted shape from this. **Never persisted.** Tool-result parts
@@ -148,13 +152,13 @@ export interface RuntimeAssistantState {
    */
   activityTimeline: TimelineItem[]
   /**
-   * Live response blocks. Populated by the queue ops. Streams
-   * alongside `parts` but stays hidden in state 1.
+ * Live response blocks. Populated by the queue ops and rendered below the
+ * compact State 1 activity card.
    */
   response: ResponseBlock[]
   /**
    * Total wall-clock duration in ms. Set by the freeze step on
-   * `message-end`. Surfaced as the `▶ Thought (3.2s)` label.
+   * `agent-end`. Surfaced as the `Worked for …` duration.
    */
   totalDurationMs?: number
   /**
@@ -239,7 +243,7 @@ export function isMessageInFlight(state: RuntimeAssistantState): boolean {
       if (part.state === 'streaming') return true
     }
     if (part.type === 'tool-call') {
-      if (part.state !== 'complete') return true
+      if (part.state !== 'complete' && part.state !== 'error') return true
       const hasResult = state.parts.some(
         (p) =>
           p.type === 'tool-result' &&
@@ -270,7 +274,7 @@ export function getMessageStartedAt(state: RuntimeAssistantState): number {
 export function getActiveToolSummary(state: RuntimeAssistantState): string | null {
   const inFlight = state.parts.filter(
     (p): p is Extract<ContentPart, { type: 'tool-call' }> =>
-      p.type === 'tool-call' && p.state !== 'complete',
+      p.type === 'tool-call' && p.state !== 'complete' && p.state !== 'error',
   )
   if (inFlight.length === 0) return null
   return `Running ${inFlight.length} tool${inFlight.length === 1 ? '' : 's'}…`
@@ -410,11 +414,24 @@ export type StreamOp =
       args: unknown
     }
   | {
+      kind: 'append-activity-summary'
+      agentId: string
+      messageId: string
+      summary: string
+    }
+  | {
       kind: 'finalize-tool-result'
       agentId: string
       toolCallId: string
       result: ToolResultContent[]
       isError: boolean
+    }
+  | {
+      kind: 'start-tool-execution'
+      agentId: string
+      toolCallId: string
+      name: string
+      args: unknown
     }
   | {
       kind: 'finalize-message'

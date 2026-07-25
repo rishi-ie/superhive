@@ -183,18 +183,8 @@ export interface RuntimeSlice {
   pendingTurn: { userMessageId: string; startedAt: number } | null
   pendingTurnTimeoutId?: ReturnType<typeof setTimeout>
   /**
-   * 60s safety-net timer for frozen freeze. Set by `startFrozenSafetyNet`
-   * when a new in-flight assistant message begins streaming (on
-   * `message-start` op). Cleared on `finalize-message` op or when the slice
-   * is disposed. If the timer fires, it enqueues a `set-frozen` op to
-   * force-freeze the message so the renderer can transition state 1 →
-   * state 2.
-   */
-  frozenSafetyNetTimer?: ReturnType<typeof setTimeout>
-  /**
-   * Set by `useAgentRuntime.send` to the same `startedAt` as `pendingTurn`.
-   * Read+cleared by the queue's `message-start` op to set the new assistant
-   * message's `ts` to the user-send time.
+   * Set by `useAgentRuntime.send` while waiting for the first assistant
+   * event. Cleared by `message-start`; it is not used as the work timer.
    */
   lastResponseStart: number | null
   /**

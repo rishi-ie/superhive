@@ -89,6 +89,7 @@ export function translateEventToOps(
       ]
 
     case 'tool-call-start':
+      if (event.name === 'report_activity') return []
       return [
         {
           kind: 'append-part',
@@ -116,6 +117,14 @@ export function translateEventToOps(
       ]
 
     case 'tool-call-end':
+      if (event.name === 'report_activity') {
+        const summary = event.args && typeof event.args === 'object'
+          ? (event.args as Record<string, unknown>).summary
+          : undefined
+        return typeof summary === 'string' && summary.trim()
+          ? [{ kind: 'append-activity-summary', agentId, messageId: event.messageId, summary: summary.trim() }]
+          : []
+      }
       return [
         {
           kind: 'finalize-tool-call',
@@ -127,7 +136,16 @@ export function translateEventToOps(
       ]
 
     case 'tool-execution-start':
-      return [{ kind: 'increment-inflight', agentId, delta: 1 }]
+      return [
+        { kind: 'increment-inflight', agentId, delta: 1 },
+        {
+          kind: 'start-tool-execution',
+          agentId,
+          toolCallId: event.toolCallId,
+          name: event.name,
+          args: event.args,
+        },
+      ]
 
     case 'tool-execution-end':
       return [

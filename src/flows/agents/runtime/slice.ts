@@ -10,9 +10,6 @@
  *     when `inFlight.frozen === true`, build the AssistantMessage, push to
  *     `slice.messages`, clear `inFlight`. Then fire the
  *     `agents.persistAssistantMessage` IPC for every unfrozen-id row.
- *   - The 60s safety net (renamed from `lineageSafetyNetTimer` →
- *     `frozenSafetyNetTimer`) enqueues `set-frozen` if the freeze never
- *     lands.
  *
  * Owns:
  *   - The `runtimeSlices` Map (keyed by agentId, survives component unmount).
@@ -38,11 +35,10 @@ import {
 import { translateEventToOps } from './event-translator'
 
 /**
- * 60s safety net: if `finalize-message` op never lands for an in-flight
- * assistant message (agent crash, dropped event, lost connection),
- * force-freeze after 60s so the renderer can transition state 1 → state 2.
+ * Pi's `agent-end` is the only successful response completion signal. Errors
+ * and process exits have their own explicit paths; an elapsed-time watchdog
+ * must never turn legitimate long-running work into a false completion.
  */
-const FROZEN_SAFETY_NET_MS = 60_000
 
 const runtimeSlices = new Map<string, RuntimeSlice>()
 
@@ -67,7 +63,6 @@ export function disposeRuntimeSliceNow(agentId: string): void {
     clearTimeout(slice.pendingTurnTimeoutId)
     slice.pendingTurnTimeoutId = undefined
   }
-  clearFrozenSafetyNet(slice)
   slice.pendingTurn = null
   slice.lastResponseStart = null
   slice.agentResponseActive = false
@@ -81,9 +76,6 @@ export function disposeRuntimeSliceNow(agentId: string): void {
  * and IPC them to the main process for persistence. Idempotent via the
  * `persistedFrozenMessages` set so re-renders don't re-fire the IPC.
  *
- * Also drives the 60s frozen safety net: when a new in-flight assistant
- * message begins streaming, start the timer. When the message freezes,
- * clear the timer.
  */
 function persistFrozenMessages(slice: RuntimeSlice, agentId: string): void {
   for (const m of slice.messages) {
@@ -98,34 +90,6 @@ function persistFrozenMessages(slice: RuntimeSlice, agentId: string): void {
         err,
       )
     })
-  }
-  // Manage the 60s safety net.
-  if (slice.inFlight && !slice.inFlight.frozen) {
-    if (!slice.frozenSafetyNetTimer) {
-      startFrozenSafetyNet(slice, agentId)
-    }
-  } else {
-    clearFrozenSafetyNet(slice)
-  }
-}
-
-function startFrozenSafetyNet(slice: RuntimeSlice, agentId: string): void {
-  if (slice.frozenSafetyNetTimer) return
-  slice.frozenSafetyNetTimer = setTimeout(() => {
-    const entry = runtimeSlices.get(agentId)
-    if (!entry?.inFlight || entry.inFlight.frozen) return
-    enqueue({
-      kind: 'set-frozen',
-      agentId,
-      messageId: entry.inFlight.id,
-    })
-  }, FROZEN_SAFETY_NET_MS)
-}
-
-function clearFrozenSafetyNet(slice: RuntimeSlice): void {
-  if (slice.frozenSafetyNetTimer) {
-    clearTimeout(slice.frozenSafetyNetTimer)
-    slice.frozenSafetyNetTimer = undefined
   }
 }
 
@@ -153,7 +117,6 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     inFlightToolCount: 0,
     pendingTurn: null,
     pendingTurnTimeoutId: undefined,
-    frozenSafetyNetTimer: undefined,
     lastResponseStart: null,
     agentResponseActive: false,
     persistedFrozenMessages: new Set(),
@@ -262,7 +225,6 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
                 clearTimeout(e.pendingTurnTimeoutId)
                 e.pendingTurnTimeoutId = undefined
               }
-              clearFrozenSafetyNet(e)
               e.pendingTurn = null
               e.lastResponseStart = null
             }

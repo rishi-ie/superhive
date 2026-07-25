@@ -5,25 +5,24 @@ See `src/models/assistant-message.ts` for the persisted shape (`activityTimeline
 
 ## Layout
 
-`AssistantMessage` renders an indicator, a single chronologically-ordered list,
-and a footer per assistant turn. The timeline items and prose blocks are
-merged into one list sorted by `startedAt`, so prose that arrived between two
-thinking/tool-call rounds renders between them.
+`AssistantMessage` renders one response run per user prompt. It stays live
+across Pi's individual message turns, then freezes into one duration header,
+collapsible trace, final prose, and footer.
 
-1. **Top indicator** — `● Working…` (state 1) or `✓ Finished` (state 2). Always
-   visible at the top of the message. Scrolls with the row (not sticky to
-   viewport). The finished marker is here ONLY — there is no second
-   "Completed" row at the end of the lineage anymore.
-2. **Merged lineage + prose** — one ordered list combining:
+1. **Live status (State 1)** — `Working for …`, a divider, prose in arrival
+   order, then one current action and Stop. Each new action replaces the
+   previous one. It does not render raw thinking or full tool output.
+2. **Activity + prose (State 2)** — `Worked for …` has a chevron; expanding it
+   reveals the trace above final prose:
    - **Activity timeline** (`message.activityTimeline`) — one row per item,
      type-driven:
-     - `thinking` — `Thought (N.Ns)` collapsed (click to expand). Same
-       total-duration label for every thinking row in one response.
+     - `thinking` — `Thought`; raw thinking is never displayed or persisted.
      - `tool-call` — compact `<verb>` row. Consecutive tool-calls are
        clustered into a single `<ToolCallGroupRow>` via `group-timeline-items`.
      - `warning` — `⚠ <message>`. `error` — `❌ <message>`. Non-expandable.
-     - `planning` / `system` — defined but never emitted today.
-   - **Response blocks** (`message.response`) — only shown when frozen (state 2):
+     - `planning` — an explicit, user-facing `report_activity` summary.
+   - **Response blocks** (`message.response`) — stream below the live header,
+     then render as final Markdown once frozen:
      - `text` → `<MarkdownPart>`
      - `image` → `<ImagePart>`
      - `compaction-summary` → `<CompactionCard>`
@@ -31,8 +30,8 @@ thinking/tool-call rounds renders between them.
    timestamp tooltip, `<UsageFooter>`. Always last; never appears between
    the lineage and prose.
 
-In state 1, response blocks are filtered out. Only the indicator + timeline
-items show.
+In State 1, the trace is replaced by the one-line live status; streaming text
+remains visible above it.
 
 ## Files
 
@@ -55,8 +54,7 @@ message-parts/
 
 ## Memoization (Phase F)
 
-- `TimelineItemRow` is `React.memo`'d on `(item, frozen, totalDurationMs)`
-  reference equality.
+- `TimelineItemRow` is `React.memo`'d on `(item, frozen)` reference equality.
 - `ToolCallGroupRow` is `React.memo`'d on `(items, frozen)` reference equality.
 
 The comparator's reference-equality on `blocks` and `item` only works because

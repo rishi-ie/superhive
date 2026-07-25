@@ -12,7 +12,7 @@ import { isMessageInFlight } from '@/models/runtime'
 
 type Row =
   | { kind: 'message'; message: ChatRow }                       // user message (non-assistant) only
-  | { kind: 'merged-assistant'; messages: PersistedAssistantMessage[] }
+  | { kind: 'merged-assistant'; messages: PersistedAssistantMessage[]; inFlight?: RuntimeAssistantState }
   | { kind: 'in-flight'; message: RuntimeAssistantState }
   | { kind: 'pending'; id: string; startedAt: number }
 
@@ -59,7 +59,9 @@ export function ConversationArea({
 }: ConversationAreaProps) {
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null)
   const [atBottom, setAtBottom] = React.useState(true)
+  const [unseenUpdates, setUnseenUpdates] = React.useState(0)
   const seenIdsRef = React.useRef<Set<string>>(new Set())
+  const liveUpdateKeyRef = React.useRef<string | null>(null)
   const [freshIds, setFreshIds] = React.useState<Set<string>>(new Set())
 
   const rows: Row[] = React.useMemo(() => {
@@ -98,6 +100,8 @@ export function ConversationArea({
     const alreadyInMessages =
       inFlightId !== undefined && messages.some((m) => m.id === inFlightId)
     if (inFlight && !alreadyInMessages) {
+      // A new run has no persisted assistant row yet. Keep it separate from
+      // the prior reply so only this response receives the live timer.
       out.push({ kind: 'in-flight', message: inFlight })
     }
 
@@ -107,7 +111,8 @@ export function ConversationArea({
     // stack a "Waiting for response…" placeholder on top.
     const tail = out[out.length - 1]
     const tailIsInFlightAssistant =
-      tail?.kind === 'in-flight' && isMessageInFlight(tail.message)
+      (tail?.kind === 'in-flight' && isMessageInFlight(tail.message)) ||
+      (tail?.kind === 'merged-assistant' && tail.inFlight !== undefined && isMessageInFlight(tail.inFlight))
 
     if (pendingTurn && !tailIsInFlightAssistant) {
       out.push({
@@ -146,19 +151,29 @@ export function ConversationArea({
 
   const onAtBottomChange = React.useCallback((bottom: boolean) => {
     setAtBottom(bottom)
+    if (bottom) setUnseenUpdates(0)
   }, [])
 
   React.useEffect(() => {
-    if (!busy) return
+    const key = inFlight
+      ? `${inFlight.activityTimeline.map((item) => `${item.id}:${'state' in item ? item.state : ''}`).join('|')}:${inFlight.response.length}`
+      : ''
+    const previous = liveUpdateKeyRef.current
+    liveUpdateKeyRef.current = key
+    if (!busy || atBottom || previous === null || previous === key) return
+    setUnseenUpdates((count) => Math.min(99, count + 1))
+  }, [atBottom, busy, inFlight])
+
+  React.useEffect(() => {
+		if (!busy || !atBottom) return
     if (rows.length === 0) return
-    setAtBottom(true)
     requestAnimationFrame(() => {
       virtuosoRef.current?.scrollToIndex({
         index: rows.length - 1,
         align: 'end',
       })
     })
-  }, [busy, rows])
+	}, [atBottom, busy, rows])
 
   const Scroller = React.useCallback(
     (props: React.HTMLAttributes<HTMLDivElement>) => (
@@ -219,6 +234,7 @@ export function ConversationArea({
                   message={row.message}
                   agentId={agentId ?? ''}
                   agentResponseActive={agentResponseActive}
+                  onCancel={onCancel}
                   className={
                     freshIds.has(row.message.id)
                       ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
@@ -237,6 +253,8 @@ export function ConversationArea({
                   messages={row.messages}
                   agentId={agentId ?? ''}
                   agentResponseActive={agentResponseActive}
+                  onCancel={onCancel}
+                  inFlight={row.inFlight}
                   className={
                     isFresh
                       ? 'animate-in fade-in-0 slide-in-from-bottom-2 duration-200'
@@ -269,6 +287,19 @@ export function ConversationArea({
           />
         </div>
       ) : null}
+		{!atBottom && busy ? (
+			<button
+				type="button"
+				onClick={() => {
+					setAtBottom(true)
+					setUnseenUpdates(0)
+					virtuosoRef.current?.scrollToIndex({ index: Math.max(0, rows.length - 1), align: 'end', behavior: 'smooth' })
+				}}
+				className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-sm hover:text-foreground"
+			>
+				Jump to latest{unseenUpdates > 0 ? ` · ${unseenUpdates} update${unseenUpdates === 1 ? '' : 's'}` : ''}
+			</button>
+		) : null}
     </div>
   )
 }

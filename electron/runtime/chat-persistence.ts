@@ -67,12 +67,12 @@ export async function flushAllChats(rt: GeneralKaiRuntime): Promise<void> {
 /**
  * Renderer-driven assistant-message persistence. Fired by the slice's
  * `notify` path on every finalized `AssistantMessage` (via
- * `finalize-message`, `set-frozen`, or `append-error`). Replaces the
+ * `agent-end` or `append-error`). Replaces the
  * in-flight placeholder by id, queues the row to `_chatPending`, and
  * schedules the debounced flush to chat.jsonl via `appendBatch`.
  *
  * Idempotent — repeated calls with the same id overwrite the in-memory
- * row (e.g. a retried freeze from the 60s safety net).
+ * row after a retried finalization signal.
  */
 export function persistAssistantMessage(
   rt: GeneralKaiRuntime,

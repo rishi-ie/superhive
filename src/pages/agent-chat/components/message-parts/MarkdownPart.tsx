@@ -12,6 +12,8 @@ import { MarkdownTable } from './MarkdownTable'
 interface MarkdownPartProps {
   source: string
   cwd?: string
+	/** Streaming text stays lightweight; completed blocks get full rich rendering. */
+	streaming?: boolean
 }
 
 function nodeToPlainText(node: React.ReactNode): string {
@@ -70,13 +72,13 @@ function getShikiHtml(children: React.ReactNode): string {
 
 const components: Components = {
   h1: ({ children }) => (
-    <h1 className="text-base font-semibold tracking-tight">{children}</h1>
+		<h1 className="mt-5 text-lg font-semibold tracking-tight first:mt-0">{children}</h1>
   ),
   h2: ({ children }) => (
-    <h2 className="text-sm font-semibold mt-3 mb-1.5">{children}</h2>
+		<h2 className="mt-5 mb-2 text-base font-semibold first:mt-0">{children}</h2>
   ),
   h3: ({ children }) => (
-    <h3 className="text-sm font-medium mt-3 mb-1">{children}</h3>
+		<h3 className="mt-4 mb-1.5 text-sm font-semibold">{children}</h3>
   ),
   h4: ({ children }) => (
     <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h4>
@@ -88,7 +90,7 @@ const components: Components = {
     <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h6>
   ),
   p: ({ children }) => (
-    <p className="text-base leading-relaxed my-1.5">{children}</p>
+		<p className="my-2 text-[15px] leading-7">{children}</p>
   ),
   strong: ({ children }) => (
     <strong className="font-semibold text-foreground">{children}</strong>
@@ -99,13 +101,13 @@ const components: Components = {
   ),
   hr: () => <Separator className="my-3" />,
   ul: ({ children }) => (
-    <ul className="list-disc list-inside my-1.5 gap-1">{children}</ul>
+		<ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal list-inside my-1.5 gap-1">{children}</ol>
+		<ol className="my-2 list-decimal space-y-1 pl-5">{children}</ol>
   ),
   li: ({ children }) => (
-    <li className="text-base leading-relaxed">{children}</li>
+		<li className="text-[15px] leading-7 pl-0.5">{children}</li>
   ),
   input: ({ checked, type }) => {
     if (type !== 'checkbox') return null
@@ -161,7 +163,7 @@ const components: Components = {
     </a>
   ),
   blockquote: ({ children }) => (
-    <blockquote className="border-l-2 border-border pl-3 italic text-muted-foreground">
+		<blockquote className="my-3 border-l-2 border-primary/40 pl-3 text-[15px] leading-7 text-muted-foreground">
       {children}
     </blockquote>
   ),
@@ -170,12 +172,20 @@ const components: Components = {
   tbody: ({ children }) => <tbody>{children}</tbody>,
   tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
   th: ({ children }) => (
-    <th className="text-left text-xs font-medium p-2">{children}</th>
+		<th className="sticky top-0 bg-muted/95 text-left text-xs font-medium p-2">{children}</th>
   ),
   td: ({ children }) => <td className="text-xs p-2">{children}</td>,
 }
 
-export function MarkdownPart({ source }: MarkdownPartProps) {
+export function MarkdownPart({ source, streaming = false }: MarkdownPartProps) {
+	if (streaming) {
+		return (
+			<div className="text-base leading-relaxed whitespace-pre-wrap break-words">
+				{source}
+				<span aria-hidden className="ml-0.5 inline-block h-4 w-0.5 align-[-2px] bg-foreground/70 animate-pulse" />
+			</div>
+		)
+	}
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath]}

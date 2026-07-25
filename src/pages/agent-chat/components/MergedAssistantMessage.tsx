@@ -1,5 +1,6 @@
 import { AssistantMessage } from './AssistantMessage'
 import type { AssistantMessage as PersistedAssistantMessage } from '@/models/assistant-message'
+import type { RuntimeAssistantState } from '@/models/runtime'
 
 interface MergedAssistantMessageProps {
   /** Two or more consecutive AssistantMessage rows that should render
@@ -17,6 +18,9 @@ interface MergedAssistantMessageProps {
    * `RuntimeSlice.agentResponseActive`).
    */
   agentResponseActive?: boolean
+  onCancel?: () => void
+  /** The active turn joins the preceding finalized turns into one response run. */
+  inFlight?: RuntimeAssistantState | null
 }
 
 /**
@@ -41,20 +45,56 @@ export function MergedAssistantMessage({
   agentId,
   className,
   agentResponseActive = false,
+  onCancel,
+  inFlight = null,
 }: MergedAssistantMessageProps) {
-  if (messages.length === 1) {
+  if (messages.length === 1 && !inFlight) {
     return (
       <AssistantMessage
         message={messages[0]!}
         agentId={agentId}
         className={className}
         agentResponseActive={agentResponseActive}
+        onCancel={onCancel}
       />
     )
   }
 
   const first = messages[0]!
   const last = messages[messages.length - 1]!
+
+  if (inFlight) {
+    const liveRun: RuntimeAssistantState = {
+      ...(inFlight ?? {
+        id: last.id,
+        role: 'assistant' as const,
+        parts: [],
+        activityTimeline: [],
+        response: [],
+        nextSequence: 0,
+      }),
+      // The run starts with the user's send timestamp, not its newest Pi turn.
+      ts: first.timestamp,
+      activityTimeline: [
+        ...messages.flatMap((message) => message.activityTimeline),
+        ...(inFlight?.activityTimeline ?? []),
+      ],
+      response: [
+        ...messages.flatMap((message) => message.response),
+        ...(inFlight?.response ?? []),
+      ],
+      frozen: false,
+    }
+    return (
+      <AssistantMessage
+        message={liveRun}
+        agentId={agentId}
+        className={className}
+        agentResponseActive={agentResponseActive}
+        onCancel={onCancel}
+      />
+    )
+  }
 
   // Compute the merged turn duration from absolute timestamps so the
   // thinking label ("Thought (N.Ns)") reflects the whole prompt response,
@@ -78,6 +118,7 @@ export function MergedAssistantMessage({
       agentId={agentId}
       className={className}
       agentResponseActive={agentResponseActive}
+      onCancel={onCancel}
     />
   )
 }

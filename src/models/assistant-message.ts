@@ -7,10 +7,11 @@
  * finalized, with a complete activity timeline and a frozen response.
  *
  * The lifecycle is:
- *   1. The runtime emits `message-start` → `message-end` over IPC.
+ *   1. The runtime emits `message-start` → `agent-end` over IPC. Pi may emit
+ *      several intermediate `message-end` events inside that one response.
  *   2. The renderer's queue collects the events into a
  *      `RuntimeAssistantState` (in-memory only, never persisted).
- *   3. On `message-end`, the queue freezes the timeline + response and
+ *   3. On `agent-end`, the queue freezes the timeline + response and
  *      constructs an `AssistantMessage`.
  *   4. The renderer calls `agents.persistAssistantMessage(id, message)` →
  *      main process appends to `chat.jsonl` in one atomic write.
@@ -19,13 +20,11 @@
  *      runtime replay, no execution reconstruction.
  *
  * Two distinct fields:
- *   - `activityTimeline`: ordered, append-only, typed list of execution
- *     metadata. Never interleaved with prose. Renders above.
- *   - `response`: the assistant's prose text. Renders below the timeline.
- *     Streams live during execution, but invisible in state 1.
+ *   - `activityTimeline` and `response` carry a shared monotonic `sequence`.
+ *     The renderer uses it to form one ordered response lineage.
  */
 
-import type { MessageUsage } from './runtime'
+import type { MessageUsage, ToolResultContent } from './runtime'
 
 // ---------------------------------------------------------------------------
 // Activity timeline — execution metadata
@@ -49,28 +48,41 @@ export interface ThinkingTimelineItem {
   startedAt: number
   /** Wall-clock ms when thinking-end arrived. 0 while still streaming. */
   endedAt: number
+  /** Monotonic order within this response run. */
+  sequence?: number
 }
 
 export interface ToolCallTimelineItem {
   kind: 'tool-call'
   id: string
   toolName: string
-  state: 'pending' | 'streaming-args' | 'complete'
+  /** A safe, short description such as a file path or search query. */
+  target?: string
+  /**
+   * `tool-call-end` only means the model finished supplying arguments.
+   * The item is complete only after the host reports tool-execution-end.
+   */
+  state: 'pending' | 'streaming-args' | 'running' | 'complete' | 'error'
   /** Wall-clock ms when tool-call-start arrived. */
   startedAt: number
   /** Wall-clock ms when tool-call-end arrived. null while still streaming. */
   endedAt: number | null
+  /** Short host error summary. */
+  error?: string
+  /** Normalized result retained for the collapsed State 2 audit trail. */
+  result?: ToolResultContent[]
+  /** Monotonic order within this response run. */
+  sequence?: number
 }
 
-/**
- * Reserved for a future "Planning" item type. The spec defines seven item
- * kinds; we define the type for forward compatibility but never emit one
- * from the queue today.
- */
 export interface PlanningTimelineItem {
   kind: 'planning'
   id: string
-  text: string
+  /** Safe, user-facing summary supplied by the agent; never raw reasoning. */
+  summary: string
+  startedAt: number
+  endedAt: number
+  sequence?: number
 }
 
 /**
@@ -81,6 +93,7 @@ export interface SystemTimelineItem {
   kind: 'system'
   id: string
   message: string
+  sequence?: number
 }
 
 export interface WarningTimelineItem {
@@ -88,6 +101,7 @@ export interface WarningTimelineItem {
   id: string
   /** Human-readable warning text. */
   message: string
+  sequence?: number
 }
 
 export interface ErrorTimelineItem {
@@ -95,11 +109,13 @@ export interface ErrorTimelineItem {
   id: string
   /** Human-readable error text. */
   message: string
+  sequence?: number
 }
 
 export interface CompletionTimelineItem {
   kind: 'completion'
   id: string
+  sequence?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +125,7 @@ export interface CompletionTimelineItem {
 /**
  * One block of the assistant's response. The response is a sequence of
  * blocks (e.g. text + image + a compaction summary card). The renderer
- * streams `state: 'streaming'` blocks live but hides them in state 1.
+ * streams text blocks live below State 1 activity and finalizes them in State 2.
  *
  * Why a list and not a single string: the assistant can include image
  * attachments inline, and the response can be interleaved with system
@@ -127,9 +143,9 @@ export interface CompletionTimelineItem {
  * two thinking/tool-call rounds renders between them in the lineage.
  */
 export type ResponseBlock =
-  | { type: 'text'; text: string; state: 'streaming' | 'complete'; startedAt: number }
-  | { type: 'image'; data: string; mimeType: string; startedAt: number }
-  | { type: 'compaction-summary'; tokensBefore: number; summary: string; startedAt: number }
+  | { type: 'text'; text: string; state: 'streaming' | 'complete'; startedAt: number; sequence?: number }
+  | { type: 'image'; data: string; mimeType: string; startedAt: number; sequence?: number }
+  | { type: 'compaction-summary'; tokensBefore: number; summary: string; startedAt: number; sequence?: number }
 
 // ---------------------------------------------------------------------------
 // Persisted assistant message
@@ -141,12 +157,11 @@ export type ResponseBlock =
  * designed to absorb future fields without a schema migration.
  */
 export interface AssistantMessageMetadata {
-  /** Active model at message-end (provider/name). */
+  /** Active model for the completed response (provider/name). */
   model?: { provider: string; name: string }
-  /** Token usage snapshot reported on message-end. */
+  /** Token usage snapshot reported during the completed response. */
   usage?: MessageUsage
-  /** Total wall-clock ms from user-send to message-end. Used by the thinking
-   *  duration label ("▶ Thought (3.2s)"). */
+  /** Total wall-clock ms from first assistant output to agent-end. */
   totalDurationMs?: number
 }
 

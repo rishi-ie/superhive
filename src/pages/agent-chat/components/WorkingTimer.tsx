@@ -5,7 +5,7 @@ interface WorkingTimerProps {
   className?: string
 }
 
-function formatElapsed(seconds: number): string {
+export function formatElapsed(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
@@ -18,7 +18,7 @@ export function WorkingTimer({ startedAt, className }: WorkingTimerProps) {
   React.useEffect(() => {
     const update = () => {
       if (textRef.current) {
-        const elapsed = Math.round((Date.now() - startedAt) / 1000)
+        const elapsed = Math.max(0, Math.floor((Date.now() - startedAt) / 1000))
         textRef.current.textContent = formatElapsed(elapsed)
       }
     }

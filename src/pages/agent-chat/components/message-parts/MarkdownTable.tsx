@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Children, isValidElement } from 'react'
+import { Children, cloneElement, isValidElement } from 'react'
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { copyTable } from '@/flows/ui/copy-table'
@@ -156,6 +156,18 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
 
   const showToggle = allTrs.length > COLLAPSED_ROW_COUNT
   const hiddenCount = allTrs.length - COLLAPSED_ROW_COUNT
+	const visibleChildren = React.useMemo(() => {
+		if (isExpanded || !showToggle) return children
+		return Children.map(children, (section) => {
+			if (!isValidElement<{ children?: React.ReactNode }>(section)) return section
+			const tagName =
+				(section.type as React.ComponentType<{ tagName?: string }>).displayName?.toLowerCase() ??
+				(section.type as unknown as string) ??
+				''
+			if (tagName !== 'tbody') return section
+			return cloneElement(section, undefined, Children.toArray(section.props.children).slice(0, COLLAPSED_ROW_COUNT - 1))
+		})
+	}, [children, isExpanded, showToggle])
 
   return (
     <div className={cn('relative my-2', className)}>
@@ -164,8 +176,8 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
           ref={containerRef}
           className="overflow-x-auto rounded-chat-code-block border border-chat-bubble-code-header-bg"
         >
-          <table className="w-full border-collapse text-xs font-mono">
-            {children}
+			<table className="w-full border-collapse text-xs">
+				{visibleChildren}
           </table>
         </div>
         {isOverflowing && (
