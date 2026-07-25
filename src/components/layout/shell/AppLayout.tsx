@@ -7,7 +7,7 @@ import { RightStatusBar } from "../right-sidebar/RightStatusBar";
 import { cn } from "@/lib/utils";
 import { Workspace } from "./Workspace";
 import { CenterBreadcrumb } from "@/components/layout/common/CenterBreadcrumb";
-import { TopRightControls } from "@/components/layout/common/TopRightControls";
+import { RightSidebarToggle, TopRightControls } from "@/components/layout/common/TopRightControls";
 import { CommandPalette } from "../command-palette/CommandPalette";
 import { CreateAgentDialog } from "@/pages/agent-chat/dialogs/CreateAgentDialog";
 import { CreateProjectDialog } from "@/pages/project-chat/dialogs/CreateProjectDialog";
@@ -46,7 +46,7 @@ function AppLayoutShell() {
   React.useEffect(() => {
     const shouldOpen = location.pathname !== "/" && location.pathname !== "/plugins";
     setRightSidebarOpen(shouldOpen);
-    if (shouldOpen) setStatusBarOpen(false);
+    setStatusBarOpen(false);
   }, [location.pathname]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
@@ -121,9 +121,18 @@ function AppLayoutShell() {
     };
   }, [isResizingRight, resizeRight, stopResizingRight]);
 
+  const toggleRightSidebar = React.useCallback(() => {
+    if (!rightSidebarOpen) setStatusBarOpen(false);
+    setRightSidebarOpen((open) => !open);
+  }, [rightSidebarOpen]);
+
+  const toggleStatusBar = React.useCallback(() => {
+    setStatusBarOpen((open) => !open);
+  }, []);
+
   return (
     <>
-      <div className="flex h-screen w-screen overflow-hidden">
+      <div className="relative flex h-screen w-screen overflow-hidden">
         <div className="drag absolute left-0 right-0 top-0 z-[70] h-2.5 w-full" />
 
         {leftSidebarOpen && (
@@ -142,29 +151,20 @@ function AppLayoutShell() {
 
         <Workspace>
           <CenterBreadcrumb />
-          <TopRightControls
-            rightSidebarOpen={rightSidebarOpen}
-            onToggleRightSidebar={() => {
-              setStatusBarOpen(false);
-              setRightSidebarOpen((o) => !o);
-            }}
-            statusBarOpen={statusBarOpen}
-            onToggleStatusBar={() => {
-              setRightSidebarOpen(false);
-              setStatusBarOpen((o) => !o);
-            }}
-          />
           <Outlet />
         </Workspace>
         <div
           className={cn(
-            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-200 ease-out",
+            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
           )}
           style={{ width: rightSidebarOpen ? `${rightSidebarWidth}px` : 0 }}
         >
           <div
-            className="relative flex h-full"
+            className={cn(
+              "relative flex h-full will-change-[opacity,transform] transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              rightSidebarOpen ? "translate-x-0 opacity-100 delay-50" : "translate-x-2 opacity-0"
+            )}
             style={{ width: `${rightSidebarWidth}px`, flexShrink: 0 }}
           >
             <div
@@ -176,13 +176,26 @@ function AppLayoutShell() {
         </div>
         <div
           className={cn(
-            "relative flex-shrink-0 h-full overflow-hidden transition-[width] duration-200 ease-out",
-            statusBarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
+            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            statusBarOpen && !rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
           )}
-          style={{ width: statusBarOpen ? 320 : 0 }}
+          style={{ width: statusBarOpen && !rightSidebarOpen ? 320 : 0 }}
         >
-          <RightStatusBar />
         </div>
+        <RightStatusBar
+          open={statusBarOpen}
+          rightOffset={rightSidebarOpen ? rightSidebarWidth : 0}
+          isPopover={rightSidebarOpen}
+          onDismiss={() => setStatusBarOpen(false)}
+        />
+        <TopRightControls
+          rightSidebarOpen={rightSidebarOpen}
+          rightSidebarWidth={rightSidebarWidth}
+          isRightSidebarResizing={isResizingRight}
+          statusBarOpen={statusBarOpen}
+          onToggleStatusBar={toggleStatusBar}
+        />
+        <RightSidebarToggle open={rightSidebarOpen} onToggle={toggleRightSidebar} />
       </div>
       <CommandPalette />
       <CreateAgentDialog />

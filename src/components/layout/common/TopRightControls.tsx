@@ -13,14 +13,16 @@ import { goToSettings } from '@/flows/navigation';
 
 interface TopRightControlsProps {
   rightSidebarOpen: boolean;
-  onToggleRightSidebar: () => void;
+  rightSidebarWidth: number;
+  isRightSidebarResizing: boolean;
   statusBarOpen: boolean;
   onToggleStatusBar: () => void;
 }
 
 export function TopRightControls({
   rightSidebarOpen,
-  onToggleRightSidebar,
+  rightSidebarWidth,
+  isRightSidebarResizing,
   statusBarOpen,
   onToggleStatusBar,
 }: TopRightControlsProps) {
@@ -30,7 +32,14 @@ export function TopRightControls({
   const isPlugins = location.pathname === "/plugins";
 
   return (
-    <div className="absolute right-0 top-2 flex items-center gap-gap-tight text-muted-foreground pr-3">
+    <div
+      className={`absolute top-2 z-[60] flex items-center gap-gap-tight pr-3 text-muted-foreground ${
+        isRightSidebarResizing
+          ? "transition-none"
+          : "transition-[right] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+      }`}
+      style={{ right: rightSidebarOpen ? rightSidebarWidth : 32 }}
+    >
       {isLanding && (
         <Tooltip>
           <TooltipTrigger asChild>
@@ -70,8 +79,10 @@ export function TopRightControls({
           <Button
             variant="ghost"
             size="icon-lg"
-            className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
+            className="cursor-default border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
             onClick={onToggleStatusBar}
+            aria-label={`${statusBarOpen ? "Close" : "Open"} status panel`}
+            aria-expanded={statusBarOpen}
           >
             <HugeIcon icon={ListTreeIcon} size={16} className="size-4 text-muted-foreground" />
           </Button>
@@ -80,23 +91,48 @@ export function TopRightControls({
           <span>{statusBarOpen ? "Close" : "Open"} status panel</span>
         </TooltipContent>
       </Tooltip>
+    </div>
+  );
+}
+
+interface RightSidebarToggleProps {
+  open: boolean;
+  onToggle: () => void;
+}
+
+export function RightSidebarToggle({ open, onToggle }: RightSidebarToggleProps) {
+  return (
+    <div className="absolute right-3 top-2 z-[80] text-muted-foreground">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
             size="icon-lg"
-            className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
-            onClick={onToggleRightSidebar}
+            className="cursor-default border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
+            onClick={onToggle}
+            aria-label={`${open ? "Close" : "Open"} control panel`}
+            aria-expanded={open}
           >
-            {rightSidebarOpen ? (
-              <HugeIcon icon={LayoutAlignLeftIcon} size={16} className="size-4 text-muted-foreground" />
-            ) : (
-              <HugeIcon icon={LayoutAlignRightIcon} size={16} className="size-4 text-muted-foreground" />
-            )}
+            <span className="relative size-4" aria-hidden="true">
+              <HugeIcon
+                icon={LayoutAlignLeftIcon}
+                size={16}
+                className={`absolute inset-0 size-4 text-muted-foreground transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
+                  open ? "rotate-0 opacity-100" : "-rotate-45 opacity-0"
+                }`}
+              />
+              <HugeIcon
+                icon={LayoutAlignRightIcon}
+                size={16}
+                className={`absolute inset-0 size-4 text-muted-foreground transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
+                  open ? "rotate-45 opacity-0" : "rotate-0 opacity-100"
+                }`}
+              />
+            </span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <span>{rightSidebarOpen ? "Close" : "Open"} control panel</span>
+          <span>{open ? "Close" : "Open"} control panel</span>
         </TooltipContent>
       </Tooltip>
     </div>
