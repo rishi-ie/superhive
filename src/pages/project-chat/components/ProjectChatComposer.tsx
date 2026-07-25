@@ -105,7 +105,7 @@ export function ProjectChatComposer({ agentId, isBusy, isLive, contextPercent, c
   }
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 w-full">
-      <div className="relative rounded-3xl border border-border/60 bg-sidebar shadow-sm">
+      <div className="relative rounded-4xl border border-border/60 bg-[#1E1E1E] shadow-sm">
         {menu && <div className="absolute bottom-full left-0 right-0 mb-2 max-h-72 overflow-y-auto rounded-2xl border border-border bg-popover p-2 shadow-xl z-20">
           <span className="px-2 text-xs text-muted-foreground">{menu === '@' ? 'Add' : 'Skills'}</span>
           {shown.map((command, index) => <button key={command.id} type="button" disabled={command.disabled} title={command.disabledReason} onClick={() => void choose(command)} className={`flex w-full rounded-lg px-3 py-2 text-left text-sm ${command.disabled ? 'cursor-not-allowed opacity-45' : 'hover:bg-muted'} ${index === highlighted ? 'bg-muted' : ''}`}><span className="mr-3 text-muted-foreground">{command.action === 'skill' ? '/' : '@'}</span><span>{command.label}{command.description && <span className="ml-2 text-muted-foreground">{command.description}</span>}{command.disabledReason && <span className="ml-2 text-muted-foreground">{command.disabledReason}</span>}</span></button>)}
