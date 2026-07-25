@@ -131,6 +131,7 @@ export function translateEventToOps(
           agentId,
           messageId: event.messageId,
           toolCallId: event.toolCallId,
+          name: event.name,
           args: event.args,
         },
       ]
@@ -154,6 +155,7 @@ export function translateEventToOps(
           kind: 'finalize-tool-result',
           agentId,
           toolCallId: event.toolCallId,
+          name: event.name,
           result: normalizeToolResult(event.result),
           isError: event.isError,
         },

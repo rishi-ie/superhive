@@ -549,7 +549,8 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
             // The model finished producing arguments; the host may still be executing.
             return {
               ...item,
-              target: getToolTarget(item.toolName, op.args),
+              toolName: op.name || item.toolName,
+              target: getToolTarget(op.name || item.toolName, op.args),
               state: item.state === 'running' ? 'running' as const : 'pending' as const,
               endedAt: null,
             }
@@ -572,7 +573,8 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         item.kind === 'tool-call' && item.id === `toolcall-${op.toolCallId}`
           ? {
               ...item,
-              target: getToolTarget(op.name, op.args),
+              toolName: op.name || item.toolName,
+              target: getToolTarget(op.name || item.toolName, op.args),
               state: 'running' as const,
               endedAt: null,
             }
@@ -618,6 +620,7 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
         item.kind === 'tool-call' && item.id === `toolcall-${toolCallId}`
           ? {
               ...item,
+              toolName: op.name || item.toolName,
               state: op.isError ? 'error' as const : 'complete' as const,
               endedAt: Date.now(),
               ...(op.isError ? { error: 'Tool execution failed' } : {}),

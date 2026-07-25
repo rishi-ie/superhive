@@ -5,6 +5,7 @@ import { matchBootStep } from './types'
 export class RawTextAdapter implements PiProtocolAdapter {
   private lineBuffer = ''
   private currentMessageId: string | null = null
+  private toolCallIds = new Map<number, string>()
 
   onStdout(chunk: string, emit: (event: AdapterEvent) => void): void {
     this.lineBuffer += chunk
@@ -97,31 +98,40 @@ export class RawTextAdapter implements PiProtocolAdapter {
               this.currentMessageId = randomUUID()
               emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
             }
+            const contentIndex = typeof ev.contentIndex === 'number' ? ev.contentIndex : 0
+            const toolCall = toolCallFromEvent(ev)
+            const toolCallId = stringValue(toolCall?.id) ?? stringValue(ev.toolCallId) ?? randomUUID()
+            this.toolCallIds.set(contentIndex, toolCallId)
             emit({
               type: 'tool-call-start',
               messageId: this.currentMessageId,
-              toolCallId: (ev.toolCallId as string) ?? randomUUID(),
-              name: (ev.name as string) ?? '',
-              contentIndex: typeof ev.contentIndex === 'number' ? ev.contentIndex : 0,
+              toolCallId,
+              name: stringValue(toolCall?.name) ?? stringValue(ev.name) ?? '',
+              contentIndex,
             })
           }
           if (ev?.type === 'toolcall_delta') {
             if (!this.currentMessageId) return
+            const contentIndex = typeof ev.contentIndex === 'number' ? ev.contentIndex : 0
             emit({
               type: 'tool-call-delta',
               messageId: this.currentMessageId,
-              toolCallId: (ev.toolCallId as string) ?? '',
+              toolCallId: stringValue(ev.toolCallId) ?? this.toolCallIds.get(contentIndex) ?? '',
               delta: (ev.delta as string) ?? '',
             })
           }
           if (ev?.type === 'toolcall_end') {
             if (!this.currentMessageId) return
+            const contentIndex = typeof ev.contentIndex === 'number' ? ev.contentIndex : 0
+            const toolCall = toolCallFromEvent(ev)
+            const toolCallId = stringValue(toolCall?.id) ?? stringValue(ev.toolCallId) ?? this.toolCallIds.get(contentIndex) ?? ''
+            this.toolCallIds.delete(contentIndex)
             emit({
               type: 'tool-call-end',
               messageId: this.currentMessageId,
-              toolCallId: (ev.toolCallId as string) ?? '',
-              name: (ev.name as string) ?? '',
-              args: ev.args,
+              toolCallId,
+              name: stringValue(toolCall?.name) ?? stringValue(ev.name) ?? '',
+              args: toolCall?.arguments ?? ev.args,
             })
           }
           this.maybeEmitUsage(ev, emit)
@@ -129,7 +139,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
           emit({
             type: 'tool-execution-start',
             toolCallId: (obj.toolCallId as string) ?? randomUUID(),
-            name: (obj.name as string) ?? '',
+            name: stringValue(obj.toolName) ?? stringValue(obj.name) ?? '',
             args: obj.args,
           })
         } else if (obj.type === 'tool_execution_update') {
@@ -142,6 +152,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
           emit({
             type: 'tool-execution-end',
             toolCallId: (obj.toolCallId as string) ?? '',
+            name: stringValue(obj.toolName) ?? stringValue(obj.name) ?? '',
             result: obj.result,
             isError: obj.isError === true,
           })
@@ -183,6 +194,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
           if (this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
+            this.toolCallIds.clear()
           }
           // Surface "response fully written" to the renderer so it can
           // show the per-message footer (copy + timestamp + usage).
@@ -202,6 +214,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
           if (role === 'assistant' && this.currentMessageId) {
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
+            this.toolCallIds.clear()
           }
         } else if (obj.type === 'response' && obj.success === false) {
           emit({
@@ -231,6 +244,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
   reset(): void {
     this.lineBuffer = ''
     this.currentMessageId = null
+    this.toolCallIds.clear()
   }
 
   private maybeEmitUsage(
@@ -252,4 +266,18 @@ export class RawTextAdapter implements PiProtocolAdapter {
     }
     emit({ type: 'usage', usage })
   }
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined
+}
+
+function toolCallFromEvent(event: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (event.toolCall && typeof event.toolCall === 'object') {
+    return event.toolCall as Record<string, unknown>
+  }
+  const partial = event.partial as { content?: unknown[] } | undefined
+  const index = typeof event.contentIndex === 'number' ? event.contentIndex : -1
+  const item = index >= 0 ? partial?.content?.[index] : undefined
+  return item && typeof item === 'object' ? item as Record<string, unknown> : undefined
 }

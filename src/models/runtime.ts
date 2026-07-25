@@ -407,11 +407,12 @@ export type StreamOp =
       content?: string
     }
   | {
-      kind: 'finalize-tool-call'
+    kind: 'finalize-tool-call'
       agentId: string
       messageId: string
-      toolCallId: string
-      args: unknown
+    toolCallId: string
+    name: string
+    args: unknown
     }
   | {
       kind: 'append-activity-summary'
@@ -420,9 +421,10 @@ export type StreamOp =
       summary: string
     }
   | {
-      kind: 'finalize-tool-result'
+    kind: 'finalize-tool-result'
       agentId: string
-      toolCallId: string
+    toolCallId: string
+    name: string
       result: ToolResultContent[]
       isError: boolean
     }

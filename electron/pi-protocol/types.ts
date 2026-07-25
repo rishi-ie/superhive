@@ -52,7 +52,7 @@ export type AdapterEvent =
   | { type: 'tool-call-end'; messageId: string; toolCallId: string; name: string; args: unknown }
   | { type: 'tool-execution-start'; toolCallId: string; name: string; args: unknown }
   | { type: 'tool-execution-update'; toolCallId: string; partialResult: unknown }
-  | { type: 'tool-execution-end'; toolCallId: string; result: unknown; isError: boolean }
+  | { type: 'tool-execution-end'; toolCallId: string; name: string; result: unknown; isError: boolean }
   | { type: 'compaction-start'; reason: 'manual' | 'threshold' | 'overflow' }
   | {
       type: 'compaction-end'
