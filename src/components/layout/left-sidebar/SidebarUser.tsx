@@ -88,7 +88,7 @@ export function SidebarUser({ showGear = true }: SidebarUserProps) {
           onClick={() => goToSettings(navigate)}
           aria-label="Open settings"
           title="Settings"
-          className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent hover:cursor-default"
+          className="flex size-6 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-sidebar-accent-l hover:cursor-default"
         >
           <Icon icon={GearSixIcon} className="size-4" />
         </button>

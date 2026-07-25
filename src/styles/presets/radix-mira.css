@@ -176,10 +176,17 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0 0 0 / 8%);
   --sidebar-ring: oklch(0.556 0 0);
-  --sidebar-bg: #181818;
-  --sidebar-bg-translucent: rgba(24, 24, 24, 0.85);
+  --sidebar-bg: #1C1C1C;
+  --sidebar-bg-translucent: rgba(28, 28, 28, 0.85);
   --sidebar-btn-text: #ABABAB;
   --sidebar-btn-text-hover: #E8E8E8;
+
+  /* Left-sidebar-only overrides (UI polish phase). The right sidebar,
+   * TopRightControls, command palette, settings sidebar, etc. still use the
+   * generic --sidebar-btn-text / --sidebar-accent tokens above. */
+  --sidebar-btn-text-l: #CFCFCF;
+  --sidebar-accent-l: #292929;
+  --sidebar-projects-label-fg: #5B5B5B;
 
   /* TabsList surface (dark) — one shade lighter than the panel/page so the
    * tab row reads as its own surface. */
@@ -298,6 +305,9 @@
   --color-sidebar-bg-translucent: var(--sidebar-bg-translucent);
   --color-sidebar-btn-text: var(--sidebar-btn-text);
   --color-sidebar-btn-text-hover: var(--sidebar-btn-text-hover);
+  --color-sidebar-btn-text-l: var(--sidebar-btn-text-l);
+  --color-sidebar-accent-l: var(--sidebar-accent-l);
+  --color-sidebar-projects-label-fg: var(--sidebar-projects-label-fg);
   --color-chat-bubble-user: var(--chat-bubble-user);
   --color-chat-bubble-assistant: var(--chat-bubble-assistant);
   --color-chat-bubble-tool-bg-pending: var(--chat-bubble-tool-bg-pending);
