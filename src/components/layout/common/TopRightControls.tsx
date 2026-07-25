@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/icon";
 import { GearIcon } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
-import { LayoutAlignLeftIcon, LayoutAlignRightIcon, TaskDaily01Icon } from "@hugeicons/core-free-icons";
+import { LayoutAlignLeftIcon, LayoutAlignRightIcon, ListTreeIcon } from "@hugeicons/core-free-icons";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -73,7 +73,7 @@ export function TopRightControls({
             className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
             onClick={onToggleStatusBar}
           >
-            <HugeIcon icon={TaskDaily01Icon} size={16} className="size-4 text-muted-foreground" />
+            <HugeIcon icon={ListTreeIcon} size={16} className="size-4 text-muted-foreground" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
