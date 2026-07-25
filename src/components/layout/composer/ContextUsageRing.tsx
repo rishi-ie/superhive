@@ -10,8 +10,8 @@ interface ContextUsageRingProps {
 }
 
 const DEFAULT_SIZE = 20;
-const RADIUS = 9;
-const STROKE = 2;
+const RADIUS = 8.75;
+const STROKE = 2.5;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function clampPercent(value: number): number {

@@ -24,9 +24,10 @@ interface EnabledModel {
 
 interface ModelPickerProps {
   agentId?: string;
+  className?: string;
 }
 
-export function ModelPicker({ agentId }: ModelPickerProps) {
+export function ModelPicker({ agentId, className }: ModelPickerProps) {
   // Two parallel lists: enabled models and configured providers.
   // We only show models whose provider has a key set, so the user can never
   // pick a model that would fail at the LLM call.
@@ -133,7 +134,7 @@ export function ModelPicker({ agentId }: ModelPickerProps) {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-gap-tight text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default"
+          className={cn('flex h-8 items-center gap-gap-tight rounded-full px-2 text-sm text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', className)}
         >
           <span className={cn(!selected && 'text-muted-foreground')}>{display}</span>
           <Icon icon={CaretDownIcon} className="size-3" />

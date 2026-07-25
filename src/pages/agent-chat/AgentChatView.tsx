@@ -12,6 +12,7 @@ import { AgentStopped } from './components/AgentStopped';
 import { AgentWaiting } from './components/AgentWaiting';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
+import { ChatComposerFrame, ChatComposerToolbar, composerIconButtonClass, composerSendButtonClass, composerTextareaClass, useComposerTextareaAutosize } from '@/components/layout/composer/ChatComposer';
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/settings';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
@@ -82,6 +83,7 @@ export function AgentChatView() {
 
   const [input, setInput] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  useComposerTextareaAutosize(textareaRef, input);
 
   if (!agentId) return <AgentEmpty />;
 
@@ -168,52 +170,40 @@ export function AgentChatView() {
         agentResponseActive={agentResponseActive}
       />
       <div className="shrink-0">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-start">
-            <div className="flex-1 rounded-4xl bg-[#1E1E1E]">
-              <textarea
-                ref={textareaRef}
-                placeholder="Ask your digital employee…"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={onKeyDown}
-                autoFocus
-                className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-4 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-              <div className="flex items-center justify-between px-composer py-button-y">
-                <div className="flex items-center gap-3">
-                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
-                    <Icon icon={PlusIcon} className="size-5" />
-                  </button>
-                  <ContextUsageRing
-                    percent={contextPercent}
-                    usedTokens={contextUsedTokens}
-                    maxTokens={contextWindow}
-                  />
-                </div>
-                <div className="flex items-center gap-5">
-                  <ModelPicker agentId={agentId} />
-                  <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
-                    <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
-                  </button>
-                  <button
-                    onClick={isBusy ? stop : onSend}
-                    disabled={!isBusy && input.trim().length === 0}
-                    title={undefined}
-                    className={
-                      'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
-                      (isBusy
-                        ? 'bg-chat-composer-stop-bg hover:bg-chat-composer-stop-hover'
-                        : 'bg-chat-composer-send-bg hover:bg-chat-composer-send-hover disabled:bg-muted disabled:cursor-not-allowed')
-                    }
-                  >
-                    <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-4 text-white" />
-                  </button>
-                </div>
-              </div>
+        <ChatComposerFrame>
+          <textarea
+            ref={textareaRef}
+            placeholder="Ask your digital employee…"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            autoFocus
+            className={composerTextareaClass}
+          />
+          <ChatComposerToolbar>
+            <div className="flex items-center gap-2">
+              <button type="button" aria-label="Add attachment" className={composerIconButtonClass}>
+                <Icon icon={PlusIcon} className="size-5" />
+              </button>
             </div>
-          </div>
-        </div>
+            <div className="flex items-center gap-1">
+              <ContextUsageRing percent={contextPercent} usedTokens={contextUsedTokens} maxTokens={contextWindow} size={18} className="size-8" />
+              <ModelPicker agentId={agentId} />
+              <button type="button" aria-label="Voice input" className={composerIconButtonClass}>
+                <HugeIcon icon={Mic02Icon} size={18} />
+              </button>
+              <button
+                type="button"
+                aria-label={isBusy ? 'Stop response' : 'Send message'}
+                onClick={isBusy ? stop : onSend}
+                disabled={!isBusy && input.trim().length === 0}
+                className={`${composerSendButtonClass} ${isBusy ? 'bg-chat-composer-stop-bg hover:bg-chat-composer-stop-hover' : 'bg-chat-composer-send-bg hover:bg-chat-composer-send-hover disabled:bg-muted'}`}
+              >
+                <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-5 text-white" />
+              </button>
+            </div>
+          </ChatComposerToolbar>
+        </ChatComposerFrame>
       </div>
     </div>
   );
