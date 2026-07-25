@@ -39,7 +39,7 @@ export function AccordionSection({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className={cn(
-          'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm transition-colors hover:bg-sidebar-accent-l',
+          'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm font-medium transition-colors hover:bg-sidebar-accent-l',
           labelClassName || 'text-sidebar-btn-text-l'
         )}
       >

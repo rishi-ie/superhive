@@ -23,7 +23,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
       <button
         type="button"
         onClick={onClick}
-        className="group flex h-16 w-full cursor-default flex-col items-stretch gap-0 overflow-hidden rounded-sm px-row py-1 text-sm text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
+        className="group flex h-16 w-full cursor-default flex-col items-stretch gap-0 overflow-hidden rounded-sm px-row py-1 text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
       >
         <div className="flex h-8 flex-shrink-0 items-center gap-stack">
           <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
@@ -42,7 +42,7 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
       <button
         type="button"
         onClick={onClick}
-        className="group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
+        className="group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
       >
         <div className={presentation.dotClass + " size-2 rounded-full flex-shrink-0"} />
         <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
@@ -56,8 +56,8 @@ export function AgentRow({ name, status = 'idle', showStatus = true, compact = f
       type="button"
       onClick={onClick}
       className={compact
-        ? "group flex h-6 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 text-xs text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
-        : "group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
+        ? "group flex h-6 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 text-xs font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
+        : "group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
       }
     >
       <Icon icon={UserIcon} className={compact ? "size-3.5 flex-shrink-0" : "size-4 flex-shrink-0"} />
