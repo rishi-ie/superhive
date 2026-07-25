@@ -35,7 +35,7 @@ export const agents = {
   writeManage: (
     id: string,
     patch: Record<string, unknown>,
-  ): Promise<{ ok: boolean; writtenVersion: number }> =>
+  ): Promise<{ ok: boolean; writtenVersion: number; config: Record<string, unknown> }> =>
     window.api.agents.writeManage(id, patch),
   readOverview: (id: string): Promise<Record<string, unknown> | null> =>
     window.api.agents.readOverview(id),

@@ -7,6 +7,7 @@ import log from 'electron-log/main'
 import { runtime } from '../general-kai-runtime'
 import { ensureExtension } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
+import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository'
 import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
@@ -196,6 +197,15 @@ export function registerAgentIpc(): void {
 			// Coordinators only: wire superhive-pi-context (local-bundled) and seed
 			// the context-graph directory. Standard agents are unaffected.
 			const isCoordinator = agent.agentKind === 'project-coordinator'
+			// A coordinator belongs to an already-created project. Read that record
+			// here instead of trusting form values so the first system prompt and
+			// overview always use the project's canonical name and description.
+			const canonicalProject = isCoordinator && data.projectId
+				? await ProjectRepository.getById(data.projectId)
+				: undefined
+			if (isCoordinator && data.projectId && !canonicalProject) {
+				throw new Error(`Project not found while creating coordinator: ${data.projectId}`)
+			}
 			const baseManifestExtensions: string[] = [
 				'./extensions/superhive-pi-truth',
 				'./extensions/superhive-pi-telemetry',
@@ -383,9 +393,9 @@ export function registerAgentIpc(): void {
 				...(isCoordinator && data.projectId && {
 						project: {
 							id: data.projectId,
-							name: data.projectName?.trim() || data.name.trim(),
-							description: data.projectDescription?.trim() ?? data.description?.trim() ?? '',
-							localPath: data.projectPath,
+							name: canonicalProject?.name ?? (data.projectName?.trim() || data.name.trim()),
+							description: canonicalProject?.description ?? (data.projectDescription?.trim() ?? data.description?.trim() ?? ''),
+							localPath: canonicalProject?.localPath ?? data.projectPath,
 							coordinatorAgentId: agent.id,
 							members: [],
 					},
@@ -406,8 +416,8 @@ export function registerAgentIpc(): void {
 						version: 1,
 						managedBy: 'superhive-pi-truth@1#0',
 						lastModified: new Date().toISOString(),
-						name: data.name.trim(),
-						description: data.description?.trim() ?? '',
+						name: canonicalProject?.name ?? data.name.trim(),
+						description: canonicalProject?.description ?? data.description?.trim() ?? '',
 						team: [],
 						focus: [],
 						activity: [],
@@ -523,6 +533,17 @@ export function registerAgentIpc(): void {
 				// `{ runtime: { thinkingLevel: 'high' } }` patch — losing
 				// `activeTools`. See AGENT_SETTINGS.md §12.
 				const merged = deepMerge(current, patch) as Record<string, unknown>
+				// Canonical v2 surface: agent.mode. Keep the legacy planMode mirror
+				// until every installed plan extension reads the new namespace.
+				const agentConfig = merged.agent
+				if (agentConfig && typeof agentConfig === 'object' && !Array.isArray(agentConfig)) {
+					const mode = (agentConfig as Record<string, unknown>).mode
+					if (mode === 'plan' || mode === 'execute') {
+						const currentPlan = merged.planMode && typeof merged.planMode === 'object'
+							? merged.planMode as Record<string, unknown> : {}
+						merged.planMode = { ...currentPlan, defaultMode: mode === 'plan' ? 'plan' : 'build' }
+					}
+				}
 				merged.version = 1
 				merged.managedBy = `superhive-pi-truth@1#${myCounter}`
 				merged.lastModified = new Date().toISOString()
@@ -604,7 +625,11 @@ export function registerAgentIpc(): void {
 				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
 					runtime.markSelfWrite(agentId, 'manage', parseCounter(verify.managedBy as string | undefined))
 					await writePlanModeExtension(agent.localPath, merged.planMode)
-					return { ok: true, writtenVersion: parseCounter(verify.managedBy as string | undefined) }
+					return {
+						ok: true,
+						writtenVersion: parseCounter(verify.managedBy as string | undefined),
+						config: verify,
+					}
 				}
 			}
 			throw new Error('WRITE_MANAGE: exceeded max retries (3)')

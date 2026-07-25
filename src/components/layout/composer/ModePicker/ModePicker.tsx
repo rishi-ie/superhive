@@ -3,7 +3,6 @@ import type { HugeiconsIconProps } from "@hugeicons/react";
 import {
   Plant01Icon,
   RepairIcon,
-  LanternIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { HugeIcon } from "@/components/ui/huge-icon";
@@ -19,24 +18,17 @@ import type { Mode } from "@/models/component";
 
 const MODES: Array<{ value: Mode; label: string; icon: HugeiconsIconProps["icon"] }> = [
   { value: "plan", label: "Plan", icon: Plant01Icon },
-  { value: "execute", label: "Build", icon: RepairIcon },
-  { value: "auto", label: "Auto mode", icon: LanternIcon },
+  { value: "execute", label: "Execute", icon: RepairIcon },
 ];
 
 /**
  * The composer's `Mode` type uses `execute` for what truth's plan extension
  * calls `build`. This is the only place the two are reconciled.
  */
-const MODE_TO_TRUTH: Record<Mode, "plan" | "build" | "auto"> = {
-  plan: "plan",
-  execute: "build",
-  auto: "auto",
-};
-
 const TRUTH_TO_MODE: Record<"plan" | "build" | "auto", Mode> = {
   plan: "plan",
   build: "execute",
-  auto: "auto",
+  auto: "execute",
 };
 
 interface ModePickerProps {
@@ -48,18 +40,18 @@ export function ModePicker({ agentId }: ModePickerProps) {
   const planModeBlock = settings?.planMode as
     | { defaultMode?: "plan" | "build" | "auto" }
     | undefined;
-  const truthDefaultMode = (planModeBlock?.defaultMode ?? "auto") as
+  const configuredMode = (settings?.agent as { mode?: "plan" | "execute" } | undefined)?.mode;
+  const truthDefaultMode = (configuredMode === "plan" ? "plan" : configuredMode === "execute" ? "build" : planModeBlock?.defaultMode ?? "auto") as
     | "plan"
     | "build"
     | "auto";
   const mode: Mode = TRUTH_TO_MODE[truthDefaultMode];
-  const current = MODES.find((m) => m.value === mode) ?? MODES[2]!;
+  const current = MODES.find((m) => m.value === mode) ?? MODES[1]!;
   const CurrentIcon = current.icon;
 
   const onChange = (next: string) => {
-    if (next !== "plan" && next !== "execute" && next !== "auto") return;
-    const truthValue = MODE_TO_TRUTH[next];
-    void patch("planMode", { ...(planModeBlock ?? {}), defaultMode: truthValue });
+    if (next !== "plan" && next !== "execute") return;
+    void patch("agent.mode", next);
   };
 
   return (

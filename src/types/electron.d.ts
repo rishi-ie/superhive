@@ -49,7 +49,7 @@ export interface AgentsAPI {
 	 * on first launch; these channels always operate on the new layout.
 	 */
 	readManage: (id: string) => Promise<Record<string, unknown> | null>
-	writeManage: (id: string, patch: Record<string, unknown>) => Promise<{ ok: boolean; writtenVersion: number }>
+	writeManage: (id: string, patch: Record<string, unknown>) => Promise<{ ok: boolean; writtenVersion: number; config: Record<string, unknown> }>
 	readOverview: (id: string) => Promise<Record<string, unknown> | null>
 	writeOverview: (id: string, patch: Record<string, unknown>) => Promise<{ ok: boolean; writtenVersion: number }>
 	readInbox: (id: string) => Promise<{ items: unknown[] } | null>

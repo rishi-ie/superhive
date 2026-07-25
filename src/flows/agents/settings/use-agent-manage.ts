@@ -1,163 +1,158 @@
-/**
- * useAgentManage — React flow for `<agentDir>/manage.json`.
- *
- * Mirror of `useAgentSettings` but targeting the `manage.json` truth file
- * (identity, behavior, permissions, skills/extensions/prompts/packages/
- * themes, planMode, project). Used by the right-sidebar Manage tab —
- * each MANAGE_SECTIONS row's `patch` goes through this hook.
- *
- * Writes are immediate (no debounce). The main process's deep-merge +
- * 3-attempt retry loop handles correctness. Text inputs add a
- * per-component 250ms debounce so rapid typing doesn't trigger one
- * IPC per keystroke.
- */
-
+/** One transactional draft for every Manage control on an agent. */
 import * as React from 'react'
 import { agents } from '@/api/agents'
 import { toast } from 'sonner'
 
 export type ManageFileState = Record<string, unknown> | null
+type CommitReason = 'send' | 'blur' | 'background'
 
-export interface AgentManageSlice {
-	state: ManageFileState
+interface AgentManageSlice {
+	persisted: ManageFileState
+	draft: ManageFileState
+	dirty: Record<string, unknown> | null
 	isLoading: boolean
 	error: string | null
 	pending: Promise<void>
 	pendingWrites: number
+	debounceTimer: ReturnType<typeof setTimeout> | null
+	unsub: (() => void) | null
 	listeners: Set<() => void>
 }
 
+const AUTO_SAVE_MS = 750
 const slices = new Map<string, AgentManageSlice>()
+
+function merge(base: unknown, patch: unknown): Record<string, unknown> {
+	const result: Record<string, unknown> = base && typeof base === 'object' && !Array.isArray(base)
+		? { ...(base as Record<string, unknown>) } : {}
+	if (!patch || typeof patch !== 'object' || Array.isArray(patch)) return result
+	for (const [key, value] of Object.entries(patch as Record<string, unknown>)) {
+		const prior = result[key]
+		result[key] = prior && typeof prior === 'object' && !Array.isArray(prior)
+			&& value && typeof value === 'object' && !Array.isArray(value)
+			? merge(prior, value) : value
+	}
+	return result
+}
+
+function dottedPatch(path: string, value: unknown): Record<string, unknown> {
+	return path.split('.').reverse().reduce<unknown>((child, key) => ({ [key]: child }), value) as Record<string, unknown>
+}
+
+function notify(slice: AgentManageSlice): void { slice.listeners.forEach((listener) => listener()) }
 
 function ensureSlice(agentId: string): AgentManageSlice {
 	const existing = slices.get(agentId)
 	if (existing) return existing
 	const slice: AgentManageSlice = {
-		state: null,
-		isLoading: false,
-		error: null,
-		pending: Promise.resolve(),
-		pendingWrites: 0,
-		listeners: new Set(),
+		persisted: null, draft: null, dirty: null, isLoading: false, error: null,
+		pending: Promise.resolve(), pendingWrites: 0, debounceTimer: null, unsub: null, listeners: new Set(),
 	}
 	slices.set(agentId, slice)
-	void reloadManage(agentId)
+	void refreshAgentManage(agentId)
+	slice.unsub = agents.onSettingsChanged(agentId, () => {
+		// Never replace an active local draft with an external/cascade revision.
+		if (!slice.dirty && slice.pendingWrites === 0) void refreshAgentManage(agentId)
+	})
 	return slice
 }
 
-/** Wait for all renderer-initiated Manage writes for an agent to reach disk. */
-export async function flushAgentManage(agentId: string): Promise<void> {
-	await slices.get(agentId)?.pending
-}
-
-export async function reloadManage(agentId: string): Promise<void> {
+export async function refreshAgentManage(agentId: string): Promise<void> {
 	const slice = slices.get(agentId)
 	if (!slice) return
-	slice.isLoading = true
-	slice.error = null
+	slice.isLoading = true; slice.error = null; notify(slice)
 	try {
-		const result = await agents.readManage(agentId)
-		slice.state = (result as ManageFileState) ?? null
-	} catch (err) {
-		slice.error = err instanceof Error ? err.message : 'Failed to load manage.json'
+		const config = (await agents.readManage(agentId)) as ManageFileState
+		slice.persisted = config
+		if (!slice.dirty && slice.pendingWrites === 0) slice.draft = config
+	} catch (error) {
+		slice.error = error instanceof Error ? error.message : 'Failed to load Manage settings'
 		toast.error(slice.error)
-	} finally {
-		slice.isLoading = false
-		slice.listeners.forEach((l) => l())
-	}
+	} finally { slice.isLoading = false; notify(slice) }
 }
 
-function deepMergeDotted(base: unknown, dottedKey: string, value: unknown): unknown {
-	const segments = dottedKey.split('.')
-	if (segments.length === 1) {
-		return value
+function commitSlice(agentId: string, reason: CommitReason): Promise<void> {
+	const slice = slices.get(agentId)
+	if (!slice || !slice.dirty) return slice?.pending ?? Promise.resolve()
+	if (slice.debounceTimer) { clearTimeout(slice.debounceTimer); slice.debounceTimer = null }
+	const patch = slice.dirty
+	slice.dirty = null
+	slice.pendingWrites += 1
+	const write = slice.pending.catch(() => undefined).then(async () => {
+		const result = await agents.writeManage(agentId, patch)
+		slice.persisted = result.config
+		// A user may have edited again while this revision was in flight.
+		slice.draft = merge(result.config, slice.dirty ?? {})
+	}).catch((error: unknown) => {
+		slice.error = error instanceof Error ? error.message : `Failed to save Manage settings (${reason})`
+		toast.error(slice.error)
+		// Restore the failed patch without losing newer edits.
+		slice.dirty = merge(patch, slice.dirty ?? {})
+		throw error
+	}).finally(() => {
+		slice.pendingWrites -= 1
+		notify(slice)
+	})
+	slice.pending = write
+	notify(slice)
+	return write
+}
+
+/** Flushes every local revision. This is the correctness boundary before Send. */
+export async function flushAgentManage(agentId: string): Promise<void> {
+	const slice = slices.get(agentId)
+	if (!slice) return
+	while (slice.dirty || slice.pendingWrites > 0) {
+		if (slice.dirty) void commitSlice(agentId, 'send')
+		await slice.pending
 	}
-	const root: Record<string, unknown> =
-		base && typeof base === 'object' && !Array.isArray(base)
-			? { ...(base as Record<string, unknown>) }
-			: {}
-	let cursor: Record<string, unknown> = root
-	for (let i = 0; i < segments.length - 1; i++) {
-		const seg = segments[i]!
-		const existing = cursor[seg]
-		const next: Record<string, unknown> =
-			existing && typeof existing === 'object' && !Array.isArray(existing)
-				? { ...(existing as Record<string, unknown>) }
-				: {}
-		cursor[seg] = next
-		cursor = next
-	}
-	cursor[segments[segments.length - 1]!] = value
-	return root
 }
 
 export function useAgentManage(agentId: string | null) {
-	const slice = React.useMemo(() => {
-		if (!agentId) return null
-		return ensureSlice(agentId)
-	}, [agentId])
-
-	const [state, setState] = React.useState<ManageFileState>(null)
-	const [isLoading, setIsLoading] = React.useState(false)
-	const [isSaving, setIsSaving] = React.useState(false)
-	const [error, setError] = React.useState<string | null>(null)
-
+	const slice = React.useMemo(() => agentId ? ensureSlice(agentId) : null, [agentId])
+	const [, rerender] = React.useState(0)
 	React.useEffect(() => {
 		if (!slice) return
-		const sync = () => {
-			setState(slice.state)
-			setIsLoading(slice.isLoading)
-			setIsSaving(slice.pendingWrites > 0)
-			setError(slice.error)
-		}
-		sync()
+		const sync = () => rerender((value) => value + 1)
 		slice.listeners.add(sync)
-		return () => {
-			slice.listeners.delete(sync)
-		}
+		return () => { slice.listeners.delete(sync) }
 	}, [slice])
 
-	const patch = React.useCallback((key: string, value: unknown): Promise<void> => {
-		if (!agentId) return Promise.resolve()
-		const s = slices.get(agentId)
-		if (!s) return Promise.resolve()
-		// Optimistic local state: deep-merge so siblings are preserved.
-		if (s.state) {
-			s.state = deepMergeDotted(s.state, key, value) as ManageFileState
-		}
-		s.listeners.forEach((l) => l())
-		// Build the top-level partial patch (e.g. "behavior.autoCompaction" ->
-		// { behavior: { autoCompaction: false } }). The main process's
-		// deep-merge + 3-attempt retry loop handles correctness.
-		const partial = deepMergeDotted({}, key, value) as Record<string, unknown>
-		// Serialize writes per agent. A Plan selection followed immediately by
-		// Send must see this exact write, not an earlier concurrent patch.
-		s.pendingWrites += 1
-		const write = s.pending.catch(() => undefined).then(async () => {
-			await agents.writeManage(agentId, partial)
-			await reloadManage(agentId)
-		})
-		s.pending = write
-		void write.catch((err: unknown) => {
-			toast.error(err instanceof Error ? err.message : 'Failed to save manage.json')
-		}).finally(() => {
-			s.pendingWrites -= 1
-			s.listeners.forEach((l) => l())
-		})
-		s.listeners.forEach((l) => l())
-		return write
-	}, [agentId])
-
-	const reload = React.useCallback(async () => {
+	const updateDraft = React.useCallback((path: string, value: unknown) => {
 		if (!agentId) return
-		await reloadManage(agentId)
+		const current = slices.get(agentId)
+		if (!current) return
+		const patch = dottedPatch(path, value)
+		current.draft = merge(current.draft, patch)
+		current.dirty = merge(current.dirty, patch)
+		current.error = null
+		if (current.debounceTimer) clearTimeout(current.debounceTimer)
+		current.debounceTimer = setTimeout(() => { void commitSlice(agentId, 'background') }, AUTO_SAVE_MS)
+		notify(current)
 	}, [agentId])
 
-	return { settings: state, isLoading, error, isSaving, patch, reload }
+	const commitDraft = React.useCallback(async (reason: CommitReason = 'blur') => {
+		if (!agentId) return
+		await commitSlice(agentId, reason)
+	}, [agentId])
+
+	return {
+		settings: slice?.draft ?? null,
+		persisted: slice?.persisted ?? null,
+		isLoading: slice?.isLoading ?? false,
+		isSaving: (slice?.pendingWrites ?? 0) > 0,
+		error: slice?.error ?? null,
+		updateDraft,
+		commitDraft,
+		patch: updateDraft,
+		reload: () => agentId ? refreshAgentManage(agentId) : Promise.resolve(),
+	}
 }
 
 export function disposeManageSliceNow(agentId: string): void {
 	const slice = slices.get(agentId)
 	if (!slice) return
+	if (slice.debounceTimer) clearTimeout(slice.debounceTimer)
+	slice.unsub?.()
 	slices.delete(agentId)
 }

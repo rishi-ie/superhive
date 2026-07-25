@@ -4,11 +4,11 @@ import type {
 import { OverviewSection } from "./OverviewSection";
 import { IdentitySection } from "./IdentitySection";
 import { BehaviorSection } from "./BehaviorSection";
-import { PermissionsSection } from "./PermissionsSection";
+import { PermissionsSection, getPermissionsAtoms } from "./PermissionsSection";
 import { SkillsSection, getSkillsAtoms } from "./SkillsSection";
 import { ExtensionsSection, getExtensionsAtoms } from "./ExtensionsSection";
 import { InboxSection } from "./InboxSection";
-import { PlanModeSection } from "./PlanModeSection";
+import { PlanModeSection, getPlanModeAtoms } from "./PlanModeSection";
 import { ThinkingLevelSection, getThinkingLevelAtoms } from "./ThinkingLevelSection";
 
 export { OverviewSection };
@@ -23,6 +23,30 @@ export { ThinkingLevelSection };
 export type { SearchableAtom, SettingsSectionProps, ManageSectionDef } from "@/models/component";
 
 export const MANAGE_SECTIONS: ManageSectionDef[] = [
+	{
+		id: "operating-mode",
+		label: "Operating Mode",
+		description: "Plan safely or execute work",
+		coordinatorOnly: true,
+		Component: PlanModeSection,
+		getSearchableAtoms: getPlanModeAtoms,
+	},
+	{
+		id: "permissions",
+		label: "Permissions",
+		description: "Runtime access allowed for the agent",
+		Component: PermissionsSection,
+		getSearchableAtoms: getPermissionsAtoms,
+	},
+	{
+		id: "behavior",
+		label: "Behavior",
+		description: "Queue, follow-up, retry, and compaction defaults",
+		Component: BehaviorSection,
+		getSearchableAtoms: () => [
+			{ id: "behavior", label: "Behavior", description: "Queue, retry, and compaction settings" },
+		],
+	},
   {
     id: "skills",
     label: "Skills",
@@ -45,4 +69,3 @@ export const MANAGE_SECTIONS: ManageSectionDef[] = [
     getSearchableAtoms: getThinkingLevelAtoms,
   },
 ];
-

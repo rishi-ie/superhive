@@ -9,6 +9,13 @@ import type { SettingsSectionProps } from "./registry";
 
 interface CatalogItem {
   path: string;
+  manifest?: {
+    id?: string;
+    title?: string;
+    description?: string;
+    apply?: 'next-turn' | 'restart-required';
+    settings?: { properties?: Record<string, { type?: string; title?: string; description?: string; enum?: string[] }> };
+  };
 }
 
 function nameOf(item: CatalogItem): string {
@@ -70,20 +77,42 @@ export function ExtensionsSection({ settings, patch, query }: SettingsSectionPro
   return (
     <div className="flex flex-col">
       {filtered.map(({ item }) => (
-        <div
-          key={item.path}
-          className="flex items-center justify-between gap-gap-loose py-1"
-        >
-          <div className="flex flex-col gap-0.5">
-            <span className="text-sm text-foreground">{nameOf(item)}</span>
-            <span className="text-[11px] text-muted-foreground">{item.path}</span>
+        <div key={item.path}>
+          <div className="flex items-center justify-between gap-gap-loose py-1">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm text-foreground">{item.manifest?.title ?? nameOf(item)}</span>
+              <span className="text-[11px] text-muted-foreground">{item.manifest?.description ?? item.path}</span>
+            </div>
+            <Switch checked={activeSet.has(item.path)} onCheckedChange={() => toggle(item.path)} />
           </div>
-          <Switch
-            checked={activeSet.has(item.path)}
-            onCheckedChange={() => toggle(item.path)}
-          />
+          {activeSet.has(item.path) && item.manifest?.id ? <ExtensionSchemaFields item={item} settings={settings} patch={patch} /> : null}
         </div>
       ))}
     </div>
   );
+}
+
+function ExtensionSchemaFields({ item, settings, patch }: { item: CatalogItem; settings: SettingsSectionProps['settings']; patch: SettingsSectionProps['patch'] }) {
+  const extensionId = item.manifest?.id
+  const properties = item.manifest?.settings?.properties
+  if (!extensionId || !properties || Object.keys(properties).length === 0) return null
+  const values = ((settings.extensionSettings as Record<string, Record<string, unknown>> | undefined)?.[extensionId]) ?? {}
+  return (
+    <div className="ml-1 mb-2 rounded border border-border/50 p-2 space-y-2">
+      <span className="text-[11px] text-muted-foreground">{item.manifest?.apply === 'restart-required' ? 'Restart required' : 'Applies to the next message'}</span>
+      {Object.entries(properties).map(([key, field]) => field.type === 'boolean' ? (
+        <div key={key} className="flex items-center justify-between gap-3 text-xs">
+          <span>{field.title ?? key}</span>
+          <Switch checked={Boolean(values[key])} onCheckedChange={(value) => patch?.(`extensionSettings.${extensionId}.${key}`, value)} />
+        </div>
+      ) : field.enum ? (
+        <label key={key} className="flex items-center justify-between gap-3 text-xs">
+          <span>{field.title ?? key}</span>
+          <select className="bg-transparent" value={String(values[key] ?? field.enum[0] ?? '')} onChange={(event) => patch?.(`extensionSettings.${extensionId}.${key}`, event.target.value)}>
+            {field.enum.map((value) => <option key={value} value={value}>{value}</option>)}
+          </select>
+        </label>
+      ) : null)}
+    </div>
+  )
 }

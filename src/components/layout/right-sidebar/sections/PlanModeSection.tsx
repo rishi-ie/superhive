@@ -44,14 +44,13 @@ interface PlanModeBlock {
 }
 
 const DEFAULT_PLAN_MODE_BLOCK: PlanModeBlock = {
-  defaultMode: "auto",
+	defaultMode: "build",
   thinkingLevel: "inherit",
 };
 
 const DEFAULT_MODE_OPTIONS: Array<{ value: PlanDefaultMode; label: string }> = [
-  { value: "plan", label: "Plan" },
-  { value: "build", label: "Build" },
-  { value: "auto", label: "Auto" },
+	{ value: "plan", label: "Plan" },
+	{ value: "build", label: "Execute" },
 ];
 
 const THINKING_LEVEL_OPTIONS: Array<{ value: PlanThinkingLevel; label: string }> = [
@@ -138,7 +137,7 @@ export function PlanModeSection({ settings, patch }: SettingsSectionProps) {
 
   const block = readBlock(settings);
   const merged = { ...DEFAULT_PLAN_MODE_BLOCK, ...block };
-  const defaultMode: PlanDefaultMode = merged.defaultMode ?? "auto";
+	const defaultMode: PlanDefaultMode = merged.defaultMode === "auto" ? "build" : (merged.defaultMode ?? "build");
   const thinkingLevel: PlanThinkingLevel = merged.thinkingLevel ?? "inherit";
   const defaultPlanTools = new Set(merged.defaultPlanTools ?? []);
   const safeGit = new Set(merged.safeSubcommands?.git ?? []);
@@ -184,7 +183,7 @@ export function PlanModeSection({ settings, patch }: SettingsSectionProps) {
     <div className="flex flex-col gap-gap-loose py-1">
       <SettingRow
         label="Default mode"
-        description="Plan = always plan; Build = never plan; Auto = user toggles"
+		description="Plan permits read-only analysis; Execute permits normal work"
       >
         <SelectDropdown
           value={defaultMode}
