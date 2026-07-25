@@ -124,7 +124,7 @@ export function ProjectChatComposer({ agentId, isBusy, isLive, contextPercent, c
           onPaste={(event) => { const files = Array.from(event.clipboardData.files).filter(isImage); if (files.length) { event.preventDefault(); void addAttachments(files) } }}
           onDrop={(event) => { event.preventDefault(); void addAttachments(event.dataTransfer.files) }} onDragOver={(event) => event.preventDefault()}
           onKeyDown={(event) => { if (menu && event.key === 'Escape') { event.preventDefault(); setMenu(null); return } if (menu && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) { event.preventDefault(); setSelected(nextEnabledIndex(shown, highlighted, event.key === 'ArrowDown' ? 1 : -1)); return } if (menu && event.key === 'Enter') { event.preventDefault(); const item = shown[highlighted]; if (item) void choose(item); return } if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); if (canSend) { onSend({ text, composerContext: context }); setText(''); setAttachments([]); setSkills([]); setPlugins([]); setMode(undefined) } } }}
-          className="min-h-24 w-full resize-none border-0 bg-transparent px-5 pt-4 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none" />
+          className="min-h-16 w-full resize-none border-0 bg-transparent px-5 pt-4 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none" />
         <div className="flex items-center justify-between gap-3 px-5 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <button type="button" onClick={() => { setMenu('@'); setQuery('') }} className="text-sidebar-foreground/70 hover:text-sidebar-foreground"><Icon icon={PlusIcon} className="size-5" /></button>
