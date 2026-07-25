@@ -241,12 +241,6 @@ export interface ManageFileState {
   extensions?: string[]
   packages?: unknown[]
   themes?: string[]
-  planMode?: {
-    defaultMode?: 'plan' | 'build' | 'auto'
-    thinkingLevel?: string
-    defaultPlanTools?: string[]
-    safeSubcommands?: { git?: string[]; gh?: string[] }
-  }
   project?: ManageProjectBlock
   /**
    * Catalog list (settings.json-cached) for the skills/extensions/prompts

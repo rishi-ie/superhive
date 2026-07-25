@@ -198,6 +198,28 @@ export interface UserMessage {
   role: 'user'
   timestamp: number
   text: string
+  composerContext?: ComposerContext
+}
+
+export interface ComposerAttachment {
+  id: string
+  kind: 'image' | 'file' | 'folder'
+  name: string
+  path: string
+  mimeType?: string
+}
+
+export interface ComposerContext {
+  attachments?: ComposerAttachment[]
+  skills?: string[]
+  plugins?: string[]
+  mode?: 'plan' | 'execute'
+  goal?: string
+}
+
+export interface TurnInput {
+  text: string
+  composerContext?: ComposerContext
 }
 
 // ---------------------------------------------------------------------------

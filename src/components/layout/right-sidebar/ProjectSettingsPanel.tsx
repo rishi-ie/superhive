@@ -101,7 +101,7 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   // three so the catalog (skills/extensions/prompts) is available in
   // addition to the manage.json user-tweakable surface.
   //   settings.json → coordinatorSettings   (catalog.skills / .extensions / .prompts)
-  //   manage.json   → coordinatorManage     (identity / behavior / permissions / active sets / planMode / project)
+  //   manage.json   → coordinatorManage     (identity / behavior / permissions / active sets / project)
   //   overview.json → coordinatorOverview   (right-sidebar Overview snapshot)
   const coordinatorManage = useAgentManage(coordinatorId);
   const coordinatorOverview = useAgentOverview(coordinatorId);

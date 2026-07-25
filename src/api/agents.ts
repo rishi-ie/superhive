@@ -7,7 +7,7 @@ import type {
   RuntimeExitPayload,
   AdapterEvent,
 } from '@/types/electron'
-import type { AssistantMessage, ChatRow } from '@/models/assistant-message'
+import type { AssistantMessage, ChatRow, TurnInput, ComposerAttachment } from '@/models/assistant-message'
 
 export const agents = {
   list: (): Promise<Agent[]> => window.api.agents.list(),
@@ -20,7 +20,10 @@ export const agents = {
   start: (id: string): Promise<{ ok: boolean }> => window.api.agents.start(id),
   stop: (id: string): Promise<{ ok: boolean }> => window.api.agents.stop(id),
   restart: (id: string): Promise<{ ok: boolean }> => window.api.agents.restart(id),
-  send: (id: string, message: string): Promise<{ ok: boolean }> => window.api.agents.send(id, message),
+  send: (id: string, message: TurnInput): Promise<{ ok: boolean }> => window.api.agents.send(id, message),
+  pickAttachments: (id: string, kind: 'file' | 'folder'): Promise<ComposerAttachment[]> => window.api.agents.pickAttachments(id, kind),
+  importAttachment: (id: string, input: { name: string; mimeType?: string; data: string }): Promise<ComposerAttachment> => window.api.agents.importAttachment(id, input),
+  discardAttachment: (id: string, attachmentId: string): Promise<void> => window.api.agents.discardAttachment(id, attachmentId),
   getRuntimeState: (id: string): Promise<RuntimeStatusPayload | null> =>
     window.api.agents.getRuntimeState(id),
   getProjects: (id: string): Promise<Project[]> => window.api.agents.getProjects(id),

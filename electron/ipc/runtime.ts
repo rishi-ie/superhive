@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import type { TurnInput } from '../../src/models/assistant-message'
 import { existsSync } from 'node:fs'
 import { readFile, writeFile, rename } from 'node:fs/promises'
 import { runtime } from '../general-kai-runtime'
@@ -151,7 +152,7 @@ export function registerRuntimeIpc(): void {
 		return { ok: true }
 	})
 
-	ipcMain.handle(IPC.AGENTS.SEND, async (_e, agentId: string, message: string) => {
+	ipcMain.handle(IPC.AGENTS.SEND, async (_e, agentId: string, message: TurnInput) => {
 		const ok = runtime.send(agentId, message)
 		return { ok }
 	})

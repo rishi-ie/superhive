@@ -1,7 +1,8 @@
 import type { Agent, AgentStatus, Project, Task, TaskStatus, TaskPriority } from '@/storage/types'
 import type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
-import type { AssistantMessage, ChatRow } from '@/models/assistant-message'
+import type { AssistantMessage, ChatRow, TurnInput, ComposerAttachment } from '@/models/assistant-message'
+import type { ComposerCommandFiles } from '@/models/composer-command'
 
 export type { Agent, AgentStatus, Project }
 export type { Task, TaskStatus, TaskPriority }
@@ -37,7 +38,10 @@ export interface AgentsAPI {
 	start: (id: string) => Promise<{ ok: boolean }>
 	stop: (id: string) => Promise<{ ok: boolean }>
 	restart: (id: string) => Promise<{ ok: boolean }>
-	send: (id: string, message: string) => Promise<{ ok: boolean }>
+  send: (id: string, message: TurnInput) => Promise<{ ok: boolean }>
+  pickAttachments: (id: string, kind: 'file' | 'folder') => Promise<ComposerAttachment[]>
+  importAttachment: (id: string, input: { name: string; mimeType?: string; data: string }) => Promise<ComposerAttachment>
+  discardAttachment: (id: string, attachmentId: string) => Promise<void>
 	getRuntimeState: (id: string) => Promise<RuntimeStatusPayload | null>
 	getProjects: (id: string) => Promise<Project[]>
 	getMessages: (id: string) => Promise<ChatRow[]>
@@ -177,6 +181,12 @@ export interface ElectronAPI {
 	settings: SettingsAPI
 	tasks: TasksAPI
 	templates: TemplatesAPI
+	composerCommands: ComposerCommandsAPI
+}
+
+export interface ComposerCommandsAPI {
+	get: () => Promise<ComposerCommandFiles>
+	onChanged: (cb: () => void) => () => void
 }
 
 /**

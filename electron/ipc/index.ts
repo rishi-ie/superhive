@@ -6,6 +6,7 @@ import { registerSettingsIpc } from './settings';
 import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
 import { registerTemplatesIpc } from './templates';
+import { registerComposerCommandsIpc } from './composer-commands';
 
 export const IPC = {
   AGENTS: {
@@ -18,6 +19,9 @@ export const IPC = {
     STOP: 'agents:stop',
     RESTART: 'agents:restart',
     SEND: 'agents:send',
+    PICK_ATTACHMENTS: 'agents:pickAttachments',
+    IMPORT_ATTACHMENT: 'agents:importAttachment',
+    DISCARD_ATTACHMENT: 'agents:discardAttachment',
     GET_RUNTIME_STATE: 'agents:getRuntimeState',
     GET_PROJECTS: 'agents:getProjects',
     GET_MESSAGES: 'agents:get-messages',
@@ -94,6 +98,10 @@ export const IPC = {
     GET: 'templates:get',
     OPEN_FOLDER: 'templates:open-folder',
   },
+  COMPOSER_COMMANDS: {
+    GET: 'composer-commands:get',
+    ON_CHANGED: 'composer-commands:changed',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -105,4 +113,5 @@ export function registerIpc(): void {
   registerMailboxIpc();
   registerTaskIpc();
   registerTemplatesIpc();
+  registerComposerCommandsIpc();
 }

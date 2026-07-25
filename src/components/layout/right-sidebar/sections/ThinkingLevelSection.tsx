@@ -10,12 +10,9 @@ import {
 import type { SettingsSectionProps, SearchableAtom } from "./registry";
 
 const THINKING_LEVELS = [
-  { value: "off", label: "Off" },
-  { value: "minimal", label: "Minimal" },
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "xhigh", label: "Extra high" },
+  { value: "low", label: "Concise" },
+  { value: "medium", label: "Balanced" },
+  { value: "high", label: "Thorough" },
 ] as const;
 
 type ThinkingLevel = (typeof THINKING_LEVELS)[number]["value"];
@@ -23,7 +20,7 @@ type ThinkingLevel = (typeof THINKING_LEVELS)[number]["value"];
 export function ThinkingLevelSection({ settings, patch }: SettingsSectionProps) {
   const current = (settings.defaultThinkingLevel ?? "medium") as ThinkingLevel;
   const currentLabel =
-    THINKING_LEVELS.find((l) => l.value === current)?.label ?? "Medium";
+    THINKING_LEVELS.find((l) => l.value === current)?.label ?? "Balanced";
 
   const onChange = (next: string) => {
     if (THINKING_LEVELS.some((l) => l.value === next)) {

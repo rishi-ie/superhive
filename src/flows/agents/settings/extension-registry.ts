@@ -35,15 +35,7 @@ export const EXTENSION_REGISTRY: readonly ExtensionDescriptor[] = [
     id: 'superhive-pi-plan',
     presets: ['project_manager'],
     defaultEnabled: true,
-    settings: [
-      {
-        key: 'planMode',
-        label: 'Plan mode',
-        scope: 'agent',
-        apply: 'next_turn',
-        affectsSystemPrompt: true,
-      },
-    ],
+    settings: [],
     contributesSystemPrompt: true,
   },
 ] as const

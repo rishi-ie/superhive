@@ -9,14 +9,14 @@
  * `telemetryTailers`, `silenceTimers`, `readyEmitted`, `settingsWatchers`
  * Maps. This module mutates them through the `rt` reference passed in.
  */
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawn, type ChildProcess } from 'node:child_process'
 import log from 'electron-log/main'
 import { chatFilePath, readAll } from '../agent-chat-store'
 import type { RuntimeEntry } from '../runtime-status'
 import type { GeneralKaiRuntime } from '../general-kai-runtime'
-import type { UserMessage } from '../../src/models/assistant-message'
+import type { ComposerContext, TurnInput, UserMessage } from '../../src/models/assistant-message'
 import { RawTextAdapter } from '../pi-protocol'
 
 type EventedChildProcess = ChildProcess & {
@@ -129,24 +129,72 @@ export function restart(rt: GeneralKaiRuntime, agentId: string): void {
   setTimeout(() => rt.start(agentId, entry.agentDir, entry.manifestPiSource), RESTART_DELAY_MS)
 }
 
-export function send(rt: GeneralKaiRuntime, agentId: string, text: string): boolean {
+function resolvedPrompt(input: TurnInput): string {
+  const context = input.composerContext
+  if (!context) return input.text
+  const sections: string[] = []
+  if (context.goal) sections.push(`Active project goal: ${context.goal}`)
+  if (context.mode) sections.push(`Turn mode: ${context.mode}. Follow this mode's tool policy.`)
+  if (context.skills?.length) sections.push(`Use these skills for this turn: ${context.skills.join(', ')}`)
+  if (context.plugins?.length) sections.push(`Use these installed capabilities for this turn: ${context.plugins.join(', ')}`)
+  if (context.attachments?.length) sections.push(`User attachments (read only when relevant):\n${context.attachments.map((item) => `- ${item.kind}: ${item.name} at ${item.path}`).join('\n')}`)
+  return sections.length ? `${input.text}\n\n[Superhive turn context]\n${sections.join('\n')}` : input.text
+}
+
+/** Apply the composer mode before Pi receives this turn. */
+function applyTurnMode(agentDir: string, mode: ComposerContext['mode']): boolean {
+  if (!existsSync(join(agentDir, 'extensions', 'superhive-pi-plan'))) return true
+  const filePath = join(agentDir, 'superhive-pi-plan.json')
+  let current: Record<string, unknown> = {}
+  try {
+    const parsed = JSON.parse(readFileSync(filePath, 'utf8')) as unknown
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) current = parsed as Record<string, unknown>
+  } catch {
+    // The plan extension accepts this minimal first-turn config.
+  }
+  try {
+    const currentMode = current.planMode
+    const planMode = currentMode && typeof currentMode === 'object' && !Array.isArray(currentMode)
+      ? currentMode as Record<string, unknown> : {}
+    const next = {
+      ...current,
+      version: typeof current.version === 'number' ? current.version : 1,
+      managedBy: 'superhive-runtime',
+      lastModified: new Date().toISOString(),
+      // No chip means Execute, so a previous Plan turn cannot leak forward.
+      planMode: { ...planMode, defaultMode: mode === 'plan' ? 'plan' : 'build' },
+    }
+    const tmp = `${filePath}.${process.pid}.${Date.now()}.tmp`
+    writeFileSync(tmp, JSON.stringify(next, null, '\t') + '\n', 'utf8')
+    renameSync(tmp, filePath)
+    return true
+  } catch (error) {
+    log.error(`[runtime] failed to apply turn mode for ${agentDir}:`, error)
+    return false
+  }
+}
+
+export function send(rt: GeneralKaiRuntime, agentId: string, input: TurnInput): boolean {
   const entry = rt.entries.get(agentId)
   if (!entry?.process) return false
-  if (!text.trim()) return false
+  if (!input.text.trim() && !input.composerContext?.attachments?.length) return false
+  if (!applyTurnMode(entry.agentDir, input.composerContext?.mode)) return false
   const userMsg: UserMessage = {
     id: crypto.randomUUID(),
     role: 'user',
     timestamp: Date.now(),
-    text,
+    text: input.text,
+    composerContext: input.composerContext,
   }
   entry.messages.push(userMsg)
   entry._chatPending.add(userMsg.id)
   rt.scheduleChatPersist(entry)
   rt.transitionStatus(entry, 'busy')
   rt.emitMessages(agentId)
-  log.debug(`[runtime.send] agent=${agentId} wire=${entry.adapter.serializeInput(text).replace(/\n$/, '')}`)
+  const prompt = resolvedPrompt(input)
+  log.debug(`[runtime.send] agent=${agentId} wire=${entry.adapter.serializeInput(prompt).replace(/\n$/, '')}`)
   try {
-    const wire = entry.adapter.serializeInput(text)
+    const wire = entry.adapter.serializeInput(prompt)
     entry.process.stdin?.write(wire)
     return true
   } catch (err) {

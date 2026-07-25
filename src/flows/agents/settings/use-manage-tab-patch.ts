@@ -3,7 +3,7 @@
  * Manage tab (both AgentSettingsPanel and ProjectSettingsPanel).
  *
  * Writes user-tweakable fields to the right truth file:
- *   - `manage.json` (skills, extensions, planMode, etc.)
+ *   - `manage.json` (skills, extensions, etc.)
  *   - `settings.json` (defaultThinkingLevel + runtime.thinkingLevel)
  *
  * The Thinking Level patch is a DUAL-WRITE:

@@ -15,18 +15,8 @@
 
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-import { Icon } from '@/components/ui/icon';
-import {
-  PlusIcon,
-  ArrowUpIcon,
-  Stop,
-} from '@phosphor-icons/react';
-import { HugeIcon } from "@/components/ui/huge-icon";
-import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
-import { ModelPicker } from '@/components/layout/composer/ModelPicker';
-import { ModePicker } from '@/components/layout/composer/ModePicker';
-import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
+import { ProjectChatComposer } from './components/ProjectChatComposer';
 import { ProjectAgentBooting } from './components/ProjectAgentBooting';
 import { ProjectAgentError } from './components/ProjectAgentError';
 import { ProjectAgentStopped } from './components/ProjectAgentStopped';
@@ -38,7 +28,6 @@ import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/settings';
 import { useAgentsListVersion } from '@/flows/agents/runtime';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
-import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
@@ -185,8 +174,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     contextWindow != null && contextWindow > 0 && contextUsedTokens > 0
       ? Math.min(100, (contextUsedTokens / contextWindow) * 100)
       : 0;
-  const [input, setInput] = React.useState('');
-  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
 
   if (loading) {
     return (
@@ -221,29 +208,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
   const isLive = status === 'active' || status === 'busy';
   const isBusy = status === 'busy';
 
-  const onSend = () => {
-    const result = sendMessage({ text: input, isLive, send })
-    if (result.ok) {
-      setInput('');
-      requestAnimationFrame(() => textareaRef.current?.focus());
-    }
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      onSend();
-      return;
-    }
-    if (e.key === 'ArrowUp' && !input && messages.length > 0) {
-      const lastUser = [...messages].reverse().find((m) => m.role === 'user');
-      if (lastUser) {
-        e.preventDefault();
-        setInput(lastUser.text);
-        requestAnimationFrame(() => textareaRef.current?.focus());
-      }
-    }
-  };
 
   useChatShortcuts({
     onCopyLast: () => {
@@ -268,60 +232,9 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
         agentName={projectAgent.name}
         pendingTurn={pendingTurn}
         agentResponseActive={agentResponseActive}
-        onPromptSelect={(prompt) => {
-          setInput(prompt)
-          requestAnimationFrame(() => textareaRef.current?.focus())
-        }}
+        onPromptSelect={() => undefined}
       />
-      <div className="shrink-0">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-start">
-            <div className="flex-1 rounded-3xl bg-sidebar">
-            <textarea
-              ref={textareaRef}
-              placeholder="Message the project agent..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              autoFocus
-              className="min-h-[24px] w-full resize-none border-0 bg-transparent px-composer pt-4 pb-2 text-sm text-sidebar-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-            <div className="flex items-center justify-between px-composer py-button-y">
-              <div className="flex items-center gap-3">
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
-                  <Icon icon={PlusIcon} className="size-5" />
-                </button>
-                <ContextUsageRing
-                  percent={contextPercent}
-                  usedTokens={contextUsedTokens}
-                  maxTokens={contextWindow}
-                />
-              </div>
-              <div className="flex items-center gap-5">
-                <ModePicker agentId={projectAgent.id} />
-                <ModelPicker agentId={projectAgent.id} />
-                <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-pointer">
-                  <HugeIcon icon={Mic02Icon} size={20} className="text-sidebar-foreground/70" />
-                </button>
-                <button
-                  onClick={isBusy ? stop : onSend}
-                  disabled={!isBusy && input.trim().length === 0}
-                  title={undefined}
-                  className={
-                    'flex size-5 items-center justify-center rounded-full cursor-pointer ' +
-                    (isBusy
-                      ? 'bg-chat-composer-stop-bg hover:bg-chat-composer-stop-hover'
-                      : 'bg-chat-composer-send-bg hover:bg-chat-composer-send-hover disabled:bg-muted disabled:cursor-not-allowed')
-                  }
-                >
-                    <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-4 text-white" />
-                </button>
-              </div>
-            </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="shrink-0"><ProjectChatComposer agentId={projectAgent.id} isBusy={isBusy} isLive={isLive} contextPercent={contextPercent} contextUsedTokens={contextUsedTokens} contextWindow={contextWindow} onSend={(input) => void send(input)} onStop={() => void stop()} /></div>
     </div>
   );
 }

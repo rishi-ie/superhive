@@ -32,6 +32,9 @@ const api: ElectronAPI = {
     stop:     (id) => ipcRenderer.invoke('agents:stop', id),
     restart:  (id) => ipcRenderer.invoke('agents:restart', id),
     send:     (id, message) => ipcRenderer.invoke('agents:send', id, message),
+    pickAttachments: (id, kind) => ipcRenderer.invoke('agents:pickAttachments', id, kind),
+    importAttachment: (id, input) => ipcRenderer.invoke('agents:importAttachment', id, input),
+    discardAttachment: (id, attachmentId) => ipcRenderer.invoke('agents:discardAttachment', id, attachmentId),
     getRuntimeState: (id) => ipcRenderer.invoke('agents:getRuntimeState', id),
     getProjects:   (id) => ipcRenderer.invoke('agents:getProjects', id),
     getMessages:   (id) => ipcRenderer.invoke('agents:get-messages', id),
@@ -136,6 +139,10 @@ const api: ElectronAPI = {
     list: () => ipcRenderer.invoke('templates:list'),
     get: (id) => ipcRenderer.invoke('templates:get', id),
     openFolder: () => ipcRenderer.invoke('templates:open-folder'),
+  },
+  composerCommands: {
+    get: () => ipcRenderer.invoke('composer-commands:get'),
+    onChanged: (cb) => subscribe('composer-commands:changed', cb),
   },
 }
 

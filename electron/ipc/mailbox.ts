@@ -96,14 +96,14 @@ export function attachMailboxWatches(): void {
 		const senderName = entry.fromAgentName ?? 'a team member'
 		runtime.send(
 			coordId,
-			`[mail] New message from ${senderName} in project chat. Call read_inbox to inspect.`,
+			{ text: `[mail] New message from ${senderName} in project chat. Call read_inbox to inspect.` },
 		)
 	}
 
 	mailboxWatcher.onMemberMail = (memberId) => {
 		runtime.send(
 			memberId,
-			`[mail] You have a new direct ask. Call read_inbox to inspect.`,
+			{ text: `[mail] You have a new direct ask. Call read_inbox to inspect.` },
 		)
 	}
 

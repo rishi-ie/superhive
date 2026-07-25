@@ -7,7 +7,7 @@ import {
 } from './pi-protocol'
 import { TelemetryTailer } from './pi-protocol/telemetry-tailer'
 import type { RuntimeStatusPayload } from '../src/types/electron'
-import type { ChatRow, UserMessage, AssistantMessage } from '../src/models/assistant-message'
+import type { ChatRow, UserMessage, AssistantMessage, TurnInput } from '../src/models/assistant-message'
 import { IPC } from './ipc/index'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { buildStatusPayload } from './runtime-status'
@@ -113,8 +113,8 @@ export class GeneralKaiRuntime {
    * (spec: "User Message — Persist immediately"). The runtime then
    * writes the wire envelope to Pi's stdin.
    */
-  send(agentId: string, text: string): boolean {
-    return spawnModule.send(this, agentId, text)
+  send(agentId: string, input: TurnInput): boolean {
+    return spawnModule.send(this, agentId, input)
   }
 
   async shutdownAll(): Promise<void> {

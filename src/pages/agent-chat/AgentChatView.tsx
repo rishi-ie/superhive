@@ -121,7 +121,7 @@ export function AgentChatView() {
   const isBusy = status === 'busy';
 
   const onSend = () => {
-    const result = sendMessage({ text: input, isLive, send })
+    const result = sendMessage({ text: input, isLive, send: (text) => void send({ text }) })
     if (result.ok) {
       setInput('');
       requestAnimationFrame(() => textareaRef.current?.focus());

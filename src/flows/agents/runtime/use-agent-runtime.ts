@@ -21,7 +21,7 @@ import type {
   ModelInfo,
   RuntimeAssistantState,
 } from '@/types/electron'
-import type { ChatRow } from '@/models/assistant-message'
+import type { ChatRow, TurnInput } from '@/models/assistant-message'
 import type { CompactionStatus, RetryStatus } from '@/models/runtime'
 import { toast } from 'sonner'
 import { initRuntimeSlice } from './slice'
@@ -93,11 +93,10 @@ export function useAgentRuntime(agentId: string | undefined) {
     }
   }, [slice])
 
-  const send = React.useCallback(async (text: string) => {
+  const send = React.useCallback(async (input: TurnInput) => {
     if (!agentId) return
     try {
-      // The Plan extension reads its config in before_agent_start. Waiting
-      // here makes a just-selected composer mode apply to this very turn.
+      // Commit ordinary Manage changes before the next turn starts.
       await flushAgentManage(agentId)
     } catch {
       // The Manage flow already surfaced the persistence failure.
@@ -125,7 +124,7 @@ export function useAgentRuntime(agentId: string | undefined) {
       s.listeners.forEach((l) => l())
     }
     try {
-      const result = await agents.send(agentId, text)
+      const result = await agents.send(agentId, input)
       if (!result.ok) throw new Error('Agent is not running')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to send message')

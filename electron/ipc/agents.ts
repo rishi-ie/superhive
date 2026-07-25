@@ -1,8 +1,9 @@
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, dialog } from 'electron'
 import { mkdir, cp, writeFile, chmod, rename, readFile } from 'node:fs/promises'
 import { existsSync, symlinkSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
+import type { ComposerAttachment } from '../../src/models/assistant-message'
 import log from 'electron-log/main'
 import { runtime } from '../general-kai-runtime'
 import { ensureExtension } from '../extension-source'
@@ -78,35 +79,6 @@ function deepMerge<T>(base: T, overrides: unknown): T {
 	return result as T
 }
 
-/**
- * The Plan extension reads this file at the beginning of each Pi turn.
- * Mirror a committed manage.planMode immediately so a user can select a mode
- * and send without waiting for Truth's asynchronous filesystem watcher.
- */
-async function writePlanModeExtension(agentDir: string, planMode: unknown): Promise<void> {
-	if (!planMode || typeof planMode !== 'object' || Array.isArray(planMode)) return
-	const filePath = join(agentDir, 'superhive-pi-plan.json')
-	let current: Record<string, unknown> = {}
-	try {
-		const parsed = JSON.parse(await readFile(filePath, 'utf8')) as unknown
-		if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-			current = parsed as Record<string, unknown>
-		}
-	} catch {
-		// A missing or malformed extension file is replaced with a valid seed.
-	}
-	const next = {
-		...current,
-		version: typeof current.version === 'number' ? current.version : 1,
-		managedBy: 'superhive-pi-truth@1',
-		lastModified: new Date().toISOString(),
-		planMode,
-	}
-	const tmp = `${filePath}.${process.pid}.${Date.now()}.tmp`
-	await writeFile(tmp, JSON.stringify(next, null, '\t') + '\n', 'utf8')
-	await rename(tmp, filePath)
-}
-
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
 const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
@@ -138,6 +110,52 @@ export function registerAgentIpc(): void {
 
 	ipcMain.handle(IPC.AGENTS.GET, async (_e, id: string) => {
 		return (await AgentRepository.getById(id)) ?? null
+	})
+
+	const attachmentRoot = (agentDir: string) => join(agentDir, 'attachments')
+	const copyAttachment = async (agentDir: string, source: string): Promise<ComposerAttachment> => {
+		const id = crypto.randomUUID()
+		const name = basename(source)
+		const destination = join(attachmentRoot(agentDir), `${id}-${name}`)
+		await mkdir(attachmentRoot(agentDir), { recursive: true })
+		await cp(source, destination)
+		const image = /\.(png|jpe?g|gif|webp|heic)$/i.test(name)
+		return { id, kind: image ? 'image' : 'file', name, path: destination }
+	}
+
+	ipcMain.handle(IPC.AGENTS.PICK_ATTACHMENTS, async (_e, agentId: string, kind: 'file' | 'folder') => {
+		const agent = await AgentRepository.getById(agentId)
+		if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+		const result = await dialog.showOpenDialog({
+			properties: kind === 'folder' ? ['openDirectory', 'multiSelections'] : ['openFile', 'multiSelections'],
+		})
+		if (result.canceled) return []
+		if (kind === 'folder') {
+			return result.filePaths.map((path) => ({ id: crypto.randomUUID(), kind: 'folder' as const, name: basename(path), path }))
+		}
+		return Promise.all(result.filePaths.map((path) => copyAttachment(agent.localPath!, path)))
+	})
+
+	ipcMain.handle(IPC.AGENTS.IMPORT_ATTACHMENT, async (_e, agentId: string, input: { name: string; mimeType?: string; data: string }) => {
+		const agent = await AgentRepository.getById(agentId)
+		if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+		const id = crypto.randomUUID()
+		const name = basename(input.name || 'image')
+		const destination = join(attachmentRoot(agent.localPath), `${id}-${name}`)
+		const base64 = input.data.includes(',') ? input.data.slice(input.data.indexOf(',') + 1) : input.data
+		await mkdir(attachmentRoot(agent.localPath), { recursive: true })
+		await writeFile(destination, Buffer.from(base64, 'base64'))
+		return { id, kind: input.mimeType?.startsWith('image/') ? 'image' : 'file', name, path: destination, mimeType: input.mimeType } as ComposerAttachment
+	})
+
+	ipcMain.handle(IPC.AGENTS.DISCARD_ATTACHMENT, async (_e, agentId: string, attachmentId: string) => {
+		const agent = await AgentRepository.getById(agentId)
+		if (!agent?.localPath || !/^[a-f0-9-]{36}$/i.test(attachmentId)) return
+		const root = attachmentRoot(agent.localPath)
+		const { readdir } = await import('node:fs/promises')
+		for (const name of await readdir(root).catch(() => [] as string[])) {
+			if (name.startsWith(`${attachmentId}-`)) await rm(join(root, name), { force: true })
+		}
 	})
 
 	ipcMain.handle(
@@ -364,7 +382,7 @@ export function registerAgentIpc(): void {
 				'utf8',
 			)
 
-			// manage.json — identity + permissions + extensions + planMode +
+			// manage.json — identity + permissions + extensions +
 			// (for coordinators) the project block. The seed is a clean
 			// DEFAULT_MANAGE shape; the truth ext's validator fills in
 			// any missing top-level fields on next read.
@@ -389,7 +407,6 @@ export function registerAgentIpc(): void {
 					autoCompaction: true,
 					autoRetry: true,
 				},
-				planMode: { defaultMode: 'auto' as const, thinkingLevel: 'inherit' as const },
 				...(isCoordinator && data.projectId && {
 						project: {
 							id: data.projectId,
@@ -533,17 +550,6 @@ export function registerAgentIpc(): void {
 				// `{ runtime: { thinkingLevel: 'high' } }` patch — losing
 				// `activeTools`. See AGENT_SETTINGS.md §12.
 				const merged = deepMerge(current, patch) as Record<string, unknown>
-				// Canonical v2 surface: agent.mode. Keep the legacy planMode mirror
-				// until every installed plan extension reads the new namespace.
-				const agentConfig = merged.agent
-				if (agentConfig && typeof agentConfig === 'object' && !Array.isArray(agentConfig)) {
-					const mode = (agentConfig as Record<string, unknown>).mode
-					if (mode === 'plan' || mode === 'execute') {
-						const currentPlan = merged.planMode && typeof merged.planMode === 'object'
-							? merged.planMode as Record<string, unknown> : {}
-						merged.planMode = { ...currentPlan, defaultMode: mode === 'plan' ? 'plan' : 'build' }
-					}
-				}
 				merged.version = 1
 				merged.managedBy = `superhive-pi-truth@1#${myCounter}`
 				merged.lastModified = new Date().toISOString()
@@ -609,6 +615,8 @@ export function registerAgentIpc(): void {
 				// top-level keys — toggling one `behavior.autoCompaction`
 				// would wipe `steeringMode`, `compaction`, etc.)
 				const merged = deepMerge(current, patch) as Record<string, unknown>
+				// Mode is selected per message in the composer, never in Manage.
+				delete merged.planMode
 				merged.version = 1
 				merged.managedBy = `superhive-pi-truth@1#${myCounter}`
 				merged.lastModified = new Date().toISOString()
@@ -624,7 +632,6 @@ export function registerAgentIpc(): void {
 				const verify = JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>
 				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
 					runtime.markSelfWrite(agentId, 'manage', parseCounter(verify.managedBy as string | undefined))
-					await writePlanModeExtension(agent.localPath, merged.planMode)
 					return {
 						ok: true,
 						writtenVersion: parseCounter(verify.managedBy as string | undefined),
@@ -1017,7 +1024,6 @@ export function registerAgentIpc(): void {
 				prompts: [],
 				packages: [],
 				themes: [],
-				planMode: { defaultMode: 'auto' as const, thinkingLevel: 'inherit' as const },
 				// spawner-bound: the spawned agent carries the spawner's
 				// project id so it shows up in project rosters.
 				projectIds: [input.projectId],

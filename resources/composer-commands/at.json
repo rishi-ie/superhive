@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "items": [
+    { "id": "files", "label": "Files and folders", "description": "Attach files for this message", "keywords": ["file", "attach"], "action": "attachment", "value": "file" },
+    { "id": "folders", "label": "Folder", "description": "Attach a folder reference", "keywords": ["folder", "directory"], "action": "attachment", "value": "folder" },
+    { "id": "goal", "label": "Goal", "description": "Set the project goal", "keywords": ["objective"], "action": "goal" },
+    { "id": "plan", "label": "Plan mode", "description": "Plan safely for this message", "keywords": ["read-only"], "action": "mode", "value": "plan" },
+    { "id": "execute", "label": "Execute mode", "description": "Execute work for this message", "keywords": ["build"], "action": "mode", "value": "execute" },
+    { "id": "plugins", "source": "plugins" }
+  ]
+}

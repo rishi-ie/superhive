@@ -17,6 +17,8 @@ import { agentsFsWatcher } from './agents-fs-watcher';
 import { attachMailboxWatches } from './ipc/mailbox';
 import { tasksFileWatcher } from './tasks-file-watcher';
 import { getTaskRunner } from './task-runner';
+import { installComposerCommands, watchComposerCommands } from './composer-command-config';
+import { IPC } from './ipc';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -113,6 +115,7 @@ app.whenReady().then(async () => {
   }
 
   installDefaultsBundle()
+  installComposerCommands()
 
   await seedWorkspace();
   runtime.pruneStaleEntries();
@@ -158,6 +161,7 @@ app.whenReady().then(async () => {
   }
 
   createWindow();
+  watchComposerCommands(() => mainWindow?.webContents.send(IPC.COMPOSER_COMMANDS.ON_CHANGED));
   if (mainWindow) setupAutoUpdater(mainWindow);
 
   app.on('activate', () => {

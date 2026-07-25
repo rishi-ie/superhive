@@ -10,7 +10,7 @@ import type { SettingsSectionProps } from "./registry";
  * compaction, retry) on manage.json for the user-tweakable surface.
  *
  * Plan-mode and permissions live in their own dedicated sections
- * (`PlanModeSection`, `PermissionsSection`). Behavior stays focused on
+ * (`PermissionsSection`). Behavior stays focused on
  * the queue-time + retry + compaction toggles.
  */
 

@@ -38,7 +38,7 @@ export function settingsFilePathFor(agentDir: string): string {
 /**
  * Resolve `<agentDir>/manage.json`. Hosts the user-tweakable surface
  * (identity, permissions, behavior, skills/extensions/prompts/
- * packages/themes, planMode, project).
+ * packages/themes, project).
  */
 export function manageFilePathFor(agentDir: string): string {
 	return join(agentDir, 'manage.json')
