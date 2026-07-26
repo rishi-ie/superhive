@@ -162,7 +162,7 @@ export function ModelPicker({ agentId, className }: ModelPickerProps) {
               className="flex items-center gap-1.5 cursor-pointer"
             >
               <Icon icon={PlusIcon} className="size-3.5 text-modal-foreground/60" />
-              <span className="text-sm text-modal-foreground/70">Add API keys</span>
+              <span className="text-sm text-modal-foreground/70">Add model</span>
             </DropdownMenuItem>
           </>
         )}

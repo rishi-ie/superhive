@@ -14,7 +14,7 @@ export function SettingsSectionView() {
         title={def?.label ?? "Settings"}
         description={
           section === "models"
-            ? "Add your API key for each provider to enable its models in chat."
+            ? "Choose the models available in chat and manage their provider access."
             : undefined
         }
       >

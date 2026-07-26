@@ -115,6 +115,7 @@ const api: ElectronAPI = {
     setModelEnabled: (id, enabled) =>
       ipcRenderer.invoke('settings:set-model-enabled', id, enabled),
     addModel: (input) => ipcRenderer.invoke('settings:add-model', input),
+    updateModel: (input) => ipcRenderer.invoke('settings:update-model', input),
     deleteModel: (id) => ipcRenderer.invoke('settings:delete-model', id),
     getEnabledModels: () => ipcRenderer.invoke('settings:get-enabled-models'),
 

@@ -7,6 +7,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 import { ProviderKeyBlock } from './ProviderKeyBlock';
 import { useProviders } from '@/flows/settings';
 import { SettingsPanel } from '../../../SettingsPrimitives';
@@ -71,7 +72,7 @@ export function APIKeysSection() {
     <Collapsible open={open} onOpenChange={setOpen}>
       <SettingsPanel
         title="API Keys"
-        description="Manage the providers available to your models."
+        description="Manage access for the models above."
         action={
           <CollapsibleTrigger className="flex size-7 items-center justify-center rounded-button text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
             <Icon
@@ -82,7 +83,7 @@ export function APIKeysSection() {
           </CollapsibleTrigger>
         }
       >
-        <CollapsibleContent className="flex flex-col gap-4 px-(--card-spacing) pb-(--card-spacing)">
+        <CollapsibleContent className="px-(--card-spacing) pb-(--card-spacing)">
           <APIKeysBlocks />
         </CollapsibleContent>
       </SettingsPanel>
@@ -94,19 +95,23 @@ function APIKeysBlocks() {
   const { providers, refresh } = useProviders();
 
   return (
-    <div className="flex flex-col gap-4">
-      {BLOCKS.map((b) => (
-        <ProviderKeyBlock
-          key={b.name}
-          providerName={b.name}
-          heading={b.heading}
-          shape={b.shape}
-          showBaseUrl={b.showBaseUrl}
-          baseUrlPlaceholder={b.baseUrlPlaceholder}
-          docsUrl={b.docsUrl}
-          existingProvider={providers[b.name]}
-          onSaved={refresh}
-        />
+    <div className="flex flex-col">
+      {BLOCKS.map((b, index) => (
+        <React.Fragment key={b.name}>
+          <div className="py-4 first:pt-0 last:pb-0">
+            <ProviderKeyBlock
+              providerName={b.name}
+              heading={b.heading}
+              shape={b.shape}
+              showBaseUrl={b.showBaseUrl}
+              baseUrlPlaceholder={b.baseUrlPlaceholder}
+              docsUrl={b.docsUrl}
+              existingProvider={providers[b.name]}
+              onSaved={refresh}
+            />
+          </div>
+          {index < BLOCKS.length - 1 ? <Separator /> : null}
+        </React.Fragment>
       ))}
     </div>
   );

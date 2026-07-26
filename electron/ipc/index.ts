@@ -77,6 +77,7 @@ export const IPC = {
     GET_MODELS: 'settings:get-models',
     SET_MODEL_ENABLED: 'settings:set-model-enabled',
     ADD_MODEL: 'settings:add-model',
+    UPDATE_MODEL: 'settings:update-model',
     DELETE_MODEL: 'settings:delete-model',
     GET_ENABLED_MODELS: 'settings:get-enabled-models',
     ON_MODEL_UPDATED: 'settings:model-updated',

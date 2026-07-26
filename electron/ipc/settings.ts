@@ -37,7 +37,17 @@ interface ModelEntry {
 	name: string
 	enabled: boolean
 	isCustom?: boolean
+	catalogId?: string
 	contextWindow?: number
+}
+
+interface UpdateModelInput {
+	id?: string
+	provider?: string
+	name?: string
+	baseUrl?: string
+	apiKey?: string
+	catalogId?: string
 }
 
 /**
@@ -308,6 +318,82 @@ export function registerSettingsIpc(): void {
 			)
 		},
 	)
+
+	ipcMain.handle(IPC.SETTINGS.UPDATE_MODEL, async (_e, input: UpdateModelInput) => {
+		const id = input.id?.trim()
+		const provider = input.provider?.trim()
+		const name = input.name?.trim()
+		const apiKey = input.apiKey?.trim()
+		if (!id) throw new Error('Model id is required')
+		if (!provider) throw new Error('Provider is required')
+		if (!name) throw new Error('Model name is required')
+		if (!apiKey) throw new Error('API key is required')
+
+		const nextId = `${provider}:${name}`
+		const existingRow = await SettingsRepository.getSetting(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			id,
+		)
+		const existing = existingRow?.value as ModelEntry | undefined
+		const collision = nextId === id
+			? undefined
+			: await SettingsRepository.getSetting(GLOBAL_OWNER_TYPE, GLOBAL_OWNER_ID, nextId)
+		if (collision) throw new Error(`Model ${nextId} already exists`)
+
+		const providerRow = await SettingsRepository.getSetting(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			provider,
+		)
+		const currentProvider = (providerRow?.value as ProviderEntry | undefined) ?? {}
+		await SettingsRepository.setSetting(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			provider,
+			{
+				...currentProvider,
+				name: provider,
+				baseUrl: input.baseUrl?.trim() || null,
+				apiKey,
+			},
+			'json',
+			provider,
+			undefined,
+			GROUP_PROVIDERS,
+		)
+
+		const catalogId = input.catalogId?.trim()
+		const { catalogId: _catalogId, ...model } = existing ?? {
+			id,
+			provider,
+			name,
+			enabled: true,
+			isCustom: !catalogId,
+		}
+		const next: ModelEntry = {
+			...model,
+			id: nextId,
+			provider,
+			name,
+			isCustom: catalogId ? false : (model.isCustom ?? true),
+			...(catalogId && nextId !== catalogId ? { catalogId } : {}),
+		}
+		await SettingsRepository.setSetting(
+			GLOBAL_OWNER_TYPE,
+			GLOBAL_OWNER_ID,
+			nextId,
+			next,
+			'json',
+			name,
+			undefined,
+			GROUP_MODELS,
+		)
+		if (nextId !== id && existingRow) {
+			await SettingsRepository.removeSetting(GLOBAL_OWNER_TYPE, GLOBAL_OWNER_ID, id)
+		}
+		await reSeedAllAgents()
+	})
 
 	ipcMain.handle(IPC.SETTINGS.DELETE_MODEL, async (_e, id: string) => {
 		await SettingsRepository.removeSetting(

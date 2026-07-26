@@ -1,7 +1,6 @@
 import { Icon } from '@/components/ui/icon';
 import { KeyIcon, PencilSimpleIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import type { ModelEntry } from '@/types/electron';
@@ -31,23 +30,23 @@ export function ModelRow({
   return (
     <SettingsRow
       title={
-        <span className="flex min-w-0 items-center gap-gap-tight">
-          <span className="truncate">{model.name}</span>
-          {!hasApiKey ? <Badge variant="destructive">No key</Badge> : null}
-          {hasApiKey && model.enabled ? <Badge variant="secondary">Active</Badge> : null}
-          {model.isCustom ? <Badge variant="outline">Custom</Badge> : null}
-          {model.contextWindow ? <Badge variant="outline">{formatContextWindow(model.contextWindow)}</Badge> : null}
+        <span className="truncate">{model.name}</span>
+      }
+      description={
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+          <span className="font-mono">{model.provider}</span>
+          {model.isCustom ? <span>Custom</span> : null}
+          {model.contextWindow ? <span>{formatContextWindow(model.contextWindow)}</span> : null}
+          {!hasApiKey ? <span>API key required to enable.</span> : null}
         </span>
       }
-      description={<span className="font-mono">{model.provider}</span>}
     >
-      <div className="flex shrink-0 items-center gap-stack">
+      <div className="flex shrink-0 items-center gap-2">
         <Tooltip>
           <TooltipTrigger asChild>
             <span>
               <Switch
                 checked={model.enabled}
-                disabled={!hasApiKey}
                 onCheckedChange={onToggleEnabled}
                 aria-label={`Enable ${model.name}`}
               />
@@ -60,37 +59,39 @@ export function ModelRow({
           )}
         </Tooltip>
 
-        {!model.isCustom && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={onConfigure}
+              aria-label={hasApiKey ? `Edit ${model.name}` : `Configure ${model.name}`}
+            >
+              <Icon icon={hasApiKey ? PencilSimpleIcon : KeyIcon} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {hasApiKey ? 'Edit model' : 'Configure model'}
+          </TooltipContent>
+        </Tooltip>
+
+        {model.isCustom && onDelete && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 type="button"
-                variant="outline"
-                size="sm"
-                onClick={onConfigure}
-                aria-label={hasApiKey ? `Edit ${model.provider} key` : `Add key for ${model.provider}`}
+                variant="ghost"
+                size="icon-sm"
+                onClick={onDelete}
+                aria-label={`Delete ${model.name}`}
+                className="text-muted-foreground"
               >
-                <Icon icon={hasApiKey ? PencilSimpleIcon : KeyIcon} data-icon="inline-start" />
-                {hasApiKey ? 'Edit key' : 'Add key'}
+                <Icon icon={TrashSimpleIcon} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              {hasApiKey ? 'Edit API key & base URL' : 'Add API key'}
-            </TooltipContent>
+            <TooltipContent>Delete model</TooltipContent>
           </Tooltip>
-        )}
-
-        {model.isCustom && onDelete && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onDelete}
-            aria-label={`Delete ${model.name}`}
-            className="text-muted-foreground"
-          >
-            <Icon icon={TrashSimpleIcon} />
-          </Button>
         )}
       </div>
     </SettingsRow>

@@ -4,6 +4,7 @@ export { configureCatalogProvider } from './configure-catalog-provider';
 export { saveProviderBlock } from './save-provider-block';
 export { setModelEnabled } from './set-model-enabled';
 export { addModel } from './add-model';
+export { updateModel } from './update-model';
 export { deleteModel } from './delete-model';
 export { getEnabledModels } from './get-enabled-models';
 export { addCustomModel } from './add-custom-model';

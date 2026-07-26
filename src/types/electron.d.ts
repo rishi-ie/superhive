@@ -247,6 +247,8 @@ export interface ModelEntry {
   name: string
   enabled: boolean
   isCustom?: boolean
+  /** Catalog entry this row overrides after its provider or model ID changes. */
+  catalogId?: string
   contextWindow?: number
 }
 
@@ -261,6 +263,15 @@ export interface SetProviderInput {
 	region?: string
 }
 
+export interface UpdateModelInput {
+  id: string
+  provider: string
+  name: string
+  baseUrl?: string
+  apiKey: string
+  catalogId?: string
+}
+
 export interface SettingsAPI {
 	getProviders: () => Promise<Record<string, ProviderEntry>>
 	setProvider: (input: SetProviderInput) => Promise<void>
@@ -268,6 +279,7 @@ export interface SettingsAPI {
 	getModels: () => Promise<ModelEntry[]>
 	setModelEnabled: (id: string, enabled: boolean) => Promise<void>
 	addModel: (input: { provider: string; name: string }) => Promise<void>
+	updateModel: (input: UpdateModelInput) => Promise<void>
 	deleteModel: (id: string) => Promise<void>
 	getEnabledModels: () => Promise<Array<{ id: string; provider: string; name: string }>>
 	/**

@@ -14,26 +14,24 @@ import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/common/PasswordInput';
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
-import { configureCatalogProvider } from '@/flows/settings/crud/configure-catalog-provider';
 import { addCustomModel } from '@/flows/settings/crud/add-custom-model';
-import { deleteProvider } from '@/flows/settings/crud/delete-provider';
 import { deleteModel } from '@/flows/settings/crud/delete-model';
+import { updateModel } from '@/flows/settings/crud/update-model';
 import type { CatalogProviderMeta } from './catalog';
 import type { ModelEntry, ProviderEntry } from '@/types/electron';
-
-type Mode = 'catalog' | 'custom';
 
 interface ModelEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
   catalogProvider?: CatalogProviderMeta;
-  /** Curated model name to enable when the user saves in catalog mode. */
   catalogModelName?: string;
+  catalogId?: string;
   existingModel?: ModelEntry;
   existingProvider?: ProviderEntry;
 }
@@ -44,23 +42,15 @@ export function ModelEditorDialog({
   onSaved,
   catalogProvider,
   catalogModelName,
+  catalogId,
   existingModel,
   existingProvider,
 }: ModelEditorDialogProps) {
-  const mode: Mode = catalogProvider ? 'catalog' : 'custom';
-  const showBaseUrl = mode === 'catalog'
-    ? catalogProvider!.showBaseUrl
-    : true;
-
-  const initialProvider = mode === 'catalog'
-    ? catalogProvider!.name
-    : (existingModel?.provider ?? '');
-  const initialBaseUrl = existingProvider?.baseUrl
-    ?? (mode === 'catalog' ? catalogProvider!.baseUrl : 'https://');
+  const isCatalog = Boolean(catalogId);
+  const initialProvider = existingModel?.provider ?? catalogProvider?.name ?? '';
+  const initialModelName = existingModel?.name ?? catalogModelName ?? '';
+  const initialBaseUrl = existingProvider?.baseUrl ?? catalogProvider?.baseUrl ?? 'https://';
   const initialKey = existingProvider?.apiKey ?? '';
-  const initialModelName = mode === 'custom'
-    ? (existingModel?.name ?? '')
-    : '';
 
   const [provider, setProvider] = React.useState(initialProvider);
   const [modelName, setModelName] = React.useState(initialModelName);
@@ -79,16 +69,12 @@ export function ModelEditorDialog({
     setError(null);
   }, [open, initialProvider, initialModelName, initialBaseUrl, initialKey]);
 
-  const hasExisting = mode === 'catalog'
-    ? Boolean(existingProvider?.apiKey?.trim())
-    : Boolean(existingModel);
-  const isEditing = hasExisting;
-
+  const isEditing = Boolean(existingModel);
   const canSubmit =
     phase === 'idle' &&
     provider.trim().length > 0 &&
-    apiKey.trim().length > 0 &&
-    (mode === 'catalog' || modelName.trim().length > 0);
+    modelName.trim().length > 0 &&
+    apiKey.trim().length > 0;
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,34 +82,15 @@ export function ModelEditorDialog({
     setError(null);
     setPhase('saving');
 
-    const trimmedProvider = provider.trim();
-    const trimmedBaseUrl = showBaseUrl ? baseUrl.trim() : undefined;
-    const trimmedKey = apiKey.trim();
-    const trimmedModel = modelName.trim();
-    const targetModel = (mode === 'catalog' ? (catalogModelName ?? '').trim() : trimmedModel);
-
-    if (mode === 'catalog' && !targetModel) {
-      setPhase('idle');
-      setError('Model is required');
-      return;
-    }
-
-    let result;
-    if (mode === 'catalog') {
-      result = await configureCatalogProvider({
-        provider: trimmedProvider,
-        baseUrl: trimmedBaseUrl,
-        apiKey: trimmedKey,
-        modelName: targetModel,
-      });
-    } else {
-      result = await addCustomModel({
-        provider: trimmedProvider,
-        modelName: trimmedModel,
-        baseUrl: trimmedBaseUrl,
-        apiKey: trimmedKey,
-      })
-    }
+    const values = {
+      provider: provider.trim(),
+      name: modelName.trim(),
+      baseUrl: baseUrl.trim(),
+      apiKey: apiKey.trim(),
+    };
+    const result = isEditing || isCatalog
+      ? await updateModel({ id: existingModel?.id ?? catalogId!, catalogId, ...values })
+      : await addCustomModel({ modelName: values.name, ...values });
 
     if (result.ok) {
       onSaved?.();
@@ -135,53 +102,27 @@ export function ModelEditorDialog({
   };
 
   const onRemove = async () => {
-    if (!isEditing) return;
+    if (!existingModel) return;
     setPhase('removing');
     setError(null);
-
-    try {
-      if (mode === 'custom' && existingModel?.isCustom) {
-        await deleteModel(existingModel.id);
-      }
-      await deleteProvider(provider.trim());
+    const result = await deleteModel(existingModel.id);
+    if (result.ok) {
       onSaved?.();
       onOpenChange(false);
-    } catch (err) {
+    } else {
       setPhase('idle');
-      const message = err instanceof Error ? err.message : 'Failed to remove';
-      setError(message);
+      setError(result.error ?? 'Failed to remove');
     }
   };
 
   const submitting = phase !== 'idle';
-  const submitLabel = (() => {
-    if (phase === 'saving') return isEditing ? 'Saving…' : 'Adding…';
-    if (phase === 'removing') return 'Removing…';
-    if (mode === 'catalog') return isEditing ? 'Save changes' : 'Add key';
-    return isEditing ? 'Save changes' : 'Add model';
-  })();
-
-  const heading = (() => {
-    if (mode === 'catalog') {
-      const target = (catalogModelName ?? catalogProvider!.name).trim();
-      return `${target} API key`;
-    }
-    if (isEditing) return 'Edit model';
-    return 'Add model';
-  })();
-
-  const description = (() => {
-    if (mode === 'catalog') {
-      const target = (catalogModelName ?? catalogProvider!.name).trim();
-      return `Save the API key for ${catalogProvider!.name} to enable ${target} in chat.`;
-    }
-    if (isEditing) return 'Update or remove this model.';
-    return 'Add a custom model not in the default catalog.';
-  })();
-
-  const keyLabel = mode === 'catalog' && catalogProvider
-    ? catalogProvider.keyLabel || 'API Key'
-    : 'API Key';
+  const heading = isEditing ? 'Edit model' : isCatalog ? 'Configure model' : 'Add model';
+  const description = isCatalog || isEditing
+    ? 'Provider access is shared by models using the same provider.'
+    : 'Add a custom model not in the default catalog.';
+  const submitLabel = phase === 'saving'
+    ? isEditing ? 'Saving…' : 'Adding…'
+    : isCatalog && !isEditing ? 'Enable model' : isEditing ? 'Save changes' : 'Add model';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -193,25 +134,19 @@ export function ModelEditorDialog({
         <form onSubmit={onSubmit}>
           <FieldGroup>
             <Field>
-            <FieldLabel htmlFor="me-provider">
-              Provider<span className="text-destructive ml-0.5">*</span>
-            </FieldLabel>
-            <Input
-              id="me-provider"
-              value={provider}
-              onChange={(e) => setProvider(e.target.value)}
-              disabled={mode === 'catalog'}
-              autoFocus={mode === 'custom'}
-              required
-              className="font-mono"
-            />
+              <FieldLabel htmlFor="me-provider">Provider<span className="ml-0.5 text-destructive">*</span></FieldLabel>
+              <Input
+                id="me-provider"
+                value={provider}
+                onChange={(e) => setProvider(e.target.value)}
+                autoFocus={!isEditing}
+                required
+                className="font-mono"
+              />
             </Field>
 
-          {mode === 'custom' && (
-              <Field>
-              <FieldLabel htmlFor="me-model">
-                Model<span className="text-destructive ml-0.5">*</span>
-              </FieldLabel>
+            <Field>
+              <FieldLabel htmlFor="me-model">Model<span className="ml-0.5 text-destructive">*</span></FieldLabel>
               <Input
                 id="me-model"
                 value={modelName}
@@ -219,82 +154,70 @@ export function ModelEditorDialog({
                 required
                 className="font-mono"
               />
-              </Field>
-          )}
+            </Field>
 
-          {showBaseUrl && (
-              <Field>
-              <FieldLabel htmlFor="me-baseurl">
-                Base URL
-              </FieldLabel>
+            <Field>
+              <FieldLabel htmlFor="me-baseurl">Base URL</FieldLabel>
               <Input
                 id="me-baseurl"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder={mode === 'catalog' && catalogProvider && catalogProvider.baseUrl ? catalogProvider.baseUrl : 'https://api.example.com/v1'}
-                disabled={false}
+                placeholder={catalogProvider?.baseUrl || 'https://api.example.com/v1'}
                 className="font-mono"
               />
-              </Field>
-          )}
-
-            <Field>
-            <FieldLabel htmlFor="me-key">
-              {keyLabel}<span className="text-destructive ml-0.5">*</span>
-            </FieldLabel>
-            <PasswordInput
-              id="me-key"
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your API key"
-              required
-              className="font-mono"
-            />
             </Field>
 
-          {mode === 'catalog' && catalogProvider?.docsUrl && (
-            <p className="text-xs text-muted-foreground">
-              Get a key from{' '}
-              <a
-                href={catalogProvider.docsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-foreground underline underline-offset-2 hover:text-primary"
-              >
-                {safeHostname(catalogProvider.docsUrl)}
-              </a>
-              .
-            </p>
-          )}
+            <Field>
+              <FieldLabel htmlFor="me-key">API Key<span className="ml-0.5 text-destructive">*</span></FieldLabel>
+              <PasswordInput
+                id="me-key"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your API key"
+                required
+                className="font-mono"
+              />
+              <FieldDescription>Shared by all models using this provider.</FieldDescription>
+            </Field>
 
-          {error ? <FieldError>{error}</FieldError> : null}
-
-          <DialogFooter className="gap-stack">
-            {isEditing ? (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={onRemove}
-                disabled={submitting}
-                className="mr-auto text-destructive"
-              >
-                <Icon icon={TrashIcon} data-icon="inline-start" />
-                Remove
-              </Button>
+            {isCatalog && catalogProvider?.docsUrl ? (
+              <p className="text-xs text-muted-foreground">
+                Get a key from{' '}
+                <a
+                  href={catalogProvider.docsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-foreground underline underline-offset-2 hover:text-primary"
+                >
+                  {safeHostname(catalogProvider.docsUrl)}
+                </a>
+                .
+              </p>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!canSubmit}>
-              {submitting && <Icon icon={CircleNotchIcon} data-icon="inline-start" className="animate-spin" />}
-              {submitLabel}
-            </Button>
-          </DialogFooter>
+
+            {error ? <FieldError>{error}</FieldError> : null}
+
+            <DialogFooter className="gap-stack">
+              {existingModel ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={onRemove}
+                  disabled={submitting}
+                  className="mr-auto text-destructive"
+                >
+                  <Icon icon={TrashIcon} data-icon="inline-start" />
+                  Remove
+                </Button>
+              ) : null}
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!canSubmit}>
+                {submitting ? <Icon icon={CircleNotchIcon} data-icon="inline-start" className="animate-spin" /> : null}
+                {submitLabel}
+              </Button>
+            </DialogFooter>
           </FieldGroup>
         </form>
       </DialogContent>
@@ -304,8 +227,8 @@ export function ModelEditorDialog({
 
 function safeHostname(url: string): string {
   try {
-    return new URL(url).hostname
+    return new URL(url).hostname;
   } catch {
-    return url
+    return url;
   }
 }

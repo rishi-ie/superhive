@@ -2,25 +2,25 @@ import * as React from 'react';
 import { Icon } from '@/components/ui/icon';
 import { PlusIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ModelRow } from './ModelsSection/ModelRow';
 import { ModelEditorDialog } from './ModelsSection/ModelEditorDialog';
 import { APIKeysSection } from './ModelsSection/APIKeys';
 import { useProviders, useModels } from '@/flows/settings';
 import { useModelUpdatedSubscription } from '@/flows/settings/ui/use-model-updated';
 import { setModelEnabled } from '@/flows/settings/crud/set-model-enabled';
-import { addModel } from '@/flows/settings/crud/add-model';
 import {
   CATALOG,
   getProviderMeta,
   isCatalogModel,
-  type CatalogProviderMeta,
+  type CatalogModel,
 } from './ModelsSection/catalog';
 import type { ModelEntry, ProviderEntry } from '@/types/electron';
 import { deleteModel } from '@/flows/settings/crud/delete-model';
 import { SettingsDivider, SettingsPanel } from '../SettingsPrimitives';
 
 type EditorTarget =
-  | { kind: 'catalog'; provider: CatalogProviderMeta; modelName: string }
+  | { kind: 'catalog'; catalog: CatalogModel; existingModel?: ModelEntry }
   | { kind: 'custom'; existingModel: ModelEntry; existingProvider?: ProviderEntry }
   | { kind: 'new' };
 
@@ -36,34 +36,15 @@ export function ModelsSection() {
 
   // Auto-fill contextWindow via Pi telemetry. When the main process writes
   // back a previously-undefined ModelEntry.contextWindow, refresh the list
-  // so the chip on the row re-renders.
+  // so the row metadata re-renders.
   useModelUpdatedSubscription(refreshModels);
 
-  const catalogById = React.useMemo(
-    () => new Map(CATALOG.map((m) => [m.id, m])),
-    [],
-  );
-
   const customModels = React.useMemo(
-    () => storedModels.filter((m) => !isCatalogModel(m.id)),
+    () => storedModels.filter((m) => !isCatalogModel(m.id) && !m.catalogId),
     [storedModels],
   );
 
-  const onToggleModel = async (m: ModelEntry, enabled: boolean, modelHasKey: boolean) => {
-    if (!modelHasKey) {
-      const catalog = catalogById.get(m.id);
-      const providerMeta = catalog ? getProviderMeta(catalog.provider) : getProviderMeta(m.provider);
-      if (providerMeta) {
-        setEditor({ kind: 'catalog', provider: providerMeta, modelName: catalog?.name ?? m.name });
-        return;
-      }
-      setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] });
-      return;
-    }
-
-    if (!storedModels.find((s) => s.id === m.id)) {
-      await addModel({ provider: m.provider, name: m.name });
-    }
+  const onToggleModel = async (m: ModelEntry, enabled: boolean) => {
     await setModelEnabled(m.id, enabled);
     await refreshModels();
   };
@@ -76,55 +57,63 @@ export function ModelsSection() {
   const loading = loadingProviders || loadingModels;
 
   return (
-    <div className="flex flex-col gap-6">
-      <SettingsPanel
-        title="Models"
-        description="Enable the models available in chat."
-        action={
+    <div className="flex flex-col gap-12">
+      <section className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-sm font-medium text-foreground">Available models</h2>
+            <p className="text-xs/relaxed text-muted-foreground">Enable the models available in chat.</p>
+          </div>
           <Button
             size="sm"
-            variant="outline"
             onClick={() => setEditor({ kind: 'new' })}
           >
             <Icon icon={PlusIcon} data-icon="inline-start" />
             Add model
           </Button>
-        }
-      >
-        {loading ? null : (
-          <>
-            {CATALOG.map((m) => {
-              const stored = storedModels.find((s) => s.id === m.id);
-              const modelHasKey = hasApiKey(m.provider);
+        </div>
+        <SettingsPanel>
+          {loading ? (
+            <div className="flex flex-col">
+              {Array.from({ length: 5 }, (_, index) => (
+                <div key={index} className="flex items-center justify-between gap-4 px-(--card-spacing) py-3">
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                  <Skeleton className="h-5 w-8 rounded-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {CATALOG.map((m) => {
+              const stored = storedModels.find((s) => s.id === m.id || s.catalogId === m.id);
+              const model: ModelEntry = stored ?? {
+                id: m.id,
+                provider: m.provider,
+                name: m.name,
+                enabled: false,
+                isCustom: false,
+              };
+              const modelHasKey = hasApiKey(model.provider);
+              const openEditor = () => setEditor({ kind: 'catalog', catalog: m, existingModel: stored });
               return (
                 <React.Fragment key={m.id}>
                   <ModelRow
-                    model={{
-                      id: m.id,
-                      provider: m.provider,
-                      name: m.name,
-                      enabled: Boolean(stored?.enabled),
-                      isCustom: stored?.isCustom ?? false,
-                    }}
+                    model={model}
                     hasApiKey={modelHasKey}
-                    onToggleEnabled={(enabled: boolean) =>
-                      onToggleModel(
-                        { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: stored?.isCustom ?? false },
-                        enabled,
-                        modelHasKey,
-                      )
-                    }
-                    onConfigure={() => {
-                      const providerMeta = getProviderMeta(m.provider);
-                      if (providerMeta) setEditor({ kind: 'catalog', provider: providerMeta, modelName: m.name });
-                      else setEditor({ kind: 'new' });
+                    onToggleEnabled={(enabled: boolean) => {
+                      if (!modelHasKey) openEditor();
+                      else void onToggleModel(model, enabled);
                     }}
+                    onConfigure={openEditor}
                   />
                   {(m !== CATALOG[CATALOG.length - 1] || customModels.length > 0) ? <SettingsDivider /> : null}
                 </React.Fragment>
               );
-            })}
-            {customModels.map((m) => {
+              })}
+              {customModels.map((m) => {
               const modelHasKey = hasApiKey(m.provider);
               return (
                 <React.Fragment key={m.id}>
@@ -138,21 +127,21 @@ export function ModelsSection() {
                       contextWindow: m.contextWindow,
                     }}
                     hasApiKey={modelHasKey}
-                    onToggleEnabled={(enabled: boolean) => onToggleModel(
-                      { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: m.isCustom ?? true },
-                      enabled,
-                      modelHasKey,
-                    )}
+                    onToggleEnabled={(enabled: boolean) => {
+                      if (!modelHasKey) setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] });
+                      else void onToggleModel(m, enabled);
+                    }}
                     onConfigure={() => setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] })}
                     onDelete={() => onDeleteCustomModel(m.id)}
                   />
                   {m !== customModels[customModels.length - 1] ? <SettingsDivider /> : null}
                 </React.Fragment>
               );
-            })}
-          </>
-        )}
-      </SettingsPanel>
+              })}
+            </>
+          )}
+        </SettingsPanel>
+      </section>
 
       <APIKeysSection />
 
@@ -162,12 +151,19 @@ export function ModelsSection() {
           if (!open) setEditor(null);
         }}
         onSaved={refreshAll}
-        catalogProvider={editor?.kind === 'catalog' ? editor.provider : undefined}
-        catalogModelName={editor?.kind === 'catalog' ? editor.modelName : undefined}
-        existingModel={editor?.kind === 'custom' ? editor.existingModel : undefined}
+        catalogProvider={editor?.kind === 'catalog' ? getProviderMeta(editor.catalog.provider) : undefined}
+        catalogModelName={editor?.kind === 'catalog' ? editor.catalog.name : undefined}
+        catalogId={editor?.kind === 'catalog' ? editor.catalog.id : undefined}
+        existingModel={
+          editor?.kind === 'catalog'
+            ? editor.existingModel
+            : editor?.kind === 'custom'
+              ? editor.existingModel
+              : undefined
+        }
         existingProvider={
           editor?.kind === 'catalog'
-            ? providers[editor.provider.name]
+            ? providers[editor.existingModel?.provider ?? editor.catalog.provider]
             : editor?.kind === 'custom'
               ? editor.existingProvider
               : undefined

@@ -6,15 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { PasswordInput } from '@/components/common/PasswordInput';
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
   Field,
   FieldDescription,
   FieldError,
@@ -175,12 +166,12 @@ export function ProviderKeyBlock({
   const submitting = phase !== 'idle'
 
   return (
-    <form onSubmit={onSave}>
-      <Card size="sm" className="rounded-card">
-        <CardHeader>
-          <CardTitle>{heading}</CardTitle>
+    <form className="flex flex-col gap-4" onSubmit={onSave}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sm font-medium text-foreground">{heading}</h3>
           {docsUrl ? (
-            <CardDescription>
+            <p className="text-xs/relaxed text-muted-foreground">
               Get a key from{' '}
               <a
                 href={docsUrl}
@@ -191,20 +182,18 @@ export function ProviderKeyBlock({
                 {safeHostname(docsUrl)}
               </a>
               .
-            </CardDescription>
+            </p>
           ) : null}
-          <CardAction>
-            <Switch
-              checked={state.enabled}
-              disabled={submitting || (!hasExisting && !state.preferredModel.trim() && !state.apiKey.trim() && shape === 'single') || (!hasExisting && !state.accessKeyId.trim() && !state.secretAccessKey && shape === 'aws')}
-              onCheckedChange={(v) => setState((p) => ({ ...p, enabled: v }))}
-              aria-label={`Show ${heading} in chat`}
-            />
-          </CardAction>
-        </CardHeader>
+        </div>
+        <Switch
+          checked={state.enabled}
+          disabled={submitting || (!hasExisting && !state.preferredModel.trim() && !state.apiKey.trim() && shape === 'single') || (!hasExisting && !state.accessKeyId.trim() && !state.secretAccessKey && shape === 'aws')}
+          onCheckedChange={(v) => setState((p) => ({ ...p, enabled: v }))}
+          aria-label={`Show ${heading} in chat`}
+        />
+      </div>
 
-        <CardContent>
-          <FieldGroup>
+      <FieldGroup>
           {shape === 'single' ? (
             <>
               <Field>
@@ -282,11 +271,10 @@ export function ProviderKeyBlock({
             </>
           )}
 
-          {error ? <FieldError>{error}</FieldError> : null}
-          </FieldGroup>
-        </CardContent>
+        {error ? <FieldError>{error}</FieldError> : null}
+      </FieldGroup>
 
-        <CardFooter className="justify-end gap-stack border-t">
+      <div className="flex justify-end gap-stack">
         {hasExisting && (
           <Button
             type="button"
@@ -306,8 +294,7 @@ export function ProviderKeyBlock({
           )}
           {hasExisting ? 'Save' : 'Add'}
         </Button>
-        </CardFooter>
-      </Card>
+      </div>
     </form>
   )
 }

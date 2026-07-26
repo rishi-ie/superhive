@@ -2,7 +2,7 @@
  * Settings domain shapes — public surface of `src/flows/settings/`.
  */
 
-import type { ModelEntry, ProviderEntry } from '@/types/electron'
+import type { ModelEntry, ProviderEntry, UpdateModelInput } from '@/types/electron'
 
 // ---------------------------------------------------------------------------
 // CRUD inputs and results
@@ -26,6 +26,13 @@ export interface AddCustomModelInput {
 }
 
 export interface AddCustomModelResult {
+  ok: boolean
+  error?: string
+}
+
+export type { UpdateModelInput }
+
+export interface UpdateModelResult {
   ok: boolean
   error?: string
 }
