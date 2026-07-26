@@ -79,12 +79,12 @@ export function TopRightControls({
           <Button
             variant="ghost"
             size="icon-lg"
-            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
+            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-[#1D1D1D] aria-expanded:text-[#FCFCFC]"
             onClick={onToggleStatusBar}
             aria-label={`${statusBarOpen ? "Close" : "Open"} status panel`}
             aria-expanded={statusBarOpen}
           >
-            <HugeIcon icon={ListTreeIcon} size={16} className="size-4 text-muted-foreground" />
+            <HugeIcon icon={ListTreeIcon} size={16} className="size-4 text-current" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -108,7 +108,7 @@ export function RightSidebarToggle({ open, onToggle }: RightSidebarToggleProps) 
           <Button
             variant="ghost"
             size="icon-lg"
-            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
+            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-[#1D1D1D] aria-expanded:text-[#FCFCFC]"
             onClick={onToggle}
             aria-label={`${open ? "Close" : "Open"} control panel`}
             aria-expanded={open}
@@ -117,14 +117,14 @@ export function RightSidebarToggle({ open, onToggle }: RightSidebarToggleProps) 
               <HugeIcon
                 icon={LayoutAlignLeftIcon}
                 size={16}
-                className={`absolute inset-0 size-4 text-muted-foreground transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
+                className={`absolute inset-0 size-4 text-current transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
                   open ? "rotate-0 opacity-100" : "-rotate-45 opacity-0"
                 }`}
               />
               <HugeIcon
                 icon={LayoutAlignRightIcon}
                 size={16}
-                className={`absolute inset-0 size-4 text-muted-foreground transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
+                className={`absolute inset-0 size-4 text-current transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none ${
                   open ? "rotate-45 opacity-0" : "rotate-0 opacity-100"
                 }`}
               />

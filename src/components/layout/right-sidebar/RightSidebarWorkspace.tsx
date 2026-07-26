@@ -94,9 +94,9 @@ export function RightSidebarWorkspace<TTabId extends string>({
                 <div
                   key={tab.id}
                   className={cn(
-                    "flex h-8 min-w-0 max-w-40 items-center rounded-md border border-transparent transition-colors",
+                    "flex h-8 min-w-0 max-w-40 items-center rounded-md transition-colors",
                     selected
-                      ? "bg-muted/80 text-foreground"
+                      ? "bg-[#1D1D1D] text-[#FCFCFC]"
                       : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                   )}
                 >
@@ -120,7 +120,7 @@ export function RightSidebarWorkspace<TTabId extends string>({
                   </button>
                   <button
                     aria-label={`Close ${tab.label} tab`}
-                    className="mr-1 flex size-6 shrink-0 items-center justify-center rounded-icon text-muted-foreground hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="mr-1 flex size-6 shrink-0 cursor-default items-center justify-center rounded-icon text-[#7F7F7F] hover:bg-[#2A2A2A] hover:text-[#7F7F7F] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     onClick={() => closeTab(tab.id)}
                     type="button"
                   >
@@ -132,7 +132,7 @@ export function RightSidebarWorkspace<TTabId extends string>({
           </div>
           <button
             aria-label="Open workspace launcher"
-            className="flex size-7 shrink-0 items-center justify-center rounded-icon text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex size-7 shrink-0 cursor-default items-center justify-center rounded-[10px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             onClick={showLauncher}
             type="button"
           >
