@@ -3,6 +3,7 @@ import type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload } 
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
 import type { AssistantMessage, ChatRow, TurnInput, ComposerAttachment } from '@/models/assistant-message'
 import type { ComposerCommandFiles } from '@/models/composer-command'
+import type { MarketplaceActivationResult, MarketplaceItem } from '@/models/marketplace'
 
 export type { Agent, AgentStatus, Project }
 export type { Task, TaskStatus, TaskPriority }
@@ -183,10 +184,20 @@ export interface ElectronAPI {
 	tasks: TasksAPI
 	templates: TemplatesAPI
 	composerCommands: ComposerCommandsAPI
+	marketplace: MarketplaceAPI
 }
 
 export interface ComposerCommandsAPI {
 	get: () => Promise<ComposerCommandFiles>
+	onChanged: (cb: () => void) => () => void
+}
+
+export interface MarketplaceAPI {
+	list: () => Promise<MarketplaceItem[]>
+	get: (id: string) => Promise<MarketplaceItem | null>
+	install: (id: string) => Promise<MarketplaceItem>
+	remove: (id: string) => Promise<void>
+	activateForAgent: (agentId: string, id: string) => Promise<MarketplaceActivationResult>
 	onChanged: (cb: () => void) => () => void
 }
 

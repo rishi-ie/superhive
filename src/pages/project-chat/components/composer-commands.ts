@@ -1,4 +1,5 @@
 import type { ComposerCommandAction, ComposerCommandFile, ComposerCommandItem } from '@/models/composer-command'
+import type { MarketplaceItem } from '@/models/marketplace'
 
 export interface CommandCatalogItem { path: string; manifest?: { title?: string; description?: string } }
 export interface ResolvedComposerCommand {
@@ -10,15 +11,16 @@ export interface ResolvedComposerCommand {
   value?: string
   disabled?: boolean
   disabledReason?: string
+  capability?: MarketplaceItem
 }
 
-type Catalogs = { skills: CommandCatalogItem[]; plugins: CommandCatalogItem[]; activeSkills: string[]; activePlugins: string[] }
+type Catalogs = { skills?: CommandCatalogItem[]; plugins?: CommandCatalogItem[]; activeSkills?: string[]; activePlugins?: string[]; capabilities?: MarketplaceItem[] }
 
 function labelFor(path: string): string { return path.split('/').pop() || path }
 
 function availability(action: 'skill' | 'plugin', value: string, catalogs: Catalogs): Pick<ResolvedComposerCommand, 'disabled' | 'disabledReason'> {
-  const catalog = action === 'skill' ? catalogs.skills : catalogs.plugins
-  const active = action === 'skill' ? catalogs.activeSkills : catalogs.activePlugins
+  const catalog = action === 'skill' ? catalogs.skills ?? [] : catalogs.plugins ?? []
+  const active = action === 'skill' ? catalogs.activeSkills ?? [] : catalogs.activePlugins ?? []
   if (!catalog.some((item) => item.path === value)) return { disabled: true, disabledReason: 'Not installed for this agent' }
   if (!active.includes(value)) return { disabled: true, disabledReason: 'Enable it in Manage first' }
   return {}
@@ -27,7 +29,15 @@ function availability(action: 'skill' | 'plugin', value: string, catalogs: Catal
 function fromItem(item: ComposerCommandItem, catalogs: Catalogs): ResolvedComposerCommand[] {
   if (item.source === 'skills' || item.source === 'plugins') {
     const action = item.source === 'skills' ? 'skill' : 'plugin'
-    const catalog = action === 'skill' ? catalogs.skills : catalogs.plugins
+    const marketplace = (catalogs.capabilities ?? []).filter((entry) => action === 'skill' ? entry.kind === 'skill' : entry.kind !== 'skill')
+    if (catalogs.capabilities) return marketplace.map((entry) => ({
+      id: `${item.id}:${entry.id}`,
+      label: entry.label,
+      description: entry.description,
+      keywords: [entry.id, entry.kind], action, value: entry.id, capability: entry,
+      ...(entry.installed ? {} : { disabled: true, disabledReason: 'Install from Marketplace first' }),
+    }))
+    const catalog = action === 'skill' ? catalogs.skills ?? [] : catalogs.plugins ?? []
     return catalog.map((entry) => ({
       id: `${item.id}:${entry.path}`,
       label: entry.manifest?.title ?? labelFor(entry.path),

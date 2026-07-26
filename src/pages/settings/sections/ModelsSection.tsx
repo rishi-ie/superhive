@@ -1,8 +1,17 @@
 import * as React from 'react';
 import { Icon } from '@/components/ui/icon';
-import { PlusIcon } from '@phosphor-icons/react';
+import { CaretDownIcon, PlusIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ModelRow } from './ModelsSection/ModelRow';
 import { ModelEditorDialog } from './ModelsSection/ModelEditorDialog';
 import { APIKeysSection } from './ModelsSection/APIKeys';
@@ -29,6 +38,7 @@ export function ModelsSection() {
   const { models: storedModels, loading: loadingModels, refresh: refreshModels } = useModels();
 
   const [editor, setEditor] = React.useState<EditorTarget | null>(null);
+  const [defaultModelId, setDefaultModelId] = React.useState<string | null>(null);
 
   const refreshAll = React.useCallback(async () => {
     await Promise.all([refreshProviders(), refreshModels()]);
@@ -43,6 +53,15 @@ export function ModelsSection() {
     () => storedModels.filter((m) => !isCatalogModel(m.id) && !m.catalogId),
     [storedModels],
   );
+  const enabledModels = React.useMemo(
+    () => storedModels.filter((model) => model.enabled && hasApiKey(model.provider)),
+    [hasApiKey, storedModels],
+  );
+  const selectedDefaultModel = enabledModels.find((model) => model.id === defaultModelId) ?? enabledModels[0];
+
+  React.useEffect(() => {
+    if (!selectedDefaultModel && enabledModels[0]) setDefaultModelId(enabledModels[0].id);
+  }, [enabledModels, selectedDefaultModel]);
 
   const onToggleModel = async (m: ModelEntry, enabled: boolean) => {
     await setModelEnabled(m.id, enabled);
@@ -58,6 +77,43 @@ export function ModelsSection() {
 
   return (
     <div className="flex flex-col gap-12">
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-sm font-medium text-foreground">New agent default</h2>
+          <p className="text-xs/relaxed text-muted-foreground">A preview-only default used when creating future agents.</p>
+        </div>
+        <SettingsPanel>
+          <div className="flex items-center justify-between gap-4 px-(--card-spacing) py-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-foreground">Default model</span>
+              <span className="text-xs text-muted-foreground">{selectedDefaultModel ? `${selectedDefaultModel.provider} · ${selectedDefaultModel.name}` : "Enable a configured model first."}</span>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={enabledModels.length === 0}>
+                  {selectedDefaultModel?.name ?? "Choose model"}
+                  <Icon icon={CaretDownIcon} data-icon="inline-end" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuRadioGroup value={selectedDefaultModel?.id} onValueChange={setDefaultModelId}>
+                    {enabledModels.map((model) => (
+                      <DropdownMenuRadioItem key={model.id} value={model.id}>
+                        {model.name}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex px-(--card-spacing) pb-(--card-spacing)">
+            <Badge variant="outline">Preview only</Badge>
+          </div>
+        </SettingsPanel>
+      </section>
+
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">

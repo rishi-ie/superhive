@@ -1,0 +1,50 @@
+{
+	"version": 1,
+	"items": [
+		{
+			"id": "writing-guide",
+			"kind": "skill",
+			"version": "1.0.0",
+			"label": "Writing guide",
+			"description": "A compact instruction set for clear, structured writing.",
+			"category": "Productivity",
+			"permissions": [],
+			"source": { "path": "packages/writing-guide", "entry": "SKILL.md", "integrity": "sha256-c04bc51ee1911a1ad36de5fc1708473e315420900a37204dc883354b1b9c29b7" },
+			"activation": "restart-required"
+		},
+		{
+			"id": "research-brief",
+			"kind": "skill",
+			"version": "1.0.0",
+			"label": "Research brief",
+			"description": "A reusable workflow for gathering and presenting a concise brief.",
+			"category": "Featured",
+			"permissions": [],
+			"source": { "path": "packages/research-brief", "entry": "SKILL.md", "integrity": "sha256-d26cf8b7182cc00ff49a7722e2e96276547d89ea32228525429544c4bbc245e2" },
+			"activation": "restart-required"
+		},
+		{
+			"id": "workspace-tools",
+			"kind": "plugin",
+			"version": "1.0.0",
+			"label": "Workspace tools",
+			"description": "A Pi runtime extension slot for workspace-aware work.",
+			"category": "Productivity",
+			"permissions": ["Read project files"],
+			"source": { "path": "packages/workspace-tools", "entry": "index.ts", "integrity": "sha256-b85048ca8a4d0861528b1a53132969d79f15d0c49f48f7e69e1399302de8e55d" },
+			"activation": "restart-required"
+		},
+		{
+			"id": "research-connector",
+			"kind": "mcp-adapter",
+			"version": "1.0.0",
+			"label": "Research connector",
+			"description": "An MCP adapter slot for approved research connections.",
+			"category": "Featured",
+			"permissions": ["Use configured MCP connection"],
+			"requiredConfiguration": ["Connect a provider before use"],
+			"source": { "path": "packages/research-connector", "entry": "index.ts", "integrity": "sha256-70aecb8e09d662e66635c3df3c651da354b6247fe2a5fe321a67b0250a1e689d" },
+			"activation": "restart-required"
+		}
+	]
+}

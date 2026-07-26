@@ -135,8 +135,8 @@ function resolvedPrompt(input: TurnInput): string {
   const sections: string[] = []
   if (context.goal) sections.push(`Active project goal: ${context.goal}`)
   if (context.mode) sections.push(`Turn mode: ${context.mode}. Follow this mode's tool policy.`)
-  if (context.skills?.length) sections.push(`Use these skills for this turn: ${context.skills.join(', ')}`)
-  if (context.plugins?.length) sections.push(`Use these installed capabilities for this turn: ${context.plugins.join(', ')}`)
+  if (context.skills?.length) sections.push(`Use these skills for this turn: ${context.skills.map((item) => `${item.label} (${item.agentPath})`).join(', ')}`)
+  if (context.plugins?.length) sections.push(`Use these installed capabilities for this turn: ${context.plugins.map((item) => `${item.label} (${item.agentPath})`).join(', ')}`)
   if (context.attachments?.length) sections.push(`User attachments (read only when relevant):\n${context.attachments.map((item) => `- ${item.kind}: ${item.name} at ${item.path}`).join('\n')}`)
   return sections.length ? `${input.text}\n\n[Superhive turn context]\n${sections.join('\n')}` : input.text
 }

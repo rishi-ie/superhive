@@ -146,6 +146,14 @@ const api: ElectronAPI = {
     get: () => ipcRenderer.invoke('composer-commands:get'),
     onChanged: (cb) => subscribe('composer-commands:changed', cb),
   },
+  marketplace: {
+    list: () => ipcRenderer.invoke('marketplace:list'),
+    get: (id) => ipcRenderer.invoke('marketplace:get', id),
+    install: (id) => ipcRenderer.invoke('marketplace:install', id),
+    remove: (id) => ipcRenderer.invoke('marketplace:remove', id),
+    activateForAgent: (agentId, id) => ipcRenderer.invoke('marketplace:activate', agentId, id),
+    onChanged: (cb) => subscribe('marketplace:changed', cb),
+  },
 }
 
 contextBridge.exposeInMainWorld('api', api)

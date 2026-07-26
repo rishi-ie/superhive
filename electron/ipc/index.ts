@@ -7,6 +7,7 @@ import { registerMailboxIpc } from './mailbox';
 import { registerTaskIpc } from './tasks';
 import { registerTemplatesIpc } from './templates';
 import { registerComposerCommandsIpc } from './composer-commands';
+import { registerMarketplaceIpc } from './marketplace';
 
 export const IPC = {
   AGENTS: {
@@ -103,6 +104,14 @@ export const IPC = {
     GET: 'composer-commands:get',
     ON_CHANGED: 'composer-commands:changed',
   },
+  MARKETPLACE: {
+    LIST: 'marketplace:list',
+    GET: 'marketplace:get',
+    INSTALL: 'marketplace:install',
+    REMOVE: 'marketplace:remove',
+    ACTIVATE: 'marketplace:activate',
+    ON_CHANGED: 'marketplace:changed',
+  },
 } as const;
 
 export function registerIpc(): void {
@@ -115,4 +124,5 @@ export function registerIpc(): void {
   registerTaskIpc();
   registerTemplatesIpc();
   registerComposerCommandsIpc();
+  registerMarketplaceIpc();
 }

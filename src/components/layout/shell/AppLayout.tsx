@@ -36,6 +36,7 @@ function AppLayoutShell() {
   useProjectReconcileToast();
   const { open: leftSidebarOpen } = useSidebar();
   const location = useLocation();
+  const isMarketplace = location.pathname === "/plugins";
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
@@ -156,7 +157,7 @@ function AppLayoutShell() {
           <CenterBreadcrumb />
           <Outlet />
         </Workspace>
-        <div
+        {!isMarketplace && <div
           className={cn(
             "relative h-full flex-shrink-0 overflow-hidden motion-reduce:transition-none",
             isResizingRight
@@ -185,8 +186,8 @@ function AppLayoutShell() {
             />
             <RightSidebar width={rightSidebarWidth} />
           </div>
-        </div>
-        <div
+        </div>}
+        {!isMarketplace && <div
           className={cn(
             "relative h-full flex-shrink-0 bg-[#111111] overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             statusBarOpen && !rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
@@ -194,21 +195,23 @@ function AppLayoutShell() {
           style={{ width: statusBarOpen && !rightSidebarOpen ? `${STATUS_PANEL_WIDTH}px` : 0 }}
         >
           <div aria-hidden="true" className="absolute inset-x-0 top-12 border-t border-border" />
-        </div>
-        <RightStatusBar
-          open={statusBarOpen}
-          rightOffset={rightSidebarOpen ? rightSidebarWidth : 0}
-          isPopover={rightSidebarOpen}
-          onDismiss={() => setStatusBarOpen(false)}
-        />
-        <TopRightControls
-          rightSidebarOpen={rightSidebarOpen}
-          rightSidebarWidth={rightSidebarWidth}
-          isRightSidebarResizing={isResizingRight}
-          statusBarOpen={statusBarOpen}
-          onToggleStatusBar={toggleStatusBar}
-        />
-        <RightSidebarToggle open={rightSidebarOpen} onToggle={toggleRightSidebar} />
+        </div>}
+        {!isMarketplace && <>
+          <RightStatusBar
+            open={statusBarOpen}
+            rightOffset={rightSidebarOpen ? rightSidebarWidth : 0}
+            isPopover={rightSidebarOpen}
+            onDismiss={() => setStatusBarOpen(false)}
+          />
+          <TopRightControls
+            rightSidebarOpen={rightSidebarOpen}
+            rightSidebarWidth={rightSidebarWidth}
+            isRightSidebarResizing={isResizingRight}
+            statusBarOpen={statusBarOpen}
+            onToggleStatusBar={toggleStatusBar}
+          />
+          <RightSidebarToggle open={rightSidebarOpen} onToggle={toggleRightSidebar} />
+        </>}
       </div>
       <CommandPalette />
       <CreateAgentDialog />

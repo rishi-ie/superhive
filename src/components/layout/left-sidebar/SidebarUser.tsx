@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { goToSettings } from "@/flows/navigation/go-to-settings";
+import { SETTINGS_PREVIEW_ACCOUNT } from "@/lib/settings-preview";
 
 interface SidebarUserProps {
   showGear?: boolean;
@@ -28,15 +29,15 @@ export function SidebarUser({ showGear = true }: SidebarUserProps) {
           >
             <Avatar className="size-8">
               <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
-                U
+                {SETTINGS_PREVIEW_ACCOUNT.initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex min-w-0 flex-col items-start text-left">
               <span className="truncate text-sm font-medium text-foreground/70 hover:text-foreground">
-                User
+                {SETTINGS_PREVIEW_ACCOUNT.name}
               </span>
               <span className="truncate text-xs text-muted-foreground">
-                Free plan
+                {SETTINGS_PREVIEW_ACCOUNT.plan} plan
               </span>
             </div>
           </button>
@@ -49,12 +50,12 @@ export function SidebarUser({ showGear = true }: SidebarUserProps) {
         <DropdownMenuLabel className="flex items-center gap-stack p-row rounded-button">
           <Avatar className="size-8">
             <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
-              U
+                {SETTINGS_PREVIEW_ACCOUNT.initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-modal-foreground">User</span>
-            <span className="text-xs text-modal-foreground/60">Free plan</span>
+            <span className="text-sm font-medium text-modal-foreground">{SETTINGS_PREVIEW_ACCOUNT.name}</span>
+            <span className="text-xs text-modal-foreground/60">{SETTINGS_PREVIEW_ACCOUNT.plan} plan</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />

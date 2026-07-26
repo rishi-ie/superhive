@@ -25,6 +25,7 @@
  */
 
 import type { MessageUsage, ToolResultContent } from './runtime'
+import type { MarketplaceCapabilityRef } from './marketplace'
 
 // ---------------------------------------------------------------------------
 // Activity timeline — execution metadata
@@ -211,8 +212,8 @@ export interface ComposerAttachment {
 
 export interface ComposerContext {
   attachments?: ComposerAttachment[]
-  skills?: string[]
-  plugins?: string[]
+  skills?: MarketplaceCapabilityRef[]
+  plugins?: MarketplaceCapabilityRef[]
   mode?: 'plan' | 'execute'
   goal?: string
 }

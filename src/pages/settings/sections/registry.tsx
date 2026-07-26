@@ -6,11 +6,8 @@ import {
   BrainIcon,
   RobotIcon,
   ChartLineUpIcon,
-  GlobeIcon,
   ToolboxIcon,
   BookIcon,
-  TestTubeIcon,
-  ArrowUpRightIcon,
 } from "@phosphor-icons/react";
 import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
@@ -42,15 +39,8 @@ export const SETTINGS_GROUPS: SettingsSectionGroup[] = [
       { id: "models", label: "Models", icon: makeIcon(BrainIcon) },
       { id: "agents", label: "Agents", icon: makeIcon(RobotIcon) },
       { id: "plans", label: "Plans and Usage", icon: makeIcon(ChartLineUpIcon) },
-      { id: "remote", label: "Remote", icon: makeIcon(GlobeIcon) },
-      { id: "tools", label: "Tools", icon: makeIcon(ToolboxIcon) },
-      { id: "rules", label: "Rules & Skills", icon: makeIcon(BookIcon) },
-    ],
-  },
-  {
-    sections: [
-      { id: "beta", label: "Beta", icon: makeIcon(TestTubeIcon) },
-      { id: "docs", label: "Docs", icon: makeIcon(BookIcon), trailingIcon: makeIcon(ArrowUpRightIcon) },
+      { id: "privacy", label: "Privacy & Data", icon: makeIcon(ToolboxIcon) },
+      { id: "support", label: "Updates & Support", icon: makeIcon(BookIcon) },
     ],
   },
 ];
