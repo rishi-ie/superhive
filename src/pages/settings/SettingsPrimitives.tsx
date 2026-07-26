@@ -28,10 +28,10 @@ export function SettingsPage({
   children: ReactNode;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-[800px] flex-col gap-8 px-6 pt-20 pb-8">
+    <div className="mx-auto flex w-full max-w-[960px] flex-col gap-10 px-8 pt-14 pb-12">
       <header className="flex flex-col gap-gap-tight">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
-        {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+        {description ? <p className="text-base text-muted-foreground">{description}</p> : null}
       </header>
       {children}
     </div>
@@ -45,7 +45,7 @@ export function SettingsPanel({
   children,
   footer,
 }: {
-  title: ReactNode;
+  title?: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   children: ReactNode;
@@ -53,11 +53,13 @@ export function SettingsPanel({
 }) {
   return (
     <Card size="sm" className="rounded-card">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
-        {action ? <CardAction>{action}</CardAction> : null}
-      </CardHeader>
+      {title || description || action ? (
+        <CardHeader>
+          {title ? <CardTitle>{title}</CardTitle> : null}
+          {description ? <CardDescription>{description}</CardDescription> : null}
+          {action ? <CardAction>{action}</CardAction> : null}
+        </CardHeader>
+      ) : null}
       <CardContent className="-mb-(--card-spacing)">
         <FieldGroup className="-mx-(--card-spacing) gap-0">{children}</FieldGroup>
       </CardContent>
@@ -76,10 +78,13 @@ export function SettingsRow({
   children: ReactNode;
 }) {
   return (
-    <Field orientation="horizontal" className="min-h-11 px-(--card-spacing) py-2">
+    <Field
+      orientation="horizontal"
+      className="min-h-12 px-(--card-spacing) py-3 [&>[data-slot=field-content]+*]:shrink-0 [&>[data-slot=field-content]+*]:self-center"
+    >
       <FieldContent>
-        <FieldTitle>{title}</FieldTitle>
-        {description ? <FieldDescription>{description}</FieldDescription> : null}
+        <FieldTitle className="text-sm">{title}</FieldTitle>
+        {description ? <FieldDescription className="text-sm">{description}</FieldDescription> : null}
       </FieldContent>
       {children}
     </Field>

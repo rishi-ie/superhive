@@ -11,25 +11,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Segmented } from "@/components/layout/right-sidebar/primitives/Segmented";
 import {
   SettingsDivider,
   SettingsPanel,
   SettingsRow,
 } from "../SettingsPrimitives";
 
-type ThemeValue = "light" | "dark" | "system";
-type DefaultViewValue = "last" | "home" | "projects";
+type FileOpenDestination = "vscode" | "system";
+type Language = "english" | "system";
+type TerminalLocation = "bottom" | "right";
 
-const THEME_LABELS: Record<ThemeValue, string> = {
-  light: "Light",
-  dark: "Dark",
-  system: "System",
+const FILE_DESTINATION_LABELS: Record<FileOpenDestination, string> = {
+  vscode: "VS Code",
+  system: "System default",
 };
 
-const DEFAULT_VIEW_LABELS: Record<DefaultViewValue, string> = {
-  last: "Last agent",
-  home: "Home",
-  projects: "Projects",
+const LANGUAGE_LABELS: Record<Language, string> = {
+  english: "English",
+  system: "System default",
 };
 
 function DropdownChoice<T extends string>({
@@ -46,7 +46,7 @@ function DropdownChoice<T extends string>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
+        <Button type="button" variant="outline" size="sm" className="min-w-36 justify-between">
           {labels?.[value] ?? value}
           <Icon icon={CaretDownIcon} data-icon="inline-end" />
         </Button>
@@ -67,76 +67,68 @@ function DropdownChoice<T extends string>({
 }
 
 export function GeneralSection() {
-  const [theme, setTheme] = React.useState<ThemeValue>("system");
-  const [reduceMotion, setReduceMotion] = React.useState(false);
-  const [welcomeOnLaunch, setWelcomeOnLaunch] = React.useState(true);
-  const [launchAtLogin, setLaunchAtLogin] = React.useState(false);
-  const [defaultView, setDefaultView] = React.useState<DefaultViewValue>("last");
-  const [autoUpdate, setAutoUpdate] = React.useState(true);
-  const [desktopNotifs, setDesktopNotifs] = React.useState(true);
-  const [notifSound, setNotifSound] = React.useState(false);
-  const [mentionOnly, setMentionOnly] = React.useState(false);
-  const [crashReports, setCrashReports] = React.useState(true);
-  const [telemetry, setTelemetry] = React.useState(true);
-  const [localOnly, setLocalOnly] = React.useState(false);
+  const [defaultPermissions, setDefaultPermissions] = React.useState(true);
+  const [autoReview, setAutoReview] = React.useState(true);
+  const [fullAccess, setFullAccess] = React.useState(true);
+  const [fileDestination, setFileDestination] = React.useState<FileOpenDestination>("vscode");
+  const [language, setLanguage] = React.useState<Language>("english");
+  const [showInMenuBar, setShowInMenuBar] = React.useState(true);
+  const [showBottomPanel, setShowBottomPanel] = React.useState(true);
+  const [terminalLocation, setTerminalLocation] = React.useState<TerminalLocation>("bottom");
+  const [preventSleep, setPreventSleep] = React.useState(false);
 
   return (
-    <div className="flex flex-col gap-6">
-      <SettingsPanel title="Appearance" description="Choose how Superhive looks and moves.">
-        <SettingsRow title="Theme" description="Choose how Superhive looks.">
-          <DropdownChoice value={theme} options={["light", "dark", "system"]} labels={THEME_LABELS} onChange={setTheme} />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Reduce motion" description="Minimize animations across the app.">
-          <Switch checked={reduceMotion} onCheckedChange={setReduceMotion} aria-label="Reduce motion" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Show welcome on launch" description="Display the welcome screen when no agent is open.">
-          <Switch checked={welcomeOnLaunch} onCheckedChange={setWelcomeOnLaunch} aria-label="Show welcome on launch" />
-        </SettingsRow>
-      </SettingsPanel>
+    <div className="flex flex-col gap-12">
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-medium tracking-tight text-foreground">Permissions</h2>
+        <SettingsPanel>
+          <SettingsRow title="Default agent permissions" description="Allow new agents to read and edit files in their workspace. They can request additional access when needed.">
+            <Switch checked={defaultPermissions} onCheckedChange={setDefaultPermissions} aria-label="Default agent permissions" />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Automatically review access requests" description="Let Superhive review requests for additional access before asking you. Automatic reviews can make mistakes.">
+            <Switch checked={autoReview} onCheckedChange={setAutoReview} aria-label="Automatically review access requests" />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Full access" description="Allow agents to edit files outside their workspace and run networked commands without approval. This increases the risk of unintended changes or data exposure.">
+            <Switch checked={fullAccess} onCheckedChange={setFullAccess} aria-label="Full access" />
+          </SettingsRow>
+        </SettingsPanel>
+      </section>
 
-      <SettingsPanel title="Startup" description="Control how Superhive opens and updates.">
-        <SettingsRow title="Launch at login" description="Open Superhive automatically when you sign in.">
-          <Switch checked={launchAtLogin} onCheckedChange={setLaunchAtLogin} aria-label="Launch at login" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Default view" description="What to show when Superhive opens.">
-          <DropdownChoice value={defaultView} options={["last", "home", "projects"]} labels={DEFAULT_VIEW_LABELS} onChange={setDefaultView} />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Auto-update" description="Install updates without prompting.">
-          <Switch checked={autoUpdate} onCheckedChange={setAutoUpdate} aria-label="Auto-update" />
-        </SettingsRow>
-      </SettingsPanel>
-
-      <SettingsPanel title="Notifications" description="Decide when Superhive gets your attention.">
-        <SettingsRow title="Desktop notifications" description="Show a banner when an agent finishes.">
-          <Switch checked={desktopNotifs} onCheckedChange={setDesktopNotifs} aria-label="Desktop notifications" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Notification sound" description="Play a sound with each notification.">
-          <Switch checked={notifSound} onCheckedChange={setNotifSound} aria-label="Notification sound" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Mention only" description="Notify only when the agent needs input.">
-          <Switch checked={mentionOnly} onCheckedChange={setMentionOnly} aria-label="Mention only" />
-        </SettingsRow>
-      </SettingsPanel>
-
-      <SettingsPanel title="Privacy" description="Choose what Superhive can share.">
-        <SettingsRow title="Send crash reports" description="Help improve stability by sharing crash logs.">
-          <Switch checked={crashReports} onCheckedChange={setCrashReports} aria-label="Send crash reports" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Share usage analytics" description="Anonymous usage data to guide product decisions.">
-          <Switch checked={telemetry} onCheckedChange={setTelemetry} aria-label="Share usage analytics" />
-        </SettingsRow>
-        <SettingsDivider />
-        <SettingsRow title="Local-only mode" description="Block all network requests from agents.">
-          <Switch checked={localOnly} onCheckedChange={setLocalOnly} aria-label="Local-only mode" />
-        </SettingsRow>
-      </SettingsPanel>
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-medium tracking-tight text-foreground">General</h2>
+        <SettingsPanel>
+          <SettingsRow title="Default file open destination" description="Choose where files and folders open by default.">
+            <DropdownChoice value={fileDestination} options={["vscode", "system"]} labels={FILE_DESTINATION_LABELS} onChange={setFileDestination} />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Language" description="Choose the language used in the Superhive interface.">
+            <DropdownChoice value={language} options={["english", "system"]} labels={LANGUAGE_LABELS} onChange={setLanguage} />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Show in menu bar" description="Keep Superhive available in the menu bar when the main window is closed.">
+            <Switch checked={showInMenuBar} onCheckedChange={setShowInMenuBar} aria-label="Show in menu bar" />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Bottom panel" description="Show the bottom-panel control in the app header.">
+            <Switch checked={showBottomPanel} onCheckedChange={setShowBottomPanel} aria-label="Bottom panel" />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Default terminal location" description="Choose where terminal shortcuts and environment actions open terminal tabs.">
+            <Segmented
+              className="w-36"
+              value={terminalLocation}
+              onValueChange={setTerminalLocation}
+              options={[{ value: "bottom", label: "Bottom" }, { value: "right", label: "Right" }]}
+            />
+          </SettingsRow>
+          <SettingsDivider />
+          <SettingsRow title="Prevent sleep while running" description="Keep your computer awake while Superhive is running an agent task.">
+            <Switch checked={preventSleep} onCheckedChange={setPreventSleep} aria-label="Prevent sleep while running" />
+          </SettingsRow>
+        </SettingsPanel>
+      </section>
     </div>
   );
 }
