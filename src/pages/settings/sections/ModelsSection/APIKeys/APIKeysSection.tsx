@@ -9,6 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ProviderKeyBlock } from './ProviderKeyBlock';
 import { useProviders } from '@/flows/settings';
+import { SettingsPanel } from '../../../SettingsPrimitives';
 
 type BlockSpec = {
   name: string;
@@ -67,21 +68,24 @@ export function APIKeysSection() {
   const [open, setOpen] = React.useState(true);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="flex flex-col gap-gap-loose">
-      <CollapsibleTrigger className="group flex items-center justify-between gap-stack cursor-default self-start">
-        <h2 className="text-sm font-semibold text-foreground">API Keys</h2>
-        <Icon
-          icon={CaretDownIcon}
-          className={cn(
-            'size-3.5 text-muted-foreground transition-transform',
-            open && 'rotate-180',
-          )}
-        />
-      </CollapsibleTrigger>
-
-      <CollapsibleContent className="flex flex-col gap-gap-loose">
-        <APIKeysBlocks />
-      </CollapsibleContent>
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <SettingsPanel
+        title="API Keys"
+        description="Manage the providers available to your models."
+        action={
+          <CollapsibleTrigger className="flex size-7 items-center justify-center rounded-button text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <Icon
+              icon={CaretDownIcon}
+              className={cn('transition-transform', open && 'rotate-180')}
+            />
+            <span className="sr-only">Toggle API keys</span>
+          </CollapsibleTrigger>
+        }
+      >
+        <CollapsibleContent className="flex flex-col gap-4 px-(--card-spacing) pb-(--card-spacing)">
+          <APIKeysBlocks />
+        </CollapsibleContent>
+      </SettingsPanel>
     </Collapsible>
   );
 }
@@ -90,7 +94,7 @@ function APIKeysBlocks() {
   const { providers, refresh } = useProviders();
 
   return (
-    <div className="flex flex-col gap-gap-loose">
+    <div className="flex flex-col gap-4">
       {BLOCKS.map((b) => (
         <ProviderKeyBlock
           key={b.name}

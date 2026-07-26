@@ -5,6 +5,7 @@ type IconProps = {
   size?: number | string;
   weight?: IconWeight;
   color?: string;
+  "data-icon"?: "inline-start" | "inline-end";
 };
 
 export function Icon({

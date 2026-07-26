@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 const MAX_TEXTAREA_HEIGHT = 152
 
 export const composerIconButtonClass =
-  'flex size-8 shrink-0 items-center justify-center rounded-full text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'
+  'flex size-8 shrink-0 items-center justify-center rounded-icon text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'
 
 export const composerSendButtonClass =
   'flex size-10 shrink-0 items-center justify-center rounded-full text-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'

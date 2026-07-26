@@ -11,8 +11,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { PasswordInput } from '@/components/common/PasswordInput';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { configureCatalogProvider } from '@/flows/settings/crud/configure-catalog-provider';
 import { addCustomModel } from '@/flows/settings/crud/add-custom-model';
 import { deleteProvider } from '@/flows/settings/crud/delete-provider';
@@ -180,18 +185,17 @@ export function ModelEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-sidebar border border-sidebar-border text-sidebar-foreground p-card gap-6">
-        <DialogHeader className="gap-stack pb-3 border-b border-sidebar-border">
-          <DialogTitle className="text-sidebar-foreground">{heading}</DialogTitle>
-          <DialogDescription className="text-sidebar-foreground/60">
-            {description}
-          </DialogDescription>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{heading}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-stack">
-            <Label htmlFor="me-provider" className="text-sidebar-foreground">
+        <form onSubmit={onSubmit}>
+          <FieldGroup>
+            <Field>
+            <FieldLabel htmlFor="me-provider">
               Provider<span className="text-destructive ml-0.5">*</span>
-            </Label>
+            </FieldLabel>
             <Input
               id="me-provider"
               value={provider}
@@ -199,63 +203,63 @@ export function ModelEditorDialog({
               disabled={mode === 'catalog'}
               autoFocus={mode === 'custom'}
               required
-              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+              className="font-mono"
             />
-          </div>
+            </Field>
 
           {mode === 'custom' && (
-            <div className="flex flex-col gap-stack">
-              <Label htmlFor="me-model" className="text-sidebar-foreground">
+              <Field>
+              <FieldLabel htmlFor="me-model">
                 Model<span className="text-destructive ml-0.5">*</span>
-              </Label>
+              </FieldLabel>
               <Input
                 id="me-model"
                 value={modelName}
                 onChange={(e) => setModelName(e.target.value)}
                 required
-                className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+                className="font-mono"
               />
-            </div>
+              </Field>
           )}
 
           {showBaseUrl && (
-            <div className="flex flex-col gap-stack">
-              <Label htmlFor="me-baseurl" className="text-sidebar-foreground">
+              <Field>
+              <FieldLabel htmlFor="me-baseurl">
                 Base URL
-              </Label>
+              </FieldLabel>
               <Input
                 id="me-baseurl"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
                 placeholder={mode === 'catalog' && catalogProvider && catalogProvider.baseUrl ? catalogProvider.baseUrl : 'https://api.example.com/v1'}
                 disabled={false}
-                className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+                className="font-mono"
               />
-            </div>
+              </Field>
           )}
 
-          <div className="flex flex-col gap-stack">
-            <Label htmlFor="me-key" className="text-sidebar-foreground">
+            <Field>
+            <FieldLabel htmlFor="me-key">
               {keyLabel}<span className="text-destructive ml-0.5">*</span>
-            </Label>
+            </FieldLabel>
             <PasswordInput
               id="me-key"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="Enter your API key"
               required
-              className="bg-input/30 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/40 font-mono"
+              className="font-mono"
             />
-          </div>
+            </Field>
 
           {mode === 'catalog' && catalogProvider?.docsUrl && (
-            <p className="text-xs text-sidebar-foreground/60">
+            <p className="text-xs text-muted-foreground">
               Get a key from{' '}
               <a
                 href={catalogProvider.docsUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-sidebar-foreground underline underline-offset-2 hover:text-primary"
+                className="text-foreground underline underline-offset-2 hover:text-primary"
               >
                 {safeHostname(catalogProvider.docsUrl)}
               </a>
@@ -263,44 +267,35 @@ export function ModelEditorDialog({
             </p>
           )}
 
-          {error && (
-            <p
-              role="alert"
-              className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
-            >
-              {error}
-            </p>
-          )}
+          {error ? <FieldError>{error}</FieldError> : null}
 
           <DialogFooter className="gap-stack">
             {isEditing ? (
               <Button
                 type="button"
                 variant="ghost"
-                size="lg"
                 onClick={onRemove}
                 disabled={submitting}
-                className="text-destructive hover:text-destructive mr-auto"
+                className="mr-auto text-destructive"
               >
-                <Icon icon={TrashIcon} className="size-3.5" />
+                <Icon icon={TrashIcon} data-icon="inline-start" />
                 Remove
               </Button>
             ) : null}
             <Button
               type="button"
               variant="outline"
-              size="lg"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="border-sidebar-border text-sidebar-foreground"
             >
               Cancel
             </Button>
-            <Button type="submit" size="lg" disabled={!canSubmit}>
-              {submitting && <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />}
+            <Button type="submit" disabled={!canSubmit}>
+              {submitting && <Icon icon={CircleNotchIcon} data-icon="inline-start" className="animate-spin" />}
               {submitLabel}
             </Button>
           </DialogFooter>
+          </FieldGroup>
         </form>
       </DialogContent>
     </Dialog>

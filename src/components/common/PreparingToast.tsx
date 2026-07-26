@@ -154,7 +154,7 @@ export function PreparingToast() {
                   type="button"
                   aria-label="Dismiss"
                   onClick={() => dismiss(t.id)}
-                  className="shrink-0 rounded-sm p-0.5 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+                  className="shrink-0 rounded-icon p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
                 >
                   <Icon icon={XIcon} className="size-3.5" />
                 </button>

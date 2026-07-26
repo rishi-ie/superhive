@@ -128,7 +128,7 @@ export function ProjectsListView() {
                 type="button"
                 onClick={() => setFilter('')}
                 aria-label="Clear search"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-icon p-1 text-muted-foreground hover:bg-muted"
               >
                 <Icon icon={XIcon} className="size-3" />
               </button>

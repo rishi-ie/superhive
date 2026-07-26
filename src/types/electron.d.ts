@@ -168,6 +168,7 @@ export interface AppUpdateInfo {
 }
 
 export interface AppAPI {
+	platform: NodeJS.Platform
 	getVersion: () => Promise<string>
 	onUpdateAvailable: (cb: (info: AppUpdateInfo) => void) => () => void
 	onUpdateDownloaded: (cb: (info: AppUpdateInfo) => void) => () => void

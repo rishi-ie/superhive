@@ -16,13 +16,13 @@ export function ComposerCard() {
         />
         <div className="flex items-center justify-between px-composer py-3">
           <div className="flex items-center gap-4">
-            <button className="text-sidebar-foreground/70 hover:text-sidebar-foreground cursor-default">
+            <button className="flex size-7 items-center justify-center rounded-icon text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground cursor-default transition-colors" aria-label="Add attachment">
               <Icon icon={PlusIcon} className="size-5" />
             </button>
           </div>
           <div className="flex items-center gap-4">
             <ModelPicker />
-            <button className="flex size-7 items-center justify-center rounded-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer transition-colors">
+            <button className="flex size-7 items-center justify-center rounded-icon text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer transition-colors" aria-label="Voice input">
               <Icon icon={MicrophoneIcon} className="size-5" />
             </button>
             <button className="flex size-7 items-center justify-center rounded-full text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent cursor-pointer transition-colors">

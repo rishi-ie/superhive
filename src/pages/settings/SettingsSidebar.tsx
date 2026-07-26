@@ -14,7 +14,7 @@ export function SettingsSidebar() {
       <div className="flex flex-col gap-gap-tight px-row pt-12 pb-1">
         <button
           onClick={() => goBackHome(navigate)}
-          className="flex h-8 items-center gap-stack rounded-card px-row text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:!text-foreground/80"
+          className="flex h-8 w-full items-center gap-stack rounded-card px-row text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l hover:text-sidebar-foreground"
         >
           <Icon icon={CaretLeftIcon} className="size-4" />
           <span>Back to Home</span>
@@ -29,9 +29,9 @@ export function SettingsSidebar() {
                 to={`/settings/${section.id}`}
                 className={({ isActive }) =>
                   cn(
-                    "flex h-8 items-center gap-stack rounded-card px-row text-sm transition-colors",
-                    "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                    "flex h-8 items-center gap-stack rounded-card px-row text-sm font-medium transition-colors",
+                    "text-sidebar-btn-text-l hover:bg-sidebar-accent-l hover:text-sidebar-foreground",
+                    isActive && "bg-sidebar-accent-l text-sidebar-foreground"
                   )
                 }
               >

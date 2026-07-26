@@ -76,7 +76,7 @@ export function SidebarRepositories() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setCreateProjectOpen(true); }}
-                className="flex size-6 cursor-default items-center justify-center rounded-card text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
+              className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
                 title="Add project"
               >
                 <Icon icon={PlusIcon} className="size-4" />
@@ -84,7 +84,7 @@ export function SidebarRepositories() {
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); }}
-                className="flex size-6 cursor-default items-center justify-center rounded-card text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
+              className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
                 title="Reorder projects"
               >
                 <Icon icon={ArrowsDownUpIcon} className="size-4" />

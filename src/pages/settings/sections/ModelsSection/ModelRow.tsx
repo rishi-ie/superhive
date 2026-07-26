@@ -1,10 +1,11 @@
 import { Icon } from '@/components/ui/icon';
-import { CheckCircleIcon, KeyIcon, PencilSimpleIcon, TrashSimpleIcon, XCircleIcon } from '@phosphor-icons/react';
+import { KeyIcon, PencilSimpleIcon, TrashSimpleIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
 import type { ModelEntry } from '@/types/electron';
+import { SettingsRow } from '../../SettingsPrimitives';
 
 function formatContextWindow(tokens: number): string {
   if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(tokens % 1_000_000 === 0 ? 0 : 1)}M ctx`
@@ -28,45 +29,18 @@ export function ModelRow({
   onDelete,
 }: ModelRowProps) {
   return (
-    <div className="flex items-center gap-4 rounded-button border border-border bg-card px-composer py-3">
-      <div
-        className={cn(
-          'flex min-w-0 flex-1 flex-col gap-0.5',
-          !hasApiKey && 'opacity-60',
-        )}
-      >
-        <div className="flex items-center gap-stack">
-          <span className="text-sm font-medium text-foreground truncate">
-            {model.name}
-          </span>
-          {!hasApiKey && (
-            <span className="inline-flex items-center gap-gap-tight rounded-full bg-destructive/10 px-1.5 py-0.5 text-[0.625rem] text-destructive">
-              <Icon icon={XCircleIcon} className="size-2.5" />
-              No key
-            </span>
-          )}
-          {hasApiKey && model.enabled && (
-            <span className="inline-flex items-center gap-gap-tight rounded-full bg-success/10 px-1.5 py-0.5 text-[0.625rem] text-success">
-              <Icon icon={CheckCircleIcon} className="size-2.5" />
-              Active
-            </span>
-          )}
-          {model.isCustom && (
-            <span className="inline-flex items-center gap-gap-tight rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground">
-              custom
-            </span>
-          )}
-          {model.contextWindow ? (
-            <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[0.625rem] text-muted-foreground font-mono">
-              {formatContextWindow(model.contextWindow)}
-            </span>
-          ) : null}
-        </div>
-        <span className="text-xs text-muted-foreground truncate font-mono">
-          {model.provider}
+    <SettingsRow
+      title={
+        <span className="flex min-w-0 items-center gap-gap-tight">
+          <span className="truncate">{model.name}</span>
+          {!hasApiKey ? <Badge variant="destructive">No key</Badge> : null}
+          {hasApiKey && model.enabled ? <Badge variant="secondary">Active</Badge> : null}
+          {model.isCustom ? <Badge variant="outline">Custom</Badge> : null}
+          {model.contextWindow ? <Badge variant="outline">{formatContextWindow(model.contextWindow)}</Badge> : null}
         </span>
-      </div>
-
+      }
+      description={<span className="font-mono">{model.provider}</span>}
+    >
       <div className="flex shrink-0 items-center gap-stack">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -94,13 +68,9 @@ export function ModelRow({
                 variant="outline"
                 size="sm"
                 onClick={onConfigure}
-                className="gap-list-item cursor-default"
                 aria-label={hasApiKey ? `Edit ${model.provider} key` : `Add key for ${model.provider}`}
               >
-                <Icon
-                  icon={hasApiKey ? PencilSimpleIcon : KeyIcon}
-                  className="size-3.5"
-                />
+                <Icon icon={hasApiKey ? PencilSimpleIcon : KeyIcon} data-icon="inline-start" />
                 {hasApiKey ? 'Edit key' : 'Add key'}
               </Button>
             </TooltipTrigger>
@@ -117,12 +87,12 @@ export function ModelRow({
             size="icon-sm"
             onClick={onDelete}
             aria-label={`Delete ${model.name}`}
-            className="text-muted-foreground hover:text-destructive cursor-default"
+            className="text-muted-foreground"
           >
-            <Icon icon={TrashSimpleIcon} className="size-3.5" />
+            <Icon icon={TrashSimpleIcon} />
           </Button>
         )}
       </div>
-    </div>
+    </SettingsRow>
   );
 }

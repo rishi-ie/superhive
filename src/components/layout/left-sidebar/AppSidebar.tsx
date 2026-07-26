@@ -14,9 +14,11 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ width = 330 }: AppSidebarProps) {
+  const isMacOS = typeof window !== "undefined" && window.api?.app?.platform === "darwin";
+
   return (
     <Sidebar
-      className="border-r-[0.5px] border-sidebar-border bg-sidebar-bg-translucent [--font-scale:1.1]"
+      className={`${isMacOS ? "bg-sidebar-bg-translucent macos-sidebar-material" : "bg-sidebar-bg"} border-r-[0.5px] border-sidebar-border [--font-scale:1.1]`}
       collapsible="none"
       style={{ "--sidebar-width": `${width}px` } as React.CSSProperties}
     >

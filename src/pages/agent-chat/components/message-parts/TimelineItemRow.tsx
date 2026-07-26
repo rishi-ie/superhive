@@ -1,6 +1,7 @@
 import * as React from 'react'
+import { BulbIcon } from '@hugeicons/core-free-icons'
+import { HugeIcon } from '@/components/ui/huge-icon'
 import {
-  THINKING_ICON as THOUGHT_ICON,
   FALLBACK_ICON,
   getToolDisplay,
   formatToolName,
@@ -40,7 +41,7 @@ function TimelineItemRowBase({
     return (
       <li className="flex items-start gap-2 pb-3">
         <Bullet>
-          <THOUGHT_ICON className="size-3.5 text-muted-foreground" />
+          <HugeIcon icon={BulbIcon} size={15} className="text-muted-foreground" />
         </Bullet>
         <div className="flex-1 min-w-0 text-xs leading-snug">
           <span className="text-foreground/80">Thought</span>
@@ -53,7 +54,7 @@ function TimelineItemRowBase({
     return (
       <li className="flex items-start gap-2 pb-3">
         <Bullet>
-          <THOUGHT_ICON className="size-3.5 text-muted-foreground" />
+          <HugeIcon icon={BulbIcon} size={15} className="text-muted-foreground" />
         </Bullet>
         <div className="flex-1 min-w-0 text-xs leading-snug text-foreground/80">
           Thought — {item.summary}

@@ -23,13 +23,13 @@ export function ImagePart({ data, mimeType, alt }: ImagePartProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="my-3 block cursor-zoom-in"
+        className="my-3 block cursor-zoom-in rounded-card focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       >
         <img
           src={src}
           alt={label}
           loading="lazy"
-          className="max-h-[400px] rounded-card border border-border/70 shadow-sm"
+          className="max-h-[400px] max-w-full rounded-card border border-border/70 bg-muted/25 shadow-sm"
         />
       </button>
       <ImageLightbox open={open} onOpenChange={setOpen} src={src} alt={label} />

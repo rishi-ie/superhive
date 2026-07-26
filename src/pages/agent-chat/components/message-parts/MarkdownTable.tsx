@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { Children, cloneElement, isValidElement } from 'react'
 import { CaretDownIcon, CaretRightIcon } from '@phosphor-icons/react'
+import { CheckIcon, Copy01Icon } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 import { copyTable } from '@/flows/ui/copy-table'
+import { HugeIcon } from '@/components/ui/huge-icon'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -98,22 +100,10 @@ function serializeTableToCsv(tableChildren: React.ReactNode): string {
 
 export function MarkdownTable({ children, className }: MarkdownTableProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const [isOverflowing, setIsOverflowing] = React.useState(false)
   const [copiedFormat, setCopiedFormat] = React.useState<'md' | 'csv' | null>(null)
   const copyTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const tableChildren = children
-
-  React.useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const observer = new ResizeObserver(() => {
-      setIsOverflowing(el.scrollWidth > el.clientWidth)
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
 
   const rawMd = React.useMemo(
     () => serializeTableToMarkdown(tableChildren),
@@ -172,32 +162,24 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
   return (
     <div className={cn('relative my-3', className)}>
       <div className="relative group">
-        <div
-          ref={containerRef}
-          className="overflow-x-auto rounded-chat-code-block border border-chat-bubble-code-header-bg bg-chat-bubble-code-bg"
-        >
-			<table className="w-full border-collapse text-xs">
+		<div className="overflow-x-auto">
+			<table className="min-w-max w-full border-collapse text-[15px] leading-6">
 				{visibleChildren}
           </table>
         </div>
-        {isOverflowing && (
-          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none" />
-        )}
-        <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon-xs"
-                className="h-5 w-5 bg-background/80 hover:bg-background border border-border"
+                className="h-6 w-6 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
                 aria-label="Copy table"
               >
                 {copiedFormat ? (
-                  <span className="text-xs text-chat-status-success font-mono">
-                    {copiedFormat.toUpperCase()}
-                  </span>
+                  <HugeIcon icon={CheckIcon} size={13} className="size-3.5 text-chat-status-success" />
                 ) : (
-                  <span className="text-xs text-muted-foreground font-mono">COPY</span>
+                  <HugeIcon icon={Copy01Icon} size={13} className="size-3.5 text-muted-foreground" />
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -215,7 +197,7 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
       {showToggle && (
         <button
           type="button"
-          className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+          className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           onClick={() => setIsExpanded((v) => !v)}
         >
           {isExpanded ? (

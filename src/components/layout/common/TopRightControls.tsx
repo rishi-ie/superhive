@@ -46,7 +46,7 @@ export function TopRightControls({
             <Button
               variant="ghost"
               size="icon-lg"
-              className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
+              className="rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
               onClick={() => goToSettings(navigate)}
             >
               <Icon icon={GearIcon} className="size-4" />
@@ -63,7 +63,7 @@ export function TopRightControls({
             <Button
               variant="ghost"
               size="icon-lg"
-              className="border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
+              className="rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-default"
               onClick={() => goToSettings(navigate)}
             >
               <Icon icon={GearIcon} className="size-4" />
@@ -79,7 +79,7 @@ export function TopRightControls({
           <Button
             variant="ghost"
             size="icon-lg"
-            className="cursor-default border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
+            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
             onClick={onToggleStatusBar}
             aria-label={`${statusBarOpen ? "Close" : "Open"} status panel`}
             aria-expanded={statusBarOpen}
@@ -108,7 +108,7 @@ export function RightSidebarToggle({ open, onToggle }: RightSidebarToggleProps) 
           <Button
             variant="ghost"
             size="icon-lg"
-            className="cursor-default border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
+            className="cursor-default rounded-icon border-none text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground aria-expanded:bg-sidebar-accent"
             onClick={onToggle}
             aria-label={`${open ? "Close" : "Open"} control panel`}
             aria-expanded={open}

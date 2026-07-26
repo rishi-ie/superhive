@@ -196,7 +196,7 @@ export function AgentSettingsPanel({ agentId, activeTab }: AgentSettingsPanelPro
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-default text-muted-foreground hover:text-foreground"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-icon p-0.5 cursor-default text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 <Icon icon={XIcon} className="size-3.5" />
               </button>

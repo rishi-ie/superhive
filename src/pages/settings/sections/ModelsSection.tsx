@@ -17,6 +17,7 @@ import {
 } from './ModelsSection/catalog';
 import type { ModelEntry, ProviderEntry } from '@/types/electron';
 import { deleteModel } from '@/flows/settings/crud/delete-model';
+import { SettingsDivider, SettingsPanel } from '../SettingsPrimitives';
 
 type EditorTarget =
   | { kind: 'catalog'; provider: CatalogProviderMeta; modelName: string }
@@ -75,95 +76,85 @@ export function ModelsSection() {
   const loading = loadingProviders || loadingModels;
 
   return (
-    <div className="flex flex-col gap-8">
-      <section className="flex flex-col gap-gap-loose">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-foreground">Models</h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Add an API key for each provider to enable its models in chat.
-            </p>
-          </div>
+    <div className="flex flex-col gap-6">
+      <SettingsPanel
+        title="Models"
+        description="Enable the models available in chat."
+        action={
           <Button
             size="sm"
             variant="outline"
             onClick={() => setEditor({ kind: 'new' })}
-            className="gap-list-item"
           >
-            <Icon icon={PlusIcon} className="size-3.5" />
+            <Icon icon={PlusIcon} data-icon="inline-start" />
             Add model
           </Button>
-        </div>
-
+        }
+      >
         {loading ? null : (
-          <div className="flex flex-col gap-stack">
+          <>
             {CATALOG.map((m) => {
               const stored = storedModels.find((s) => s.id === m.id);
               const modelHasKey = hasApiKey(m.provider);
               return (
-                <ModelRow
-                  key={m.id}
-                  model={{
-                    id: m.id,
-                    provider: m.provider,
-                    name: m.name,
-                    enabled: Boolean(stored?.enabled),
-                    isCustom: stored?.isCustom ?? false,
-                  }}
-                  hasApiKey={modelHasKey}
-                  onToggleEnabled={(enabled: boolean) =>
-                    onToggleModel(
-                      { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: stored?.isCustom ?? false },
-                      enabled,
-                      modelHasKey,
-                    )
-                  }
-                  onConfigure={() => {
-                    const providerMeta = getProviderMeta(m.provider);
-                    if (providerMeta) {
-                      setEditor({ kind: 'catalog', provider: providerMeta, modelName: m.name });
-                    } else {
-                      setEditor({ kind: 'new' });
+                <React.Fragment key={m.id}>
+                  <ModelRow
+                    model={{
+                      id: m.id,
+                      provider: m.provider,
+                      name: m.name,
+                      enabled: Boolean(stored?.enabled),
+                      isCustom: stored?.isCustom ?? false,
+                    }}
+                    hasApiKey={modelHasKey}
+                    onToggleEnabled={(enabled: boolean) =>
+                      onToggleModel(
+                        { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: stored?.isCustom ?? false },
+                        enabled,
+                        modelHasKey,
+                      )
                     }
-                  }}
-                />
+                    onConfigure={() => {
+                      const providerMeta = getProviderMeta(m.provider);
+                      if (providerMeta) setEditor({ kind: 'catalog', provider: providerMeta, modelName: m.name });
+                      else setEditor({ kind: 'new' });
+                    }}
+                  />
+                  {(m !== CATALOG[CATALOG.length - 1] || customModels.length > 0) ? <SettingsDivider /> : null}
+                </React.Fragment>
               );
             })}
             {customModels.map((m) => {
               const modelHasKey = hasApiKey(m.provider);
               return (
-                <ModelRow
-                  key={m.id}
-                  model={{
-                    id: m.id,
-                    provider: m.provider,
-                    name: m.name,
-                    enabled: Boolean(m.enabled),
-                    isCustom: m.isCustom ?? true,
-                    contextWindow: m.contextWindow,
-                  }}
-                  hasApiKey={modelHasKey}
-                  onToggleEnabled={(enabled: boolean) =>
-                    onToggleModel(
+                <React.Fragment key={m.id}>
+                  <ModelRow
+                    model={{
+                      id: m.id,
+                      provider: m.provider,
+                      name: m.name,
+                      enabled: Boolean(m.enabled),
+                      isCustom: m.isCustom ?? true,
+                      contextWindow: m.contextWindow,
+                    }}
+                    hasApiKey={modelHasKey}
+                    onToggleEnabled={(enabled: boolean) => onToggleModel(
                       { id: m.id, provider: m.provider, name: m.name, enabled, isCustom: m.isCustom ?? true },
                       enabled,
                       modelHasKey,
-                    )
-                  }
-                  onConfigure={() =>
-                    setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] })
-                  }
-                  onDelete={() => onDeleteCustomModel(m.id)}
-                />
+                    )}
+                    onConfigure={() => setEditor({ kind: 'custom', existingModel: m, existingProvider: providers[m.provider] })}
+                    onDelete={() => onDeleteCustomModel(m.id)}
+                  />
+                  {m !== customModels[customModels.length - 1] ? <SettingsDivider /> : null}
+                </React.Fragment>
               );
             })}
-          </div>
+          </>
         )}
-      </section>
+      </SettingsPanel>
 
-      <section className="flex flex-col gap-gap-loose">
-        <APIKeysSection />
-      </section>
+      <APIKeysSection />
 
       <ModelEditorDialog
         open={editor !== null}

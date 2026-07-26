@@ -80,9 +80,9 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
   const wrapLabel = isWrapped ? 'Disable line wrap' : 'Wrap lines'
 
   return (
-    <div className="my-3 overflow-hidden rounded-chat-code-block border border-chat-bubble-code-header-bg bg-chat-bubble-code-bg">
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
-        <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">
+    <div className="my-3 overflow-hidden rounded-card border border-border/70 bg-muted/25">
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/60 bg-muted/40 px-3 py-1.5">
+        <span className="font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
           {lang}
         </span>
         <span className="flex items-center gap-0.5">
@@ -92,7 +92,7 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
             >
               <button
                 type="button"
-                className="text-muted-foreground hover:text-foreground h-6 w-6 inline-flex items-center justify-center border-0 bg-transparent"
+                className="text-muted-foreground hover:text-foreground h-6 w-6 inline-flex items-center justify-center rounded-icon border-0 bg-transparent"
                 aria-pressed={isWrapped}
                 onClick={() => setIsWrapped((v) => !v)}
                 aria-label={wrapLabel}
@@ -109,7 +109,7 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
             <TooltipTrigger asChild>
               <button
                 type="button"
-                className="text-muted-foreground hover:text-foreground h-6 w-6 inline-flex items-center justify-center border-0 bg-transparent"
+                className="text-muted-foreground hover:text-foreground h-6 w-6 inline-flex items-center justify-center rounded-icon border-0 bg-transparent"
                 onClick={handleCopy}
                 aria-label={copyLabel}
               >
@@ -126,12 +126,12 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
       </div>
       {highlighted ? (
         <div
-          className={`max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono ${isWrapped ? 'whitespace-pre-wrap break-all' : ''}`}
+          className={`max-h-[500px] overflow-auto px-3 py-2 font-mono text-[13px] leading-5 [&_.shiki]:!bg-transparent ${isWrapped ? 'whitespace-pre-wrap break-all' : ''}`}
           dangerouslySetInnerHTML={{ __html: highlighted }}
         />
       ) : (
         <pre
-          className={`max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono ${isWrapped ? 'whitespace-pre-wrap break-all' : ''}`}
+          className={`max-h-[500px] overflow-auto px-3 py-2 font-mono text-[13px] leading-5 ${isWrapped ? 'whitespace-pre-wrap break-all' : ''}`}
         >
           <code>{code}</code>
         </pre>

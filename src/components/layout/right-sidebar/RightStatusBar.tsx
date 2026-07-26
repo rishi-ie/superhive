@@ -70,7 +70,7 @@ function StatusSection({ section, footer }: { section: StatusPanelSection; foote
       <div className="mb-2 flex h-6 items-center justify-between">
         <h2 className="text-sm font-medium text-muted-foreground">{section.label}</h2>
         {section.actionLabel && (
-          <button type="button" aria-label={section.actionLabel} onClick={section.onAction} disabled={!section.onAction} className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-muted-foreground">
+          <button type="button" aria-label={section.actionLabel} onClick={section.onAction} disabled={!section.onAction} className="flex size-7 items-center justify-center rounded-icon text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-default disabled:hover:bg-transparent disabled:hover:text-muted-foreground">
             <Icon icon={PlusIcon} className="size-4" />
           </button>
         )}

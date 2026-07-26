@@ -120,7 +120,7 @@ export function RightSidebarWorkspace<TTabId extends string>({
                   </button>
                   <button
                     aria-label={`Close ${tab.label} tab`}
-                    className="mr-1 flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    className="mr-1 flex size-6 shrink-0 items-center justify-center rounded-icon text-muted-foreground hover:bg-background/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     onClick={() => closeTab(tab.id)}
                     type="button"
                   >
@@ -132,7 +132,7 @@ export function RightSidebarWorkspace<TTabId extends string>({
           </div>
           <button
             aria-label="Open workspace launcher"
-            className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="flex size-7 shrink-0 items-center justify-center rounded-icon text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             onClick={showLauncher}
             type="button"
           >
@@ -174,7 +174,7 @@ function WorkspaceLauncher<TTabId extends string>({
             onClick={() => onOpenTab(tab.id)}
             type="button"
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background/60 text-muted-foreground transition-colors group-hover:text-foreground">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-icon bg-background/60 text-muted-foreground transition-colors group-hover:text-foreground">
               <Icon icon={tab.icon} className="size-4" />
             </span>
             <span className="min-w-0">

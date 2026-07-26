@@ -101,6 +101,7 @@ const api: ElectronAPI = {
     onFolderMissing: (cb) => subscribe('projects:folder-missing', cb),
   },
   app: {
+    platform: process.platform,
     getVersion: () => ipcRenderer.invoke('app:get-version'),
     onUpdateAvailable: (cb) => subscribe('app:update-available', cb),
     onUpdateDownloaded: (cb) => subscribe('app:update-downloaded', cb),

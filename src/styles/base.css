@@ -61,6 +61,20 @@
   -webkit-app-region: no-drag;
 }
 
+/* macOS native vibrancy shows through this restrained sidebar material. */
+.macos-sidebar-material {
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  backdrop-filter: blur(18px) saturate(120%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .macos-sidebar-material {
+    background-color: var(--sidebar-bg) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 /* Scrollbar suppression — keeps scroll functional, hides the visual bar */
 .no-scrollbar {
   scrollbar-width: none;

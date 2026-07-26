@@ -38,8 +38,10 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     title: 'Superhive',
-    backgroundColor: '#181818',
-    vibrancy: 'sidebar',
+    backgroundColor: process.platform === 'darwin' ? '#00000000' : '#181818',
+    ...(process.platform === 'darwin'
+      ? { vibrancy: 'sidebar' as const, visualEffectState: 'active' as const, transparent: true }
+      : {}),
     frame: false,
     titleBarStyle: 'hidden',
     trafficLightPosition: { x: 16, y: 16 },

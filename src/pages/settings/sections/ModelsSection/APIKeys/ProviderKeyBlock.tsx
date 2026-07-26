@@ -5,6 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { PasswordInput } from '@/components/common/PasswordInput';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { saveProviderBlock } from '@/flows/settings/crud/save-provider-block';
 import { notifyProviderBlockSaved, notifyProviderBlockCleared } from '@/flows/settings/crud/notify-provider-block';
 import type { ProviderEntry } from '@/types/electron';
@@ -159,12 +175,12 @@ export function ProviderKeyBlock({
   const submitting = phase !== 'idle'
 
   return (
-    <form onSubmit={onSave} className="flex flex-col gap-gap-loose rounded-button border border-border bg-card/40 p-card">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <h3 className="text-sm font-semibold text-foreground">{heading}</h3>
-          {docsUrl && (
-            <p className="text-xs text-muted-foreground">
+    <form onSubmit={onSave}>
+      <Card size="sm" className="rounded-card">
+        <CardHeader>
+          <CardTitle>{heading}</CardTitle>
+          {docsUrl ? (
+            <CardDescription>
               Get a key from{' '}
               <a
                 href={docsUrl}
@@ -175,128 +191,123 @@ export function ProviderKeyBlock({
                 {safeHostname(docsUrl)}
               </a>
               .
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-stack">
-          <span className="text-xs text-muted-foreground">Show in chat</span>
-          <Switch
-            checked={state.enabled}
-            disabled={submitting || (!hasExisting && !state.preferredModel.trim() && !state.apiKey.trim() && shape === 'single') || (!hasExisting && !state.accessKeyId.trim() && !state.secretAccessKey && shape === 'aws')}
-            onCheckedChange={(v) => setState((p) => ({ ...p, enabled: v }))}
-            aria-label={`Toggle ${heading}`}
-          />
-        </div>
-      </div>
+            </CardDescription>
+          ) : null}
+          <CardAction>
+            <Switch
+              checked={state.enabled}
+              disabled={submitting || (!hasExisting && !state.preferredModel.trim() && !state.apiKey.trim() && shape === 'single') || (!hasExisting && !state.accessKeyId.trim() && !state.secretAccessKey && shape === 'aws')}
+              onCheckedChange={(v) => setState((p) => ({ ...p, enabled: v }))}
+              aria-label={`Show ${heading} in chat`}
+            />
+          </CardAction>
+        </CardHeader>
 
-      {shape === 'single' ? (
-        <>
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">API Key</label>
+        <CardContent>
+          <FieldGroup>
+          {shape === 'single' ? (
+            <>
+              <Field>
+                <FieldLabel>API Key</FieldLabel>
             <PasswordInput
               value={state.apiKey}
               onChange={(e) => setState((p) => ({ ...p, apiKey: e.target.value }))}
               placeholder={hasExisting ? '•••••••• (stored)' : 'Enter your API key'}
             />
-          </div>
+              </Field>
           {showBaseUrl && (
-            <div className="flex flex-col gap-list-item">
-              <label className="text-xs text-muted-foreground">Endpoint (Base URL)</label>
+                <Field>
+                  <FieldLabel>Endpoint (Base URL)</FieldLabel>
               <Input
                 value={state.baseUrl}
                 onChange={(e) => setState((p) => ({ ...p, baseUrl: e.target.value }))}
                 placeholder={baseUrlPlaceholder}
                 className="font-mono"
               />
-            </div>
+                </Field>
           )}
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">Model</label>
+              <Field>
+                <FieldLabel>Model</FieldLabel>
             <Input
               value={state.preferredModel}
               onChange={(e) => setState((p) => ({ ...p, preferredModel: e.target.value }))}
               placeholder="e.g. gpt-4o"
               className="font-mono"
             />
-            <p className="text-[0.65rem] text-muted-foreground">
+                <FieldDescription>
               Default model for this provider. Saved with the master toggle above.
-            </p>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">Access Key ID</label>
+                </FieldDescription>
+              </Field>
+            </>
+          ) : (
+            <>
+              <Field>
+                <FieldLabel>Access Key ID</FieldLabel>
             <Input
               value={state.accessKeyId}
               onChange={(e) => setState((p) => ({ ...p, accessKeyId: e.target.value }))}
               placeholder={hasExisting ? '•••••••• (stored)' : 'AKIA…'}
               className="font-mono"
             />
-          </div>
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">Secret Access Key</label>
+              </Field>
+              <Field>
+                <FieldLabel>Secret Access Key</FieldLabel>
             <PasswordInput
               value={state.secretAccessKey}
               onChange={(e) => setState((p) => ({ ...p, secretAccessKey: e.target.value }))}
               placeholder={hasExisting ? '•••••••• (stored)' : 'Enter Secret Access Key'}
             />
-          </div>
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">Region</label>
+              </Field>
+              <Field>
+                <FieldLabel>Region</FieldLabel>
             <Input
               value={state.region}
               onChange={(e) => setState((p) => ({ ...p, region: e.target.value }))}
               placeholder="us-east-1"
               className="font-mono"
             />
-          </div>
-          <div className="flex flex-col gap-list-item">
-            <label className="text-xs text-muted-foreground">Model</label>
+              </Field>
+              <Field>
+                <FieldLabel>Model</FieldLabel>
             <Input
               value={state.preferredModel}
               onChange={(e) => setState((p) => ({ ...p, preferredModel: e.target.value }))}
               placeholder="anthropic.claude-3-5-sonnet-20241022-v2:0"
               className="font-mono"
             />
-            <p className="text-[0.65rem] text-muted-foreground">
+                <FieldDescription>
               Default Bedrock model id. Saved with the master toggle above.
-            </p>
-          </div>
-        </>
-      )}
+                </FieldDescription>
+              </Field>
+            </>
+          )}
 
-      {error && (
-        <p
-          role="alert"
-          className="rounded-button border border-destructive/30 bg-destructive/10 px-button-x py-button-y text-xs text-destructive"
-        >
-          {error}
-        </p>
-      )}
+          {error ? <FieldError>{error}</FieldError> : null}
+          </FieldGroup>
+        </CardContent>
 
-      <div className="flex items-center justify-end gap-stack pt-1">
+        <CardFooter className="justify-end gap-stack border-t">
         {hasExisting && (
           <Button
             type="button"
             variant="ghost"
             onClick={onClear}
             disabled={submitting}
-            className="text-destructive hover:text-destructive gap-list-item"
           >
-            <Icon icon={XCircleIcon} className="size-3.5" />
+            <Icon icon={XCircleIcon} data-icon="inline-start" />
             Clear
           </Button>
         )}
-        <Button type="submit" disabled={submitting} className="gap-list-item">
+        <Button type="submit" disabled={submitting}>
           {submitting ? (
-            <Icon icon={CircleNotchIcon} className="size-3.5 animate-spin" />
+            <Icon icon={CircleNotchIcon} data-icon="inline-start" className="animate-spin" />
           ) : (
-            <Icon icon={hasExisting ? FloppyDiskIcon : CheckCircleIcon} className="size-3.5" />
+            <Icon icon={hasExisting ? FloppyDiskIcon : CheckCircleIcon} data-icon="inline-start" />
           )}
           {hasExisting ? 'Save' : 'Add'}
         </Button>
-      </div>
+        </CardFooter>
+      </Card>
     </form>
   )
 }

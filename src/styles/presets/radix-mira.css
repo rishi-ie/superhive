@@ -106,6 +106,7 @@
   --spacing-gap-tight: calc(0.25rem * var(--ui-scale));
   --spacing-gap-loose: calc(0.75rem * var(--ui-scale));
   --radius-button: 0.5rem;
+  --radius-icon: var(--radius-button);
   --radius-input: 0.5rem;
   --radius-card: 0.625rem;
   --radius-popover: 0.75rem;
@@ -177,7 +178,7 @@
   --sidebar-border: oklch(0 0 0 / 8%);
   --sidebar-ring: oklch(0.556 0 0);
   --sidebar-bg: #1C1C1C;
-  --sidebar-bg-translucent: rgba(28, 28, 28, 0.85);
+  --sidebar-bg-translucent: rgba(28, 28, 28, 0.82);
   --sidebar-btn-text: #ABABAB;
   --sidebar-btn-text-hover: #E8E8E8;
 
@@ -276,6 +277,7 @@
   --spacing-gap-tight: var(--spacing-gap-tight);
   --spacing-gap-loose: var(--spacing-gap-loose);
   --radius-button: var(--radius-button);
+  --radius-icon: var(--radius-icon);
   --radius-input: var(--radius-input);
   --radius-card: var(--radius-card);
   --radius-popover: var(--radius-popover);

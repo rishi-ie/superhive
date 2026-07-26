@@ -128,20 +128,28 @@ export function AssistantMessage({
         </>
       ) : (
         <>
-        {activityExpanded ? (
-        <div className="flex flex-col gap-2">
-          {traceEvents.map((event, index) => (
-            <React.Fragment key={event.type === 'status' ? `trace-status-${event.status.id}` : `trace-block-${event.block.sequence ?? event.block.startedAt}-${event.block.type}-${index}`}>
-              {event.type === 'status' ? (
-                <ActivityStatusLine status={event.status} />
-              ) : (
-                <ResponseBlockView block={event.block} streaming={false} />
-              )}
-            </React.Fragment>
-          ))}
-          {!traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
+        <div
+          aria-hidden={!activityExpanded}
+          className={cn(
+            'grid transition-[grid-template-rows,opacity] duration-150 ease-out motion-reduce:transition-none',
+            activityExpanded ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0',
+          )}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="flex flex-col gap-2">
+              {traceEvents.map((event, index) => (
+                <React.Fragment key={event.type === 'status' ? `trace-status-${event.status.id}` : `trace-block-${event.block.sequence ?? event.block.startedAt}-${event.block.type}-${index}`}>
+                  {event.type === 'status' ? (
+                    <ActivityStatusLine status={event.status} />
+                  ) : (
+                    <ResponseBlockView block={event.block} streaming={false} />
+                  )}
+                </React.Fragment>
+              ))}
+              {!traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
+            </div>
+          </div>
         </div>
-        ) : null}
         {finalSegment ? (
           <div className="flex flex-col gap-3">
             <ResponseBlockView block={finalSegment.block} streaming={false} />
