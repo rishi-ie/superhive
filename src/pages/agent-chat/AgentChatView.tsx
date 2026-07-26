@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, ArrowUpIcon, Stop } from "@phosphor-icons/react";
+import { PlusIcon, ArrowUpIcon, Stop, XIcon } from "@phosphor-icons/react";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
@@ -16,8 +16,13 @@ import { ChatComposerFrame, ChatComposerToolbar, composerIconButtonClass, compos
 import { useAgentRuntime } from '@/flows/agents/runtime';
 import { useAgentSettings } from '@/flows/agents/settings';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
-import { sendMessage } from '@/flows/ui/send-message';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
+import { agents } from '@/api/agents';
+import type { ComposerAttachment } from '@/models/assistant-message';
+
+function isImage(file: File): boolean {
+  return file.type.startsWith('image/');
+}
 
 export function AgentChatView() {
   const { agentId } = useParams();
@@ -82,6 +87,7 @@ export function AgentChatView() {
       : 0;
 
   const [input, setInput] = React.useState('');
+  const [attachments, setAttachments] = React.useState<ComposerAttachment[]>([]);
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   useComposerTextareaAutosize(textareaRef, input);
 
@@ -122,12 +128,30 @@ export function AgentChatView() {
   const isLive = status === 'active' || status === 'busy';
   const isBusy = status === 'busy';
 
-  const onSend = () => {
-    const result = sendMessage({ text: input, isLive, send: (text) => void send({ text }) })
-    if (result.ok) {
-      setInput('');
-      requestAnimationFrame(() => textareaRef.current?.focus());
+  const addAttachments = async (files: FileList | File[]) => {
+    const next: ComposerAttachment[] = [];
+    for (const file of Array.from(files)) {
+      const data = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.readAsDataURL(file);
+      });
+      next.push(await agents.importAttachment(agentId, { name: file.name, mimeType: file.type, data }));
     }
+    setAttachments((current) => [...current, ...next]);
+  };
+
+  const pickAttachments = async () => {
+    const picked = await agents.pickAttachments(agentId, 'file');
+    setAttachments((current) => [...current, ...picked]);
+  };
+
+  const onSend = () => {
+    if (!isLive || (!input.trim() && !attachments.length)) return;
+    void send({ text: input, composerContext: { attachments } });
+    setInput('');
+    setAttachments([]);
+    requestAnimationFrame(() => textareaRef.current?.focus());
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -171,18 +195,53 @@ export function AgentChatView() {
       />
       <div className="shrink-0">
         <ChatComposerFrame>
+          {attachments.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto px-4 pt-3 pb-1">
+              {attachments.map((attachment) => (
+                <div key={attachment.id} className="relative flex min-w-28 shrink-0 items-center gap-2 rounded-xl border border-border bg-background/40 p-2">
+                  {attachment.kind === 'image' ? (
+                    <img src={`file://${attachment.path}`} alt={attachment.name} className="size-12 rounded object-cover" />
+                  ) : <span className="text-xl">▤</span>}
+                  <span className="max-w-28 truncate text-xs">{attachment.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${attachment.name}`}
+                    onClick={() => {
+                      void agents.discardAttachment(agentId, attachment.id);
+                      setAttachments((current) => current.filter((item) => item.id !== attachment.id));
+                    }}
+                    className="absolute -right-1 -top-1 rounded-full bg-background"
+                  >
+                    <Icon icon={XIcon} className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             placeholder="Ask your digital employee…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onPaste={(event) => {
+              const files = Array.from(event.clipboardData.files).filter(isImage);
+              if (files.length) {
+                event.preventDefault();
+                void addAttachments(files);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              void addAttachments(event.dataTransfer.files);
+            }}
+            onDragOver={(event) => event.preventDefault()}
             onKeyDown={onKeyDown}
             autoFocus
             className={composerTextareaClass}
           />
           <ChatComposerToolbar>
             <div className="flex items-center gap-2">
-              <button type="button" aria-label="Add attachment" className={composerIconButtonClass}>
+              <button type="button" aria-label="Add attachment" onClick={() => void pickAttachments()} className={composerIconButtonClass}>
                 <Icon icon={PlusIcon} className="size-5" />
               </button>
             </div>
@@ -196,7 +255,7 @@ export function AgentChatView() {
                 type="button"
                 aria-label={isBusy ? 'Stop response' : 'Send message'}
                 onClick={isBusy ? stop : onSend}
-                disabled={!isBusy && input.trim().length === 0}
+                disabled={!isBusy && (!isLive || (!input.trim() && attachments.length === 0))}
                 className={`${composerSendButtonClass} ${isBusy ? 'bg-chat-composer-stop-bg hover:bg-chat-composer-stop-hover' : 'bg-chat-composer-send-bg hover:bg-chat-composer-send-hover disabled:bg-muted'}`}
               >
                 <Icon icon={isBusy ? Stop : ArrowUpIcon} className="size-5 text-white" />

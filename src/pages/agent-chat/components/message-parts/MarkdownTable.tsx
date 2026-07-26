@@ -170,11 +170,11 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
 	}, [children, isExpanded, showToggle])
 
   return (
-    <div className={cn('relative my-2', className)}>
+    <div className={cn('relative my-3', className)}>
       <div className="relative group">
         <div
           ref={containerRef}
-          className="overflow-x-auto rounded-chat-code-block border border-chat-bubble-code-header-bg"
+          className="overflow-x-auto rounded-chat-code-block border border-chat-bubble-code-header-bg bg-chat-bubble-code-bg"
         >
 			<table className="w-full border-collapse text-xs">
 				{visibleChildren}
@@ -215,7 +215,7 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
       {showToggle && (
         <button
           type="button"
-          className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => setIsExpanded((v) => !v)}
         >
           {isExpanded ? (

@@ -151,7 +151,7 @@ export function AssistantMessage({
       )}
 
       {frozen && !agentResponseActive ? (
-        <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center gap-gap-tight mt-1 [--muted-foreground:#707070]">
+        <div className="mt-2 flex items-center gap-gap-tight opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 [--muted-foreground:#707070]">
           <Button
             size="icon-sm"
             variant="ghost"

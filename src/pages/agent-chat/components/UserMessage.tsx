@@ -32,20 +32,20 @@ export function UserMessage({ message }: UserMessageProps) {
     <div className="group relative w-full py-button-y flex flex-col items-end">
       <div
         className={cn(
-          'w-fit max-w-[80%] rounded-xl bg-sidebar-accent p-3 shadow-sm',
+          'w-fit max-w-[80%] rounded-xl bg-[#1D1D1D] px-3 py-2.5 text-[#FCFCFC] shadow-sm',
         )}
       >
         {isLong && !expanded ? (
           <div className="relative">
             {visibleLines.map((line, i) => (
-              <p key={i} className="text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
+              <p key={i} className="text-base leading-relaxed text-[#FCFCFC] whitespace-pre-wrap break-words">
                 {line}
               </p>
             ))}
             <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-b from-transparent to-[--chat-bubble-user-bg] pointer-events-none" />
           </div>
         ) : (
-          <p className="text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
+          <p className="text-base leading-relaxed text-[#FCFCFC] whitespace-pre-wrap break-words">
             {message.text}
           </p>
         )}

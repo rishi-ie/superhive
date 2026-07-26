@@ -19,6 +19,7 @@ const DEFAULT_WIDTH = 280;
 const MIN_RIGHT_WIDTH = 200;
 const MAX_RIGHT_WIDTH = 480;
 const DEFAULT_RIGHT_WIDTH = 370;
+const STATUS_PANEL_WIDTH = 304;
 
 export function AppLayout() {
   return (
@@ -42,6 +43,7 @@ function AppLayoutShell() {
   const [rightSidebarOpen, setRightSidebarOpen] = React.useState(location.pathname === "/");
   const [statusBarOpen, setStatusBarOpen] = React.useState(false);
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
+  const rightResizeRef = React.useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null);
 
   React.useEffect(() => {
     const shouldOpen = location.pathname !== "/" && location.pathname !== "/plugins";
@@ -58,15 +60,6 @@ function AppLayoutShell() {
     setIsResizingLeft(false);
   }, []);
 
-  const startResizingRight = React.useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizingRight(true);
-  }, []);
-
-  const stopResizingRight = React.useCallback(() => {
-    setIsResizingRight(false);
-  }, []);
-
   const resizeLeft = React.useCallback(
     (e: MouseEvent) => {
       if (isResizingLeft) {
@@ -79,17 +72,32 @@ function AppLayoutShell() {
     [isResizingLeft]
   );
 
-  const resizeRight = React.useCallback(
-    (e: MouseEvent) => {
-      if (isResizingRight) {
-        let newWidth = window.innerWidth - e.clientX;
-        if (newWidth < MIN_RIGHT_WIDTH) newWidth = MIN_RIGHT_WIDTH;
-        if (newWidth > MAX_RIGHT_WIDTH) newWidth = MAX_RIGHT_WIDTH;
-        setRightSidebarWidth(newWidth);
-      }
-    },
-    [isResizingRight]
-  );
+  const startResizingRight = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    rightResizeRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startWidth: rightSidebarWidth,
+    };
+    setIsResizingRight(true);
+  }, [rightSidebarWidth]);
+
+  const resizeRight = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const resize = rightResizeRef.current;
+    if (!resize || resize.pointerId !== event.pointerId) return;
+    setRightSidebarWidth(Math.min(MAX_RIGHT_WIDTH, Math.max(MIN_RIGHT_WIDTH, resize.startWidth + resize.startX - event.clientX)));
+  }, []);
+
+  const stopResizingRight = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (rightResizeRef.current?.pointerId !== event.pointerId) return;
+    rightResizeRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setIsResizingRight(false);
+  }, []);
 
   React.useEffect(() => {
     if (isResizingLeft) {
@@ -107,19 +115,14 @@ function AppLayoutShell() {
   }, [isResizingLeft, resizeLeft, stopResizingLeft]);
 
   React.useEffect(() => {
-    if (isResizingRight) {
-      window.addEventListener("mousemove", resizeRight);
-      window.addEventListener("mouseup", stopResizingRight);
-      document.body.style.cursor = "col-resize";
-      document.body.style.userSelect = "none";
-    }
+    if (!isResizingRight) return;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
     return () => {
-      window.removeEventListener("mousemove", resizeRight);
-      window.removeEventListener("mouseup", stopResizingRight);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizingRight, resizeRight, stopResizingRight]);
+  }, [isResizingRight]);
 
   const toggleRightSidebar = React.useCallback(() => {
     if (!rightSidebarOpen) setStatusBarOpen(false);
@@ -155,32 +158,42 @@ function AppLayoutShell() {
         </Workspace>
         <div
           className={cn(
-            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            "relative h-full flex-shrink-0 overflow-hidden motion-reduce:transition-none",
+            isResizingRight
+              ? "transition-none"
+              : "transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
             rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
           )}
           style={{ width: rightSidebarOpen ? `${rightSidebarWidth}px` : 0 }}
         >
           <div
             className={cn(
-              "relative flex h-full will-change-[opacity,transform] transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+              "relative flex h-full min-w-0 w-full motion-reduce:transition-none",
+              isResizingRight
+                ? "transition-none"
+                : "will-change-[opacity,transform] transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
               rightSidebarOpen ? "translate-x-0 opacity-100 delay-50" : "translate-x-2 opacity-0"
             )}
-            style={{ width: `${rightSidebarWidth}px`, flexShrink: 0 }}
           >
             <div
-              onMouseDown={startResizingRight}
-              className="no-drag absolute left-0 top-0 z-[60] h-full w-1 cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
+              onPointerCancel={stopResizingRight}
+              onPointerDown={startResizingRight}
+              onLostPointerCapture={stopResizingRight}
+              onPointerMove={resizeRight}
+              onPointerUp={stopResizingRight}
+              className="no-drag absolute left-0 top-0 z-[60] h-full w-1 touch-none cursor-col-resize transition-colors hover:bg-foreground/10 active:bg-foreground/20"
             />
             <RightSidebar width={rightSidebarWidth} />
           </div>
         </div>
         <div
           className={cn(
-            "relative h-full flex-shrink-0 overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            "relative h-full flex-shrink-0 bg-[#111111] overflow-hidden transition-[width] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             statusBarOpen && !rightSidebarOpen ? "pointer-events-auto" : "pointer-events-none w-0"
           )}
-          style={{ width: statusBarOpen && !rightSidebarOpen ? 320 : 0 }}
+          style={{ width: statusBarOpen && !rightSidebarOpen ? `${STATUS_PANEL_WIDTH}px` : 0 }}
         >
+          <div aria-hidden="true" className="absolute inset-x-0 top-12 border-t border-border" />
         </div>
         <RightStatusBar
           open={statusBarOpen}

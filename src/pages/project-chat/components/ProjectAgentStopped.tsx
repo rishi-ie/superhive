@@ -16,7 +16,7 @@ interface ProjectAgentStoppedProps {
 
 export function ProjectAgentStopped({ onStart }: ProjectAgentStoppedProps) {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-background">
+    <div className="flex h-full w-full items-center justify-center bg-[#111111]">
       <div className="flex max-w-sm flex-col items-center gap-gap-loose px-6 text-center">
         <div className="rounded-full bg-muted/40 p-panel">
           <Icon icon={PauseIcon} className="size-5 text-muted-foreground" />

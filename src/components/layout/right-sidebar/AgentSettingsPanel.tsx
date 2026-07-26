@@ -2,9 +2,6 @@ import * as React from "react";
 import { Icon } from "@/components/ui/icon";
 import {
   WarningCircleIcon,
-  BookOpenTextIcon,
-  TreeViewIcon,
-  TrayIcon,
   MagnifyingGlassIcon,
   XIcon,
 } from "@phosphor-icons/react";
@@ -19,15 +16,16 @@ import {
 import { OverviewSection } from "./sections/OverviewSection";
 import type { OverviewData, ManageFileState } from "@/models/component";
 import { ResponsibilitySlider } from "./primitives";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import type { Project } from "@/storage/types";
+import type { RightSidebarTabId } from "./right-sidebar-tabs";
 
 interface AgentSettingsPanelProps {
   agentId: string;
+  activeTab: RightSidebarTabId;
 }
 
 function scoreAtom(label: string, description: string | undefined, tokens: string[]): number {
@@ -49,7 +47,7 @@ function sectionMatchesLabel(sec: ManageSectionDef, tokens: string[]): boolean {
   return tokens.every((t) => haystack.includes(t));
 }
 
-export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
+export function AgentSettingsPanel({ agentId, activeTab }: AgentSettingsPanelProps) {
   const manage = useAgentManage(agentId);
   const settingsJson = useAgentSettings(agentId);
 
@@ -80,6 +78,10 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
   }, [agentId]);
 
   const [query, setQuery] = React.useState("");
+
+  React.useEffect(() => {
+    if (activeTab !== "manage") setQuery("");
+  }, [activeTab]);
 
   const overviewData = React.useMemo<OverviewData>(() => ({
     name: (settings?.name as string | undefined) ?? (settings?.identity as { name?: string } | undefined)?.name ?? "Untitled agent",
@@ -158,96 +160,77 @@ export function AgentSettingsPanel({ agentId }: AgentSettingsPanelProps) {
     );
   }
 
+  if (activeTab === "overview") {
+    return (
+      <div className="flex h-full flex-col px-button-x">
+        <ScrollArea className="flex-1 min-h-0">
+          <OverviewSection data={overviewData} />
+        </ScrollArea>
+        <div className="mt-auto pb-gap-loose">
+          <ResponsibilitySlider count={overviewData.responsibilityCount} />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeTab === "inbox") {
+    return <InboxSection agentId={agentId} />;
+  }
+
   return (
-    <div className="flex h-full flex-col px-button-x">
-      <Tabs
-        defaultValue="overview"
-        onValueChange={(v) => { if (v !== "manage") setQuery(""); }}
-        className="flex flex-1 min-h-0 flex-col"
-      >
-        <TabsList className="w-full h-8 justify-center bg-tabs-list-bg px-0.5">
-          <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={BookOpenTextIcon} className="size-3.5" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={TreeViewIcon} className="size-3.5" />
-            Manage
-          </TabsTrigger>
-          <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={TrayIcon} className="size-3.5" />
-            Inbox
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-0 flex flex-1 flex-col min-h-0 p-0">
-          <ScrollArea className="flex-1 min-h-0">
-            <OverviewSection data={overviewData} />
-          </ScrollArea>
-          <div className="mt-auto pb-gap-loose">
-            <ResponsibilitySlider count={overviewData.responsibilityCount} />
+    <div className="h-full px-button-x">
+      <ScrollArea className="h-full" scrollbar={false}>
+        <div className="flex flex-col gap-5">
+          <div className="relative">
+            <Icon
+              icon={MagnifyingGlassIcon}
+              className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter settings"
+              className="h-7 pl-7 pr-7 text-sm focus-visible:border-transparent focus-visible:ring-0"
+            />
+            {query.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-default text-muted-foreground hover:text-foreground"
+              >
+                <Icon icon={XIcon} className="size-3.5" />
+              </button>
+            )}
           </div>
-        </TabsContent>
 
-        <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full" scrollbar={false}>
-              <div className="flex flex-col gap-5">
-              <div className="relative">
-                <Icon
-                  icon={MagnifyingGlassIcon}
-                  className="size-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          {rankedSections.length === 0 && tokens.length > 0 ? (
+            <Empty>
+              <Icon icon={MagnifyingGlassIcon} className="size-8 text-muted-foreground/30" />
+              <EmptyTitle>No settings match</EmptyTitle>
+              <EmptyDescription>
+                Try keywords like &ldquo;filesystem&rdquo;, &ldquo;skills&rdquo;, or &ldquo;network&rdquo;.
+              </EmptyDescription>
+              <Button variant="ghost" size="sm" className="mt-2 h-7" onClick={() => setQuery("")}>
+                Clear search
+              </Button>
+            </Empty>
+          ) : (
+            rankedSections.map(({ s, effectiveQuery }) => (
+              <div key={s.id} className="flex flex-col gap-stack">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {s.label}
+                </span>
+                <s.Component
+                  settings={settings}
+                  agentId={agentId}
+                  query={effectiveQuery}
+                  patch={patch}
                 />
-                  <Input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Filter settings"
-                    className="h-7 pl-7 pr-7 text-sm focus-visible:ring-0 focus-visible:border-transparent"
-                  />
-                {query.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-default"
-                  >
-                    <Icon icon={XIcon} className="size-3.5" />
-                  </button>
-                )}
               </div>
-
-              {rankedSections.length === 0 && tokens.length > 0 ? (
-                <Empty>
-                  <Icon icon={MagnifyingGlassIcon} className="size-8 text-muted-foreground/30" />
-                  <EmptyTitle>No settings match</EmptyTitle>
-                  <EmptyDescription>
-                    Try keywords like &ldquo;filesystem&rdquo;, &ldquo;skills&rdquo;, or &ldquo;network&rdquo;.
-                  </EmptyDescription>
-                  <Button variant="ghost" size="sm" className="h-7 mt-2" onClick={() => setQuery("")}>
-                    Clear search
-                  </Button>
-                </Empty>
-              ) : (
-                rankedSections.map(({ s, effectiveQuery }) => (
-                  <div key={s.id} className="flex flex-col gap-stack">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      {s.label}
-                    </span>
-                    <s.Component
-                      settings={settings}
-                      agentId={agentId}
-                      query={effectiveQuery}
-                      patch={patch}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="inbox" className="mt-0 flex-1 min-h-0 p-0">
-          <InboxSection agentId={agentId} />
-        </TabsContent>
-      </Tabs>
+            ))
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

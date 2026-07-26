@@ -80,7 +80,7 @@ export function CodeBlock({ lang, code, wrap = false }: CodeBlockProps) {
   const wrapLabel = isWrapped ? 'Disable line wrap' : 'Wrap lines'
 
   return (
-    <div className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg my-2">
+    <div className="my-3 overflow-hidden rounded-chat-code-block border border-chat-bubble-code-header-bg bg-chat-bubble-code-bg">
       <div className="sticky top-0 z-10 flex items-center justify-between bg-chat-bubble-code-header-bg px-3 py-1.5">
         <span className="text-xs text-muted-foreground font-mono uppercase tracking-wide">
           {lang}

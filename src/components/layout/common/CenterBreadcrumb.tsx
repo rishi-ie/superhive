@@ -18,7 +18,7 @@ export function CenterBreadcrumb() {
   if (isPlugins) return null;
   if (!segments) return null;
   return (
-    <div className={isAgentChat || isProjectChat ? "flex items-center px-composer pt-3 pb-3 border-b border-border" : "flex items-center px-composer pt-3 pb-2"}>
+    <div className={isAgentChat || isProjectChat ? "flex h-12 items-center border-b border-border px-composer" : "flex items-center px-composer pt-3 pb-2"}>
       <Breadcrumb className="flex-1 font-sans">
         <BreadcrumbList>
           {segments.map((seg, i) => {

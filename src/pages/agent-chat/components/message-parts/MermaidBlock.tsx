@@ -54,21 +54,21 @@ export function MermaidBlock({ source }: MermaidBlockProps) {
   }, [source])
   if (error) {
     return (
-      <pre className="font-mono text-xs whitespace-pre-wrap bg-muted/40 border border-border rounded-card p-3 text-destructive">
+      <pre className="my-3 whitespace-pre-wrap rounded-card border border-border bg-muted/40 p-3 font-mono text-xs text-destructive">
         {source}
       </pre>
     )
   }
   if (!svg) {
     return (
-      <div className="my-2 h-24 w-full rounded-card border border-dashed border-border bg-muted/30 flex items-center justify-center text-xs text-muted-foreground">
+      <div className="my-3 flex h-24 w-full items-center justify-center rounded-card border border-dashed border-border bg-muted/30 text-xs text-muted-foreground">
         Rendering diagram…
       </div>
     )
   }
   return (
     <div
-      className="my-2 rounded-card border border-border bg-background p-3 overflow-x-auto [&_svg]:max-w-full"
+      className="my-3 overflow-x-auto rounded-card border border-border/70 bg-background p-4 [&_svg]:max-w-full"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   )

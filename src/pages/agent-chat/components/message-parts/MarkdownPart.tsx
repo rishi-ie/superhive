@@ -72,42 +72,42 @@ function getShikiHtml(children: React.ReactNode): string {
 
 const components: Components = {
   h1: ({ children }) => (
-		<h1 className="mt-5 text-lg font-semibold tracking-tight first:mt-0">{children}</h1>
+    <h1 className="mt-5 mb-2 text-xl font-semibold leading-7 tracking-tight first:mt-0">{children}</h1>
   ),
   h2: ({ children }) => (
-		<h2 className="mt-5 mb-2 text-base font-semibold first:mt-0">{children}</h2>
+    <h2 className="mt-5 mb-2 text-lg font-semibold leading-7 tracking-tight first:mt-0">{children}</h2>
   ),
   h3: ({ children }) => (
-		<h3 className="mt-4 mb-1.5 text-sm font-semibold">{children}</h3>
+    <h3 className="mt-4 mb-1.5 text-base font-semibold leading-6 first:mt-0">{children}</h3>
   ),
   h4: ({ children }) => (
-    <h4 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h4>
+    <h4 className="mt-4 mb-1 text-sm font-semibold leading-6 first:mt-0">{children}</h4>
   ),
   h5: ({ children }) => (
-    <h5 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h5>
+    <h5 className="mt-4 mb-1 text-sm font-medium leading-6 text-foreground first:mt-0">{children}</h5>
   ),
   h6: ({ children }) => (
-    <h6 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{children}</h6>
+    <h6 className="mt-4 mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground first:mt-0">{children}</h6>
   ),
   p: ({ children }) => (
-		<p className="my-2 text-[15px] leading-7">{children}</p>
+    <p className="my-2 text-[15px] leading-6 first:mt-0 last:mb-0">{children}</p>
   ),
   strong: ({ children }) => (
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
-  em: ({ children }) => <em className="italic">{children}</em>,
+  em: ({ children }) => <em className="italic text-foreground/90">{children}</em>,
   del: ({ children }) => (
     <del className="line-through text-muted-foreground">{children}</del>
   ),
   hr: () => <Separator className="my-3" />,
   ul: ({ children }) => (
-		<ul className="my-2 list-disc space-y-1 pl-5">{children}</ul>
+    <ul className="my-2 list-disc space-y-1 pl-6 marker:text-muted-foreground [&_ol]:my-1 [&_ul]:my-1">{children}</ul>
   ),
   ol: ({ children }) => (
-		<ol className="my-2 list-decimal space-y-1 pl-5">{children}</ol>
+    <ol className="my-2 list-decimal space-y-1 pl-6 marker:text-muted-foreground [&_ol]:my-1 [&_ul]:my-1">{children}</ol>
   ),
   li: ({ children }) => (
-		<li className="text-[15px] leading-7 pl-0.5">{children}</li>
+    <li className="pl-0.5 text-[15px] leading-6 [&>p]:my-0">{children}</li>
   ),
   input: ({ checked, type }) => {
     if (type !== 'checkbox') return null
@@ -124,7 +124,7 @@ const components: Components = {
       }
     }
     return (
-      <code className={className ?? 'bg-muted rounded-sm px-1 py-0.5 font-mono text-[0.85em]'}>
+      <code className={className ?? 'rounded-md border border-border/60 bg-muted/70 px-1.5 py-0.5 font-mono text-[0.84em] text-foreground'}>
         {children}
       </code>
     )
@@ -135,7 +135,7 @@ const components: Components = {
       const html = getShikiHtml(children)
       return (
         <div
-          className="bg-chat-bubble-code-bg rounded-chat-code-block overflow-hidden border border-chat-bubble-code-header-bg my-2"
+          className="my-3 overflow-hidden rounded-chat-code-block border border-chat-bubble-code-header-bg bg-chat-bubble-code-bg"
         >
           <div
             className="max-h-[500px] overflow-auto px-3 py-2 text-xs font-mono [&_.shiki]:!bg-transparent"
@@ -157,24 +157,24 @@ const components: Components = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-primary underline underline-offset-2 hover:text-primary/80"
+      className="font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:text-primary/80 hover:decoration-primary"
     >
       {children}
     </a>
   ),
   blockquote: ({ children }) => (
-		<blockquote className="my-3 border-l-2 border-primary/40 pl-3 text-[15px] leading-7 text-muted-foreground">
+    <blockquote className="my-3 border-l-2 border-primary/50 py-0.5 pl-4 text-[15px] leading-6 text-muted-foreground [&_p]:my-0">
       {children}
     </blockquote>
   ),
   table: ({ children }) => <MarkdownTable>{children}</MarkdownTable>,
-  thead: ({ children }) => <thead className="bg-muted/40">{children}</thead>,
+  thead: ({ children }) => <thead className="bg-muted/50">{children}</thead>,
   tbody: ({ children }) => <tbody>{children}</tbody>,
-  tr: ({ children }) => <tr className="border-b border-border">{children}</tr>,
+  tr: ({ children }) => <tr className="border-b border-border/70 last:border-b-0">{children}</tr>,
   th: ({ children }) => (
-		<th className="sticky top-0 bg-muted/95 text-left text-xs font-medium p-2">{children}</th>
+    <th className="sticky top-0 bg-muted/95 p-2.5 text-left text-xs font-semibold text-foreground">{children}</th>
   ),
-  td: ({ children }) => <td className="text-xs p-2">{children}</td>,
+  td: ({ children }) => <td className="p-2.5 text-xs leading-5 text-foreground/90">{children}</td>,
 }
 
 export function MarkdownPart({ source, streaming = false }: MarkdownPartProps) {

@@ -1,9 +1,3 @@
-import {
-  BookOpenTextIcon,
-  TreeViewIcon,
-  TrayIcon,
-} from "@phosphor-icons/react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
@@ -22,10 +16,11 @@ import { ProjectOverviewSection } from "./sections/ProjectOverviewSection";
 import { InboxSection } from "./sections/InboxSection";
 import { MANAGE_SECTIONS, type ManageSectionDef } from "./sections/registry";
 import type { ProjectOverviewSectionData, ManageFileState } from "@/models/component";
-import { Icon } from "@/components/ui/icon";
+import type { RightSidebarTabId } from "./right-sidebar-tabs";
 
 interface ProjectSettingsPanelProps {
   projectId: string;
+  activeTab: RightSidebarTabId;
 }
 
 interface TeamState {
@@ -34,7 +29,7 @@ interface TeamState {
   members: Agent[];
 }
 
-export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
+export function ProjectSettingsPanel({ projectId, activeTab }: ProjectSettingsPanelProps) {
   const [team, setTeam] = useState<TeamState>({
     project: null,
     coordinator: null,
@@ -196,51 +191,40 @@ export function ProjectSettingsPanel({ projectId }: ProjectSettingsPanelProps) {
   // goes to manage.json. Shared hook — see useManageTabPatch.
   const routingPatch = useManageTabPatch(coordinatorManage, coordinatorSettings);
 
+  if (activeTab === "overview") {
+    return (
+      <div className="h-full px-button-x">
+        <ScrollArea className="h-full" scrollbar={false}>
+          <ProjectOverviewSection data={overviewData} liveStatuses={liveStates} liveRuntimeSummary={liveRuntimeSummary} />
+        </ScrollArea>
+      </div>
+    );
+  }
+
+  if (activeTab === "inbox") {
+    return (
+      <div className="h-full px-button-x">
+        <ScrollArea className="h-full" scrollbar={false}>
+          <InboxSection agentId={coordinatorId} projectName={mergedTeam.project?.name} />
+        </ScrollArea>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex h-full flex-col px-button-x">
-      <Tabs defaultValue="overview" className="flex flex-1 min-h-0 flex-col">
-        <TabsList className="w-full h-8 justify-center bg-tabs-list-bg px-0.5">
-          <TabsTrigger value="overview" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={BookOpenTextIcon} className="size-3.5" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="manage" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={TreeViewIcon} className="size-3.5" />
-            Manage
-          </TabsTrigger>
-          <TabsTrigger value="inbox" className="cursor-default justify-center px-0 py-0 !border-transparent data-[state=active]:bg-muted data-[state=active]:text-foreground">
-            <Icon icon={TrayIcon} className="size-3.5" />
-            Inbox
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-0 flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full" scrollbar={false}>
-				<ProjectOverviewSection data={overviewData} liveStatuses={liveStates} liveRuntimeSummary={liveRuntimeSummary} />
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="manage" className="mt-0 flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full" scrollbar={false}>
-            <div className="flex flex-col gap-5">
-              {coordinatorId ? (
-                <ManageSectionList
-                  sections={MANAGE_SECTIONS}
-                  agentId={coordinatorId}
-                  settings={coordinatorMergedManage}
-                  patch={routingPatch}
-                />
-              ) : null}
-            </div>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="inbox" className="mt-0 flex-1 min-h-0 p-0">
-          <ScrollArea className="h-full" scrollbar={false}>
-            <InboxSection agentId={coordinatorId} projectName={mergedTeam.project?.name} />
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
+    <div className="h-full px-button-x">
+      <ScrollArea className="h-full" scrollbar={false}>
+        <div className="flex flex-col gap-5">
+          {coordinatorId ? (
+            <ManageSectionList
+              sections={MANAGE_SECTIONS}
+              agentId={coordinatorId}
+              settings={coordinatorMergedManage}
+              patch={routingPatch}
+            />
+          ) : null}
+        </div>
+      </ScrollArea>
     </div>
   );
 }
