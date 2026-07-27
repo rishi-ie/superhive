@@ -20,6 +20,7 @@ export interface PlanEntry {
   description?: string
   dependencies?: string[]
   assignedAgent: string  // member name, resolved to id
+	workPacket?: Record<string, unknown>
 }
 
 export interface PlanFile {
@@ -113,7 +114,9 @@ export async function ingestPlan(coordDir: string, planFilename = 'tasks-plan.js
       description: entry.description,
       projectId: project.id,
       assignedAgentId: agentId,
+		context: entry.workPacket ? JSON.stringify({ ...entry.workPacket, version: 1, projectId: project.id, taskId: '', workerAgentId: agentId }) : undefined,
     })
+		if (entry.workPacket) await TaskRepository.update(task.id, { context: JSON.stringify({ ...entry.workPacket, version: 1, projectId: project.id, taskId: task.id, workerAgentId: agentId }) })
     if (entry.dependencies && entry.dependencies.length > 0) {
       const allTasks = await TaskRepository.getByProject(project.id)
       const byTitle = new Map(allTasks.map((t) => [t.title, t.id]))

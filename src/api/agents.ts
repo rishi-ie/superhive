@@ -65,6 +65,8 @@ export const agents = {
     status?: 'pending' | 'read' | 'answered' | 'dismissed',
   ): Promise<{ ok: boolean; removed: number }> =>
     window.api.agents.clearInbox(id, status),
+	answerInboxQuestion: (id: string, inboxId: string, answer: string): Promise<{ ok: boolean; alreadyAnswered?: boolean }> =>
+		window.api.agents.answerInboxQuestion(id, inboxId, answer),
   reveal: (id: string): Promise<{ ok: boolean }> =>
     window.api.agents.reveal(id),
   persistAssistantMessage: (

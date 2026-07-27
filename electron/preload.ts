@@ -53,6 +53,7 @@ const api: ElectronAPI = {
     markInboxRead: (id, inboxId, answeredWith) =>
       ipcRenderer.invoke('agents:markInboxRead', id, inboxId, answeredWith),
     clearInbox:    (id, status) => ipcRenderer.invoke('agents:clearInbox', id, status),
+		answerInboxQuestion: (id, inboxId, answer) => ipcRenderer.invoke('agents:answerInboxQuestion', id, inboxId, answer),
     reveal:        (id) => ipcRenderer.invoke('agents:reveal', id),
     persistAssistantMessage: (id, message) =>
       ipcRenderer.invoke('agents:persistAssistantMessage', id, message),

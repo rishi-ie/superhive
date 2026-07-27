@@ -37,6 +37,7 @@ export const IPC = {
     APPEND_INBOX:     'agents:appendInbox',
     MARK_INBOX_READ:  'agents:markInboxRead',
     CLEAR_INBOX:      'agents:clearInbox',
+		ANSWER_INBOX_QUESTION: 'agents:answerInboxQuestion',
     REVEAL: 'agents:reveal',
     PERSIST_ASSISTANT_MESSAGE: 'agents:persistAssistantMessage',
     ON_EVENT:    (id: string) => `agent:${id}:event`,

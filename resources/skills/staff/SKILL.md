@@ -8,7 +8,7 @@ For each unit of work:
 
 1. **Check existing project staff.** Read the project's roster — the staff bound to your project are visible via the right-sidebar's Roster/Team section and via `overview.team[]` / `agents:getProjects`. Look for an existing agent whose role + skills match the unit.
 2. **If a fit exists, hand off.** Send the work to that agent's inbox with `agents:ask-member` (or your project chat primitive). Include: the unit's task, any inputs the agent needs (files, prior context), the definition of done, and the deadline.
-3. **If no fit exists, spawn.** Use the spawn tool with the marketplace template that best matches the role (e.g. `spawn_agent({ template: 'research', name: 'AI Competitor Researcher', role: '...' })`). The new agent is auto-bound to your project — you do not need to relink.
+3. **If no fit exists, spawn.** Use `general-worker` unless a specialized marketplace template is clearly a better fit (e.g. `spawn_agent({ template: 'general-worker', name: 'Implementation Worker', role: '...' })`). The worker is auto-bound and started for this project.
 4. **Reflect.** After spawning, update `overview.team[]` to include the new staff, and append to `activity[]` so the right sidebar reflects the change.
 
 ## Handoff etiquette

@@ -90,9 +90,10 @@ export function installTemplates(): InstallTemplatesResult {
 	let skipped = 0
 
 	const entries = readdirSync(sourceDir).filter((name) => name.endsWith('.json'))
-	for (const entry of entries) {
-		const sourceFile = join(sourceDir, entry)
-		const destinationFile = join(destinationDir, entry)
+	const generalWorkerSource = join(sourceDir, '..', 'agent-profiles', 'general-worker.json')
+	const bundled = entries.map((entry) => ({ sourceFile: join(sourceDir, entry), destinationFile: join(destinationDir, entry) }))
+	if (existsSync(generalWorkerSource)) bundled.push({ sourceFile: generalWorkerSource, destinationFile: join(destinationDir, 'general-worker.json') })
+	for (const { sourceFile, destinationFile } of bundled) {
 
 		if (existsSync(destinationFile)) {
 			skipped += 1

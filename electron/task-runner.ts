@@ -30,6 +30,8 @@ import { getUserDataPath } from '../src/storage/database'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { GENERAL_KAI_DIR } from './install-general-kai'
+import { mkdir, rename, writeFile } from 'node:fs/promises'
+import { parseWorkPacket } from '../src/models/work-packet'
 
 const TICK_MS = 5_000
 const STALE_MS = 10 * 60 * 1000  // 10 minutes before auto-retry
@@ -54,18 +56,17 @@ export interface TaskRunnerOpts {
   staleMs?: number
 }
 
-export function buildTaskPrompt(opts: {
-  taskId: string
-  title: string
-  description?: string
-  projectName: string
-}): string {
-  return [
-    `Task ${opts.taskId}: ${opts.title}`,
-    `Project: ${opts.projectName}`,
-    '',
-    opts.description ?? '',
-  ].join('\n')
+export function buildTaskPrompt(taskId: string): string { return `Assignment ${taskId} is ready. Call read_current_assignment, execute its loop, and report through project side chat.` }
+
+async function writeAssignment(agentDir: string, taskId: string, packet: unknown): Promise<void> {
+  const assignments = join(agentDir, 'assignments')
+  await mkdir(assignments, { recursive: true })
+  const write = async (file: string, value: unknown) => {
+    const target = join(assignments, file); const temp = `${target}.${process.pid}.${Date.now()}.tmp`
+    await writeFile(temp, JSON.stringify(value, null, '\t') + '\n', 'utf8'); await rename(temp, target)
+  }
+  await write(`${taskId}.json`, packet)
+  await write('current.json', { taskId })
 }
 
 async function loadProjects(): Promise<Array<{ id: string; name: string; localPath?: string }>> {
@@ -180,12 +181,10 @@ export class TaskRunner {
     if (!this.runtime.isRunning(agent.id)) {
       await this.runtime.start(agent.id, agent.localPath, GENERAL_KAI_DIR)
     }
-    const prompt = buildTaskPrompt({
-      taskId: ready.id,
-      title: ready.title,
-      description: ready.description,
-      projectName: project.name,
-    })
+    const packet = parseWorkPacket(ready.context, ready.id, project.id, agent.id)
+    if (!packet) { log.warn(`[task-runner] task ${ready.id} has no valid work packet; skipping`); return }
+    await writeAssignment(agent.localPath, ready.id, packet)
+    const prompt = buildTaskPrompt(ready.id)
     const sent = this.runtime.send(agent.id, prompt)
     if (sent) {
       await TaskRepository.changeStatus(ready.id, 'running', { staleSince: Date.now() })

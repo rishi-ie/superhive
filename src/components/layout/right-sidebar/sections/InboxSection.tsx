@@ -1,4 +1,7 @@
+import * as React from 'react'
 import { Icon } from '@/components/ui/icon'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { TrayIcon, CheckIcon, XIcon, FileTextIcon } from '@phosphor-icons/react'
 import type { InboxItemRaw } from '@/flows/agents/settings/use-agent-inbox'
 import { useAgentInbox } from '@/flows/agents/settings'
@@ -56,10 +59,14 @@ function PlanBadge({ payload }: { payload: unknown }) {
 function ItemRow({
 	item,
 	onMarkRead,
+	onAnswer,
 }: {
 	item: InboxItemRaw
 	onMarkRead: (id: string, answeredWith?: unknown) => void
+	onAnswer: (id: string, answer: string) => void
 }) {
+	const [answer, setAnswer] = React.useState('')
+	const clarification = item.payload?.kind === 'worker-clarification'
 	const severityClass =
 		item.severity === 'error'
 			? 'border-destructive/30 bg-destructive/5'
@@ -87,6 +94,7 @@ function ItemRow({
 			</div>
 			{item.status === 'pending' && (
 				<div className="flex items-center gap-2">
+					{clarification && <><Textarea value={answer} onChange={(event) => setAnswer(event.target.value)} placeholder="Answer for the project agent" className="flex-1" /><Button type="button" variant="outline" size="sm" disabled={!answer.trim()} onClick={() => onAnswer(item.id, answer)}>Send answer</Button></>}
 					<button
 						type="button"
 						className="flex items-center gap-1 rounded-md border border-border/40 bg-background/40 px-2 py-1 text-xs text-foreground/80 hover:bg-background/60"
@@ -113,6 +121,7 @@ function ItemRow({
 
 export function InboxSection({ agentId, projectName }: InboxSectionProps) {
 	const { items, isLoading, markRead, clear, reload } = useAgentInbox(agentId)
+	const answer = (id: string, value: string) => { if (agentId) void window.api.agents.answerInboxQuestion(agentId, id, value).then(() => reload()) }
 
 	if (!agentId) {
 		return (
@@ -171,14 +180,14 @@ export function InboxSection({ agentId, projectName }: InboxSectionProps) {
 				</div>
 			</div>
 			{pending.map((item) => (
-				<ItemRow key={item.id} item={item} onMarkRead={markRead} />
+				<ItemRow key={item.id} item={item} onMarkRead={markRead} onAnswer={answer} />
 			))}
 			{rest.length > 0 && (
 				<details className="text-xs text-muted-foreground">
 					<summary className="cursor-pointer py-1">Past items ({rest.length})</summary>
 					<div className="flex flex-col gap-2 pt-2">
 						{rest.map((item) => (
-							<ItemRow key={item.id} item={item} onMarkRead={markRead} />
+							<ItemRow key={item.id} item={item} onMarkRead={markRead} onAnswer={answer} />
 						))}
 					</div>
 				</details>

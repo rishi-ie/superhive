@@ -29,6 +29,7 @@ import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 import { resolvePlanExtensionPath } from '../install-plan'
+import { appendProjectChat } from '../mailbox-store'
 import {
 	installProjectAgentSkills,
 	BUNDLED_SKILL_NAMES,
@@ -794,6 +795,27 @@ export function registerAgentIpc(): void {
 		},
 	)
 
+	ipcMain.handle(IPC.AGENTS.ANSWER_INBOX_QUESTION, async (_e, agentId: string, inboxId: string, answer: string) => {
+		if (!answer.trim()) throw new Error('An answer is required')
+		const agent = await AgentRepository.getById(agentId)
+		if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+		const filePath = inboxFilePathFor(agent.localPath)
+		const current = JSON.parse(await readFile(filePath, 'utf8')) as { items?: Array<Record<string, unknown>>; managedBy?: string }
+		const items = Array.isArray(current.items) ? current.items.slice() : []
+		const index = items.findIndex((item) => item.id === inboxId)
+		if (index < 0) throw new Error('Inbox question not found')
+		const item = items[index]!
+		if (item.status === 'answered') return { ok: true, alreadyAnswered: true }
+		const payload = item.payload as { kind?: string; chatMessageId?: string; taskId?: string } | undefined
+		if (payload?.kind !== 'worker-clarification') throw new Error('Inbox item is not a worker clarification')
+		items[index] = { ...item, status: 'answered', answeredWith: answer.trim(), updatedAt: new Date().toISOString() }
+		await writeFile(filePath, JSON.stringify({ ...current, items, managedBy: `superhive-pi-truth@1#${parseCounter(current.managedBy) + 1}`, lastModified: new Date().toISOString() }, null, '\t') + '\n', 'utf8')
+		const manage = JSON.parse(await readFile(manageFilePathFor(agent.localPath), 'utf8')) as { project?: { localPath?: string } }
+		if (manage.project?.localPath) appendProjectChat(join(manage.project.localPath, 'agent'), { id: crypto.randomUUID(), ts: Date.now(), role: 'user', parts: [{ type: 'text', text: answer.trim() }], kind: 'request', refMessageId: payload.chatMessageId })
+		runtime.send(agentId, { text: `[user clarification] ${answer.trim()} (task=${payload.taskId ?? 'unknown'}). Read the project chat and reply to the worker with ask_member.` })
+		return { ok: true }
+	})
+
 	ipcMain.handle(
 		IPC.AGENTS.CLEAR_INBOX,
 		async (_e, agentId: string, status?: string) => {
@@ -877,6 +899,13 @@ export function registerAgentIpc(): void {
 			if (!input?.renderedTemplate || typeof input.renderedTemplate !== 'object') {
 				throw new Error('renderedTemplate is required and must be an object')
 			}
+			const template = input.renderedTemplate as Record<string, unknown>
+			const templateExtensions = Array.isArray(template.extensions) ? template.extensions.filter((value): value is string => typeof value === 'string') : []
+			const extensionNames = templateExtensions.map((value) => value.replace(/^\.\/extensions\//, ''))
+			const allowedExtensions = new Set([SUPERHIVE_PI_TRUTH_NAME, SUPERHIVE_PI_TELEMETRY_NAME, SUPERHIVE_PI_ORCHESTRATION_NAME])
+			if (!extensionNames.length || extensionNames.some((name) => !allowedExtensions.has(name))) {
+				throw new Error('spawn-from-template: template declares unsupported extensions')
+			}
 
 			// Defense-in-depth: re-validate the spawner is a project
 			// coordinator. The spawn ext's gate is upstream; we re-check
@@ -894,6 +923,10 @@ export function registerAgentIpc(): void {
 					`Spawner ${input.spawnerAgentId} is not bound to project ${input.projectId}; refusing to spawn`,
 				)
 			}
+			if (!spawner.localPath) throw new Error(`Spawner ${input.spawnerAgentId} has no localPath`)
+			const spawnerManage = JSON.parse(await readFile(manageFilePathFor(spawner.localPath), 'utf8')) as { project?: Record<string, unknown> }
+			const projectBlock = spawnerManage.project
+			if (!projectBlock || projectBlock.coordinatorAgentId !== spawner.id) throw new Error('spawn-from-template: spawner has no valid coordinator project block')
 
 			// Extract a usable agent name. Priority: caller override →
 			// template.identity.name → error (no nameable agent).
@@ -925,17 +958,14 @@ export function registerAgentIpc(): void {
 			await mkdir(join(agentDir, 'extensions'), { recursive: true })
 			log.info(`[agents:spawn-from-template] creating agent dir ${agentDir}`)
 
-			// Copy agent.sh + symlink truth + telemetry ONLY.
-			// Spawned agents are regular agents, NOT project
-			// coordinators — they don't get context, orch, or plan.
+			// Materialize only the extensions explicitly declared by the bundled profile.
 			ensureGeneralKai()
 			await cp(join(GENERAL_KAI_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
 			await chmod(join(agentDir, 'agent.sh'), 0o755)
 
-			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL })
-			symlinkSync(extensionSource, join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME), 'dir')
-			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL })
-			symlinkSync(telemetrySource, join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME), 'dir')
+			if (extensionNames.includes(SUPERHIVE_PI_TRUTH_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL }), join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME), 'dir')
+			if (extensionNames.includes(SUPERHIVE_PI_TELEMETRY_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL }), join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME), 'dir')
+			if (extensionNames.includes(SUPERHIVE_PI_ORCHESTRATION_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_ORCHESTRATION_NAME, { kind: 'local', path: resolveOrchestrationExtensionPath(process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH) }), join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME), 'dir')
 
 			// Create the Agent row first so we have an id to thread
 			// into the manage.json seed and any post-write cascades.
@@ -946,7 +976,7 @@ export function registerAgentIpc(): void {
 			const agent = await AgentRepository.create({
 				name: baseName,
 				role,
-				description: typeof tplIdentity.name === 'string' ? tplIdentity.name : undefined,
+					description: typeof template.description === 'string' ? template.description : undefined,
 				localPath: agentDir,
 				status: 'idle',
 				// agentKind: undefined — spawned agents are regular, not coordinators
@@ -959,10 +989,7 @@ export function registerAgentIpc(): void {
 					superhiveId: agent.id,
 					version: 1,
 					workspace: './workspace',
-					extensions: [
-						'./extensions/superhive-pi-truth',
-						'./extensions/superhive-pi-telemetry',
-					],
+					extensions: extensionNames.map((name) => `./extensions/${name}`),
 				},
 				null,
 				2,
@@ -982,6 +1009,7 @@ export function registerAgentIpc(): void {
 					defaultModel: topModel.name,
 					enabledModels: [topModel.id],
 				}),
+				...(typeof template.systemPrompt === 'string' && { systemPrompt: template.systemPrompt }),
 			}
 			await writeFile(
 				settingsFilePathFor(agentDir),
@@ -1017,16 +1045,14 @@ export function registerAgentIpc(): void {
 					autoRetry: tplBehavior.autoRetry !== false,
 				},
 				skills: tplSkills,
-				extensions: [
-					'./extensions/superhive-pi-truth',
-					'./extensions/superhive-pi-telemetry',
-				],
+				extensions: extensionNames.map((name) => `./extensions/${name}`),
 				prompts: [],
 				packages: [],
 				themes: [],
 				// spawner-bound: the spawned agent carries the spawner's
 				// project id so it shows up in project rosters.
 				projectIds: [input.projectId],
+				project: projectBlock,
 			}
 			await writeFile(
 				manageFilePathFor(agentDir),
@@ -1075,6 +1101,27 @@ export function registerAgentIpc(): void {
 			// assignToProject post-create.
 			await AgentRepository.assignToProject(agent.id, input.projectId)
 
+			// Add the worker to the coordinator roster before it can receive mail.
+			const coordinatorManage = JSON.parse(await readFile(manageFilePathFor(spawner.localPath), 'utf8')) as Record<string, unknown>
+			const coordinatorProject = coordinatorManage.project as { members?: unknown[] } | undefined
+			if (coordinatorProject) {
+				const members = Array.isArray(coordinatorProject.members) ? coordinatorProject.members : []
+				coordinatorProject.members = [...members, { agentId: agent.id, name: baseName, role, localPath: agentDir, status: 'idle', joinedAt: new Date().toISOString() }]
+				coordinatorManage.project = coordinatorProject
+				await writeFile(manageFilePathFor(spawner.localPath), JSON.stringify({ ...coordinatorManage, lastModified: new Date().toISOString() }, null, '\t') + '\n', 'utf8')
+			}
+
+			try {
+				await runtime.start(agent.id, agentDir, GENERAL_KAI_DIR)
+				await AgentRepository.update(agent.id, { status: 'active', lastError: undefined })
+				await patchCoordinatorForMemberStatus(agent.id, 'active')
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err)
+				await AgentRepository.update(agent.id, { status: 'idle', lastError: message })
+				log.error(`[agents:spawn-from-template] failed to start ${agent.id}: ${message}`)
+				return { agentId: agent.id, status: 'idle' }
+			}
+
 			// Notify any listening renderer that a new agent exists.
 			// (Same pattern as agents:create — broadcast on the
 			// window so AgentsListView refreshes.)
@@ -1087,7 +1134,7 @@ export function registerAgentIpc(): void {
 			log.info(
 				`[agents:spawn-from-template] spawned ${agent.id} (${baseName}) bound to project=${input.projectId} from spawner=${input.spawnerAgentId}`,
 			)
-			return { agentId: agent.id, status: 'ready' }
+			return { agentId: agent.id, status: 'active' }
 		},
 	)
 

@@ -61,6 +61,7 @@ export interface AgentsAPI {
 	appendInbox: (id: string, input: { kind: 'notification' | 'permission' | 'question'; message: string; severity?: 'info' | 'warning' | 'error'; payload?: Record<string, unknown> }) => Promise<{ ok: boolean; id: string; writtenVersion: number }>
 	markInboxRead: (id: string, inboxId: string, answeredWith?: unknown) => Promise<{ ok: boolean }>
 	clearInbox: (id: string, status?: 'pending' | 'read' | 'answered' | 'dismissed') => Promise<{ ok: boolean; removed: number }>
+	answerInboxQuestion: (id: string, inboxId: string, answer: string) => Promise<{ ok: boolean; alreadyAnswered?: boolean }>
 	reveal: (id: string) => Promise<{ ok: boolean }>
 	/**
 	 * Renderer-driven assistant-message persistence. Fired on every

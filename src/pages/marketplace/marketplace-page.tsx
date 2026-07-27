@@ -5,6 +5,7 @@ import { useMarketplace } from '@/flows/marketplace'
 import type { MarketplaceItem } from '@/models/marketplace'
 import { FunnelSimpleIcon, MagnifyingGlassIcon } from '@phosphor-icons/react'
 import { MoreHorizontalIcon } from '@hugeicons/core-free-icons'
+import generalWorkerProfile from '../../../resources/agent-profiles/general-worker.json'
 
 type MarketplaceSection = 'plugins' | 'skills' | 'agents'
 type Scope = 'public' | 'personal'
@@ -16,6 +17,7 @@ const copy: Record<MarketplaceSection, { label: string; description: string }> =
 }
 
 const agentDirectory = [
+	{ id: generalWorkerProfile.id, label: generalWorkerProfile.label, description: generalWorkerProfile.description, category: 'Built-in' },
 	{ id: 'developer-agent', label: 'Developer agent', description: 'Plans, builds, and reviews software work.', category: 'Engineering' },
 	{ id: 'research-agent', label: 'Research agent', description: 'Finds sources and produces curated briefs.', category: 'Research' },
 	{ id: 'marketing-agent', label: 'Marketing agent', description: 'Shapes positioning, campaigns, and launch copy.', category: 'Marketing' },
