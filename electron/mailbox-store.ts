@@ -35,7 +35,7 @@ import {
 import { dirname, join } from 'node:path'
 import { writeFile, rename } from 'node:fs/promises'
 import log from 'electron-log/main'
-import type { MailEvent } from '../../superhive-pi-telemetry/types'
+import type { MailEvent } from './mail-types'
 
 // ---------------------------------------------------------------------------
 // Types

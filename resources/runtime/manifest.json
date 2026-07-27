@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "generalKai": {
+    "repository": "https://github.com/rishi-ie/general-kai.git",
+    "ref": "6e257c76a70de2a4acf60f2bc18a44372ad23a2c"
+  },
+  "extensions": {
+    "superhive-pi-truth": "41390ff2732755b50b20f2ca7bdc24563d07372a",
+    "superhive-pi-telemetry": "59abff19e81094fbd3dd0da88bfdf98b37819a8c",
+    "superhive-pi-context": "f9bc31d3f51aa90803ccb0c861512c21fa939c58",
+    "superhive-pi-orchestration": "4723054a313abc412c40a8de8415c4cf16d1e292",
+    "superhive-pi-plan": "103a627a24c51af2fd28058d760fa5b5b3f3c297",
+    "superhive-pi-spawn": "f9c3ad3c156d19315f622c4cec597e5ae65658ac"
+  }
+}

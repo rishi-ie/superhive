@@ -6,15 +6,17 @@ directories:
 files:
   - dist
   - dist-electron
-  - superhive-pi-context/**
-  - superhive-pi-orchestration/**
 asar: true
 afterPack: build/after-pack.cjs
 extraResources:
-  - from: superhive-pi-context
-    to: extensions/superhive-pi-context
-  - from: superhive-pi-orchestration
-    to: extensions/superhive-pi-orchestration
+  - from: resources
+    to: .
+  - from: runtime
+    to: runtime
+  - from: .runtime/general-kai
+    to: runtime/general-kai
+  - from: .runtime/extensions
+    to: runtime/extensions
 mac:
   target:
     - dmg

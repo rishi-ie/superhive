@@ -111,8 +111,8 @@ app.whenReady().then(async () => {
 
   if (!isGeneralKaiReady()) {
     log.warn(
-      '[main] general-kai template not found at ~/.superhive/general-kai-template/\n' +
-      '[main] Agent creation will fail until you run: bun run install:kai',
+      '[main] Prepared Pi runtime is missing.\n' +
+      '[main] Agent creation is disabled until you run: bun run setup',
     )
   }
 

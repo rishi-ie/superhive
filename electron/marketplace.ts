@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto'
-import { cpSync, existsSync, mkdirSync, readFileSync, readlinkSync, renameSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { basename, dirname, join, resolve } from 'node:path'
+import { basename, join, resolve } from 'node:path'
 import { app } from 'electron'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import type { MarketplaceActivationResult, MarketplaceCatalogItem, MarketplaceItem, InstalledMarketplaceItem } from '../src/models/marketplace'
 import { runtime } from './general-kai-runtime'
+import { copyTree } from './agent-assets'
 
 type CatalogFile = { version: number; items: MarketplaceCatalogItem[] }
 type Registry = { version: 1; items: Record<string, InstalledMarketplaceItem> }
@@ -147,7 +148,7 @@ export async function activateMarketplaceItem(agentId: string, id: string): Prom
 	const source = packageDir(item)
 	const reference = isSkill ? `./skills/${id}/SKILL.md` : `./extensions/${id}`
 	const createdLink = !existsSync(target)
-	if (!createdLink && resolve(dirname(target), readlinkSync(target)) !== source) throw new Error(`A different package already occupies ${folder}/${id}`)
+	if (!createdLink && !existsSync(join(target, item.source.entry))) throw new Error(`A different package already occupies ${folder}/${id}`)
 	const managePath = join(agent.localPath, 'manage.json')
 	const manifestPath = join(agent.localPath, 'manifest.json')
 	const previousManage = readJson(managePath)
@@ -155,11 +156,11 @@ export async function activateMarketplaceItem(agentId: string, id: string): Prom
 	try {
 		runtime.ensureSettingsWatcher(agentId, join(agent.localPath, 'settings.json'))
 		mkdirSync(join(agent.localPath, folder), { recursive: true })
-		if (createdLink) symlinkSync(source, target, 'dir')
+		if (createdLink) copyTree(source, target)
 		updateConfig(managePath, isSkill ? 'skills' : 'extensions', reference)
 		if (!isSkill) updateConfig(manifestPath, 'extensions', reference)
 	} catch (error) {
-		if (createdLink && existsSync(target)) unlinkSync(target)
+		if (createdLink && existsSync(target)) rmSync(target, { recursive: true, force: true })
 		writeJsonAtomic(managePath, previousManage)
 		if (!isSkill) writeJsonAtomic(manifestPath, previousManifest)
 		throw error
@@ -170,7 +171,7 @@ export async function activateMarketplaceItem(agentId: string, id: string): Prom
 		await new Promise<void>((resolve) => setTimeout(resolve, 900))
 		const reloaded = runtime.getStatusPayload(agentId)
 		if (!reloaded || reloaded.status === 'idle') {
-			if (createdLink && existsSync(target)) unlinkSync(target)
+			if (createdLink && existsSync(target)) rmSync(target, { recursive: true, force: true })
 			writeJsonAtomic(managePath, previousManage)
 			if (!isSkill) writeJsonAtomic(manifestPath, previousManifest)
 			throw new Error('The agent did not come back after enabling this capability')

@@ -42,7 +42,7 @@ import {
 	type InboxEntry,
 	type MailKind,
 } from '../mailbox-store'
-import type { ProjectBlock } from '../../../superhive-pi-truth/settings-schema'
+import type { ProjectBlock } from '../mail-types'
 
 // ---------------------------------------------------------------------------
 // Public types

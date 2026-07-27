@@ -1,24 +1,19 @@
 /**
  * Local-bundle resolver for superhive-pi-orchestration.
  *
- * Mirrors `install-context.ts`. Unlike superhive-pi-truth and superhive-pi-telemetry
- * (which clone from GitHub), superhive-pi-orchestration is shipped alongside
- * the Superhive repo or as a bundled extraResources entry. This resolver
- * returns the absolute path to use as the extension source.
+ * Mirrors `install-context.ts`. The extension is prepared by `bun run setup`
+ * and copied into each agent.
  *
  * Resolution order:
  *   1. SUPERHIVE_PI_ORCHESTRATION_PATH env var (explicit override)
- *   2. Walk up from cwd looking for `superhive-pi-orchestration` with `index.ts`
- *   3. <resourcesPath>/extensions/superhive-pi-orchestration   (production bundle)
+ *   2. <cwd>/.runtime/extensions/superhive-pi-orchestration (dev bundle)
+ *   3. Walk up from cwd looking for a local development source
+ *   4. <resourcesPath>/runtime/extensions/superhive-pi-orchestration (production)
  *
  * No GitHub clone. No network call. If none of the above resolve, throws —
  * the coordinator agent creation flow must catch and surface the error.
  *
- * Dev convention: the canonical location is the workspace root
- * `superhive-pi-orchestration/` (sibling to `superhive/`). Electron runs from
- * `superhive/`, so the walk-up search resolves `<workspace>/superhive-pi-orchestration`.
- * A `superhive/superhive-pi-orchestration` symlink is also accepted for layouts
- * where the extension lives inside the app dir (matches electron-builder.yml).
+ * The walk-up source is an explicit development fallback for multi-repo workspaces.
  */
 
 import { existsSync } from 'node:fs'
@@ -51,6 +46,9 @@ export function resolveOrchestrationExtensionPath(resourcesPath?: string): strin
 		return resolve(override)
 	}
 
+	const prepared = join(process.cwd(), '.runtime', 'extensions', 'superhive-pi-orchestration')
+	if (hasSentinel(prepared)) return prepared
+
 	const found = walkUp(process.cwd(), 'superhive-pi-orchestration')
 	if (found) return found
 
@@ -59,6 +57,8 @@ export function resolveOrchestrationExtensionPath(resourcesPath?: string): strin
 		'extensions',
 		'superhive-pi-orchestration',
 	)
+	const packaged = join(resourcesPath ?? process.resourcesPath ?? '', 'runtime', 'extensions', 'superhive-pi-orchestration')
+	if (hasSentinel(packaged)) return packaged
 	if (hasSentinel(bundled)) return bundled
 
 	throw new Error(
@@ -67,6 +67,6 @@ export function resolveOrchestrationExtensionPath(resourcesPath?: string): strin
 			`Checked walk-up from cwd (${process.cwd()}): no matching dir\n` +
 			`Checked bundled path: ${bundled}\n` +
 			`Ensure the extension source is available (dev checkout at workspace root, ` +
-			`symlink at superhive/superhive-pi-orchestration, or bundled in extraResources).`,
+			`prepared .runtime bundle or packaged extraResources).`,
 	)
 }

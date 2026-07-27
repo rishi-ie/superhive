@@ -1,19 +1,16 @@
 /**
  * Canonical extension source for Superhive.
  *
- * Extensions are no longer bundled with the app. At runtime, each extension
- * is cloned ONCE to a canonical location (`~/.superhive/extensions/<name>/`)
- * and symlinked into each agent's `extensions/` folder.
+ * Runtime extension sources are prepared once by `bun run setup` and copied
+ * into each agent's `extensions/` folder. Runtime code never clones or
+ * installs an extension.
  *
- * Usage:
- *   const path = ensureExtension('superhive-pi-truth', 'https://github.com/rishi-ie/superhive-pi-truth.git')
- *   // → ~/.superhive/extensions/superhive-pi-truth  (cloned if missing)
+ * Legacy callers may still use `ensureExtension` for local development sources.
  */
 
 import { cpSync, existsSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { execFileSync } from 'node:child_process'
 import log from 'electron-log/main'
 
 export const EXTENSIONS_DIR = join(homedir(), '.superhive', 'extensions')
@@ -23,11 +20,9 @@ export type ExtensionSource =
 	| { kind: 'local'; path: string }
 
 /**
- * Ensure an extension is present at its canonical location.
- * Idempotent: if the canonical dir exists and contains the sentinel file,
- * the existing clone is reused. Otherwise populated from `source`:
- *   - `{ kind: 'git', url }` → `git clone <url> <dir>`
- *   - `{ kind: 'local', path }` → copy directory contents from `path`
+ * Ensure an extension is present at the legacy canonical location.
+ * New agent creation uses `agent-assets.ts` directly; this helper remains
+ * for older callers but intentionally rejects remote sources.
  *
  * @returns absolute path to the canonical extension directory.
  */
@@ -40,17 +35,10 @@ export function ensureExtension(name: string, source: ExtensionSource, sentinel 
 	mkdirSync(EXTENSIONS_DIR, { recursive: true })
 
 	if (source.kind === 'git') {
-		log.info(`[extension-source] ${name} missing, cloning from ${source.url}...`)
-		try {
-			execFileSync('git', ['clone', source.url, dir], { stdio: 'pipe' })
-		} catch (err) {
-			const msg = err instanceof Error ? err.message : String(err)
-			log.error(`[extension-source] git clone failed for ${name}: ${msg}`)
-			throw new Error(
-				`Failed to clone extension "${name}" from ${source.url}.\n` +
-				`Check your network connection and try again.`,
-			)
-		}
+		throw new Error(
+			`Remote extension source rejected for "${name}". ` +
+			`Run "bun run setup" to prepare the pinned local extension bundle.`,
+		)
 	} else {
 		log.info(`[extension-source] ${name} missing, copying from ${source.path}...`)
 		if (!existsSync(join(source.path, sentinel))) {

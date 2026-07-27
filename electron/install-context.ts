@@ -1,24 +1,18 @@
 /**
  * Local-bundle resolver for superhive-pi-context.
  *
- * Unlike superhive-pi-truth and superhive-pi-telemetry (which clone from GitHub),
- * superhive-pi-context is shipped alongside the Superhive repo or as a bundled
- * extraResources entry. This resolver returns the absolute path to use as the
- * extension source.
+ * The extension is prepared by `bun run setup` and copied into each agent.
  *
  * Resolution order:
  *   1. SUPERHIVE_PI_CONTEXT_PATH env var (explicit override)
- *   2. Walk up from cwd looking for `superhive-pi-context` with `index.ts`
- *   3. <resourcesPath>/extensions/superhive-pi-context   (production bundle)
+ *   2. <cwd>/.runtime/extensions/superhive-pi-context (dev bundle)
+ *   3. Walk up from cwd looking for a local development source
+ *   4. <resourcesPath>/runtime/extensions/superhive-pi-context (production)
  *
  * No GitHub clone. No network call. If none of the above resolve, throws —
  * the coordinator agent creation flow must catch and surface the error.
  *
- * Dev convention: the canonical location is the workspace root
- * `superhive-pi-context/` (sibling to `superhive/`). Electron runs from
- * `superhive/`, so the walk-up search resolves `<workspace>/superhive-pi-context`.
- * A `superhive/superhive-pi-context` symlink is also accepted for layouts
- * where the extension lives inside the app dir (matches electron-builder.yml).
+ * The walk-up source is an explicit development fallback for multi-repo workspaces.
  */
 
 import { existsSync } from 'node:fs'
@@ -52,20 +46,26 @@ export function resolveContextExtensionPath(resourcesPath?: string): string {
 		return resolve(override)
 	}
 
-	// 2. Walk up from cwd looking for a `superhive-pi-context` directory
+	// 2. Prefer the prepared bundle so sibling checkouts cannot drift at runtime.
+	const prepared = join(process.cwd(), '.runtime', 'extensions', 'superhive-pi-context')
+	if (hasSentinel(prepared)) return prepared
+
+	// 3. Walk up from cwd looking for a `superhive-pi-context` directory
 	//    that contains `index.ts`. Handles both layouts:
 	//      - cwd = workspace root → finds ./superhive-pi-context
 	//      - cwd = superhive/ → finds ../superhive-pi-context
-	//      - cwd = superhive/ with symlink → finds ./superhive-pi-context
+	//      - cwd = superhive/ with a local development folder → finds ./superhive-pi-context
 	const found = walkUp(process.cwd(), 'superhive-pi-context')
 	if (found) return found
 
-	// 3. Bundled resources (production builds).
+	// 4. Bundled resources (production builds).
 	const bundled = join(
 		resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH ?? '',
 		'extensions',
 		'superhive-pi-context',
 	)
+	const packaged = join(resourcesPath ?? process.resourcesPath ?? '', 'runtime', 'extensions', 'superhive-pi-context')
+	if (hasSentinel(packaged)) return packaged
 	if (hasSentinel(bundled)) return bundled
 
 	throw new Error(
@@ -74,6 +74,6 @@ export function resolveContextExtensionPath(resourcesPath?: string): string {
 			`Checked walk-up from cwd (${process.cwd()}): no matching dir\n` +
 			`Checked bundled path: ${bundled}\n` +
 			`Ensure the extension source is available (dev checkout at workspace root, ` +
-			`symlink at superhive/superhive-pi-context, or bundled in extraResources).`,
+			`prepared .runtime bundle or packaged extraResources).`,
 	)
 }

@@ -79,9 +79,9 @@ function writeManifestSuperhiveId(agentDir: string, id: string): void {
   }
   parsed.superhiveId = id
   writeFileSync(manifestPath, JSON.stringify(parsed, null, 2) + '\n', 'utf8')
-  // Keep the agent.json → manifest.json symlink consistent. Symlinks created
-  // by the agent-create IPC mirror the file content via symlink, so writing
-  // the canonical path covers both.
+  // Keep the legacy agent.json compatibility file in sync with manifest.json.
+  // Agent creation copies this file instead of creating a symlink so the same
+  // layout works on Windows without Developer Mode or elevated privileges.
 }
 
 function readSettingsName(agentDir: string, fallback: string): string {

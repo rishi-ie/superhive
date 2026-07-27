@@ -5,7 +5,12 @@ import renderer from 'vite-plugin-electron-renderer';
 import { join } from 'path';
 
 export default defineConfig({
-  plugins: [
+	server: {
+		host: '127.0.0.1',
+		port: 5173,
+		strictPort: false,
+	},
+	plugins: [
     react(),
     electron([
       {

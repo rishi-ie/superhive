@@ -16,6 +16,7 @@ import { manageFilePathFor } from '../agent-settings-defaults';
 import log from 'electron-log/main';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
 import { tasksFileWatcher } from '../tasks-file-watcher';
+import { expandHome } from '../path-utils';
 
 export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
@@ -33,8 +34,7 @@ export function registerProjectIpc(): void {
 
       const requestedPath = data.localPath?.trim();
       const defaultFolder = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
-      const localPath = (requestedPath ?? join(homedir(), '.superhive', 'projects', defaultFolder))
-        .replace(/^~(?=\/|$)/, process.env.HOME ?? homedir());
+      const localPath = expandHome(requestedPath ?? join(homedir(), '.superhive', 'projects', defaultFolder));
       await mkdir(localPath, { recursive: true });
       if (!existsSync(localPath)) {
         throw new Error(`Failed to create project folder: ${localPath}`);

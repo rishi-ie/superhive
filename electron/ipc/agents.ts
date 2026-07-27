@@ -1,18 +1,16 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
-import { mkdir, cp, writeFile, chmod, rename, readFile } from 'node:fs/promises'
-import { existsSync, symlinkSync } from 'node:fs'
+import { mkdir, cp, writeFile, rename, readFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { rm } from 'node:fs/promises'
 import { basename, join } from 'node:path'
 import type { ComposerAttachment } from '../../src/models/assistant-message'
 import log from 'electron-log/main'
 import { runtime } from '../general-kai-runtime'
-import { ensureExtension } from '../extension-source'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository'
 import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
 import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
-import { config } from '../config'
 import { chatFilePath, readAll as getAgentChatMessages } from '../agent-chat-store'
 import {
 	type SettingsFile,
@@ -30,6 +28,13 @@ import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 import { resolvePlanExtensionPath } from '../install-plan'
 import { appendProjectChat } from '../mailbox-store'
+import { expandHome } from '../path-utils'
+import {
+	installAgentExtension,
+	installAgentLaunchers,
+	installBundledExtension,
+	installManifestAlias,
+} from '../agent-assets'
 import {
 	installProjectAgentSkills,
 	BUNDLED_SKILL_NAMES,
@@ -81,9 +86,7 @@ function deepMerge<T>(base: T, overrides: unknown): T {
 }
 
 const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
-const SUPERHIVE_PI_TRUTH_URL = 'https://github.com/rishi-ie/superhive-pi-truth.git'
 const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
-const SUPERHIVE_PI_TELEMETRY_URL = 'https://github.com/rishi-ie/superhive-pi-telemetry.git'
 const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
 const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
 const SUPERHIVE_PI_PLAN_NAME = 'superhive-pi-plan'
@@ -175,7 +178,7 @@ export function registerAgentIpc(): void {
 					`Invalid folder name "${rawFolderName}" — cannot be empty, ".", "..", or contain path separators`,
 				)
 			}
-			const parentDir = data.parentDir.trim().replace(/^~(?=\/|$)/, process.env.HOME ?? '')
+			const parentDir = expandHome(data.parentDir.trim())
 
 			await mkdir(parentDir, { recursive: true })
 
@@ -188,21 +191,9 @@ export function registerAgentIpc(): void {
 			await mkdir(agentDir, { recursive: true })
 			await mkdir(join(agentDir, 'extensions'), { recursive: true })
 
-			// Copy agent.sh from the pre-installed template
-			await cp(join(GENERAL_KAI_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
-			await chmod(join(agentDir, 'agent.sh'), 0o755)
-
-			// Ensure the extension is cloned to its canonical location, then symlink
-			// it into the agent's extensions folder (zero copy, always fresh).
-			const extensionSource = ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL })
-			const extLink = join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME)
-			symlinkSync(extensionSource, extLink, 'dir')
-			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TRUTH_NAME} from canonical clone`)
-
-			const telemetrySource = ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL })
-			const telemetryLink = join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME)
-			symlinkSync(telemetrySource, telemetryLink, 'dir')
-			log.info(`[agents:create] symlinked ${SUPERHIVE_PI_TELEMETRY_NAME} from canonical clone`)
+			installAgentLaunchers(agentDir)
+			installAgentExtension(agentDir, SUPERHIVE_PI_TRUTH_NAME, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
+			installAgentExtension(agentDir, SUPERHIVE_PI_TELEMETRY_NAME, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
 
 			const agent = await AgentRepository.create({
 				name: data.name.trim(),
@@ -243,13 +234,8 @@ export function registerAgentIpc(): void {
 					log.error(`[agents:create] coordinator context extension missing: ${err instanceof Error ? err.message : String(err)}`)
 					throw err
 				}
-				const contextSource = ensureExtension(SUPERHIVE_PI_CONTEXT_NAME, {
-					kind: 'local',
-					path: contextSourcePath,
-				})
 				const contextLink = join(agentDir, 'extensions', SUPERHIVE_PI_CONTEXT_NAME)
-				symlinkSync(contextSource, contextLink, 'dir')
-				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_CONTEXT_NAME} from local bundle`)
+				installBundledExtension(contextSourcePath, contextLink)
 
 				baseManifestExtensions.push('./extensions/superhive-pi-context')
 				baseSettingsExtensions.push('./extensions/superhive-pi-context')
@@ -266,13 +252,8 @@ export function registerAgentIpc(): void {
 					log.error(`[agents:create] coordinator orchestration extension missing: ${err instanceof Error ? err.message : String(err)}`)
 					throw err
 				}
-				const orchestrationSource = ensureExtension(SUPERHIVE_PI_ORCHESTRATION_NAME, {
-					kind: 'local',
-					path: orchestrationSourcePath,
-				})
 				const orchestrationLink = join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME)
-				symlinkSync(orchestrationSource, orchestrationLink, 'dir')
-				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_ORCHESTRATION_NAME} from local bundle`)
+				installBundledExtension(orchestrationSourcePath, orchestrationLink)
 
 				baseManifestExtensions.push('./extensions/superhive-pi-orchestration')
 				baseSettingsExtensions.push('./extensions/superhive-pi-orchestration')
@@ -289,13 +270,8 @@ export function registerAgentIpc(): void {
 					log.error(`[agents:create] coordinator plan extension missing: ${err instanceof Error ? err.message : String(err)}`)
 					throw err
 				}
-				const planSource = ensureExtension(SUPERHIVE_PI_PLAN_NAME, {
-					kind: 'local',
-					path: planSourcePath,
-				})
 				const planLink = join(agentDir, 'extensions', SUPERHIVE_PI_PLAN_NAME)
-				symlinkSync(planSource, planLink, 'dir')
-				log.info(`[agents:create] symlinked ${SUPERHIVE_PI_PLAN_NAME} from local bundle`)
+				installBundledExtension(planSourcePath, planLink)
 
 				baseManifestExtensions.push('./extensions/superhive-pi-plan')
 				baseSettingsExtensions.push('./extensions/superhive-pi-plan')
@@ -335,28 +311,21 @@ export function registerAgentIpc(): void {
 				}
 			}
 
-			// Minimal manifest — just enough for agent.sh --manifest to load Pi and the extension.
-			// environment.MINIMAX_API_KEY is included so the agent has API access at first launch.
+			// Minimal manifest — the user can select a provider and configure credentials
+			// from Manage/settings. Agent creation must not require a provider key.
 			const manifestContent = JSON.stringify(
 				{
 					superhiveId: agent.id,
 					version: 1,
 					workspace: './workspace',
 					extensions: baseManifestExtensions,
-					environment: {
-						MINIMAX_API_KEY: config.minimaxApiKey,
-					},
 				},
 				null,
 				2,
 			) + '\n'
 			await writeFile(join(agentDir, 'manifest.json'), manifestContent, 'utf8')
 
-			// Symlink agent.json → manifest.json so agent.sh's legacy --manifest flag
-			// resolves to the populated manifest. This avoids agent.sh's first-run
-			// bootstrap writing an empty default over our manifest.
-			symlinkSync('manifest.json', join(agentDir, 'agent.json'))
-			log.info(`[agents:create] symlinked agent.json → manifest.json`)
+			installManifestAlias(agentDir)
 
 			// Seed the four truth files. The legacy file (settings.json only
 			// with a merged shape) is gone — each new agent boots into the
@@ -948,7 +917,7 @@ export function registerAgentIpc(): void {
 
 			// Spawned agents live at ~/.superhive/agents/<folderName>
 			// (same parent as create).
-			const parentDir = join(process.env.HOME ?? '', '.superhive', 'agents')
+			const parentDir = join(expandHome('~'), '.superhive', 'agents')
 			const agentDir = join(parentDir, folderName)
 			if (existsSync(agentDir)) {
 				throw new Error(`Spawned agent folder already exists: ${agentDir}`)
@@ -960,12 +929,17 @@ export function registerAgentIpc(): void {
 
 			// Materialize only the extensions explicitly declared by the bundled profile.
 			ensureGeneralKai()
-			await cp(join(GENERAL_KAI_DIR, 'agent.sh'), join(agentDir, 'agent.sh'))
-			await chmod(join(agentDir, 'agent.sh'), 0o755)
-
-			if (extensionNames.includes(SUPERHIVE_PI_TRUTH_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_TRUTH_NAME, { kind: 'git', url: SUPERHIVE_PI_TRUTH_URL }), join(agentDir, 'extensions', SUPERHIVE_PI_TRUTH_NAME), 'dir')
-			if (extensionNames.includes(SUPERHIVE_PI_TELEMETRY_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_TELEMETRY_NAME, { kind: 'git', url: SUPERHIVE_PI_TELEMETRY_URL }), join(agentDir, 'extensions', SUPERHIVE_PI_TELEMETRY_NAME), 'dir')
-			if (extensionNames.includes(SUPERHIVE_PI_ORCHESTRATION_NAME)) symlinkSync(ensureExtension(SUPERHIVE_PI_ORCHESTRATION_NAME, { kind: 'local', path: resolveOrchestrationExtensionPath(process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH) }), join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME), 'dir')
+			installAgentLaunchers(agentDir)
+			for (const extensionName of extensionNames) {
+				if (extensionName === SUPERHIVE_PI_ORCHESTRATION_NAME) {
+					installBundledExtension(
+						resolveOrchestrationExtensionPath(process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH),
+						join(agentDir, 'extensions', extensionName),
+					)
+				} else {
+					installAgentExtension(agentDir, extensionName, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
+				}
+			}
 
 			// Create the Agent row first so we have an id to thread
 			// into the manage.json seed and any post-write cascades.
@@ -995,7 +969,7 @@ export function registerAgentIpc(): void {
 				2,
 			) + '\n'
 			await writeFile(join(agentDir, 'manifest.json'), manifestContent, 'utf8')
-			symlinkSync('manifest.json', join(agentDir, 'agent.json'))
+			installManifestAlias(agentDir)
 
 			// Seed settings.json with a top model.
 			const topModel = await getTopEnabledModel()
