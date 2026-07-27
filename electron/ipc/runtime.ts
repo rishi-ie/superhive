@@ -14,7 +14,6 @@ import { manageFilePathFor } from '../agent-settings-defaults'
 import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { mailboxWatcher } from '../mailbox-watcher'
 import { mergeProviders, normalizeRuntimeSettings, type ProviderConfig } from '../provider-merge'
-import { installAgentExtension } from '../agent-assets'
 
 const providerReseeds = new Map<string, Promise<void>>()
 
@@ -169,10 +168,6 @@ export async function startManagedAgent(agentId: string): Promise<void> {
 	if (!agent?.localPath) throw new Error(`Agent not found or missing localPath: ${agentId}`)
 	await ensureRuntimePrepared()
 	ensureGeneralKai()
-	// Core extensions are app-managed. Refresh truth before every launch so
-	// existing agents receive bundled protocol/provider compatibility fixes
-	// without touching their settings, workspace, or credentials.
-	installAgentExtension(agent.localPath, 'superhive-pi-truth', process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
 	await autoSeedProviders(agentId, agent.localPath)
 	await runtime.start(agentId, agent.localPath, getGeneralKaiDir())
 	await watchMailbox(agentId, agent.localPath)

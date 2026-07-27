@@ -25,22 +25,23 @@ import {
 import { revealInFinder } from './reveal-in-finder'
 import { getTopEnabledModel } from '../get-top-enabled-model'
 import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
-import { resolveContextExtensionPath } from '../install-context'
-import { resolveOrchestrationExtensionPath } from '../install-orchestration'
-import { resolvePlanExtensionPath } from '../install-plan'
 import { appendProjectChat } from '../mailbox-store'
-import { startManagedAgent } from './runtime'
 import { expandHome } from '../path-utils'
 import {
-	installAgentExtension,
 	installAgentLaunchers,
-	installBundledExtension,
 	installManifestAlias,
 } from '../agent-assets'
 import {
 	installProjectAgentSkills,
 	BUNDLED_SKILL_NAMES,
 } from '../install-project-agent-skills'
+import {
+	extensionReferences,
+	extensionSettings,
+	extensionReference,
+	extensionsForProfile,
+	type AgentProfile,
+} from '../agent-profile'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -87,11 +88,6 @@ function deepMerge<T>(base: T, overrides: unknown): T {
 	return result as T
 }
 
-const SUPERHIVE_PI_TRUTH_NAME = 'superhive-pi-truth'
-const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
-const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
-const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
-const SUPERHIVE_PI_PLAN_NAME = 'superhive-pi-plan'
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
 
 interface CreateAgentInput {
@@ -196,11 +192,8 @@ export function registerAgentIpc(): void {
 
 			log.info(`[agents:create] creating agent dir ${agentDir}`)
 			await mkdir(agentDir, { recursive: true })
-			await mkdir(join(agentDir, 'extensions'), { recursive: true })
 
 			installAgentLaunchers(agentDir)
-			installAgentExtension(agentDir, SUPERHIVE_PI_TRUTH_NAME, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
-			installAgentExtension(agentDir, SUPERHIVE_PI_TELEMETRY_NAME, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
 
 			const agent = await AgentRepository.create({
 				name: data.name.trim(),
@@ -223,65 +216,18 @@ export function registerAgentIpc(): void {
 			if (isCoordinator && data.projectId && !canonicalProject) {
 				throw new Error(`Project not found while creating coordinator: ${data.projectId}`)
 			}
-			const baseManifestExtensions: string[] = [
-				'./extensions/superhive-pi-truth',
-				'./extensions/superhive-pi-telemetry',
-			]
-			const baseSettingsExtensions: string[] = [
-				'./extensions/superhive-pi-truth',
-				'./extensions/superhive-pi-telemetry',
-			]
+			const profile: AgentProfile = isCoordinator ? 'project-coordinator' : 'standard'
+			const profileExtensions = extensionsForProfile(profile)
+			const baseManifestExtensions = extensionReferences(
+				profileExtensions,
+				process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
+			)
+			const baseSettingsExtensions = extensionSettings(profileExtensions)
 			if (isCoordinator) {
-				let contextSourcePath: string
-				try {
-					contextSourcePath = resolveContextExtensionPath(
-						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
-					)
-				} catch (err) {
-					log.error(`[agents:create] coordinator context extension missing: ${err instanceof Error ? err.message : String(err)}`)
-					throw err
-				}
-				const contextLink = join(agentDir, 'extensions', SUPERHIVE_PI_CONTEXT_NAME)
-				installBundledExtension(contextSourcePath, contextLink)
-
-				baseManifestExtensions.push('./extensions/superhive-pi-context')
-				baseSettingsExtensions.push('./extensions/superhive-pi-context')
-
-				// Gap 1: wire superhive-pi-orchestration (coordinator-only).
-				// Resolved from local bundle — same pattern as superhive-pi-context.
-				// See electron/install-orchestration.ts for the walk-up resolver.
-				let orchestrationSourcePath: string
-				try {
-					orchestrationSourcePath = resolveOrchestrationExtensionPath(
-						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
-					)
-				} catch (err) {
-					log.error(`[agents:create] coordinator orchestration extension missing: ${err instanceof Error ? err.message : String(err)}`)
-					throw err
-				}
-				const orchestrationLink = join(agentDir, 'extensions', SUPERHIVE_PI_ORCHESTRATION_NAME)
-				installBundledExtension(orchestrationSourcePath, orchestrationLink)
-
-				baseManifestExtensions.push('./extensions/superhive-pi-orchestration')
-				baseSettingsExtensions.push('./extensions/superhive-pi-orchestration')
-
-				// Plan extension: coordinator-only. Resolved from local bundle —
-				// same pattern as superhive-pi-orchestration above. See
-				// electron/install-plan.ts for the walk-up resolver.
-				let planSourcePath: string
-				try {
-					planSourcePath = resolvePlanExtensionPath(
-						process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
-					)
-				} catch (err) {
-					log.error(`[agents:create] coordinator plan extension missing: ${err instanceof Error ? err.message : String(err)}`)
-					throw err
-				}
-				const planLink = join(agentDir, 'extensions', SUPERHIVE_PI_PLAN_NAME)
-				installBundledExtension(planSourcePath, planLink)
-
-				baseManifestExtensions.push('./extensions/superhive-pi-plan')
-				baseSettingsExtensions.push('./extensions/superhive-pi-plan')
+				const contextSourcePath = extensionReference(
+					'superhive-pi-context',
+					process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH,
+				)
 
 				await mkdir(join(agentDir, 'context', 'nodes'), { recursive: true })
 				await mkdir(join(agentDir, 'context', '.lock'), { recursive: true })
@@ -877,9 +823,11 @@ export function registerAgentIpc(): void {
 			}
 			const template = input.renderedTemplate as Record<string, unknown>
 			const templateExtensions = Array.isArray(template.extensions) ? template.extensions.filter((value): value is string => typeof value === 'string') : []
-			const extensionNames = templateExtensions.map((value) => value.replace(/^\.\/extensions\//, ''))
-			const allowedExtensions = new Set([SUPERHIVE_PI_TRUTH_NAME, SUPERHIVE_PI_TELEMETRY_NAME, SUPERHIVE_PI_ORCHESTRATION_NAME])
-			if (!extensionNames.length || extensionNames.some((name) => !allowedExtensions.has(name))) {
+			const profileExtensions = extensionsForProfile('project-member')
+			const allowedExtensions = new Set<string>(profileExtensions)
+			if (!templateExtensions.length || templateExtensions
+				.map((value) => value.replace(/^\.\/extensions\//, ''))
+				.some((name) => !allowedExtensions.has(name))) {
 				throw new Error('spawn-from-template: template declares unsupported extensions')
 			}
 
@@ -931,23 +879,12 @@ export function registerAgentIpc(): void {
 			}
 			await mkdir(parentDir, { recursive: true })
 			await mkdir(agentDir, { recursive: true })
-			await mkdir(join(agentDir, 'extensions'), { recursive: true })
 			log.info(`[agents:spawn-from-template] creating agent dir ${agentDir}`)
 
-			// Materialize only the extensions explicitly declared by the bundled profile.
+			// Every project member uses the same shared core extension profile.
 			await ensureRuntimePrepared()
 			ensureGeneralKai()
 			installAgentLaunchers(agentDir)
-			for (const extensionName of extensionNames) {
-				if (extensionName === SUPERHIVE_PI_ORCHESTRATION_NAME) {
-					installBundledExtension(
-						resolveOrchestrationExtensionPath(process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH),
-						join(agentDir, 'extensions', extensionName),
-					)
-				} else {
-					installAgentExtension(agentDir, extensionName, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH)
-				}
-			}
 
 			// Create the Agent row first so we have an id to thread
 			// into the manage.json seed and any post-write cascades.
@@ -971,7 +908,7 @@ export function registerAgentIpc(): void {
 					superhiveId: agent.id,
 					version: 1,
 					workspace: './workspace',
-					extensions: extensionNames.map((name) => `./extensions/${name}`),
+					extensions: extensionReferences(profileExtensions, process.resourcesPath ?? process.env.SUPERHIVE_RESOURCES_PATH),
 				},
 				null,
 				2,
@@ -1027,7 +964,7 @@ export function registerAgentIpc(): void {
 					autoRetry: tplBehavior.autoRetry !== false,
 				},
 				skills: tplSkills,
-				extensions: extensionNames.map((name) => `./extensions/${name}`),
+				extensions: extensionSettings(profileExtensions),
 				prompts: [],
 				packages: [],
 				themes: [],
@@ -1093,20 +1030,9 @@ export function registerAgentIpc(): void {
 				await writeFile(manageFilePathFor(spawner.localPath), JSON.stringify({ ...coordinatorManage, lastModified: new Date().toISOString() }, null, '\t') + '\n', 'utf8')
 			}
 
-			let startError: string | undefined
-			try {
-				await startManagedAgent(agent.id)
-			} catch (err) {
-				const message = err instanceof Error ? err.message : String(err)
-				await AgentRepository.update(agent.id, { status: 'idle', lastError: message })
-				log.error(`[agents:spawn-from-template] failed to start ${agent.id}: ${message}`)
-				startError = message
-			}
-
 			// Notify any listening renderer that a new agent exists.
 			// (Same pattern as agents:create — broadcast on the
 			// window so AgentsListView refreshes.)
-			const { BrowserWindow } = await import('electron')
 			const win = BrowserWindow.getAllWindows()[0]
 			if (win && !win.isDestroyed()) {
 				win.webContents.send(IPC.AGENTS.ON_CHANGED, { reason: 'spawned', agentId: agent.id })
@@ -1115,7 +1041,7 @@ export function registerAgentIpc(): void {
 			log.info(
 				`[agents:spawn-from-template] spawned ${agent.id} (${baseName}) bound to project=${input.projectId} from spawner=${input.spawnerAgentId}`,
 			)
-			return { agentId: agent.id, status: startError ? 'idle' : 'active' }
+			return { agentId: agent.id, status: 'ready' }
 		},
 	)
 

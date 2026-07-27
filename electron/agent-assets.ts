@@ -1,20 +1,18 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveExtensionPath, resolveLauncherPath } from './runtime-paths'
+import { resolveLauncherPath } from './runtime-paths'
+import { writeAgentRuntimeReference } from './agent-runtime-reference'
 
-function ignored(path: string): boolean {
-	return /[\\/](?:\.git|node_modules|test|tests)(?:[\\/]|$)/.test(path) || path.endsWith('.DS_Store')
-}
-
+/** Copies user-managed marketplace assets only; core extensions use runtime references. */
 export function copyTree(source: string, destination: string): void {
 	if (!existsSync(source)) throw new Error(`Asset source does not exist: ${source}`)
 	mkdirSync(destination, { recursive: true })
 	for (const entry of readdirSync(source)) {
-		const sourcePath = join(source, entry)
-		if (ignored(sourcePath)) continue
-		const destinationPath = join(destination, entry)
-		if (statSync(sourcePath).isDirectory()) copyTree(sourcePath, destinationPath)
-		else cpSync(sourcePath, destinationPath)
+		if (entry === '.git' || entry === 'node_modules' || entry === '.DS_Store') continue
+		const from = join(source, entry)
+		const to = join(destination, entry)
+		if (statSync(from).isDirectory()) copyTree(from, to)
+		else cpSync(from, to)
 	}
 }
 
@@ -23,18 +21,10 @@ export function installAgentLaunchers(agentDir: string): void {
 		const source = resolveLauncherPath(name)
 		cpSync(source, join(agentDir, name))
 	}
-}
-
-export function installAgentExtension(agentDir: string, name: string, resourcesPath?: string): void {
-	const source = resolveExtensionPath(name, resourcesPath)
-	copyTree(source, join(agentDir, 'extensions', name))
+	writeAgentRuntimeReference(agentDir)
 }
 
 export function installManifestAlias(agentDir: string): void {
 	const manifest = join(agentDir, 'manifest.json')
 	if (existsSync(manifest)) cpSync(manifest, join(agentDir, 'agent.json'))
-}
-
-export function installBundledExtension(source: string, destination: string): void {
-	copyTree(source, destination)
 }

@@ -5,16 +5,10 @@ import { fileURLToPath } from 'node:url'
 import log from 'electron-log/main'
 import { isPackagedApp, runtimeRoot } from './runtime-paths'
 import { RUNTIME_COMPATIBILITY_VERSION } from '../scripts/runtime-compatibility'
+import { loadRuntimeBundleManifest } from './runtime-bundle-manifest'
 
 const PI_ENTRY = ['general-kai', 'pi', 'packages', 'coding-agent', 'dist', 'cli.js']
-const EXTENSIONS = [
-	'superhive-pi-truth',
-	'superhive-pi-telemetry',
-	'superhive-pi-context',
-	'superhive-pi-orchestration',
-	'superhive-pi-plan',
-	'superhive-pi-spawn',
-]
+const EXTENSIONS = Object.keys(loadRuntimeBundleManifest().extensions)
 
 let preparing: Promise<void> | null = null
 

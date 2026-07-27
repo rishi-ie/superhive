@@ -2,21 +2,19 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFile
 import { execFileSync } from 'node:child_process'
 import { join, resolve } from 'node:path'
 import { applyRuntimeCompatibility, RUNTIME_COMPATIBILITY_VERSION } from './runtime-compatibility'
+import { loadRuntimeBundleManifest } from '../electron/runtime-bundle-manifest'
 
 const root = resolve(import.meta.dir, '..')
 const runtimeRoot = process.env.SUPERHIVE_RUNTIME_DIR
 	? resolve(process.env.SUPERHIVE_RUNTIME_DIR)
 	: join(root, '.runtime')
-const generalKaiRef = '6e257c76a70de2a4acf60f2bc18a44372ad23a2c'
-
-const extensionSpecs = [
-	['superhive-pi-truth', 'https://github.com/rishi-ie/superhive-pi-truth.git', '41390ff2732755b50b20f2ca7bdc24563d07372a'],
-	['superhive-pi-telemetry', 'https://github.com/rishi-ie/superhive-pi-telemetry.git', '59abff19e81094fbd3dd0da88bfdf98b37819a8c'],
-	['superhive-pi-context', 'https://github.com/rishi-ie/superhive-pi-context.git', 'f9bc31d3f51aa90803ccb0c861512c21fa939c58'],
-	['superhive-pi-orchestration', 'https://github.com/rishi-ie/superhive-pi-orchestration.git', '4723054a313abc412c40a8de8415c4cf16d1e292'],
-	['superhive-pi-plan', 'https://github.com/rishi-ie/superhive-pi-plan.git', '103a627a24c51af2fd28058d760fa5b5b3f3c297'],
-	['superhive-pi-spawn', 'https://github.com/rishi-ie/superhive-pi-spawn.git', 'f9c3ad3c156d19315f622c4cec597e5ae65658ac'],
-] as const
+const runtimeManifest = loadRuntimeBundleManifest()
+const generalKaiRef = runtimeManifest.generalKai.ref
+const extensionSpecs = Object.entries(runtimeManifest.extensions).map(([name, ref]) => [
+	name,
+	`https://github.com/rishi-ie/${name}.git`,
+	ref,
+] as const)
 
 function command(name: string, args: string[], cwd?: string): string {
 	try {

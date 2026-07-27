@@ -3,30 +3,18 @@ import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, test } from 'bun:test'
-import { installAgentLaunchers, installBundledExtension } from './agent-assets'
+import { installAgentLaunchers } from './agent-assets'
 
 describe('agent assets', () => {
-	test('installs portable launchers without symlinks', () => {
+	test('installs portable launchers and a shared runtime reference without symlinks', () => {
 		const root = mkdtempSync(join(tmpdir(), 'superhive-assets-'))
 		try {
 			installAgentLaunchers(root)
 			for (const name of ['agent-runner.mjs', 'agent.sh', 'agent.cmd', 'agent.ps1']) {
 				expect(existsSync(join(root, name))).toBe(true)
 			}
-		} finally {
-			rmSync(root, { recursive: true, force: true })
-		}
-	})
-
-	test('copies extension files into an agent directory', () => {
-		const root = mkdtempSync(join(tmpdir(), 'superhive-extension-'))
-		const source = join(root, 'source')
-		const target = join(root, 'target')
-		try {
-			mkdirSync(source, { recursive: true })
-			writeFileSync(join(source, 'index.ts'), 'export default {}\n')
-			installBundledExtension(source, target)
-			expect(readFileSync(join(target, 'index.ts'), 'utf8')).toContain('export default')
+			const reference = JSON.parse(readFileSync(join(root, 'superhive-runtime.json'), 'utf8'))
+			expect(reference).toMatchObject({ version: 1, runtimeRoot: expect.any(String) })
 		} finally {
 			rmSync(root, { recursive: true, force: true })
 		}
@@ -57,10 +45,12 @@ describe('agent assets', () => {
 	test('always passes manifest.json when a stale legacy settings file exists', () => {
 		const root = mkdtempSync(join(tmpdir(), 'superhive-runner-manifest-'))
 		const piDir = join(root, 'pi')
+		const runtimeRoot = join(root, 'runtime')
 		const cli = join(piDir, 'packages', 'coding-agent', 'dist', 'cli.js')
 		try {
 			mkdirSync(join(piDir, 'packages', 'coding-agent', 'dist'), { recursive: true })
 			writeFileSync(join(root, 'manifest.json'), JSON.stringify({ source: 'manifest' }))
+			writeFileSync(join(root, 'superhive-runtime.json'), JSON.stringify({ version: 1, runtimeRoot }))
 			writeFileSync(join(root, 'Superhive-pi-agent.json'), JSON.stringify({ source: 'legacy' }))
 			writeFileSync(cli, "const fs = require('node:fs'); const i = process.argv.indexOf('--manifest'); console.log(fs.readFileSync(process.argv[i + 1], 'utf8'))\n")
 			const runner = join(process.cwd(), 'runtime', 'agent-runner.mjs')
@@ -71,6 +61,33 @@ describe('agent assets', () => {
 			expect(result.status).toBe(0)
 			expect(result.stdout).toContain('manifest')
 			expect(result.stdout).not.toContain('legacy')
+		} finally {
+			rmSync(root, { recursive: true, force: true })
+		}
+	})
+
+	test('migrates legacy core extension paths to the shared runtime reference', () => {
+		const root = mkdtempSync(join(tmpdir(), 'superhive-runner-reference-'))
+		const piDir = join(root, 'pi')
+		const runtimeRoot = join(root, 'runtime')
+		const cli = join(piDir, 'packages', 'coding-agent', 'dist', 'cli.js')
+		try {
+			mkdirSync(join(piDir, 'packages', 'coding-agent', 'dist'), { recursive: true })
+			writeFileSync(cli, '')
+			writeFileSync(join(root, 'manifest.json'), JSON.stringify({
+				extensions: ['./extensions/superhive-pi-truth', './extensions/custom'],
+			}))
+			writeFileSync(join(root, 'superhive-runtime.json'), JSON.stringify({ version: 1, runtimeRoot }))
+			const runner = join(process.cwd(), 'runtime', 'agent-runner.mjs')
+			spawnSync(process.execPath, [runner], {
+				encoding: 'utf8',
+				env: { ...process.env, AGENT_DIR: root, PI_DIR: piDir, PI_NODE: process.execPath },
+			})
+			const manifest = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'))
+			expect(manifest.extensions).toEqual([
+				join(runtimeRoot, 'extensions', 'superhive-pi-truth'),
+				'./extensions/custom',
+			])
 		} finally {
 			rmSync(root, { recursive: true, force: true })
 		}
