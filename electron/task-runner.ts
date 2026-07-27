@@ -29,7 +29,6 @@ import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import { getUserDataPath } from '../src/storage/database'
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { GENERAL_KAI_DIR } from './install-general-kai'
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { parseWorkPacket } from '../src/models/work-packet'
 
@@ -38,7 +37,6 @@ const STALE_MS = 10 * 60 * 1000  // 10 minutes before auto-retry
 
 export interface RuntimeLike {
   isRunning(agentId: string): boolean
-  start(agentId: string, agentDir: string, manifestPiSource: string): Promise<void>
   send(agentId: string, text: string): boolean
 }
 
@@ -50,10 +48,17 @@ function getDefaultRuntime(): RuntimeLike {
   return runtime
 }
 
+function getDefaultStartAgent(): (agentId: string) => Promise<void> {
+  // Keep unit tests free of Electron unless they explicitly exercise startup.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return (require('./ipc/runtime') as typeof import('./ipc/runtime')).startManagedAgent
+}
+
 export interface TaskRunnerOpts {
-  runtime?: RuntimeLike
-  tickMs?: number
-  staleMs?: number
+	runtime?: RuntimeLike
+	tickMs?: number
+	staleMs?: number
+	startAgent?: (agentId: string) => Promise<void>
 }
 
 export function buildTaskPrompt(taskId: string): string { return `Assignment ${taskId} is ready. Call read_current_assignment, execute its loop, and report through project side chat.` }
@@ -87,12 +92,14 @@ export class TaskRunner {
   private stopped = true
   private readonly tickMs: number
   private readonly staleMs: number
-  private readonly runtime: RuntimeLike
+	private readonly runtime: RuntimeLike
+	private readonly startAgent: (agentId: string) => Promise<void>
 
   constructor(opts: TaskRunnerOpts = {}) {
     this.tickMs = opts.tickMs ?? TICK_MS
     this.staleMs = opts.staleMs ?? STALE_MS
-    this.runtime = opts.runtime ?? getDefaultRuntime()
+		this.runtime = opts.runtime ?? getDefaultRuntime()
+		this.startAgent = opts.startAgent ?? getDefaultStartAgent()
   }
 
   start(): void {
@@ -178,12 +185,10 @@ export class TaskRunner {
       return
     }
 
-    if (!this.runtime.isRunning(agent.id)) {
-      await this.runtime.start(agent.id, agent.localPath, GENERAL_KAI_DIR)
-    }
-    const packet = parseWorkPacket(ready.context, ready.id, project.id, agent.id)
-    if (!packet) { log.warn(`[task-runner] task ${ready.id} has no valid work packet; skipping`); return }
-    await writeAssignment(agent.localPath, ready.id, packet)
+	const packet = parseWorkPacket(ready.context, ready.id, project.id, agent.id)
+	if (!packet) { log.warn(`[task-runner] task ${ready.id} has no valid work packet; skipping`); return }
+	await writeAssignment(agent.localPath, ready.id, packet)
+	if (!this.runtime.isRunning(agent.id)) await this.startAgent(agent.id)
     const prompt = buildTaskPrompt(ready.id)
     const sent = this.runtime.send(agent.id, prompt)
     if (sent) {

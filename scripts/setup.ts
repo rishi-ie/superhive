@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { join, resolve } from 'node:path'
+import { applyRuntimeCompatibility, RUNTIME_COMPATIBILITY_VERSION } from './runtime-compatibility'
 
 const root = resolve(import.meta.dir, '..')
 const runtimeRoot = process.env.SUPERHIVE_RUNTIME_DIR
@@ -152,9 +153,10 @@ try {
 	validateResources()
 	const generalKaiDir = prepareGeneralKai()
 	prepareExtensions(generalKaiDir)
+	applyRuntimeCompatibility(runtimeRoot)
 	mkdirSync(runtimeRoot, { recursive: true })
 	writeFileSync(join(runtimeRoot, 'runtime-manifest.json'), JSON.stringify({
-		version: 1,	generalKaiRef,
+		version: RUNTIME_COMPATIBILITY_VERSION,	generalKaiRef,
 		generalKaiDir,
 		extensions: Object.fromEntries(extensionSpecs.map(([name, , ref]) => [name, ref])),
 		preparedAt: new Date().toISOString(),

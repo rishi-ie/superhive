@@ -37,6 +37,9 @@ export function WorkedHeader({
 
 export function ActivityStatusLine({ status, live = false }: { status: ActivityStatus; live?: boolean }) {
   const StatusIcon = status.kind === 'thinking' ? BulbIcon : Loading03Icon
+	if (!live && (status.kind === 'warning' || status.kind === 'error')) {
+		return <div className={status.kind === 'error' ? 'text-destructive' : 'text-amber-500'}>{status.kind === 'error' ? '❌' : '⚠'} {status.pastLabel}</div>
+	}
 
   if (!live && status.source && (status.source.kind === 'thinking' || status.source.kind === 'tool-call')) {
     return (

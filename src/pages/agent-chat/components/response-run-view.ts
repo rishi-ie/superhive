@@ -5,7 +5,7 @@ export interface ActivityStatus {
   id: string
   label: string
   pastLabel: string
-  kind: 'thinking' | 'activity' | 'tool' | 'writing'
+  kind: 'thinking' | 'activity' | 'tool' | 'writing' | 'warning' | 'error'
   source?: TimelineItem
 }
 
@@ -49,6 +49,9 @@ function statusFor(item: TimelineItem, context?: string): ActivityStatus | null 
   if (item.kind === 'tool-call') {
     return { id: item.id, kind: 'tool', label: toolLabel(item, context), pastLabel: pastToolLabel(item), source: item }
   }
+	if (item.kind === 'warning' || item.kind === 'error') {
+		return { id: item.id, kind: item.kind, label: item.message, pastLabel: item.message, source: item }
+	}
   return null
 }
 

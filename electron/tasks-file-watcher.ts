@@ -168,7 +168,11 @@ class TasksFileWatcher {
   }
 
   private async handlePlan(coordDir: string): Promise<void> {
-    const { created } = await ingestPlan(coordDir)
+		const { created, error } = await ingestPlan(coordDir)
+		if (error) {
+			log.warn(`[tasks-fs-watcher] rejected plan at ${coordDir}: ${error}`)
+			return
+		}
     if (created > 0) {
       log.info(`[tasks-fs-watcher] plan ingested: ${created} task(s) at ${coordDir}`)
       this.notifyChanged()

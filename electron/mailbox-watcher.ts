@@ -60,6 +60,7 @@ class MailboxWatcherImpl {
 	private agentToProject = new Map<string, string>()
 	/** projectDir → coordinatorId (for filtering self-posts). */
 	private projectToCoord = new Map<string, string>()
+	private agentToDir = new Map<string, string>()
 	private pollTimer: NodeJS.Timeout | null = null
 	private stopped = true
 
@@ -102,6 +103,8 @@ class MailboxWatcherImpl {
 	 *    being watched IS the coordinator (so the watcher can filter
 	 *    self-posts out of `onCoordMail`) */
 	watchAgent(opts: AgentInfo): void {
+		// Re-registration happens on restart; close the old agent watch first.
+		this.unwatchAgent(opts.agentId)
 		const memberKey = opts.agentId
 		this.entries.set(memberKey, {
 			watchers: [],
@@ -109,9 +112,8 @@ class MailboxWatcherImpl {
 			lastChatSize: 0,
 			lastInboxSize: 0,
 		})
-		if (opts.projectDir) {
-			this.agentToProject.set(opts.agentId, opts.projectDir)
-		}
+		this.agentToDir.set(opts.agentId, opts.agentDir)
+		if (opts.projectDir) this.agentToProject.set(opts.agentId, opts.projectDir)
 		if (opts.coordinatorId && opts.projectDir) {
 			this.projectToCoord.set(opts.projectDir, opts.coordinatorId)
 		}
@@ -129,16 +131,18 @@ class MailboxWatcherImpl {
 		// events when chat.jsonl is created/updated.
 		if (opts.projectDir) {
 			const projectKey = `project:${opts.projectDir}`
-			this.entries.set(projectKey, {
-				watchers: [],
-				debounceTimer: null,
-				lastChatSize: 0,
-				lastInboxSize: 0,
-			})
-			const projectChatDir = join(opts.projectDir, 'agent')
-			this.attachDirWatch(projectKey, projectChatDir, () =>
-				this.checkProjectChat(opts.projectDir!),
-			)
+			if (!this.entries.has(projectKey)) {
+				this.entries.set(projectKey, {
+					watchers: [],
+					debounceTimer: null,
+					lastChatSize: 0,
+					lastInboxSize: 0,
+				})
+				const projectChatDir = join(opts.projectDir, 'agent')
+				this.attachDirWatch(projectKey, projectChatDir, () =>
+					this.checkProjectChat(opts.projectDir!),
+				)
+			}
 		}
 
 		// Cold-start wake: if the agent's inbox already has pending
@@ -164,12 +168,12 @@ class MailboxWatcherImpl {
 		}
 		this.entries.delete(agentId)
 		this.agentToProject.delete(agentId)
-		// Note: projectToCoord is intentionally not cleared here. The
-		// mapping is keyed by projectDir (not agentId), so removing the
-		// coordinator's entry when the coordinator stops is the right
-		// time. We accept the small risk of stale entries if a coord
-		// is removed without a matching unregister; the next reconcile
-		// cleans up via `unwatchProject` (callers that know).
+		this.agentToDir.delete(agentId)
+		for (const [projectDir, coordinatorId] of this.projectToCoord) {
+			if (coordinatorId === agentId) this.projectToCoord.delete(projectDir)
+		}
+		// Project watches are shared by all members and stay attached until
+		// project teardown; only the stopped coordinator's routing entry is removed.
 	}
 
 	/** Explicit cleanup when a project is removed. */
@@ -330,23 +334,6 @@ class MailboxWatcherImpl {
 		return this.agentToDir.get(agentId) ?? null
 	}
 
-	/** Companion map for resolveMemberDir. Kept separate from
-	 *  agentToProject so the type stays narrow. */
-	private agentToDir = new Map<string, string>()
-
-	/** Internal — sets the agent's directory on watchAgent. */
-	_setAgentDir(agentId: string, agentDir: string): void {
-		this.agentToDir.set(agentId, agentDir)
-	}
 }
 
 export const mailboxWatcher = new MailboxWatcherImpl()
-
-// Patch watchAgent to also record the agentDir. Cleaner than splitting
-// the API surface. We do this via a property accessor to keep the
-// external signature stable.
-const origWatchAgent = mailboxWatcher.watchAgent.bind(mailboxWatcher)
-mailboxWatcher.watchAgent = (opts: AgentInfo) => {
-	mailboxWatcher._setAgentDir(opts.agentId, opts.agentDir)
-	origWatchAgent(opts)
-}

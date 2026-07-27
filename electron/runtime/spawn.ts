@@ -18,7 +18,7 @@ import type { RuntimeEntry } from '../runtime-status'
 import type { GeneralKaiRuntime } from '../general-kai-runtime'
 import type { ComposerContext, TurnInput, UserMessage } from '../../src/models/assistant-message'
 import { RawTextAdapter } from '../pi-protocol'
-import { resolveLauncherPath } from '../runtime-paths'
+import { resolveLauncherPath, resolvePiNode } from '../runtime-paths'
 
 type EventedChildProcess = ChildProcess & {
   on(event: 'exit', listener: (code: number | null, signal: NodeJS.Signals | null) => void): EventedChildProcess
@@ -50,7 +50,7 @@ export async function start(
     agentDir,
     manifestPiSource,
     process: null,
-    status: 'active',
+    status: 'waiting',
     messages: [],
     stderrLog: [],
     adapter,
@@ -66,7 +66,7 @@ export async function start(
   entry.adapter = adapter
   entry.agentDir = agentDir
   entry.manifestPiSource = manifestPiSource
-  entry.status = 'active'
+  entry.status = 'waiting'
   entry.startedAt = Date.now()
   entry.endedAt = undefined
   entry.lastError = undefined
@@ -264,19 +264,24 @@ export function removeEntry(rt: GeneralKaiRuntime, agentId: string): void {
 export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
   const { agentId, agentDir, manifestPiSource } = entry
   const piDir = join(manifestPiSource, 'pi')
-  const launcher = join(agentDir, 'agent-runner.mjs')
-  const nodeBin = process.env.PI_NODE ?? 'node'
+  // The host owns launcher compatibility. Existing agent folders may contain
+  // an older copied launcher, so never let that stale copy select legacy
+  // config files after an app upgrade.
+  const launcher = resolveLauncherPath('agent-runner.mjs')
+  const node = resolvePiNode()
 
   log.info(`[runtime] spawning ${launcher} (PI_DIR=${piDir})`)
 
   let proc: EventedChildProcess
   try {
-    proc = spawn(nodeBin, [existsSync(launcher) ? launcher : resolveLauncherPath('agent-runner.mjs'), '--mode', 'rpc', '--no-session'], {
+    proc = spawn(node.executable, [launcher, '--mode', 'rpc', '--no-session'], {
       cwd: agentDir,
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: false,
       env: {
         ...process.env,
+        PI_NODE: node.executable,
+        ...(node.electronRunAsNode ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
         PI_DIR: piDir,
         AGENT_DIR: agentDir,
         PI_AGENT_DIR: agentDir,

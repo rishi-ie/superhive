@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import log from 'electron-log/main';
@@ -11,7 +11,6 @@ import { reconcileAgents } from './reconcile-agents';
 import { reconcileProjects } from './reconcile-projects';
 import { reconcileRuntime } from './reconcile-runtime';
 import { migrateLegacyChatFolders } from './agent-chat-store';
-import { isGeneralKaiReady } from './install-general-kai';
 import { installDefaultsBundle } from './install-defaults-bundle';
 import { agentsFsWatcher } from './agents-fs-watcher';
 import { attachMailboxWatches } from './ipc/mailbox';
@@ -52,6 +51,32 @@ function createWindow() {
       nodeIntegration: false,
     },
   });
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
+        void shell.openExternal(url);
+      }
+    } catch {
+      // Keep malformed links inside the denied renderer boundary.
+    }
+    return { action: 'deny' };
+  });
+  const allowedNavigation = process.env.VITE_DEV_SERVER_URL ?? 'file://';
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith(allowedNavigation)) return;
+    event.preventDefault();
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === 'https:' || parsed.protocol === 'http:' || parsed.protocol === 'mailto:') {
+        void shell.openExternal(url);
+      }
+    } catch {
+      // Navigation remains blocked for malformed URLs.
+    }
+  });
+  mainWindow.webContents.session.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
 
   mainWindow.maximize();
   mainWindow.show();
@@ -108,13 +133,6 @@ app.whenReady().then(async () => {
 
   setUserDataPath(app.getPath('userData'));
   log.info(`[main] userData = ${app.getPath('userData')}`);
-
-  if (!isGeneralKaiReady()) {
-    log.warn(
-      '[main] Prepared Pi runtime is missing.\n' +
-      '[main] Agent creation is disabled until you run: bun run setup',
-    )
-  }
 
   installDefaultsBundle()
   installComposerCommands()

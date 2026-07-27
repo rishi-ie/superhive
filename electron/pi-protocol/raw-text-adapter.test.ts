@@ -20,3 +20,44 @@ test('normalizes Pi tool metadata from its nested streaming payload', () => {
   expect(events.find((event) => event.type === 'tool-execution-start')).toMatchObject({ toolCallId: 'call-read', name: 'read' })
   expect(events.find((event) => event.type === 'tool-execution-end')).toMatchObject({ toolCallId: 'call-read', name: 'read' })
 })
+
+test('bridges current Pi RPC messages into a live assistant response', () => {
+  const adapter = new RawTextAdapter()
+  const events: AdapterEvent[] = []
+  const emit = (event: AdapterEvent) => events.push(event)
+
+  adapter.onStdout(JSON.stringify({ type: 'agent_start' }) + '\n', emit)
+  adapter.onStdout(JSON.stringify({ type: 'message_start', message: { role: 'assistant', content: [{ type: 'text', text: '' }] } }) + '\n', emit)
+  adapter.onStdout(JSON.stringify({ type: 'message_end', message: { role: 'assistant', content: [{ type: 'text', text: 'Hello from Pi' }] } }) + '\n', emit)
+  adapter.onStdout(JSON.stringify({ type: 'agent_end' }) + '\n', emit)
+
+  const started = events.find((event) => event.type === 'message-start')
+  expect(started).toMatchObject({ type: 'message-start', role: 'assistant' })
+  const messageId = (started as Extract<AdapterEvent, { type: 'message-start' }>).messageId
+  expect(events).toContainEqual({ type: 'text-delta', messageId, delta: 'Hello from Pi' })
+  expect(events).toContainEqual({ type: 'text-end', messageId, contentIndex: 0, content: 'Hello from Pi' })
+  expect(events).toContainEqual({ type: 'message-end', messageId })
+  expect(events).toContainEqual({ type: 'agent-end' })
+})
+
+test('turns an empty direct provider result into an actionable UI error', () => {
+  const adapter = new RawTextAdapter()
+  const events: AdapterEvent[] = []
+  const emit = (event: AdapterEvent) => events.push(event)
+
+  adapter.onStdout(JSON.stringify({ type: 'agent_start' }) + '\n', emit)
+  adapter.onStdout(JSON.stringify({ type: 'message_end', message: { role: 'assistant', content: [{ type: 'text', text: '' }] } }) + '\n', emit)
+
+  expect(events).toContainEqual({
+    type: 'error',
+    message: 'The selected provider returned an empty response. Verify its model and credentials, then retry.',
+    recoverable: true,
+  })
+})
+
+test('finalizes a failed prompt before Pi streams content', () => {
+	const adapter = new RawTextAdapter()
+	const events: AdapterEvent[] = []
+	adapter.onStdout(JSON.stringify({ type: 'response', command: 'prompt', success: false, error: 'No API key found' }) + '\n', (event) => events.push(event))
+	expect(events.map((event) => event.type)).toEqual(['message-start', 'error', 'message-end', 'agent-end'])
+})

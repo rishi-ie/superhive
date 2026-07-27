@@ -77,9 +77,6 @@ export function AssistantMessage({
 		? message.metadata.totalDurationMs ?? 0
 		: message.totalDurationMs ?? Math.max(0, Date.now() - message.ts)
 	const [activityExpanded, setActivityExpanded] = React.useState(false)
-	React.useEffect(() => {
-		if (frozen) setActivityExpanded(false)
-	}, [frozen])
 
 	const runView = React.useMemo(
     () => buildResponseRunView(message.activityTimeline, response),
@@ -105,9 +102,7 @@ export function AssistantMessage({
 			<WorkedHeader
 				durationMs={workedDurationMs}
 				expanded={activityExpanded}
-				onToggle={() => {
-					if (hasTrace) setActivityExpanded((value) => !value)
-				}}
+				onToggle={() => setActivityExpanded((value) => !value)}
 			/>
 		) : null}
 
@@ -146,7 +141,11 @@ export function AssistantMessage({
                   )}
                 </React.Fragment>
               ))}
-              {!traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
+              {!hasTrace ? (
+                <div className="text-[15px] leading-6 text-muted-foreground">
+                  No detailed activity was emitted for this response.
+                </div>
+              ) : !traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
             </div>
           </div>
         </div>
@@ -159,7 +158,7 @@ export function AssistantMessage({
       )}
 
       {frozen && !agentResponseActive ? (
-        <div className="mt-2 flex items-center gap-gap-tight opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100 [--muted-foreground:#707070]">
+        <div className="mt-2 flex items-center gap-gap-tight [--muted-foreground:#707070]">
           <Button
             size="icon-sm"
             variant="ghost"

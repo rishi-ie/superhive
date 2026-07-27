@@ -178,7 +178,7 @@ export function RightStatusBar({ open, rightOffset, isPopover, onDismiss }: Righ
     <div
       aria-hidden={!open}
       className={`absolute inset-y-0 left-0 z-[50] transition-[right] duration-[260ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-        open ? "pointer-events-auto" : "pointer-events-none"
+        open && isPopover ? "pointer-events-auto" : "pointer-events-none"
       }`}
       style={{ right: rightOffset }}
       onMouseDown={(event) => {

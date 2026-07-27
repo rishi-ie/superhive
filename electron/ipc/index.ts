@@ -71,6 +71,7 @@ export const IPC = {
   APP: {
     GET_VERSION: 'app:get-version',
     INSTALL_UPDATE: 'app:install-update',
+    COPY_TEXT: 'app:copy-text',
   },
   SETTINGS: {
     GET_PROVIDERS: 'settings:get-providers',

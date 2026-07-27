@@ -53,4 +53,26 @@ describe('agent assets', () => {
 			rmSync(root, { recursive: true, force: true })
 		}
 	})
+
+	test('always passes manifest.json when a stale legacy settings file exists', () => {
+		const root = mkdtempSync(join(tmpdir(), 'superhive-runner-manifest-'))
+		const piDir = join(root, 'pi')
+		const cli = join(piDir, 'packages', 'coding-agent', 'dist', 'cli.js')
+		try {
+			mkdirSync(join(piDir, 'packages', 'coding-agent', 'dist'), { recursive: true })
+			writeFileSync(join(root, 'manifest.json'), JSON.stringify({ source: 'manifest' }))
+			writeFileSync(join(root, 'Superhive-pi-agent.json'), JSON.stringify({ source: 'legacy' }))
+			writeFileSync(cli, "const fs = require('node:fs'); const i = process.argv.indexOf('--manifest'); console.log(fs.readFileSync(process.argv[i + 1], 'utf8'))\n")
+			const runner = join(process.cwd(), 'runtime', 'agent-runner.mjs')
+			const result = spawnSync(process.execPath, [runner, '--mode', 'rpc'], {
+				encoding: 'utf8',
+				env: { ...process.env, AGENT_DIR: root, PI_DIR: piDir, PI_NODE: process.execPath },
+			})
+			expect(result.status).toBe(0)
+			expect(result.stdout).toContain('manifest')
+			expect(result.stdout).not.toContain('legacy')
+		} finally {
+			rmSync(root, { recursive: true, force: true })
+		}
+	})
 })

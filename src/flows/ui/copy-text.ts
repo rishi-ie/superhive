@@ -18,7 +18,10 @@ export async function copyText(
   options: { successLabel?: string; silent?: boolean } = {},
 ): Promise<boolean> {
   try {
-    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    if (typeof window !== 'undefined' && window.api?.app?.copyText) {
+      const result = await window.api.app.copyText(text)
+      if (!result.ok) throw new Error(result.error ?? 'Failed to copy')
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text)
     } else {
       fallbackCopy(text)
@@ -42,6 +45,7 @@ function fallbackCopy(text: string): void {
   textarea.style.left = '-9999px'
   document.body.appendChild(textarea)
   textarea.select()
-  document.execCommand('copy')
+  const copied = document.execCommand('copy')
   document.body.removeChild(textarea)
+  if (!copied) throw new Error('Clipboard access is unavailable')
 }

@@ -59,3 +59,8 @@ test('keeps every tool call in the completed audit trail', () => {
     'Ran command bun test',
   ])
 })
+
+test('does not create a disclosure trace for a plain text response', () => {
+  const plain = buildResponseRunView([], [{ type: 'text', text: 'Hello', state: 'complete', startedAt: 1 }])
+  expect(plain.auditEvents.filter((event) => event.type === 'status')).toHaveLength(0)
+})

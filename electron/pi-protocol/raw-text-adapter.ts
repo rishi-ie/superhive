@@ -6,6 +6,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
   private lineBuffer = ''
   private currentMessageId: string | null = null
   private toolCallIds = new Map<number, string>()
+  private streamedAssistantContent = false
 
   onStdout(chunk: string, emit: (event: AdapterEvent) => void): void {
     this.lineBuffer += chunk
@@ -25,8 +26,18 @@ export class RawTextAdapter implements PiProtocolAdapter {
 
       if (parsed && typeof parsed === 'object') {
         const obj = parsed as Record<string, unknown>
-        if (obj.type === 'message_update') {
+        if (obj.type === 'agent_start') {
+          // Current Pi RPC emits this before any assistant content. Starting
+          // here makes the renderer show the live working state immediately.
+          this.ensureAssistantMessage(emit)
+        } else if (obj.type === 'message_start') {
+          if (messageRole(obj) === 'assistant') this.ensureAssistantMessage(emit)
+        } else if (obj.type === 'message_update') {
           const ev = obj.assistantMessageEvent as Record<string, unknown> | undefined
+          const eventType = typeof ev?.type === 'string' ? ev.type : ''
+          if (eventType.startsWith('text_') || eventType.startsWith('thinking_') || eventType.startsWith('toolcall_')) {
+            this.streamedAssistantContent = true
+          }
           if (ev?.type === 'text_start') {
             if (!this.currentMessageId) {
               this.currentMessageId = randomUUID()
@@ -210,18 +221,31 @@ export class RawTextAdapter implements PiProtocolAdapter {
           // a brand-new (split) assistant message — turning a single
           // Pi turn into N+1 AssistantMessage rows, each with its own
           // Indicator, Completion, and footer.
-          const role = (obj as { message?: { role?: string } }).message?.role
+          const role = messageRole(obj)
           if (role === 'assistant' && this.currentMessageId) {
+            if (!this.streamedAssistantContent && !this.emitDirectAssistantContent(obj.message, emit)) {
+              emit({
+                type: 'error',
+                message: 'The selected provider returned an empty response. Verify its model and credentials, then retry.',
+                recoverable: true,
+              })
+            }
             emit({ type: 'message-end', messageId: this.currentMessageId })
             this.currentMessageId = null
             this.toolCallIds.clear()
+            this.streamedAssistantContent = false
           }
         } else if (obj.type === 'response' && obj.success === false) {
+			const messageId = this.ensureAssistantMessage(emit)
           emit({
             type: 'error',
             message: (obj.error as string) ?? 'Unknown error from Pi',
             recoverable: true,
           })
+			emit({ type: 'message-end', messageId })
+			this.currentMessageId = null
+			this.toolCallIds.clear()
+			emit({ type: 'agent-end' })
         }
       }
     }
@@ -245,6 +269,32 @@ export class RawTextAdapter implements PiProtocolAdapter {
     this.lineBuffer = ''
     this.currentMessageId = null
     this.toolCallIds.clear()
+    this.streamedAssistantContent = false
+  }
+
+  private ensureAssistantMessage(emit: (event: AdapterEvent) => void): string {
+    if (!this.currentMessageId) {
+      this.currentMessageId = randomUUID()
+      this.streamedAssistantContent = false
+      emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
+    }
+    return this.currentMessageId
+  }
+
+  private emitDirectAssistantContent(message: unknown, emit: (event: AdapterEvent) => void): boolean {
+    if (!this.currentMessageId || !message || typeof message !== 'object') return false
+    const content = (message as { content?: unknown }).content
+    if (!Array.isArray(content)) return false
+    let emitted = false
+    for (const part of content) {
+      if (!part || typeof part !== 'object') continue
+      const value = part as Record<string, unknown>
+      if (value.type !== 'text' || typeof value.text !== 'string' || !value.text) continue
+      emit({ type: 'text-delta', messageId: this.currentMessageId, delta: value.text })
+      emit({ type: 'text-end', messageId: this.currentMessageId, contentIndex: 0, content: value.text })
+      emitted = true
+    }
+    return emitted
   }
 
   private maybeEmitUsage(
@@ -266,6 +316,13 @@ export class RawTextAdapter implements PiProtocolAdapter {
     }
     emit({ type: 'usage', usage })
   }
+}
+
+function messageRole(value: Record<string, unknown>): string | undefined {
+  const message = value.message
+  if (!message || typeof message !== 'object') return undefined
+  const role = (message as { role?: unknown }).role
+  return typeof role === 'string' ? role : undefined
 }
 
 function stringValue(value: unknown): string | undefined {

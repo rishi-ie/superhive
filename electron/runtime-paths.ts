@@ -1,46 +1,35 @@
 import { existsSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const RUNTIME_DIR_NAME = '.runtime'
-
-function walkUp(start: string, target: string): string | null {
-	let current = resolve(start)
-	for (;;) {
-		const candidate = join(current, target)
-		if (existsSync(candidate)) return candidate
-		const parent = dirname(current)
-		if (parent === current) return null
-		current = parent
-	}
+export function isPackagedApp(): boolean {
+	// Electron sets defaultApp only for `electron .` / Vite development.
+	// A packaged app must never fall back to a developer checkout.
+	return Boolean(process.resourcesPath && !process.defaultApp && !process.env.VITE_DEV_SERVER_URL)
 }
 
-function runtimeRoot(): string {
-	const candidates = [
-		process.env.SUPERHIVE_RUNTIME_DIR,
-		process.resourcesPath ? join(process.resourcesPath, 'runtime') : undefined,
-		join(process.cwd(), RUNTIME_DIR_NAME),
-		walkUp(process.cwd(), RUNTIME_DIR_NAME),
-	]
-		.filter((value): value is string => Boolean(value))
-
-	for (const candidate of candidates) {
-		if (existsSync(candidate)) return resolve(candidate)
+export function runtimeRoot(): string {
+	if (isPackagedApp()) {
+		return resolve(process.resourcesPath!, 'runtime')
 	}
 
-	return resolve(process.cwd(), RUNTIME_DIR_NAME)
+	return resolve(process.env.SUPERHIVE_RUNTIME_DIR ?? join(homedir(), '.superhive', 'runtime'))
 }
 
 export function resolveGeneralKaiDir(): string {
+	if (isPackagedApp()) return join(runtimeRoot(), 'general-kai')
+
 	const candidates = [
 		process.env.SUPERHIVE_GENERAL_KAI_PATH,
 		join(runtimeRoot(), 'general-kai'),
-		walkUp(process.cwd(), 'general-kai'),
 	]
 		.filter((value): value is string => Boolean(value))
 
 	for (const candidate of candidates) {
-		if (existsSync(join(candidate, 'pi', 'packages', 'coding-agent'))) {
+		// Explicit overrides must point at a compiled Pi runtime. The normal
+		// development path is the durable per-user runtime prepared on first use.
+		if (existsSync(join(candidate, 'pi', 'packages', 'coding-agent', 'dist', 'cli.js'))) {
 			return resolve(candidate)
 		}
 	}
@@ -49,16 +38,19 @@ export function resolveGeneralKaiDir(): string {
 }
 
 export function resolveExtensionPath(name: string, resourcesPath?: string): string {
+	if (isPackagedApp()) {
+		const source = join(resourcesPath ?? process.resourcesPath!, 'runtime', 'extensions', name)
+		if (existsSync(join(source, 'index.ts'))) return resolve(source)
+		throw new Error(`Bundled extension ${name} is missing at ${source}. Reinstall Superhive.`)
+	}
+
 	const suffix = name.replace(/^superhive-pi-/, '').replaceAll('-', '_').toUpperCase()
 	const envName = `SUPERHIVE_PI_${suffix}_PATH`
 	const genericEnvName = `SUPERHIVE_${name.replaceAll('-', '_').toUpperCase()}_PATH`
 	const candidates = [
 		process.env[envName],
 		process.env[genericEnvName],
-		resourcesPath ? join(resourcesPath, 'extensions', name) : undefined,
-		process.resourcesPath ? join(process.resourcesPath, 'extensions', name) : undefined,
 		join(runtimeRoot(), 'extensions', name),
-		walkUp(process.cwd(), name),
 	]
 		.filter((value): value is string => Boolean(value))
 
@@ -67,15 +59,20 @@ export function resolveExtensionPath(name: string, resourcesPath?: string): stri
 	}
 
 	throw new Error(
-		`${name} is not prepared. Run "bun run setup" from the superhive directory, ` +
-		`then restart the app. Checked: ${candidates.join(', ')}`,
+		`${name} is not prepared. Create or start an agent while online to prepare the runtime. ` +
+		`Checked: ${candidates.join(', ')}`,
 	)
 }
 
 export function resolveLauncherPath(name: string): string {
+	if (isPackagedApp()) {
+		const launcher = join(process.resourcesPath!, 'runtime', name)
+		if (existsSync(launcher)) return resolve(launcher)
+		throw new Error(`Bundled launcher ${name} is missing. Reinstall Superhive.`)
+	}
+
 	const candidates = [
 		join(process.cwd(), 'runtime', name),
-		process.resourcesPath ? join(process.resourcesPath, 'runtime', name) : undefined,
 		join(dirname(fileURLToPath(import.meta.url)), '..', 'runtime', name),
 	].filter((value): value is string => Boolean(value))
 
@@ -84,4 +81,10 @@ export function resolveLauncherPath(name: string): string {
 	}
 
 	throw new Error(`Bundled launcher ${name} is missing. Reinstall dependencies and run "bun run setup".`)
+}
+
+export function resolvePiNode(): { executable: string; electronRunAsNode: boolean } {
+	if (process.env.PI_NODE) return { executable: process.env.PI_NODE, electronRunAsNode: false }
+	if (isPackagedApp()) return { executable: process.execPath, electronRunAsNode: true }
+	return { executable: 'node', electronRunAsNode: false }
 }

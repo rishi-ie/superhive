@@ -83,7 +83,7 @@ export interface AgentsAPI {
 	 *     agents are regular)
 	 *   - seeds manage.json from the rendered template
 	 *   - binds projectIds: [spawner.projectId]
-	 *   - does NOT start the spawned agent
+	 *   - starts the spawned worker after its durable project state is complete
 	 *
 	 * The main process broadcasts `agents:changed` on success so
 	 * the AgentsListView refreshes. The IPC name is
@@ -172,6 +172,7 @@ export interface AppUpdateInfo {
 export interface AppAPI {
 	platform: NodeJS.Platform
 	getVersion: () => Promise<string>
+	copyText: (text: string) => Promise<{ ok: boolean; error?: string }>
 	onUpdateAvailable: (cb: (info: AppUpdateInfo) => void) => () => void
 	onUpdateDownloaded: (cb: (info: AppUpdateInfo) => void) => () => void
 	installUpdate: () => Promise<{ ok: boolean }>

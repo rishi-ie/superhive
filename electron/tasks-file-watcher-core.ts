@@ -12,6 +12,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { TaskRepository } from '../src/storage/repositories/TaskRepository'
 import { getUserDataPath } from '../src/storage/database'
+import { parseWorkPacket } from '../src/models/work-packet'
 
 const COORDINATOR_SUBPATH = 'agent'
 
@@ -82,9 +83,9 @@ async function loadAgentsById(agentIds: string[]): Promise<Map<string, string>> 
   return byName
 }
 
-export async function ingestPlan(coordDir: string, planFilename = 'tasks-plan.json'): Promise<{ created: number }> {
+export async function ingestPlan(coordDir: string, planFilename = 'tasks-plan.json'): Promise<{ created: number; error?: string }> {
   const planPath = join(coordDir, planFilename)
-  if (!existsSync(planPath)) return { created: 0 }
+	if (!existsSync(planPath)) return { created: 0 }
   let raw: string
   try {
     raw = readFileSync(planPath, 'utf-8')
@@ -98,14 +99,43 @@ export async function ingestPlan(coordDir: string, planFilename = 'tasks-plan.js
   } catch {
     return { created: 0 }
   }
-  if (!plan || !Array.isArray(plan.tasks)) return { created: 0 }
+	if (!plan || !Array.isArray(plan.tasks)) return { created: 0, error: 'tasks-plan.json must contain a tasks array' }
 
   const project = await resolveProjectForCoordDir(coordDir)
   if (!project) return { created: 0 }
 
-  const memberByName = await loadAgentsById(project.agentIds ?? [])
+	const memberByName = await loadAgentsById(project.agentIds ?? [])
+	const titles = new Set<string>()
+	for (const entry of plan.tasks) {
+		if (!entry || typeof entry.title !== 'string' || !entry.title.trim()) return { created: 0, error: 'every task needs a title' }
+		if (titles.has(entry.title)) return { created: 0, error: `duplicate task title: ${entry.title}` }
+		titles.add(entry.title)
+		const agentId = memberByName.get(entry.assignedAgent)
+		if (!agentId) return { created: 0, error: `unknown assigned agent: ${entry.assignedAgent}` }
+		const packet = { ...entry.workPacket, version: 1, projectId: project.id, taskId: '__pending__', workerAgentId: agentId }
+		if (!entry.workPacket || !parseWorkPacket(JSON.stringify(packet), '__pending__', project.id, agentId)) {
+			return { created: 0, error: `task ${entry.title} has an invalid work packet` }
+		}
+		for (const dependency of entry.dependencies ?? []) {
+			if (!titles.has(dependency) && !plan.tasks.some((candidate) => candidate.title === dependency)) return { created: 0, error: `task ${entry.title} references unknown dependency: ${dependency}` }
+			if (dependency === entry.title) return { created: 0, error: `task ${entry.title} depends on itself` }
+		}
+	}
+	const dependencies = new Map(plan.tasks.map((entry) => [entry.title, entry.dependencies ?? []]))
+	const visiting = new Set<string>()
+	const visited = new Set<string>()
+	const hasCycle = (title: string): boolean => {
+		if (visiting.has(title)) return true
+		if (visited.has(title)) return false
+		visiting.add(title)
+		for (const dependency of dependencies.get(title) ?? []) if (hasCycle(dependency)) return true
+		visiting.delete(title)
+		visited.add(title)
+		return false
+	}
+	if (plan.tasks.some((entry) => hasCycle(entry.title))) return { created: 0, error: 'task dependencies contain a cycle' }
 
-  let created = 0
+	let created = 0
   for (const entry of plan.tasks) {
     const agentId = memberByName.get(entry.assignedAgent)
     if (!agentId) continue
@@ -114,18 +144,16 @@ export async function ingestPlan(coordDir: string, planFilename = 'tasks-plan.js
       description: entry.description,
       projectId: project.id,
       assignedAgentId: agentId,
-		context: entry.workPacket ? JSON.stringify({ ...entry.workPacket, version: 1, projectId: project.id, taskId: '', workerAgentId: agentId }) : undefined,
+		context: JSON.stringify({ ...entry.workPacket, version: 1, projectId: project.id, taskId: '', workerAgentId: agentId }),
     })
 		if (entry.workPacket) await TaskRepository.update(task.id, { context: JSON.stringify({ ...entry.workPacket, version: 1, projectId: project.id, taskId: task.id, workerAgentId: agentId }) })
-    if (entry.dependencies && entry.dependencies.length > 0) {
+	if (entry.dependencies && entry.dependencies.length > 0) {
       const allTasks = await TaskRepository.getByProject(project.id)
       const byTitle = new Map(allTasks.map((t) => [t.title, t.id]))
-      const depIds = entry.dependencies
+		const depIds = entry.dependencies
         .map((title) => byTitle.get(title))
         .filter((id): id is string => Boolean(id))
-      if (depIds.length > 0) {
-        await TaskRepository.update(task.id, { dependencies: depIds })
-      }
+		await TaskRepository.update(task.id, { dependencies: depIds })
     }
     created++
   }

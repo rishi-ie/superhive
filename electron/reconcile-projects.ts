@@ -8,11 +8,10 @@
  * The filesystem is the source of truth for project existence: a project
  * row only exists while its folder exists.
  *
- * Validity sentinel: a project root `<root>` is valid iff
- * `<root>/agent/Superhive-pi-agent.json` exists. The agent reconcile uses
- * the same marker, so any folder adopted as a project here will also be
- * adopted as a coordinator agent by the agent reconcile in the same boot
- * cycle.
+ * Validity sentinel: a project root `<root>` is valid iff its coordinator has
+ * `manage.json`. This is the canonical split-truth marker; legacy settings
+ * files are deliberately ignored so old agents remain non-destructively
+ * recoverable.
  *
  * Pipeline (called by boot and by the watcher on every debounced fs event):
  *   reconcileProjects()

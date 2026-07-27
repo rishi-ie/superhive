@@ -17,6 +17,7 @@ import log from 'electron-log/main';
 import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/electron';
 import { tasksFileWatcher } from '../tasks-file-watcher';
 import { expandHome } from '../path-utils';
+import { ensureRuntimePrepared } from '../runtime-provisioner';
 
 export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
@@ -31,6 +32,7 @@ export function registerProjectIpc(): void {
       if (!data.name?.trim()) {
         throw new Error('Project name is required');
       }
+      await ensureRuntimePrepared();
 
       const requestedPath = data.localPath?.trim();
       const defaultFolder = data.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';

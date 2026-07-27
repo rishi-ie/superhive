@@ -10,7 +10,8 @@ import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { ProjectRepository } from '../../src/storage/repositories/ProjectRepository'
 import type { Agent, AgentStatus, AgentKind } from '../../src/storage/types'
 import { IPC } from './index'
-import { GENERAL_KAI_DIR, ensureGeneralKai } from '../install-general-kai'
+import { ensureGeneralKai } from '../install-general-kai'
+import { ensureRuntimePrepared } from '../runtime-provisioner'
 import { chatFilePath, readAll as getAgentChatMessages } from '../agent-chat-store'
 import {
 	type SettingsFile,
@@ -28,6 +29,7 @@ import { resolveContextExtensionPath } from '../install-context'
 import { resolveOrchestrationExtensionPath } from '../install-orchestration'
 import { resolvePlanExtensionPath } from '../install-plan'
 import { appendProjectChat } from '../mailbox-store'
+import { startManagedAgent } from './runtime'
 import { expandHome } from '../path-utils'
 import {
 	installAgentExtension,
@@ -90,6 +92,7 @@ const SUPERHIVE_PI_TELEMETRY_NAME = 'superhive-pi-telemetry'
 const SUPERHIVE_PI_CONTEXT_NAME = 'superhive-pi-context'
 const SUPERHIVE_PI_ORCHESTRATION_NAME = 'superhive-pi-orchestration'
 const SUPERHIVE_PI_PLAN_NAME = 'superhive-pi-plan'
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024
 
 interface CreateAgentInput {
 	name: string
@@ -143,12 +146,15 @@ export function registerAgentIpc(): void {
 	ipcMain.handle(IPC.AGENTS.IMPORT_ATTACHMENT, async (_e, agentId: string, input: { name: string; mimeType?: string; data: string }) => {
 		const agent = await AgentRepository.getById(agentId)
 		if (!agent?.localPath) throw new Error(`Agent not found: ${agentId}`)
+		if (!input?.name || typeof input.data !== 'string') throw new Error('Attachment name and data are required')
 		const id = crypto.randomUUID()
 		const name = basename(input.name || 'image')
 		const destination = join(attachmentRoot(agent.localPath), `${id}-${name}`)
 		const base64 = input.data.includes(',') ? input.data.slice(input.data.indexOf(',') + 1) : input.data
+		const content = Buffer.from(base64, 'base64')
+		if (content.length > MAX_ATTACHMENT_BYTES) throw new Error('Attachment exceeds the 25 MB limit')
 		await mkdir(attachmentRoot(agent.localPath), { recursive: true })
-		await writeFile(destination, Buffer.from(base64, 'base64'))
+		await writeFile(destination, content)
 		return { id, kind: input.mimeType?.startsWith('image/') ? 'image' : 'file', name, path: destination, mimeType: input.mimeType } as ComposerAttachment
 	})
 
@@ -169,6 +175,7 @@ export function registerAgentIpc(): void {
 			if (!data.folderName?.trim()) throw new Error('Agent folder name is required')
 			if (!data.parentDir?.trim()) throw new Error('Parent directory is required')
 
+			await ensureRuntimePrepared()
 			ensureGeneralKai()
 
 			const rawFolderName = data.folderName.trim()
@@ -928,6 +935,7 @@ export function registerAgentIpc(): void {
 			log.info(`[agents:spawn-from-template] creating agent dir ${agentDir}`)
 
 			// Materialize only the extensions explicitly declared by the bundled profile.
+			await ensureRuntimePrepared()
 			ensureGeneralKai()
 			installAgentLaunchers(agentDir)
 			for (const extensionName of extensionNames) {
@@ -1085,15 +1093,14 @@ export function registerAgentIpc(): void {
 				await writeFile(manageFilePathFor(spawner.localPath), JSON.stringify({ ...coordinatorManage, lastModified: new Date().toISOString() }, null, '\t') + '\n', 'utf8')
 			}
 
+			let startError: string | undefined
 			try {
-				await runtime.start(agent.id, agentDir, GENERAL_KAI_DIR)
-				await AgentRepository.update(agent.id, { status: 'active', lastError: undefined })
-				await patchCoordinatorForMemberStatus(agent.id, 'active')
+				await startManagedAgent(agent.id)
 			} catch (err) {
 				const message = err instanceof Error ? err.message : String(err)
 				await AgentRepository.update(agent.id, { status: 'idle', lastError: message })
 				log.error(`[agents:spawn-from-template] failed to start ${agent.id}: ${message}`)
-				return { agentId: agent.id, status: 'idle' }
+				startError = message
 			}
 
 			// Notify any listening renderer that a new agent exists.
@@ -1108,7 +1115,7 @@ export function registerAgentIpc(): void {
 			log.info(
 				`[agents:spawn-from-template] spawned ${agent.id} (${baseName}) bound to project=${input.projectId} from spawner=${input.spawnerAgentId}`,
 			)
-			return { agentId: agent.id, status: 'active' }
+			return { agentId: agent.id, status: startError ? 'idle' : 'active' }
 		},
 	)
 

@@ -7,8 +7,6 @@ const agentDir = resolve(process.env.AGENT_DIR ?? dirname(fileURLToPath(import.m
 const piDir = resolve(process.env.PI_DIR ?? join(agentDir, 'pi'))
 const piEntry = join(piDir, 'packages', 'coding-agent', 'dist', 'cli.js')
 const manifest = join(agentDir, 'manifest.json')
-const folderName = agentDir.split(/[\\/]/).pop() || 'agent'
-const settings = join(agentDir, `Superhive-pi-${folderName}.json`)
 
 if (!existsSync(piEntry)) {
 	console.error(`[agent-runner] Pi runtime is missing: ${piEntry}`)
@@ -25,9 +23,8 @@ if (!existsSync(manifest)) {
 	}, null, 2) + '\n')
 }
 
-const activeManifest = existsSync(settings) ? settings : manifest
 const nodeBin = process.env.PI_NODE || process.env.NODE || 'node'
-const child = spawn(nodeBin, [piEntry, '--manifest', activeManifest, ...process.argv.slice(2)], {
+const child = spawn(nodeBin, [piEntry, '--manifest', manifest, ...process.argv.slice(2)], {
 	cwd: agentDir,
 	stdio: 'inherit',
 	shell: false,

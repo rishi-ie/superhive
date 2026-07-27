@@ -104,6 +104,7 @@ const api: ElectronAPI = {
   app: {
     platform: process.platform,
     getVersion: () => ipcRenderer.invoke('app:get-version'),
+		copyText: (text) => ipcRenderer.invoke('app:copy-text', text),
     onUpdateAvailable: (cb) => subscribe('app:update-available', cb),
     onUpdateDownloaded: (cb) => subscribe('app:update-downloaded', cb),
     installUpdate: () => ipcRenderer.invoke('app:install-update'),

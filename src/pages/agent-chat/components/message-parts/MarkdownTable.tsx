@@ -167,7 +167,7 @@ export function MarkdownTable({ children, className }: MarkdownTableProps) {
 				{visibleChildren}
           </table>
         </div>
-        <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        <div className="absolute right-1.5 top-1.5 flex items-center gap-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

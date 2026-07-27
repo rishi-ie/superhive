@@ -5,10 +5,10 @@ Superhive is a local-first desktop workspace for running AI agents and coordinat
 The supported developer workflow is the same on Windows, macOS, and Linux:
 
 ```text
-install prerequisites → bun install → bun run setup → bun run dev
+install prerequisites → bun install → bun run dev
 ```
 
-`bun run setup` prepares the pinned Pi runtime and extension bundle once. Creating or starting an agent never runs `npm install`, `bun install`, or `git clone`.
+On the first project or agent creation, Superhive prepares its pinned Pi runtime and extensions in `~/.superhive/runtime/`. A normal Superhive-only clone therefore works without manually cloning or staging runtime repositories. Later starts reuse that cache. `bun run setup` remains the explicit command for preparing the `.runtime/` bundle used by release packaging.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ install prerequisites → bun install → bun run setup → bun run dev
 - Git 2.40 or newer
 - Bun 1.3 or newer
 - Node.js 22.19 or newer (the Pi runtime uses Node)
-- Network access for the initial `bun install` and `bun run setup`
+- Network access for the initial `bun install` and first project/agent creation
 - A provider API key only when sending a live request to a provider; the app, setup, and automated tests start without credentials
 
 Check the installed versions before setup:
@@ -28,7 +28,7 @@ bun --version
 node --version
 ```
 
-The repository contains the Superhive app. The Pi runtime and extension repositories remain canonical upstream sources, but developers do not need to clone them manually. Setup uses the pinned revisions in `scripts/setup.ts` and stores the prepared result in the ignored `.runtime/` directory.
+The Superhive checkout can be developed beside canonical runtime repositories: `../general-kai` and `../superhive-pi-*`. First-use provisioning copies and builds from those sibling sources when present, otherwise it clones their pinned Git refs into the per-user runtime. Set `SUPERHIVE_GENERAL_KAI_PATH` or `SUPERHIVE_PI_*_PATH` to use a specific live source. `bun run setup` stages pinned, compiled output into ignored `.runtime/` for bundle validation and packaging; packaged apps resolve only bundled `resources/runtime` assets.
 
 ### Windows 10/11
 
@@ -146,8 +146,8 @@ Run these from the `superhive/` directory:
 
 ```bash
 bun install                 # install app dependencies
-bun run setup               # prepare the pinned Pi runtime and extensions
 bun run dev                 # start Vite and Electron together
+bun run setup               # prepare the release bundle in .runtime/
 bun run typecheck           # TypeScript validation
 bun test                    # app-level tests
 bun run build               # production renderer/main build
@@ -155,7 +155,7 @@ bun run electron:build      # setup, build, and package for the current OS
 bun run electron:preview    # preview the production build in Electron
 ```
 
-The first setup may take several minutes because it installs and builds the Pi workspace once. The result is cached in `.runtime/`. Individual agents reuse that prepared runtime and start immediately.
+First project/agent creation may take several minutes because it installs and builds the Pi workspace once. The result is cached in `~/.superhive/runtime/`; individual agents reuse it immediately. `bun run setup` performs the same work into `.runtime/` only for release packaging.
 
 To use a local checkout of `general-kai` or an extension repository during development, set the corresponding environment override before setup. For example, in PowerShell:
 
@@ -189,11 +189,12 @@ Never commit `.env.local`, agent settings, or provider keys. Superhive can start
 - `electron/` — Electron main process, IPC, runtime lifecycle, watchers, persistence, and packaging integration
 - `resources/` — templates, marketplace packages, skills, and default profiles
 - `runtime/` — portable agent launchers for POSIX, CMD, and PowerShell
-- `.runtime/` — generated, ignored Pi runtime and extension bundle
+- `~/.superhive/runtime/` — generated per-user Pi runtime and extension cache
+- `.runtime/` — generated release-bundle staging area
 - `../general-kai/` — canonical Pi runtime source when checked out beside Superhive
 - `../superhive-pi-*` — canonical extension repositories when checked out beside Superhive
 
-The runtime contract is filesystem-based: Superhive seeds an agent folder, copies the selected extensions and launchers into it, then starts the Node launcher with the prepared Pi runtime. No agent process reaches back to GitHub to install itself.
+The runtime contract is filesystem-based: Superhive seeds an agent folder, copies the selected extensions and launchers into it, then starts the Pi launcher. Development uses the prepared per-user runtime, built from sibling sources or pinned clones on first use. Packaged apps use their bundled Electron executable in Node mode and never reach back to GitHub or a developer checkout.
 
 ## Troubleshooting
 
@@ -211,7 +212,7 @@ Install the Electron libraries listed in the Linux section. For headless environ
 
 ### An agent says the Pi runtime is missing
 
-From `superhive/`, run:
+Create or start an agent while online and Superhive will prepare the runtime. For a release bundle, run:
 
 ```bash
 bun run setup
