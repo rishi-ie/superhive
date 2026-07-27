@@ -37,20 +37,20 @@ function AppLayoutShell() {
   const { open: leftSidebarOpen } = useSidebar();
   const location = useLocation();
   const isMarketplace = location.pathname === "/plugins";
+  const isConversation = /^\/(agents|projects)\/[^/]+/.test(location.pathname);
   const [leftSidebarWidth, setLeftSidebarWidth] = React.useState(DEFAULT_WIDTH);
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
   const [isResizingRight, setIsResizingRight] = React.useState(false);
-  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(location.pathname === "/");
-  const [statusBarOpen, setStatusBarOpen] = React.useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(() => location.pathname === "/" || (!isConversation && !isMarketplace));
+  const [statusBarOpen, setStatusBarOpen] = React.useState(isConversation);
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
   const rightResizeRef = React.useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null);
 
   React.useEffect(() => {
-    const shouldOpen = location.pathname !== "/" && location.pathname !== "/plugins";
-    setRightSidebarOpen(shouldOpen);
-    setStatusBarOpen(false);
-  }, [location.pathname]);
+    setRightSidebarOpen(!isConversation && !isMarketplace);
+    setStatusBarOpen(isConversation);
+  }, [isConversation, isMarketplace]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
