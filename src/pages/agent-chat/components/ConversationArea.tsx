@@ -205,7 +205,7 @@ export function ConversationArea({
           if (row.kind === 'pending') {
             return (
               <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
-                <div className="flex items-center gap-2 self-start text-xs text-muted-foreground">
+                <div className="flex select-none items-center gap-2 self-start text-xs text-muted-foreground">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-muted-foreground opacity-50" />
                     <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-muted-foreground" />

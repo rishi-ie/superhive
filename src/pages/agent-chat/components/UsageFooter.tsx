@@ -11,7 +11,7 @@ export function UsageFooter({ usage }: UsageFooterProps) {
   const cost = usage.cost
 
   return (
-    <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+    <div className="ml-auto flex select-none items-center gap-2 text-xs text-muted-foreground">
       <span className="font-mono">
         ↑{fmt(usage.input)} ↓{fmt(usage.output)}
         {usage.cacheRead ? ` R${fmt(usage.cacheRead)}` : ''}

@@ -39,7 +39,7 @@ function TimelineItemRowBase({
 }: TimelineItemRowProps) {
   if (item.kind === 'thinking') {
     return (
-      <li className="flex items-start gap-2 pb-3">
+      <li className="flex select-none items-start gap-2 pb-3">
         <Bullet>
           <HugeIcon icon={BulbIcon} size={15} className="text-muted-foreground" />
         </Bullet>
@@ -52,7 +52,7 @@ function TimelineItemRowBase({
 
   if (item.kind === 'planning') {
     return (
-      <li className="flex items-start gap-2 pb-3">
+      <li className="flex select-none items-start gap-2 pb-3">
         <Bullet>
           <HugeIcon icon={BulbIcon} size={15} className="text-muted-foreground" />
         </Bullet>
@@ -67,7 +67,7 @@ function TimelineItemRowBase({
     const display: ToolDisplay | undefined = getToolDisplay(item.toolName)
     const Icon = display?.icon ?? FALLBACK_ICON
     return (
-      <li className="flex items-start gap-2 pb-3">
+      <li className="flex select-none items-start gap-2 pb-3">
         <Bullet>
           <Icon className="size-3.5 text-muted-foreground" />
         </Bullet>
@@ -87,7 +87,7 @@ function TimelineItemRowBase({
 
   if (item.kind === 'warning') {
     return (
-      <li className="flex items-start gap-2 pb-3">
+      <li className="flex select-none items-start gap-2 pb-3">
         <Bullet>
           <span aria-hidden className="text-amber-500">⚠</span>
         </Bullet>
@@ -100,7 +100,7 @@ function TimelineItemRowBase({
 
   if (item.kind === 'error') {
     return (
-      <li className="flex items-start gap-2 pb-3">
+      <li className="flex select-none items-start gap-2 pb-3">
         <Bullet>
           <span aria-hidden className="text-destructive">❌</span>
         </Bullet>

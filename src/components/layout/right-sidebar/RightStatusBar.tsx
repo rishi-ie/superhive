@@ -90,7 +90,7 @@ function ProjectWorkboard({ projectId }: { projectId: string }) {
         <p className="text-xs text-muted-foreground">{currentSummary ?? "Waiting for project activity"}</p>
       </section>
 
-      <section className="flex flex-col gap-2 border-t border-sidebar-border/70 pt-4">
+      <section className="flex flex-col gap-2 pt-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium text-muted-foreground">Plan progress</h2>
           <span className="text-xs text-muted-foreground">{counts.completed} / {counts.total}</span>
@@ -103,7 +103,7 @@ function ProjectWorkboard({ projectId }: { projectId: string }) {
         </p>
       </section>
 
-      <section className="flex flex-col gap-2 border-t border-sidebar-border/70 pt-4">
+      <section className="flex flex-col gap-2 pt-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium text-muted-foreground">Worker hive</h2>
           <span className="text-xs text-muted-foreground">{staff.length}</span>
@@ -130,7 +130,7 @@ function ProjectWorkboard({ projectId }: { projectId: string }) {
         )}
       </section>
 
-      <section className="flex flex-col gap-2 border-t border-sidebar-border/70 pt-4">
+      <section className="flex flex-col gap-2 pt-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium text-muted-foreground">Needs attention</h2>
           <span className="text-xs text-muted-foreground">{attention.length}</span>
@@ -188,7 +188,7 @@ export function RightStatusBar({ open, rightOffset, isPopover, onDismiss }: Righ
       <aside
         aria-label="Project status panel"
         role="dialog"
-        className={`absolute right-3 top-14 flex max-h-[calc(100vh-4.5rem)] w-[304px] flex-col overflow-hidden rounded-3xl border border-sidebar-border bg-sidebar-bg shadow-xl shadow-black/15 will-change-[opacity,transform] transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+        className={`absolute right-3 top-14 flex max-h-[calc(100vh-4.5rem)] w-[304px] flex-col overflow-hidden rounded-3xl bg-sidebar-bg shadow-xl shadow-black/15 will-change-[opacity,transform] transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
           open ? "pointer-events-auto translate-x-0 opacity-100 delay-50" : "translate-x-2 opacity-0"
         }`}
       >

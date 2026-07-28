@@ -10,12 +10,12 @@ export const composerSendButtonClass =
   'flex size-10 shrink-0 items-center justify-center rounded-full text-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40'
 
 export const composerTextareaClass =
-  'block min-h-11 max-h-[152px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-5 py-2.5 text-sm font-semibold leading-6 text-sidebar-foreground placeholder:font-normal placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
+  'block min-h-11 max-h-[152px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-5 py-2.5 text-sm font-normal leading-6 text-sidebar-foreground placeholder:font-normal placeholder:text-muted-foreground outline-none focus-visible:ring-0 focus-visible:ring-offset-0'
 
 export function ChatComposerFrame({ children, className }: React.PropsWithChildren<{ className?: string }>) {
   return (
     <div className={cn('mx-auto w-full max-w-4xl px-4 py-4 sm:px-6', className)}>
-      <div className="relative overflow-visible rounded-3xl border border-border/70 bg-[#1E1E1E] shadow-sm">
+      <div className="relative overflow-visible rounded-3xl bg-[#1E1E1E] shadow-sm">
         {children}
       </div>
     </div>

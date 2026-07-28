@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 import { activeComposerTrigger } from './ProjectChatComposer'
-import { nextEnabledIndex, resolveComposerCommands } from './composer-commands'
+import { groupComposerCommands, nextEnabledIndex, resolveComposerCommands } from './composer-commands'
 
 test('recognizes slash and at queries at the active cursor', () => {
   expect(activeComposerTrigger('/doc', 4)).toMatchObject({ kind: '/', query: 'doc', start: 0 })
@@ -38,4 +38,19 @@ test('keeps / skill-only and @ plugin/MCP-only when resolving marketplace capabi
   expect(slash[0]?.disabled).toBeUndefined()
   expect(at).toHaveLength(1)
   expect(at[0]).toMatchObject({ action: 'plugin', value: 'mcp', disabled: true, disabledReason: 'Install from Marketplace first' })
+})
+
+test('groups visible commands without rendering empty menu sections', () => {
+  const groups = groupComposerCommands([
+    { id: 'file', label: 'Files', keywords: [], action: 'attachment' },
+    { id: 'skill', label: 'Document', keywords: [], action: 'skill' },
+    { id: 'plugin', label: 'Drive', keywords: [], action: 'plugin' },
+  ])
+
+  expect(groups.map(({ id, commands }) => [id, commands.map((command) => command.id)])).toEqual([
+    ['add', ['file']],
+    ['skills', ['skill']],
+    ['plugins', ['plugin']],
+  ])
+  expect(groupComposerCommands([{ id: 'skill', label: 'Document', keywords: [], action: 'skill' }]).map((group) => group.id)).toEqual(['skills'])
 })

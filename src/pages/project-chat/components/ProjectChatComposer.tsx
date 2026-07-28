@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ArrowUpIcon, PlusIcon, Stop, XIcon } from '@phosphor-icons/react'
+import { ArrowUpIcon, CodeIcon, FolderIcon, LightbulbIcon, PaperclipIcon, PlugIcon, PlusIcon, PuzzlePieceIcon, RocketLaunchIcon, Stop, TargetIcon, XIcon } from '@phosphor-icons/react'
 import { Icon } from '@/components/ui/icon'
 import { HugeIcon } from '@/components/ui/huge-icon'
 import { Mic02Icon } from '@hugeicons/core-free-icons'
@@ -12,7 +12,7 @@ import { useMarketplace } from '@/flows/marketplace'
 import type { ComposerAttachment, ComposerContext, TurnInput } from '@/models/assistant-message'
 import type { ComposerCommandFiles } from '@/models/composer-command'
 import type { MarketplaceCapabilityRef } from '@/models/marketplace'
-import { filterComposerCommands, nextEnabledIndex, resolveComposerCommands, type ResolvedComposerCommand } from './composer-commands'
+import { filterComposerCommands, groupComposerCommands, nextEnabledIndex, resolveComposerCommands, type ResolvedComposerCommand } from './composer-commands'
 
 type MenuKind = '@' | '/' | null
 
@@ -50,6 +50,7 @@ export function ProjectChatComposer({ agentId, isBusy, isLive, contextPercent, c
         capabilities: marketplaceItems,
       }) : [], [commandFiles, marketplaceItems, menu])
   const shown = React.useMemo(() => filterComposerCommands(commands, query), [commands, query])
+  const groups = React.useMemo(() => groupComposerCommands(shown), [shown])
   const highlighted = shown.length === 0 ? -1 : shown[Math.min(selected, shown.length - 1)]?.disabled
     ? nextEnabledIndex(shown, Math.min(selected, shown.length - 1) - 1, 1)
     : Math.min(selected, shown.length - 1)
@@ -117,12 +118,13 @@ export function ProjectChatComposer({ agentId, isBusy, isLive, contextPercent, c
   return (
     <ChatComposerFrame>
       <div className="relative">
-        {menu && <div className="absolute bottom-full left-0 right-0 mb-2 max-h-72 overflow-y-auto rounded-2xl border border-border bg-popover p-2 shadow-xl z-20">
-          <span className="px-2 text-xs text-muted-foreground">{menu === '@' ? 'Plugins & MCP adapters' : 'Skills'}</span>
-          {shown.map((command, index) => <button key={command.id} type="button" disabled={command.disabled} title={command.disabledReason} onClick={() => void choose(command)} className={`flex w-full rounded-lg px-3 py-2 text-left text-sm ${command.disabled ? 'cursor-not-allowed opacity-45' : 'hover:bg-muted'} ${index === highlighted ? 'bg-muted' : ''}`}><span className="mr-3 text-muted-foreground">{command.action === 'skill' ? '/' : '@'}</span><span>{command.label}{command.description && <span className="ml-2 text-muted-foreground">{command.description}</span>}{command.disabledReason && <span className="ml-2 text-muted-foreground">{command.disabledReason}</span>}</span></button>)}
-          {!shown.length && <span className="block px-3 py-2 text-sm text-muted-foreground">No matches</span>}
-          {isPreparing && <span className="block px-3 py-2 text-xs text-muted-foreground">Preparing capability for this agent…</span>}
-        </div>}
+        {menu && <ComposerCommandMenu
+          groups={groups}
+          highlighted={highlighted}
+          isPreparing={isPreparing}
+          onChoose={choose}
+          shown={shown}
+        />}
         {attachments.length > 0 && <div className="flex gap-2 overflow-x-auto px-4 pt-3 pb-1">
           {attachments.map((attachment) => <div key={attachment.id} className="relative flex min-w-28 shrink-0 items-center gap-2 rounded-xl border border-border bg-background/40 p-2">
             {attachment.kind === 'image' ? <img src={`file://${attachment.path}`} className="size-12 rounded object-cover" /> : <span className="text-xl">{attachment.kind === 'folder' ? '▱' : '▤'}</span>}
@@ -151,6 +153,99 @@ export function ProjectChatComposer({ agentId, isBusy, isLive, contextPercent, c
       </div>
     </ChatComposerFrame>
   )
+}
+
+function ComposerCommandMenu({
+  groups,
+  highlighted,
+  isPreparing,
+  onChoose,
+  shown,
+}: {
+  groups: ReturnType<typeof groupComposerCommands>
+  highlighted: number
+  isPreparing: boolean
+  onChoose: (command: ResolvedComposerCommand) => Promise<void>
+  shown: ResolvedComposerCommand[]
+}) {
+  return (
+    <div
+      aria-label="Composer commands"
+      className="absolute bottom-full left-0 right-0 z-20 mb-2 max-h-[min(36rem,calc(100vh-10rem))] overflow-y-auto rounded-[28px] border border-[#303030] bg-[#1E1E1E] p-2 shadow-2xl shadow-black/35"
+      role="listbox"
+    >
+      {groups.map((group) => (
+        <section key={group.id} className="px-1 pb-3 pt-1 first:pt-2 last:pb-1">
+          <h2 className="mb-1 px-2 text-sm font-normal text-[#7F7F7F]">{group.label}</h2>
+          <div className="flex flex-col gap-0.5">
+            {group.commands.map((command) => (
+              <ComposerCommandRow
+                key={command.id}
+                command={command}
+                highlighted={shown.indexOf(command) === highlighted}
+                onChoose={onChoose}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+      {shown.length === 0 && <p className="px-3 py-3 text-base text-[#8A8A8A]">No matches</p>}
+      {isPreparing && <p className="px-3 pb-2 pt-1 text-sm text-[#8A8A8A]">Preparing capability for this agent…</p>}
+    </div>
+  )
+}
+
+function ComposerCommandRow({
+  command,
+  highlighted,
+  onChoose,
+}: {
+  command: ResolvedComposerCommand
+  highlighted: boolean
+  onChoose: (command: ResolvedComposerCommand) => Promise<void>
+}) {
+  const presentation = commandPresentation(command)
+  return (
+    <button
+      aria-selected={highlighted}
+      className={`flex min-h-12 w-full select-none items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+        command.disabled
+          ? 'cursor-not-allowed opacity-40'
+          : highlighted
+            ? 'bg-[#2A2A2A] text-[#F5F5F5]'
+            : 'text-[#E8E8E8] hover:bg-[#272727]'
+      }`}
+      disabled={command.disabled}
+      onClick={() => void onChoose(command)}
+      role="option"
+      title={command.disabledReason}
+      type="button"
+    >
+      <span className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${presentation.tone}`}>
+        <Icon icon={presentation.icon} className="size-5" weight="regular" />
+      </span>
+      <span className="flex min-w-0 items-baseline gap-2 overflow-hidden">
+        <span className="shrink-0 text-base leading-6">{command.label}</span>
+        {command.description && <span className="truncate text-base leading-6 text-[#898989]">{command.description}</span>}
+      </span>
+    </button>
+  )
+}
+
+function commandPresentation(command: ResolvedComposerCommand) {
+  if (command.action === 'attachment') {
+    return { icon: command.value === 'folder' ? FolderIcon : PaperclipIcon, tone: 'text-[#D9D9D9]' }
+  }
+  if (command.action === 'goal') return { icon: TargetIcon, tone: 'text-[#D9D9D9]' }
+  if (command.action === 'mode') {
+    return command.value === 'plan'
+      ? { icon: LightbulbIcon, tone: 'text-[#D9D9D9]' }
+      : { icon: RocketLaunchIcon, tone: 'text-[#D9D9D9]' }
+  }
+  if (command.action === 'skill') return { icon: CodeIcon, tone: 'bg-violet-500/15 text-violet-300' }
+  return command.capability?.kind === 'mcp-adapter'
+    ? { icon: PlugIcon, tone: 'bg-emerald-500/15 text-emerald-300' }
+    : { icon: PuzzlePieceIcon, tone: 'bg-sky-500/15 text-sky-300' }
 }
 
 function Chip({ label, prefix = '@', onRemove, onClick }: { label: string; prefix?: '@' | '/'; onRemove: () => void; onClick?: () => void }) {

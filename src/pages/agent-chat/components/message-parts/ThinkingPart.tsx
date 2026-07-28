@@ -15,7 +15,7 @@ export function ThinkingPart({ text, isStreaming }: ThinkingPartProps) {
     else setOpen(false)
   }, [isStreaming])
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible className="select-none" open={open} onOpenChange={setOpen}>
       <div className="rounded-card px-3 py-2 pl-0">
         <CollapsibleTrigger className="flex items-center gap-1.5 text-xs cursor-pointer">
           <span>

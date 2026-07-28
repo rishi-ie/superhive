@@ -14,6 +14,14 @@ export interface ResolvedComposerCommand {
   capability?: MarketplaceItem
 }
 
+export type ComposerCommandGroupId = 'add' | 'skills' | 'plugins'
+
+export interface ComposerCommandGroup {
+  id: ComposerCommandGroupId
+  label: string
+  commands: ResolvedComposerCommand[]
+}
+
 type Catalogs = { skills?: CommandCatalogItem[]; plugins?: CommandCatalogItem[]; activeSkills?: string[]; activePlugins?: string[]; capabilities?: MarketplaceItem[] }
 
 function labelFor(path: string): string { return path.split('/').pop() || path }
@@ -63,6 +71,21 @@ export function filterComposerCommands(items: ResolvedComposerCommand[], query: 
   const needle = query.trim().toLowerCase()
   if (!needle) return items
   return items.filter((item) => [item.id, item.label, item.description ?? '', ...item.keywords].some((value) => value.toLowerCase().includes(needle)))
+}
+
+export function groupComposerCommands(items: ResolvedComposerCommand[]): ComposerCommandGroup[] {
+  const groups: ComposerCommandGroup[] = [
+    { id: 'add', label: 'Add', commands: [] },
+    { id: 'skills', label: 'Skills', commands: [] },
+    { id: 'plugins', label: 'Plugins', commands: [] },
+  ]
+
+  for (const item of items) {
+    const group = item.action === 'skill' ? groups[1] : item.action === 'plugin' ? groups[2] : groups[0]
+    group?.commands.push(item)
+  }
+
+  return groups.filter((group) => group.commands.length > 0)
 }
 
 export function nextEnabledIndex(items: ResolvedComposerCommand[], from: number, direction: 1 | -1): number {

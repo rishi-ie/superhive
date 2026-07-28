@@ -142,7 +142,7 @@ export function AssistantMessage({
                 </React.Fragment>
               ))}
               {!hasTrace ? (
-                <div className="text-[15px] leading-6 text-muted-foreground">
+                <div className="select-none text-[15px] leading-6 text-muted-foreground">
                   No detailed activity was emitted for this response.
                 </div>
               ) : !traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
@@ -158,7 +158,7 @@ export function AssistantMessage({
       )}
 
       {frozen && !agentResponseActive ? (
-        <div className="mt-2 flex items-center gap-gap-tight [--muted-foreground:#707070]">
+        <div className="mt-2 flex select-none items-center gap-gap-tight [--muted-foreground:#707070]">
           <Button
             size="icon-sm"
             variant="ghost"

@@ -42,15 +42,15 @@ function AppLayoutShell() {
   const [rightSidebarWidth, setRightSidebarWidth] = React.useState(DEFAULT_RIGHT_WIDTH);
   const [isResizingLeft, setIsResizingLeft] = React.useState(false);
   const [isResizingRight, setIsResizingRight] = React.useState(false);
-  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(() => location.pathname === "/" || (!isConversation && !isMarketplace));
+  const [rightSidebarOpen, setRightSidebarOpen] = React.useState(false);
   const [statusBarOpen, setStatusBarOpen] = React.useState(isConversation);
   const leftContainerRef = React.useRef<HTMLDivElement>(null);
   const rightResizeRef = React.useRef<{ pointerId: number; startX: number; startWidth: number } | null>(null);
 
   React.useEffect(() => {
-    setRightSidebarOpen(!isConversation && !isMarketplace);
+    setRightSidebarOpen(false);
     setStatusBarOpen(isConversation);
-  }, [isConversation, isMarketplace]);
+  }, [location.pathname, isConversation]);
 
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();

@@ -24,7 +24,7 @@ function ToolCallGroupRowBase({ items, frozen }: ToolCallGroupRowProps) {
   const hasInFlight = !frozen && items.some((item) => item.state !== 'complete' && item.state !== 'error')
 
   return (
-    <li className="flex items-start gap-2 pb-3">
+    <li className="flex select-none items-start gap-2 pb-3">
       <span
         aria-hidden
         className="flex size-3.5 shrink-0 items-center justify-center rounded-full bg-background"
