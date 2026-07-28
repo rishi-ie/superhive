@@ -28,7 +28,7 @@ export function UnassignAgentDialog(props: UnassignAgentDialogProps) {
 </AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={props.onCancel}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel>Cancel</AlertDialogCancel>
 					<AlertDialogAction onClick={props.onConfirm}>Unlink anyway</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

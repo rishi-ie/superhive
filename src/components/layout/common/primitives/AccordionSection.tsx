@@ -49,7 +49,7 @@ export function AccordionSection({
         >
           {leadingIcon && <div className="size-4 flex-shrink-0">{open && openLeadingIcon ? openLeadingIcon : leadingIcon}</div>}
           <span className="flex-1 truncate text-left">{label}</span>
-          <div className={cn('mr-2 flex size-5 shrink-0 items-center justify-center', hoverActions && 'group-hover/project:hidden')}>{trailing}</div>
+          <div className={cn('flex size-5 shrink-0 items-center justify-center', hoverActions && 'group-hover/project:hidden')}>{trailing}</div>
           {!leadingIcon && <Icon icon={CaretRightIcon} className={cn('size-4 flex-shrink-0 transition-transform duration-150', open && 'rotate-90')} />}
         </button>
 

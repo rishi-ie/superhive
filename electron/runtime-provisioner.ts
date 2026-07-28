@@ -8,7 +8,8 @@ import { RUNTIME_COMPATIBILITY_VERSION } from '../scripts/runtime-compatibility'
 import { loadRuntimeBundleManifest } from './runtime-bundle-manifest'
 
 const PI_ENTRY = ['general-kai', 'pi', 'packages', 'coding-agent', 'dist', 'cli.js']
-const EXTENSIONS = Object.keys(loadRuntimeBundleManifest().extensions)
+const BUNDLE_MANIFEST = loadRuntimeBundleManifest()
+const EXTENSIONS = Object.keys(BUNDLE_MANIFEST.extensions)
 
 let preparing: Promise<void> | null = null
 
@@ -18,8 +19,14 @@ export function isRuntimePrepared(root = runtimeRoot()): boolean {
 	if (!assetsReady) return false
 	if (isPackagedApp()) return true
 	try {
-		const manifest = JSON.parse(readFileSync(join(root, 'runtime-manifest.json'), 'utf8')) as { version?: number }
-		return manifest.version === RUNTIME_COMPATIBILITY_VERSION
+		const manifest = JSON.parse(readFileSync(join(root, 'runtime-manifest.json'), 'utf8')) as {
+			version?: number
+			generalKaiRef?: string
+			extensions?: Record<string, string>
+		}
+		return manifest.version === RUNTIME_COMPATIBILITY_VERSION &&
+			manifest.generalKaiRef === BUNDLE_MANIFEST.generalKai.ref &&
+			EXTENSIONS.every((name) => manifest.extensions?.[name] === BUNDLE_MANIFEST.extensions[name])
 	} catch {
 		return false
 	}

@@ -21,21 +21,45 @@ test('prepared truth extension boots with Pi native MiniMax routing', async () =
 			managedBy: 'superhive-pi-truth@1#1',
 			model: { provider: 'minimax', name: 'MiniMax-M3' },
 			providers: { minimax: { apiKey: 'test-key', baseUrl: 'https://api.minimax.io/anthropic' } },
+			defaultThinkingLevel: 'medium',
+			runtime: { thinkingLevel: 'medium' },
 		}))
 
-		const output = await new Promise<string>((resolve, reject) => {
+		const state = await new Promise<{
+			model?: { reasoning?: boolean }
+			thinkingLevel?: string
+		}>((resolve, reject) => {
 			let stdout = ''
 			let stderr = ''
 			const timer = setTimeout(() => reject(new Error(`Timed out while booting Pi: ${stderr}`)), 8_000)
+			let stateRequested = false
 			child = spawn('node', [join(process.cwd(), 'runtime', 'agent-runner.mjs'), '--mode', 'rpc', '--no-session'], {
 				cwd: agentDir,
 				env: { ...process.env, PI_NODE: 'node', PI_DIR: join(process.cwd(), '.runtime', 'general-kai', 'pi'), AGENT_DIR: agentDir },
 			})
 			child.stdout?.on('data', (chunk: Buffer) => {
 				stdout += chunk.toString('utf8')
-				if (stdout.includes('Catalog:')) {
-					clearTimeout(timer)
-					resolve(stdout)
+				if (stdout.includes('Catalog:') && !stateRequested) {
+					stateRequested = true
+					child?.stdin?.write(`${JSON.stringify({ id: 'state', type: 'get_state' })}\n`)
+				}
+				for (const line of stdout.split('\n')) {
+					try {
+						const response = JSON.parse(line) as {
+							id?: string
+							success?: boolean
+							data?: {
+								model?: { reasoning?: boolean }
+								thinkingLevel?: string
+							}
+						}
+						if (response.id === 'state' && response.success && response.data) {
+							clearTimeout(timer)
+							resolve(response.data)
+						}
+					} catch {
+						// Extension notifications and partial JSONL lines are ignored.
+					}
 				}
 			})
 			child.stderr?.on('data', (chunk: Buffer) => { stderr += chunk.toString('utf8') })
@@ -44,7 +68,8 @@ test('prepared truth extension boots with Pi native MiniMax routing', async () =
 				reject(error)
 			})
 		})
-		expect(output).toContain('Catalog:')
+		expect(state.model?.reasoning).toBe(true)
+		expect(state.thinkingLevel).toBe('medium')
 	} finally {
 		child?.kill('SIGTERM')
 		rmSync(agentDir, { recursive: true, force: true })

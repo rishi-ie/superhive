@@ -1,7 +1,11 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { join, resolve } from 'node:path'
-import { applyRuntimeCompatibility, RUNTIME_COMPATIBILITY_VERSION } from './runtime-compatibility'
+import {
+	applyRuntimeCompatibility,
+	RUNTIME_COMPATIBILITY_VERSION,
+	runtimeAssetNeedsRefresh,
+} from './runtime-compatibility'
 import { loadRuntimeBundleManifest } from '../electron/runtime-bundle-manifest'
 
 const root = resolve(import.meta.dir, '..')
@@ -15,6 +19,16 @@ const extensionSpecs = Object.entries(runtimeManifest.extensions).map(([name, re
 	`https://github.com/rishi-ie/${name}.git`,
 	ref,
 ] as const)
+const preparedRuntimeManifest = (() => {
+	try {
+		return JSON.parse(readFileSync(join(runtimeRoot, 'runtime-manifest.json'), 'utf8')) as {
+			generalKaiRef?: string
+			extensions?: Record<string, string>
+		}
+	} catch {
+		return {}
+	}
+})()
 
 function command(name: string, args: string[], cwd?: string): string {
 	try {
@@ -97,11 +111,18 @@ function prepareGeneralKai(): string {
 			? sibling
 			: null
 	const destination = join(runtimeRoot, 'general-kai')
-	const refresh = process.env.SUPERHIVE_REFRESH_RUNTIME === '1'
+	const refresh = runtimeAssetNeedsRefresh(
+		preparedRuntimeManifest.generalKaiRef,
+		generalKaiRef,
+		process.env.SUPERHIVE_REFRESH_RUNTIME === '1',
+	)
 	const runtimeReady = existsSync(join(destination, 'pi', 'packages', 'coding-agent', 'dist', 'cli.js'))
 	if (source && resolve(source) !== resolve(destination) && (!runtimeReady || refresh)) {
 		rmSync(destination, { recursive: true, force: true })
 		copyTree(source, destination)
+	}
+	if (!source && refresh) {
+		rmSync(destination, { recursive: true, force: true })
 	}
 	if (!existsSync(join(destination, 'pi', 'package.json'))) {
 		mkdirSync(runtimeRoot, { recursive: true })
@@ -129,7 +150,12 @@ function prepareExtensions(generalKaiDir: string): void {
 	for (const [name, url, ref] of extensionSpecs) {
 		const destination = join(destinationRoot, name)
 		const local = localCandidate(name) ?? join(generalKaiDir, 'extensions', name)
-		if (existsSync(join(destination, 'index.ts')) && process.env.SUPERHIVE_REFRESH_RUNTIME !== '1') {
+		const refresh = runtimeAssetNeedsRefresh(
+			preparedRuntimeManifest.extensions?.[name],
+			ref,
+			process.env.SUPERHIVE_REFRESH_RUNTIME === '1',
+		)
+		if (existsSync(join(destination, 'index.ts')) && !refresh) {
 			console.log(`[setup] ${name} already prepared`)
 			continue
 		}
@@ -138,6 +164,7 @@ function prepareExtensions(generalKaiDir: string): void {
 			copyTree(local, destination)
 			console.log(`[setup] prepared ${name} from local source`)
 		} else {
+			rmSync(destination, { recursive: true, force: true })
 			cloneAt(name, url, ref, destination)
 			console.log(`[setup] prepared ${name} from pinned source`)
 		}

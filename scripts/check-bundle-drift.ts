@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { RUNTIME_COMPATIBILITY_VERSION } from './runtime-compatibility'
 
 const root = resolve(import.meta.dir, '..')
 const resourcesManifestPath = join(root, 'resources', 'runtime', 'manifest.json')
@@ -12,6 +13,9 @@ function readJson(path: string): Record<string, unknown> {
 
 const resources = readJson(resourcesManifestPath)
 const prepared = readJson(preparedManifestPath)
+if (prepared.version !== RUNTIME_COMPATIBILITY_VERSION) {
+	throw new Error(`Runtime compatibility drift detected: expected ${RUNTIME_COMPATIBILITY_VERSION} but prepared ${String(prepared.version)}`)
+}
 const expectedGeneralKai = (resources.generalKai as { ref?: string } | undefined)?.ref
 const actualGeneralKai = prepared.generalKaiRef
 if (!expectedGeneralKai || actualGeneralKai !== expectedGeneralKai) {
