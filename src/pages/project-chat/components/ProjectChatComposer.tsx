@@ -175,8 +175,8 @@ function ComposerCommandMenu({
       role="listbox"
     >
       {groups.map((group) => (
-        <section key={group.id} className="px-1 pb-3 pt-1 first:pt-2 last:pb-1">
-          <h2 className="mb-1 px-2 text-sm font-normal text-[#7F7F7F]">{group.label}</h2>
+        <section key={group.id} className="px-1 pb-2 pt-1 first:pt-1.5 last:pb-0.5">
+          <h2 className="mb-0.5 px-2 text-xs font-normal text-[#7F7F7F]">{group.label}</h2>
           <div className="flex flex-col gap-0.5">
             {group.commands.map((command) => (
               <ComposerCommandRow
@@ -189,8 +189,8 @@ function ComposerCommandMenu({
           </div>
         </section>
       ))}
-      {shown.length === 0 && <p className="px-3 py-3 text-base text-[#8A8A8A]">No matches</p>}
-      {isPreparing && <p className="px-3 pb-2 pt-1 text-sm text-[#8A8A8A]">Preparing capability for this agent…</p>}
+      {shown.length === 0 && <p className="px-3 py-2 text-sm text-[#8A8A8A]">No matches</p>}
+      {isPreparing && <p className="px-3 pb-1.5 pt-1 text-xs text-[#8A8A8A]">Preparing capability for this agent…</p>}
     </div>
   )
 }
@@ -208,7 +208,7 @@ function ComposerCommandRow({
   return (
     <button
       aria-selected={highlighted}
-      className={`flex min-h-12 w-full select-none items-center gap-3 rounded-2xl px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
+      className={`flex min-h-10 w-full select-none items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring ${
         command.disabled
           ? 'cursor-not-allowed opacity-40'
           : highlighted
@@ -221,12 +221,12 @@ function ComposerCommandRow({
       title={command.disabledReason}
       type="button"
     >
-      <span className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${presentation.tone}`}>
-        <Icon icon={presentation.icon} className="size-5" weight="regular" />
+      <span className={`flex size-6 shrink-0 items-center justify-center rounded-md ${presentation.tone}`}>
+        <Icon icon={presentation.icon} className="size-4" weight="regular" />
       </span>
-      <span className="flex min-w-0 items-baseline gap-2 overflow-hidden">
-        <span className="shrink-0 text-base leading-6">{command.label}</span>
-        {command.description && <span className="truncate text-base leading-6 text-[#898989]">{command.description}</span>}
+      <span className="flex min-w-0 items-baseline gap-1.5 overflow-hidden">
+        <span className="shrink-0 text-sm leading-5">{command.label}</span>
+        {command.description && <span className="truncate text-sm leading-5 text-[#898989]">{command.description}</span>}
       </span>
     </button>
   )
