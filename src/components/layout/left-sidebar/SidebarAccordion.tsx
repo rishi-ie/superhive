@@ -1,20 +1,24 @@
 import * as React from 'react';
 import { useLocation } from 'react-router-dom';
+import { ArrowsDownUpIcon, PlusIcon } from '@phosphor-icons/react';
+import { Icon } from '@/components/ui/icon';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { listProjects } from '@/flows/projects/crud/list-projects';
 import { useAgentsListVersion } from '@/flows/agents/runtime';
 import { useAllAgentStatuses } from '@/flows/agents/runtime';
 import { useProjectsListVersion } from '@/flows/projects/runtime';
+import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
 import type { Agent } from '@/types/electron';
 import type { Project } from '@/storage/types';
 import { PinnedSection } from './sections/PinnedSection';
 import { ProjectsSection } from './sections/ProjectsSection';
 
+const PINNED_PROJECTS_KEY = 'superhive.sidebar.pinned-project-ids'
 const PINNED_AGENTS_KEY = 'superhive.sidebar.pinned-agent-ids'
 
-function loadPinnedIds(): string[] {
+function loadPinnedProjectIds(): string[] {
   try {
-    const value = JSON.parse(window.localStorage.getItem(PINNED_AGENTS_KEY) ?? '[]')
+    const value = JSON.parse(window.localStorage.getItem(PINNED_PROJECTS_KEY) ?? '[]')
     return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []
   } catch { return [] }
 }
@@ -23,8 +27,9 @@ export function SidebarAccordion() {
   const location = useLocation();
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [pinnedIds, setPinnedIds] = React.useState<string[]>(loadPinnedIds);
+  const [pinnedProjectIds, setPinnedProjectIds] = React.useState<string[]>(loadPinnedProjectIds);
   const [completedIds, setCompletedIds] = React.useState<Set<string>>(() => new Set());
+  const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   const previousStatuses = React.useRef(new Map<string, string>());
   const currentAgentId = location.pathname.match(/^\/agents\/([^/]+)/)?.[1]
   const currentProjectId = location.pathname.match(/^\/projects\/([^/]+)/)?.[1]
@@ -87,18 +92,33 @@ export function SidebarAccordion() {
     if (coordinatorId) openAgent(coordinatorId)
   }, [agents, currentProjectId])
 
-  React.useEffect(() => { window.localStorage.setItem(PINNED_AGENTS_KEY, JSON.stringify(pinnedIds)) }, [pinnedIds])
+  React.useEffect(() => {
+    window.localStorage.removeItem(PINNED_AGENTS_KEY)
+    window.localStorage.setItem(PINNED_PROJECTS_KEY, JSON.stringify(pinnedProjectIds))
+  }, [pinnedProjectIds])
 
-  const togglePin = (id: string) => setPinnedIds((current) => current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id])
+  const toggleProjectPin = (id: string) => setPinnedProjectIds((current) => current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id])
   const openAgent = (id: string) => setCompletedIds((current) => { const next = new Set(current); next.delete(id); return next })
-  const pinnedAgents = pinnedIds.map((id) => agents.find((agent) => agent.id === id)).filter((agent): agent is Agent => Boolean(agent))
-  const pinnedSet = new Set(pinnedIds)
+  const pinnedProjectSet = new Set(pinnedProjectIds)
+  const pinnedProjects = projectItems.filter((project) => pinnedProjectSet.has(project.id))
+  const unpinnedProjects = projectItems.filter((project) => !pinnedProjectSet.has(project.id))
   const coordinatorStates = new Map(agents.filter((agent) => agent.agentKind === 'project-coordinator').map((agent) => [agent.id, workingIds.has(agent.id) ? 'working' as const : completedIds.has(agent.id) ? 'completed' as const : undefined]).filter((entry): entry is [string, 'working' | 'completed'] => Boolean(entry[1])))
 
   return (
     <div className="flex flex-col gap-gap-tight px-row">
-      <PinnedSection items={pinnedAgents} workingIds={workingIds} completedIds={completedIds} onOpen={openAgent} onTogglePin={togglePin} />
-      <ProjectsSection items={projectItems} agents={agents} workingIds={workingIds} completedIds={completedIds} pinnedIds={pinnedSet} coordinatorStates={coordinatorStates} onOpen={openAgent} onTogglePin={togglePin} />
+      <PinnedSection items={pinnedProjects} agents={agents} workingIds={workingIds} completedIds={completedIds} pinnedProjectIds={pinnedProjectSet} coordinatorStates={coordinatorStates} onOpen={openAgent} onToggleProjectPin={toggleProjectPin} />
+      <div className="group flex h-8 w-full items-center gap-stack px-row text-sm font-medium text-sidebar-projects-label-fg">
+        <span>Projects</span>
+        <div className="ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          <button type="button" onClick={() => setCreateProjectOpen(true)} className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground" title="Add project">
+            <Icon icon={PlusIcon} className="size-4" />
+          </button>
+          <button type="button" className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground" title="Reorder projects">
+            <Icon icon={ArrowsDownUpIcon} className="size-4" />
+          </button>
+        </div>
+      </div>
+      <ProjectsSection items={unpinnedProjects} agents={agents} workingIds={workingIds} completedIds={completedIds} pinnedProjectIds={pinnedProjectSet} coordinatorStates={coordinatorStates} onOpen={openAgent} onToggleProjectPin={toggleProjectPin} />
     </div>
   );
 }

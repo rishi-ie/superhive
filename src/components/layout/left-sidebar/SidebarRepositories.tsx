@@ -1,5 +1,5 @@
 import { Icon } from "@/components/ui/icon";
-import { PlusIcon, HexagonIcon, MagnifyingGlassIcon, UserIcon, ArrowsDownUpIcon, PaperPlaneTiltIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
+import { HexagonIcon, MagnifyingGlassIcon, UserIcon, PaperPlaneTiltIcon, PuzzlePieceIcon } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import {
   SidebarGroup,
@@ -9,12 +9,10 @@ import {
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
 import { goBackHome, goToAgents, goToPlugins } from "@/flows/navigation";
-import { useOpenCreateProject } from "@/flows/projects/ui/open-create-project";
 import { useCommandPalette } from "@/flows/ui/use-command-palette";
 
 export function SidebarRepositories() {
   const navigate = useNavigate();
-  const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   return (
     <SidebarGroup>
@@ -70,27 +68,6 @@ export function SidebarRepositories() {
               <span>Marketplace</span>
             </button>
           </SidebarMenuItem>
-          <div className="mt-2 group flex h-8 w-full cursor-default items-center gap-stack px-row text-sm font-medium text-sidebar-projects-label-fg">
-            <span>Projects</span>
-            <div className="ml-auto flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setCreateProjectOpen(true); }}
-              className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
-                title="Add project"
-              >
-                <Icon icon={PlusIcon} className="size-4" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); }}
-              className="flex size-6 cursor-default items-center justify-center rounded-icon text-sidebar-projects-label-fg hover:bg-sidebar-accent-l hover:text-foreground"
-                title="Reorder projects"
-              >
-                <Icon icon={ArrowsDownUpIcon} className="size-4" />
-              </button>
-            </div>
-          </div>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

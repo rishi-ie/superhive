@@ -11,8 +11,9 @@ interface AccordionSectionProps {
   onClick?: () => void;
   labelClassName?: string;
   leadingIcon?: ReactNode;
+  openLeadingIcon?: ReactNode;
   trailing?: ReactNode;
-  swapLeadingOnHover?: boolean;
+  hoverActions?: ReactNode;
 }
 
 export function AccordionSection({
@@ -22,11 +23,11 @@ export function AccordionSection({
   onClick,
   labelClassName,
   leadingIcon,
+  openLeadingIcon,
   trailing,
-  swapLeadingOnHover = false,
+  hoverActions,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
-  const [hovered, setHovered] = useState(false);
 
   const handleClick = () => {
     if (onClick) onClick();
@@ -35,49 +36,23 @@ export function AccordionSection({
 
   return (
     <div className="flex flex-col">
-      <button
-        type="button"
-        onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className={cn(
-          'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm font-medium transition-colors hover:bg-sidebar-accent-l',
-          labelClassName || 'text-sidebar-btn-text-l'
-        )}
-      >
-        {swapLeadingOnHover ? (
-          <>
-            <div className="size-4 flex-shrink-0">
-              {hovered ? (
-                <Icon
-                  icon={CaretRightIcon}
-                  className={cn(
-                    'size-4 transition-transform duration-150',
-                    open && 'rotate-90'
-                  )}
-                />
-              ) : (
-                leadingIcon
-              )}
-            </div>
-            <span className="flex-1 truncate text-left">{label}</span>
-            {trailing}
-          </>
-        ) : (
-          <>
-            {leadingIcon}
-            <span className="flex-1 truncate text-left">{label}</span>
-            {trailing}
-            <Icon
-              icon={CaretRightIcon}
-              className={cn(
-                'size-4 flex-shrink-0 transition-transform duration-150',
-                open && 'rotate-90'
-              )}
-            />
-          </>
-        )}
-      </button>
+      <div className="group/project relative rounded-card hover:bg-sidebar-accent-l">
+        <button
+          type="button"
+          onClick={handleClick}
+          className={cn(
+            'flex h-8 w-full cursor-default items-center gap-stack rounded-card px-row text-sm font-medium transition-colors',
+            labelClassName || 'text-sidebar-btn-text-l'
+          )}
+        >
+          {leadingIcon && <div className="size-4 flex-shrink-0">{open && openLeadingIcon ? openLeadingIcon : leadingIcon}</div>}
+          <span className="flex-1 truncate text-left">{label}</span>
+          <div className={cn('mr-2 flex size-5 shrink-0 items-center justify-center', hoverActions && 'group-hover/project:hidden')}>{trailing}</div>
+          {!leadingIcon && <Icon icon={CaretRightIcon} className={cn('size-4 flex-shrink-0 transition-transform duration-150', open && 'rotate-90')} />}
+        </button>
+
+        {hoverActions && <div className="absolute right-1 top-1 hidden items-center gap-0.5 group-hover/project:flex">{hoverActions}</div>}
+      </div>
 
       <div
         className={cn(
