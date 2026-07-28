@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import { Icon } from "@/components/ui/icon";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { cn } from '@/lib/utils';
@@ -14,6 +14,7 @@ interface AccordionSectionProps {
   openLeadingIcon?: ReactNode;
   trailing?: ReactNode;
   hoverActions?: ReactNode;
+  onContextMenu?: MouseEventHandler<HTMLDivElement>;
 }
 
 export function AccordionSection({
@@ -26,6 +27,7 @@ export function AccordionSection({
   openLeadingIcon,
   trailing,
   hoverActions,
+  onContextMenu,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -36,7 +38,7 @@ export function AccordionSection({
 
   return (
     <div className="flex flex-col">
-      <div className="group/project relative rounded-card hover:bg-sidebar-accent-l">
+      <div onContextMenu={onContextMenu} className="group/project relative rounded-card hover:bg-sidebar-accent-l">
         <button
           type="button"
           onClick={handleClick}

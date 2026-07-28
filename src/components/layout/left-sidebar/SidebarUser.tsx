@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -45,38 +44,26 @@ export function SidebarUser({ showGear = true }: SidebarUserProps) {
         <DropdownMenuContent
           align="start"
           side="top"
-          className="border border-foreground/25 ring-0 bg-modal font-sans text-sm text-modal-foreground p-[6px]"
+          className="rounded-xl border border-foreground/25 ring-0 bg-sidebar-bg p-[6px] font-sans text-sm text-modal-foreground"
         >
-        <DropdownMenuLabel className="flex items-center gap-stack p-row rounded-button">
-          <Avatar className="size-8">
-            <AvatarFallback className="bg-muted text-xs font-medium text-foreground">
-                {SETTINGS_PREVIEW_ACCOUNT.initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-modal-foreground">{SETTINGS_PREVIEW_ACCOUNT.name}</span>
-            <span className="text-xs text-modal-foreground/60">{SETTINGS_PREVIEW_ACCOUNT.plan} plan</span>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
-        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-modal-foreground">
+        <DropdownMenuItem className="gap-stack min-h-8 rounded-lg px-row py-1.5 text-[15px] text-modal-foreground hover:!bg-sidebar-accent-l">
           <Icon icon={CreditCardIcon} className="size-4 text-modal-foreground/60" />
           <span>Manage subscription</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-modal-foreground">
+        <DropdownMenuItem className="gap-stack min-h-8 rounded-lg px-row py-1.5 text-[15px] text-modal-foreground hover:!bg-sidebar-accent-l">
           <Icon icon={KeyboardIcon} className="size-4 text-modal-foreground/60" />
           <span>Keyboard shortcuts</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-modal-foreground">
+        <DropdownMenuItem className="gap-stack min-h-8 rounded-lg px-row py-1.5 text-[15px] text-modal-foreground hover:!bg-sidebar-accent-l">
           <Icon icon={HeadphonesIcon} className="size-4 text-modal-foreground/60" />
           <span>Help & support</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-modal-foreground" onSelect={() => goToSettings(navigate)}>
+        <DropdownMenuItem className="gap-stack min-h-8 rounded-lg px-row py-1.5 text-[15px] text-modal-foreground hover:!bg-sidebar-accent-l" onSelect={() => goToSettings(navigate)}>
           <Icon icon={GearSixIcon} className="size-4 text-modal-foreground/60" />
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-border/50 -mx-1.5 mx-0" />
-        <DropdownMenuItem className="gap-stack min-h-8 px-row py-1.5 text-destructive focus:text-destructive">
+        <DropdownMenuItem variant="destructive" className="gap-stack min-h-8 rounded-lg px-row py-1.5 text-[15px] hover:!bg-sidebar-accent-l">
           <Icon icon={SignOutIcon} className="size-4" />
           <span>Sign out</span>
         </DropdownMenuItem>

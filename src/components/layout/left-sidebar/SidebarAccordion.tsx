@@ -54,7 +54,7 @@ export function SidebarAccordion() {
     };
   }, [agentsVersion, projectsVersion]);
 
-  const projectItems = projects.map((p) => ({ id: p.id, name: p.name, agentIds: p.agentIds }));
+  const projectItems = projects.map((p) => ({ id: p.id, name: p.name, localPath: p.localPath, agentIds: p.agentIds }));
   const liveStatuses = useAllAgentStatuses(agents.map((agent) => agent.id))
   const workingIds = React.useMemo(() => new Set(
     agents
