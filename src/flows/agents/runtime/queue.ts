@@ -648,7 +648,10 @@ function applyOp(slice: RuntimeSliceView, op: StreamOp): void {
       // This is the only State 1 → State 2 boundary. It captures the exact
       // elapsed duration, then persists one complete response run.
       if (slice.inFlight && !slice.inFlight.frozen) {
-        const frozen = freezeAssistantState(slice.inFlight)
+        const fallbackActivity = slice.inFlight.activityTimeline.length === 0 && slice.inFlight.response.some((block) => block.type === 'text' && block.text.trim())
+          ? [{ kind: 'planning' as const, id: `activity-${slice.inFlight.id}`, summary: 'Generated response', startedAt: Date.now(), endedAt: Date.now(), sequence: slice.inFlight.nextSequence }]
+          : []
+        const frozen = freezeAssistantState({ ...slice.inFlight, activityTimeline: [...slice.inFlight.activityTimeline, ...fallbackActivity] })
         slice.messages = [...slice.messages, buildAssistantMessage(frozen)]
         slice.inFlight = null
       }

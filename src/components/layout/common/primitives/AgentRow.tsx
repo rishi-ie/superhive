@@ -1,67 +1,32 @@
-import type { MouseEventHandler } from 'react';
-import { Icon } from "@/components/ui/icon";
-import { UserIcon } from "@phosphor-icons/react";
-import { useAgentStatusPresentation } from '@/components/common/AgentStatusBadge';
-import type { AgentStatus } from '@/storage/types';
+import type { MouseEventHandler } from 'react'
+import { Icon } from '@/components/ui/icon'
+import { CircleNotchIcon, DotsThreeIcon, PushPinIcon, UserIcon } from '@phosphor-icons/react'
 
 interface AgentRowProps {
-  name: string;
-  status?: AgentStatus;
-  showStatus?: boolean;
-  compact?: boolean;
-  currentAction?: string;
-  onClick?: MouseEventHandler<HTMLButtonElement>;
+  name: string
+  working?: boolean
+  completed?: boolean
+  pinned?: boolean
+  projectMember?: boolean
+  onClick?: MouseEventHandler<HTMLButtonElement>
+  onPin?: () => void
+  onMore?: () => void
 }
 
-const WORKING_STATUSES: ReadonlySet<AgentStatus> = new Set<AgentStatus>(['active', 'busy', 'waiting'])
-
-export function AgentRow({ name, status = 'idle', showStatus = true, compact = false, currentAction = "Working…", onClick }: AgentRowProps) {
-  const presentation = useAgentStatusPresentation(status)
-
-  if (showStatus && WORKING_STATUSES.has(status)) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className="group flex h-16 w-full cursor-default flex-col items-stretch gap-0 overflow-hidden rounded-sm px-row py-1 text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
-      >
-        <div className="flex h-8 flex-shrink-0 items-center gap-stack">
-          <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
-          <span className="flex-1 truncate text-left">{name}</span>
-        </div>
-        <div className="flex h-8 flex-shrink-0 items-center gap-list-item pl-6">
-          <div className="size-3 rounded-full border border-border border-t-foreground/80 animate-spin" />
-          <span className="truncate text-xs text-muted-foreground">{currentAction}</span>
-        </div>
-      </button>
-    );
-  }
-
-  if (showStatus) {
-    return (
-      <button
-        type="button"
-        onClick={onClick}
-        className="group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
-      >
-        <div className={presentation.dotClass + " size-2 rounded-full flex-shrink-0"} />
-        <Icon icon={UserIcon} className="size-4 flex-shrink-0" />
-        <span className="flex-1 truncate text-left">{name}</span>
-      </button>
-    );
-  }
-
+export function AgentRow({ name, working = false, completed = false, pinned = false, projectMember = false, onClick, onPin, onMore }: AgentRowProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={compact
-        ? "group flex h-6 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 text-xs font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
-        : "group flex h-8 w-full cursor-default items-center gap-stack rounded-sm px-row text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l"
-      }
-    >
-      <Icon icon={UserIcon} className={compact ? "size-3.5 flex-shrink-0" : "size-4 flex-shrink-0"} />
-      <span className="flex-1 truncate text-left">{name}</span>
-    </button>
-  );
+    <div className="group relative flex h-8 w-full items-center rounded-card text-sm font-medium text-sidebar-btn-text-l transition-colors hover:bg-sidebar-accent-l">
+      <button type="button" onClick={onClick} className="flex h-full min-w-0 flex-1 items-center gap-stack px-row text-left">
+        <Icon icon={UserIcon} className="size-4 shrink-0" />
+        <span className="flex-1 truncate">{name}</span>
+      </button>
+      <div className={`mr-2 flex size-5 shrink-0 items-center justify-center ${working ? '' : 'group-hover:hidden'}`}>
+        {working ? <Icon icon={CircleNotchIcon} aria-label="Responding" weight="bold" className="size-4 animate-[spin_1.8s_linear_infinite] text-muted-foreground" /> : completed ? <span aria-label="New response" className="size-2 rounded-full bg-blue-500" /> : null}
+      </div>
+      <div className={`absolute right-1 hidden items-center gap-0.5 ${working ? '' : 'group-hover:flex'}`}>
+        {projectMember ? <button type="button" aria-label={`More actions for ${name}`} onClick={(event) => { event.stopPropagation(); onMore?.() }} className="flex size-6 items-center justify-center rounded-icon hover:bg-sidebar-accent-l"><Icon icon={DotsThreeIcon} className="size-4" /></button> : null}
+        <button type="button" aria-label={pinned ? `Unpin ${name}` : `Pin ${name}`} onClick={(event) => { event.stopPropagation(); onPin?.() }} className="flex size-6 items-center justify-center rounded-icon hover:bg-sidebar-accent-l"><Icon icon={PushPinIcon} className="size-4" weight={pinned ? 'fill' : 'regular'} /></button>
+      </div>
+    </div>
+  )
 }

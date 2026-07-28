@@ -97,6 +97,13 @@ export interface AgentsAPI {
 		role?: string
 	}) => Promise<{ agentId: string; status: string }>
 
+	provisionMarketplaceMember: (input: {
+		profileId: 'general-worker'
+		projectId: string
+		name: string
+		role: string
+	}) => Promise<{ agentId: string; status: string }>
+
 	/**
 	 * Subscribe to all `AdapterEvent` variants for the agent. The full discriminated
 	 * union flows through this single channel; consumers narrow on `event.type`.

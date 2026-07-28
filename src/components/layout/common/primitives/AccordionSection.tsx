@@ -11,6 +11,7 @@ interface AccordionSectionProps {
   onClick?: () => void;
   labelClassName?: string;
   leadingIcon?: ReactNode;
+  trailing?: ReactNode;
   swapLeadingOnHover?: boolean;
 }
 
@@ -21,6 +22,7 @@ export function AccordionSection({
   onClick,
   labelClassName,
   leadingIcon,
+  trailing,
   swapLeadingOnHover = false,
 }: AccordionSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
@@ -58,12 +60,14 @@ export function AccordionSection({
                 leadingIcon
               )}
             </div>
-            <span className="truncate text-left">{label}</span>
+            <span className="flex-1 truncate text-left">{label}</span>
+            {trailing}
           </>
         ) : (
           <>
             {leadingIcon}
-            <span className="truncate text-left">{label}</span>
+            <span className="flex-1 truncate text-left">{label}</span>
+            {trailing}
             <Icon
               icon={CaretRightIcon}
               className={cn(

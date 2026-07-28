@@ -55,6 +55,19 @@ test('turns an empty direct provider result into an actionable UI error', () => 
   })
 })
 
+test('recovers final-message thinking blocks when a provider does not stream them', () => {
+  const adapter = new RawTextAdapter()
+  const events: AdapterEvent[] = []
+  adapter.onStdout(JSON.stringify({ type: 'agent_start' }) + '\n', (event) => events.push(event))
+  adapter.onStdout(JSON.stringify({ type: 'message_end', message: { role: 'assistant', content: [
+    { type: 'thinking', thinking: 'Checking the request.' },
+    { type: 'text', text: 'Hello!' },
+  ] } }) + '\n', (event) => events.push(event))
+
+  expect(events.some((event) => event.type === 'thinking-delta' && event.delta === 'Checking the request.')).toBe(true)
+  expect(events.some((event) => event.type === 'text-delta' && event.delta === 'Hello!')).toBe(true)
+})
+
 test('finalizes a failed prompt before Pi streams content', () => {
 	const adapter = new RawTextAdapter()
 	const events: AdapterEvent[] = []

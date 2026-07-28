@@ -143,7 +143,7 @@ export function AssistantMessage({
               ))}
               {!hasTrace ? (
                 <div className="select-none text-[15px] leading-6 text-muted-foreground">
-                  No detailed activity was emitted for this response.
+                  This model did not emit a native thinking trace or activity.
                 </div>
               ) : !traceEvents.length && activityCount > 0 ? <ActivityStatusLine status={runView.liveStatus} /> : null}
             </div>

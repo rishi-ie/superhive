@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
+import { clearCreateProjectContinuation, takeCreateProjectContinuation, useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
 import { prepareProject } from '@/flows/projects/crud/prepare-project';
 import { usePreparingToast } from '@/components/common/PreparingToast';
 import { slugify } from '@/lib/slugify';
@@ -93,7 +93,12 @@ export function CreateProjectDialog() {
     if (result.ok) {
       toast.dismiss(toastId)
       setPhase('idle')
+      const continuation = takeCreateProjectContinuation()
       setOpen(false)
+      if (continuation) {
+        continuation(result.project)
+        return
+      }
       goToProject(navigate, result.project.id)
       return
     }
@@ -132,6 +137,7 @@ export function CreateProjectDialog() {
       open={open}
       onOpenChange={(next) => {
         if (submitting) return
+        if (!next) clearCreateProjectContinuation()
         setOpen(next)
       }}
     >
@@ -216,7 +222,7 @@ export function CreateProjectDialog() {
               type="button"
               variant="outline"
               size="lg"
-              onClick={() => setOpen(false)}
+              onClick={() => { clearCreateProjectContinuation(); setOpen(false) }}
               disabled={submitting}
               className="border-sidebar-border text-sidebar-foreground"
             >

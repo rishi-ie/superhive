@@ -7,6 +7,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
   private currentMessageId: string | null = null
   private toolCallIds = new Map<number, string>()
   private streamedAssistantContent = false
+  private sawNativeThinking = false
 
   onStdout(chunk: string, emit: (event: AdapterEvent) => void): void {
     this.lineBuffer += chunk
@@ -70,6 +71,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
             })
           }
           if (ev?.type === 'thinking_start') {
+            this.sawNativeThinking = true
             if (!this.currentMessageId) {
               this.currentMessageId = randomUUID()
               emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
@@ -81,6 +83,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
             })
           }
           if (ev?.type === 'thinking_delta') {
+            this.sawNativeThinking = true
             if (!this.currentMessageId) {
               this.currentMessageId = randomUUID()
               emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
@@ -93,6 +96,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
             })
           }
           if (ev?.type === 'thinking_end') {
+            this.sawNativeThinking = true
             if (!this.currentMessageId) {
               this.currentMessageId = randomUUID()
               emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
@@ -223,6 +227,7 @@ export class RawTextAdapter implements PiProtocolAdapter {
           // Indicator, Completion, and footer.
           const role = messageRole(obj)
           if (role === 'assistant' && this.currentMessageId) {
+            this.emitFinalThinking(obj.message, emit)
             if (!this.streamedAssistantContent && !this.emitDirectAssistantContent(obj.message, emit)) {
               emit({
                 type: 'error',
@@ -231,9 +236,14 @@ export class RawTextAdapter implements PiProtocolAdapter {
               })
             }
             emit({ type: 'message-end', messageId: this.currentMessageId })
+            console.info('[pi-protocol] assistant response', {
+              contentTypes: contentTypes(obj.message),
+              nativeThinking: this.sawNativeThinking,
+            })
             this.currentMessageId = null
             this.toolCallIds.clear()
             this.streamedAssistantContent = false
+            this.sawNativeThinking = false
           }
         } else if (obj.type === 'response' && obj.success === false) {
 			const messageId = this.ensureAssistantMessage(emit)
@@ -270,12 +280,14 @@ export class RawTextAdapter implements PiProtocolAdapter {
     this.currentMessageId = null
     this.toolCallIds.clear()
     this.streamedAssistantContent = false
+    this.sawNativeThinking = false
   }
 
   private ensureAssistantMessage(emit: (event: AdapterEvent) => void): string {
     if (!this.currentMessageId) {
       this.currentMessageId = randomUUID()
       this.streamedAssistantContent = false
+      this.sawNativeThinking = false
       emit({ type: 'message-start', messageId: this.currentMessageId, role: 'assistant' })
     }
     return this.currentMessageId
@@ -286,15 +298,30 @@ export class RawTextAdapter implements PiProtocolAdapter {
     const content = (message as { content?: unknown }).content
     if (!Array.isArray(content)) return false
     let emitted = false
-    for (const part of content) {
+    for (const [contentIndex, part] of content.entries()) {
       if (!part || typeof part !== 'object') continue
       const value = part as Record<string, unknown>
       if (value.type !== 'text' || typeof value.text !== 'string' || !value.text) continue
       emit({ type: 'text-delta', messageId: this.currentMessageId, delta: value.text })
-      emit({ type: 'text-end', messageId: this.currentMessageId, contentIndex: 0, content: value.text })
+      emit({ type: 'text-end', messageId: this.currentMessageId, contentIndex, content: value.text })
       emitted = true
     }
     return emitted
+  }
+
+  private emitFinalThinking(message: unknown, emit: (event: AdapterEvent) => void): void {
+    if (!this.currentMessageId || this.sawNativeThinking || !message || typeof message !== 'object') return
+    const content = (message as { content?: unknown }).content
+    if (!Array.isArray(content)) return
+    for (const [contentIndex, part] of content.entries()) {
+      if (!part || typeof part !== 'object') continue
+      const value = part as Record<string, unknown>
+      if (value.type !== 'thinking' || typeof value.thinking !== 'string' || !value.thinking) continue
+      this.sawNativeThinking = true
+      emit({ type: 'thinking-start', messageId: this.currentMessageId, contentIndex })
+      emit({ type: 'thinking-delta', messageId: this.currentMessageId, contentIndex, delta: value.thinking })
+      emit({ type: 'thinking-end', messageId: this.currentMessageId, contentIndex, content: value.thinking })
+    }
   }
 
   private maybeEmitUsage(
@@ -316,6 +343,14 @@ export class RawTextAdapter implements PiProtocolAdapter {
     }
     emit({ type: 'usage', usage })
   }
+}
+
+function contentTypes(message: unknown): string[] {
+  if (!message || typeof message !== 'object') return []
+  const content = (message as { content?: unknown }).content
+  return Array.isArray(content)
+    ? content.flatMap((part) => part && typeof part === 'object' && typeof (part as { type?: unknown }).type === 'string' ? [(part as { type: string }).type] : [])
+    : []
 }
 
 function messageRole(value: Record<string, unknown>): string | undefined {

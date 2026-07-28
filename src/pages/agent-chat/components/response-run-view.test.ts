@@ -64,3 +64,12 @@ test('does not create a disclosure trace for a plain text response', () => {
   const plain = buildResponseRunView([], [{ type: 'text', text: 'Hello', state: 'complete', startedAt: 1 }])
   expect(plain.auditEvents.filter((event) => event.type === 'status')).toHaveLength(0)
 })
+
+test('labels non-reasoning milestones as activity rather than thought', () => {
+  const view = buildResponseRunView(
+    [{ kind: 'planning', id: 'activity', summary: 'Generated response', startedAt: 1, endedAt: 1, sequence: 0 }],
+    [{ type: 'text', text: 'Hello', state: 'complete', startedAt: 2, sequence: 1 }],
+  )
+
+  expect(view.segments[0]!.statusBefore?.pastLabel).toBe('Activity — Generated response')
+})

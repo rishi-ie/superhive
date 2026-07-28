@@ -79,36 +79,19 @@ export function useAllAgentStatuses(
     () => new Map(),
   )
 
-  // The id list driving the effect must be content-stable, not reference-
-  // stable. `agentIds` is `nonCoordinators.map((a) => a.id)` — a new array
-  // reference on every parent render — so a `useMemo` dep would always see
-  // a change and rebuild the aggregator subscription on every render,
-  // driving an infinite render loop. Track the last deduped+sorted id
-  // list in a ref and skip the effect when its contents are unchanged.
-  const lastIdsRef = React.useRef<string[]>([])
-  const lastEnabledRef = React.useRef<boolean>(enabled)
+  // `agentIds` is often a new array on each parent render. Depend on its
+  // normalized value so React does not clean up live subscriptions first.
+  const idsKey = Array.from(
+    new Set(agentIds.filter((id): id is string => typeof id === 'string' && id.length > 0)),
+  ).sort().join(',')
 
   React.useEffect(() => {
-    const nextIds = Array.from(
-      new Set(
-        agentIds.filter(
-          (id): id is string => typeof id === 'string' && id.length > 0,
-        ),
-      ),
-    ).sort()
+    const nextIds = idsKey ? idsKey.split(',') : []
 
-    const prevIds = lastIdsRef.current
-    const idsUnchanged =
-      prevIds.length === nextIds.length &&
-      prevIds.every((id, i) => id === nextIds[i])
-    const enabledUnchanged = lastEnabledRef.current === enabled
-
-    if (idsUnchanged && enabledUnchanged) return
-
-    lastIdsRef.current = nextIds
-    lastEnabledRef.current = enabled
-
-    if (!enabled) return
+    if (!enabled || nextIds.length === 0) {
+      setSnapshot((previous) => previous.size === 0 ? previous : new Map())
+      return
+    }
 
     for (const id of nextIds) {
       initAggregatorSlice(id)
@@ -131,6 +114,7 @@ export function useAllAgentStatuses(
       const slice = aggregatorSlices.get(id)
       if (slice) slice.listeners.add(sync)
     }
+    sync()
 
     return () => {
       for (const id of nextIds) {
@@ -141,11 +125,7 @@ export function useAllAgentStatuses(
         }
       }
     }
-    // `agentIds` reference changes every parent render by design; the
-    // content-stability check above short-circuits no-op runs so this
-    // effect only re-subscribes when the actual id list changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentIds, enabled])
+  }, [idsKey, enabled])
 
   return snapshot
 }

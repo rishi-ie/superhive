@@ -42,6 +42,7 @@ import {
 	extensionsForProfile,
 	type AgentProfile,
 } from '../agent-profile'
+import generalWorkerProfile from '../../resources/agent-profiles/general-worker.json'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -804,11 +805,8 @@ export function registerAgentIpc(): void {
 	// the main process is the final line of defense.
 	// -------------------------------------------------------------------------
 
-	ipcMain.handle(
-		IPC.AGENTS.SPAWN_FROM_TEMPLATE,
-		async (
-			_e,
-			input: {
+	const spawnProjectMember = async (
+		input: {
 				spawnerAgentId: string
 				projectId: string
 				renderedTemplate: Record<string, unknown>
@@ -1042,6 +1040,33 @@ export function registerAgentIpc(): void {
 				`[agents:spawn-from-template] spawned ${agent.id} (${baseName}) bound to project=${input.projectId} from spawner=${input.spawnerAgentId}`,
 			)
 			return { agentId: agent.id, status: 'ready' }
+		}
+
+	ipcMain.handle(IPC.AGENTS.SPAWN_FROM_TEMPLATE, async (_e, input) => spawnProjectMember(input))
+	ipcMain.handle(
+		IPC.AGENTS.PROVISION_MARKETPLACE_MEMBER,
+		async (_e, input: { profileId: string; projectId: string; name: string; role: string }) => {
+			if (input?.profileId !== generalWorkerProfile.id) throw new Error('Unsupported Marketplace agent profile')
+			const project = await ProjectRepository.getById(input.projectId)
+			if (!project || project.archived) throw new Error('Select an active project')
+			const members = await AgentRepository.getByProject(input.projectId)
+			const coordinator = members.find((agent) => agent.agentKind === 'project-coordinator')
+			if (!coordinator) throw new Error('This project no longer has an available coordinator')
+			return spawnProjectMember({
+				spawnerAgentId: coordinator.id,
+				projectId: input.projectId,
+				name: input.name,
+				role: input.role,
+				renderedTemplate: {
+					identity: { name: input.name, role: input.role },
+					description: generalWorkerProfile.description,
+					systemPrompt: generalWorkerProfile.systemPrompt,
+					permissions: generalWorkerProfile.permissions,
+					behavior: generalWorkerProfile.behavior,
+					skills: generalWorkerProfile.skills,
+					extensions: generalWorkerProfile.extensions,
+				},
+			})
 		},
 	)
 

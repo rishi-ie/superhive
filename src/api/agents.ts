@@ -74,6 +74,13 @@ export const agents = {
     message: AssistantMessage,
   ): Promise<{ ok: boolean }> =>
     window.api.agents.persistAssistantMessage(id, message),
+  provisionMarketplaceMember: (input: {
+    profileId: 'general-worker'
+    projectId: string
+    name: string
+    role: string
+  }): Promise<{ agentId: string; status: string }> =>
+    window.api.agents.provisionMarketplaceMember(input),
 
   onEvent:    (id: string, cb: (event: AdapterEvent) => void): (() => void) => window.api.agents.onEvent(id, cb),
   onStatus:   (id: string, cb: (status: RuntimeStatusPayload) => void): (() => void) => window.api.agents.onStatus(id, cb),

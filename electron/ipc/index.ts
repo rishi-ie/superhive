@@ -56,6 +56,7 @@ export const IPC = {
     // Phase E: project-coordinator spawns a regular agent on the fly
     // from a marketplace template, auto-bound to the same project.
     SPAWN_FROM_TEMPLATE: 'agents:spawn-from-template',
+    PROVISION_MARKETPLACE_MEMBER: 'agents:provision-marketplace-member',
   },
   PROJECTS: {
     LIST: 'projects:list',

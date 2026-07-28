@@ -44,7 +44,7 @@ function statusFor(item: TimelineItem, context?: string): ActivityStatus | null 
     }
   }
   if (item.kind === 'planning') {
-    return { id: item.id, kind: 'activity', label: item.summary, pastLabel: `Planned — ${item.summary}`, source: item }
+    return { id: item.id, kind: 'activity', label: item.summary, pastLabel: `Activity — ${item.summary}`, source: item }
   }
   if (item.kind === 'tool-call') {
     return { id: item.id, kind: 'tool', label: toolLabel(item, context), pastLabel: pastToolLabel(item), source: item }

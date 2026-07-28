@@ -60,6 +60,8 @@ const api: ElectronAPI = {
 
     spawnFromTemplate: (input) =>
       ipcRenderer.invoke('agents:spawn-from-template', input),
+    provisionMarketplaceMember: (input) =>
+      ipcRenderer.invoke('agents:provision-marketplace-member', input),
 
     // `agent:${id}:event` forwards every `AdapterEvent` variant. The full
     // discriminated union now spans (per implementation.md Phase 1.1):
