@@ -53,6 +53,7 @@ interface SettingsLike {
 }
 
 const MANAGED_BY_PREFIX = 'superhive-pi-truth@1#'
+const statusWrites = new Map<string, Promise<void>>()
 
 /**
  * Update `project.members[].status` on the coordinator's truth settings file.
@@ -84,7 +85,13 @@ export async function patchCoordinatorForMemberStatus(
 		}
 
 		try {
-			await patchSingleCoordinator(settingsPath, memberAgentId, newStatus)
+			const previous = statusWrites.get(settingsPath) ?? Promise.resolve()
+			const current = previous
+				.catch(() => undefined)
+				.then(() => patchSingleCoordinator(settingsPath, memberAgentId, newStatus))
+			statusWrites.set(settingsPath, current)
+			await current
+			if (statusWrites.get(settingsPath) === current) statusWrites.delete(settingsPath)
 		} catch (err) {
 			log.error(
 				`[status-mirror] failed to patch ${settingsPath}: ${err instanceof Error ? err.message : String(err)}`,

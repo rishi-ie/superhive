@@ -43,6 +43,7 @@ import {
 	type AgentProfile,
 } from '../agent-profile'
 import generalWorkerProfile from '../../resources/agent-profiles/general-worker.json'
+import { ensureAgentReady, stopAgentForSystemReason } from './runtime'
 
 function sanitizeFolderName(raw: string): string {
 	const trimmed = raw.trim()
@@ -426,10 +427,7 @@ export function registerAgentIpc(): void {
 		const agent = await AgentRepository.getById(id)
 		if (!agent) return false
 
-		const status = runtime.getStatusPayload(id)
-		if (status && status.status !== 'idle') {
-			await runtime.stop(id)
-		}
+		await stopAgentForSystemReason(id)
 
 		const deleted = await AgentRepository.delete(id)
 		if (!deleted) return false
@@ -496,6 +494,9 @@ export function registerAgentIpc(): void {
 				// byte-for-byte equality with what we wrote.
 				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
 					runtime.markSelfWrite(agentId, 'settings', parseCounter(verify.managedBy as string | undefined))
+					void ensureAgentReady(agentId).catch((error) => {
+						log.error(`[agents:writeSettings] failed to ensure ${agentId}:`, error)
+					})
 					return merged
 				}
 				// Raced — re-read and retry
@@ -556,6 +557,9 @@ export function registerAgentIpc(): void {
 				const verify = JSON.parse(await readFile(filePath, 'utf8')) as Record<string, unknown>
 				if (JSON.stringify(verify, null, '\t') + '\n' === serialized) {
 					runtime.markSelfWrite(agentId, 'manage', parseCounter(verify.managedBy as string | undefined))
+					void ensureAgentReady(agentId).catch((error) => {
+						log.error(`[agents:writeManage] failed to ensure ${agentId}:`, error)
+					})
 					return {
 						ok: true,
 						writtenVersion: parseCounter(verify.managedBy as string | undefined),
@@ -893,9 +897,10 @@ export function registerAgentIpc(): void {
 			const agent = await AgentRepository.create({
 				name: baseName,
 				role,
-					description: typeof template.description === 'string' ? template.description : undefined,
+				description: typeof template.description === 'string' ? template.description : undefined,
 				localPath: agentDir,
 				status: 'idle',
+				workerProfileId: generalWorkerProfile.id,
 				// agentKind: undefined — spawned agents are regular, not coordinators
 			})
 
@@ -1023,7 +1028,15 @@ export function registerAgentIpc(): void {
 			const coordinatorProject = coordinatorManage.project as { members?: unknown[] } | undefined
 			if (coordinatorProject) {
 				const members = Array.isArray(coordinatorProject.members) ? coordinatorProject.members : []
-				coordinatorProject.members = [...members, { agentId: agent.id, name: baseName, role, localPath: agentDir, status: 'idle', joinedAt: new Date().toISOString() }]
+				coordinatorProject.members = [...members, {
+					agentId: agent.id,
+					name: baseName,
+					role,
+					localPath: agentDir,
+					status: 'idle',
+					joinedAt: new Date().toISOString(),
+					workerProfileId: agent.workerProfileId ?? generalWorkerProfile.id,
+				}]
 				coordinatorManage.project = coordinatorProject
 				await writeFile(manageFilePathFor(spawner.localPath), JSON.stringify({ ...coordinatorManage, lastModified: new Date().toISOString() }, null, '\t') + '\n', 'utf8')
 			}

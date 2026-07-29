@@ -1,12 +1,12 @@
 /**
  * Process lifecycle for the live Pi runtime.
  *
- * Owns: spawn (ChildProcess creation), stop (SIGABRT + SIGTERM),
+ * Owns: spawn (ChildProcess creation), stop (RPC abort + stdin close),
  * restart, send (stdin write), shutdownAll, pruneStaleEntries,
  * removeEntry, spawnProcess, terminateProcess.
  *
  * The orchestrator class (`GeneralKaiRuntime`) holds the `entries`,
- * `telemetryTailers`, `silenceTimers`, `readyEmitted`, `settingsWatchers`
+ * `telemetryTailers`, `readyEmitted`, `settingsWatchers`
  * Maps. This module mutates them through the `rt` reference passed in.
  */
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
@@ -17,7 +17,7 @@ import { chatFilePath, readAll } from '../agent-chat-store'
 import type { RuntimeEntry } from '../runtime-status'
 import type { GeneralKaiRuntime } from '../general-kai-runtime'
 import type { ComposerContext, TurnInput, UserMessage } from '../../src/models/assistant-message'
-import { RawTextAdapter } from '../pi-protocol'
+import { RawTextAdapter, RUNTIME_READY_PROBE_ID } from '../pi-protocol'
 import { resolveLauncherPath, resolvePiNode } from '../runtime-paths'
 
 type EventedChildProcess = ChildProcess & {
@@ -29,6 +29,7 @@ const STDERR_LOG_LIMIT = 500
 const RESTART_DELAY_MS = 800
 const SIGTERM_DELAY_MS = 500
 const SIGKILL_DELAY_MS = 3000
+const CONFIG_INVALIDATION_TIMEOUT_MS = 4000
 
 export async function start(
   rt: GeneralKaiRuntime,
@@ -51,6 +52,7 @@ export async function start(
     manifestPiSource,
     process: null,
     status: 'waiting',
+    readiness: 'recovering',
     messages: [],
     stderrLog: [],
     adapter,
@@ -71,6 +73,9 @@ export async function start(
   entry.endedAt = undefined
   entry.lastError = undefined
   entry.bootStep = undefined
+  entry.readiness = 'recovering'
+  entry.readyAt = undefined
+  entry.configurationError = undefined
   entry.usage = undefined
   entry.contextUsage = undefined
   entry.extensionLoaded = existsSync(join(agentDir, 'extensions', 'superhive-pi-telemetry'))
@@ -106,7 +111,6 @@ export async function start(
 }
 
 export function stop(rt: GeneralKaiRuntime, agentId: string): void {
-  rt.clearSilenceTimer(agentId)
   rt.readyEmitted.delete(agentId)
   const entry = rt.entries.get(agentId)
   if (!entry?.process) {
@@ -206,11 +210,43 @@ export function send(rt: GeneralKaiRuntime, agentId: string, input: TurnInput): 
   }
 }
 
+export function sendInternal(
+  rt: GeneralKaiRuntime,
+  agentId: string,
+  text: string,
+): boolean {
+  const entry = rt.entries.get(agentId)
+  if (!entry?.process || !text.trim()) return false
+  try {
+    entry.process.stdin?.write(entry.adapter.serializeInput(text))
+    rt.transitionStatus(entry, 'busy')
+    return true
+  } catch (err) {
+    log.error(`[runtime] internal wake failed for ${agentId}:`, err)
+    entry.lastError = err instanceof Error ? err.message : String(err)
+    rt.transitionStatus(entry, 'idle')
+    return false
+  }
+}
+
+export function abortTurn(rt: GeneralKaiRuntime, agentId: string): boolean {
+  const entry = rt.entries.get(agentId)
+  if (!entry?.process) return false
+  try {
+    entry.process.stdin?.write(`${JSON.stringify({
+      id: `superhive-abort-${crypto.randomUUID()}`,
+      type: 'abort',
+    })}\n`)
+    return true
+  } catch (error) {
+    entry.lastError = error instanceof Error ? error.message : String(error)
+    rt.emitStatus(agentId)
+    return false
+  }
+}
+
 export async function shutdownAll(rt: GeneralKaiRuntime): Promise<void> {
   rt.closeAllSettingsWatchers()
-  for (const agentId of Array.from(rt.silenceTimers.keys())) {
-    rt.clearSilenceTimer(agentId)
-  }
   rt.readyEmitted.clear()
   for (const agentId of Array.from(rt.telemetryTailers.keys())) {
     rt.stopTelemetryTailer(agentId)
@@ -239,7 +275,6 @@ export function pruneStaleEntries(rt: GeneralKaiRuntime): void {
   for (const [id, entry] of rt.entries) {
     if (entry.agentDir && !existsSync(entry.agentDir)) {
       log.info(`[runtime] pruning stale entry for ${id} (folder missing: ${entry.agentDir})`)
-      rt.clearSilenceTimer(id)
       rt.readyEmitted.delete(id)
       rt.lastSeenCounters.delete(id)
       rt.stopTelemetryTailer(id)
@@ -252,12 +287,61 @@ export function pruneStaleEntries(rt: GeneralKaiRuntime): void {
 }
 
 export function removeEntry(rt: GeneralKaiRuntime, agentId: string): void {
-  rt.clearSilenceTimer(agentId)
   rt.readyEmitted.delete(agentId)
   rt.closeSettingsWatcher(agentId)
   rt.stopTelemetryTailer(agentId)
   rt.lastSeenCounters.delete(agentId)
   rt.stop(agentId)
+  rt.entries.delete(agentId)
+}
+
+/**
+ * Membership and extension role are captured when Pi starts. Stop the old
+ * process completely before dropping its entry so an immediate relink/start
+ * cannot overlap with a process that still holds the previous project ID.
+ */
+export async function invalidateForConfigurationChange(
+  rt: GeneralKaiRuntime,
+  agentId: string,
+): Promise<void> {
+  const entry = rt.entries.get(agentId)
+  if (!entry) return
+
+  if (entry._chatDebounceTimer) {
+    clearTimeout(entry._chatDebounceTimer)
+    entry._chatDebounceTimer = null
+  }
+  await rt.flushChatEntry(entry)
+
+  const proc = entry.process
+  if (proc) {
+    const exited = new Promise<void>((resolve) => {
+      proc.once('exit', () => resolve())
+    })
+    rt.stop(agentId)
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    const timedOut = await Promise.race([
+      exited.then(() => false),
+      new Promise<boolean>((resolve) => {
+        timeout = setTimeout(() => resolve(true), CONFIG_INVALIDATION_TIMEOUT_MS)
+      }),
+    ])
+    if (timeout) clearTimeout(timeout)
+    if (timedOut && entry.process) {
+      try {
+        entry.process.kill('SIGKILL')
+      } catch {}
+    }
+  }
+
+  // Emit/persist idle before deletion. A late exit callback then sees an
+  // already-idle entry and cannot overwrite the status of a newly started
+  // process for the same agent.
+  rt.transitionStatus(entry, 'idle', 'configuration changed')
+  rt.readyEmitted.delete(agentId)
+  rt.closeSettingsWatcher(agentId)
+  rt.stopTelemetryTailer(agentId)
+  rt.lastSeenCounters.delete(agentId)
   rt.entries.delete(agentId)
 }
 
@@ -301,14 +385,12 @@ export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
   entry.process = proc
   entry.pid = proc.pid
   rt.readyEmitted.delete(agentId)
-  rt.resetSilenceTimer(entry)
 
   proc.stdout?.on('data', (chunk: Buffer) => {
     const text = chunk.toString('utf8')
     const preview = text.length > 200 ? text.slice(0, 200) + '...' : text
     log.debug(`[runtime.stdout] agent=${agentId} len=${chunk.length} preview=${JSON.stringify(preview)}`)
     entry.adapter.onStdout(text, (ev) => rt.handleAdapterEvent(agentId, ev))
-    rt.resetSilenceTimer(entry)
   })
 
   proc.stderr?.on('data', (chunk: Buffer) => {
@@ -333,16 +415,21 @@ export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
     const preview = text.length > 200 ? text.slice(0, 200) + '...' : text
     log.debug(`[runtime.stderr] agent=${agentId} len=${chunk.length} preview=${JSON.stringify(preview)}`)
     entry.adapter.onStderr(text, (ev) => rt.handleAdapterEvent(agentId, ev))
-    rt.resetSilenceTimer(entry)
   })
 
-  proc.on('exit', (code, signal) => {
+  let ended = false
+  const finish = (code: number | null, signal: NodeJS.Signals | null, error?: Error) => {
+    if (ended) return
+    ended = true
     log.info(`[runtime] agent ${agentId} exited code=${code} signal=${signal}`)
-    rt.clearSilenceTimer(agentId)
     entry.process = null
     entry.pid = undefined
     entry.endedAt = Date.now()
-    if (code === 0 || signal === 'SIGTERM' || signal === 'SIGKILL') {
+    entry.readiness = 'recovering'
+    if (error) {
+      entry.lastError = error.message
+      rt.transitionStatus(entry, 'idle')
+    } else if (code === 0 || signal === 'SIGTERM' || signal === 'SIGKILL') {
       rt.transitionStatus(entry, 'idle')
     } else {
       entry.lastError = entry.stderrLog.slice(-3).join(' | ') || `Process exited with code ${code}`
@@ -350,13 +437,22 @@ export function spawnProcess(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
     }
     rt.emitStatus(agentId)
     rt.sendExitEvent(agentId, code, signal)
+    rt.handleProcessExit(agentId, code, signal)
+  }
+
+  proc.on('exit', (code, signal) => {
+    finish(code, signal)
   })
 
   proc.on('error', (err) => {
     log.error(`[runtime] agent ${agentId} error:`, err)
-    entry.lastError = err.message
-    rt.transitionStatus(entry, 'idle')
+    finish(null, null, err)
   })
+
+  proc.stdin?.write(`${JSON.stringify({
+    id: RUNTIME_READY_PROBE_ID,
+    type: 'get_state',
+  })}\n`)
 }
 
 export function terminateProcess(_rt: GeneralKaiRuntime, proc: ChildProcess): void {

@@ -3,13 +3,6 @@
  * `<agentDir>/chat.jsonl`. Only finalized `ChatRow`s (user + assistant)
  * reach disk. Streaming state lives in the renderer slice, not in the
  * main process.
- *
- * Also houses the **readiness-detection** helpers (`resetSilenceTimer`,
- * `clearSilenceTimer`, `maybeEmitReady`) and the `silenceTimers` /
- * `readyEmitted` Maps. The 2-second output-silence heuristic is a
- * low-level boot signal that conceptually belongs with the
- * process-lifecycle module, but lives here to keep the file count at
- * the approved 6. See commit message for the split rationale.
  */
 import log from 'electron-log/main'
 import { appendBatch, chatFilePath, trimTo } from '../agent-chat-store'
@@ -18,7 +11,6 @@ import type { RuntimeEntry } from '../runtime-status'
 import type { GeneralKaiRuntime } from '../general-kai-runtime'
 import type { AssistantMessage, ChatRow } from '../../src/models/assistant-message'
 
-const READY_SILENCE_MS = 2000
 const CHAT_DEBOUNCE_MS = 1000
 
 export function scheduleChatPersist(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
@@ -93,39 +85,4 @@ export function persistAssistantMessage(
   }
   entry._chatPending.add(message.id)
   rt.scheduleChatPersist(entry)
-}
-
-// ============================================================
-// READINESS DETECTION — output-silence heuristic
-// ============================================================
-
-export function resetSilenceTimer(rt: GeneralKaiRuntime, entry: RuntimeEntry): void {
-  const agentId = entry.agentId
-  const existing = rt.silenceTimers.get(agentId)
-  if (existing) clearTimeout(existing)
-  const timer = setTimeout(() => rt.maybeEmitReady(agentId), READY_SILENCE_MS)
-  rt.silenceTimers.set(agentId, timer)
-}
-
-export function clearSilenceTimer(rt: GeneralKaiRuntime, agentId: string): void {
-  const existing = rt.silenceTimers.get(agentId)
-  if (existing) {
-    clearTimeout(existing)
-    rt.silenceTimers.delete(agentId)
-  }
-}
-
-export function maybeEmitReady(rt: GeneralKaiRuntime, agentId: string): void {
-  rt.silenceTimers.delete(agentId)
-  if (rt.readyEmitted.has(agentId)) return
-  const entry = rt.entries.get(agentId)
-  if (!entry || !entry.process) return
-  if (entry.status === 'idle') return
-  rt.readyEmitted.add(agentId)
-  entry.bootStep = 'ready'
-  rt.transitionStatus(entry, 'active')
-  log.info(`[runtime] agent ${agentId} ready (silence-based)`)
-  rt.emitStatus(agentId)
-  rt.emitEvent(agentId, { type: 'boot-step', step: 'ready' })
-  rt.emitEvent(agentId, { type: 'ready' })
 }

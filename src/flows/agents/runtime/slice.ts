@@ -106,6 +106,10 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     inFlight: null,
     lastError: undefined,
     bootStep: undefined,
+    readiness: undefined,
+    readyAt: undefined,
+    recoveryAttempt: undefined,
+    configurationError: undefined,
     usage: undefined,
     contextUsage: undefined,
     availableModels: undefined,
@@ -133,6 +137,10 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.status = s.status
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
+      entry.readiness = s.readiness
+      entry.readyAt = s.readyAt
+      entry.recoveryAttempt = s.recoveryAttempt
+      entry.configurationError = s.configurationError
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
       entry.availableModels = s.availableModels
@@ -159,6 +167,10 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
       entry.status = s.status
       entry.bootStep = s.bootStep
       entry.lastError = s.lastError
+      entry.readiness = s.readiness
+      entry.readyAt = s.readyAt
+      entry.recoveryAttempt = s.recoveryAttempt
+      entry.configurationError = s.configurationError
       entry.usage = s.usage
       entry.contextUsage = s.contextUsage
       entry.availableModels = s.availableModels
@@ -266,9 +278,9 @@ export function initRuntimeSlice(agentId: string): RuntimeSlice {
     agents.getRuntimeState(agentId).then((s) => {
       const entry = runtimeSlices.get(agentId)
       if (!entry) return
-      if (!s || s.status === 'idle') {
-        agents.start(agentId).catch((err: unknown) => {
-          toast.error(err instanceof Error ? err.message : 'Failed to start agent')
+      if (!s || s.readiness !== 'ready') {
+        agents.ensureReady(agentId).catch((err: unknown) => {
+          toast.error(err instanceof Error ? err.message : 'Agent configuration needs attention')
         })
       }
     })

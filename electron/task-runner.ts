@@ -141,7 +141,7 @@ export class TaskRunner {
 
     // 1. reset stale running → todo
     const now = Date.now()
-    const staleTasks = tasks.filter((tt) => tt.status === 'running' && tt.staleSince && now - tt.staleSince > this.staleMs)
+    const staleTasks = tasks.filter((tt) => !tt.planId && tt.status === 'running' && tt.staleSince && now - tt.staleSince > this.staleMs)
     for (const t of staleTasks) {
       log.info(`[task-runner] auto-retry stale task ${t.id} (${t.title})`)
       await TaskRepository.changeStatus(t.id, 'todo', { staleSince: undefined })
@@ -167,7 +167,7 @@ export class TaskRunner {
 
     // 3. dispatch first ready task (serial)
     const ready = tasks.find(
-      (t) => t.status === 'todo' && t.dependencies.every((id) => byId.get(id)?.status === 'completed'),
+      (t) => !t.planId && t.status === 'todo' && t.dependencies.every((id) => byId.get(id)?.status === 'completed'),
     )
     if (!ready) return
     if (!ready.assignedAgentId) {

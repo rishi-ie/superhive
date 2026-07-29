@@ -18,6 +18,10 @@ import type { ProjectCreateInput, ProjectUpdateInput } from '../../src/types/ele
 import { tasksFileWatcher } from '../tasks-file-watcher';
 import { expandHome } from '../path-utils';
 import { ensureRuntimePrepared } from '../runtime-provisioner';
+import {
+  ensureAgentReady,
+  suspendAgentForReconfiguration,
+} from './runtime';
 
 export function registerProjectIpc(): void {
   ipcMain.handle(IPC.PROJECTS.LIST, () => ProjectRepository.getAll());
@@ -65,20 +69,61 @@ export function registerProjectIpc(): void {
   });
 
   ipcMain.handle(IPC.PROJECTS.ADD_AGENT, async (_e, projectId: string, agentId: string) => {
-    await ProjectRepository.addAgent(projectId, agentId);
-    // Gap 1: populate the coordinator's truth file `project.members[]`
-    // so the orchestration extension sees this agent on the next
-    // session_start (or immediately, if the coordinator is running).
-    await addMemberToCoordinatorRoster(projectId, agentId);
-    await tasksFileWatcher.refresh();
-    agentsFsWatcher.notifyProjectsChanged();
+    // Pi extensions capture project membership at session_start. Fully stop
+    // and forget a live session before changing that launch-time truth.
+    await suspendAgentForReconfiguration(agentId);
+    try {
+      // manage.json currently carries one canonical project block. Reconcile
+      // any stale database memberships left by older link/unlink behavior
+      // before assigning the new project.
+      const agent = await AgentRepository.getById(agentId);
+      const allProjects = await ProjectRepository.getAll();
+      const previousProjectIds = new Set([
+        ...(agent?.projectIds ?? []),
+        ...allProjects
+          .filter((project) => project.agentIds.includes(agentId))
+          .map((project) => project.id),
+      ]);
+      for (const previousProjectId of previousProjectIds) {
+        if (previousProjectId !== projectId) {
+          await ProjectRepository.removeAgent(previousProjectId, agentId);
+        }
+      }
+      // Also sweep orphaned truth rosters. Older partial unlinks could update
+      // lowdb successfully and fail before removing the coordinator-side row.
+      for (const previousProject of allProjects) {
+        if (previousProject.id !== projectId) {
+          await removeMemberFromCoordinatorRoster(previousProject.id, agentId);
+        }
+      }
+
+      await ProjectRepository.addAgent(projectId, agentId);
+      // Gap 1: populate the coordinator's truth file `project.members[]`
+      // so the orchestration extension sees this agent on the next
+      // session_start (or immediately, if the coordinator is running).
+      await addMemberToCoordinatorRoster(projectId, agentId);
+      await tasksFileWatcher.refresh();
+      agentsFsWatcher.notifyProjectsChanged();
+    } finally {
+      await ensureAgentReady(agentId).catch((error) => {
+        log.error(`[projects:addAgent] failed to rewarm ${agentId}:`, error);
+      });
+    }
   });
 
   ipcMain.handle(IPC.PROJECTS.REMOVE_AGENT, async (_e, projectId: string, agentId: string) => {
-    await ProjectRepository.removeAgent(projectId, agentId);
-    // Gap 1: drop the member from the coordinator's truth file roster.
-    await removeMemberFromCoordinatorRoster(projectId, agentId);
-    agentsFsWatcher.notifyProjectsChanged();
+    await suspendAgentForReconfiguration(agentId);
+    try {
+      await ProjectRepository.removeAgent(projectId, agentId);
+      // Gap 1: drop the member from the coordinator's truth file roster.
+      await removeMemberFromCoordinatorRoster(projectId, agentId);
+      await tasksFileWatcher.refresh();
+      agentsFsWatcher.notifyProjectsChanged();
+    } finally {
+      await ensureAgentReady(agentId).catch((error) => {
+        log.error(`[projects:removeAgent] failed to rewarm ${agentId}:`, error);
+      });
+    }
   });
 
   ipcMain.handle(IPC.PROJECTS.REVEAL, async (_e, projectId: string) => {
@@ -126,11 +171,9 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
       project?: { id: string; members: Array<{ agentId: string; [k: string]: unknown }> };
     };
     if (!settings.project) return;
-    if (settings.project.members.some((m) => m.agentId === agentId)) return;
-
     const topModel = await getTopEnabledModel().catch(() => null);
-
-    settings.project.members.push({
+    const existing = settings.project.members.find((item) => item.agentId === agentId);
+    const canonicalMember = {
       agentId: member.id,
       name: member.name,
       role: member.role,
@@ -138,18 +181,32 @@ async function addMemberToCoordinatorRoster(projectId: string, agentId: string):
         ? { provider: topModel.provider, name: topModel.name }
         : undefined,
       status: member.status ?? 'idle',
-      joinedAt: new Date().toISOString(),
+      joinedAt: typeof existing?.joinedAt === 'string'
+        ? existing.joinedAt
+        : new Date().toISOString(),
       localPath: member.localPath,
-    });
+      workerProfileId: member.workerProfileId ?? 'general-worker',
+    };
+    const existingSerialized = existing ? JSON.stringify(existing) : null;
+    if (existing) {
+      Object.assign(existing, canonicalMember);
+    } else {
+      settings.project.members.push(canonicalMember);
+    }
 
-    const counter = parseCounter(settings.managedBy) + 1;
-    settings.managedBy = `superhive-pi-truth@1#${counter}`;
-    (settings as { lastModified?: string }).lastModified = new Date().toISOString();
+    if (!existing || existingSerialized !== JSON.stringify(existing)) {
+      const counter = parseCounter(settings.managedBy) + 1;
+      settings.managedBy = `superhive-pi-truth@1#${counter}`;
+      (settings as { lastModified?: string }).lastModified = new Date().toISOString();
 
-    const serialized = JSON.stringify(settings, null, '\t') + '\n';
-    const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
-    await writeFile(tmp, serialized, 'utf8');
-    await rename(tmp, settingsPath);
+      const serialized = JSON.stringify(settings, null, '\t') + '\n';
+      const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
+      await writeFile(tmp, serialized, 'utf8');
+      await rename(tmp, settingsPath);
+    }
+
+    // Repair the member side even when the coordinator roster was already
+    // correct (older partial link attempts could leave only one side stale).
     await writeMemberProjectContext(member, project, coordinator);
   } catch (err) {
     log.error(
@@ -192,41 +249,44 @@ async function writeMemberProjectContext(
  * is not on the roster.
  */
 async function removeMemberFromCoordinatorRoster(projectId: string, agentId: string): Promise<void> {
+  const member = await AgentRepository.getById(agentId);
   const allInProject = await AgentRepository.getByProject(projectId);
   const coordinator = allInProject.find((a) => a.agentKind === 'project-coordinator');
-  if (!coordinator?.localPath) return;
+  if (coordinator?.localPath) {
+    const settingsPath = manageFilePathFor(coordinator.localPath);
+    if (existsSync(settingsPath)) {
+      try {
+        const raw = readFileSync(settingsPath, 'utf8');
+        const settings = JSON.parse(raw) as {
+          managedBy?: string;
+          project?: { id: string; members: Array<{ agentId: string; [k: string]: unknown }> };
+        };
+        if (settings.project) {
+          const before = settings.project.members.length;
+          settings.project.members = settings.project.members.filter((m) => m.agentId !== agentId);
+          if (settings.project.members.length !== before) {
+            const counter = parseCounter(settings.managedBy) + 1;
+            settings.managedBy = `superhive-pi-truth@1#${counter}`;
+            (settings as { lastModified?: string }).lastModified = new Date().toISOString();
 
-  const settingsPath = manageFilePathFor(coordinator.localPath);
-  if (!existsSync(settingsPath)) return;
-
-  try {
-    const raw = readFileSync(settingsPath, 'utf8');
-    const settings = JSON.parse(raw) as {
-      managedBy?: string;
-      project?: { id: string; members: Array<{ agentId: string; [k: string]: unknown }> };
-    };
-    if (!settings.project) return;
-
-    const before = settings.project.members.length;
-    settings.project.members = settings.project.members.filter((m) => m.agentId !== agentId);
-    if (settings.project.members.length === before) return;
-
-    const counter = parseCounter(settings.managedBy) + 1;
-    settings.managedBy = `superhive-pi-truth@1#${counter}`;
-    (settings as { lastModified?: string }).lastModified = new Date().toISOString();
-
-    const serialized = JSON.stringify(settings, null, '\t') + '\n';
-    const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
-    await writeFile(tmp, serialized, 'utf8');
-    await rename(tmp, settingsPath);
-    const member = await AgentRepository.getById(agentId);
-    if (member?.localPath) {
-      await clearMemberProjectContext(member.localPath, projectId);
+            const serialized = JSON.stringify(settings, null, '\t') + '\n';
+            const tmp = `${settingsPath}.${process.pid}.${Date.now()}.tmp`;
+            await writeFile(tmp, serialized, 'utf8');
+            await rename(tmp, settingsPath);
+          }
+        }
+      } catch (err) {
+        log.error(
+          `[projects:removeAgent] failed to patch coordinator roster: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
     }
-  } catch (err) {
-    log.error(
-      `[projects:removeAgent] failed to patch coordinator roster: ${err instanceof Error ? err.message : String(err)}`,
-    );
+  }
+
+  // Clear the member side even when the coordinator roster was already
+  // missing or unavailable.
+  if (member?.localPath) {
+    await clearMemberProjectContext(member.localPath, projectId);
   }
 }
 

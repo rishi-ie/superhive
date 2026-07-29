@@ -2,6 +2,7 @@ import * as React from 'react'
 import { agents } from '@/api/agents'
 import type { AgentStatus, InitStep } from '@/types/electron'
 import type { AgentLiveState } from '@/models/agent'
+import { initRuntimeSlice } from './slice'
 
 interface AggregatorSlice {
   states: Map<string, AgentLiveState>
@@ -32,6 +33,11 @@ function initAggregatorSlice(agentId: string): AggregatorSlice {
     listeners: new Set(),
   }
   aggregatorSlices.set(agentId, slice)
+
+  // Project workers can receive trusted background turns without their chat
+  // page being open. Keep the shared runtime slice subscribed so those turns
+  // are assembled and persisted, ready to display when the worker chat opens.
+  initRuntimeSlice(agentId)
 
   agents.getRuntimeState(agentId).then((s) => {
     const entry = aggregatorSlices.get(agentId)

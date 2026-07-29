@@ -15,9 +15,14 @@ import { installDefaultsBundle } from './install-defaults-bundle';
 import { agentsFsWatcher } from './agents-fs-watcher';
 import { attachMailboxWatches } from './ipc/mailbox';
 import { tasksFileWatcher } from './tasks-file-watcher';
+import {
+  orchestrationOutboxWatcher,
+  recoverOrchestrationProjects,
+} from './orchestration/orchestration-container';
 import { getTaskRunner } from './task-runner';
 import { installComposerCommands, watchComposerCommands } from './composer-command-config';
 import { IPC } from './ipc';
+import { prepareRuntimeShutdown, warmAllAgents } from './ipc/runtime';
 
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -167,6 +172,12 @@ app.whenReady().then(async () => {
   // drops from the coordinator) and the task runner (5s poll loop
   // that dispatches ready tasks to their assigned workers).
   tasksFileWatcher.start();
+  await orchestrationOutboxWatcher.start();
+  const warmup = await warmAllAgents(4);
+  if (warmup.failed.length > 0) {
+    log.warn('[runtime] app opened with configuration errors:', warmup.failed);
+  }
+  await recoverOrchestrationProjects();
   getTaskRunner().start();
   // If the boot reconcile dropped projects whose folders were missing,
   // the renderer needs to know before the user navigates to the projects
@@ -200,9 +211,11 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', async () => {
   log.info('Shutting down agent runtimes...');
+  prepareRuntimeShutdown();
   agentsFsWatcher.stop();
   tasksFileWatcher.stop();
   getTaskRunner().stop();
+  orchestrationOutboxWatcher.stop();
   await runtime.shutdownAll();
 });
 

@@ -29,6 +29,7 @@ export const AgentRepository = {
       taskIds: [],
       sessionIds: [],
       agentKind: data.agentKind,
+      workerProfileId: data.workerProfileId,
       createdAt: now,
       updatedAt: now,
     }

@@ -28,7 +28,15 @@ export function handleAdapterEvent(
   }
 
   if (event.type === 'ready') {
+    rt.readyEmitted.add(agentId)
+    entry.bootStep = 'ready'
+    entry.readiness = 'ready'
+    entry.readyAt = Date.now()
+    entry.recoveryAttempt = undefined
+    entry.configurationError = undefined
+    entry.lastError = undefined
     rt.transitionStatus(entry, 'active')
+    rt.emitStatus(agentId)
     log.debug(`[runtime.event] agent=${agentId} type=ready`)
     return
   }

@@ -1,12 +1,16 @@
 import * as React from "react";
 import { useMatch } from "react-router-dom";
-import { CircleIcon, ClockIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { Icon } from "@/components/ui/icon";
 import { loadProjectTeam } from "@/flows/projects/crud/load-project-team";
 import { useTasksByProject } from "@/flows/tasks/runtime/use-tasks-by-project";
 import { useProjectStaff } from "@/flows/projects/runtime/use-project-staff";
 import { useAllAgentStatuses } from "@/flows/agents/runtime/use-all-agent-statuses";
 import { useAgentInbox, useAgentOverview } from "@/flows/agents/settings";
+import { useProjectExecution } from "@/flows/orchestration";
+import { selectProjectProgress } from "@/orchestration/application";
+import {
+  projectStatusSections,
+  type ProjectStatusViewModel,
+} from "@/flows/orchestration/status-sections";
 import type { Agent, Project, Task } from "@/storage/types";
 import type { AgentLiveState } from "@/models/agent";
 
@@ -31,20 +35,21 @@ function taskCounts(tasks: Task[]) {
       counts[task.status] += 1;
       return counts;
     },
-    { total: 0, todo: 0, running: 0, blocked: 0, completed: 0, cancelled: 0 },
+    { total: 0, todo: 0, running: 0, waiting: 0, reviewing: 0, blocked: 0, completed: 0, cancelled: 0 },
   );
 }
 
-function workerLabel(worker: Agent, state: AgentLiveState | undefined, work: string | undefined): string {
+function workerLabel(_worker: Agent, state: AgentLiveState | undefined, work: string | undefined): string {
   if (work) return work;
   if (state?.status === "waiting") return "Waiting for coordinator";
-  if (state?.status === "busy" || state?.status === "active") return "Working";
-  return worker.role ?? "Available";
+  if (state?.status === "busy") return "Working";
+  return "Available";
 }
 
 function ProjectWorkboard({ projectId }: { projectId: string }) {
   const [team, setTeam] = React.useState<ProjectTeamState>({ project: null, coordinator: null });
   const tasks = useTasksByProject(projectId);
+  const execution = useProjectExecution(projectId);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -63,6 +68,17 @@ function ProjectWorkboard({ projectId }: { projectId: string }) {
   const inbox = useAgentInbox(team.coordinator?.id ?? null);
 
   const counts = taskCounts(tasks);
+  const progress = execution.snapshot
+    ? selectProjectProgress(execution.snapshot)
+    : {
+        total: counts.total,
+        completed: counts.completed,
+        active: counts.running,
+        reviewing: counts.reviewing,
+        waiting: counts.waiting,
+        blocked: counts.blocked,
+        queued: counts.todo,
+      };
   const pendingInbox = inbox.items.filter((item) => item.status === "pending");
   const workByAgent = React.useMemo(() => {
     const members = (overview.settings as { team?: unknown } | null)?.team;
@@ -79,75 +95,54 @@ function ProjectWorkboard({ projectId }: { projectId: string }) {
   const attention = [
     ...pendingInbox.map((item) => ({ id: `inbox:${item.id}`, label: item.message })),
     ...tasks.filter((task) => task.status === "blocked").map((task) => ({ id: `task:${task.id}`, label: task.blockerReason ?? `${task.title} is blocked` })),
+    ...(execution.snapshot?.unresolvedQuestionIds ?? []).map((id) => ({
+      id: `question:${id}`,
+      label: "An agent question needs a response",
+    })),
     ...staff.filter((worker) => worker.lastError).map((worker) => ({ id: `error:${worker.id}`, label: `${worker.name} needs attention` })),
   ];
-  const progress = counts.total === 0 ? 0 : Math.round((counts.completed / counts.total) * 100);
+  const workersById = new Map(staff.map((worker) => [worker.id, worker]));
+  const activeLoops = (execution.snapshot?.activeIterationIds ?? [])
+    .map((id) => execution.snapshot?.iterations[id])
+    .filter((iteration): iteration is NonNullable<typeof iteration> => Boolean(iteration))
+    .map((iteration) => ({
+      id: iteration.id,
+      workerName: workersById.get(iteration.workerAgentId)?.name ?? iteration.workerAgentId,
+      status: iteration.status.replaceAll("_", " "),
+      activity: execution.snapshot?.workers[iteration.workerAgentId]?.activity?.summary ?? "Iteration in progress",
+    }));
+  const executionLabel = execution.snapshot?.state.replaceAll("_", " ") ?? "planning";
+  const viewModel: ProjectStatusViewModel = {
+    projectName: team.project?.name ?? "Project",
+    executionLabel,
+    planVersion: execution.snapshot?.activePlanVersion,
+    activity: execution.snapshot?.projectAgentActivity?.summary
+      ?? currentSummary
+      ?? (execution.loading ? "Loading project activity" : "Waiting for project activity"),
+    progress,
+    activeLoops,
+    workers: staff.map((worker) => {
+      const projected = execution.snapshot?.workers[worker.id];
+      const live = liveStates.get(worker.id);
+      return {
+        id: worker.id,
+        name: worker.name,
+        label: projected?.activity?.summary
+          ?? (projected?.availability === "awaiting_review" ? "Result awaiting review" : undefined)
+          ?? workerLabel(worker, live, workByAgent.get(worker.id)),
+        working: projected?.availability === "working"
+          || live?.status === "busy",
+        error: Boolean(worker.lastError || projected?.availability === "error"),
+      };
+    }),
+    attention,
+  };
 
   return (
     <div className="flex flex-col gap-5">
-      <section className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-sidebar-foreground">{team.project?.name ?? "Project"}</p>
-        <p className="text-xs text-muted-foreground">{currentSummary ?? "Waiting for project activity"}</p>
-      </section>
-
-      <section className="flex flex-col gap-2 pt-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground">Plan progress</h2>
-          <span className="text-xs text-muted-foreground">{counts.completed} / {counts.total}</span>
-        </div>
-        <div aria-label={`${progress}% of project tasks complete`} className="h-1.5 overflow-hidden rounded-full bg-sidebar-accent">
-          <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${progress}%` }} />
-        </div>
-        <p className="text-xs text-muted-foreground">
-          {counts.running} active · {counts.todo} queued · {counts.blocked} blocked
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-2 pt-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground">Worker hive</h2>
-          <span className="text-xs text-muted-foreground">{staff.length}</span>
-        </div>
-        {staff.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No workers assigned yet.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {staff.map((worker) => {
-              const state = liveStates.get(worker.id);
-              const isWorking = state?.status === "active" || state?.status === "busy";
-              const icon = worker.lastError ? WarningCircleIcon : isWorking ? ClockIcon : CircleIcon;
-              return (
-                <div key={worker.id} className="flex items-start gap-2">
-                  <Icon icon={icon} className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-sidebar-foreground">{worker.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{workerLabel(worker, state, workByAgent.get(worker.id))}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="flex flex-col gap-2 pt-4">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium text-muted-foreground">Needs attention</h2>
-          <span className="text-xs text-muted-foreground">{attention.length}</span>
-        </div>
-        {attention.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Nothing needs you right now.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {attention.slice(0, 3).map((item) => (
-              <div key={item.id} className="flex items-start gap-2">
-                <Icon icon={WarningCircleIcon} className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-                <p className="text-xs text-sidebar-foreground">{item.label}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      {projectStatusSections.list().map(({ id, Component }) => (
+        <Component key={id} viewModel={viewModel} />
+      ))}
     </div>
   );
 }

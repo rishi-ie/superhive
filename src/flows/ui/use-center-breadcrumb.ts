@@ -1,47 +1,97 @@
 import { useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { agents } from "@/api/agents";
-import { loadProject } from "@/flows/projects/crud/load-project";
-import type { BreadcrumbSegment } from "@/models/ui";
+import { listProjects, loadProject } from "@/flows/projects/crud";
+import { useAgentsListVersion } from "@/flows/agents/runtime";
+import { useProjectsListVersion } from "@/flows/projects/runtime";
+import type { Agent, Project } from "@/types/electron";
+import type { CenterBreadcrumbState } from "@/models/ui";
 
-export function useCenterBreadcrumb(): BreadcrumbSegment[] | null {
+export function useCenterBreadcrumb(): CenterBreadcrumbState {
   const { pathname } = useLocation();
   const { agentId, projectId } = useParams();
-  const [agentName, setAgentName] = useState<string | null>(null);
-  const [projectName, setProjectName] = useState<string | null>(null);
+  const agentsVersion = useAgentsListVersion();
+  const projectsVersion = useProjectsListVersion();
+  const [agent, setAgent] = useState<Agent | null>(null);
+  const [agentProjects, setAgentProjects] = useState<Project[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    if (!agentId) return;
-    agents.get(agentId).then((a) => {
-      setAgentName(a?.name ?? agentId);
-    });
-  }, [agentId]);
+    if (!agentId) {
+      setAgent(null);
+      setAgentProjects([]);
+      return;
+    }
+    let cancelled = false;
+    Promise.all([agents.get(agentId), listProjects()])
+      .then(([nextAgent, nextProjects]) => {
+        if (cancelled) return;
+        setAgent(nextAgent);
+        setAgentProjects(nextProjects);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setAgent(null);
+        setAgentProjects([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [agentId, agentsVersion, projectsVersion]);
 
   useEffect(() => {
-    if (!projectId) return;
-    loadProject(projectId).then((p) => {
-      setProjectName(p?.name ?? projectId);
-    });
-  }, [projectId]);
+    if (!projectId) {
+      setProject(null);
+      return;
+    }
+    let cancelled = false;
+    loadProject(projectId)
+      .then((nextProject) => {
+        if (cancelled) return;
+        setProject(nextProject);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setProject(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, projectsVersion]);
 
   if (pathname === "/landing" || pathname === "/") {
-    return null;
+    return { segments: null, context: null };
   }
   if (pathname === "/agents" || pathname.startsWith("/agents/")) {
-    return agentId
-      ? [{ label: "Agent", clickable: false }, { label: agentName ?? agentId }]
-      : [{ label: "Agent" }];
+    const currentAgent = agent?.id === agentId ? agent : null;
+    return {
+      segments: agentId
+        ? [{ label: "Agent", clickable: false }, { label: currentAgent?.name ?? agentId }]
+        : [{ label: "Agent" }],
+      context: agentId && currentAgent
+        ? { kind: "agent", agent: currentAgent, projects: agentProjects }
+        : null,
+    };
   }
   if (pathname === "/projects" || pathname.startsWith("/projects/")) {
-    return projectId
-      ? [{ label: "Projects", href: "/projects" }, { label: projectName ?? projectId }]
-      : [{ label: "Projects" }];
+    const currentProject = project?.id === projectId ? project : null;
+    return {
+      segments: projectId
+        ? [{ label: "Projects", href: "/projects" }, { label: currentProject?.name ?? projectId }]
+        : [{ label: "Projects" }],
+      context: projectId && currentProject
+        ? { kind: "project", project: currentProject }
+        : null,
+    };
   }
   if (pathname === "/hive") {
-    return [{ label: "Meta Hive" }];
+    return { segments: [{ label: "Meta Hive" }], context: null };
   }
   if (pathname === "/remote") {
-    return [{ label: "Remote" }];
+    return { segments: [{ label: "Remote" }], context: null };
   }
-  return [{ label: "Landing", href: "/landing" }];
+  return {
+    segments: [{ label: "Landing", href: "/landing" }],
+    context: null,
+  };
 }

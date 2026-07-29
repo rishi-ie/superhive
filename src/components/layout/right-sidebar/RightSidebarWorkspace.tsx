@@ -39,6 +39,14 @@ export function RightSidebarWorkspace<TTabId extends string>({
     setState((current) => openWorkspaceTab(current, tabId, tabIds));
   }, [tabIds]);
 
+  React.useEffect(() => {
+    const openManage = () => {
+      if (tabIds.includes("manage" as TTabId)) openTab("manage" as TTabId);
+    };
+    window.addEventListener("superhive:open-manage", openManage);
+    return () => window.removeEventListener("superhive:open-manage", openManage);
+  }, [openTab, tabIds]);
+
   const closeTab = React.useCallback((tabId: TTabId) => {
     setState((current) => closeWorkspaceTab(current, tabId));
   }, []);

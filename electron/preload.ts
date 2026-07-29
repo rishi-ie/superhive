@@ -31,6 +31,8 @@ const api: ElectronAPI = {
     start:    (id) => ipcRenderer.invoke('agents:start', id),
     stop:     (id) => ipcRenderer.invoke('agents:stop', id),
     restart:  (id) => ipcRenderer.invoke('agents:restart', id),
+    ensureReady: (id) => ipcRenderer.invoke('agents:ensure-ready', id),
+    abortTurn: (id) => ipcRenderer.invoke('agents:abort-turn', id),
     send:     (id, message) => ipcRenderer.invoke('agents:send', id, message),
     pickAttachments: (id, kind) => ipcRenderer.invoke('agents:pickAttachments', id, kind),
     importAttachment: (id, input) => ipcRenderer.invoke('agents:importAttachment', id, input),
@@ -157,6 +159,29 @@ const api: ElectronAPI = {
     remove: (id) => ipcRenderer.invoke('marketplace:remove', id),
     activateForAgent: (agentId, id) => ipcRenderer.invoke('marketplace:activate', agentId, id),
     onChanged: (cb) => subscribe('marketplace:changed', cb),
+  },
+  orchestration: {
+    getProjectSnapshot: (projectId) => ipcRenderer.invoke('orchestration:get-project', projectId),
+    getAgentSnapshot: (agentId) => ipcRenderer.invoke('orchestration:get-agent', agentId),
+    listPlans: (projectId) => ipcRenderer.invoke('orchestration:list-plans', projectId),
+    getIteration: (projectId, iterationId) =>
+      ipcRenderer.invoke('orchestration:get-iteration', projectId, iterationId),
+    listProjectMessages: (projectId) =>
+      ipcRenderer.invoke('orchestration:list-messages', projectId),
+    approvePlan: (projectId, planId) =>
+      ipcRenderer.invoke('orchestration:approve-plan', projectId, planId),
+    pauseProject: (projectId) =>
+      ipcRenderer.invoke('orchestration:pause-project', projectId),
+    resumeProject: (projectId) =>
+      ipcRenderer.invoke('orchestration:resume-project', projectId),
+    cancelProject: (projectId) =>
+      ipcRenderer.invoke('orchestration:cancel-project', projectId),
+    onProjectChanged: (projectId, cb) =>
+      subscribe(`orchestration:project:${projectId}:changed`, cb),
+    onProjectChatChanged: (projectId, cb) =>
+      subscribe(`orchestration:project:${projectId}:chat-changed`, cb),
+    onAgentChanged: (agentId, cb) =>
+      subscribe(`orchestration:agent:${agentId}:changed`, cb),
   },
 }
 

@@ -23,6 +23,7 @@ export interface Agent extends BaseEntity {
   taskIds: string[]
   sessionIds: string[]
   agentKind?: AgentKind
+  workerProfileId?: string
 }
 
 export interface Project extends BaseEntity {
@@ -43,7 +44,7 @@ export interface Workspace extends BaseEntity {
   name: string
 }
 
-export type TaskStatus = 'todo' | 'running' | 'blocked' | 'completed' | 'cancelled'
+export type TaskStatus = 'todo' | 'running' | 'waiting' | 'reviewing' | 'blocked' | 'completed' | 'cancelled'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical'
 
 export interface Task extends BaseEntity {
@@ -60,6 +61,18 @@ export interface Task extends BaseEntity {
   blockerReason?: string          // when status='blocked'
   staleSince?: number             // epoch ms; runner-managed, used for auto-retry
   outcome?: string                // final summary set by complete_task
+  // Loop-engineering projection fields. Canonical lineage lives in the
+  // project event store; these fields keep existing task UI/query paths useful.
+  planId?: string
+  planVersion?: number
+  objective?: string
+  deliverables?: string[]
+  definitionOfDone?: string[]
+  currentIterationId?: string
+  acceptedIterationId?: string
+  iterationCount?: number
+  waitingReason?: string
+  legacy?: boolean
 }
 
 export interface Session extends BaseEntity {

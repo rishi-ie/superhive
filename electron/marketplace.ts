@@ -6,6 +6,10 @@ import { app } from 'electron'
 import { AgentRepository } from '../src/storage/repositories/AgentRepository'
 import type { MarketplaceActivationResult, MarketplaceCatalogItem, MarketplaceItem, InstalledMarketplaceItem } from '../src/models/marketplace'
 import { runtime } from './general-kai-runtime'
+import {
+	ensureAgentReady,
+	suspendAgentForReconfiguration,
+} from './ipc/runtime'
 import { copyTree } from './agent-assets'
 
 type CatalogFile = { version: number; items: MarketplaceCatalogItem[] }
@@ -167,13 +171,15 @@ export async function activateMarketplaceItem(agentId: string, id: string): Prom
 	}
 	const restarted = Boolean(status)
 	if (restarted) {
-		runtime.restart(agentId)
-		await new Promise<void>((resolve) => setTimeout(resolve, 900))
-		const reloaded = runtime.getStatusPayload(agentId)
-		if (!reloaded || reloaded.status === 'idle') {
+		await suspendAgentForReconfiguration(agentId)
+		try {
+			await ensureAgentReady(agentId)
+		} catch {
 			if (createdLink && existsSync(target)) rmSync(target, { recursive: true, force: true })
 			writeJsonAtomic(managePath, previousManage)
 			if (!isSkill) writeJsonAtomic(manifestPath, previousManifest)
+			await suspendAgentForReconfiguration(agentId)
+			void ensureAgentReady(agentId)
 			throw new Error('The agent did not come back after enabling this capability')
 		}
 	}

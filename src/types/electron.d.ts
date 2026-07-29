@@ -1,14 +1,15 @@
 import type { Agent, AgentStatus, Project, Task, TaskStatus, TaskPriority } from '@/storage/types'
-import type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload } from '@/models/runtime'
+import type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload, RuntimeReadiness } from '@/models/runtime'
 import type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo } from '@/models/runtime'
 import type { AssistantMessage, ChatRow, TurnInput, ComposerAttachment } from '@/models/assistant-message'
 import type { ComposerCommandFiles } from '@/models/composer-command'
 import type { MarketplaceActivationResult, MarketplaceItem } from '@/models/marketplace'
+import type { OrchestrationAPI } from '@/orchestration/contracts'
 
 export type { Agent, AgentStatus, Project }
 export type { Task, TaskStatus, TaskPriority }
 
-export type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload }
+export type { RuntimeAssistantState, RuntimeStatusPayload, RuntimeExitPayload, RuntimeReadiness }
 export type { InitStep, AdapterEvent, UsageSnapshot, ContextSnapshot, ModelInfo }
 export type { ChatRow, AssistantMessage }
 
@@ -39,6 +40,8 @@ export interface AgentsAPI {
 	start: (id: string) => Promise<{ ok: boolean }>
 	stop: (id: string) => Promise<{ ok: boolean }>
 	restart: (id: string) => Promise<{ ok: boolean }>
+	ensureReady: (id: string) => Promise<RuntimeStatusPayload>
+	abortTurn: (id: string) => Promise<{ ok: boolean }>
   send: (id: string, message: TurnInput) => Promise<{ ok: boolean }>
   pickAttachments: (id: string, kind: 'file' | 'folder') => Promise<ComposerAttachment[]>
   importAttachment: (id: string, input: { name: string; mimeType?: string; data: string }) => Promise<ComposerAttachment>
@@ -194,6 +197,7 @@ export interface ElectronAPI {
 	templates: TemplatesAPI
 	composerCommands: ComposerCommandsAPI
 	marketplace: MarketplaceAPI
+	orchestration: OrchestrationAPI
 }
 
 export interface ComposerCommandsAPI {

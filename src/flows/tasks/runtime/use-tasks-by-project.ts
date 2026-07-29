@@ -34,10 +34,12 @@ export function useTasksVersion(): number {
 
 const STATUS_ORDER: Record<Task['status'], number> = {
   running: 0,
-  todo: 1,
-  blocked: 2,
-  completed: 3,
-  cancelled: 4,
+  reviewing: 1,
+  waiting: 2,
+  todo: 3,
+  blocked: 4,
+  completed: 5,
+  cancelled: 6,
 }
 
 export function sortTasksByStatus(tasks: Task[]): Task[] {

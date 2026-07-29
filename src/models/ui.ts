@@ -6,6 +6,7 @@
  */
 
 import type { ChatRow } from '@/models/assistant-message'
+import type { Agent, Project } from '@/types/electron'
 
 // ---------------------------------------------------------------------------
 // Composer
@@ -29,6 +30,15 @@ export interface BreadcrumbSegment {
   label: string
   href?: string
   clickable?: boolean
+}
+
+export type BreadcrumbEntityContext =
+  | { kind: 'agent'; agent: Agent; projects: Project[] }
+  | { kind: 'project'; project: Project }
+
+export interface CenterBreadcrumbState {
+  segments: BreadcrumbSegment[] | null
+  context: BreadcrumbEntityContext | null
 }
 
 // ---------------------------------------------------------------------------

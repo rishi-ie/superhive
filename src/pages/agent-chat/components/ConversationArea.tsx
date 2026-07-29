@@ -8,12 +8,24 @@ import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import type { AssistantMessage as PersistedAssistantMessage, ChatRow } from '@/models/assistant-message'
 import type { RuntimeAssistantState } from '@/models/runtime'
 import { isMessageInFlight } from '@/models/runtime'
+import type { ProjectChannelMessage } from '@/orchestration/domain/entities'
+import { ProjectChannelMessageCard } from '@/flows/orchestration/message-renderers'
 
 type Row =
   | { kind: 'message'; message: ChatRow }                       // user message (non-assistant) only
   | { kind: 'merged-assistant'; messages: PersistedAssistantMessage[]; inFlight?: RuntimeAssistantState }
+  | { kind: 'project-channel'; message: ProjectChannelMessage }
+  | { kind: 'lifecycle'; state: AgentLifecycleState }
   | { kind: 'in-flight'; message: RuntimeAssistantState }
   | { kind: 'pending'; id: string; startedAt: number }
+
+export interface AgentLifecycleState {
+  id: string
+  label: string
+  detail?: string
+  actionLabel?: string
+  onAction?: () => void
+}
 
 interface ConversationAreaProps {
   messages: ChatRow[]
@@ -39,6 +51,8 @@ interface ConversationAreaProps {
    * it.
    */
   agentResponseActive?: boolean
+  projectChannelMessages?: ProjectChannelMessage[]
+  lifecycleState?: AgentLifecycleState
 }
 
 export function ConversationArea({
@@ -51,6 +65,8 @@ export function ConversationArea({
   agentId,
   pendingTurn = null,
   agentResponseActive = false,
+  projectChannelMessages = [],
+  lifecycleState,
 }: ConversationAreaProps) {
   const virtuosoRef = React.useRef<VirtuosoHandle | null>(null)
   const [atBottom, setAtBottom] = React.useState(true)
@@ -69,9 +85,22 @@ export function ConversationArea({
     // Merging here gives the user one indicator + one footer +
     // interleaved prose per prompt response. User messages and any
     // other role break the chain (each renders individually).
+    const timeline = [
+      ...messages.map((message) => ({ kind: 'chat' as const, message })),
+      ...projectChannelMessages.map((message) => ({ kind: 'project-channel' as const, message })),
+    ].sort((left, right) =>
+      left.message.timestamp - right.message.timestamp ||
+      left.message.id.localeCompare(right.message.id))
+
     let i = 0
-    while (i < messages.length) {
-      const m = messages[i]!
+    while (i < timeline.length) {
+      const entry = timeline[i]!
+      if (entry.kind === 'project-channel') {
+        out.push({ kind: 'project-channel', message: entry.message })
+        i++
+        continue
+      }
+      const m = entry.message
       if (m.role !== 'assistant') {
         out.push({ kind: 'message', message: m })
         i++
@@ -79,13 +108,19 @@ export function ConversationArea({
       }
       const group: PersistedAssistantMessage[] = [m as PersistedAssistantMessage]
       let j = i + 1
-      while (j < messages.length && messages[j]!.role === 'assistant') {
-        group.push(messages[j]! as PersistedAssistantMessage)
+      while (
+        j < timeline.length &&
+        timeline[j]!.kind === 'chat' &&
+        timeline[j]!.message.role === 'assistant'
+      ) {
+        group.push(timeline[j]!.message as PersistedAssistantMessage)
         j++
       }
       out.push({ kind: 'merged-assistant', messages: group })
       i = j
     }
+
+    if (lifecycleState) out.push({ kind: 'lifecycle', state: lifecycleState })
 
     // If there's an in-flight message AND no finalized row already carries
     // that id, render it as a virtual trailing row. The frozen AssistantMessage
@@ -117,11 +152,12 @@ export function ConversationArea({
       })
     }
     return out
-  }, [messages, inFlight, pendingTurn])
+  }, [messages, inFlight, lifecycleState, pendingTurn, projectChannelMessages])
 
   React.useEffect(() => {
     const currentIds = new Set<string>()
     for (const m of messages) currentIds.add(m.id)
+    for (const message of projectChannelMessages) currentIds.add(message.id)
     if (inFlight) currentIds.add(inFlight.id)
     const next = new Set<string>()
     for (const id of currentIds) {
@@ -142,7 +178,7 @@ export function ConversationArea({
       })
     }, 400)
     return () => clearTimeout(t)
-  }, [messages, inFlight])
+  }, [messages, inFlight, projectChannelMessages])
 
   const onAtBottomChange = React.useCallback((bottom: boolean) => {
     setAtBottom(bottom)
@@ -193,8 +229,10 @@ export function ConversationArea({
         data={rows}
         computeItemKey={(_, row) => {
           if (row.kind === 'pending') return `pending-${row.id}`
+          if (row.kind === 'lifecycle') return `lifecycle-${row.state.id}`
           if (row.kind === 'in-flight') return `inflight-${row.message.id}`
           if (row.kind === 'merged-assistant') return `merged-${row.messages[0]!.id}`
+          if (row.kind === 'project-channel') return `project-channel-${row.message.id}`
           return row.message.id
         }}
         followOutput={atBottom ? 'smooth' : false}
@@ -202,6 +240,29 @@ export function ConversationArea({
         initialTopMostItemIndex={Math.max(0, rows.length - 1)}
         components={{ Scroller }}
         itemContent={(_index, row) => {
+          if (row.kind === 'lifecycle') {
+            return (
+              <div className="mx-auto flex w-full max-w-4xl px-4 py-2 sm:px-6">
+                <div className="flex w-full items-center justify-between gap-3 rounded-xl border border-border/70 bg-card/50 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm text-foreground">{row.state.label}</p>
+                    {row.state.detail ? (
+                      <p className="mt-1 truncate text-xs text-muted-foreground">{row.state.detail}</p>
+                    ) : null}
+                  </div>
+                  {row.state.actionLabel && row.state.onAction ? (
+                    <button
+                      type="button"
+                      onClick={row.state.onAction}
+                      className="shrink-0 rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      {row.state.actionLabel}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            )
+          }
           if (row.kind === 'pending') {
             return (
               <div className="mx-auto flex w-full max-w-4xl flex-col px-4 sm:px-6 py-2">
@@ -250,6 +311,13 @@ export function ConversationArea({
                       : undefined
                   }
                 />
+              </div>
+            )
+          }
+          if (row.kind === 'project-channel') {
+            return (
+              <div className="mx-auto flex w-full max-w-4xl flex-col px-4 py-2 sm:px-6">
+                <ProjectChannelMessageCard message={row.message} />
               </div>
             )
           }

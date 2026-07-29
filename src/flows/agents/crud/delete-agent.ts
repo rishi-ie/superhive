@@ -5,7 +5,6 @@ import type { DeleteAgentResult } from '@/models/agent';
 
 export async function deleteAgent(id: string): Promise<DeleteAgentResult> {
   try {
-    await agents.stop(id).catch(() => {});
     const ok = await agents.delete(id);
     if (!ok) {
       toast.error('Agent not found');

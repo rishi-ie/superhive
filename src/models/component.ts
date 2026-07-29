@@ -28,7 +28,7 @@ export type Mode = 'plan' | 'execute' | 'auto'
 
 export interface OverviewPreviousTask {
   name: string
-  cost: number
+  cost?: number
 }
 
 export interface OverviewChecklistItem {
@@ -56,6 +56,13 @@ export interface OverviewData {
   previousTasks: OverviewPreviousTask[]
   activeChecklist: OverviewChecklist | null
   recentActivity: OverviewRecentActivityItem[]
+  communication?: Array<{
+    id: string
+    actor: string
+    text: string
+    timestamp?: string
+  }>
+  resultStatus?: string
   responsibilityCount: number
   projects: Project[]
 }

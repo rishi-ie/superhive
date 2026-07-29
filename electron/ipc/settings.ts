@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { SettingsRepository } from '../../src/storage/repositories'
 import { AgentRepository } from '../../src/storage/repositories/AgentRepository'
 import { IPC } from './index'
-import { reSeedProviders } from './runtime'
+import { ensureAgentReady, reSeedProviders } from './runtime'
 
 const GLOBAL_OWNER_TYPE = 'global' as const
 const GLOBAL_OWNER_ID = 'global' as const
@@ -59,6 +59,7 @@ async function reSeedAllAgents(): Promise<void> {
 	for (const agent of agents) {
 		try {
 			await reSeedProviders(agent.id)
+			await ensureAgentReady(agent.id)
 		} catch (err) {
 			console.error(`[settings] reSeedProviders failed for agent ${agent.id}:`, err)
 		}

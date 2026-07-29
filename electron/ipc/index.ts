@@ -8,6 +8,7 @@ import { registerTaskIpc } from './tasks';
 import { registerTemplatesIpc } from './templates';
 import { registerComposerCommandsIpc } from './composer-commands';
 import { registerMarketplaceIpc } from './marketplace';
+import { registerOrchestrationIpc } from '../orchestration/ipc-handlers';
 
 export const IPC = {
   AGENTS: {
@@ -19,6 +20,8 @@ export const IPC = {
     START: 'agents:start',
     STOP: 'agents:stop',
     RESTART: 'agents:restart',
+    ENSURE_READY: 'agents:ensure-ready',
+    ABORT_TURN: 'agents:abort-turn',
     SEND: 'agents:send',
     PICK_ATTACHMENTS: 'agents:pickAttachments',
     IMPORT_ATTACHMENT: 'agents:importAttachment',
@@ -128,4 +131,5 @@ export function registerIpc(): void {
   registerTemplatesIpc();
   registerComposerCommandsIpc();
   registerMarketplaceIpc();
+  registerOrchestrationIpc();
 }

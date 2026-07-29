@@ -14,8 +14,16 @@ import { manageFilePathFor } from '../agent-settings-defaults'
 import { patchCoordinatorForMemberStatus } from '../project-status-mirror'
 import { mailboxWatcher } from '../mailbox-watcher'
 import { mergeProviders, normalizeRuntimeSettings, type ProviderConfig } from '../provider-merge'
+import log from 'electron-log/main'
+import type { RuntimeStatusPayload } from '../../src/models/runtime'
 
 const providerReseeds = new Map<string, Promise<void>>()
+const readinessPromises = new Map<string, Promise<RuntimeStatusPayload>>()
+const desiredReadyAgents = new Set<string>()
+const START_RETRY_DELAYS_MS = [0, 250, 1_000, 3_000] as const
+const READY_TIMEOUT_MS = 10_000
+let shuttingDown = false
+let supervisorInstalled = false
 
 /**
  * Bootstrap env-var API keys from process.env into the `providers` map.
@@ -161,63 +169,205 @@ async function waitForRuntimeStop(agentId: string): Promise<void> {
 	if (runtime.getState(agentId)?.process) throw new Error('Agent runtime did not stop within 5 seconds')
 }
 
-/** The only supported process-start path. Keep side effects consistent for UI,
- * spawned workers, and task dispatch. */
-export async function startManagedAgent(agentId: string): Promise<void> {
+async function startManagedAgentOnce(agentId: string, attempt: number): Promise<RuntimeStatusPayload> {
 	const agent = await AgentRepository.getById(agentId)
 	if (!agent?.localPath) throw new Error(`Agent not found or missing localPath: ${agentId}`)
+
+	const existing = runtime.getState(agentId)
+	if (
+		existing?.process &&
+		runtime.readyEmitted.has(agentId) &&
+		existing.bootStep === 'ready'
+	) {
+		return runtime.getStatusPayload(agentId)!
+	}
+	if (existing?.process) {
+		runtime.stop(agentId)
+		await waitForRuntimeStop(agentId)
+	}
+
 	await ensureRuntimePrepared()
 	ensureGeneralKai()
 	await autoSeedProviders(agentId, agent.localPath)
 	await runtime.start(agentId, agent.localPath, getGeneralKaiDir())
-	await watchMailbox(agentId, agent.localPath)
+	const started = runtime.getState(agentId)
+	if (started) {
+		started.readiness = 'recovering'
+		started.recoveryAttempt = attempt + 1
+		runtime.emitStatus(agentId)
+	}
 
-	// Pi has no synchronous ready signal. Wait for its existing ready event rather
-	// than marking a failed child process as active immediately.
-	const deadline = Date.now() + 10_000
+	// RawTextAdapter emits ready only after Pi answers the correlated get_state
+	// probe written by spawnProcess.
+	const deadline = Date.now() + READY_TIMEOUT_MS
 	while (Date.now() < deadline) {
 		const entry = runtime.getState(agentId)
 		if (!entry?.process) break
 		if (runtime.readyEmitted.has(agentId) || entry.bootStep === 'ready') {
+			await watchMailbox(agentId, agent.localPath)
 			await AgentRepository.update(agentId, { status: 'active', lastError: undefined })
 			await patchCoordinatorForMemberStatus(agentId, 'active')
-			return
+			return runtime.getStatusPayload(agentId)!
 		}
 		await new Promise((resolve) => setTimeout(resolve, 50))
 	}
 
-	const message = runtime.getState(agentId)?.lastError || 'Agent failed to become ready within 10 seconds'
+	const message = runtime.getState(agentId)?.lastError || `Agent failed to become ready within ${READY_TIMEOUT_MS / 1000} seconds`
 	runtime.stop(agentId)
 	mailboxWatcher.unwatchAgent(agentId)
+	await waitForRuntimeStop(agentId).catch(() => undefined)
 	await AgentRepository.update(agentId, { status: 'idle', lastError: message })
 	await patchCoordinatorForMemberStatus(agentId, 'idle')
 	throw new Error(message)
 }
 
+/** The only supported process-start path. Concurrent callers share one launch. */
+export function ensureAgentReady(agentId: string): Promise<RuntimeStatusPayload> {
+	desiredReadyAgents.add(agentId)
+	const current = runtime.getState(agentId)
+	if (
+		current?.process &&
+		current.bootStep === 'ready' &&
+		runtime.readyEmitted.has(agentId)
+	) {
+		return Promise.resolve(runtime.getStatusPayload(agentId)!)
+	}
+	const existing = readinessPromises.get(agentId)
+	if (existing) return existing
+
+	const pending = (async () => {
+		let lastError: unknown
+		for (let attempt = 0; attempt < START_RETRY_DELAYS_MS.length; attempt++) {
+			const delayMs = START_RETRY_DELAYS_MS[attempt]!
+			if (delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs))
+			try {
+				return await startManagedAgentOnce(agentId, attempt)
+			} catch (error) {
+				lastError = error
+				log.warn(`[runtime] readiness attempt ${attempt + 1} failed for ${agentId}:`, error)
+			}
+		}
+
+		const message = lastError instanceof Error ? lastError.message : String(lastError ?? 'Agent failed to start')
+		const entry = runtime.getState(agentId)
+		if (entry) {
+			entry.readiness = 'configuration_error'
+			entry.configurationError = {
+				code: 'runtime_start_failed',
+				message,
+				settingsTarget: 'models/providers',
+			}
+			entry.lastError = message
+			entry.recoveryAttempt = START_RETRY_DELAYS_MS.length
+			runtime.emitStatus(agentId)
+		}
+		throw new Error(message)
+	})()
+	readinessPromises.set(agentId, pending)
+	void pending.finally(() => {
+		if (readinessPromises.get(agentId) === pending) readinessPromises.delete(agentId)
+	}).catch(() => undefined)
+	return pending
+}
+
+/** Compatibility name for existing task/runtime adapters. */
+export async function startManagedAgent(agentId: string): Promise<void> {
+	await ensureAgentReady(agentId)
+}
+
+export async function warmAllAgents(concurrency = 4): Promise<{
+	ready: string[]
+	failed: Array<{ agentId: string; error: string }>
+}> {
+	const agents = (await AgentRepository.getAll()).filter((agent) => Boolean(agent.localPath))
+	const ready: string[] = []
+	const failed: Array<{ agentId: string; error: string }> = []
+	let cursor = 0
+	const workers = Array.from({ length: Math.min(concurrency, agents.length) }, async () => {
+		while (cursor < agents.length) {
+			const agent = agents[cursor++]!
+			try {
+				await ensureAgentReady(agent.id)
+				ready.push(agent.id)
+			} catch (error) {
+				failed.push({
+					agentId: agent.id,
+					error: error instanceof Error ? error.message : String(error),
+				})
+			}
+		}
+	})
+	await Promise.all(workers)
+	return { ready, failed }
+}
+
+export async function stopAgentForSystemReason(agentId: string): Promise<void> {
+	desiredReadyAgents.delete(agentId)
+	runtime.stop(agentId)
+	mailboxWatcher.unwatchAgent(agentId)
+	await waitForRuntimeStop(agentId).catch(() => undefined)
+}
+
+export async function suspendAgentForReconfiguration(agentId: string): Promise<void> {
+	desiredReadyAgents.delete(agentId)
+	await runtime.invalidateForConfigurationChange(agentId)
+	mailboxWatcher.unwatchAgent(agentId)
+}
+
+export function prepareRuntimeShutdown(): void {
+	shuttingDown = true
+	desiredReadyAgents.clear()
+}
+
+function installRuntimeSupervisor(): void {
+	if (supervisorInstalled) return
+	supervisorInstalled = true
+	runtime.setProcessExitHandler((agentId) => {
+		if (
+			shuttingDown ||
+			!desiredReadyAgents.has(agentId) ||
+			readinessPromises.has(agentId)
+		) return
+		const entry = runtime.getState(agentId)
+		if (entry) {
+			entry.readiness = 'recovering'
+			entry.recoveryAttempt = 0
+			runtime.emitStatus(agentId)
+		}
+		void ensureAgentReady(agentId).catch((error) => {
+			log.error(`[runtime] automatic recovery failed for ${agentId}:`, error)
+		})
+	})
+}
+
 export function registerRuntimeIpc(): void {
+	installRuntimeSupervisor()
+
 	ipcMain.handle(IPC.AGENTS.START, async (_e, agentId: string) => {
-		await startManagedAgent(agentId)
+		await ensureAgentReady(agentId)
 		return { ok: true }
+	})
+
+	ipcMain.handle(IPC.AGENTS.ENSURE_READY, async (_e, agentId: string) => {
+		return ensureAgentReady(agentId)
 	})
 
 	ipcMain.handle(IPC.AGENTS.STOP, async (_e, agentId: string) => {
-		runtime.stop(agentId)
-		mailboxWatcher.unwatchAgent(agentId)
-		await AgentRepository.update(agentId, { status: 'idle' })
-		// Gap 1: mirror status to coordinator's truth file.
-		await patchCoordinatorForMemberStatus(agentId, 'idle')
-		return { ok: true }
+		return { ok: runtime.abortTurn(agentId) }
+	})
+
+	ipcMain.handle(IPC.AGENTS.ABORT_TURN, async (_e, agentId: string) => {
+		return { ok: runtime.abortTurn(agentId) }
 	})
 
 	ipcMain.handle(IPC.AGENTS.RESTART, async (_e, agentId: string) => {
-		runtime.stop(agentId)
-		mailboxWatcher.unwatchAgent(agentId)
-		await waitForRuntimeStop(agentId)
-		await startManagedAgent(agentId)
+		await suspendAgentForReconfiguration(agentId)
+		await ensureAgentReady(agentId)
 		return { ok: true }
 	})
 
 	ipcMain.handle(IPC.AGENTS.SEND, async (_e, agentId: string, message: TurnInput) => {
+		await ensureAgentReady(agentId)
 		const ok = runtime.send(agentId, message)
 		return { ok }
 	})

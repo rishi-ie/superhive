@@ -52,6 +52,15 @@ function AppLayoutShell() {
     setStatusBarOpen(isConversation);
   }, [location.pathname, isConversation]);
 
+  React.useEffect(() => {
+    const openSettings = () => {
+      setStatusBarOpen(false);
+      setRightSidebarOpen(true);
+    };
+    window.addEventListener("superhive:open-manage", openSettings);
+    return () => window.removeEventListener("superhive:open-manage", openSettings);
+  }, []);
+
   const startResizingLeft = React.useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsResizingLeft(true);

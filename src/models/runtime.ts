@@ -328,6 +328,11 @@ export interface RetryStatus {
   startedAt: number
 }
 
+export type RuntimeReadiness =
+  | 'ready'
+  | 'recovering'
+  | 'configuration_error'
+
 export interface RuntimeStatusPayload {
   agentId: string
   status: AgentStatus
@@ -336,6 +341,14 @@ export interface RuntimeStatusPayload {
   endedAt?: number
   lastError?: string
   bootStep?: InitStep
+  readiness: RuntimeReadiness
+  readyAt?: number
+  recoveryAttempt?: number
+  configurationError?: {
+    code: string
+    message: string
+    settingsTarget?: string
+  }
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
   availableModels?: ModelInfo[]

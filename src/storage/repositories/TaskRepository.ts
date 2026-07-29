@@ -30,6 +30,16 @@ export const TaskRepository = {
       staleSince: data.staleSince,
       outcome: data.outcome,
       blockerReason: data.blockerReason,
+      planId: data.planId,
+      planVersion: data.planVersion,
+      objective: data.objective,
+      deliverables: data.deliverables,
+      definitionOfDone: data.definitionOfDone,
+      currentIterationId: data.currentIterationId,
+      acceptedIterationId: data.acceptedIterationId,
+      iterationCount: data.iterationCount,
+      waitingReason: data.waitingReason,
+      legacy: data.legacy,
       createdAt: now,
       updatedAt: now,
     }
@@ -150,7 +160,7 @@ export const TaskRepository = {
     const patch: Partial<Task> = { status }
     if (status === 'blocked') {
       patch.blockerReason = opts?.blockerReason
-    } else if (status === 'todo' || status === 'running') {
+    } else if (status === 'todo' || status === 'running' || status === 'waiting' || status === 'reviewing') {
       patch.blockerReason = undefined
     }
     if (status === 'completed') {

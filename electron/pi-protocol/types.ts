@@ -99,6 +99,9 @@ export interface PiProtocolAdapter {
   reset(): void
 }
 
+/** Correlates the host's boot probe with Pi's explicit RPC response. */
+export const RUNTIME_READY_PROBE_ID = 'superhive-runtime-ready'
+
 export function matchBootStep(line: string): InitStep | null {
   const lower = line.toLowerCase()
   if (lower.includes('installing pi dependencies') || lower.includes('npm install')) {

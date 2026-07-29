@@ -162,6 +162,14 @@ export interface RuntimeSlice {
   inFlight: RuntimeAssistantState | null
   lastError?: string
   bootStep?: InitStep
+  readiness?: 'ready' | 'recovering' | 'configuration_error'
+  readyAt?: number
+  recoveryAttempt?: number
+  configurationError?: {
+    code: string
+    message: string
+    settingsTarget?: string
+  }
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
   availableModels?: ModelInfo[]

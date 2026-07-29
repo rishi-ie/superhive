@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import type { AdapterEvent, PiProtocolAdapter, UsageSnapshot } from './types'
-import { matchBootStep } from './types'
+import { matchBootStep, RUNTIME_READY_PROBE_ID } from './types'
 
 export class RawTextAdapter implements PiProtocolAdapter {
   private lineBuffer = ''
@@ -245,6 +245,13 @@ export class RawTextAdapter implements PiProtocolAdapter {
             this.streamedAssistantContent = false
             this.sawNativeThinking = false
           }
+        } else if (
+          obj.type === 'response' &&
+          obj.command === 'get_state' &&
+          obj.id === RUNTIME_READY_PROBE_ID &&
+          obj.success === true
+        ) {
+          emit({ type: 'ready' })
         } else if (obj.type === 'response' && obj.success === false) {
 			const messageId = this.ensureAssistantMessage(emit)
           emit({

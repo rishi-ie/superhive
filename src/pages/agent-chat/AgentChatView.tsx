@@ -6,10 +6,6 @@ import { HugeIcon } from "@/components/ui/huge-icon";
 import { Mic02Icon } from "@hugeicons/core-free-icons";
 import { ConversationArea } from './components/ConversationArea';
 import { AgentEmpty } from './components/AgentEmpty';
-import { AgentBooting } from './components/AgentBooting';
-import { AgentError } from './components/AgentError';
-import { AgentStopped } from './components/AgentStopped';
-import { AgentWaiting } from './components/AgentWaiting';
 import { ModelPicker } from '@/components/layout/composer/ModelPicker';
 import { ContextUsageRing } from '@/components/layout/composer/ContextUsageRing';
 import { ChatComposerFrame, ChatComposerToolbar, composerIconButtonClass, composerSendButtonClass, composerTextareaClass, useComposerTextareaAutosize } from '@/components/layout/composer/ChatComposer';
@@ -19,6 +15,11 @@ import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
 import { agents } from '@/api/agents';
 import type { ComposerAttachment } from '@/models/assistant-message';
+import {
+  useProjectConversation,
+  useWorkerExecution,
+} from '@/flows/orchestration';
+import { selectAgentProjectMessages } from '@/orchestration/application/selectors';
 
 function isImage(file: File): boolean {
   return file.type.startsWith('image/');
@@ -31,8 +32,6 @@ export function AgentChatView() {
     status,
     messages,
     inFlight,
-    lastError,
-    bootStep,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -40,12 +39,28 @@ export function AgentChatView() {
     retry,
     pendingTurn,
     agentResponseActive,
+    readiness,
+    configurationError,
     loading,
     send,
     stop,
-    restart,
   } = useAgentRuntime(agentId);
   const agentSettings = useAgentSettings(agentId ?? null);
+  const workerProjectId = agent?.agentKind !== 'project-coordinator' && agent?.projectIds.length === 1
+    ? agent.projectIds[0]!
+    : null;
+  const projectConversation = useProjectConversation(workerProjectId);
+  const workerExecution = useWorkerExecution(agentId ?? null);
+  const projectChannelMessages = React.useMemo(
+    () => agentId
+      ? selectAgentProjectMessages(
+          projectConversation.messages,
+          agentId,
+          workerExecution.snapshot?.currentIterationId,
+        )
+      : [],
+    [agentId, projectConversation.messages, workerExecution.snapshot?.currentIterationId],
+  );
   const selectedContextWindow = React.useMemo(() => {
     const provider = agentSettings.settings?.model?.provider;
     const name = agentSettings.settings?.model?.name;
@@ -91,6 +106,16 @@ export function AgentChatView() {
   const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
   useComposerTextareaAutosize(textareaRef, input);
 
+  useChatShortcuts({
+    onCopyLast: () => {
+      void shortcutCopyLastAssistant({ messages });
+    },
+    onStop: () => {
+      if (status === 'busy' || status === 'active') void stop();
+    },
+    enabled: !!agentId && !!agent,
+  });
+
   if (!agentId) return <AgentEmpty />;
 
   if (loading) {
@@ -109,23 +134,9 @@ export function AgentChatView() {
     );
   }
 
-  if (status === 'waiting') {
-    return <AgentWaiting agentName={agent.name} />;
-  }
-
-  if (bootStep !== undefined && bootStep !== 'ready') {
-    return <AgentBooting agentName={agent.name} lastError={lastError} onRestart={restart} />;
-  }
-
-  if (status === 'idle' && lastError) {
-    return <AgentError lastError={lastError} onRestart={restart} agentId={agent.id} />;
-  }
-
-  if (status === 'idle') {
-    return <AgentStopped onStart={restart} />;
-  }
-
-  const isLive = status === 'active' || status === 'busy';
+  // Sending is readiness-aware in the main process. The composer never asks
+  // the user to manage a runtime lifecycle.
+  const isLive = true;
   const isBusy = status === 'busy';
 
   const addAttachments = async (files: FileList | File[]) => {
@@ -170,18 +181,20 @@ export function AgentChatView() {
     }
   };
 
-  useChatShortcuts({
-    onCopyLast: () => {
-      void shortcutCopyLastAssistant({ messages });
-    },
-    onStop: () => {
-      if (status === 'busy' || status === 'active') void stop();
-    },
-    enabled: !!agentId && !!agent,
-  });
-
   return (
     <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.025] [--foreground:#D8D8D8] [--muted-foreground:#5B5B5B]">
+      {readiness === 'configuration_error' && (
+        <div role="alert" className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-foreground">
+          <span className="truncate">{configurationError?.message ?? 'Agent model or provider configuration needs attention.'}</span>
+          <button
+            type="button"
+            className="shrink-0 font-medium underline underline-offset-2"
+            onClick={() => window.dispatchEvent(new Event('superhive:open-manage'))}
+          >
+            Open Manage
+          </button>
+        </div>
+      )}
       <ConversationArea
         messages={messages}
         inFlight={inFlight}
@@ -192,6 +205,7 @@ export function AgentChatView() {
         agentId={agentId}
         pendingTurn={pendingTurn}
         agentResponseActive={agentResponseActive}
+        projectChannelMessages={projectChannelMessages}
       />
       <div className="shrink-0">
         <ChatComposerFrame>

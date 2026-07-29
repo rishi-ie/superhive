@@ -17,11 +17,8 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { ConversationArea } from '@/pages/agent-chat/components/ConversationArea';
 import { ProjectChatComposer } from './components/ProjectChatComposer';
-import { ProjectAgentBooting } from './components/ProjectAgentBooting';
-import { ProjectAgentError } from './components/ProjectAgentError';
-import { ProjectAgentStopped } from './components/ProjectAgentStopped';
-import { ProjectAgentWaiting } from './components/ProjectAgentWaiting';
 import { ProjectAgentEmpty } from './components/ProjectAgentEmpty';
+import { ProjectPlanApproval } from './components/ProjectPlanApproval';
 import { loadProject } from '@/flows/projects/crud/load-project';
 import { listAgents } from '@/flows/agents/crud/list-agents';
 import { useAgentRuntime } from '@/flows/agents/runtime';
@@ -29,6 +26,10 @@ import { useAgentSettings } from '@/flows/agents/settings';
 import { useAgentsListVersion } from '@/flows/agents/runtime';
 import { useChatShortcuts } from '@/flows/ui/use-chat-shortcuts';
 import { shortcutCopyLastAssistant } from '@/flows/ui/shortcut-copy-last-assistant';
+import {
+  useProjectConversation,
+  useProjectExecution,
+} from '@/flows/orchestration';
 import type { Project } from '@/storage/types';
 import type { Agent } from '@/types/electron';
 
@@ -114,12 +115,12 @@ export function ProjectChatView() {
 }
 
 function ProjectChatContent({ project, projectAgent }: { project: Project; projectAgent: Agent }) {
+  const execution = useProjectExecution(project.id);
+  const projectConversation = useProjectConversation(project.id);
   const {
     status,
     messages,
     inFlight,
-    lastError,
-    bootStep,
     contextUsage,
     availableModels,
     activeModelContextWindow,
@@ -127,10 +128,11 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     retry,
     pendingTurn,
     agentResponseActive,
+    readiness,
+    configurationError,
     loading,
     send,
     stop,
-    restart,
   } = useAgentRuntime(projectAgent.id);
   // Read the current model selection so we can gate the send button.
   // Mirrors the guard in AgentChatView: chat is disabled when no model is chosen.
@@ -175,40 +177,6 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
       ? Math.min(100, (contextUsedTokens / contextWindow) * 100)
       : 0;
 
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center bg-background">
-        <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-foreground/70 animate-spin" />
-      </div>
-    );
-  }
-
-  if (status === 'waiting') {
-    return <ProjectAgentWaiting agentName={projectAgent.name} />;
-  }
-
-  if (bootStep !== undefined && bootStep !== 'ready') {
-    return (
-      <ProjectAgentBooting
-        agentName={projectAgent.name}
-        lastError={lastError}
-        onRestart={restart}
-      />
-    );
-  }
-
-  if (status === 'idle' && lastError) {
-    return <ProjectAgentError lastError={lastError} onRestart={restart} projectId={project.id} />;
-  }
-
-  if (status === 'idle') {
-    return <ProjectAgentStopped onStart={restart} />;
-  }
-
-  const isLive = status === 'active' || status === 'busy';
-  const isBusy = status === 'busy';
-
-
   useChatShortcuts({
     onCopyLast: () => {
       void shortcutCopyLastAssistant({ messages });
@@ -219,8 +187,32 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
     enabled: !!projectAgent,
   });
 
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center bg-background">
+        <div className="size-5 rounded-full border-2 border-muted-foreground/30 border-t-foreground/70 animate-spin" />
+      </div>
+    );
+  }
+
+  // The main process guarantees readiness before every send/wake.
+  const isLive = true;
+  const isBusy = status === 'busy';
+
   return (
     <div className="flex flex-1 min-h-0 flex-col [--font-scale:1.025] [--foreground:#D8D8D8] [--muted-foreground:#5B5B5B]">
+      {readiness === 'configuration_error' && (
+        <div role="alert" className="mx-4 mt-3 flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-foreground">
+          <span className="truncate">{configurationError?.message ?? 'Project Agent model or provider configuration needs attention.'}</span>
+          <button
+            type="button"
+            className="shrink-0 font-medium underline underline-offset-2"
+            onClick={() => window.dispatchEvent(new Event('superhive:open-manage'))}
+          >
+            Open Manage
+          </button>
+        </div>
+      )}
       <ConversationArea
         messages={messages}
         inFlight={inFlight}
@@ -231,6 +223,12 @@ function ProjectChatContent({ project, projectAgent }: { project: Project; proje
         agentId={projectAgent.id}
         pendingTurn={pendingTurn}
         agentResponseActive={agentResponseActive}
+        projectChannelMessages={projectConversation.messages}
+      />
+      <ProjectPlanApproval
+        snapshot={execution.snapshot}
+        plans={execution.plans}
+        onApprove={execution.approvePlan}
       />
       <div className="shrink-0"><ProjectChatComposer agentId={projectAgent.id} isBusy={isBusy} isLive={isLive} contextPercent={contextPercent} contextUsedTokens={contextUsedTokens} contextWindow={contextWindow} onSend={(input) => void send(input)} onStop={() => void stop()} /></div>
     </div>

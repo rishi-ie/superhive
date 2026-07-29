@@ -1,6 +1,30 @@
 import { expect, test } from 'bun:test'
 import { RawTextAdapter } from './raw-text-adapter'
-import type { AdapterEvent } from './types'
+import { RUNTIME_READY_PROBE_ID, type AdapterEvent } from './types'
+
+test('emits ready only for the matching successful get_state boot probe', () => {
+  const adapter = new RawTextAdapter()
+  const events: AdapterEvent[] = []
+  const emit = (event: AdapterEvent) => events.push(event)
+
+  adapter.onStdout(JSON.stringify({
+    id: 'some-other-request',
+    type: 'response',
+    command: 'get_state',
+    success: true,
+    data: {},
+  }) + '\n', emit)
+  expect(events).toEqual([])
+
+  adapter.onStdout(JSON.stringify({
+    id: RUNTIME_READY_PROBE_ID,
+    type: 'response',
+    command: 'get_state',
+    success: true,
+    data: {},
+  }) + '\n', emit)
+  expect(events).toEqual([{ type: 'ready' }])
+})
 
 test('normalizes Pi tool metadata from its nested streaming payload', () => {
   const adapter = new RawTextAdapter()

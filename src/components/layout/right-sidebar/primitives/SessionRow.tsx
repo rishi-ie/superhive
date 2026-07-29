@@ -1,6 +1,6 @@
 interface SessionRowProps {
   name: string;
-  cost: number;
+  cost?: number;
   timestamp?: string;
 }
 
@@ -14,9 +14,11 @@ export function SessionRow({ name, cost, timestamp }: SessionRowProps) {
             {timestamp}
           </span>
         )}
-        <span className="text-sm tabular-nums text-muted-foreground">
-          ${cost.toFixed(2)}
-        </span>
+        {cost !== undefined ? (
+          <span className="text-sm tabular-nums text-muted-foreground">
+            ${cost.toFixed(2)}
+          </span>
+        ) : null}
       </div>
     </div>
   );

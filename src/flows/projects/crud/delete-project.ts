@@ -4,7 +4,7 @@
  * Order:
  *   1. Resolve the project + its project-agent (kind: project-coordinator)
  *   2. Delete the project row first (so agent-side cleanup sees no project link)
- *   3. Stop the project-agent runtime + delete the agent row + dispose its store slice
+ *   3. Delete the project-agent (the main process owns runtime shutdown)
  *
  * Used by `ProjectAgentError`'s "Delete Project" button.
  */
@@ -39,9 +39,8 @@ export async function deleteProject(projectId: string): Promise<DeleteProjectRes
       return { ok: false, error: 'Failed to delete project' };
     }
 
-    // Cascade: stop + delete the project-agent + dispose its runtime slice
+    // Cascade: delete the project-agent + dispose its runtime slice.
     if (projectAgent) {
-      await agents.stop(projectAgent.id).catch(() => {});
       await agents.delete(projectAgent.id).catch(() => {});
       disposeSlice(projectAgent.id);
     }

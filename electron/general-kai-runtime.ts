@@ -50,7 +50,6 @@ export class GeneralKaiRuntime {
    */
   entries = new Map<string, RuntimeEntry>()
   adapterFactories = new Map<string, () => PiProtocolAdapter>()
-  silenceTimers = new Map<string, NodeJS.Timeout>()
   readyEmitted = new Set<string>()
   settingsWatchers = new Map<string, FSWatcher>()
   telemetryTailers = new Map<string, TelemetryTailer>()
@@ -117,6 +116,19 @@ export class GeneralKaiRuntime {
     return spawnModule.send(this, agentId, input)
   }
 
+  /**
+   * Deliver a trusted orchestration wake without persisting a fake user row.
+   * Callers must wait until the runtime is active; busy-turn scheduling is
+   * owned by the orchestration wake-queue adapter.
+   */
+  sendInternal(agentId: string, text: string): boolean {
+    return spawnModule.sendInternal(this, agentId, text)
+  }
+
+  abortTurn(agentId: string): boolean {
+    return spawnModule.abortTurn(this, agentId)
+  }
+
   async shutdownAll(): Promise<void> {
     await spawnModule.shutdownAll(this)
   }
@@ -132,6 +144,15 @@ export class GeneralKaiRuntime {
 
   removeEntry(agentId: string): void {
     spawnModule.removeEntry(this, agentId)
+  }
+
+  /**
+   * Stop an agent and discard the process-local extension/session state.
+   * Membership and other launch-time truth changes must await this before
+   * rewriting manage.json so a subsequent start cannot reuse stale context.
+   */
+  async invalidateForConfigurationChange(agentId: string): Promise<void> {
+    await spawnModule.invalidateForConfigurationChange(this, agentId)
   }
 
   // ============================================================
@@ -250,18 +271,6 @@ export class GeneralKaiRuntime {
     return chatPersistence.flushChatEntry(this, entry)
   }
 
-  resetSilenceTimer(entry: RuntimeEntry): void {
-    chatPersistence.resetSilenceTimer(this, entry)
-  }
-
-  clearSilenceTimer(agentId: string): void {
-    chatPersistence.clearSilenceTimer(this, agentId)
-  }
-
-  maybeEmitReady(agentId: string): void {
-    chatPersistence.maybeEmitReady(this, agentId)
-  }
-
   startTelemetryTailer(entry: RuntimeEntry): void {
     telemetryWiring.startTelemetryTailer(this, entry)
   }
@@ -300,6 +309,30 @@ export class GeneralKaiRuntime {
 
   terminateProcess(proc: import('node:child_process').ChildProcess): void {
     spawnModule.terminateProcess(this, proc)
+  }
+
+  private processExitHandler?: (
+    agentId: string,
+    code: number | null,
+    signal: NodeJS.Signals | null,
+  ) => void
+
+  setProcessExitHandler(
+    handler: (
+      agentId: string,
+      code: number | null,
+      signal: NodeJS.Signals | null,
+    ) => void,
+  ): void {
+    this.processExitHandler = handler
+  }
+
+  handleProcessExit(
+    agentId: string,
+    code: number | null,
+    signal: NodeJS.Signals | null,
+  ): void {
+    this.processExitHandler?.(agentId, code, signal)
   }
 }
 

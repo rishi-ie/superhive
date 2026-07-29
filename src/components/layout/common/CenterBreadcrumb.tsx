@@ -10,12 +10,13 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { HugeIcon } from "@/components/ui/huge-icon";
 import { UserIcon } from "@phosphor-icons/react";
-import { EllipsisIcon, Folder02Icon } from "@hugeicons/core-free-icons";
+import { Folder02Icon } from "@hugeicons/core-free-icons";
 import { useCenterBreadcrumb } from "@/flows/ui/use-center-breadcrumb";
+import { BreadcrumbActionsMenu } from "./BreadcrumbActionsMenu";
 
 export function CenterBreadcrumb() {
   const location = useLocation();
-  const segments = useCenterBreadcrumb();
+  const { segments, context } = useCenterBreadcrumb();
   const isAgentChat = /^\/agents\/[^/]+$/.test(location.pathname);
   const isProjectChat = /^\/projects\/[^/]+$/.test(location.pathname);
   const isPlugins = location.pathname === '/plugins';
@@ -28,9 +29,7 @@ export function CenterBreadcrumb() {
         <nav aria-label="Current chat" className="flex items-center gap-2.5 font-sans text-foreground">
           {isProjectChat ? <HugeIcon icon={Folder02Icon} size={16} className="size-4" /> : <Icon icon={UserIcon} className="size-4" />}
           <span className="max-w-[min(60vw,42rem)] truncate text-base font-medium">{title}</span>
-          <button type="button" aria-label="More chat actions" className="flex size-7 cursor-default items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            <HugeIcon icon={EllipsisIcon} size={16} className="size-4" aria-hidden="true" />
-          </button>
+          <BreadcrumbActionsMenu context={context} label={title ?? (isProjectChat ? 'project' : 'agent')} />
         </nav>
       </div>
     );

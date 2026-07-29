@@ -22,6 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import type { Project } from "@/storage/types";
 import type { RightSidebarTabId } from "./right-sidebar-tabs";
+import {
+  useProjectConversation,
+  useWorkerExecution,
+} from "@/flows/orchestration";
+import { useTasksVersion } from "@/flows/tasks/runtime/use-tasks-by-project";
+import type { Task } from "@/storage/types";
 
 interface AgentSettingsPanelProps {
   agentId: string;
@@ -73,9 +79,22 @@ export function AgentSettingsPanel({ agentId, activeTab }: AgentSettingsPanelPro
   const reload = manage.reload;
 
   const [projects, setProjects] = React.useState<Project[]>([]);
+  const [agentTasks, setAgentTasks] = React.useState<Task[]>([]);
+  const tasksVersion = useTasksVersion();
+  const workerExecution = useWorkerExecution(agentId);
   React.useEffect(() => {
     loadAgentProjects(agentId).then(setProjects);
   }, [agentId]);
+  React.useEffect(() => {
+    let cancelled = false;
+    void window.api.tasks.list({ agentId }).then((tasks) => {
+      if (!cancelled) setAgentTasks(tasks);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [agentId, tasksVersion]);
+  const projectConversation = useProjectConversation(projects[0]?.id ?? null);
 
   const [query, setQuery] = React.useState("");
 
@@ -83,37 +102,54 @@ export function AgentSettingsPanel({ agentId, activeTab }: AgentSettingsPanelPro
     if (activeTab !== "manage") setQuery("");
   }, [activeTab]);
 
-  const overviewData = React.useMemo<OverviewData>(() => ({
-    name: (settings?.name as string | undefined) ?? (settings?.identity as { name?: string } | undefined)?.name ?? "Untitled agent",
-    description: (settings?.description as string | undefined) ?? (settings?.identity as { description?: string } | undefined)?.description ?? "",
-    roleSummary: "Autonomous coding agent that reviews pull requests, writes tests, and refactors legacy modules with minimal supervision.",
-    previousTasks: [
-      { name: "Audit settings page", cost: 0.31 },
-      { name: "Fix nav alignment", cost: 0.04 },
-      { name: "Refactor onboarding flow", cost: 0.12 },
-    ],
-    activeChecklist: {
-      taskName: "Building API integration",
-      items: [
-        { text: "Pull API spec", done: false },
-        { text: "Define response types", done: true },
-        { text: "Implement POST /orders", done: false },
-        { text: "Add error handling", done: false },
-      ],
-    },
-    recentActivity: [
-      { type: "run", label: "implement POST /orders", timestamp: "just now" },
-      { type: "edit", label: "src/api/orders.ts", timestamp: "2m ago" },
-      { type: "message", label: '"Define response types"', timestamp: "5m ago" },
-      { type: "tool", label: "npm test", timestamp: "8m ago" },
-      { type: "edit", label: "src/lib/types.ts", timestamp: "12m ago" },
-      { type: "run", label: "install pi-truth", timestamp: "1h ago" },
-      { type: "message", label: '"Pull API spec"', timestamp: "2h ago" },
-      { type: "tool", label: "git diff", timestamp: "3h ago" },
-    ],
-    responsibilityCount: 8,
-    projects,
-  }), [settings, projects]);
+  const overviewData = React.useMemo<OverviewData>(() => {
+    const snapshot = workerExecution.snapshot;
+    const currentTask = agentTasks.find((task) => task.id === snapshot?.currentTaskId);
+    const messages = projectConversation.messages
+      .filter((message) =>
+        message.actor.id === agentId
+        || message.recipients.some((recipient) => recipient.id === agentId))
+      .slice(-8)
+      .reverse();
+    const completed = agentTasks.filter((task) => task.status === "completed");
+    return {
+      name: (settings?.name as string | undefined) ?? (settings?.identity as { name?: string } | undefined)?.name ?? "Untitled agent",
+      description: (settings?.description as string | undefined) ?? (settings?.identity as { description?: string } | undefined)?.description ?? "",
+      roleSummary: snapshot
+        ? `${snapshot.availability.replaceAll("_", " ")}${snapshot.activity?.summary ? ` · ${snapshot.activity.summary}` : ""}`
+        : "No loop-engineering assignment",
+      previousTasks: completed.map((task) => ({ name: task.title })),
+      activeChecklist: currentTask ? {
+        taskName: currentTask.title,
+        items: (currentTask.definitionOfDone ?? []).map((text) => ({
+          text,
+          done: currentTask.status === "completed",
+        })),
+      } : null,
+      recentActivity: snapshot?.activity ? [{
+        type: "run",
+        label: snapshot.activity.summary,
+        timestamp: new Date(snapshot.activity.updatedAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }] : [],
+      communication: messages.map((message) => ({
+        id: message.id,
+        actor: message.actor.displayName,
+        text: message.text,
+        timestamp: new Date(message.timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      })),
+      resultStatus: snapshot?.availability === "awaiting_review"
+        ? "Result submitted and awaiting Project Agent review."
+        : undefined,
+      responsibilityCount: agentTasks.filter((task) => !["completed", "cancelled"].includes(task.status)).length,
+      projects,
+    };
+  }, [agentId, agentTasks, projectConversation.messages, projects, settings, workerExecution.snapshot]);
 
   const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 

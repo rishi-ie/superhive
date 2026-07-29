@@ -7,27 +7,17 @@ import { listProjects } from '@/flows/projects/crud/list-projects';
 import { useAgentsListVersion } from '@/flows/agents/runtime';
 import { useAllAgentStatuses } from '@/flows/agents/runtime';
 import { useProjectsListVersion } from '@/flows/projects/runtime';
-import { useOpenCreateProject } from '@/flows/projects/ui/open-create-project';
+import { useOpenCreateProject, usePinnedProjects } from '@/flows/projects/ui';
 import type { Agent } from '@/types/electron';
 import type { Project } from '@/storage/types';
 import { PinnedSection } from './sections/PinnedSection';
 import { ProjectsSection } from './sections/ProjectsSection';
 
-const PINNED_PROJECTS_KEY = 'superhive.sidebar.pinned-project-ids'
-const PINNED_AGENTS_KEY = 'superhive.sidebar.pinned-agent-ids'
-
-function loadPinnedProjectIds(): string[] {
-  try {
-    const value = JSON.parse(window.localStorage.getItem(PINNED_PROJECTS_KEY) ?? '[]')
-    return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : []
-  } catch { return [] }
-}
-
 export function SidebarAccordion() {
   const location = useLocation();
   const [agents, setAgents] = React.useState<Agent[]>([]);
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [pinnedProjectIds, setPinnedProjectIds] = React.useState<string[]>(loadPinnedProjectIds);
+  const { pinnedProjectIds, toggleProjectPin } = usePinnedProjects();
   const [completedIds, setCompletedIds] = React.useState<Set<string>>(() => new Set());
   const { setOpen: setCreateProjectOpen } = useOpenCreateProject();
   const previousStatuses = React.useRef(new Map<string, string>());
@@ -92,12 +82,6 @@ export function SidebarAccordion() {
     if (coordinatorId) openAgent(coordinatorId)
   }, [agents, currentProjectId])
 
-  React.useEffect(() => {
-    window.localStorage.removeItem(PINNED_AGENTS_KEY)
-    window.localStorage.setItem(PINNED_PROJECTS_KEY, JSON.stringify(pinnedProjectIds))
-  }, [pinnedProjectIds])
-
-  const toggleProjectPin = (id: string) => setPinnedProjectIds((current) => current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id])
   const openAgent = (id: string) => setCompletedIds((current) => { const next = new Set(current); next.delete(id); return next })
   const pinnedProjectSet = new Set(pinnedProjectIds)
   const pinnedProjects = projectItems.filter((project) => pinnedProjectSet.has(project.id))

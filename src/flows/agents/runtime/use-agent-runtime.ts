@@ -20,6 +20,7 @@ import type {
   ContextSnapshot,
   ModelInfo,
   RuntimeAssistantState,
+  RuntimeReadiness,
 } from '@/types/electron'
 import type { ChatRow, TurnInput } from '@/models/assistant-message'
 import type { CompactionStatus, RetryStatus } from '@/models/runtime'
@@ -40,6 +41,10 @@ export function useAgentRuntime(agentId: string | undefined) {
   const [inFlight, setInFlight] = React.useState<RuntimeAssistantState | null>(null)
   const [lastError, setLastError] = React.useState<string | undefined>(undefined)
   const [bootStep, setBootStep] = React.useState<InitStep | undefined>(undefined)
+  const [readiness, setReadiness] = React.useState<RuntimeReadiness | undefined>(undefined)
+  const [configurationError, setConfigurationError] = React.useState<
+    { code: string; message: string; settingsTarget?: string } | undefined
+  >(undefined)
   const [usage, setUsage] = React.useState<UsageSnapshot | undefined>(undefined)
   const [contextUsage, setContextUsage] = React.useState<ContextSnapshot | undefined>(undefined)
   const [availableModels, setAvailableModels] = React.useState<ModelInfo[] | undefined>(undefined)
@@ -72,6 +77,8 @@ export function useAgentRuntime(agentId: string | undefined) {
       setInFlight(sliceRef.current.inFlight)
       setLastError(sliceRef.current.lastError)
       setBootStep(sliceRef.current.bootStep)
+      setReadiness(sliceRef.current.readiness)
+      setConfigurationError(sliceRef.current.configurationError)
       setUsage(sliceRef.current.usage)
       setContextUsage(sliceRef.current.contextUsage)
       setAvailableModels(sliceRef.current.availableModels)
@@ -134,9 +141,9 @@ export function useAgentRuntime(agentId: string | undefined) {
   const stop = React.useCallback(() => {
     if (!agentId) return
     agents
-      .stop(agentId)
+      .abortTurn(agentId)
       .catch((err: unknown) => {
-        toast.error(err instanceof Error ? err.message : 'Failed to stop agent')
+        toast.error(err instanceof Error ? err.message : 'Failed to stop response')
       })
   }, [agentId])
 
@@ -159,6 +166,8 @@ export function useAgentRuntime(agentId: string | undefined) {
     inFlight,
     lastError,
     bootStep,
+    readiness,
+    configurationError,
     usage,
     contextUsage,
     availableModels,

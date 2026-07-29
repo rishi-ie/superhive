@@ -51,6 +51,14 @@ export interface RuntimeEntry {
   status: AgentStatus
   bootStep?: InitStep
   lastError?: string
+  readiness: 'ready' | 'recovering' | 'configuration_error'
+  readyAt?: number
+  recoveryAttempt?: number
+  configurationError?: {
+    code: string
+    message: string
+    settingsTarget?: string
+  }
   usage?: UsageSnapshot
   contextUsage?: ContextSnapshot
   extensionLoaded: boolean
@@ -86,6 +94,10 @@ export function buildStatusPayload(
     endedAt: entry.endedAt,
     lastError: entry.lastError,
     bootStep: entry.bootStep,
+    readiness: entry.readiness,
+    readyAt: entry.readyAt,
+    recoveryAttempt: entry.recoveryAttempt,
+    configurationError: entry.configurationError,
     usage: entry.usage,
     contextUsage: entry.contextUsage,
     availableModels: entry.availableModels,
